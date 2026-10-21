@@ -82,6 +82,16 @@ namespace Diorama
             }
         }
 
+        /// <summary>Island extent in local space (before this transform's scale).</summary>
+        public Bounds LocalBounds
+        {
+            get
+            {
+                if (_needsRebuild) Rebuild();
+                return _localBounds;
+            }
+        }
+
         public int BladeCount { get; private set; }
         public int TileCount { get; private set; }
 

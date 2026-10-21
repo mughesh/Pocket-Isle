@@ -9,8 +9,8 @@ Each step ends with something visible. Commit after each step.
 | Step | Target date | What you see at the end |
 |---|---|---|
 | 1. Toon look in Unity | Oct 21–22 | Island, wavy grass, trees and rocks in a Diorama scene, toon shaded, in the Editor |
-| 2. Creature baker | Oct 22–23 | Editor tool sculpts Emberpup into a mesh asset; it idles on the island (blink, tail wag, flame) |
-| 3. On the headset | Oct 23–24 | APK on Quest: passthrough, island anchored on your real table via MRUK (fallback: in front of you), thumb microgesture test |
+| 2. On the headset | Oct 21–22 | APK on Quest: passthrough, island anchored on your real table via MRUK (fallback: in front of you), thumb microgesture test |
+| 3. Creature baker | Oct 22–24 | Editor tool sculpts Emberpup into a mesh asset; it idles on the island (blink, tail wag, flame) |
 | 4. Walk and encounter | Oct 24–25 | Explorer walks tile to tile with microgestures, tall grass rustles, "!" pops, Emberpup jumps out |
 | 5. Capture | Oct 26–27 | Flick to throw the pod, wobble, catch, creature appears on the shelf. Tagged build before Goa |
 | Goa | Oct 28 – Nov 2 | No work |

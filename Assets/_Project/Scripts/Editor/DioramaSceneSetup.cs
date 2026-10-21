@@ -39,13 +39,70 @@ namespace Diorama.EditorTools
         [MenuItem("Tools/Diorama/Rebuild Diorama Scene")]
         public static void Build()
         {
+            // ---- scene ----
+            var existing = SceneManager.GetSceneByPath(ScenePath);
+            bool reuseSingle = existing.isLoaded && SceneManager.sceneCount == 1;
+            if (existing.isLoaded && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            if (existing.isLoaded && !reuseSingle) EditorSceneManager.CloseScene(existing, true);
+
+            var previousActive = SceneManager.GetActiveScene();
+            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, reuseSingle ? NewSceneMode.Single : NewSceneMode.Additive);
+            SceneManager.SetActiveScene(scene);
+
+            var camGo = new GameObject("Main Camera") { tag = "MainCamera" };
+            var cam = camGo.AddComponent<Camera>();
+            cam.clearFlags = CameraClearFlags.SolidColor;
+            cam.backgroundColor = Hex("#d9ddd6");
+            cam.fieldOfView = 35f;
+            cam.nearClipPlane = 0.01f;
+            cam.farClipPlane = 20f;
+            camGo.AddComponent<AudioListener>();
+            camGo.transform.position = CameraPosition;
+            camGo.transform.LookAt(CameraTarget);
+
+            var sunGo = new GameObject("Sun");
+            var sun = sunGo.AddComponent<Light>();
+            sun.type = LightType.Directional;
+            sun.color = Color.white;
+            sun.intensity = 1f;
+            sun.shadows = LightShadows.None;
+            sunGo.transform.rotation = Quaternion.LookRotation(-DirectionToLight.normalized);
+            RenderSettings.sun = sun;
+
+            var islandGo = new GameObject("Island");
+            var builder = islandGo.AddComponent<IslandBuilder>();
+            if (!ConfigureIsland(builder))
+            {
+                EditorSceneManager.CloseScene(scene, true);
+                return;
+            }
+
+            EditorSceneManager.SaveScene(scene, ScenePath);
+            Debug.Log($"[Diorama] Saved {ScenePath}: {builder.TileCount} tiles, {builder.BladeCount} grass blades, " +
+                      $"{builder.DrawCallCount} instanced draws per camera.");
+
+            SavePreview(cam);
+
+            if (!reuseSingle)
+            {
+                if (previousActive.IsValid()) SceneManager.SetActiveScene(previousActive);
+                EditorSceneManager.CloseScene(scene, true);
+            }
+        }
+
+        /// <summary>
+        /// Creates or updates the island materials and the prototype map, and wires them into the builder.
+        /// Returns false if the shaders are missing.
+        /// </summary>
+        public static bool ConfigureIsland(IslandBuilder builder)
+        {
             var toon = Shader.Find("Diorama/Toon");
             var outline = Shader.Find("Diorama/Toon Outline");
             var grassShader = Shader.Find("Diorama/Grass");
             if (toon == null || outline == null || grassShader == null)
             {
                 Debug.LogError("[Diorama] Shaders not found. Check the Console for shader compile errors.");
-                return;
+                return false;
             }
 
             foreach (var dir in new[] { "Scenes", "Materials", "Materials/Island", "Data" })
@@ -79,38 +136,6 @@ namespace Diorama.EditorTools
             }
             AssetDatabase.SaveAssets();
 
-            // ---- scene ----
-            var existing = SceneManager.GetSceneByPath(ScenePath);
-            bool reuseSingle = existing.isLoaded && SceneManager.sceneCount == 1;
-            if (existing.isLoaded && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
-            if (existing.isLoaded && !reuseSingle) EditorSceneManager.CloseScene(existing, true);
-
-            var previousActive = SceneManager.GetActiveScene();
-            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, reuseSingle ? NewSceneMode.Single : NewSceneMode.Additive);
-            SceneManager.SetActiveScene(scene);
-
-            var camGo = new GameObject("Main Camera") { tag = "MainCamera" };
-            var cam = camGo.AddComponent<Camera>();
-            cam.clearFlags = CameraClearFlags.SolidColor;
-            cam.backgroundColor = Hex("#d9ddd6");
-            cam.fieldOfView = 35f;
-            cam.nearClipPlane = 0.01f;
-            cam.farClipPlane = 20f;
-            camGo.AddComponent<AudioListener>();
-            camGo.transform.position = CameraPosition;
-            camGo.transform.LookAt(CameraTarget);
-
-            var sunGo = new GameObject("Sun");
-            var sun = sunGo.AddComponent<Light>();
-            sun.type = LightType.Directional;
-            sun.color = Color.white;
-            sun.intensity = 1f;
-            sun.shadows = LightShadows.None;
-            sunGo.transform.rotation = Quaternion.LookRotation(-DirectionToLight.normalized);
-            RenderSettings.sun = sun;
-
-            var islandGo = new GameObject("Island");
-            var builder = islandGo.AddComponent<IslandBuilder>();
             builder.map = map;
             builder.column = column;
             builder.underside = underside;
@@ -124,18 +149,15 @@ namespace Diorama.EditorTools
             builder.rock = rock;
             builder.grass = grass;
             builder.Rebuild();
+            return true;
+        }
 
-            EditorSceneManager.SaveScene(scene, ScenePath);
-            Debug.Log($"[Diorama] Saved {ScenePath}: {builder.TileCount} tiles, {builder.BladeCount} grass blades, " +
-                      $"{builder.DrawCallCount} instanced draws per camera.");
-
-            SavePreview(cam);
-
-            if (!reuseSingle)
-            {
-                if (previousActive.IsValid()) SceneManager.SetActiveScene(previousActive);
-                EditorSceneManager.CloseScene(scene, true);
-            }
+        /// <summary>Creates or updates a plain toon material in the island material folder.</summary>
+        public static Material ToonMaterial(string name, string hex, float spec = 0f)
+        {
+            var m = ToonMaterial(Shader.Find("Diorama/Toon"), name, hex);
+            m.SetFloat("_Spec", spec);
+            return m;
         }
 
         [MenuItem("Tools/Diorama/Save Preview Image")]
@@ -146,7 +168,7 @@ namespace Diorama.EditorTools
             SavePreview(cam);
         }
 
-        static void SavePreview(Camera cam)
+        public static void SavePreview(Camera cam)
         {
             const int w = 1600, h = 900;
             var rt = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
@@ -217,7 +239,7 @@ namespace Diorama.EditorTools
 
         static Color Hex(string hex) => ColorUtility.TryParseHtmlString(hex, out var c) ? c : Color.magenta;
 
-        static void EnsureFolder(string path)
+        public static void EnsureFolder(string path)
         {
             if (AssetDatabase.IsValidFolder(path)) return;
             string parent = Path.GetDirectoryName(path).Replace('\\', '/');

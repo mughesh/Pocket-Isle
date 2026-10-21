@@ -1,7 +1,12 @@
 {
     "name": "Diorama.Runtime",
     "rootNamespace": "Diorama",
-    "references": [],
+    "references": [
+        "Oculus.VR",
+        "meta.xr.mrutilitykit",
+        "Unity.InputSystem",
+        "Unity.TextMeshPro"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
