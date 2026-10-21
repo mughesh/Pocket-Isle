@@ -8,7 +8,8 @@ namespace Diorama.EditorTools
     /// <summary>
     /// Lets Claude Code drive the open Editor without window focus. Claude writes one command per line to
     /// Temp/ClaudeBridge/cmd.txt; the bridge runs them and appends results to Temp/ClaudeBridge/log.txt.
-    /// Commands: "refresh" (import changed files, recompile), "menu:Some/Menu/Path" (run a menu item).
+    /// Commands: "refresh" (import changed files, recompile), "play" / "stop" (Play mode),
+    /// "menu:Some/Menu/Path" (run a menu item).
     /// Temp/ is not in git and is wiped when Unity closes.
     /// </summary>
     [InitializeOnLoad]
@@ -53,6 +54,11 @@ namespace Diorama.EditorTools
                     {
                         AssetDatabase.Refresh();
                         Log("refresh: ok");
+                    }
+                    else if (cmd == "play" || cmd == "stop")
+                    {
+                        EditorApplication.isPlaying = cmd == "play";
+                        Log($"{cmd}: ok");
                     }
                     else if (cmd.StartsWith("menu:", StringComparison.Ordinal))
                     {

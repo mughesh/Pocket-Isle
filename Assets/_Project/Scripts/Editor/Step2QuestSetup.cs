@@ -22,10 +22,10 @@ namespace Diorama.EditorTools
         const string DioramaScenePath = "Assets/_Project/Scenes/Diorama.unity";
         const string MobileRpAssetPath = "Assets/Settings/Mobile_RPAsset.asset";
 
-        // Placeholders until the app has a name; the package name must be unique on the Horizon Store.
+        // The package name must be unique on the Horizon Store.
         const string CompanyName = "Mugesh";
-        const string ProductName = "Creature Diorama";
-        const string PackageName = "com.mugesh.creaturediorama";
+        const string ProductName = "Pocket isle";
+        const string PackageName = "com.mugesh.pocketisle";
 
         // Building Block data assets (Meta XR SDK v207). Camera Rig first; the others depend on it.
         static readonly string[] BlockAssets =
@@ -93,8 +93,16 @@ namespace Diorama.EditorTools
                 }
             }
 
+            // The Passthrough block adds the layer but leaves OVRManager's switch for the Project Setup Tool.
+            var ovrManager = UnityEngine.Object.FindFirstObjectByType<OVRManager>();
+            if (ovrManager != null)
+            {
+                ovrManager.isInsightPassthroughEnabled = true;
+                EditorUtility.SetDirty(ovrManager);
+            }
+
             // Passthrough needs the eye camera to clear to transparent black.
-            var rig = UnityEngine.Object.FindFirstObjectByType<OVRCameraRig>();
+            var rig =UnityEngine.Object.FindFirstObjectByType<OVRCameraRig>();
             if (rig != null && rig.centerEyeAnchor != null && rig.centerEyeAnchor.TryGetComponent(out Camera eye))
             {
                 eye.clearFlags = CameraClearFlags.SolidColor;

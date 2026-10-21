@@ -6,8 +6,11 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
-    guid: 99c9720ab356a0642a771bea13969a05
+    path: Assets/_Project/Scenes/MR_Main.unity
+    guid: 16ca1385ba8a0d648a496b13606ff413
+  - enabled: 0
+    path: Assets/_Project/Scenes/Diorama.unity
+    guid: fa7353969761ab84a94c170537a70011
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: f0e0b5ad901aba24ebdcf8ee4c0f8d49, type: 2}
