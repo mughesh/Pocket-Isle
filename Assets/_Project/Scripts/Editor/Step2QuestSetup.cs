@@ -93,6 +93,8 @@ namespace Diorama.EditorTools
                 }
             }
 
+            DisableRigLocomotion();
+
             // The Passthrough block adds the layer but leaves OVRManager's switch for the Project Setup Tool.
             var ovrManager = UnityEngine.Object.FindFirstObjectByType<OVRManager>();
             if (ovrManager != null)
@@ -146,6 +148,46 @@ namespace Diorama.EditorTools
             EditorSceneManager.SaveScene(scene, ScenePath);
             SetBuildScenes();
             Debug.Log($"[Diorama] Saved {ScenePath} with Building Blocks, island and gesture test.");
+        }
+
+        // The comprehensive Interactions Rig ships with locomotion: a gravity character controller (falls forever
+        // in MR with no floor collider), thumb-microgesture teleport / snap turn / step, and controller thumbstick
+        // locomotion. Pocket isle is seated and uses the thumb swipes itself, so all of it goes.
+        static readonly string[] LocomotionObjects =
+        {
+            "Locomotor",
+            "MicroGesturesLocomotionHandInteractorGroup",
+            "LocomotionControllerInteractorGroup",
+            "LocomotionOutput",
+        };
+
+        [MenuItem("Tools/Diorama/Step 2/3. Disable Rig Locomotion (open scene)")]
+        static void DisableRigLocomotion()
+        {
+            int count = 0;
+            var rig = UnityEngine.Object.FindFirstObjectByType<OVRCameraRig>(FindObjectsInactive.Include);
+            if (rig == null)
+            {
+                Debug.LogWarning("[Diorama] No OVRCameraRig in the open scene.");
+                return;
+            }
+            foreach (var t in rig.GetComponentsInChildren<Transform>(true))
+            {
+                if (Array.IndexOf(LocomotionObjects, t.name) < 0 || !t.gameObject.activeSelf) continue;
+                Undo.RecordObject(t.gameObject, "Disable rig locomotion");
+                t.gameObject.SetActive(false);
+                count++;
+            }
+            EditorSceneManager.MarkSceneDirty(rig.gameObject.scene);
+            Debug.Log($"[Diorama] Disabled {count} rig locomotion objects.");
+        }
+
+        /// <summary>Batch mode: -executeMethod Diorama.EditorTools.Step2QuestSetup.FixMrMainLocomotion</summary>
+        static void FixMrMainLocomotion()
+        {
+            var scene = EditorSceneManager.OpenScene(ScenePath);
+            DisableRigLocomotion();
+            EditorSceneManager.SaveScene(scene);
         }
 
         static async Task<bool> InstallBlock(string assetPath)
