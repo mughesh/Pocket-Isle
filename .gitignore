@@ -74,6 +74,9 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
+# Concept art (design reference only, not shipped)
+Assets/Docs/ConceptArt/
+
 # Local IDE / solution files
 *.slnx
 .vscode/

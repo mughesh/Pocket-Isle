@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
 using Meta.XR.MRUtilityKit;
+using Oculus.Interaction;
+using Oculus.Interaction.HandGrab;
 using TMPro;
 using UnityEditor;
 using UnityEditor.Build;
@@ -147,6 +149,7 @@ namespace Diorama.EditorTools
             var probe = testGo.AddComponent<ThumbHoldProbe>();
             probe.input = input;
             piece.probe = probe;
+            AddIslandHandling(builder, placer, input);
 
             EditorSceneManager.SaveScene(scene, ScenePath);
             SetBuildScenes();
@@ -218,6 +221,134 @@ namespace Diorama.EditorTools
             }
             EditorSceneManager.SaveScene(active);
             Debug.Log("[Diorama] ThumbHoldProbe added to MR_Main.");
+        }
+
+        [MenuItem("Tools/Diorama/Step 2/5. Add Island Handling to MR_Main")]
+        static void AddIslandHandlingMenu()
+        {
+            var active = EditorSceneManager.GetActiveScene();
+            if (active.path != ScenePath)
+            {
+                if (active.isDirty)
+                {
+                    Debug.LogError($"[Diorama] Save or discard changes in {active.name} first.");
+                    return;
+                }
+                active = EditorSceneManager.OpenScene(ScenePath);
+            }
+            var builder = UnityEngine.Object.FindFirstObjectByType<IslandBuilder>();
+            var placer = UnityEngine.Object.FindFirstObjectByType<IslandPlacer>();
+            var input = UnityEngine.Object.FindFirstObjectByType<MicrogestureInput>();
+            if (builder == null || placer == null || input == null)
+            {
+                Debug.LogError("[Diorama] MR_Main is missing the island, placer or microgesture input.");
+                return;
+            }
+            AddIslandHandling(builder, placer, input);
+            EditorSceneManager.SaveScene(active);
+            Debug.Log("[Diorama] Island handling added to MR_Main.");
+        }
+
+        // Rim grab box sizes, island-local metres (the island is 14 tiles x 5 cm, cap top at +0.006).
+        const float RimInset = 0.04f, RimOutset = 0.035f, RimTop = 0f, RimBottom = -0.10f;
+
+        /// <summary>Grabbable + rim HandGrabInteractable + IslandHandle on the island, shadow, palm summon, gesture guard.</summary>
+        static void AddIslandHandling(IslandBuilder builder, IslandPlacer placer, MicrogestureInput input)
+        {
+            var islandGo = builder.gameObject;
+            var grabbable = islandGo.GetComponent<Grabbable>();
+            if (grabbable == null) grabbable = Undo.AddComponent<Grabbable>(islandGo);
+            var handle = islandGo.GetComponent<IslandHandle>();
+            if (handle == null) handle = Undo.AddComponent<IslandHandle>(islandGo);
+
+            // Rim: kinematic body + a box along each side, below the cap so the play surface can't start a grab.
+            var rimT = islandGo.transform.Find("Rim Grab");
+            if (rimT != null) Undo.DestroyObjectImmediate(rimT.gameObject);
+            var rimGo = new GameObject("Rim Grab");
+            Undo.RegisterCreatedObjectUndo(rimGo, "Rim Grab");
+            rimGo.transform.SetParent(islandGo.transform, false);
+            var rb = rimGo.AddComponent<Rigidbody>();
+            rb.isKinematic = true;
+            rb.useGravity = false;
+
+            var map = builder.map;
+            float halfX = map.Columns * map.tileSize * 0.5f, halfZ = map.Rows * map.tileSize * 0.5f;
+            float depth = RimInset + RimOutset, height = RimTop - RimBottom, y = (RimTop + RimBottom) * 0.5f;
+            float edge = (RimOutset - RimInset) * 0.5f; // box centre offset from the island edge, outward
+            var colliders = new List<Collider>();
+            void AddBox(Vector3 center, Vector3 size)
+            {
+                var box = rimGo.AddComponent<BoxCollider>();
+                box.center = center;
+                box.size = size;
+                colliders.Add(box);
+            }
+            AddBox(new Vector3(0f, y, halfZ + edge), new Vector3(halfX * 2f + depth, height, depth));
+            AddBox(new Vector3(0f, y, -halfZ - edge), new Vector3(halfX * 2f + depth, height, depth));
+            AddBox(new Vector3(halfX + edge, y, 0f), new Vector3(depth, height, halfZ * 2f + depth));
+            AddBox(new Vector3(-halfX - edge, y, 0f), new Vector3(depth, height, halfZ * 2f + depth));
+
+            var interactable = rimGo.AddComponent<HandGrabInteractable>();
+            interactable.InjectRigidbody(rb);
+            interactable.InjectOptionalPointableElement(grabbable);
+            interactable.InjectSupportedGrabTypes(Oculus.Interaction.Grab.GrabTypeFlags.All);
+            interactable.HandAlignment = HandAlignType.None; // free grab, the hand doesn't snap to a pose
+
+            var g = new SerializedObject(grabbable);
+            g.FindProperty("_oneGrabTransformer").objectReferenceValue = handle;
+            g.FindProperty("_twoGrabTransformer").objectReferenceValue = handle;
+            g.FindProperty("_maxGrabPoints").intValue = 2;
+            g.ApplyModifiedPropertiesWithoutUndo();
+
+            handle.island = builder;
+            handle.placer = placer;
+            handle.rimInteractable = interactable;
+            handle.rimColliders = colliders.ToArray();
+            EditorUtility.SetDirty(handle);
+
+            input.grabGuard = handle;
+            EditorUtility.SetDirty(input);
+
+            var shadow = UnityEngine.Object.FindFirstObjectByType<IslandShadow>();
+            if (shadow == null)
+            {
+                var shadowGo = new GameObject("Island Shadow");
+                Undo.RegisterCreatedObjectUndo(shadowGo, "Island Shadow");
+                shadow = shadowGo.AddComponent<IslandShadow>();
+            }
+            shadow.island = builder;
+            shadow.shadowMaterial = BlobShadowMaterial();
+            EditorUtility.SetDirty(shadow);
+
+            var summon = input.GetComponent<PalmSummon>();
+            if (summon == null) summon = Undo.AddComponent<PalmSummon>(input.gameObject);
+            summon.placer = placer;
+            summon.handle = handle;
+            summon.buttonMaterial = DioramaSceneSetup.ToonMaterial("Summon_Button", "#f2c14e", 0.3f);
+            EditorUtility.SetDirty(summon);
+
+            if (input.TryGetComponent(out GestureTestPiece piece))
+            {
+                piece.moveMode = MoveMode.HoldToWalk;
+                EditorUtility.SetDirty(piece);
+            }
+        }
+
+        static Material BlobShadowMaterial()
+        {
+            const string path = "Assets/_Project/Materials/BlobShadow.mat";
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (mat != null) return mat;
+            var shader = Shader.Find("Diorama/BlobShadow");
+            if (shader == null)
+            {
+                Debug.LogError("[Diorama] Shader Diorama/BlobShadow not found.");
+                return null;
+            }
+            DioramaSceneSetup.EnsureFolder("Assets/_Project/Materials");
+            mat = new Material(shader) { name = "BlobShadow", enableInstancing = true };
+            AssetDatabase.CreateAsset(mat, path);
+            return mat;
         }
 
         /// <summary>Batch mode: -executeMethod Diorama.EditorTools.Step2QuestSetup.FixMrMainLocomotion</summary>

@@ -158,7 +158,8 @@ namespace Diorama
                 if (_heading.x > 0) return kb.rightArrowKey.isPressed;
                 return _heading.y < 0 ? kb.upArrowKey.isPressed : kb.downArrowKey.isPressed;
             }
-            // Lost tracking counts as released.
+            // Lost tracking or a hand busy with the island counts as released.
+            if (input.IsBlocked(_source)) return false;
             return probe != null && probe.TryGetOffsetMm(_source == GestureSource.LeftHand, out var mm) && mm.magnitude >= holdReleaseMm;
         }
 

@@ -97,7 +97,7 @@ namespace Diorama
 
         void UpdateHand(HandProbe probe, Handedness handedness)
         {
-            if (probe.hand == null) probe.hand = FindHand(handedness);
+            HandLookup.Refresh(ref probe.hand, handedness);
             probe.valid = probe.hand != null && probe.hand.IsTrackedDataValid && TryReadOffset(probe.hand, out probe.current);
             if (!probe.valid) return;
 
@@ -107,14 +107,6 @@ namespace Diorama
 
             // Until the first swipe there is no measured rest; follow the thumb slowly so the numbers are readable.
             if (!probe.hasRest) probe.rest = Vector2.Lerp(probe.rest == Vector2.zero ? probe.current : probe.rest, probe.current, Time.unscaledDeltaTime);
-        }
-
-        static Hand FindHand(Handedness handedness)
-        {
-            // Raw tracked hands only; SyntheticHand is the visual hand that gets locked to interactables.
-            foreach (var hand in FindObjectsByType<Hand>(FindObjectsSortMode.None))
-                if (!(hand is SyntheticHand) && hand.Handedness == handedness) return hand;
-            return null;
         }
 
         static bool TryReadOffset(IHand hand, out Vector2 offset)

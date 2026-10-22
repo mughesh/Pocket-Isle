@@ -46,6 +46,9 @@ namespace Diorama
         public int bladesPerGrassTile = 7;
         public int bladesPerTallGrassTile = 46;
 
+        /// <summary>Brightens the rocky sides (0..1, lerp to white). Driven by IslandHandle; not saved.</summary>
+        [NonSerialized] public float rimHighlight;
+
         // Fixed sizes from the prototype, in metres.
         const float ColumnDepth = 0.04f;
         const float WaterDrop = 0.008f;
@@ -53,11 +56,14 @@ namespace Diorama
 
         static readonly int GrassPushId = Shader.PropertyToID("_DioramaGrassPush");
         static readonly int DioramaScaleId = Shader.PropertyToID("_DioramaScale");
+        static readonly int FlashId = Shader.PropertyToID("_Flash");
+        MaterialPropertyBlock _rimProps;
 
         sealed class Batch
         {
             public Mesh mesh;
             public Material material;
+            public bool rim; // rocky sides; takes the hover highlight
             public readonly List<Matrix4x4> local = new List<Matrix4x4>();
             public Matrix4x4[] world = Array.Empty<Matrix4x4>();
         }
@@ -136,6 +142,7 @@ namespace Diorama
 
             var columns = AddBatch(columnMesh, column);
             var undersides = AddBatch(undersideMesh, underside);
+            columns.rim = undersides.rim = true;
             var caps = new Dictionary<char, Batch>
             {
                 { IslandMap.Grass, AddBatch(capMesh, capGrass) },
@@ -306,6 +313,12 @@ namespace Diorama
             Shader.SetGlobalFloat(DioramaScaleId, transform.lossyScale.y);
 
             var bounds = TransformBounds(transform.localToWorldMatrix, _localBounds);
+            bool highlight = rimHighlight > 0.001f;
+            if (highlight)
+            {
+                if (_rimProps == null) _rimProps = new MaterialPropertyBlock();
+                _rimProps.SetFloat(FlashId, rimHighlight);
+            }
             foreach (var b in _batches)
             {
                 if (b.material == null || b.world.Length == 0) continue;
@@ -321,6 +334,7 @@ namespace Diorama
                     worldBounds = bounds,
                     shadowCastingMode = ShadowCastingMode.Off,
                     receiveShadows = false,
+                    matProps = highlight && b.rim ? _rimProps : null,
                 };
                 for (int start = 0; start < b.world.Length; start += MaxInstancesPerDraw)
                 {

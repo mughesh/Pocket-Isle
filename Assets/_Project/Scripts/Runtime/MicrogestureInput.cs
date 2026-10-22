@@ -18,6 +18,9 @@ namespace Diorama
         [Tooltip("Ignore the same gesture from the same hand repeated within this time (s).")]
         public float repeatGuard = 0.15f;
 
+        [Tooltip("Gestures from a hand that is grabbing or touching the island rim are ignored.")]
+        public IslandHandle grabGuard;
+
         public event Action<ThumbGesture, GestureSource> Gesture;
 
         OVRPlugin.HandTrackingState _state;
@@ -40,11 +43,16 @@ namespace Diorama
             if (!OVRPlugin.GetHandTrackingState(OVRPlugin.Step.Render, hand, ref _state)) return;
             var type = _state.Microgesture;
             if (!TryMap(type, out var gesture)) return;
+            if (IsBlocked(source)) return;
             if (type == _lastType[index] && Time.unscaledTime - _lastTime[index] < repeatGuard) return;
             _lastType[index] = type;
             _lastTime[index] = Time.unscaledTime;
             Gesture?.Invoke(gesture, source);
         }
+
+        /// <summary>True when this hand is busy with the island, so its thumb gestures don't count.</summary>
+        public bool IsBlocked(GestureSource source) =>
+            source != GestureSource.Keyboard && grabGuard != null && grabGuard.IsHandBusy(source == GestureSource.LeftHand);
 
         static bool TryMap(OVRPlugin.MicrogestureType type, out ThumbGesture gesture)
         {
