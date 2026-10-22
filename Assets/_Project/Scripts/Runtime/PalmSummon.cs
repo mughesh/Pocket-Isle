@@ -58,15 +58,15 @@ namespace Diorama
 
             var labelGo = new GameObject("Summon Label");
             labelGo.transform.SetParent(_button, false);
-            labelGo.transform.localPosition = new Vector3(0f, 1.3f, 0f);
+            labelGo.transform.localPosition = new Vector3(0f, 1.8f, 0f);
             _label = labelGo.AddComponent<TextMeshPro>();
-            _label.text = "Bring island here";
+            _label.text = "Touch with your other\nindex finger to\nbring the island here";
             _label.fontSize = 0.12f;
             _label.alignment = TextAlignmentOptions.Center;
             _label.color = Color.white;
             _label.outlineWidth = 0.2f;
             _label.outlineColor = new Color32(20, 30, 25, 255);
-            _label.rectTransform.sizeDelta = new Vector2(0.15f, 0.03f);
+            _label.rectTransform.sizeDelta = new Vector2(0.15f, 0.05f);
             labelGo.transform.localScale = Vector3.one / (buttonRadius * 2f); // undo the sphere scale
 
             _button.gameObject.SetActive(false);
@@ -93,7 +93,7 @@ namespace Diorama
             // The other hand's index tip touching the button confirms.
             var other = _hands[1 - _shownOn];
             if (HandLookup.TryGetJoint(other.hand, HandJointId.HandIndexTip, out var tip) &&
-                Vector3.Distance(tip, _button.position) <= buttonRadius + 0.012f)
+                Vector3.Distance(tip, _button.position) <= buttonRadius + 0.02f)
             {
                 Debug.Log("[PalmSummon] Bring island here: re-placing in front of the user.");
                 if (placer != null) placer.Place();
@@ -146,6 +146,7 @@ namespace Diorama
         void Show(int handIndex)
         {
             _shownOn = handIndex;
+            Debug.Log($"[PalmSummon] Button shown above the {(handIndex == 0 ? "left" : "right")} palm; touch it with the other index finger.");
             if (TryGetPalm(_hands[handIndex].hand, out var palm, out _)) _button.position = palm + Vector3.up * buttonHeight;
             _button.gameObject.SetActive(true);
         }

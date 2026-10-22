@@ -84,6 +84,7 @@ namespace Diorama
         public void BeginTransform()
         {
             _tiltT = 1f;
+            if (placer != null) placer.MarkUserMoved();
             var points = _grabbable.GrabPoints;
             var t = Target;
             _startPos = t.position;
@@ -133,10 +134,10 @@ namespace Diorama
         /// <summary>Eases the island so its top faces the head (pitch 0..maxPitch), keeping its yaw.</summary>
         public void StartTilt()
         {
-            var cam = Camera.main;
-            if (cam == null) return;
+            var head = placer != null ? placer.Head : Camera.main != null ? Camera.main.transform : null;
+            if (head == null) return;
             var t = Target;
-            Vector3 toHead = cam.transform.position - t.position;
+            Vector3 toHead = head.position - t.position;
             Vector3 flat = new Vector3(toHead.x, 0f, toHead.z);
             float elevation = Mathf.Atan2(toHead.y, flat.magnitude) * Mathf.Rad2Deg; // 90 = head straight above
             float pitch = Mathf.Clamp(90f - elevation, 0f, maxPitch) * Mathf.Deg2Rad;
