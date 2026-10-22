@@ -144,6 +144,7 @@ namespace Diorama.EditorTools
             piece.input = input;
             piece.placer = placer;
             piece.cubeMaterial = DioramaSceneSetup.ToonMaterial("Placeholder_Cube", "#e0752d", 0.3f);
+            testGo.AddComponent<ThumbHoldProbe>().input = input;
 
             EditorSceneManager.SaveScene(scene, ScenePath);
             SetBuildScenes();
@@ -180,6 +181,32 @@ namespace Diorama.EditorTools
             }
             EditorSceneManager.MarkSceneDirty(rig.gameObject.scene);
             Debug.Log($"[Diorama] Disabled {count} rig locomotion objects.");
+        }
+
+        [MenuItem("Tools/Diorama/Step 2/4. Add Thumb Hold Probe to MR_Main")]
+        static void AddThumbHoldProbe()
+        {
+            var active = EditorSceneManager.GetActiveScene();
+            if (active.path != ScenePath)
+            {
+                if (active.isDirty)
+                {
+                    Debug.LogError($"[Diorama] Save or discard changes in {active.name} first.");
+                    return;
+                }
+                active = EditorSceneManager.OpenScene(ScenePath);
+            }
+            var input = UnityEngine.Object.FindFirstObjectByType<MicrogestureInput>();
+            if (input == null)
+            {
+                Debug.LogError("[Diorama] No MicrogestureInput in MR_Main.");
+                return;
+            }
+            if (!input.TryGetComponent(out ThumbHoldProbe probe)) probe = Undo.AddComponent<ThumbHoldProbe>(input.gameObject);
+            probe.input = input;
+            EditorUtility.SetDirty(probe);
+            EditorSceneManager.SaveScene(active);
+            Debug.Log("[Diorama] ThumbHoldProbe added to MR_Main.");
         }
 
         /// <summary>Batch mode: -executeMethod Diorama.EditorTools.Step2QuestSetup.FixMrMainLocomotion</summary>

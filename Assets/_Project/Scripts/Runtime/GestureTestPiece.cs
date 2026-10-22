@@ -4,8 +4,11 @@ using UnityEngine;
 namespace Diorama
 {
     /// <summary>
-    /// Step 2 microgesture test: a placeholder cube that steps one tile per thumb swipe and hops on tap,
-    /// plus a small world-space label beside the island showing the last gesture, the hand and placement.
+    /// Step 2 microgesture test: a placeholder cube that walks across the island, plus a small world-space
+    /// label beside the island showing the last gesture, the hand and placement.
+    /// A swipe sets the walking direction and the cube keeps walking until another swipe, the island edge,
+    /// or a tap stops it. A second swipe in the same direction while moving switches to run; turning keeps
+    /// the current speed. Tap while standing still makes it hop.
     /// Swipes map to the user's view of the island: forward = away, back = toward, left / right = their left / right.
     /// </summary>
     public class GestureTestPiece : MonoBehaviour
@@ -19,13 +22,18 @@ namespace Diorama
         public Vector2Int startTile = new Vector2Int(10, 7); // (column, row)
 
         public float cubeSize = 0.028f;   // island-local metres
-        public float stepTime = 0.12f;
+        [Tooltip("Seconds per tile when walking.")]
+        public float walkSeconds = 0.3f;
+        [Tooltip("Seconds per tile when running.")]
+        public float runSeconds = 0.15f;
         public float hopHeight = 0.045f;
         public float hopTime = 0.35f;
 
         Transform _cube;
         TextMeshPro _label;
         Vector2Int _tile;
+        Vector2Int _heading;
+        bool _running;
         Vector3 _from, _to;
         float _stepT = 1f, _hopT = 1f;
         int _count;
@@ -80,21 +88,39 @@ namespace Diorama
             };
             if (gesture == ThumbGesture.Tap)
             {
-                _hopT = 0f;
+                if (_heading != Vector2Int.zero) Stop();
+                else _hopT = 0f;
             }
             else
             {
-                var next = _tile + d;
-                if (island.map.At(next.y, next.x) == IslandMap.Empty) _last += " - edge";
-                else
-                {
-                    _tile = next;
-                    _from = _cube.localPosition;
-                    _to = TilePosition(_tile);
-                    _stepT = 0f;
-                }
+                if (d == _heading) _running = true;
+                _heading = d;
+                if (_stepT >= 1f) TryStep();
             }
             RefreshLabel();
+        }
+
+        void TryStep()
+        {
+            var next = _tile + _heading;
+            if (island.map.At(next.y, next.x) == IslandMap.Empty)
+            {
+                Stop();
+                _last += " - edge";
+                RefreshLabel();
+                return;
+            }
+            _tile = next;
+            _from = _to;
+            _to = TilePosition(_tile);
+            _stepT = 0f;
+            RefreshLabel();
+        }
+
+        void Stop()
+        {
+            _heading = Vector2Int.zero;
+            _running = false;
         }
 
         Vector3 TilePosition(Vector2Int tile)
@@ -108,11 +134,13 @@ namespace Diorama
         void Update()
         {
             if (_cube == null) return;
+            if (_stepT >= 1f && _heading != Vector2Int.zero) TryStep();
             Vector3 p = _to;
             if (_stepT < 1f)
             {
-                _stepT = Mathf.Min(1f, _stepT + Time.deltaTime / stepTime);
-                p = Vector3.Lerp(_from, _to, Mathf.SmoothStep(0f, 1f, _stepT));
+                // Linear so consecutive steps join into a steady walk.
+                _stepT = Mathf.Min(1f, _stepT + Time.deltaTime / (_running ? runSeconds : walkSeconds));
+                p = Vector3.Lerp(_from, _to, _stepT);
             }
             if (_hopT < 1f)
             {
@@ -143,7 +171,15 @@ namespace Diorama
         {
             if (_label == null) return;
             string place = placer != null ? placer.Status : "-";
-            _label.text = $"<b>Last:</b> {_last}\n<b>Count:</b> {_count}\n<b>Tile:</b> r{_tile.y} c{_tile.x}\n<b>Place:</b> {place}";
+            string move = _heading == Vector2Int.zero ? "Stopped" : $"{(_running ? "Run" : "Walk")} {HeadingName(_heading)}";
+            _label.text = $"<b>Last:</b> {_last}\n<b>Count:</b> {_count}\n<b>Tile:</b> r{_tile.y} c{_tile.x}  <b>{move}</b>\n<b>Place:</b> {place}";
+        }
+
+        static string HeadingName(Vector2Int h)
+        {
+            if (h.x < 0) return "left";
+            if (h.x > 0) return "right";
+            return h.y < 0 ? "forward" : "back";
         }
     }
 }

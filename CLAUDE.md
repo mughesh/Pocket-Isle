@@ -4,10 +4,13 @@
 A seated, hands-first mixed reality creature-collecting game for Meta Quest, built for the
 **Meta VR Start Developer Competition 2026**. Working title and all creature names are placeholders.
 
-The player sits back. A small floating island (about 70 cm wide) is anchored on their real desk or
-coffee table. A tiny explorer walks around it. Walking into tall grass triggers an encounter, a short
-battle weakens the wild creature, and a flick of the hand throws a capture pod. Caught creatures live
-on a collection shelf beside the island.
+The player sits or reclines. A small floating island (about 70 cm wide) floats in their real room.
+**No table is needed.** They place it where they like (desk height, hip level, eye level from a
+reclining chair) and can move, turn and resize it. The island is a window onto a much larger world map:
+it shows only a patch of land that scrolls as a tiny explorer walks, like the top-down view in classic
+creature-collecting games. Walking into tall grass triggers an encounter, a short battle weakens the
+wild creature, and a flick of the hand throws a capture pod. Caught creatures live on a collection shelf
+beside the island. The finished game has a short storyline across a few regions.
 
 Core loop: **explore → tall-grass encounter → battle → capture flick → collection shelf**.
 
@@ -19,11 +22,12 @@ Core loop: **explore → tall-grass encounter → battle → capture flick → c
 
 ## Competition rules that affect code and content
 - **Fully usable with hands, end to end.** Controllers optional. Never require a controller.
-- Seated: every interaction works within roughly a 2 ft radius. No walking around the room.
+- Seated or reclined: every interaction works without standing or walking around the room.
 - Fast cold start, clean pause/resume, something satisfying within 10 minutes.
 - Keep key UI inside the central ~70° field of view (Meta VR Glasses are narrower than Quest 3).
 - At least 60 fps on Quest (target 72). Must be stable and bug-free.
-- Passthrough must be purposeful: the island sits on a real surface found with MRUK.
+- Passthrough must be purposeful: the island floats in the real room, casts a soft shadow on the real
+  surface below it (MRUK), and snaps onto a table if released just above one.
 - **No brand logos, no branded products, no real people, no copyrighted characters.**
   Creatures must be original. Do not imitate Pokémon designs, names, or the red-and-white ball.
 - English only. Must work offline. **No runtime calls to AI or web APIs.**
@@ -31,8 +35,13 @@ Core loop: **explore → tall-grass encounter → battle → capture flick → c
 ## Technical decisions (do not change without asking)
 - Unity **6.3 LTS**, URP, Meta Quest build profile, OpenXR with the Meta XR feature group.
 - Meta XR SDK **v207 or later**: Core SDK, Interaction SDK, MR Utility Kit (MRUK), Meta XR Simulator.
-- Input: Interaction SDK hands. Movement uses **thumb microgestures** (thumb swipe left, right,
-  forward, back and tap on the index finger). Capture is a flick/throw gesture. Gaze + pinch for UI.
+- Input: Interaction SDK hands. Movement uses **thumb microgestures**: a swipe (left, right, forward,
+  back) starts walking; walking continues while the thumb stays off-centre (read from hand joint poses,
+  because microgesture events fire once per swipe); thumb back to rest or a thumb tap stops. Steps are
+  tile-by-tile. Capture is a flick/throw gesture. Gaze + pinch for UI.
+- Island placement: grab the rocky rim/base to move (never the play surface); two-hand grab for yaw and
+  uniform scale; on release the island tilts its top toward the head (pitch clamped). Microgestures are
+  ignored on a hand that is grabbing.
 - Art style: **toon-shaded, sculpted, procedural**. No hand modelling, no imported art except from the
   Meta Asset Library if Mugesh approves it.
   - Creature bodies are **signed distance field (SDF) recipes** melted together with smooth union,
@@ -43,7 +52,9 @@ Core loop: **explore → tall-grass encounter → battle → capture flick → c
     patterns (belly, socks, tips, spots). Eyes are a separate eye shader (iris, pupil, highlights)
     that can look at the camera.
   - Grass is one instanced mesh with a wind and push-away vertex shader.
-  - The island map is a text/data grid; tiles, rocks and trees are instanced.
+  - The world is a large authored data grid (built with a generator, then story beats placed by hand;
+    not random at runtime). The island renders a scrolling window of it: tiles, rocks and trees are
+    instanced and recycled; entering tiles rise from the base, leaving tiles sink. The rocky base is fixed.
 - Battle: 1 vs 1, 2–3 moves per creature, no menus. Four attack templates (shoot, lunge, slam,
   shield) recoloured per element. Effects are small shaders plus one pooled particle system.
 
@@ -77,3 +88,13 @@ and translate the JS SDF recipes and marching cubes to C# Editor tools.
 - Keep explanations short. He is an experienced XR design engineer, not a beginner.
 - Use Meta's agentic tooling (Meta VR CLI, meta-quest agentic skills) to check docs and the device
   instead of guessing APIs. Meta SDK APIs change between versions; confirm against v207+.
+
+## Overrides to my personal CLAUDE.md (this project only)
+- **Hands:** use the Meta Interaction SDK (hands, microgestures, gaze + pinch). AutoHands does not
+  apply here, and don't use XRI.
+- **Island placement fallback is intended.** The island floats by default; MRUK only adds the shadow
+  and table snap. When there is no scene data, skip those and keep playing. That is a UX feature, not a
+  hidden config fallback. Log which path was taken.
+- **Project settings are part of the work.** When a step deliberately changes ProjectSettings, XR
+  settings, URP assets or OpenXR/Meta settings, commit those files with that step and list them.
+  Still never commit UserSettings, Library, Temp, Logs or .slnx/.csproj.

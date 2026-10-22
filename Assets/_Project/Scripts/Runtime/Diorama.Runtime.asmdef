@@ -3,6 +3,7 @@
     "rootNamespace": "Diorama",
     "references": [
         "Oculus.VR",
+        "Oculus.Interaction",
         "meta.xr.mrutilitykit",
         "Unity.InputSystem",
         "Unity.TextMeshPro"
