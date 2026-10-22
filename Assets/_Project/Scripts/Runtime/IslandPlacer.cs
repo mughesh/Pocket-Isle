@@ -2,6 +2,9 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.XR;
+using InputDevices = UnityEngine.XR.InputDevices;
+using CommonUsages = UnityEngine.XR.CommonUsages;
 
 namespace Diorama
 {
@@ -26,6 +29,9 @@ namespace Diorama
         public float distance = 0.45f;
         [Tooltip("How far below eye height the island sits, in metres. About 0.55 is waist level when seated.")]
         public float belowEye = 0.55f;
+
+        [Tooltip("Eye height above the floor assumed when there is no head pose at all (seated), in metres.")]
+        public float seatedEyeHeight = 1.15f;
 
         [Tooltip("Wait at most this long for a real head pose before placing anyway (flat Editor Play has none).")]
         public float trackingTimeout = 10f;
@@ -59,19 +65,55 @@ namespace Diorama
             if (OVRManager.display != null) OVRManager.display.RecenteredPose += OnRecentered;
 
             float t = 0f;
-            while (!HeadHasPose() && t < trackingTimeout)
+            while (!TryGetHeadPose(out _, out _, out _) && t < trackingTimeout)
             {
                 t += Time.unscaledDeltaTime;
                 yield return null;
             }
             // A few more frames so the pose settles.
             for (int i = 0; i < 5; i++) yield return null;
-            if (!UnityEngine.XR.XRSettings.isDeviceActive)
-                Debug.LogWarning("[IslandPlacer] XR is not running (Windows: XR Plug-in Management > Initialize XR on Startup is off, " +
-                                 "or no headset in Link). The camera sits at the rig origin on the floor, so the island will too.");
-            else if (!HeadHasPose())
-                Debug.LogWarning($"[IslandPlacer] No head pose after {trackingTimeout:0} s, placing from the current camera pose.");
+            LogDiagnostics();
             Place("startup");
+        }
+
+        void LogDiagnostics()
+        {
+            var eye = InputDevices.GetDeviceAtXRNode(XRNode.CenterEye);
+            string xrEye = eye.isValid && eye.TryGetFeatureValue(CommonUsages.centerEyePosition, out var p) ? p.ToString("F2") : "none";
+            Debug.Log($"[IslandPlacer] Diagnostics: XR device active {XRSettings.isDeviceActive} ('{XRSettings.loadedDeviceName}'), " +
+                      $"OVRManager initialized {OVRManager.OVRManagerinitialized}, HMD present {OVRManager.isHmdPresent}, " +
+                      $"CenterEyeAnchor local {(Head != null ? Head.localPosition.ToString("F2") : "none")}, XR input centre eye {xrEye}.");
+        }
+
+        /// <summary>
+        /// World-space head pose. Tries the rig's CenterEyeAnchor first, then Unity XR input directly (the anchor stayed
+        /// at the origin over Link on the office PC). False when neither has a real pose.
+        /// </summary>
+        bool TryGetHeadPose(out Vector3 position, out Vector3 forward, out string source)
+        {
+            var head = Head;
+            // A tracked centre eye is never exactly at the tracking-space origin.
+            if (head != null && head.localPosition.sqrMagnitude > 1e-4f)
+            {
+                position = head.position;
+                forward = head.forward;
+                source = "CenterEyeAnchor";
+                return true;
+            }
+            var eye = InputDevices.GetDeviceAtXRNode(XRNode.CenterEye);
+            if (eye.isValid && eye.TryGetFeatureValue(CommonUsages.centerEyePosition, out var p) && p.sqrMagnitude > 1e-4f &&
+                eye.TryGetFeatureValue(CommonUsages.centerEyeRotation, out var r))
+            {
+                var space = Rig != null && Rig.trackingSpace != null ? Rig.trackingSpace : null;
+                position = space != null ? space.TransformPoint(p) : p;
+                forward = space != null ? space.rotation * (r * Vector3.forward) : r * Vector3.forward;
+                source = "XR input";
+                return true;
+            }
+            position = default;
+            forward = default;
+            source = null;
+            return false;
         }
 
         void OnDestroy()
@@ -98,9 +140,6 @@ namespace Diorama
             Place(reason);
         }
 
-        // A tracked centre eye is never exactly at the tracking-space origin.
-        bool HeadHasPose() => Head != null && Head.localPosition.sqrMagnitude > 1e-4f;
-
         void OnValidate()
         {
             if (island != null && Application.isPlaying) ApplyScale();
@@ -124,17 +163,25 @@ namespace Diorama
                 Debug.LogError("[IslandPlacer] No island assigned.");
                 return;
             }
-            var head = Head;
-            if (head == null)
+            Vector3 pos, fwd;
+            if (TryGetHeadPose(out var headPos, out var headFwd, out var source))
             {
-                Debug.LogError("[IslandPlacer] No OVRCameraRig centre eye or main camera found; can't place the island.");
-                return;
+                fwd = Flat(headFwd);
+                pos = headPos + fwd * distance + Vector3.down * belowEye;
+                Status = $"waist ({source})";
+                Debug.Log($"[IslandPlacer] Placed ({reason}) from {source}. Head {headPos:F2}, island {pos:F2}.");
             }
-            Vector3 fwd = Flat(head.forward);
-            Vector3 pos = head.position + fwd * distance + Vector3.down * belowEye;
+            else
+            {
+                // No head pose at all: fixed seated spot in the tracking space (floor-level origin), in front of where
+                // the Quest's recenter says forward is. Recentering moves the tracking space, so this follows the user.
+                var space = Rig != null && Rig.trackingSpace != null ? Rig.trackingSpace : transform;
+                fwd = Flat(space.forward);
+                pos = space.TransformPoint(new Vector3(0f, seatedEyeHeight - belowEye, distance));
+                Status = "seated default (no head pose)";
+                Debug.LogWarning($"[IslandPlacer] Placed ({reason}) at the seated default: no head pose from the rig or XR input. Island {pos:F2}.");
+            }
             island.transform.SetPositionAndRotation(pos, Quaternion.LookRotation(-fwd, Vector3.up));
-            Status = $"waist, eye y {head.localPosition.y:0.00} m";
-            Debug.Log($"[IslandPlacer] Placed ({reason}). Head {head.position:F2} (local {head.localPosition:F2}), island {pos:F2}.");
             Placed?.Invoke();
         }
 
