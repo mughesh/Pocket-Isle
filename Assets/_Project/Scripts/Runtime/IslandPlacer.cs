@@ -66,7 +66,11 @@ namespace Diorama
             }
             // A few more frames so the pose settles.
             for (int i = 0; i < 5; i++) yield return null;
-            if (!HeadHasPose()) Debug.LogWarning($"[IslandPlacer] No head pose after {trackingTimeout:0} s, placing from the current camera pose.");
+            if (!UnityEngine.XR.XRSettings.isDeviceActive)
+                Debug.LogWarning("[IslandPlacer] XR is not running (Windows: XR Plug-in Management > Initialize XR on Startup is off, " +
+                                 "or no headset in Link). The camera sits at the rig origin on the floor, so the island will too.");
+            else if (!HeadHasPose())
+                Debug.LogWarning($"[IslandPlacer] No head pose after {trackingTimeout:0} s, placing from the current camera pose.");
             Place("startup");
         }
 
