@@ -81,6 +81,14 @@ namespace Diorama
             }
         }
 
+        /// <summary>Thumb offset from its rest point in mm (along, across). False until a swipe set the rest, or when untracked.</summary>
+        public bool TryGetOffsetMm(bool leftHand, out Vector2 mm)
+        {
+            var probe = _hands[leftHand ? 0 : 1];
+            mm = (probe.current - probe.rest) * 1000f;
+            return probe.valid && probe.hasRest;
+        }
+
         void Update()
         {
             for (int i = 0; i < 2; i++) UpdateHand(_hands[i], i == 0 ? Handedness.Left : Handedness.Right);

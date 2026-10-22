@@ -571,13 +571,17 @@ MonoBehaviour:
   island: {fileID: 270959109}
   input: {fileID: 374318556}
   placer: {fileID: 374318555}
+  probe: {fileID: 374318558}
   cubeMaterial: {fileID: 2100000, guid: 465021766fd4ece4294b3a58730b1c8e, type: 2}
+  moveMode: 1
   startTile: {x: 10, y: 7}
   cubeSize: 0.028
-  walkSeconds: 0.3
-  runSeconds: 0.15
+  walkSeconds: 0.6
+  runSeconds: 0.3
   hopHeight: 0.045
   hopTime: 0.35
+  holdReleaseMm: 5
+  holdGraceSeconds: 0.25
 --- !u!114 &374318555
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -144,7 +144,9 @@ namespace Diorama.EditorTools
             piece.input = input;
             piece.placer = placer;
             piece.cubeMaterial = DioramaSceneSetup.ToonMaterial("Placeholder_Cube", "#e0752d", 0.3f);
-            testGo.AddComponent<ThumbHoldProbe>().input = input;
+            var probe = testGo.AddComponent<ThumbHoldProbe>();
+            probe.input = input;
+            piece.probe = probe;
 
             EditorSceneManager.SaveScene(scene, ScenePath);
             SetBuildScenes();
@@ -205,6 +207,15 @@ namespace Diorama.EditorTools
             if (!input.TryGetComponent(out ThumbHoldProbe probe)) probe = Undo.AddComponent<ThumbHoldProbe>(input.gameObject);
             probe.input = input;
             EditorUtility.SetDirty(probe);
+            if (input.TryGetComponent(out GestureTestPiece piece))
+            {
+                Undo.RecordObject(piece, "Wire thumb probe");
+                piece.probe = probe;
+                // Halved after the first headset test; the scene had the old values serialized.
+                piece.walkSeconds = 0.6f;
+                piece.runSeconds = 0.3f;
+                EditorUtility.SetDirty(piece);
+            }
             EditorSceneManager.SaveScene(active);
             Debug.Log("[Diorama] ThumbHoldProbe added to MR_Main.");
         }
