@@ -8,10 +8,9 @@ namespace Diorama
     /// <summary>
     /// Holding the floating island. The ISDK Grabbable on the island uses this as both its one- and two-grab
     /// transformer; grabs can only start on the rim colliders (HandGrabInteractable on the "Rim Grab" child),
-    /// never on the play surface.
+    /// never on the play surface. The island always stays level (parallel to the floor).
     /// One hand: the island follows the hand, keeping the grab offset (no rotation).
-    /// Two hands: yaw only and uniform scale around the hands' midpoint, scale clamped relative to the start scale.
-    /// Release (and every re-place): eases so the top faces the head, pitch clamped.
+    /// Two hands: yaw and uniform scale around the hands' midpoint, scale clamped relative to the placer's scale.
     /// Also reports which hands are busy with the island so microgestures can ignore them.
     /// </summary>
     [RequireComponent(typeof(Grabbable))]
@@ -27,10 +26,6 @@ namespace Diorama
         public float minScaleFactor = 0.5f;
         public float maxScaleFactor = 2f;
 
-        [Header("Tilt toward the head")]
-        public float tiltSeconds = 0.4f;
-        [Range(0f, 89f)] public float maxPitch = 40f;
-
         [Header("Gesture guard and hover")]
         [Tooltip("A hand whose thumb tip or palm is this close to the rim counts as busy.")]
         public float nearRimDistance = 0.05f;
@@ -43,11 +38,7 @@ namespace Diorama
 
         // grab state captured on BeginTransform
         Vector3 _startPos, _offset, _startMid, _startFlat;
-        Quaternion _startRot;
-        float _startDist, _startScale;
-
-        Quaternion _tiltFrom, _tiltTo;
-        float _tiltT = 1f;
+        float _startYaw, _startDist, _startScale;
 
         readonly Hand[] _hands = new Hand[2];
         readonly bool[] _near = new bool[2];
@@ -61,20 +52,7 @@ namespace Diorama
         void Start()
         {
             _baseScale = placer != null ? placer.islandScale : transform.localScale.x;
-            _grabbableComponent.WhenPointerEventRaised += OnPointerEvent;
-            if (placer != null) placer.Placed += StartTilt;
             if (rimInteractable == null) Debug.LogError("[IslandHandle] No rim HandGrabInteractable assigned; the island can't be grabbed.");
-        }
-
-        void OnDestroy()
-        {
-            if (_grabbableComponent != null) _grabbableComponent.WhenPointerEventRaised -= OnPointerEvent;
-            if (placer != null) placer.Placed -= StartTilt;
-        }
-
-        void OnPointerEvent(PointerEvent evt)
-        {
-            if ((evt.Type == PointerEventType.Unselect || evt.Type == PointerEventType.Cancel) && !IsGrabbed) StartTilt();
         }
 
         // ---- ITransformer ----
@@ -83,12 +61,10 @@ namespace Diorama
 
         public void BeginTransform()
         {
-            _tiltT = 1f;
-            if (placer != null) placer.MarkUserMoved();
             var points = _grabbable.GrabPoints;
             var t = Target;
             _startPos = t.position;
-            _startRot = t.rotation;
+            _startYaw = YawOf(t.rotation);
             _startScale = t.localScale.x;
             if (points.Count == 1)
             {
@@ -109,7 +85,7 @@ namespace Diorama
             var t = Target;
             if (points.Count == 1)
             {
-                t.position = points[0].position + _offset;
+                t.SetPositionAndRotation(points[0].position + _offset, Quaternion.Euler(0f, _startYaw, 0f));
                 return;
             }
             if (points.Count < 2) return;
@@ -123,54 +99,24 @@ namespace Diorama
                 _baseScale * minScaleFactor, _baseScale * maxScaleFactor);
             var yawRot = Quaternion.AngleAxis(yaw, Vector3.up);
 
-            t.SetPositionAndRotation(mid + yawRot * (_startPos - _startMid) * (scale / _startScale), yawRot * _startRot);
+            t.SetPositionAndRotation(mid + yawRot * (_startPos - _startMid) * (scale / _startScale),
+                Quaternion.Euler(0f, _startYaw + yaw, 0f));
             t.localScale = Vector3.one * scale;
         }
 
         public void EndTransform() { }
 
-        // ---- tilt ----
-
-        /// <summary>Eases the island so its top faces the head (pitch 0..maxPitch), keeping its yaw.</summary>
-        public void StartTilt()
-        {
-            var head = placer != null ? placer.Head : Camera.main != null ? Camera.main.transform : null;
-            if (head == null) return;
-            var t = Target;
-            Vector3 toHead = head.position - t.position;
-            Vector3 flat = new Vector3(toHead.x, 0f, toHead.z);
-            float elevation = Mathf.Atan2(toHead.y, flat.magnitude) * Mathf.Rad2Deg; // 90 = head straight above
-            float pitch = Mathf.Clamp(90f - elevation, 0f, maxPitch) * Mathf.Deg2Rad;
-            Vector3 dir = flat.sqrMagnitude > 1e-6f ? flat.normalized : Vector3.forward;
-            Vector3 up = Vector3.up * Mathf.Cos(pitch) + dir * Mathf.Sin(pitch);
-
-            _tiltFrom = t.rotation;
-            _tiltTo = Quaternion.FromToRotation(Vector3.up, up) * Quaternion.Euler(0f, YawOf(t.rotation), 0f);
-            _tiltT = 0f;
-        }
-
         static float YawOf(Quaternion rotation)
         {
             Vector3 f = rotation * Vector3.forward;
             f.y = 0f;
-            if (f.sqrMagnitude < 1e-6f)
-            {
-                f = rotation * Vector3.up; // island stood on its edge; use where its top points
-                f.y = 0f;
-            }
-            return Mathf.Atan2(f.x, f.z) * Mathf.Rad2Deg;
+            return f.sqrMagnitude > 1e-6f ? Mathf.Atan2(f.x, f.z) * Mathf.Rad2Deg : 0f;
         }
 
-        // ---- per frame: tilt animation, hand proximity, highlight ----
+        // ---- per frame: hand proximity, highlight ----
 
         void Update()
         {
-            if (_tiltT < 1f && !IsGrabbed)
-            {
-                _tiltT = Mathf.Min(1f, _tiltT + Time.deltaTime / Mathf.Max(0.01f, tiltSeconds));
-                Target.rotation = Quaternion.Slerp(_tiltFrom, _tiltTo, Mathf.SmoothStep(0f, 1f, _tiltT));
-            }
-
             _near[0] = IsNearRim(HandLookup.Refresh(ref _hands[0], Handedness.Left));
             _near[1] = IsNearRim(HandLookup.Refresh(ref _hands[1], Handedness.Right));
 

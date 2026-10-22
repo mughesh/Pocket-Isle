@@ -40,8 +40,9 @@ Core loop: **explore → tall-grass encounter → battle → capture flick → c
   because microgesture events fire once per swipe); thumb back to rest or a thumb tap stops. Steps are
   tile-by-tile. Capture is a flick/throw gesture. Gaze + pinch for UI.
 - Island placement: grab the rocky rim/base to move (never the play surface); two-hand grab for yaw and
-  uniform scale; on release the island tilts its top toward the head (pitch clamped). Microgestures are
-  ignored on a hand that is grabbing.
+  uniform scale; the island always stays level (no tilt toward the head). Re-placing in front of the user is
+  the standard Quest recenter. The island is parented to the rig's TrackingSpace so MRUK world lock moves it
+  with the user. Microgestures are ignored on a hand that is grabbing.
 - Art style: **toon-shaded, sculpted, procedural**. No hand modelling, no imported art except from the
   Meta Asset Library if Mugesh approves it.
   - Creature bodies are **signed distance field (SDF) recipes** melted together with smooth union,

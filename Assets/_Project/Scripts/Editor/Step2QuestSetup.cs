@@ -320,12 +320,9 @@ namespace Diorama.EditorTools
             shadow.shadowMaterial = BlobShadowMaterial();
             EditorUtility.SetDirty(shadow);
 
+            // Re-placing is the Quest recenter now (IslandPlacer); the palm-up button is retired.
             var summon = input.GetComponent<PalmSummon>();
-            if (summon == null) summon = Undo.AddComponent<PalmSummon>(input.gameObject);
-            summon.placer = placer;
-            summon.handle = handle;
-            summon.buttonMaterial = DioramaSceneSetup.ToonMaterial("Summon_Button", "#f2c14e", 0.3f);
-            EditorUtility.SetDirty(summon);
+            if (summon != null) Undo.DestroyObjectImmediate(summon);
 
             if (input.TryGetComponent(out GestureTestPiece piece))
             {

@@ -1,18 +1,18 @@
 using System;
 using System.Collections;
-using Meta.XR.MRUtilityKit;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace Diorama
 {
     /// <summary>
-    /// Places the island in front of the seated user at about waist height, facing them. The island's +Z
-    /// faces the user. Keeps the user's current island scale. Re-place: PalmSummon, or press R in the Editor.
-    /// Moving, turning and resizing by hand is IslandHandle.
-    /// Startup: waits until the rig's centre eye has a real pose (over Link, OVRPlugin can report the head as
-    /// tracked while the camera is still at the rig origin on the floor), places, and places again once the
-    /// MRUK room has loaded (world locking can shift the rig) unless the user has already moved the island.
+    /// Places the island level, in front of the seated user at about waist height, its +Z facing them.
+    /// Keeps the user's current island scale. Re-place: the Quest recenter (hold the Meta button, or the system
+    /// menu's recenter), or R in the Editor. Moving, turning and resizing by hand is IslandHandle.
+    /// The island is parented to the camera rig's TrackingSpace: MRUK world locking moves that transform after the
+    /// room loads, and the island has to move with it or it is left behind (it ended up on the floor).
+    /// Startup waits until the centre eye has a real pose; over Link, OVRPlugin can report the head as tracked
+    /// while the camera is still at the rig origin.
     /// </summary>
     public class IslandPlacer : MonoBehaviour
     {
@@ -35,8 +35,8 @@ namespace Diorama
 
         public event Action Placed;
 
+        OVRCameraRig _rig;
         Transform _head;
-        bool _userMoved;
 
         /// <summary>The rig's centre eye (falls back to Camera.main outside the Meta rig).</summary>
         public Transform Head
@@ -44,16 +44,20 @@ namespace Diorama
             get
             {
                 if (_head != null) return _head;
-                var rig = FindFirstObjectByType<OVRCameraRig>();
-                if (rig != null && rig.centerEyeAnchor != null) _head = rig.centerEyeAnchor;
+                if (Rig != null && Rig.centerEyeAnchor != null) _head = Rig.centerEyeAnchor;
                 else if (Camera.main != null) _head = Camera.main.transform;
                 return _head;
             }
         }
 
+        OVRCameraRig Rig => _rig != null ? _rig : _rig = FindFirstObjectByType<OVRCameraRig>();
+
         IEnumerator Start()
         {
             ApplyScale();
+            AttachToTrackingSpace();
+            if (OVRManager.display != null) OVRManager.display.RecenteredPose += OnRecentered;
+
             float t = 0f;
             while (!HeadHasPose() && t < trackingTimeout)
             {
@@ -64,15 +68,30 @@ namespace Diorama
             for (int i = 0; i < 5; i++) yield return null;
             if (!HeadHasPose()) Debug.LogWarning($"[IslandPlacer] No head pose after {trackingTimeout:0} s, placing from the current camera pose.");
             Place("startup");
-
-            if (MRUK.Instance != null) MRUK.Instance.RegisterSceneLoadedCallback(OnSceneLoaded);
-            else Debug.Log("[IslandPlacer] No MRUK in the scene; no re-place after room load.");
         }
 
-        void OnSceneLoaded()
+        void OnDestroy()
         {
-            if (_userMoved) Debug.Log("[IslandPlacer] MRUK room loaded; island already moved by the user, leaving it.");
-            else Place("after MRUK room load");
+            if (OVRManager.display != null) OVRManager.display.RecenteredPose -= OnRecentered;
+        }
+
+        void AttachToTrackingSpace()
+        {
+            if (island == null) return;
+            if (Rig != null && Rig.trackingSpace != null)
+            {
+                island.transform.SetParent(Rig.trackingSpace, true);
+                Debug.Log("[IslandPlacer] Island parented to the rig's TrackingSpace (moves with MRUK world lock).");
+            }
+            else Debug.LogWarning("[IslandPlacer] No OVRCameraRig tracking space; island stays in world space.");
+        }
+
+        void OnRecentered() => StartCoroutine(PlaceAfterFrames("Quest recenter", 2));
+
+        IEnumerator PlaceAfterFrames(string reason, int frames)
+        {
+            for (int i = 0; i < frames; i++) yield return null; // the camera picks up the new pose
+            Place(reason);
         }
 
         // A tracked centre eye is never exactly at the tracking-space origin.
@@ -91,10 +110,7 @@ namespace Diorama
             if (kb != null && kb.rKey.wasPressedThisFrame) Place("R key");
         }
 
-        /// <summary>Called by IslandHandle when the user grabs the island, so automatic re-placing stops.</summary>
-        public void MarkUserMoved() => _userMoved = true;
-
-        /// <summary>Places the island in front of the user at waist height.</summary>
+        /// <summary>Places the island in front of the user at waist height, level.</summary>
         public void Place() => Place("request");
 
         void Place(string reason)
@@ -112,9 +128,8 @@ namespace Diorama
             }
             Vector3 fwd = Flat(head.forward);
             Vector3 pos = head.position + fwd * distance + Vector3.down * belowEye;
-            Vector3 toUser = Flat(head.position - pos);
-            island.transform.SetPositionAndRotation(pos, Quaternion.LookRotation(toUser, Vector3.up));
-            Status = $"waist, eye y {head.position.y:0.00} m";
+            island.transform.SetPositionAndRotation(pos, Quaternion.LookRotation(-fwd, Vector3.up));
+            Status = $"waist, eye y {head.localPosition.y:0.00} m";
             Debug.Log($"[IslandPlacer] Placed ({reason}). Head {head.position:F2} (local {head.localPosition:F2}), island {pos:F2}.");
             Placed?.Invoke();
         }
