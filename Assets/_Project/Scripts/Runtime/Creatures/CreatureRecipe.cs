@@ -66,6 +66,10 @@ namespace Diorama
         public Vector3 bellyDirection;
         public float bellyAt;
         public float bellyMaxY;
+        [Tooltip("> 0: the belly edge runs down in this many drips around the body (glaze on pots).")]
+        public float bellyDrips;
+        [Tooltip("How far the drips run down (0.5-1).")]
+        public float bellyDripLength;
 
         [Tooltip("Everything below a height.")]
         public bool socks;
@@ -79,6 +83,13 @@ namespace Diorama
         [Tooltip("Scattered spots on the back, in the accent colour.")]
         public bool spots;
         public float spotScale;
+
+        [Tooltip("Glowing crack lines in the glow colour (lit by themselves, pulse over time).")]
+        public bool cracks;
+        [Tooltip("Cells per shape unit; lower = fewer, longer cracks.")]
+        public float crackScale;
+        public float crackWidth;
+        [Range(0f, 1f)] public float crackPulse;
 
         [Tooltip("Up to 6 round patches (mirrored ones count twice). Later ones paint over earlier ones.")]
         public List<PatternPatch> patches;
@@ -145,6 +156,8 @@ namespace Diorama
         public float bob;
         [Tooltip("Side to side rock, degrees.")]
         public float sway;
+        [Tooltip("Rock speed (0 = default 1.2). Heavy creatures rock slower.")]
+        public float swaySpeed;
     }
 
     /// <summary>

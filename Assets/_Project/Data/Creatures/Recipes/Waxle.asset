@@ -1,0 +1,88 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e27712b2a6f9fc45ae0b54784bf7327, type: 3}
+  m_Name: Waxle
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.CreatureRecipe
+  baseRecipe: {fileID: 0}
+  body: {fileID: 11400000, guid: 537d9cc291eed354b87a23f1ff73cb34, type: 2}
+  height: 0.036
+  zones:
+    belly: 0
+    bellyDirection: {x: 0, y: 0, z: 0}
+    bellyAt: 0
+    bellyMaxY: 0
+    bellyDrips: 0
+    bellyDripLength: 0
+    socks: 0
+    socksY: 0
+    tips: 0
+    tipAxis: {x: 0, y: 0, z: 0}
+    tipAt: 0
+    spots: 0
+    spotScale: 0
+    cracks: 0
+    crackScale: 0
+    crackWidth: 0
+    crackPulse: 0
+    patches: []
+  parts:
+  - part: {fileID: 11400000, guid: 87d0b333ef63056458528f49ea7736c3, type: 2}
+    position: {x: 0, y: -0.4, z: -0.14}
+    rotation: {x: -6, y: 0, z: 0}
+    scale: {x: 1.3, y: 1.3, z: 1.3}
+    mirror: 0
+    parent: -1
+  - part: {fileID: 11400000, guid: d2de439f45b65be41b0165256fd8246a, type: 2}
+    position: {x: 0, y: 0.58, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: {x: 0.95, y: 0.95, z: 0.95}
+    mirror: 0
+    parent: 0
+  face:
+    eyeSize: 0.055
+    eyeSpacing: 0.13
+    eyeHeight: 0.46
+    eyeStretch: 1.1
+    decals:
+    - kind: 1
+      at: {x: 0, y: 0.01}
+      size: {x: 0.04, y: 0}
+      color: 6
+      mirrorX: 0
+  palette:
+    baseColor: {r: 0.9411765, g: 0.8784314, b: 0.627451, a: 1}
+    belly: {r: 0.9607843, g: 0.9019608, b: 0.78431374, a: 1}
+    accent: {r: 0.84705883, g: 0.7529412, b: 0.5019608, a: 1}
+    socks: {r: 0.9411765, g: 0.8784314, b: 0.627451, a: 1}
+    glow: {r: 0.8980392, g: 0.39215687, b: 0.11764706, a: 1}
+    extra: {r: 1, g: 0.8156863, b: 0.3764706, a: 1}
+    face: {r: 0.22745098, g: 0.16470589, b: 0.09411765, a: 1}
+    iris: {r: 0.22745098, g: 0.16470589, b: 0.09411765, a: 1}
+  spec: 0.2
+  outline: 0.035
+  idle:
+    breathe: 0.015
+    breatheSpeed: 1.8
+    jiggle: 0.006
+    hover: 0
+    bob: 0
+    sway: 1
+    swaySpeed: 0
+  heightScale: 1.25
+  extraParts: []
+  overridePalette: 0
+  hueShift: 0
+  saturationScale: 1
+  valueScale: 1
+  resolution: 88
+  triangleBudget: 6000
+  bakedPrefab: {fileID: 2897710189970665803, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}

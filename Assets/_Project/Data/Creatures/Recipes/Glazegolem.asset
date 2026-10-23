@@ -1,0 +1,87 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e27712b2a6f9fc45ae0b54784bf7327, type: 3}
+  m_Name: Glazegolem
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.CreatureRecipe
+  baseRecipe: {fileID: 0}
+  body: {fileID: 11400000, guid: 7568906f14ddb6c4fab124d398bf8676, type: 2}
+  height: 0.058
+  zones:
+    belly: 1
+    bellyDirection: {x: 0, y: 1, z: 0}
+    bellyAt: 0.55
+    bellyMaxY: 9
+    bellyDrips: 9
+    bellyDripLength: 0.9
+    socks: 0
+    socksY: 0
+    tips: 0
+    tipAxis: {x: 0, y: 0, z: 0}
+    tipAt: 0
+    spots: 0
+    spotScale: 0
+    cracks: 1
+    crackScale: 1.6
+    crackWidth: 0.045
+    crackPulse: 0.8
+    patches:
+    - center: {x: 0, y: 0.6, z: 0}
+      radius: 0.17
+      color: 2
+      mirrorX: 0
+  parts:
+  - part: {fileID: 11400000, guid: 634bba82503e0614fa0228143afa90f3, type: 2}
+    position: {x: 0, y: 0.62, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+    mirror: 0
+    parent: -1
+  - part: {fileID: 11400000, guid: 803c8199a8e391342b9615ec33018c02, type: 2}
+    position: {x: 0.34, y: 0.14, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: {x: 1.15, y: 1.15, z: 1.15}
+    mirror: 1
+    parent: -1
+  face:
+    eyeSize: 0.055
+    eyeSpacing: 0.11
+    eyeHeight: 0.47
+    eyeStretch: 0.8
+    decals: []
+  palette:
+    baseColor: {r: 0.627451, g: 0.32156864, b: 0.1764706, a: 1}
+    belly: {r: 0.8509804, g: 0.5568628, b: 0.19607843, a: 1}
+    accent: {r: 0.2901961, g: 0.14117648, b: 0.078431375, a: 1}
+    socks: {r: 0.627451, g: 0.32156864, b: 0.1764706, a: 1}
+    glow: {r: 1, g: 0.47843137, b: 0.15686275, a: 1}
+    extra: {r: 0.41960785, g: 0.22745098, b: 0.11764706, a: 1}
+    face: {r: 0.16470589, g: 0.101960786, b: 0.078431375, a: 1}
+    iris: {r: 1, g: 0.47843137, b: 0.15686275, a: 1}
+  spec: 0.25
+  outline: 0.035
+  idle:
+    breathe: 0.008
+    breatheSpeed: 1.4
+    jiggle: 0
+    hover: 0
+    bob: 0
+    sway: 3
+    swaySpeed: 0.6
+  heightScale: 1.25
+  extraParts: []
+  overridePalette: 0
+  hueShift: 0
+  saturationScale: 1
+  valueScale: 1
+  resolution: 88
+  triangleBudget: 6000
+  bakedPrefab: {fileID: 1182588500041950733, guid: 22fd4e315453c5d48a4640308a8065d5, type: 3}

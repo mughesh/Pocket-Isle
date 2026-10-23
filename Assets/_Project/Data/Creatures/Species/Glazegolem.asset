@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8421308f89f57d498f601bfba37a8cf, type: 3}
+  m_Name: Glazegolem
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.CreatureSpecies
+  displayName: Glazegolem
+  element: 1
+  recipe: {fileID: 11400000, guid: d7116e0e51ba4074d92e9a4e521517d1, type: 2}
+  evolvesTo: {fileID: 11400000, guid: e163c6002098afa4ea9295b9d4055e5a, type: 2}
+  evolveLevel: 26
+  baseStats:
+    hp: 54
+    attack: 12
+    defense: 15
+    speed: 5
+  moves:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}

@@ -17,6 +17,8 @@ Shader "Diorama/Toon"
         _BellyDir ("Belly Direction (object space)", Vector) = (0, 0, 1, 0)
         _BellyAt ("Belly Threshold", Float) = 0.5
         _BellyMaxY ("Belly Max Y", Float) = 9
+        _BellyDrips ("Belly Drips (count, 0 = off)", Float) = 0
+        _BellyDripLen ("Belly Drip Length", Float) = 0.8
 
         [Header(Socks)]
         [ToggleUI] _SockOn ("Socks", Float) = 0
@@ -33,6 +35,13 @@ Shader "Diorama/Toon"
         [ToggleUI] _SpotOn ("Spots", Float) = 0
         _SpotColor ("Spot Colour", Color) = (0, 0, 0, 1)
         _SpotScale ("Spot Scale", Float) = 9
+
+        [Header(Cracks (glowing))]
+        [ToggleUI] _CrackOn ("Cracks", Float) = 0
+        _CrackColor ("Crack Colour", Color) = (1, 0.4, 0.1, 1)
+        _CrackScale ("Crack Scale", Float) = 2.5
+        _CrackWidth ("Crack Width", Float) = 0.04
+        _CrackPulse ("Crack Pulse", Range(0, 1)) = 0
 
         [Header(Lighting)]
         _Spec ("Specular Glint", Range(0, 2)) = 0.3
@@ -138,7 +147,7 @@ Shader "Diorama/Toon"
                 float3 c = lerp(_BaseColor.rgb, _TopColor.rgb, _Grad * smoothstep(-0.4, 0.7, pO.y)) * i.shade;
                 float sp = sin(pO.x * _SpotScale) * sin(pO.y * _SpotScale * 1.3 + 1.7) * sin(pO.z * _SpotScale * 0.9 + 0.5);
                 c = lerp(c, _SpotColor.rgb, _SpotOn * smoothstep(0.30, 0.36, sp) * smoothstep(-0.1, 0.3, dot(nO, normalize(float3(0.0, 1.0, -0.6)))));
-                c = lerp(c, _BellyColor.rgb, _BellyOn * smoothstep(_BellyAt, _BellyAt + 0.12, dot(nO, normalize(_BellyDir.xyz))) * smoothstep(_BellyMaxY + 0.05, _BellyMaxY - 0.05, pO.y));
+                c = lerp(c, _BellyColor.rgb, _BellyOn * smoothstep(_BellyAt, _BellyAt + 0.12, dot(nO, normalize(_BellyDir.xyz)) + _BellyAt - ToonBellyAt(pO)) * smoothstep(_BellyMaxY + 0.05, _BellyMaxY - 0.05, pO.y));
                 c = lerp(c, _SockColor.rgb, _SockOn * smoothstep(_SockY + 0.04, _SockY - 0.04, pO.y));
                 c = lerp(c, _TipColor.rgb, _TipOn * smoothstep(_TipAt, _TipAt + 0.06, dot(pO, _TipAxis.xyz)));
                 c = ToonPatches(c, pO);
@@ -156,6 +165,7 @@ Shader "Diorama/Toon"
                 float3 h = normalize(L + v);
                 col += smoothstep(0.93, 0.95, dot(n, h)) * _Spec * 0.55;
                 col += c * _Emissive;
+                if (_CrackOn > 0.5) col = ToonLava(col, pO);
                 col = lerp(col, float3(1.0, 1.0, 1.0), _Flash);
                 return float4(col, 1.0);
             }

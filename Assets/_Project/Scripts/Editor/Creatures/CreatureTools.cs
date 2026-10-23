@@ -9,8 +9,8 @@ using UnityEngine;
 namespace Diorama.EditorTools
 {
     /// <summary>
-    /// Step 4 scene tools: the Creature Lab scene, turnaround shots of every species, the 3 starters on the island in
-    /// MR_Main, and a draw call / triangle report.
+    /// Step 4 scene tools: the Creature Lab scene, turnaround shots of every species, the 3 starters and the wild
+    /// creatures on the island in MR_Main, and a draw call / triangle report.
     /// </summary>
     public static class CreatureTools
     {
@@ -18,6 +18,13 @@ namespace Diorama.EditorTools
         const string MainPath = "Assets/_Project/Scenes/MR_Main.unity";
         const string ShotDir = "Logs/CreatureShots"; // Temp/ is wiped when Unity quits; Logs/ is not in git
         static readonly string[] Starters = { "Kilnpot", "Pebbloop", "Pufflet" };
+        // Lab cycle and shot order: starters, then each line base -> evolution. Species not listed come last.
+        static readonly string[] LabOrder =
+            { "Kilnpot", "Pebbloop", "Pufflet", "Kilnhearth", "Toastling", "Crumbhog", "Waxle", "Lanternsnail", "Kettlewing", "Glazegolem", "Kilngolem" };
+        // Wild wanderers on the test world: species and home tile (column, row), well away from the start tile (c28 r27).
+        static readonly (string name, Vector2Int tile)[] Wild =
+            { ("Toastling", new Vector2Int(19, 16)), ("Waxle", new Vector2Int(41, 45)), ("Kettlewing", new Vector2Int(44, 30)) };
+        static readonly string[] FireRecipes = { "Toastling", "Crumbhog", "Waxle", "Lanternsnail", "Kettlewing", "Glazegolem", "Kilngolem" };
 
         // ---- Creature Lab ----
 
@@ -66,9 +73,27 @@ namespace Diorama.EditorTools
             AssetDatabase.FindAssets("t:CreatureSpecies")
                 .Select(g => AssetDatabase.LoadAssetAtPath<CreatureSpecies>(AssetDatabase.GUIDToAssetPath(g)))
                 .Where(s => s != null)
-                .OrderBy(s => System.Array.IndexOf(Starters, s.name) is int i && i >= 0 ? i : 99)
+                .OrderBy(s => System.Array.IndexOf(LabOrder, s.name) is int i && i >= 0 ? i : 99)
                 .ThenBy(s => s.name)
                 .ToList();
+
+        /// <summary>Points the saved Creature Lab at every species (opened additively, so the open scene stays put).</summary>
+        public static void RefreshLabSpecies()
+        {
+            var lab = EditorSceneManager.GetSceneByPath(LabPath);
+            bool opened = !lab.isLoaded;
+            if (opened) lab = EditorSceneManager.OpenScene(LabPath, OpenSceneMode.Additive);
+            foreach (var root in lab.GetRootGameObjects())
+                foreach (var l in root.GetComponentsInChildren<CreatureLab>(true))
+                {
+                    l.species = AllSpecies();
+                    EditorUtility.SetDirty(l);
+                    Debug.Log($"[CreatureTools] Creature Lab now cycles {l.species.Count} species.");
+                }
+            EditorSceneManager.MarkSceneDirty(lab);
+            EditorSceneManager.SaveScene(lab);
+            if (opened) EditorSceneManager.CloseScene(lab, true);
+        }
 
         // ---- shots ----
 
@@ -113,6 +138,7 @@ namespace Diorama.EditorTools
                     go.transform.SetParent(turntable, false);
                     go.transform.localScale = Vector3.one * 8f;
                     go.GetComponent<CreatureView>().ApplyStyles();
+                    Frame(cam, go);
                     foreach (var (view, yaw) in new[] { ("front", 0f), ("side", -90f), ("threequarter", -35f) })
                     {
                         turntable.localRotation = Quaternion.Euler(0f, yaw, 0f);
@@ -128,6 +154,19 @@ namespace Diorama.EditorTools
             {
                 EditorSceneManager.ClosePreviewScene(preview);
             }
+        }
+
+        // Same view direction as the Creature Lab camera; backs off so tall or long creatures fit at any yaw.
+        static void Frame(Camera cam, GameObject go)
+        {
+            var b = new Bounds(go.transform.position, Vector3.zero);
+            foreach (var rend in go.GetComponentsInChildren<Renderer>()) b.Encapsulate(rend.bounds);
+            float radius = new Vector2(Mathf.Max(b.extents.x, b.extents.z), b.extents.y).magnitude;
+            float fit = radius * 1.1f / Mathf.Tan(cam.fieldOfView * 0.5f * Mathf.Deg2Rad);
+            Vector3 target = new Vector3(0f, Mathf.Max(0.19f, b.center.y), 0f);
+            Vector3 dir = new Vector3(0f, 0.11f, 1.45f).normalized;
+            cam.transform.position = target + dir * Mathf.Max(1.46f, fit);
+            cam.transform.LookAt(target);
         }
 
         static void SceneManagerMove(GameObject go, UnityEngine.SceneManagement.Scene scene) =>
@@ -202,6 +241,57 @@ namespace Diorama.EditorTools
                 mc.homeTile = tile;
                 mc.SnapToMap();
                 report.Append($"\n  {Starters[i]} on c{tile.x} r{tile.y} ('{world.At(tile.y, tile.x)}')");
+            }
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+            Debug.Log(report.ToString());
+        }
+
+        /// <summary>Puts the wild wanderers (MapCreature, wander radius 3) on the test world, far from the start tile.</summary>
+        [MenuItem("Tools/Pocket Isle/Creatures/Add Wild Creatures to MR_Main", priority = 42)]
+        public static void AddWildToMain()
+        {
+            var scene = EditorSceneManager.GetActiveScene();
+            if (scene.path != MainPath)
+            {
+                if (!SaveOrAbort()) return;
+                scene = EditorSceneManager.OpenScene(MainPath);
+            }
+            var island = Object.FindFirstObjectByType<IslandBuilder>();
+            var explorer = Object.FindFirstObjectByType<GestureTestPiece>();
+            if (island == null || island.world == null)
+            {
+                Debug.LogError("[CreatureTools] MR_Main needs the island with a world map (Step 3 menus).");
+                return;
+            }
+            var world = island.world;
+            var taken = new HashSet<Vector2Int> { world.startTile };
+            foreach (var c in Object.FindObjectsByType<MapCreature>(FindObjectsSortMode.None))
+                if (System.Array.IndexOf(Starters, c.name) >= 0) taken.Add(c.homeTile);
+            var report = new StringBuilder("[CreatureTools] Wild creatures in MR_Main:");
+            foreach (var (name, want) in Wild)
+            {
+                var species = AssetDatabase.LoadAssetAtPath<CreatureSpecies>($"Assets/_Project/Data/Creatures/Species/{name}.asset");
+                if (species == null || species.Prefab == null)
+                {
+                    Debug.LogError($"[CreatureTools] {name} is not baked yet (Bake All first).");
+                    return;
+                }
+                var old = island.transform.Find(name);
+                if (old != null) Object.DestroyImmediate(old.gameObject);
+
+                var tile = NearestWalkable(world, want, taken);
+                taken.Add(tile);
+                var go = (GameObject)PrefabUtility.InstantiatePrefab(species.Prefab, island.transform);
+                go.name = name;
+                var mc = go.AddComponent<MapCreature>();
+                mc.island = island;
+                mc.explorer = explorer;
+                mc.homeTile = tile;
+                mc.wanderRadius = 3;
+                mc.SnapToMap();
+                var d = tile - world.startTile;
+                report.Append($"\n  {name} on c{tile.x} r{tile.y} ('{world.At(tile.y, tile.x)}'), {Mathf.Abs(d.x) + Mathf.Abs(d.y)} tiles from the start");
             }
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
@@ -328,6 +418,39 @@ namespace Diorama.EditorTools
             CaptureShots();
             AddStartersToMain();
             DrawCallReport();
+        }
+
+        /// <summary>
+        /// Step 4b in one go (bridge: exec:Diorama.EditorTools.CreatureTools.BatchFire): writes the fire kit, bakes the
+        /// 7 fire creatures (starters untouched), refreshes the Lab list, saves shots, adds the wanderers, reports.
+        /// </summary>
+        public static void BatchFire()
+        {
+            FireKit.Write();
+            BakeFire();
+            RefreshLabSpecies();
+            CaptureShots();
+            AddWildToMain();
+            DrawCallReport();
+        }
+
+        /// <summary>Fire kit rewrite + bake + shots only (after tweaking FireKit.cs).</summary>
+        public static void BatchFireShots()
+        {
+            FireKit.Write();
+            BakeFire();
+            CaptureShots();
+        }
+
+        static void BakeFire()
+        {
+            var sb = new StringBuilder("[CreatureTools] Baked fire creatures:");
+            foreach (var name in FireRecipes)
+            {
+                var r = AssetDatabase.LoadAssetAtPath<CreatureRecipe>($"Assets/_Project/Data/Creatures/Recipes/{name}.asset");
+                if (r != null) sb.Append("\n  ").Append(CreatureBaker.Bake(r));
+            }
+            Debug.Log(sb.ToString());
         }
 
         /// <summary>Rebake + shots only (after recipe tweaks), for the command line.</summary>

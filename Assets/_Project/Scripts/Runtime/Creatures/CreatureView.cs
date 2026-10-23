@@ -19,6 +19,8 @@ namespace Diorama
         public Vector3 bellyDirection;
         public float bellyAt;
         public float bellyMaxY;
+        public float bellyDrips;
+        public float bellyDripLength;
 
         public bool socks;
         public Color socksColor;
@@ -32,6 +34,12 @@ namespace Diorama
         public bool spots;
         public Color spotColor;
         public float spotScale;
+
+        public bool cracks;
+        public Color crackColor;
+        public float crackScale;
+        public float crackWidth;
+        public float crackPulse;
 
         [Tooltip("xyz = centre, w = radius (0 = off).")]
         public Vector4[] patches;
@@ -130,6 +138,13 @@ namespace Diorama
         static readonly int BellyDirId = Shader.PropertyToID("_BellyDir");
         static readonly int BellyAtId = Shader.PropertyToID("_BellyAt");
         static readonly int BellyMaxYId = Shader.PropertyToID("_BellyMaxY");
+        static readonly int BellyDripsId = Shader.PropertyToID("_BellyDrips");
+        static readonly int BellyDripLenId = Shader.PropertyToID("_BellyDripLen");
+        static readonly int CrackOnId = Shader.PropertyToID("_CrackOn");
+        static readonly int CrackColorId = Shader.PropertyToID("_CrackColor");
+        static readonly int CrackScaleId = Shader.PropertyToID("_CrackScale");
+        static readonly int CrackWidthId = Shader.PropertyToID("_CrackWidth");
+        static readonly int CrackPulseId = Shader.PropertyToID("_CrackPulse");
         static readonly int SockOnId = Shader.PropertyToID("_SockOn");
         static readonly int SockColorId = Shader.PropertyToID("_SockColor");
         static readonly int SockYId = Shader.PropertyToID("_SockY");
@@ -242,6 +257,13 @@ namespace Diorama
                 block.SetVector(BellyDirId, s.bellyDirection);
                 block.SetFloat(BellyAtId, s.bellyAt);
                 block.SetFloat(BellyMaxYId, s.bellyMaxY);
+                block.SetFloat(BellyDripsId, s.bellyDrips);
+                block.SetFloat(BellyDripLenId, s.bellyDripLength);
+                block.SetFloat(CrackOnId, s.cracks ? 1f : 0f);
+                block.SetVector(CrackColorId, s.crackColor.linear);
+                block.SetFloat(CrackScaleId, s.crackScale > 0f ? s.crackScale : 2.5f);
+                block.SetFloat(CrackWidthId, s.crackWidth > 0f ? s.crackWidth : 0.04f);
+                block.SetFloat(CrackPulseId, s.crackPulse);
                 block.SetFloat(SockOnId, s.socks ? 1f : 0f);
                 block.SetVector(SockColorId, s.socksColor.linear);
                 block.SetFloat(SockYId, s.socksY);
@@ -462,7 +484,7 @@ namespace Diorama
             float f = Mathf.SmoothStep(0f, 1f, _faint);
             // Lying on its side, the body's half width is its new height above the ground.
             y = Mathf.Lerp(y, rigPosition.y + sideRestHeight - centerHeight, f);
-            float roll = Mathf.Sin((t + _timeOffset) * 1.2f) * idle.sway * (1f - f) + 90f * f;
+            float roll = Mathf.Sin((t + _timeOffset) * (idle.swaySpeed > 0f ? idle.swaySpeed : 1.2f)) * idle.sway * (1f - f) + 90f * f;
 
             // The rig origin is at the feet; turn around the body centre instead.
             var rotation = Quaternion.Euler(0f, _headYaw, roll);

@@ -251,7 +251,7 @@ namespace Diorama.EditorTools
 
         // ---- asset helpers ----
 
-        static T Asset<T>(string path) where T : ScriptableObject
+        internal static T Asset<T>(string path) where T : ScriptableObject
         {
             var a = AssetDatabase.LoadAssetAtPath<T>(path);
             if (a != null) return a;
@@ -260,7 +260,7 @@ namespace Diorama.EditorTools
             return a;
         }
 
-        static SdfShape Shape(string name, params SdfPrimitive[] prims)
+        internal static SdfShape Shape(string name, params SdfPrimitive[] prims)
         {
             var s = Asset<SdfShape>($"{Root}/Shapes/{name}.asset");
             s.primitives = new List<SdfPrimitive>(prims);
@@ -268,7 +268,7 @@ namespace Diorama.EditorTools
             return s;
         }
 
-        static CreaturePart Part(string name, PartMotion motion, Vector3 axis, float amount, float speed, PartStyle style, params SdfPrimitive[] prims)
+        internal static CreaturePart Part(string name, PartMotion motion, Vector3 axis, float amount, float speed, PartStyle style, params SdfPrimitive[] prims)
         {
             var p = Asset<CreaturePart>($"{Root}/Parts/{name}.asset");
             p.shape = Shape("Part_" + name, prims);
@@ -284,7 +284,7 @@ namespace Diorama.EditorTools
             return p;
         }
 
-        static CreatureRecipe Recipe(string name, SdfShape body, float height, CreaturePalette palette, BodyZones zones,
+        internal static CreatureRecipe Recipe(string name, SdfShape body, float height, CreaturePalette palette, BodyZones zones,
                                      FaceSettings face, IdleStyle idle, List<PlacedPart> parts)
         {
             var r = Asset<CreatureRecipe>($"{Root}/Recipes/{name}.asset");
@@ -304,7 +304,7 @@ namespace Diorama.EditorTools
             return r;
         }
 
-        static CreatureSpecies Species(string name, Element element, CreatureRecipe recipe, CreatureSpecies evolvesTo, int level)
+        internal static CreatureSpecies Species(string name, Element element, CreatureRecipe recipe, CreatureSpecies evolvesTo, int level)
         {
             var s = Asset<CreatureSpecies>($"{Root}/Species/{name}.asset");
             s.displayName = name;
@@ -316,42 +316,42 @@ namespace Diorama.EditorTools
             return s;
         }
 
-        static PlacedPart Place(CreaturePart part, Vector3 position, Vector3 rotation, float scale, bool mirror = false, int parent = -1) =>
+        internal static PlacedPart Place(CreaturePart part, Vector3 position, Vector3 rotation, float scale, bool mirror = false, int parent = -1) =>
             new PlacedPart { part = part, position = position, rotation = rotation, scale = Vector3.one * scale, mirror = mirror, parent = parent };
 
-        static Color Hex(string hex) => ColorUtility.TryParseHtmlString(hex, out var c) ? c : Color.magenta;
+        internal static Color Hex(string hex) => ColorUtility.TryParseHtmlString(hex, out var c) ? c : Color.magenta;
 
         // ---- primitive helpers ----
 
-        static SdfPrimitive Sphere(Vector3 c, float r, float k = 0.1f) =>
+        internal static SdfPrimitive Sphere(Vector3 c, float r, float k = 0.1f) =>
             new SdfPrimitive { kind = SdfKind.Sphere, a = c, size = new Vector3(r, 0f, 0f), k = k };
 
-        static SdfPrimitive Ell(Vector3 c, Vector3 r, float k = 0.1f, Vector3 rotation = default) =>
+        internal static SdfPrimitive Ell(Vector3 c, Vector3 r, float k = 0.1f, Vector3 rotation = default) =>
             new SdfPrimitive { kind = SdfKind.Ellipsoid, a = c, size = r, k = k, rotation = rotation };
 
-        static SdfPrimitive Cone(Vector3 a, Vector3 b, float r1, float r2, float k = 0.08f) =>
+        internal static SdfPrimitive Cone(Vector3 a, Vector3 b, float r1, float r2, float k = 0.08f) =>
             new SdfPrimitive { kind = SdfKind.RoundCone, a = a, b = b, size = new Vector3(r1, r2, 0f), k = k };
 
-        static SdfPrimitive Torus(Vector3 c, float ring, float tube, Vector3 rotation, float k = 0.05f) =>
+        internal static SdfPrimitive Torus(Vector3 c, float ring, float tube, Vector3 rotation, float k = 0.05f) =>
             new SdfPrimitive { kind = SdfKind.Torus, a = c, size = new Vector3(ring, tube, 0f), rotation = rotation, k = k };
 
         /// <summary>Cuts everything below <paramref name="y"/> (flat feet).</summary>
-        static SdfPrimitive Floor(float y) =>
+        internal static SdfPrimitive Floor(float y) =>
             new SdfPrimitive { kind = SdfKind.Plane, blend = SdfBlend.Intersect, a = new Vector3(0f, y, 0f), b = Vector3.down, k = 0.02f };
 
-        static SdfPrimitive Mirror(this SdfPrimitive p)
+        internal static SdfPrimitive Mirror(this SdfPrimitive p)
         {
             p.mirrorX = true;
             return p;
         }
 
-        static SdfPrimitive Sub(this SdfPrimitive p)
+        internal static SdfPrimitive Sub(this SdfPrimitive p)
         {
             p.blend = SdfBlend.Subtract;
             return p;
         }
 
-        static SdfPrimitive Bumps(this SdfPrimitive p, float height, float frequency)
+        internal static SdfPrimitive Bumps(this SdfPrimitive p, float height, float frequency)
         {
             p.bumps = height;
             p.bumpFrequency = frequency;

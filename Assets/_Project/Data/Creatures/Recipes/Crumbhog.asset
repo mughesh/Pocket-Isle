@@ -1,0 +1,143 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e27712b2a6f9fc45ae0b54784bf7327, type: 3}
+  m_Name: Crumbhog
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.CreatureRecipe
+  baseRecipe: {fileID: 0}
+  body: {fileID: 11400000, guid: 72cff5d891505ec4caaa017003b380b5, type: 2}
+  height: 0.05
+  zones:
+    belly: 0
+    bellyDirection: {x: 0, y: 0, z: 0}
+    bellyAt: 0
+    bellyMaxY: 0
+    bellyDrips: 0
+    bellyDripLength: 0
+    socks: 0
+    socksY: 0
+    tips: 0
+    tipAxis: {x: 0, y: 0, z: 0}
+    tipAt: 0
+    spots: 0
+    spotScale: 0
+    cracks: 0
+    crackScale: 0
+    crackWidth: 0
+    crackPulse: 0
+    patches:
+    - center: {x: 0, y: -0.26, z: 0.38}
+      radius: 0.26
+      color: 1
+      mirrorX: 0
+    - center: {x: 0, y: 0.21, z: 0.41}
+      radius: 0.13
+      color: 1
+      mirrorX: 0
+  parts:
+  - part: {fileID: 11400000, guid: 798ff29359e8b624e98ef8e1ec13cbbe, type: 2}
+    position: {x: 0.25, y: 0.56, z: 0}
+    rotation: {x: 0, y: 0, z: -25}
+    scale: {x: 0.9, y: 0.9, z: 0.9}
+    mirror: 1
+    parent: -1
+  - part: {fileID: 11400000, guid: 6ba0fd8c58e01c443812878a0f001361, type: 2}
+    position: {x: 0.27, y: 0.47, z: -0.08}
+    rotation: {x: -25, y: 0, z: -50}
+    scale: {x: 1.2, y: 1.2, z: 1.2}
+    mirror: 1
+    parent: -1
+  - part: {fileID: 11400000, guid: 6ba0fd8c58e01c443812878a0f001361, type: 2}
+    position: {x: 0.38, y: 0.2, z: -0.1}
+    rotation: {x: -15, y: 0, z: -80}
+    scale: {x: 1.25, y: 1.25, z: 1.25}
+    mirror: 1
+    parent: -1
+  - part: {fileID: 11400000, guid: 6ba0fd8c58e01c443812878a0f001361, type: 2}
+    position: {x: 0.4, y: -0.18, z: -0.12}
+    rotation: {x: 0, y: 0, z: -105}
+    scale: {x: 1.2, y: 1.2, z: 1.2}
+    mirror: 1
+    parent: -1
+  - part: {fileID: 11400000, guid: 6ba0fd8c58e01c443812878a0f001361, type: 2}
+    position: {x: 0, y: 0.45, z: -0.22}
+    rotation: {x: -60, y: 0, z: 0}
+    scale: {x: 1.25, y: 1.25, z: 1.25}
+    mirror: 0
+    parent: -1
+  - part: {fileID: 11400000, guid: 6ba0fd8c58e01c443812878a0f001361, type: 2}
+    position: {x: 0.16, y: 0.1, z: -0.33}
+    rotation: {x: -90, y: 0, z: -20}
+    scale: {x: 1.25, y: 1.25, z: 1.25}
+    mirror: 1
+    parent: -1
+  - part: {fileID: 11400000, guid: 6ba0fd8c58e01c443812878a0f001361, type: 2}
+    position: {x: 0, y: -0.25, z: -0.36}
+    rotation: {x: -100, y: 0, z: 0}
+    scale: {x: 1.2, y: 1.2, z: 1.2}
+    mirror: 0
+    parent: -1
+  - part: {fileID: 11400000, guid: e06881b1cad8ecf4f8f5a76077082abd, type: 2}
+    position: {x: 0, y: 0.63, z: 0.06}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: {x: 1.3, y: 1.3, z: 1.3}
+    mirror: 0
+    parent: -1
+  - part: {fileID: 11400000, guid: e06881b1cad8ecf4f8f5a76077082abd, type: 2}
+    position: {x: 0.1, y: 0.6, z: 0.08}
+    rotation: {x: 0, y: 40, z: -20}
+    scale: {x: 1.1, y: 1.1, z: 1.1}
+    mirror: 1
+    parent: -1
+  face:
+    eyeSize: 0.058
+    eyeSpacing: 0.15
+    eyeHeight: 0.36
+    eyeStretch: 1.15
+    decals:
+    - kind: 0
+      at: {x: 0, y: 0.26}
+      size: {x: 0.045, y: 0.032}
+      color: 6
+      mirrorX: 0
+    - kind: 1
+      at: {x: 0, y: 0.17}
+      size: {x: 0.035, y: 0}
+      color: 6
+      mirrorX: 0
+  palette:
+    baseColor: {r: 0.61960787, g: 0.41960785, b: 0.1882353, a: 1}
+    belly: {r: 0.9607843, g: 0.92941177, b: 0.85490197, a: 1}
+    accent: {r: 0.2901961, g: 0.15686275, b: 0.0627451, a: 1}
+    socks: {r: 0.61960787, g: 0.41960785, b: 0.1882353, a: 1}
+    glow: {r: 0.8980392, g: 0.39215687, b: 0.11764706, a: 1}
+    extra: {r: 0.83137256, g: 0.65882355, b: 0.2901961, a: 1}
+    face: {r: 0.16470589, g: 0.1254902, b: 0.09411765, a: 1}
+    iris: {r: 0.22745098, g: 0.14117648, b: 0.078431375, a: 1}
+  spec: 0.2
+  outline: 0.035
+  idle:
+    breathe: 0.02
+    breatheSpeed: 2.2
+    jiggle: 0
+    hover: 0
+    bob: 0
+    sway: 2
+    swaySpeed: 0
+  heightScale: 1.25
+  extraParts: []
+  overridePalette: 0
+  hueShift: 0
+  saturationScale: 1
+  valueScale: 1
+  resolution: 88
+  triangleBudget: 6000
+  bakedPrefab: {fileID: 5526829728700136042, guid: ff9858f9ac5b7a7469d38fc6c85d6476, type: 3}

@@ -231,6 +231,9 @@ Transform:
   - {fileID: 1341227098}
   - {fileID: 1532703332}
   - {fileID: 1132406366}
+  - {fileID: 2080304170}
+  - {fileID: 1967938174}
+  - {fileID: 492479180}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &270959111
@@ -716,6 +719,99 @@ MonoBehaviour:
   restLookback: 0.5
   heldThresholdMm: 8
   barRangeMm: 20
+--- !u!1001 &492479179
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 270959110}
+    m_Modifications:
+    - target: {fileID: 5595217233316352115, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6434061563040279003, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.82500005
+      objectReference: {fileID: 0}
+    - target: {fileID: 6434061563040279003, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.006
+      objectReference: {fileID: 0}
+    - target: {fileID: 6434061563040279003, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.125
+      objectReference: {fileID: 0}
+    - target: {fileID: 6434061563040279003, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6434061563040279003, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6434061563040279003, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6434061563040279003, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6434061563040279003, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6434061563040279003, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6434061563040279003, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7382049441693873171, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
+      propertyPath: m_Name
+      value: Kettlewing
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7382049441693873171, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 492479182}
+  m_SourcePrefab: {fileID: 100100000, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
+--- !u!4 &492479180 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6434061563040279003, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
+  m_PrefabInstance: {fileID: 492479179}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &492479181 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7382049441693873171, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
+  m_PrefabInstance: {fileID: 492479179}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &492479182
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 492479181}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8c5179f64e403c498ca788e714a8bd2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.MapCreature
+  island: {fileID: 270959109}
+  explorer: {fileID: 374318554}
+  homeTile: {x: 44, y: 30}
+  wander: 1
+  wanderRadius: 3
+  hopInterval: {x: 3, y: 7}
+  moveChance: 0.6
 --- !u!1 &509277689
 GameObject:
   m_ObjectHideFlags: 0
@@ -2004,6 +2100,99 @@ MonoBehaviour:
   _movementProvider: {fileID: 0}
   _handAligment: 0
   _handGrabPoses: []
+--- !u!1001 &1967938173
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 270959110}
+    m_Modifications:
+    - target: {fileID: 417414022476722940, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1269017013574076084, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.67499995
+      objectReference: {fileID: 0}
+    - target: {fileID: 1269017013574076084, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.006
+      objectReference: {fileID: 0}
+    - target: {fileID: 1269017013574076084, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.875
+      objectReference: {fileID: 0}
+    - target: {fileID: 1269017013574076084, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1269017013574076084, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1269017013574076084, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1269017013574076084, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1269017013574076084, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1269017013574076084, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1269017013574076084, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2897710189970665803, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
+      propertyPath: m_Name
+      value: Waxle
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2897710189970665803, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1967938176}
+  m_SourcePrefab: {fileID: 100100000, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
+--- !u!4 &1967938174 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1269017013574076084, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
+  m_PrefabInstance: {fileID: 1967938173}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1967938175 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2897710189970665803, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
+  m_PrefabInstance: {fileID: 1967938173}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1967938176
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1967938175}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8c5179f64e403c498ca788e714a8bd2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.MapCreature
+  island: {fileID: 270959109}
+  explorer: {fileID: 374318554}
+  homeTile: {x: 41, y: 45}
+  wander: 1
+  wanderRadius: 3
+  hopInterval: {x: 3, y: 7}
+  moveChance: 0.6
 --- !u!1 &1994521897
 GameObject:
   m_ObjectHideFlags: 0
@@ -2204,6 +2393,99 @@ MonoBehaviour:
   installationRoutineCheckpoint:
     _installationRoutineId: 2063f481-1b63-4eda-9ee8-a00df98536bc
     _installationVariants: []
+--- !u!1001 &2080304169
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 270959110}
+    m_Modifications:
+    - target: {fileID: 3867948943208261354, guid: 7c86a1237914273438b5086697873158, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5221779532185038997, guid: 7c86a1237914273438b5086697873158, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.425
+      objectReference: {fileID: 0}
+    - target: {fileID: 5221779532185038997, guid: 7c86a1237914273438b5086697873158, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.006
+      objectReference: {fileID: 0}
+    - target: {fileID: 5221779532185038997, guid: 7c86a1237914273438b5086697873158, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.575
+      objectReference: {fileID: 0}
+    - target: {fileID: 5221779532185038997, guid: 7c86a1237914273438b5086697873158, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5221779532185038997, guid: 7c86a1237914273438b5086697873158, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5221779532185038997, guid: 7c86a1237914273438b5086697873158, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5221779532185038997, guid: 7c86a1237914273438b5086697873158, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5221779532185038997, guid: 7c86a1237914273438b5086697873158, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5221779532185038997, guid: 7c86a1237914273438b5086697873158, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5221779532185038997, guid: 7c86a1237914273438b5086697873158, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5619930510433288516, guid: 7c86a1237914273438b5086697873158, type: 3}
+      propertyPath: m_Name
+      value: Toastling
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5619930510433288516, guid: 7c86a1237914273438b5086697873158, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2080304172}
+  m_SourcePrefab: {fileID: 100100000, guid: 7c86a1237914273438b5086697873158, type: 3}
+--- !u!4 &2080304170 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5221779532185038997, guid: 7c86a1237914273438b5086697873158, type: 3}
+  m_PrefabInstance: {fileID: 2080304169}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &2080304171 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5619930510433288516, guid: 7c86a1237914273438b5086697873158, type: 3}
+  m_PrefabInstance: {fileID: 2080304169}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2080304172
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2080304171}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8c5179f64e403c498ca788e714a8bd2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.MapCreature
+  island: {fileID: 270959109}
+  explorer: {fileID: 374318554}
+  homeTile: {x: 19, y: 16}
+  wander: 1
+  wanderRadius: 3
+  hopInterval: {x: 3, y: 7}
+  moveChance: 0.6
 --- !u!1 &2133717133
 GameObject:
   m_ObjectHideFlags: 0
