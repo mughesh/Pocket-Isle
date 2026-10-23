@@ -16,6 +16,9 @@ namespace Diorama
         public IslandBuilder island;
         public BattleFx fx;
         public BattleHud hud;
+        [Tooltip("Round earth disc each creature stands on.")]
+        public BattlePad padPrefab;
+        public float padSeconds = 0.4f;
 
         [Header("Timing (s)")]
         public float pauseBetweenMoves = 0.45f;
@@ -28,6 +31,7 @@ namespace Diorama
         static readonly Color HealColor = new Color(0.55f, 0.95f, 0.55f);
 
         StageActor _player, _wild;
+        BattlePad _playerPad, _wildPad;
         BattleHud.Bar _playerBar, _wildBar;
         BattleFx.Item _playerShield, _wildShield;
 
@@ -59,6 +63,8 @@ namespace Diorama
             actor.tile = tile;
             actor.yaw = StageActor.YawToward(tile, facing);
             actor.grow = 0f;
+            var pad = side == BattleSide.Player ? _playerPad : _wildPad;
+            if (pad != null) actor.baseLift = pad.TopLift;
             actor.Snap();
             if (side == BattleSide.Player) _player = actor;
             else _wild = actor;
@@ -74,6 +80,9 @@ namespace Diorama
         /// <summary>Removes both creatures, shields and labels.</summary>
         public void Cleanup()
         {
+            if (_playerPad != null) Destroy(_playerPad.gameObject);
+            if (_wildPad != null) Destroy(_wildPad.gameObject);
+            _playerPad = _wildPad = null;
             if (_player != null) Destroy(_player.gameObject);
             if (_wild != null) Destroy(_wild.gameObject);
             _player = _wild = null;
@@ -81,6 +90,44 @@ namespace Diorama
             DropShield(ref _wildShield, false);
             hud.Clear();
             _playerBar = _wildBar = null;
+        }
+
+        // ---- pads ----
+
+        /// <summary>Puts both pads in the ground (risen with <see cref="RisePads"/>), tinted for the habitat.</summary>
+        public void SpawnPads(Vector2 playerTile, Vector2 wildTile, Habitat habitat)
+        {
+            if (padPrefab == null)
+            {
+                Debug.LogError("[BattleStage] No pad prefab assigned (Tools > Diorama > Step 5 > 2. Add Battle to MR_Main).", this);
+                return;
+            }
+            _playerPad = MakePad("Pad (player)", playerTile, habitat);
+            _wildPad = MakePad("Pad (wild)", wildTile, habitat);
+        }
+
+        BattlePad MakePad(string name, Vector2 tile, Habitat habitat)
+        {
+            var pad = Instantiate(padPrefab, island.transform);
+            pad.name = name;
+            pad.island = island;
+            pad.tile = tile;
+            pad.Rise = 0f;
+            pad.Paint(habitat);
+            pad.Snap();
+            return pad;
+        }
+
+        /// <summary>Pads rise out of the ground (or sink back) over <see cref="padSeconds"/>.</summary>
+        public IEnumerator RisePads(bool up)
+        {
+            float from = up ? 0f : 1f, to = up ? 1f : 0f;
+            yield return Tween(padSeconds, p =>
+            {
+                float k = Mathf.Lerp(from, to, p);
+                if (_playerPad != null) _playerPad.Rise = k;
+                if (_wildPad != null) _wildPad.Rise = k;
+            });
         }
 
         // ---- entrances ----
@@ -138,22 +185,27 @@ namespace Diorama
         }
 
         /// <summary>The wild creature pops out of the grass with a hop, or leaps out of the water in an arc.</summary>
-        public IEnumerator WildAppears(bool rare, bool fromWater)
+        /// <param name="waterTile">Pond battles: the water tile it leaps out of, onto its pad.</param>
+        public IEnumerator WildAppears(bool rare, Vector2? waterTile)
         {
             var a = _wild;
             if (a == null) yield break;
             Vector3 burstAt = WorldAt(a.tile, 0.01f);
-            if (fromWater)
+            if (waterTile.HasValue)
             {
                 var water = ElementStyle.Of(Element.Water);
-                fx.Burst(burstAt, 24, water.burst, World(0.06f), 0.6f, World(0.004f), Vector3.up * World(0.08f));
-                float h = a.View.height;
+                Vector2 from = waterTile.Value, to = a.tile;
+                fx.Burst(WorldAt(from, 0.004f), 24, water.burst, World(0.06f), 0.6f, World(0.004f), Vector3.up * World(0.08f));
+                float h = a.View.height, rest = a.baseLift;
                 a.grow = 1f;
-                yield return Tween(0.5f, p =>
+                yield return Tween(0.6f, p =>
                 {
-                    a.lift = Mathf.Lerp(-h, 0f, p) + h * 1.6f * Mathf.Sin(p * Mathf.PI);
+                    a.tile = Vector2.Lerp(from, to, p);
+                    // Starts below the water surface, arcs up and lands on the pad.
+                    a.lift = Mathf.Lerp(-h - rest, 0f, p) + h * 1.8f * Mathf.Sin(p * Mathf.PI);
                     a.squash = new Vector3(1f - 0.1f * (1f - p), 1f + 0.15f * (1f - p), 1f - 0.1f * (1f - p));
                 });
+                a.tile = to;
                 a.lift = 0f;
                 a.squash = Vector3.one;
                 fx.Burst(burstAt, 16, water.trail, World(0.04f), 0.4f, World(0.003f), Vector3.up * World(0.03f));

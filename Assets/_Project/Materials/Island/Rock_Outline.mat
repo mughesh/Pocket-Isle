@@ -26,9 +26,15 @@ Material:
     m_Ints: []
     m_Floats:
     - _Breathe: 0
+    - _BreatheSpeed: 2.6
+    - _ClearSink: 1
+    - _DeformPivotY: 0
     - _Jiggle: 0
     - _OutlineWidth: 0.0008
+    - _TimeOffset: 0
+    - _WindowClip: 0
     m_Colors:
     - _OutlineColor: {r: 0.3534544, g: 0.3534544, b: 0.33268845, a: 0.28}
+    - _WindowOrigin: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

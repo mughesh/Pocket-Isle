@@ -86,6 +86,18 @@ namespace Diorama.EditorTools
         public static void Move3Strip() { Choose(2); Strip(); }
 
         /// <summary>Renders the main camera's view (narrower lens, bigger image) to Logs/BattleShots.</summary>
+        /// <summary>Logs every PokeInteractor with its path and which object on the path is switched off.</summary>
+        public static void ListPoke()
+        {
+            foreach (var p in Object.FindObjectsByType<Oculus.Interaction.PokeInteractor>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                var path = new System.Text.StringBuilder();
+                for (var t = p.transform; t != null; t = t.parent)
+                    path.Insert(0, "/" + t.name + (t.gameObject.activeSelf ? "" : "[OFF]"));
+                Debug.Log($"[BattleDebug] {path} enabled={p.enabled}");
+            }
+        }
+
         public static void Shot()
         {
             var main = Camera.main;

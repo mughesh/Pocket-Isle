@@ -126,6 +126,7 @@ namespace Diorama.EditorTools
             stage.island = island;
             stage.fx = fx;
             stage.hud = hudComp;
+            stage.padPrefab = PadPrefab();
 
             var runesGo = Child(island.transform, "Battle Runes");
             var runes = Component<BattleRunes>(runesGo);
@@ -154,6 +155,79 @@ namespace Diorama.EditorTools
             report.Append($"\n  Battle (Party: {party.members.Count} creature(s), EncounterDirector), Island/Battle Stage, Island/Battle Runes");
             report.Append($"\n  rim grab guard: {(handle != null ? "yes" : "none found, pinches are never blocked")}");
             Debug.Log(report.ToString());
+        }
+
+        /// <summary>
+        /// Step 5 fixes: the battle pad prefab, and the island materials' clearing flags (trees and rocks sink in the
+        /// battle clearing, tall grass caps turn short-grass green). Then re-wires MR_Main.
+        /// </summary>
+        [MenuItem("Tools/Diorama/Step 5/3. Battle Stage (pads, clearing)")]
+        public static void StageFixes()
+        {
+            const string island = "Assets/_Project/Materials/Island";
+            var report = new StringBuilder("[Step5] Battle stage set up:");
+            foreach (var name in new[] { "Tree_Trunk", "Tree_LeavesLow", "Tree_LeavesHigh", "Rock" })
+                foreach (var suffix in new[] { "", "_Outline" })
+                {
+                    var m = AssetDatabase.LoadAssetAtPath<Material>($"{island}/{name}{suffix}.mat");
+                    if (m == null)
+                    {
+                        Debug.LogError($"[Step5] Missing material {name}{suffix}.");
+                        continue;
+                    }
+                    m.SetFloat("_ClearSink", 1f);
+                    EditorUtility.SetDirty(m);
+                    report.Append($"\n  {name}{suffix}: sinks in the clearing");
+                }
+            var tall = AssetDatabase.LoadAssetAtPath<Material>($"{island}/Island_CapTallGrass.mat");
+            var shortGrass = AssetDatabase.LoadAssetAtPath<Material>($"{island}/Island_CapGrass.mat");
+            if (tall != null && shortGrass != null)
+            {
+                var c = shortGrass.GetColor("_BaseColor");
+                c.a = 1f;
+                tall.SetColor("_ClearColor", c);
+                EditorUtility.SetDirty(tall);
+                report.Append("\n  Island_CapTallGrass: short grass colour in the clearing");
+            }
+            AssetDatabase.SaveAssets();
+            PadPrefab();
+            Debug.Log(report.ToString());
+            AddToMain();
+        }
+
+        const string PadPrefabPath = "Assets/_Project/Prefabs/Battle/BattlePad.prefab";
+
+        /// <summary>Builds (or rebuilds) the pad mesh and prefab: a domed disc with the shared creature materials.</summary>
+        static BattlePad PadPrefab()
+        {
+            DioramaSceneSetup.EnsureFolder("Assets/_Project/Meshes/Generated/Battle");
+            DioramaSceneSetup.EnsureFolder("Assets/_Project/Prefabs/Battle");
+            const string meshPath = "Assets/_Project/Meshes/Generated/Battle/BattlePad.asset";
+            var mesh = AssetDatabase.LoadAssetAtPath<Mesh>(meshPath);
+            var built = BattlePad.BuildMesh();
+            if (mesh == null)
+            {
+                AssetDatabase.CreateAsset(built, meshPath);
+                mesh = built;
+            }
+            else
+            {
+                EditorUtility.CopySerialized(built, mesh);
+                Object.DestroyImmediate(built);
+            }
+            var body = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Creatures/Creature.mat");
+            var outline = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Creatures/Creature_Outline.mat");
+
+            var go = new GameObject("BattlePad");
+            go.AddComponent<MeshFilter>().sharedMesh = mesh;
+            var r = go.AddComponent<MeshRenderer>();
+            r.sharedMaterials = new[] { body, outline };
+            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            r.receiveShadows = false;
+            go.AddComponent<BattlePad>();
+            var prefab = PrefabUtility.SaveAsPrefabAsset(go, PadPrefabPath);
+            Object.DestroyImmediate(go);
+            return prefab.GetComponent<BattlePad>();
         }
 
         /// <summary>Data then scene in one go (bridge: exec:Diorama.EditorTools.Step5BattleSetup.Batch).</summary>

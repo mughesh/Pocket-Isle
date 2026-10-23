@@ -13,6 +13,12 @@ float4   _DioramaWindow;        // x clip plane (island-local y), y sinking band
 TEXTURE2D(_DioramaFootprint);   // signed distance to the footprint edge in tiles, positive inside
 SAMPLER(sampler_DioramaFootprint);
 
+// Battle clearing (IslandBuilder.SetClearing), all in map space (metres) so it stays on its tiles while zooming:
+float4   _DioramaClearing;      // xy = ellipse centre (map xz), zw = unit axis along the pad line
+float4   _DioramaClearingSize;  // x = radius along the axis, y = radius across, z = strength 0..1, w = focus dim 0..1
+float4   _DioramaClearingView;  // xy = end of the view corridor toward the player (map xz), z = corridor half width
+float4   _DioramaClearingWorld; // xyz = ellipse centre in world space (grass bends away from it)
+
 float DioramaEdgeDistance(float2 islandXZ)
 {
     float2 uv = float2(_DioramaFootprintUV.x + _DioramaFootprintUV.y * islandXZ.x,
@@ -21,17 +27,64 @@ float DioramaEdgeDistance(float2 islandXZ)
     return (e * 2.0 - 1.0) * _DioramaWindow.w;
 }
 
+// Map-space position of a world point for island content; world space for everything else.
+float3 DioramaMapPoint(float3 positionWS, float on)
+{
+    return on > 0.5 ? mul(_DioramaWorldToMap, float4(positionWS, 1.0)).xyz : positionWS;
+}
+
+// 0..1 inside the clearing ellipse (soft edge), ignoring the fade.
+float DioramaClearingShape(float2 mapXZ)
+{
+    float2 d = mapXZ - _DioramaClearing.xy;
+    float2 ax = _DioramaClearing.zw;
+    float2 r = float2(dot(d, ax) / max(_DioramaClearingSize.x, 1e-4), dot(d, float2(-ax.y, ax.x)) / max(_DioramaClearingSize.y, 1e-4));
+    return 1.0 - smoothstep(0.75, 1.1, length(r));
+}
+
+// Inside the clearing, faded in with the battle zoom (0 when there is no battle).
+float DioramaClearing(float2 mapXZ)
+{
+    if (_DioramaClearingSize.z <= 0.0) return 0.0;
+    return DioramaClearingShape(mapXZ) * _DioramaClearingSize.z;
+}
+
+// Props (trees, rocks) sink inside the clearing and in a corridor from it toward the player, so nothing blocks the view.
+float DioramaPropSink(float2 mapXZ)
+{
+    if (_DioramaClearingSize.z <= 0.0) return 0.0;
+    float2 a = _DioramaClearing.xy, b = _DioramaClearingView.xy, p = mapXZ - a, ab = b - a;
+    float t = saturate(dot(p, ab) / max(dot(ab, ab), 1e-6));
+    float corridor = 1.0 - smoothstep(_DioramaClearingView.z * 0.8, _DioramaClearingView.z * 1.2, length(p - ab * t));
+    return max(DioramaClearingShape(mapXZ), corridor) * _DioramaClearingSize.z;
+}
+
+// Darkens and desaturates content outside the clearing while a battle is on (the rocky base doesn't call this).
+float3 DioramaFocus(float3 col, float2 mapXZ)
+{
+    float dim = _DioramaClearingSize.w * (1.0 - DioramaClearingShape(mapXZ));
+    float grey = dot(col, float3(0.299, 0.587, 0.114));
+    return lerp(col, grey.xxx, dim * 0.6) * (1.0 - dim);
+}
+
 // Sinks the whole instance by how close originWS (usually the object origin) is to the window edge (continuous
 // while the map slides). Multi-mesh objects (creatures) pass one shared origin so all their pieces sink together.
+// extraSink (0..1) sinks it further (props inside the battle clearing).
 // Returns the new world position; islandPos is the island-local position for DioramaWindowClip.
-float3 DioramaWindowVertex(float3 positionWS, float on, float3 originWS, out float3 islandPos)
+float3 DioramaWindowVertexSink(float3 positionWS, float on, float3 originWS, float extraSink, out float3 islandPos)
 {
     islandPos = mul(_DioramaWorldToIsland, float4(positionWS, 1.0)).xyz;
     if (on < 0.5) return positionWS;
     float3 origin = mul(_DioramaWorldToIsland, float4(originWS, 1.0)).xyz;
     float s = DioramaEdgeDistance(origin.xz);
-    islandPos.y -= _DioramaWindow.z * (1.0 - smoothstep(-_DioramaWindow.y, _DioramaWindow.y, s));
+    float sink = max(1.0 - smoothstep(-_DioramaWindow.y, _DioramaWindow.y, s), extraSink);
+    islandPos.y -= _DioramaWindow.z * sink;
     return mul(_DioramaIslandToWorld, float4(islandPos, 1.0)).xyz;
+}
+
+float3 DioramaWindowVertex(float3 positionWS, float on, float3 originWS, out float3 islandPos)
+{
+    return DioramaWindowVertexSink(positionWS, on, originWS, 0.0, islandPos);
 }
 
 void DioramaWindowClip(float3 islandPos, float on)
@@ -39,12 +92,6 @@ void DioramaWindowClip(float3 islandPos, float on)
     if (on < 0.5) return;
     clip(islandPos.y - _DioramaWindow.x);
     clip(DioramaEdgeDistance(islandPos.xz));
-}
-
-// Map-space position of a world point for island content; world space for everything else.
-float3 DioramaMapPoint(float3 positionWS, float on)
-{
-    return on > 0.5 ? mul(_DioramaWorldToMap, float4(positionWS, 1.0)).xyz : positionWS;
 }
 
 #endif

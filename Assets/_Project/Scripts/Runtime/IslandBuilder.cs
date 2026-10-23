@@ -57,6 +57,11 @@ namespace Diorama
         /// <summary>Brightens the rocky sides (0..1, lerp to white). Driven by IslandHandle; not saved.</summary>
         [NonSerialized] public float rimHighlight;
 
+        /// <summary>Battle clearing fade (0 = off, 1 = grass parted, props sunk). See <see cref="SetClearing"/>.</summary>
+        [NonSerialized] public float clearingStrength;
+        /// <summary>How much content outside the clearing darkens (0..1), usually faded with the zoom.</summary>
+        [NonSerialized] public float clearingDim;
+
         // Fixed sizes from the prototype, in metres. The cap mesh reaches down to the column top (-CapSkirt) so
         // water, which sits CapSkirt lower, still shows above the column.
         const float ColumnDepth = 0.04f;
@@ -81,6 +86,10 @@ namespace Diorama
         static readonly int FootprintId = Shader.PropertyToID("_DioramaFootprint");
         static readonly int FootprintUvId = Shader.PropertyToID("_DioramaFootprintUV");
         static readonly int WindowId = Shader.PropertyToID("_DioramaWindow");
+        static readonly int ClearingId = Shader.PropertyToID("_DioramaClearing");
+        static readonly int ClearingSizeId = Shader.PropertyToID("_DioramaClearingSize");
+        static readonly int ClearingViewId = Shader.PropertyToID("_DioramaClearingView");
+        static readonly int ClearingWorldId = Shader.PropertyToID("_DioramaClearingWorld");
 
         MaterialPropertyBlock _rimProps, _contentProps, _flashProps;
 
@@ -113,6 +122,10 @@ namespace Diorama
         Vector2 _viewCenter, _zoomPivot;
         float _zoom = 1f;
         bool _hasView;
+
+        // Battle clearing in map tiles: centre, unit axis, radii (along, across), view corridor end and half width.
+        Vector2 _clearCenter, _clearAxis = Vector2.up, _clearRadii, _clearView;
+        float _clearViewWidth;
 
         // Tile flash (tall grass step).
         readonly Matrix4x4[] _flashMatrix = new Matrix4x4[1];
@@ -230,6 +243,27 @@ namespace Diorama
         /// <summary>Island-local position of a map tile (fractions allowed), at <paramref name="height"/> above the cap bottom, in map metres.</summary>
         public Vector3 TileToLocal(Vector2 tile, float height = 0f) =>
             ContentToLocal.MultiplyPoint3x4(MapPoint(tile) + Vector3.up * height);
+
+        /// <summary>
+        /// Shapes the battle clearing, in map tiles: an ellipse around <paramref name="center"/> stretched along
+        /// <paramref name="axis"/>, where grass parts and props sink, plus a corridor to <paramref name="viewEnd"/>
+        /// (toward the player) where props also sink. Fade it with <see cref="clearingStrength"/> / <see cref="clearingDim"/>.
+        /// </summary>
+        public void SetClearing(Vector2 center, Vector2 axis, float radiusAlong, float radiusAcross, Vector2 viewEnd, float viewHalfWidth)
+        {
+            _clearCenter = center;
+            _clearAxis = axis.sqrMagnitude > 1e-6f ? axis.normalized : Vector2.up;
+            _clearRadii = new Vector2(radiusAlong, radiusAcross);
+            _clearView = viewEnd;
+            _clearViewWidth = viewHalfWidth;
+        }
+
+        /// <summary>Map tile (fractions) under an island-local point, for the current view.</summary>
+        public Vector2 LocalToTile(Vector3 local)
+        {
+            Vector3 m = ContentToLocal.inverse.MultiplyPoint3x4(local);
+            return new Vector2(-m.x / TileSize, m.z / TileSize);
+        }
 
         /// <summary>Flashes the cap of one map tile for a moment.</summary>
         public void FlashTile(Vector2Int tile, float seconds = 0.5f)
@@ -557,6 +591,14 @@ namespace Diorama
             // the rim instead of sunk, or a zoomed window would be mostly bare dirt), z: deepest sink, w: distance range.
             Shader.SetGlobalVector(WindowId, new Vector4(-CapSkirt, 0.5f, SinkDepth * _zoom + CapSkirt, EdgeRange));
             Shader.SetGlobalFloat(DioramaScaleId, transform.lossyScale.y * _zoom);
+
+            // Map space: columns run toward -X, rows toward +Z (MapPoint), so the axis flips its x.
+            float tile = TileSize;
+            Vector3 c = MapPoint(_clearCenter), v = MapPoint(_clearView);
+            Shader.SetGlobalVector(ClearingId, new Vector4(c.x, c.z, -_clearAxis.x, _clearAxis.y));
+            Shader.SetGlobalVector(ClearingSizeId, new Vector4(_clearRadii.x * tile, _clearRadii.y * tile, clearingStrength, clearingDim));
+            Shader.SetGlobalVector(ClearingViewId, new Vector4(v.x, v.z, _clearViewWidth * tile, 0f));
+            Shader.SetGlobalVector(ClearingWorldId, (l2w * ContentToLocal).MultiplyPoint3x4(c));
         }
 
         /// <summary>Queues the island's instanced draws for one camera.</summary>

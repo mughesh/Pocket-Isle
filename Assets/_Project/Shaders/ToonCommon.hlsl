@@ -58,6 +58,9 @@ CBUFFER_START(UnityPerMaterial)
     float  _OutlineWidth;
     float4 _OutlineColor;
 
+    float  _ClearSink;  // 1 = prop (tree, rock): sinks inside the battle clearing and its view corridor
+    float4 _ClearColor; // a = 1: this colour inside the battle clearing (tall grass caps turn short)
+
     float  _WindowClip; // 1 = island map content (set by IslandBuilder)
     float4 _WindowOrigin; // w = 1: sink by this world point instead of the object origin (creatures, set per frame)
 CBUFFER_END
@@ -85,6 +88,14 @@ float ToonOriginHash()
 float3 ToonWindowOrigin()
 {
     return _WindowOrigin.w > 0.5 ? _WindowOrigin.xyz : UNITY_MATRIX_M._m03_m13_m23;
+}
+
+// Window sink and clip for any toon pass, including the battle clearing for props.
+float3 ToonWindowVertex(float3 positionWS, out float3 islandPos)
+{
+    float3 origin = ToonWindowOrigin();
+    float extra = _ClearSink > 0.5 ? DioramaPropSink(DioramaMapPoint(origin, _WindowClip).xz) : 0.0;
+    return DioramaWindowVertexSink(positionWS, _WindowClip, origin, extra, islandPos);
 }
 
 // Belly threshold lowered in vertical streaks around Y, so the painted edge drips (glaze running down a pot).

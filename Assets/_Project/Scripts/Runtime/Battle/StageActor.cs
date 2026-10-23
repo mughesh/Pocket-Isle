@@ -16,8 +16,10 @@ namespace Diorama
         public Vector2 tile;
         [Tooltip("Extra map offset in tiles (lunges, knockback).")]
         public Vector2 nudge;
-        [Tooltip("Height above the tile cap, map metres.")]
+        [Tooltip("Animation height above its stand, map metres.")]
         public float lift;
+        [Tooltip("Height of what it stands on (its battle pad), map metres.")]
+        public float baseLift;
         [Tooltip("Degrees; 0 faces the player (+Z).")]
         public float yaw;
         public float grow = 1f;
@@ -38,7 +40,7 @@ namespace Diorama
         public void Snap()
         {
             if (island == null || island.Content == null) return;
-            transform.localPosition = island.TileToLocal(tile + nudge, island.Content.capHeight + lift);
+            transform.localPosition = island.TileToLocal(tile + nudge, island.Content.capHeight + baseLift + lift);
             transform.localRotation = Quaternion.Euler(0f, yaw, 0f);
             transform.localScale = squash * (island.Zoom * Mathf.Max(0.0001f, grow));
         }
@@ -46,10 +48,10 @@ namespace Diorama
         float Cap => island.Content.capHeight;
 
         /// <summary>Island-local body centre, including the current animation offsets.</summary>
-        public Vector3 LocalCenter => island.TileToLocal(tile + nudge, Cap + lift + View.centerHeight * grow);
+        public Vector3 LocalCenter => island.TileToLocal(tile + nudge, Cap + baseLift + lift + View.centerHeight * grow);
 
         /// <summary>Island-local point just above the head, at rest (for the HP bar, so it doesn't jump with hops).</summary>
-        public Vector3 LocalTop => island.TileToLocal(tile, Cap + View.height * grow);
+        public Vector3 LocalTop => island.TileToLocal(tile, Cap + baseLift + View.height * grow);
 
         public Vector3 WorldCenter => island.transform.TransformPoint(LocalCenter);
 

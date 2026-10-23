@@ -1,5 +1,7 @@
 using System;
+using Oculus.Interaction;
 using Oculus.Interaction.Input;
+using Oculus.Interaction.Surfaces;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -9,7 +11,9 @@ namespace Diorama
     /// <summary>
     /// The battle choices: three move runes and a Run rune floating just above the island's near rim, facing the head,
     /// with a caption line above them. Pick with head gaze (soft reticle from the centre eye; Quest 3 has no eye
-    /// tracking) and a pinch on either hand, or poke a rune with an index finger.
+    /// tracking) and a pinch on either hand, or poke a rune with an index finger (Interaction SDK poke: each rune is a
+    /// PokeInteractable on a clipped plane, and its plate presses in).
+    /// The row moves down and closer if it would cover a battling creature from the head's view.
     /// Editor: 1-4 pick directly, Enter picks the rune under the gaze.
     /// </summary>
     public class BattleRunes : MonoBehaviour
@@ -22,14 +26,16 @@ namespace Diorama
         [Header("Layout (island-local metres)")]
         [Tooltip("Row centre relative to the middle of the near rim, at the cap height.")]
         public Vector3 offset = new Vector3(0f, 0.05f, 0.02f);
+        [Tooltip("Where the row goes (added to the offset) when it would cover a creature.")]
+        public Vector3 avoidOffset = new Vector3(0f, -0.05f, 0.035f);
         public Vector2 runeSize = new Vector2(0.085f, 0.04f);
         public float spacing = 0.095f;
         public float fontSize = 0.11f;
         public float captionFontSize = 0.12f;
 
         [Header("Poke")]
-        [Tooltip("A fingertip this close to a rune's face (metres, world) counts as a poke.")]
-        public float pokeDepth = 0.012f;
+        [Tooltip("How far the plate travels in when pressed (island-local metres).")]
+        public float pressDepth = 0.008f;
 
         /// <summary>0-2 = move slot, 3 = run.</summary>
         public event Action<int> Chosen;
@@ -39,8 +45,10 @@ namespace Diorama
         class Rune
         {
             public Transform root;
+            public Transform visual;
             public MeshRenderer plate;
             public TextMeshPro label;
+            public PokeInteractable poke;
             public Color tint;
             public bool usable;
             public float hover;
@@ -63,7 +71,9 @@ namespace Diorama
         int _hovered = -1;
         readonly Hand[] _hands = new Hand[2];
         readonly bool[] _wasPinching = new bool[2];
-        readonly bool[] _pokeArmed = { true, true };
+        StageActor _avoidA, _avoidB;
+        float _avoid;
+        bool _loggedPokeHover, _loggedPokeSelect, _reportedInteractors;
 
         void Awake()
         {
@@ -85,16 +95,9 @@ namespace Diorama
                 var root = new GameObject($"Rune {i + 1}").transform;
                 root.SetParent(_row, false);
                 root.localPosition = new Vector3((i - 1.5f) * spacing, 0f, 0f);
-                var plateGo = new GameObject("Plate");
-                plateGo.transform.SetParent(root, false);
-                plateGo.transform.localScale = new Vector3(runeSize.x, runeSize.y, 1f);
-                plateGo.AddComponent<MeshFilter>().sharedMesh = _quad;
-                var plate = plateGo.AddComponent<MeshRenderer>();
-                plate.sharedMaterial = hudMaterial;
-                plate.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-                var label = MakeText(root, fontSize);
-                label.transform.localPosition = new Vector3(0f, 0f, -0.001f);
-                _runes[i] = new Rune { root = root, plate = plate, label = label };
+                var rune = new Rune { root = root };
+                BuildPoke(rune, i);
+                _runes[i] = rune;
             }
             _caption = MakeText(_row, captionFontSize);
             _caption.transform.localPosition = new Vector3(0f, runeSize.y * 0.5f + 0.018f, 0f);
@@ -115,6 +118,82 @@ namespace Diorama
             _reticle.SetPropertyBlock(_block);
         }
 
+        /// <summary>
+        /// ISDK poke button, as in the SDK's poke button sample: the surface (plane clipped to the plate) is the button
+        /// base, set back by <see cref="pressDepth"/>; the visual (plate + label) sits in front of it and the
+        /// PokeInteractableVisual pushes it toward the base while a finger presses.
+        /// The row's front faces the head along -Z, so the plane normal faces backward (-Z).
+        /// </summary>
+        void BuildPoke(Rune rune, int index)
+        {
+            var surfaceGo = new GameObject("Poke Surface");
+            surfaceGo.transform.SetParent(rune.root, false);
+            surfaceGo.transform.localPosition = new Vector3(0f, 0f, pressDepth);
+            var plane = surfaceGo.AddComponent<PlaneSurface>();
+            plane.InjectAllPlaneSurface(PlaneSurface.NormalFacing.Backward, false);
+            var clipper = surfaceGo.AddComponent<BoundsClipper>();
+            clipper.Size = new Vector3(runeSize.x, runeSize.y, 0.02f);
+            var clipped = surfaceGo.AddComponent<ClippedPlaneSurface>();
+            clipped.InjectAllClippedPlaneSurface(plane, new IBoundsClipper[] { clipper });
+            var poke = surfaceGo.AddComponent<PokeInteractable>();
+            poke.InjectAllPokeInteractable(clipped);
+            poke.WhenStateChanged += args => OnPokeState(index, args);
+            rune.poke = poke;
+
+            var visual = new GameObject("Visual").transform;
+            visual.SetParent(rune.root, false);
+            var pressVisual = visual.gameObject.AddComponent<PokeInteractableVisual>();
+            pressVisual.InjectAllPokeInteractableVisual(poke, surfaceGo.transform);
+            rune.visual = visual;
+
+            var plateGo = new GameObject("Plate");
+            plateGo.transform.SetParent(visual, false);
+            plateGo.transform.localScale = new Vector3(runeSize.x, runeSize.y, 1f);
+            plateGo.AddComponent<MeshFilter>().sharedMesh = _quad;
+            rune.plate = plateGo.AddComponent<MeshRenderer>();
+            rune.plate.sharedMaterial = hudMaterial;
+            rune.plate.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            rune.label = MakeText(visual, fontSize);
+            rune.label.transform.localPosition = new Vector3(0f, 0f, -0.001f);
+        }
+
+        void OnPokeState(int index, InteractableStateChangeArgs args)
+        {
+            if (args.NewState == InteractableState.Hover && !_loggedPokeHover)
+            {
+                _loggedPokeHover = true;
+                Debug.Log($"[BattleRunes] Poke hover on rune {index + 1} (first time; ISDK poke works).");
+            }
+            if (args.NewState != InteractableState.Select) return;
+            if (!_loggedPokeSelect)
+            {
+                _loggedPokeSelect = true;
+                Debug.Log($"[BattleRunes] Poke select on rune {index + 1} (first time).");
+            }
+            if (_interactable) Pick(index, "poke");
+        }
+
+        /// <summary>
+        /// The rig's hands need enabled HandPokeInteractors for poking (the locomotion cleanup must not remove them).
+        /// ISDK switches a hand's interactor group off while that hand isn't tracked, so this is logged at the first
+        /// battle, not at startup.
+        /// </summary>
+        void ReportPokeInteractors()
+        {
+            var all = FindObjectsByType<PokeInteractor>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            int active = 0;
+            var names = new System.Text.StringBuilder();
+            foreach (var p in all)
+            {
+                bool on = p.isActiveAndEnabled;
+                if (on) active++;
+                names.Append($" {p.name}{(on ? "" : " (off)")}");
+            }
+            if (all.Length == 0) Debug.LogError("[BattleRunes] No PokeInteractor in the scene; poking runes can't work.");
+            else if (active == 0) Debug.LogWarning($"[BattleRunes] No PokeInteractor active right now (hands not tracked?). Found:{names}");
+            else Debug.Log($"[BattleRunes] Poke interactors: {active} active of {all.Length}:{names}");
+        }
+
         /// <summary>Shows the row with these three moves plus Run. Not pickable until <see cref="SetInteractable"/>.</summary>
         public void Show(MoveData[] moves)
         {
@@ -132,6 +211,11 @@ namespace Diorama
             _runes[RunIndex].tint = new Color(0.55f, 0.58f, 0.56f);
             _runes[RunIndex].label.text = "<b>Run</b>";
             _hovered = -1;
+            if (!_reportedInteractors)
+            {
+                _reportedInteractors = true;
+                ReportPokeInteractors();
+            }
             PlaceRow(true);
             Paint();
         }
@@ -139,7 +223,16 @@ namespace Diorama
         public void Hide()
         {
             _interactable = false;
+            _avoidA = _avoidB = null;
+            _avoid = 0f;
             gameObject.SetActive(false);
+        }
+
+        /// <summary>Creatures the row must not cover from the head's view.</summary>
+        public void Avoid(StageActor a, StageActor b)
+        {
+            _avoidA = a;
+            _avoidB = b;
         }
 
         /// <summary>Dims the runes and ignores input while a turn plays.</summary>
@@ -163,7 +256,8 @@ namespace Diorama
             {
                 var r = _runes[i];
                 r.hover = Mathf.MoveTowards(r.hover, i == _hovered ? 1f : 0f, Time.deltaTime * 8f);
-                r.root.localScale = Vector3.one * (1f + 0.12f * r.hover);
+                // Scale the visual only: the poke surface keeps its size.
+                r.visual.localScale = Vector3.one * (1f + 0.12f * r.hover);
             }
             Paint();
             if (!_interactable) return;
@@ -191,8 +285,6 @@ namespace Diorama
                 if (pinching && !_wasPinching[h] && !busy && _hovered >= 0) Pick(_hovered, $"gaze + pinch ({(h == 0 ? "left" : "right")})");
                 _wasPinching[h] = pinching;
                 if (!_interactable) return;
-                if (HandLookup.TryGetJoint(hand, HandJointId.HandIndexTip, out var tip)) Poke(h, tip);
-                if (!_interactable) return;
             }
         }
 
@@ -216,13 +308,38 @@ namespace Diorama
         {
             if (island == null || island.map == null) return;
             var b = island.LocalBounds;
-            _row.localPosition = new Vector3(b.center.x, island.map.capHeight, b.max.z) + offset;
             var cam = Camera.main;
+            if (cam != null && Covers(cam.transform.position)) _avoid = Mathf.MoveTowards(_avoid, 1f, Time.deltaTime * 3f);
+            _row.localPosition = new Vector3(b.center.x, island.map.capHeight, b.max.z) + offset + avoidOffset * _avoid;
             if (cam == null) return;
             Vector3 away = _row.position - cam.transform.position;
             if (away.sqrMagnitude < 1e-6f) return;
             var target = Quaternion.LookRotation(away, Vector3.up);
             _row.rotation = snap ? target : Quaternion.Slerp(_row.rotation, target, 1f - Mathf.Exp(-Time.deltaTime * 4f));
+        }
+
+        /// <summary>True when the row (runes and caption) sits between the head and either creature's body.</summary>
+        bool Covers(Vector3 head)
+        {
+            if (_avoid >= 1f) return false;
+            return Covers(head, _avoidA) || Covers(head, _avoidB);
+        }
+
+        bool Covers(Vector3 head, StageActor actor)
+        {
+            if (actor == null) return false;
+            float halfW = spacing * 1.5f + runeSize.x * 0.5f, top = runeSize.y * 0.5f + 0.03f, bottom = -runeSize.y * 0.5f;
+            var t = island.transform;
+            Vector3[] points = { actor.WorldCenter, t.TransformPoint(actor.LocalTop), t.TransformPoint(actor.island.TileToLocal(actor.tile, actor.island.Content.capHeight + actor.baseLift)) };
+            Vector3 o = _row.InverseTransformPoint(head);
+            foreach (var p in points)
+            {
+                Vector3 q = _row.InverseTransformPoint(p);
+                if (q.z <= 0f || o.z >= 0f) continue; // the creature must be behind the row, the head in front
+                Vector3 hit = Vector3.Lerp(o, q, -o.z / (q.z - o.z));
+                if (Mathf.Abs(hit.x) < halfW && hit.y < top && hit.y > bottom) return true;
+            }
+            return false;
         }
 
         int GazeHover()
@@ -253,27 +370,6 @@ namespace Diorama
                 if (Mathf.Abs(p.x) < spacing * 0.5f && Mathf.Abs(p.y) < runeSize.y * 0.75f) return _runes[i].usable ? i : -1;
             }
             return -1;
-        }
-
-        void Poke(int hand, Vector3 tipWorld)
-        {
-            float scale = Mathf.Max(1e-4f, _row.lossyScale.x);
-            float depth = pokeDepth / scale;
-            for (int i = 0; i < _runes.Length; i++)
-            {
-                Vector3 p = _runes[i].root.InverseTransformPoint(tipWorld);
-                bool inside = Mathf.Abs(p.x) < runeSize.x * 0.5f && Mathf.Abs(p.y) < runeSize.y * 0.5f;
-                if (inside && p.z > -depth && p.z < depth * 2f)
-                {
-                    if (_pokeArmed[hand])
-                    {
-                        _pokeArmed[hand] = false;
-                        Pick(i, $"poke ({(hand == 0 ? "left" : "right")})");
-                    }
-                    return;
-                }
-            }
-            _pokeArmed[hand] = true;
         }
 
         void Paint()

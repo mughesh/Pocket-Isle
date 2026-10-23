@@ -752,11 +752,12 @@ MonoBehaviour:
   grabGuard: {fileID: 270959111}
   hudMaterial: {fileID: 2100000, guid: 0656b6c4f92798e49a14cf09a2c6800e, type: 2}
   offset: {x: 0, y: 0.05, z: 0.02}
+  avoidOffset: {x: 0, y: -0.05, z: 0.035}
   runeSize: {x: 0.085, y: 0.04}
   spacing: 0.095
   fontSize: 0.11
   captionFontSize: 0.12
-  pokeDepth: 0.012
+  pressDepth: 0.008
 --- !u!4 &382714128
 Transform:
   m_ObjectHideFlags: 0
@@ -1423,6 +1424,7 @@ MonoBehaviour:
   ringMaterial: {fileID: 2100000, guid: ec21b9d2661244844b71480a3c48c9e3, type: 2}
   particleMaterial: {fileID: 2100000, guid: b04eb70d3a417c841a2017c2ad86c11b, type: 2}
   maxParticles: 500
+  particleSize: 1.7
 --- !u!114 &1078587928
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1438,6 +1440,8 @@ MonoBehaviour:
   island: {fileID: 270959109}
   fx: {fileID: 1078587927}
   hud: {fileID: 1078587926}
+  padPrefab: {fileID: 4412776347471294513, guid: 7a70d73ca9feceb40969aae40a6c4ef9, type: 3}
+  padSeconds: 0.4
   pauseBetweenMoves: 0.45
 --- !u!1001 &1132406365
 PrefabInstance:
@@ -1785,8 +1789,10 @@ MonoBehaviour:
   waterTable: {fileID: 11400000, guid: 5b47e44c4def61b419051ed86ed2fcb3, type: 2}
   grassChance: 0.125
   graceSteps: 3
-  zoom: 3
+  zoomRange: {x: 2.2, y: 3}
   zoomSeconds: 0.6
+  padDistance: 3
+  focusDim: 0.25
   rippleSeconds: 1
   seed: 0
 --- !u!114 &1499891276

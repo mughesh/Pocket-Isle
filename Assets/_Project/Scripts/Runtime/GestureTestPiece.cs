@@ -84,6 +84,14 @@ namespace Diorama
         /// <summary>Direction of the last swipe (column, row step); starts facing away from the player.</summary>
         public Vector2Int Facing => _facing;
 
+        /// <summary>
+        /// Where the explorer stands relative to its tile, in tiles (battles move it behind the party creature's pad).
+        /// It slides there smoothly; set back to zero afterwards.
+        /// </summary>
+        public Vector2 StandOffset { get; set; }
+
+        Vector2 _standOffset;
+
         /// <summary>While locked (battles) all gestures are ignored and the explorer stands still.</summary>
         public bool Locked
         {
@@ -269,6 +277,8 @@ namespace Diorama
         {
             Vector2 p = Vector2.Lerp(_fromTile, _tile, _stepT);
             if (window != null) window.Follow(p);
+            _standOffset = Vector2.MoveTowards(_standOffset, StandOffset, Time.deltaTime * 4f);
+            p += _standOffset;
             float hop = 0f;
             if (_hopStart >= 0f)
             {

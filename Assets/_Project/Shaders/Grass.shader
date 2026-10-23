@@ -65,6 +65,7 @@ Shader "Diorama/Grass"
                 float  tall       : TEXCOORD1;
                 float  variation  : TEXCOORD2;
                 float3 islandPos  : TEXCOORD3;
+                float2 mapXZ      : TEXCOORD4;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
                 UNITY_VERTEX_OUTPUT_STEREO
             };
@@ -95,10 +96,20 @@ Shader "Diorama/Grass"
                 world.xz += normalize(d + 0.0001) * push * 0.7 * k;
                 world.y -= push * 0.35 * k;
 
+                // Battle clearing: blades bend away from its centre and shrink to a fifth of their height.
+                float clear = _WindowClip > 0.5 ? DioramaClearing(mapBase.xz) : 0.0;
+                if (clear > 0.0)
+                {
+                    float2 away = base.xz - _DioramaClearingWorld.xz;
+                    world = base + (world - base) * lerp(1.0, 0.2, clear);
+                    world.xz += normalize(away + 0.0001) * clear * 0.5 * k;
+                }
+
                 world = DioramaWindowVertex(world, _WindowClip, UNITY_MATRIX_M._m03_m13_m23, o.islandPos);
                 o.positionCS = TransformWorldToHClip(world);
                 o.h = h;
-                o.tall = step(_TallThreshold * scale, height);
+                o.tall = step(_TallThreshold * scale, height) * (1.0 - clear);
+                o.mapXZ = mapBase.xz;
                 o.variation = frac(sin(dot(mapBase.xz, float2(127.1, 311.7))) * 43758.5453);
                 return o;
             }
@@ -111,6 +122,7 @@ Shader "Diorama/Grass"
                 float3 tipCol = lerp(_ShortTip.rgb, _TallTip.rgb, i.tall);
                 float3 c = lerp(baseCol, tipCol, smoothstep(0.0, 1.0, i.h));
                 c *= 0.88 + i.variation * 0.24;
+                if (_WindowClip > 0.5) c = DioramaFocus(c, i.mapXZ);
                 return float4(c, 1.0);
             }
             ENDHLSL

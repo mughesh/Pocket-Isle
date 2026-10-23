@@ -29,6 +29,8 @@ namespace Diorama
 
         Vector2 _center, _pivot;
         bool _hasCenter;
+        Vector2? _focus;
+        bool _easing;
         float _zoom = 1f, _zoomFrom = 1f, _zoomTo = 1f, _zoomT = 1f, _zoomDuration;
 
         IslandMap World => island != null ? island.Content : null;
@@ -48,12 +50,36 @@ namespace Diorama
                 _center = target;
                 _hasCenter = true;
             }
-            Vector2 d = target - _center;
-            float dz = deadZoneTiles;
-            _center = target - new Vector2(Mathf.Clamp(d.x, -dz, dz), Mathf.Clamp(d.y, -dz, dz));
-            _center = ClampToMap(_center);
+            Vector2 wanted;
+            if (_focus.HasValue) wanted = ClampToMap(_focus.Value + CenterBias());
+            else
+            {
+                Vector2 d = target - _center;
+                float dz = deadZoneTiles;
+                wanted = ClampToMap(target - new Vector2(Mathf.Clamp(d.x, -dz, dz), Mathf.Clamp(d.y, -dz, dz)));
+            }
+            // Moving to or from a battle focus glides; normal following stays locked to the explorer.
+            if (_easing)
+            {
+                _center = Vector2.Lerp(_center, wanted, 1f - Mathf.Exp(-Time.deltaTime * 7f));
+                if (!_focus.HasValue && (_center - wanted).sqrMagnitude < 1e-4f) _easing = false;
+            }
+            else _center = wanted;
             Apply();
         }
+
+        /// <summary>
+        /// Centres the view on a map point (battles: the middle of the stage) instead of the explorer; null goes back
+        /// to following the explorer. Both directions glide.
+        /// </summary>
+        public void SetFocus(Vector2? tile)
+        {
+            _focus = tile;
+            _easing = true;
+        }
+
+        /// <summary>Where the view centre ends up when focused on <paramref name="tile"/> (clamped to the map).</summary>
+        public Vector2 FocusCenter(Vector2 tile) => ClampToMap(tile + CenterBias());
 
         /// <summary>Scales the map content around <paramref name="tile"/> by <paramref name="factor"/>, eased over <paramref name="seconds"/>.</summary>
         public void ZoomTo(Vector2Int tile, float factor, float seconds) => ZoomTo((Vector2)tile, factor, seconds);

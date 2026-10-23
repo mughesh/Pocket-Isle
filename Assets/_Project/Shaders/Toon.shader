@@ -60,6 +60,10 @@ Shader "Diorama/Toon"
         _OutlineWidth ("Outline Width", Float) = 0.035
         _OutlineColor ("Outline Colour", Color) = (0.1, 0.1, 0.1, 1)
 
+        [Header(Battle clearing (island content))]
+        [ToggleUI] _ClearSink ("Sink In Clearing (props)", Float) = 0
+        _ClearColor ("Colour In Clearing (a = on)", Color) = (0, 0, 0, 0)
+
         [HideInInspector] _WindowClip ("Island Window Clip", Float) = 0
         [HideInInspector] _WindowOrigin ("Island Window Origin", Vector) = (0, 0, 0, 0)
 
@@ -127,7 +131,7 @@ Shader "Diorama/Toon"
                 float3 p = ToonDeform(v.positionOS.xyz, v.normalOS);
                 o.positionOS = v.positionOS.xyz;
                 o.normalOS = v.normalOS;
-                o.positionWS = DioramaWindowVertex(TransformObjectToWorld(p), _WindowClip, ToonWindowOrigin(), o.islandPos);
+                o.positionWS = ToonWindowVertex(TransformObjectToWorld(p), o.islandPos);
                 o.normalWS = TransformObjectToWorldNormal(v.normalOS);
                 o.positionCS = TransformWorldToHClip(o.positionWS);
                 o.shade = 1.0 + (ToonOriginHash() - 0.5) * 2.0 * _OriginJitter;
@@ -144,7 +148,10 @@ Shader "Diorama/Toon"
                 float3 nO = normalize(i.normalOS);
 
                 // painted colour, all in object space
-                float3 c = lerp(_BaseColor.rgb, _TopColor.rgb, _Grad * smoothstep(-0.4, 0.7, pO.y)) * i.shade;
+                float3 c = lerp(_BaseColor.rgb, _TopColor.rgb, _Grad * smoothstep(-0.4, 0.7, pO.y));
+                float2 mapXZ = DioramaMapPoint(i.positionWS, _WindowClip).xz;
+                if (_WindowClip > 0.5 && _ClearColor.a > 0.0) c = lerp(c, _ClearColor.rgb, DioramaClearing(mapXZ) * _ClearColor.a);
+                c *= i.shade;
                 float sp = sin(pO.x * _SpotScale) * sin(pO.y * _SpotScale * 1.3 + 1.7) * sin(pO.z * _SpotScale * 0.9 + 0.5);
                 c = lerp(c, _SpotColor.rgb, _SpotOn * smoothstep(0.30, 0.36, sp) * smoothstep(-0.1, 0.3, dot(nO, normalize(float3(0.0, 1.0, -0.6)))));
                 c = lerp(c, _BellyColor.rgb, _BellyOn * smoothstep(_BellyAt, _BellyAt + 0.12, dot(nO, normalize(_BellyDir.xyz)) + _BellyAt - ToonBellyAt(pO)) * smoothstep(_BellyMaxY + 0.05, _BellyMaxY - 0.05, pO.y));
@@ -167,6 +174,7 @@ Shader "Diorama/Toon"
                 col += c * _Emissive;
                 if (_CrackOn > 0.5) col = ToonLava(col, pO);
                 col = lerp(col, float3(1.0, 1.0, 1.0), _Flash);
+                if (_WindowClip > 0.5) col = DioramaFocus(col, mapXZ);
                 return float4(col, 1.0);
             }
             ENDHLSL
@@ -208,7 +216,7 @@ Shader "Diorama/Toon"
                 UNITY_SETUP_INSTANCE_ID(v);
                 UNITY_TRANSFER_INSTANCE_ID(v, o);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-                float3 ws = DioramaWindowVertex(TransformObjectToWorld(ToonDeform(v.positionOS.xyz, v.normalOS)), _WindowClip, ToonWindowOrigin(), o.islandPos);
+                float3 ws = ToonWindowVertex(TransformObjectToWorld(ToonDeform(v.positionOS.xyz, v.normalOS)), o.islandPos);
                 o.positionCS = TransformWorldToHClip(ws);
                 return o;
             }
