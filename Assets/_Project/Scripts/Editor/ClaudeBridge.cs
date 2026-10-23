@@ -68,10 +68,15 @@ namespace Diorama.EditorTools
                     }
                     else if (cmd.StartsWith("exec:", StringComparison.Ordinal))
                     {
-                        // Static method without parameters in this assembly, e.g. exec:Diorama.EditorTools.CreatureTools.BatchRebakeShots
+                        // Static method without parameters, e.g. exec:Diorama.EditorTools.CreatureTools.BatchRebakeShots.
+                        // This assembly first, then any loaded one (the test assembly has its own runner).
                         var full = cmd.Substring(5);
                         int dot = full.LastIndexOf('.');
-                        var type = typeof(ClaudeBridge).Assembly.GetType(full.Substring(0, dot));
+                        var typeName = full.Substring(0, dot);
+                        var type = typeof(ClaudeBridge).Assembly.GetType(typeName);
+                        if (type == null)
+                            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+                                if ((type = asm.GetType(typeName)) != null) break;
                         var method = type?.GetMethod(full.Substring(dot + 1),
                             System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
                         if (method == null) Log($"{cmd}: method not found");

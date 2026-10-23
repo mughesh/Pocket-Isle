@@ -124,6 +124,9 @@ namespace Diorama
         [Tooltip("Hop height in metres at scale 1.")]
         public float hopHeight = 0.012f;
 
+        /// <summary>Off in battle: the creature faces its opponent instead of turning to the player's head.</summary>
+        [NonSerialized] public bool lookAtPlayer = true;
+
         /// <summary>Raised when a hop touches down.</summary>
         public event Action Landed;
 
@@ -166,6 +169,7 @@ namespace Diorama
         static readonly int TimeOffsetId = Shader.PropertyToID("_TimeOffset");
         static readonly int WindowClipId = Shader.PropertyToID("_WindowClip");
         static readonly int WindowOriginId = Shader.PropertyToID("_WindowOrigin");
+        static readonly int FlashId = Shader.PropertyToID("_Flash");
         static readonly int IrisId = Shader.PropertyToID("_IrisColor");
         static readonly int LookId = Shader.PropertyToID("_Look");
         static readonly int[] PatchIds = new int[PieceStyle.MaxPatches];
@@ -185,6 +189,7 @@ namespace Diorama
         bool _windowClip;
         float _timeOffset;
         float _breatheScale = 1f;
+        float _flash;
 
         float[] _nextFlick, _flickStart;
         float _nextBlink, _blinkStart = -1f;
@@ -236,6 +241,20 @@ namespace Diorama
             _fainted = false;
             _breatheScale = 1f;
             ApplyStyles();
+        }
+
+        /// <summary>White hit flash on the body (0 = off, 1 = white).</summary>
+        public void SetFlash(float amount)
+        {
+            if (Mathf.Approximately(_flash, amount)) return;
+            _flash = amount;
+            if (_blocks == null) return;
+            for (int i = 0; i < pieces.Count && i < _blocks.Length; i++)
+            {
+                if (_blocks[i] == null || pieces[i].renderer == null) continue;
+                _blocks[i].SetFloat(FlashId, _flash);
+                pieces[i].renderer.SetPropertyBlock(_blocks[i]);
+            }
         }
 
         /// <summary>Writes every piece's palette and zones into its property block.</summary>
@@ -291,6 +310,7 @@ namespace Diorama
                 block.SetFloat(TimeOffsetId, _timeOffset);
                 block.SetFloat(WindowClipId, _windowClip ? 1f : 0f);
                 block.SetVector(WindowOriginId, WindowOrigin);
+                block.SetFloat(FlashId, _flash);
                 p.renderer.SetPropertyBlock(block);
             }
             ApplyEyes();
@@ -433,7 +453,7 @@ namespace Diorama
             var cam = Camera.main;
             Vector2 lookTarget = Vector2.zero;
             float yawTarget = 0f;
-            if (cam != null && !_fainted)
+            if (cam != null && !_fainted && lookAtPlayer)
             {
                 Vector3 head = cam.transform.position;
                 Vector3 focus = transform.TransformPoint(0f, height * 0.6f, 0f);

@@ -20,8 +20,9 @@ namespace Diorama
     /// (water, tree, rock, border), or a tap stops it. HoldToWalk: same, but it also stops when the thumb returns to
     /// rest (read from ThumbHoldProbe; in the Editor, releasing the arrow key). In both modes a second swipe in the
     /// same direction while moving switches to run, and turning keeps the current speed.
-    /// Tap stops walking; tap while standing is free (reserved for interact). The battle zoom is triggered by the game
-    /// (encounters, step 5); Z toggles it in the Editor for testing. No walking while zoomed.
+    /// Tap is context-sensitive: walking = stop; standing and facing water = fish (<see cref="OnFishTap"/>); otherwise
+    /// a little hop. The battle zoom is triggered by encounters (<see cref="EncounterDirector"/>), which also lock the
+    /// explorer while a battle runs; Z toggles the zoom in the Editor for testing. No walking while zoomed.
     /// Swipes map to the user's view of the island: forward = away, back = toward, left / right = their left / right.
     /// </summary>
     public class GestureTestPiece : MonoBehaviour
@@ -51,14 +52,23 @@ namespace Diorama
         [Tooltip("Ignore the hold check for this long after a swipe, while the thumb settles.")]
         public float holdGraceSeconds = 0.25f;
 
+        [Tooltip("Hop height in map metres when tapping while standing.")]
+        public float hopHeight = 0.012f;
+
         /// <summary>Raised when the explorer arrives on a tall grass tile (column, row).</summary>
         public event Action<Vector2Int> OnTallGrassStep;
+
+        /// <summary>Raised on a tap while standing next to water and facing it (the water tile).</summary>
+        public event Action<Vector2Int> OnFishTap;
 
         Transform _cube;
         TextMeshPro _label;
         Vector2Int _tile, _fromTile;
         Vector2Int _heading;
+        Vector2Int _facing = new Vector2Int(0, -1);
         bool _running;
+        bool _locked;
+        float _hopStart = -1f;
         GestureSource _source;
         float _swipeTime;
         float _stepT = 1f;
@@ -70,6 +80,21 @@ namespace Diorama
 
         /// <summary>The tile the explorer stands on (or is stepping onto).</summary>
         public Vector2Int Tile => _tile;
+
+        /// <summary>Direction of the last swipe (column, row step); starts facing away from the player.</summary>
+        public Vector2Int Facing => _facing;
+
+        /// <summary>While locked (battles) all gestures are ignored and the explorer stands still.</summary>
+        public bool Locked
+        {
+            get => _locked;
+            set
+            {
+                _locked = value;
+                if (value) Stop();
+                RefreshLabel();
+            }
+        }
 
         void Start()
         {
@@ -98,7 +123,6 @@ namespace Diorama
             input.Gesture += OnGesture;
             if (placer != null) placer.Placed += PositionLabel;
             if (probe == null) Debug.LogError("[GestureTestPiece] No ThumbHoldProbe assigned; HoldToWalk will stop right after each swipe.");
-            OnTallGrassStep += FlashTallGrass;
             PositionLabel();
             UpdateExplorer();
             RefreshLabel();
@@ -124,9 +148,14 @@ namespace Diorama
                 ThumbGesture.SwipeBack => new Vector2Int(0, 1),
                 _ => Vector2Int.zero,
             };
-            if (gesture == ThumbGesture.Tap)
+            if (_locked)
+            {
+                _last += " - battle, ignored";
+            }
+            else if (gesture == ThumbGesture.Tap)
             {
                 if (_heading != Vector2Int.zero) Stop();
+                else if (_stepT >= 1f && !Zoomed) TapWhileStanding();
             }
             else if (Zoomed)
             {
@@ -136,11 +165,23 @@ namespace Diorama
             {
                 if (d == _heading) _running = true;
                 _heading = d;
+                _facing = d;
                 _source = source;
                 _swipeTime = Time.unscaledTime;
                 if (_stepT >= 1f) TryStep();
             }
             RefreshLabel();
+        }
+
+        void TapWhileStanding()
+        {
+            var front = _tile + _facing;
+            if (Map.At(front.y, front.x) == IslandMap.Water)
+            {
+                _last += " - fishing";
+                OnFishTap?.Invoke(front);
+            }
+            else if (_hopStart < 0f) _hopStart = Time.time;
         }
 
         void ToggleZoom()
@@ -196,7 +237,7 @@ namespace Diorama
         {
             if (_cube == null) return;
             var kb = Keyboard.current;
-            if (kb != null && kb.zKey.wasPressedThisFrame && _heading == Vector2Int.zero && _stepT >= 1f) ToggleZoom();
+            if (kb != null && kb.zKey.wasPressedThisFrame && !_locked && _heading == Vector2Int.zero && _stepT >= 1f) ToggleZoom();
 
             if (moveMode == MoveMode.HoldToWalk && _heading != Vector2Int.zero &&
                 Time.unscaledTime - _swipeTime > holdGraceSeconds && !ThumbStillHeld())
@@ -228,14 +269,15 @@ namespace Diorama
         {
             Vector2 p = Vector2.Lerp(_fromTile, _tile, _stepT);
             if (window != null) window.Follow(p);
-            _cube.localPosition = island.TileToLocal(p, Map.capHeight + cubeSize * 0.5f);
+            float hop = 0f;
+            if (_hopStart >= 0f)
+            {
+                float u = (Time.time - _hopStart) / 0.3f;
+                if (u >= 1f) _hopStart = -1f;
+                else hop = hopHeight * 4f * u * (1f - u);
+            }
+            _cube.localPosition = island.TileToLocal(p, Map.capHeight + cubeSize * 0.5f + hop);
             _cube.localScale = Vector3.one * (cubeSize * island.Zoom);
-        }
-
-        void FlashTallGrass(Vector2Int tile)
-        {
-            island.FlashTile(tile);
-            Debug.Log($"[GestureTestPiece] Tall grass step at c{tile.x} r{tile.y}.");
         }
 
         void PositionLabel()
@@ -250,7 +292,7 @@ namespace Diorama
         {
             if (_label == null) return;
             string place = placer != null ? placer.Status : "-";
-            string move = _zoomedIn ? "Zoomed" : _heading == Vector2Int.zero ? "Stopped" : $"{(_running ? "Run" : "Walk")} {HeadingName(_heading)}";
+            string move = _locked ? "Battle" : _zoomedIn ? "Zoomed" : _heading == Vector2Int.zero ? "Stopped" : $"{(_running ? "Run" : "Walk")} {HeadingName(_heading)}";
             _label.text = $"<b>Mode:</b> {moveMode}\n<b>Last:</b> {_last}\n<b>Count:</b> {_count}\n<b>Tile:</b> c{_tile.x} r{_tile.y}  <b>{move}</b>\n<b>Place:</b> {place}";
         }
 

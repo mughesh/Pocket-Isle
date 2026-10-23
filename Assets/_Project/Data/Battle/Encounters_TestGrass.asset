@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c8626ba373ab3341a2d624c43d4cf59, type: 3}
+  m_Name: Encounters_TestGrass
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.EncounterTable
+  habitat: 0
+  entries:
+  - species: {fileID: 11400000, guid: fb46257ae3b4b0144a5861244b1b96f6, type: 2}
+    minLevel: 3
+    maxLevel: 5
+    weight: 32
+    rare: 0
+  - species: {fileID: 11400000, guid: e7c3963a9c30b4e42bc8e0dffffc34f3, type: 2}
+    minLevel: 3
+    maxLevel: 5
+    weight: 32
+    rare: 0
+  - species: {fileID: 11400000, guid: bf28c73db405a224da137bbcb4724879, type: 2}
+    minLevel: 3
+    maxLevel: 5
+    weight: 31
+    rare: 0
+  - species: {fileID: 11400000, guid: c1473e635e7776940a34b25e7b53b532, type: 2}
+    minLevel: 5
+    maxLevel: 6
+    weight: 5
+    rare: 1

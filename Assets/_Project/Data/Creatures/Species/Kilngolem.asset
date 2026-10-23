@@ -23,6 +23,6 @@ MonoBehaviour:
     defense: 18
     speed: 5
   moves:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 11400000, guid: af493a76f8d2f4a40b7bc20e84a0c6a7, type: 2}
+  - {fileID: 11400000, guid: 5f9aecbf9b514934fab29e58f655a1b7, type: 2}
+  - {fileID: 11400000, guid: 3b67ad77c7d29084bb360e9edbd5f24c, type: 2}

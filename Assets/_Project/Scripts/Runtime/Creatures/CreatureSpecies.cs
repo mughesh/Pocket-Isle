@@ -15,8 +15,8 @@ namespace Diorama
     }
 
     /// <summary>
-    /// A species: name, element, look (recipe), evolution and battle numbers. Minimal for now; battle (step 5) fills
-    /// in moves and stats.
+    /// A species: name, element, look (recipe), evolution and battle numbers (base stats and three moves:
+    /// an element attack, a Neutral attack and a support).
     /// </summary>
     [CreateAssetMenu(menuName = "Pocket Isle/Creatures/Species", fileName = "Species")]
     public class CreatureSpecies : ScriptableObject
@@ -29,10 +29,11 @@ namespace Diorama
         public CreatureSpecies evolvesTo;
         [Min(0)] public int evolveLevel;
 
-        [Header("Battle (placeholder)")]
+        [Header("Battle")]
+        [Tooltip("Stats at level 5; they grow with level (BattleMath).")]
         public BaseStats baseStats = new BaseStats { hp = 40, attack = 10, defense = 10, speed = 10 };
-        [Tooltip("Three move slots, filled in step 5.")]
-        public ScriptableObject[] moves = new ScriptableObject[3];
+        [Tooltip("Element attack, Neutral attack, support.")]
+        public MoveData[] moves = new MoveData[3];
 
         public GameObject Prefab => recipe != null ? recipe.bakedPrefab : null;
     }

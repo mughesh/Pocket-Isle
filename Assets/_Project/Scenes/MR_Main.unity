@@ -231,9 +231,8 @@ Transform:
   - {fileID: 1341227098}
   - {fileID: 1532703332}
   - {fileID: 1132406366}
-  - {fileID: 2080304170}
-  - {fileID: 1967938174}
-  - {fileID: 492479180}
+  - {fileID: 1078587925}
+  - {fileID: 382714128}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &270959111
@@ -656,6 +655,7 @@ MonoBehaviour:
   runSeconds: 0.3
   holdReleaseMm: 5
   holdGraceSeconds: 0.25
+  hopHeight: 0.012
 --- !u!114 &374318555
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -719,99 +719,59 @@ MonoBehaviour:
   restLookback: 0.5
   heldThresholdMm: 8
   barRangeMm: 20
---- !u!1001 &492479179
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 270959110}
-    m_Modifications:
-    - target: {fileID: 5595217233316352115, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6434061563040279003, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -0.82500005
-      objectReference: {fileID: 0}
-    - target: {fileID: 6434061563040279003, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.006
-      objectReference: {fileID: 0}
-    - target: {fileID: 6434061563040279003, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0.125
-      objectReference: {fileID: 0}
-    - target: {fileID: 6434061563040279003, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6434061563040279003, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6434061563040279003, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6434061563040279003, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6434061563040279003, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6434061563040279003, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6434061563040279003, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7382049441693873171, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
-      propertyPath: m_Name
-      value: Kettlewing
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 7382049441693873171, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 492479182}
-  m_SourcePrefab: {fileID: 100100000, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
---- !u!4 &492479180 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 6434061563040279003, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
-  m_PrefabInstance: {fileID: 492479179}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &492479181 stripped
+--- !u!1 &382714126
 GameObject:
-  m_CorrespondingSourceObject: {fileID: 7382049441693873171, guid: 6ed124320b8f224458ba0a90b9999b10, type: 3}
-  m_PrefabInstance: {fileID: 492479179}
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &492479182
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 382714128}
+  - component: {fileID: 382714127}
+  m_Layer: 0
+  m_Name: Battle Runes
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &382714127
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 492479181}
+  m_GameObject: {fileID: 382714126}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d8c5179f64e403c498ca788e714a8bd2, type: 3}
+  m_Script: {fileID: 11500000, guid: cb6d1900610263d40995cbd659b165a3, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Diorama.Runtime::Diorama.MapCreature
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.BattleRunes
   island: {fileID: 270959109}
-  explorer: {fileID: 374318554}
-  homeTile: {x: 44, y: 30}
-  wander: 1
-  wanderRadius: 3
-  hopInterval: {x: 3, y: 7}
-  moveChance: 0.6
+  grabGuard: {fileID: 270959111}
+  hudMaterial: {fileID: 2100000, guid: 0656b6c4f92798e49a14cf09a2c6800e, type: 2}
+  offset: {x: 0, y: 0.05, z: 0.02}
+  runeSize: {x: 0.085, y: 0.04}
+  spacing: 0.095
+  fontSize: 0.11
+  captionFontSize: 0.12
+  pokeDepth: 0.012
+--- !u!4 &382714128
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 382714126}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 270959110}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &509277689
 GameObject:
   m_ObjectHideFlags: 0
@@ -1396,6 +1356,89 @@ Transform:
   - {fileID: 2003276424}
   m_Father: {fileID: 1994521898}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1078587924
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1078587925}
+  - component: {fileID: 1078587927}
+  - component: {fileID: 1078587926}
+  - component: {fileID: 1078587928}
+  m_Layer: 0
+  m_Name: Battle Stage
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1078587925
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1078587924}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 270959110}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1078587926
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1078587924}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c021c900e6451494dbb6f1c871ca0289, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.BattleHud
+  hudMaterial: {fileID: 2100000, guid: 0656b6c4f92798e49a14cf09a2c6800e, type: 2}
+  barSize: {x: 0.075, y: 0.011}
+  barGap: 0.022
+  labelFontSize: 0.11
+  popFontSize: 0.16
+--- !u!114 &1078587927
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1078587924}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80ad7fd039e8ed946849ba79bc91c6d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.BattleFx
+  orbMaterial: {fileID: 2100000, guid: 2c87030957bf6b147b9b44eee94e3228, type: 2}
+  ringMaterial: {fileID: 2100000, guid: ec21b9d2661244844b71480a3c48c9e3, type: 2}
+  particleMaterial: {fileID: 2100000, guid: b04eb70d3a417c841a2017c2ad86c11b, type: 2}
+  maxParticles: 500
+--- !u!114 &1078587928
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1078587924}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce9181923e9c72d499e0d8e6f13e603a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.BattleStage
+  island: {fileID: 270959109}
+  fx: {fileID: 1078587927}
+  hud: {fileID: 1078587926}
+  pauseBetweenMoves: 0.45
 --- !u!1001 &1132406365
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1700,6 +1743,84 @@ Transform:
   m_Children:
   - {fileID: 1037679321}
   m_Father: {fileID: 1294784576}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1499891274
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1499891277}
+  - component: {fileID: 1499891276}
+  - component: {fileID: 1499891275}
+  m_Layer: 0
+  m_Name: Battle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1499891275
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1499891274}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ac812190db43e840ba1c396a2c3bc57, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.EncounterDirector
+  explorer: {fileID: 374318554}
+  window: {fileID: 270959113}
+  island: {fileID: 270959109}
+  party: {fileID: 1499891276}
+  stage: {fileID: 1078587928}
+  runes: {fileID: 382714127}
+  typeChart: {fileID: 11400000, guid: d07e763e31e40f44e90da37afbc060b8, type: 2}
+  grassTable: {fileID: 11400000, guid: 674dcb07c5696924dbbad850006068b4, type: 2}
+  waterTable: {fileID: 11400000, guid: 5b47e44c4def61b419051ed86ed2fcb3, type: 2}
+  grassChance: 0.125
+  graceSteps: 3
+  zoom: 3
+  zoomSeconds: 0.6
+  rippleSeconds: 1
+  seed: 0
+--- !u!114 &1499891276
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1499891274}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c87d25a2722a2c44ea3dd65276ba23d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.Party
+  members:
+  - species: {fileID: 11400000, guid: 4e0827bf455d6eb4c853967a75296d1d, type: 2}
+    level: 5
+    currentHp: 40
+    xp: 0
+    nickname: 
+--- !u!4 &1499891277
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1499891274}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1532703331
 PrefabInstance:
@@ -2100,99 +2221,6 @@ MonoBehaviour:
   _movementProvider: {fileID: 0}
   _handAligment: 0
   _handGrabPoses: []
---- !u!1001 &1967938173
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 270959110}
-    m_Modifications:
-    - target: {fileID: 417414022476722940, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1269017013574076084, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -0.67499995
-      objectReference: {fileID: 0}
-    - target: {fileID: 1269017013574076084, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.006
-      objectReference: {fileID: 0}
-    - target: {fileID: 1269017013574076084, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0.875
-      objectReference: {fileID: 0}
-    - target: {fileID: 1269017013574076084, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1269017013574076084, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1269017013574076084, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1269017013574076084, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1269017013574076084, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1269017013574076084, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1269017013574076084, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2897710189970665803, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
-      propertyPath: m_Name
-      value: Waxle
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 2897710189970665803, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1967938176}
-  m_SourcePrefab: {fileID: 100100000, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
---- !u!4 &1967938174 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 1269017013574076084, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
-  m_PrefabInstance: {fileID: 1967938173}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &1967938175 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2897710189970665803, guid: 4c79ce8b8d313e9478141d286040e1b8, type: 3}
-  m_PrefabInstance: {fileID: 1967938173}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1967938176
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1967938175}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d8c5179f64e403c498ca788e714a8bd2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Diorama.Runtime::Diorama.MapCreature
-  island: {fileID: 270959109}
-  explorer: {fileID: 374318554}
-  homeTile: {x: 41, y: 45}
-  wander: 1
-  wanderRadius: 3
-  hopInterval: {x: 3, y: 7}
-  moveChance: 0.6
 --- !u!1 &1994521897
 GameObject:
   m_ObjectHideFlags: 0
@@ -2393,99 +2421,6 @@ MonoBehaviour:
   installationRoutineCheckpoint:
     _installationRoutineId: 2063f481-1b63-4eda-9ee8-a00df98536bc
     _installationVariants: []
---- !u!1001 &2080304169
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 270959110}
-    m_Modifications:
-    - target: {fileID: 3867948943208261354, guid: 7c86a1237914273438b5086697873158, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5221779532185038997, guid: 7c86a1237914273438b5086697873158, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0.425
-      objectReference: {fileID: 0}
-    - target: {fileID: 5221779532185038997, guid: 7c86a1237914273438b5086697873158, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.006
-      objectReference: {fileID: 0}
-    - target: {fileID: 5221779532185038997, guid: 7c86a1237914273438b5086697873158, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -0.575
-      objectReference: {fileID: 0}
-    - target: {fileID: 5221779532185038997, guid: 7c86a1237914273438b5086697873158, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5221779532185038997, guid: 7c86a1237914273438b5086697873158, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5221779532185038997, guid: 7c86a1237914273438b5086697873158, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5221779532185038997, guid: 7c86a1237914273438b5086697873158, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5221779532185038997, guid: 7c86a1237914273438b5086697873158, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5221779532185038997, guid: 7c86a1237914273438b5086697873158, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5221779532185038997, guid: 7c86a1237914273438b5086697873158, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5619930510433288516, guid: 7c86a1237914273438b5086697873158, type: 3}
-      propertyPath: m_Name
-      value: Toastling
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 5619930510433288516, guid: 7c86a1237914273438b5086697873158, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2080304172}
-  m_SourcePrefab: {fileID: 100100000, guid: 7c86a1237914273438b5086697873158, type: 3}
---- !u!4 &2080304170 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 5221779532185038997, guid: 7c86a1237914273438b5086697873158, type: 3}
-  m_PrefabInstance: {fileID: 2080304169}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &2080304171 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5619930510433288516, guid: 7c86a1237914273438b5086697873158, type: 3}
-  m_PrefabInstance: {fileID: 2080304169}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &2080304172
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2080304171}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d8c5179f64e403c498ca788e714a8bd2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Diorama.Runtime::Diorama.MapCreature
-  island: {fileID: 270959109}
-  explorer: {fileID: 374318554}
-  homeTile: {x: 19, y: 16}
-  wander: 1
-  wanderRadius: 3
-  hopInterval: {x: 3, y: 7}
-  moveChance: 0.6
 --- !u!1 &2133717133
 GameObject:
   m_ObjectHideFlags: 0
@@ -2625,3 +2560,4 @@ SceneRoots:
   - {fileID: 270959110}
   - {fileID: 374318557}
   - {fileID: 542041139}
+  - {fileID: 1499891277}

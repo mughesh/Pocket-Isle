@@ -37,6 +37,9 @@ namespace Diorama
 
         public Vector2Int Tile => _tile;
 
+        /// <summary>Hides every map creature (battles: only the two fighters stand on the stage).</summary>
+        public static bool HideAll { get; set; }
+
         void Awake()
         {
             _view = GetComponent<CreatureView>();
@@ -131,7 +134,8 @@ namespace Diorama
             float margin = island.map.tileSize * 0.5f;
             bool inside = local.x > b.min.x - margin && local.x < b.max.x + margin &&
                           local.z > b.min.z - margin && local.z < b.max.z + margin;
-            if (_view.rig != null && _view.rig.gameObject.activeSelf != inside) _view.rig.gameObject.SetActive(inside);
+            bool show = inside && !(Application.isPlaying && HideAll);
+            if (_view.rig != null && _view.rig.gameObject.activeSelf != show) _view.rig.gameObject.SetActive(show);
         }
     }
 }

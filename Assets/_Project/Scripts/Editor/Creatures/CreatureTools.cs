@@ -21,9 +21,6 @@ namespace Diorama.EditorTools
         // Lab cycle and shot order: starters, then each line base -> evolution. Species not listed come last.
         static readonly string[] LabOrder =
             { "Kilnpot", "Pebbloop", "Pufflet", "Kilnhearth", "Toastling", "Crumbhog", "Waxle", "Lanternsnail", "Kettlewing", "Glazegolem", "Kilngolem" };
-        // Wild wanderers on the test world: species and home tile (column, row), well away from the start tile (c28 r27).
-        static readonly (string name, Vector2Int tile)[] Wild =
-            { ("Toastling", new Vector2Int(19, 16)), ("Waxle", new Vector2Int(41, 45)), ("Kettlewing", new Vector2Int(44, 30)) };
         static readonly string[] FireRecipes = { "Toastling", "Crumbhog", "Waxle", "Lanternsnail", "Kettlewing", "Glazegolem", "Kilngolem" };
 
         // ---- Creature Lab ----
@@ -247,57 +244,6 @@ namespace Diorama.EditorTools
             Debug.Log(report.ToString());
         }
 
-        /// <summary>Puts the wild wanderers (MapCreature, wander radius 3) on the test world, far from the start tile.</summary>
-        [MenuItem("Tools/Pocket Isle/Creatures/Add Wild Creatures to MR_Main", priority = 42)]
-        public static void AddWildToMain()
-        {
-            var scene = EditorSceneManager.GetActiveScene();
-            if (scene.path != MainPath)
-            {
-                if (!SaveOrAbort()) return;
-                scene = EditorSceneManager.OpenScene(MainPath);
-            }
-            var island = Object.FindFirstObjectByType<IslandBuilder>();
-            var explorer = Object.FindFirstObjectByType<GestureTestPiece>();
-            if (island == null || island.world == null)
-            {
-                Debug.LogError("[CreatureTools] MR_Main needs the island with a world map (Step 3 menus).");
-                return;
-            }
-            var world = island.world;
-            var taken = new HashSet<Vector2Int> { world.startTile };
-            foreach (var c in Object.FindObjectsByType<MapCreature>(FindObjectsSortMode.None))
-                if (System.Array.IndexOf(Starters, c.name) >= 0) taken.Add(c.homeTile);
-            var report = new StringBuilder("[CreatureTools] Wild creatures in MR_Main:");
-            foreach (var (name, want) in Wild)
-            {
-                var species = AssetDatabase.LoadAssetAtPath<CreatureSpecies>($"Assets/_Project/Data/Creatures/Species/{name}.asset");
-                if (species == null || species.Prefab == null)
-                {
-                    Debug.LogError($"[CreatureTools] {name} is not baked yet (Bake All first).");
-                    return;
-                }
-                var old = island.transform.Find(name);
-                if (old != null) Object.DestroyImmediate(old.gameObject);
-
-                var tile = NearestWalkable(world, want, taken);
-                taken.Add(tile);
-                var go = (GameObject)PrefabUtility.InstantiatePrefab(species.Prefab, island.transform);
-                go.name = name;
-                var mc = go.AddComponent<MapCreature>();
-                mc.island = island;
-                mc.explorer = explorer;
-                mc.homeTile = tile;
-                mc.wanderRadius = 3;
-                mc.SnapToMap();
-                var d = tile - world.startTile;
-                report.Append($"\n  {name} on c{tile.x} r{tile.y} ('{world.At(tile.y, tile.x)}'), {Mathf.Abs(d.x) + Mathf.Abs(d.y)} tiles from the start");
-            }
-            EditorSceneManager.MarkSceneDirty(scene);
-            EditorSceneManager.SaveScene(scene);
-            Debug.Log(report.ToString());
-        }
-
         static Vector2Int NearestWalkable(IslandMap map, Vector2Int want, HashSet<Vector2Int> taken)
         {
             for (int r = 0; r < 6; r++)
@@ -422,7 +368,8 @@ namespace Diorama.EditorTools
 
         /// <summary>
         /// Step 4b in one go (bridge: exec:Diorama.EditorTools.CreatureTools.BatchFire): writes the fire kit, bakes the
-        /// 7 fire creatures (starters untouched), refreshes the Lab list, saves shots, adds the wanderers, reports.
+        /// 7 fire creatures (starters untouched), refreshes the Lab list, saves shots, reports. Wild creatures don't
+        /// wander the map any more (step 5: they hide in tall grass and ponds).
         /// </summary>
         public static void BatchFire()
         {
@@ -430,7 +377,6 @@ namespace Diorama.EditorTools
             BakeFire();
             RefreshLabSpecies();
             CaptureShots();
-            AddWildToMain();
             DrawCallReport();
         }
 

@@ -56,11 +56,14 @@ namespace Diorama
         }
 
         /// <summary>Scales the map content around <paramref name="tile"/> by <paramref name="factor"/>, eased over <paramref name="seconds"/>.</summary>
-        public void ZoomTo(Vector2Int tile, float factor, float seconds)
+        public void ZoomTo(Vector2Int tile, float factor, float seconds) => ZoomTo((Vector2)tile, factor, seconds);
+
+        /// <summary>Same, around any map point (fractions allowed), e.g. the middle of a battle stage.</summary>
+        public void ZoomTo(Vector2 pivot, float factor, float seconds)
         {
-            _pivot = tile;
+            _pivot = pivot;
             StartZoom(Mathf.Max(1f, factor), seconds);
-            ZoomedIn?.Invoke(tile);
+            ZoomedIn?.Invoke(Vector2Int.RoundToInt(pivot));
         }
 
         public void ZoomTo(Vector2Int tile) => ZoomTo(tile, defaultZoom, zoomSeconds);
