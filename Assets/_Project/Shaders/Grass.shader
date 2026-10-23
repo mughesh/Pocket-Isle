@@ -95,7 +95,7 @@ Shader "Diorama/Grass"
                 world.xz += normalize(d + 0.0001) * push * 0.7 * k;
                 world.y -= push * 0.35 * k;
 
-                world = DioramaWindowVertex(world, _WindowClip, o.islandPos);
+                world = DioramaWindowVertex(world, _WindowClip, UNITY_MATRIX_M._m03_m13_m23, o.islandPos);
                 o.positionCS = TransformWorldToHClip(world);
                 o.h = h;
                 o.tall = step(_TallThreshold * scale, height);

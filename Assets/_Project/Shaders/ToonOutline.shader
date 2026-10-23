@@ -10,9 +10,13 @@ Shader "Diorama/Toon Outline"
 
         [Header(Motion (match the body material))]
         _Breathe ("Breathe", Float) = 0
+        _BreatheSpeed ("Breathe Speed", Float) = 2.6
         _Jiggle ("Jiggle", Float) = 0
+        _DeformPivotY ("Breathe Pivot Height", Float) = 0
+        [HideInInspector] _TimeOffset ("Time Offset", Float) = 0
 
         [HideInInspector] _WindowClip ("Island Window Clip", Float) = 0
+        [HideInInspector] _WindowOrigin ("Island Window Origin", Vector) = (0, 0, 0, 0)
     }
 
     SubShader
@@ -55,7 +59,7 @@ Shader "Diorama/Toon Outline"
                 UNITY_TRANSFER_INSTANCE_ID(v, o);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
                 float3 p = ToonDeform(v.positionOS.xyz, v.normalOS) + v.normalOS * _OutlineWidth;
-                o.positionCS = TransformWorldToHClip(DioramaWindowVertex(TransformObjectToWorld(p), _WindowClip, o.islandPos));
+                o.positionCS = TransformWorldToHClip(DioramaWindowVertex(TransformObjectToWorld(p), _WindowClip, ToonWindowOrigin(), o.islandPos));
                 return o;
             }
 

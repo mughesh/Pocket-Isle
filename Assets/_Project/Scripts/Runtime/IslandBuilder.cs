@@ -540,6 +540,8 @@ namespace Diorama
         {
             // Skip material/inspector preview cameras so the island doesn't show up in thumbnails.
             if (cam.cameraType == CameraType.Preview || cam.cameraType == CameraType.Reflection) return;
+            // Cameras that render a preview scene (editor shot tools) only see that scene.
+            if (cam.scene.IsValid() && cam.scene != gameObject.scene) return;
             Draw(cam);
         }
 

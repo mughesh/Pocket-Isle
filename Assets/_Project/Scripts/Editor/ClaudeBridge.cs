@@ -8,7 +8,7 @@ namespace Diorama.EditorTools
     /// <summary>
     /// Lets Claude Code drive the open Editor without window focus. Claude writes one command per line to
     /// Temp/ClaudeBridge/cmd.txt; the bridge runs them and appends results to Temp/ClaudeBridge/log.txt.
-    /// Commands: "refresh" (import changed files, recompile), "play" / "stop" (Play mode),
+    /// Commands: "refresh" (import changed files, recompile), "play" / "stop" (Play mode), "exec:Namespace.Type.Method" (static, no arguments),
     /// "menu:Some/Menu/Path" (run a menu item).
     /// Temp/ is not in git and is wiped when Unity closes.
     /// </summary>
@@ -65,6 +65,21 @@ namespace Diorama.EditorTools
                         var path = cmd.Substring(5);
                         bool ok = EditorApplication.ExecuteMenuItem(path);
                         Log($"{cmd}: {(ok ? "ok" : "menu item not found")}");
+                    }
+                    else if (cmd.StartsWith("exec:", StringComparison.Ordinal))
+                    {
+                        // Static method without parameters in this assembly, e.g. exec:Diorama.EditorTools.CreatureTools.BatchRebakeShots
+                        var full = cmd.Substring(5);
+                        int dot = full.LastIndexOf('.');
+                        var type = typeof(ClaudeBridge).Assembly.GetType(full.Substring(0, dot));
+                        var method = type?.GetMethod(full.Substring(dot + 1),
+                            System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+                        if (method == null) Log($"{cmd}: method not found");
+                        else
+                        {
+                            method.Invoke(null, null);
+                            Log($"{cmd}: ok");
+                        }
                     }
                     else
                     {

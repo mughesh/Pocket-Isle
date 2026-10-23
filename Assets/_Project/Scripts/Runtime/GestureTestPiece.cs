@@ -68,6 +68,9 @@ namespace Diorama
 
         IslandMap Map => island.Content;
 
+        /// <summary>The tile the explorer stands on (or is stepping onto).</summary>
+        public Vector2Int Tile => _tile;
+
         void Start()
         {
             if (window == null) Debug.LogError("[GestureTestPiece] No WorldWindow assigned; the map won't scroll or zoom.");

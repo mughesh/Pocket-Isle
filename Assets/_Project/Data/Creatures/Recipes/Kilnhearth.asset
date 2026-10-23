@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e27712b2a6f9fc45ae0b54784bf7327, type: 3}
+  m_Name: Kilnhearth
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.CreatureRecipe
+  baseRecipe: {fileID: 11400000, guid: 0f237a9a52dc33d4c890625b47f7d8ed, type: 2}
+  body: {fileID: 0}
+  height: 0.045
+  zones:
+    belly: 0
+    bellyDirection: {x: 0, y: 0, z: 0}
+    bellyAt: 0
+    bellyMaxY: 0
+    socks: 0
+    socksY: 0
+    tips: 0
+    tipAxis: {x: 0, y: 0, z: 0}
+    tipAt: 0
+    spots: 0
+    spotScale: 0
+    patches: []
+  parts: []
+  face:
+    eyeSize: 0
+    eyeSpacing: 0
+    eyeHeight: 0
+    eyeStretch: 0
+    decals: []
+  palette:
+    baseColor: {r: 0, g: 0, b: 0, a: 0}
+    belly: {r: 0, g: 0, b: 0, a: 0}
+    accent: {r: 0, g: 0, b: 0, a: 0}
+    socks: {r: 0, g: 0, b: 0, a: 0}
+    glow: {r: 0, g: 0, b: 0, a: 0}
+    extra: {r: 0, g: 0, b: 0, a: 0}
+    face: {r: 0, g: 0, b: 0, a: 0}
+    iris: {r: 0, g: 0, b: 0, a: 0}
+  spec: 0.2
+  outline: 0.035
+  idle:
+    breathe: 0
+    breatheSpeed: 0
+    jiggle: 0
+    hover: 0
+    bob: 0
+    sway: 0
+  heightScale: 1.3
+  extraParts:
+  - part: {fileID: 11400000, guid: d2de439f45b65be41b0165256fd8246a, type: 2}
+    position: {x: 0, y: 0.62, z: 0.05}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: {x: 0.9, y: 0.9, z: 0.9}
+    mirror: 0
+    parent: -1
+  overridePalette: 0
+  hueShift: -0.02
+  saturationScale: 1.1
+  valueScale: 0.88
+  resolution: 88
+  triangleBudget: 6000
+  bakedPrefab: {fileID: 2507445069456305529, guid: 717a3702a8e9a5a49a925d2f1843b365, type: 3}

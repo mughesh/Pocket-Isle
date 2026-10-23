@@ -21,13 +21,14 @@ float DioramaEdgeDistance(float2 islandXZ)
     return (e * 2.0 - 1.0) * _DioramaWindow.w;
 }
 
-// Sinks the whole instance by how close its origin is to the window edge (continuous while the map slides).
+// Sinks the whole instance by how close originWS (usually the object origin) is to the window edge (continuous
+// while the map slides). Multi-mesh objects (creatures) pass one shared origin so all their pieces sink together.
 // Returns the new world position; islandPos is the island-local position for DioramaWindowClip.
-float3 DioramaWindowVertex(float3 positionWS, float on, out float3 islandPos)
+float3 DioramaWindowVertex(float3 positionWS, float on, float3 originWS, out float3 islandPos)
 {
     islandPos = mul(_DioramaWorldToIsland, float4(positionWS, 1.0)).xyz;
     if (on < 0.5) return positionWS;
-    float3 origin = mul(_DioramaWorldToIsland, float4(UNITY_MATRIX_M._m03_m13_m23, 1.0)).xyz;
+    float3 origin = mul(_DioramaWorldToIsland, float4(originWS, 1.0)).xyz;
     float s = DioramaEdgeDistance(origin.xz);
     islandPos.y -= _DioramaWindow.z * (1.0 - smoothstep(-_DioramaWindow.y, _DioramaWindow.y, s));
     return mul(_DioramaIslandToWorld, float4(islandPos, 1.0)).xyz;

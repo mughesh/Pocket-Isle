@@ -42,13 +42,31 @@ Shader "Diorama/Toon"
 
         [Header(Motion)]
         _Breathe ("Breathe", Float) = 0
+        _BreatheSpeed ("Breathe Speed", Float) = 2.6
         _Jiggle ("Jiggle", Float) = 0
+        _DeformPivotY ("Breathe Pivot Height", Float) = 0
+        [HideInInspector] _TimeOffset ("Time Offset", Float) = 0
 
         [Header(Outline (read by Diorama Toon Outline))]
         _OutlineWidth ("Outline Width", Float) = 0.035
         _OutlineColor ("Outline Colour", Color) = (0.1, 0.1, 0.1, 1)
 
         [HideInInspector] _WindowClip ("Island Window Clip", Float) = 0
+        [HideInInspector] _WindowOrigin ("Island Window Origin", Vector) = (0, 0, 0, 0)
+
+        // Creature patches, set per renderer by CreatureView.
+        [HideInInspector] _Patch0 ("Patch 0", Vector) = (0, 0, 0, 0)
+        [HideInInspector] _Patch1 ("Patch 1", Vector) = (0, 0, 0, 0)
+        [HideInInspector] _Patch2 ("Patch 2", Vector) = (0, 0, 0, 0)
+        [HideInInspector] _Patch3 ("Patch 3", Vector) = (0, 0, 0, 0)
+        [HideInInspector] _Patch4 ("Patch 4", Vector) = (0, 0, 0, 0)
+        [HideInInspector] _Patch5 ("Patch 5", Vector) = (0, 0, 0, 0)
+        [HideInInspector] _PatchColor0 ("Patch Colour 0", Color) = (0, 0, 0, 1)
+        [HideInInspector] _PatchColor1 ("Patch Colour 1", Color) = (0, 0, 0, 1)
+        [HideInInspector] _PatchColor2 ("Patch Colour 2", Color) = (0, 0, 0, 1)
+        [HideInInspector] _PatchColor3 ("Patch Colour 3", Color) = (0, 0, 0, 1)
+        [HideInInspector] _PatchColor4 ("Patch Colour 4", Color) = (0, 0, 0, 1)
+        [HideInInspector] _PatchColor5 ("Patch Colour 5", Color) = (0, 0, 0, 1)
     }
 
     SubShader
@@ -100,7 +118,7 @@ Shader "Diorama/Toon"
                 float3 p = ToonDeform(v.positionOS.xyz, v.normalOS);
                 o.positionOS = v.positionOS.xyz;
                 o.normalOS = v.normalOS;
-                o.positionWS = DioramaWindowVertex(TransformObjectToWorld(p), _WindowClip, o.islandPos);
+                o.positionWS = DioramaWindowVertex(TransformObjectToWorld(p), _WindowClip, ToonWindowOrigin(), o.islandPos);
                 o.normalWS = TransformObjectToWorldNormal(v.normalOS);
                 o.positionCS = TransformWorldToHClip(o.positionWS);
                 o.shade = 1.0 + (ToonOriginHash() - 0.5) * 2.0 * _OriginJitter;
@@ -123,6 +141,7 @@ Shader "Diorama/Toon"
                 c = lerp(c, _BellyColor.rgb, _BellyOn * smoothstep(_BellyAt, _BellyAt + 0.12, dot(nO, normalize(_BellyDir.xyz))) * smoothstep(_BellyMaxY + 0.05, _BellyMaxY - 0.05, pO.y));
                 c = lerp(c, _SockColor.rgb, _SockOn * smoothstep(_SockY + 0.04, _SockY - 0.04, pO.y));
                 c = lerp(c, _TipColor.rgb, _TipOn * smoothstep(_TipAt, _TipAt + 0.06, dot(pO, _TipAxis.xyz)));
+                c = ToonPatches(c, pO);
 
                 // banded light, rim, glint
                 float3 L = _MainLightPosition.xyz;
@@ -179,7 +198,7 @@ Shader "Diorama/Toon"
                 UNITY_SETUP_INSTANCE_ID(v);
                 UNITY_TRANSFER_INSTANCE_ID(v, o);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-                float3 ws = DioramaWindowVertex(TransformObjectToWorld(ToonDeform(v.positionOS.xyz, v.normalOS)), _WindowClip, o.islandPos);
+                float3 ws = DioramaWindowVertex(TransformObjectToWorld(ToonDeform(v.positionOS.xyz, v.normalOS)), _WindowClip, ToonWindowOrigin(), o.islandPos);
                 o.positionCS = TransformWorldToHClip(ws);
                 return o;
             }
