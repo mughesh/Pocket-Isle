@@ -63,6 +63,38 @@ Beat the Keeper → the element flows again, the realm visibly revives, its shar
   are placed, and rejoins the Heart at the end.
 - Temple types: Fire = forge in a cliff; Water = half-sunk lake temple; Wind = tall wind tower.
 
+## Encounters and creature spread (decided Oct 22)
+- **Visible wanderers:** common creatures roam the tiles; walk into one to battle.
+- **Tall grass:** random encounters, mostly commons, plus ~5% **rare/powerful surprise** (gold sparkle at zoom start). The hook.
+- **Spread per realm:** ~70% home element, ~20% visitors of the type that beats that realm's Keeper, ~10% Neutral.
+  No Keeper is a hard wall: Keeper shields also break after 3 hits of any type; the counter type is just faster.
+
+## Cinderwood (fire realm, the vertical slice) — decided Oct 22
+- **Size 100×100 tiles** (~1 min walk edge to edge at 0.6 s/tile; island window is 14×14). Something every ~15 tiles.
+- **Layout: main trail + side pockets.** Gate → forest trail → kiln village → hot springs → fallen log (hand moment)
+  → cliff forge temple. Side pockets hide rare grass patches, berry bushes and an orb.
+- **Habitat:** ember tall grass (red-gold). Water visitors live in the tall grass around the hot springs.
+- **Residents (later, if cheap):** a few friendly creature villagers in the kiln village with one-line hints.
+- **Temple:** pump the forge bellows (open/close hand) → heat flows through pipes → lights 3 braziers → Keeper door opens.
+- **Hearthstag fight:** ember-crown shield blocks damage until hit by a Water move (or 3 hits of anything), then open for 2 turns; repeats.
+
+### Fire roster (placeholders; evolutions at a set level)
+| Creature | Concept | Evolves to | Rarity |
+|---|---|---|---|
+| Kilnpot | Clay-pot raccoon cub, chimney tail | Kilnhearth | Starter |
+| **Toastling** | Bread-loaf hedgehog, toasted spines | Crumbhog | Common · **first 4** |
+| **Waxle** | Snail with a melting-candle shell | Lanternsnail | Common · **first 4** |
+| **Kettlewing** | Kettle-shaped duckling, steam from its beak | Steamswan | Common · **first 4** |
+| Coalbeetle | Round beetle, glowing coal horn | Forgehorn | Common |
+| Mapadillo | Armadillo with maple-leaf plates | Emberdillo | Common |
+| Ashmole | Mole with a lit coal on its nose | Cindermole | Uncommon |
+| Cindercap | Glowing mushroom critter, ember spores | Cinderbloom | Uncommon |
+| **Glazegolem** | Stack of glazed pots, glowing cracks | Kilngolem | **Rare surprise · first 4** |
+| Embercrane | Crane with ember-tipped feathers | Pyrecrane | Rare surprise |
+| Steambara (Water visitor) | Capybara soaking in steam, fruit on head | Onsenbara | Common near hot springs (counts toward the water roster) |
+| Hearthstag | Keeper: stag, chunky ember-crystal crown, sturdy legs | — | Temple |
+Avoided for originality: lizards, foxes, cats, pigs, moths, pinecones (all used by Pokémon fire types).
+
 ## Core loop
 explore → tall grass encounter → battle → capture → party / Sanctuary → Temple Keeper → shard → statue
 
@@ -74,12 +106,20 @@ explore → tall grass encounter → battle → capture → party / Sanctuary �
   A species = data file (parts + colours + stats + moves). An evolution = the same file with modifiers.
 - Concepts from Gemini in batches; Claude turns them into recipes. Original designs only.
 
-## Battle
-- **1v1, turn-based, switch any time** from the party of 6 (switching uses your turn).
-- Types (triangle), levels and XP, fleeing from wild battles.
-- **Cinematic start:** grab a pod from the rim, throw it onto the island. Both creatures leap off and grow to
-  toy-figure size in the space in front of the island; the island stays visible behind.
-- Moves via diegetic 3D runes (gaze + pinch). Four attack templates (shoot, lunge, slam, shield) recoloured per element.
+## Battle (decided Oct 22)
+- **Stage = the island itself, zoomed in.** Grass rustles → in ~0.6 s the map content scales ~3× around the
+  encounter tile inside the fixed rocky base/rim; tiles beyond the rim are clipped (same clipping as the
+  scrolling window). Creatures end up hand-sized on real tiles. Zoom back out after. No second stage to place.
+- **Flow:** grab a pod from the rim → toss it onto the island → your creature pops out facing the wild one →
+  move runes float just above the near rim → weaken → flick a pod to capture → zoom out.
+- **1v1, turn-based, switch any time** from the party of 6 (switching uses your turn). Flee from wild battles.
+- **3 moves per creature:** one element attack, one basic (neutral) attack, one support (shield / buff / heal).
+  Built from four animation templates (shoot, lunge, slam, shield) recoloured per element.
+- **Pick moves with gaze + pinch** on 3D runes above the near rim. Works reclined, no reaching.
+- **Types:** Water > Fire > Wind > Water, plus **Neutral** (hub creatures; no strengths or weaknesses).
+  Strong ×1.5, weak ×0.67 (tune later).
+- **Levels:** XP to creatures that fought; level cap ~30; each species evolves at a set level (~12–16).
+- **Keepers:** temple hand puzzle, then a battle with a special phase (e.g. shielded until hit by its weakness).
 - **Losing everything:** explorer returns to the last Hearth Shrine, team healed, nothing lost.
 
 ## Capture
@@ -118,7 +158,6 @@ explore → tall grass encounter → battle → capture → party / Sanctuary �
 ## Open questions
 - Game name, realm names, Keeper and Heart creature designs.
 - Type chart beyond the triangle; whether to add a 4th element.
-- Move count per creature, levels cap, XP curve.
-- Battle rune layout and how the toy-size battle stage is positioned when reclined.
+- XP curve, damage numbers, move list per species.
 - Region map sizes (tiles) and how many screens per realm.
 - Story beats per realm (what you find, who you meet).
