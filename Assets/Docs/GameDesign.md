@@ -63,9 +63,12 @@ Beat the Keeper → the element flows again, the realm visibly revives, its shar
   are placed, and rejoins the Heart at the end.
 - Temple types: Fire = forge in a cliff; Water = half-sunk lake temple; Wind = tall wind tower.
 
-## Encounters and creature spread (decided Oct 22)
-- **Visible wanderers:** common creatures roam the tiles; walk into one to battle.
+## Encounters and creature spread (revised Oct 23)
+- **Wild creatures are hidden.** Nothing battle-able roams the map (replaces the Oct 22 "visible wanderers").
 - **Tall grass:** random encounters, mostly commons, plus ~5% **rare/powerful surprise** (gold sparkle at zoom start). The hook.
+- **Ponds / water edges:** stand next to water facing it and **thumb tap** → ripples → a water-edge creature leaps out.
+  Tap is context-sensitive: facing water = fish, otherwise standing still = hop, while walking = stop.
+- **Ambient life (if cheap, else polish backlog):** non-battle fireflies, birds, butterflies so the island feels alive.
 - **Spread per realm:** ~70% home element, ~20% visitors of the type that beats that realm's Keeper, ~10% Neutral.
   No Keeper is a hard wall: Keeper shields also break after 3 hits of any type; the counter type is just faster.
 
