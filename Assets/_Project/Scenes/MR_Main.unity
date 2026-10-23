@@ -170,6 +170,7 @@ GameObject:
   - component: {fileID: 270959109}
   - component: {fileID: 270959112}
   - component: {fileID: 270959111}
+  - component: {fileID: 270959113}
   m_Layer: 0
   m_Name: Island
   m_TagString: Untagged
@@ -190,6 +191,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.IslandBuilder
   map: {fileID: 11400000, guid: 02a8766f02fce1f41867418f88b1c36b, type: 2}
+  world: {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
   seed: 7
   column: {fileID: 2100000, guid: 9713c6c0478a20d42ad0c527671d1d01, type: 2}
   underside: {fileID: 2100000, guid: 93dba253338bffb44acaff7f568fcf55, type: 2}
@@ -276,6 +278,22 @@ MonoBehaviour:
   _kinematicWhileSelected: 1
   _throwWhenUnselected: 1
   _forceKinematicDisabled: 0
+--- !u!114 &270959113
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 270959108}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b2628cac1cbbb14f8880cadda138bde, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.WorldWindow
+  island: {fileID: 270959109}
+  deadZoneTiles: 0
+  defaultZoom: 3
+  zoomSeconds: 0.6
 --- !u!1 &301495217
 GameObject:
   m_ObjectHideFlags: 0
@@ -620,6 +638,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.GestureTestPiece
   island: {fileID: 270959109}
+  window: {fileID: 270959113}
   input: {fileID: 374318556}
   placer: {fileID: 374318555}
   probe: {fileID: 374318558}
@@ -629,8 +648,6 @@ MonoBehaviour:
   cubeSize: 0.028
   walkSeconds: 0.6
   runSeconds: 0.3
-  hopHeight: 0.045
-  hopTime: 0.35
   holdReleaseMm: 5
   holdGraceSeconds: 0.25
 --- !u!114 &374318555
@@ -649,6 +666,7 @@ MonoBehaviour:
   islandScale: 0.6
   distance: 0.45
   belowEye: 0.55
+  seatedEyeHeight: 1.15
   trackingTimeout: 3
 --- !u!114 &374318556
 MonoBehaviour:

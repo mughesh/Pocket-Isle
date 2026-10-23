@@ -4,7 +4,8 @@ namespace Diorama
 {
     /// <summary>
     /// Island layout as a text grid, one character per tile:
-    /// G grass, T tall grass, P path, W water, F tree, R rock, '.' empty.
+    /// G grass, T tall grass, P path, W water, F tree, R rock, X blocked border, '.' empty.
+    /// The island's own map is its footprint (the window shape); <see cref="WorldMap"/> is the bigger map it shows.
     /// </summary>
     /// <remarks>
     /// The prototype is three.js (right-handed); Unity is left-handed. We mirror X when porting,
@@ -20,6 +21,7 @@ namespace Diorama
         public const char Water = 'W';
         public const char Tree = 'F';
         public const char Rock = 'R';
+        public const char Blocked = 'X';
 
         public const string PrototypeLayout =
             "..GGGGGGGGGG..\n" +
@@ -79,6 +81,17 @@ namespace Diorama
             return rows[row][column];
         }
 
+        /// <summary>True for tiles the explorer can stand on.</summary>
+        public static bool IsWalkable(char tile) =>
+            tile == Grass || tile == TallGrass || tile == Path;
+
+        /// <summary>Replaces the layout from code (generators) and drops the row cache.</summary>
+        public void SetLayout(string text)
+        {
+            layout = text;
+            _rows = null;
+        }
+
         /// <summary>Tile centre in island-local space, at cap-bottom height (y = 0).</summary>
         public Vector3 TileCenter(int row, int column)
         {
@@ -86,6 +99,6 @@ namespace Diorama
             return new Vector3(-(column - cc) * tileSize, 0f, (row - cr) * tileSize);
         }
 
-        void OnValidate() => _rows = null;
+        protected virtual void OnValidate() => _rows = null;
     }
 }

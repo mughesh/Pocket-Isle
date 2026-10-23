@@ -47,6 +47,8 @@ Shader "Diorama/Toon"
         [Header(Outline (read by Diorama Toon Outline))]
         _OutlineWidth ("Outline Width", Float) = 0.035
         _OutlineColor ("Outline Colour", Color) = (0.1, 0.1, 0.1, 1)
+
+        [HideInInspector] _WindowClip ("Island Window Clip", Float) = 0
     }
 
     SubShader
@@ -83,6 +85,7 @@ Shader "Diorama/Toon"
                 float3 positionWS : TEXCOORD2;
                 float3 normalWS   : TEXCOORD3;
                 float  shade      : TEXCOORD4;
+                float3 islandPos  : TEXCOORD5;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
                 UNITY_VERTEX_OUTPUT_STEREO
             };
@@ -97,7 +100,7 @@ Shader "Diorama/Toon"
                 float3 p = ToonDeform(v.positionOS.xyz, v.normalOS);
                 o.positionOS = v.positionOS.xyz;
                 o.normalOS = v.normalOS;
-                o.positionWS = TransformObjectToWorld(p);
+                o.positionWS = DioramaWindowVertex(TransformObjectToWorld(p), _WindowClip, o.islandPos);
                 o.normalWS = TransformObjectToWorldNormal(v.normalOS);
                 o.positionCS = TransformWorldToHClip(o.positionWS);
                 o.shade = 1.0 + (ToonOriginHash() - 0.5) * 2.0 * _OriginJitter;
@@ -108,6 +111,7 @@ Shader "Diorama/Toon"
             {
                 UNITY_SETUP_INSTANCE_ID(i);
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
+                DioramaWindowClip(i.islandPos, _WindowClip);
 
                 float3 pO = i.positionOS;
                 float3 nO = normalize(i.normalOS);
@@ -164,6 +168,8 @@ Shader "Diorama/Toon"
             struct Varyings
             {
                 float4 positionCS : SV_POSITION;
+                float3 islandPos  : TEXCOORD0;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
                 UNITY_VERTEX_OUTPUT_STEREO
             };
 
@@ -171,13 +177,17 @@ Shader "Diorama/Toon"
             {
                 Varyings o = (Varyings)0;
                 UNITY_SETUP_INSTANCE_ID(v);
+                UNITY_TRANSFER_INSTANCE_ID(v, o);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-                o.positionCS = TransformObjectToHClip(ToonDeform(v.positionOS.xyz, v.normalOS));
+                float3 ws = DioramaWindowVertex(TransformObjectToWorld(ToonDeform(v.positionOS.xyz, v.normalOS)), _WindowClip, o.islandPos);
+                o.positionCS = TransformWorldToHClip(ws);
                 return o;
             }
 
             half frag(Varyings i) : SV_Target
             {
+                UNITY_SETUP_INSTANCE_ID(i);
+                DioramaWindowClip(i.islandPos, _WindowClip);
                 return 0;
             }
             ENDHLSL

@@ -6,6 +6,7 @@
 // Ported from toon() in Docs/Reference/creature-diorama-v2.html.
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+#include "DioramaWindow.hlsl"
 
 CBUFFER_START(UnityPerMaterial)
     float4 _BaseColor;
@@ -41,6 +42,8 @@ CBUFFER_START(UnityPerMaterial)
 
     float  _OutlineWidth;
     float4 _OutlineColor;
+
+    float  _WindowClip; // 1 = island map content (set by IslandBuilder)
 CBUFFER_END
 
 // Breathe squashes the body vertically and widens it; jiggle wobbles it along the normal.
@@ -56,9 +59,10 @@ float3 ToonDeform(float3 positionOS, float3 normalOS)
 }
 
 // 0..1 hash of the object (or instance) origin. Gives each instanced tile its own shade.
+// Island content hashes its map position, so shades stay put while the map scrolls.
 float ToonOriginHash()
 {
-    float3 o = UNITY_MATRIX_M._m03_m13_m23;
+    float3 o = DioramaMapPoint(UNITY_MATRIX_M._m03_m13_m23, _WindowClip);
     return frac(sin(dot(o.xz, float2(127.1, 311.7))) * 43758.5453);
 }
 

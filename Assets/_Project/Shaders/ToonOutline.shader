@@ -11,6 +11,8 @@ Shader "Diorama/Toon Outline"
         [Header(Motion (match the body material))]
         _Breathe ("Breathe", Float) = 0
         _Jiggle ("Jiggle", Float) = 0
+
+        [HideInInspector] _WindowClip ("Island Window Clip", Float) = 0
     }
 
     SubShader
@@ -41,6 +43,8 @@ Shader "Diorama/Toon Outline"
             struct Varyings
             {
                 float4 positionCS : SV_POSITION;
+                float3 islandPos  : TEXCOORD0;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
                 UNITY_VERTEX_OUTPUT_STEREO
             };
 
@@ -48,14 +52,17 @@ Shader "Diorama/Toon Outline"
             {
                 Varyings o = (Varyings)0;
                 UNITY_SETUP_INSTANCE_ID(v);
+                UNITY_TRANSFER_INSTANCE_ID(v, o);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
                 float3 p = ToonDeform(v.positionOS.xyz, v.normalOS) + v.normalOS * _OutlineWidth;
-                o.positionCS = TransformObjectToHClip(p);
+                o.positionCS = TransformWorldToHClip(DioramaWindowVertex(TransformObjectToWorld(p), _WindowClip, o.islandPos));
                 return o;
             }
 
             float4 frag(Varyings i) : SV_Target
             {
+                UNITY_SETUP_INSTANCE_ID(i);
+                DioramaWindowClip(i.islandPos, _WindowClip);
                 return float4(_OutlineColor.rgb, 1.0);
             }
             ENDHLSL
