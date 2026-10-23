@@ -97,13 +97,13 @@ MonoBehaviour:
       baseColor: {r: 0.627451, g: 0.32156864, b: 0.1764706, a: 1}
       top: {r: 0.627451, g: 0.32156864, b: 0.1764706, a: 1}
       gradient: 0
-      belly: 1
+      belly: 0
       bellyColor: {r: 0.8509804, g: 0.5568628, b: 0.19607843, a: 1}
-      bellyDirection: {x: 0, y: 1, z: 0}
-      bellyAt: 0.55
-      bellyMaxY: 9
-      bellyDrips: 9
-      bellyDripLength: 0.9
+      bellyDirection: {x: 0, y: 0, z: 1}
+      bellyAt: 0
+      bellyMaxY: 0
+      bellyDrips: 0
+      bellyDripLength: 0
       socks: 0
       socksColor: {r: 0.627451, g: 0.32156864, b: 0.1764706, a: 1}
       socksY: 0
@@ -123,7 +123,7 @@ MonoBehaviour:
       - {x: 0, y: 0.6, z: 0, w: 0.17}
       patchColors:
       - {r: 0.2901961, g: 0.14117648, b: 0.078431375, a: 1}
-      spec: 0.25
+      spec: 0.08
       glow: 0
       breathe: 0.008
       breatheSpeed: 1.4
