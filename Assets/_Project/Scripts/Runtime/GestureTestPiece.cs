@@ -20,7 +20,8 @@ namespace Diorama
     /// (water, tree, rock, border), or a tap stops it. HoldToWalk: same, but it also stops when the thumb returns to
     /// rest (read from ThumbHoldProbe; in the Editor, releasing the arrow key). In both modes a second swipe in the
     /// same direction while moving switches to run, and turning keeps the current speed.
-    /// Tap while standing still toggles the battle zoom (temporary test; Z in the Editor). No walking while zoomed.
+    /// Tap stops walking; tap while standing is free (reserved for interact). The battle zoom is triggered by the game
+    /// (encounters, step 5); Z toggles it in the Editor for testing. No walking while zoomed.
     /// Swipes map to the user's view of the island: forward = away, back = toward, left / right = their left / right.
     /// </summary>
     public class GestureTestPiece : MonoBehaviour
@@ -123,7 +124,6 @@ namespace Diorama
             if (gesture == ThumbGesture.Tap)
             {
                 if (_heading != Vector2Int.zero) Stop();
-                else if (_stepT >= 1f) ToggleZoom();
             }
             else if (Zoomed)
             {
