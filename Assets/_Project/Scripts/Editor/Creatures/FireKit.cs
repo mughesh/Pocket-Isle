@@ -378,7 +378,7 @@ namespace Diorama.EditorTools
                 },
                 new BodyZones
                 {
-                    belly = true, bellyDirection = Vector3.up, bellyAt = 0.55f, bellyMaxY = 9f, bellyDrips = 9f, bellyDripLength = 0.9f,
+                    // No glaze drips: next to the lava cracks they read as a second set of lines (Mugesh, Oct 23).
                     cracks = true, crackScale = 1.6f, crackWidth = 0.045f, crackPulse = 0.8f,
                     patches = new List<PatternPatch>
                     {
@@ -392,7 +392,7 @@ namespace Diorama.EditorTools
                     Place(potRim, new Vector3(0f, 0.62f, 0f), Vector3.zero, 1f),
                     Place(stubArm, new Vector3(0.34f, 0.14f, 0f), Vector3.zero, 1.15f, true),
                 });
-            glazegolem.spec = 0.25f;
+            glazegolem.spec = 0.08f;
             EditorUtility.SetDirty(glazegolem);
 
             // ---- Kilngolem: Glazegolem + modifiers (bigger, chimney with a flame, crown of nubs, own palette) ----

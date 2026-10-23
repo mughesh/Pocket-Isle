@@ -16,12 +16,12 @@ MonoBehaviour:
   body: {fileID: 11400000, guid: 7568906f14ddb6c4fab124d398bf8676, type: 2}
   height: 0.058
   zones:
-    belly: 1
-    bellyDirection: {x: 0, y: 1, z: 0}
-    bellyAt: 0.55
-    bellyMaxY: 9
-    bellyDrips: 9
-    bellyDripLength: 0.9
+    belly: 0
+    bellyDirection: {x: 0, y: 0, z: 0}
+    bellyAt: 0
+    bellyMaxY: 0
+    bellyDrips: 0
+    bellyDripLength: 0
     socks: 0
     socksY: 0
     tips: 0
@@ -66,7 +66,7 @@ MonoBehaviour:
     extra: {r: 0.41960785, g: 0.22745098, b: 0.11764706, a: 1}
     face: {r: 0.16470589, g: 0.101960786, b: 0.078431375, a: 1}
     iris: {r: 1, g: 0.47843137, b: 0.15686275, a: 1}
-  spec: 0.25
+  spec: 0.08
   outline: 0.035
   idle:
     breathe: 0.008
