@@ -5,8 +5,9 @@ using UnityEngine;
 namespace Diorama
 {
     /// <summary>
-    /// Battle labels on the island: a small HP bar with name and level above each creature, and pop-up text
-    /// (damage numbers, "Super effective!", "+XP"). Sizes are island-local metres; everything faces the head.
+    /// Battle labels on the island: a small HP bar with name and level above each creature (the party creature's also
+    /// has a thin gold XP bar under it), and pop-up text (damage numbers, "Super effective!", "+XP").
+    /// Sizes are island-local metres; everything faces the head.
     /// </summary>
     public class BattleHud : MonoBehaviour
     {
@@ -17,6 +18,8 @@ namespace Diorama
         public float barGap = 0.022f;
         public float labelFontSize = 0.11f;
         public float popFontSize = 0.2f;
+        [Tooltip("XP bar height relative to the HP bar.")]
+        public float xpBarHeight = 0.4f;
 
         public class Bar
         {
@@ -26,6 +29,8 @@ namespace Diorama
             public StageActor actor;
             public float shown, target;
             public int max;
+            public MeshRenderer xpQuad;
+            public float xp = -1f; // 0..1, -1 = no XP bar
         }
 
         class Pop
@@ -40,6 +45,7 @@ namespace Diorama
         static readonly int FillColorId = Shader.PropertyToID("_FillColor");
         static readonly int AspectId = Shader.PropertyToID("_Aspect");
         static readonly Color Green = new Color(0.44f, 0.82f, 0.42f), Yellow = new Color(0.95f, 0.79f, 0.3f), Red = new Color(0.94f, 0.36f, 0.29f);
+        static readonly Color XpGold = new Color(1f, 0.8f, 0.3f);
 
         readonly List<Bar> _bars = new List<Bar>();
         readonly List<Pop> _pops = new List<Pop>();
@@ -84,6 +90,43 @@ namespace Diorama
             if (bar == null) return;
             if (bar.root != null) Destroy(bar.root.gameObject);
             _bars.Remove(bar);
+        }
+
+        /// <summary>Adds (or sets) the thin XP bar under an HP bar: 0..1 toward the next level.</summary>
+        public void SetXp(Bar bar, float share)
+        {
+            if (bar == null) return;
+            if (bar.xpQuad == null)
+            {
+                var go = new GameObject("XP");
+                go.transform.SetParent(bar.root, false);
+                float h = barSize.y * xpBarHeight;
+                go.transform.localScale = new Vector3(barSize.x, h, 1f);
+                go.transform.localPosition = new Vector3(0f, -(barSize.y + h) * 0.5f - 0.0012f, 0f);
+                go.AddComponent<MeshFilter>().sharedMesh = _quad;
+                bar.xpQuad = go.AddComponent<MeshRenderer>();
+                bar.xpQuad.sharedMaterial = hudMaterial;
+                bar.xpQuad.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            }
+            bar.xp = Mathf.Clamp01(share);
+            _block ??= new MaterialPropertyBlock();
+            bar.xpQuad.GetPropertyBlock(_block);
+            _block.SetFloat(FillId, bar.xp);
+            _block.SetFloat(AspectId, 1f / Mathf.Max(0.05f, xpBarHeight) * barSize.x / barSize.y);
+            _block.SetColor(FillColorId, XpGold);
+            bar.xpQuad.SetPropertyBlock(_block);
+        }
+
+        /// <summary>New level and max HP (a level-up or an evolution): the label changes, the HP bar rescales.</summary>
+        public void SetLevel(Bar bar, string name, int level, int hp, int max)
+        {
+            if (bar == null) return;
+            bar.label.text = $"<b>{name}</b>  <size=80%>Lv {level}</size>";
+            float share = bar.shown / Mathf.Max(1, bar.max);
+            bar.max = Mathf.Max(1, max);
+            bar.shown = share * bar.max;
+            bar.target = Mathf.Clamp(hp, 0, bar.max);
+            Paint(bar);
         }
 
         /// <summary>The bar slides to the new value.</summary>

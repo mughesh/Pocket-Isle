@@ -16,7 +16,7 @@ MonoBehaviour:
   element: 1
   recipe: {fileID: 11400000, guid: 19b0a91a312b8b1488085a61bd12e537, type: 2}
   evolvesTo: {fileID: 11400000, guid: 44d82e91744f67e4a993758eede3bbb1, type: 2}
-  evolveLevel: 16
+  evolveLevel: 12
   baseStats:
     hp: 40
     attack: 10

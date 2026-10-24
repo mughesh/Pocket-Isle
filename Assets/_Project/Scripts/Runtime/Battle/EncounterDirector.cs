@@ -17,7 +17,9 @@ namespace Diorama
     /// from the moment the wild creature appears and can always be thrown: above red HP it wobbles once and shatters
     /// (the turn is used); in the red it glows and has a real chance; a fainted wild creature is dazed for
     /// <see cref="dazedSeconds"/> (the pod pulses) and a pod catches it for sure, otherwise it fades out and the battle
-    /// is won. Losing the whole party sends the explorer back to spawn, healed. Then walking resumes.
+    /// is won. After a win (fainted or caught) every creature that fought gets XP (<see cref="Progression"/>): the one
+    /// on the pad shows it (XP bar, level-ups) and evolves there if due. Losing the whole party sends the explorer back
+    /// to spawn, healed. Then walking resumes.
     /// Editor: B starts a grass encounter on the spot; in battle C throws the cradle pod, X switches to the next pod.
     /// </summary>
     public class EncounterDirector : MonoBehaviour
@@ -30,6 +32,7 @@ namespace Diorama
         public BattleRunes runes;
         public PodRack pods;
         public TypeChart typeChart;
+        public ProgressionConfig progression;
 
         [Header("Encounter tables (this region)")]
         public EncounterTable grassTable;
@@ -66,6 +69,12 @@ namespace Diorama
 
         public bool InBattle { get; private set; }
 
+        /// <summary>A battle finished and walking resumed (also after running before a send-out).</summary>
+        public event System.Action<BattleResult> BattleEnded;
+
+        /// <summary>A wild creature was caught (it is already in the party or storage).</summary>
+        public event System.Action<CreatureInstance> Caught;
+
         /// <summary>The battle being played, or null (testing).</summary>
         public BattleSystem CurrentBattle { get; private set; }
 
@@ -94,6 +103,7 @@ namespace Diorama
                 return;
             }
             if (grassTable == null) Debug.LogError("[EncounterDirector] No grass encounter table; tall grass won't trigger battles.", this);
+            if (progression == null) Debug.LogError("[EncounterDirector] No ProgressionConfig; wins pay no XP (Tools > Pocket Isle > Set Up MR_Main (7 progression)).", this);
             if (waterTable == null) Debug.LogError("[EncounterDirector] No water encounter table; fishing won't work.", this);
             MapCreature.HideAll = false;
             int s = seed != 0 ? seed : System.Environment.TickCount;
@@ -267,6 +277,7 @@ namespace Diorama
                 yield return new WaitForSeconds(0.5f);
                 yield return stage.Outro(BattleResult.Fled);
                 yield return Finish(false);
+                BattleEnded?.Invoke(BattleResult.Fled);
                 yield break;
             }
             stage.ShowWildBar(wild);
@@ -357,10 +368,46 @@ namespace Diorama
             var me = battle.player.creature;
             Debug.Log($"[EncounterDirector] Battle over: {battle.Result}. {me.Name} HP {me.currentHp}/{me.MaxHp}, XP {me.xp}. " +
                       $"Party {party.members.Count}/{Party.Size}, storage {party.storage.Count}.");
+            if (battle.Result == BattleResult.Won || battle.Result == BattleResult.Caught) yield return Reward(battle, wild, rare);
             yield return stage.Outro(battle.Result);
             if (battle.Result == BattleResult.Won) Dialogue.Say("battle.win.first");
             else if (battle.Result == BattleResult.Lost) Dialogue.Say("battle.lose.first");
             yield return Finish(battle.Result == BattleResult.Lost);
+            BattleEnded?.Invoke(battle.Result);
+        }
+
+        /// <summary>
+        /// After a win: every creature that fought gets its XP. The one on the pad shows it (XP bar, level-ups) and, if
+        /// due, evolves there; the others evolve in their pods after the zoom-out (<see cref="GrowthDirector"/>).
+        /// </summary>
+        IEnumerator Reward(BattleSystem battle, CreatureInstance wild, bool rare)
+        {
+            if (progression == null) yield break;
+            runes.HideMoves();
+            int reward = progression.Reward(wild.level, rare);
+            var fighters = battle.Participants;
+            var onPad = stage.Player != null ? battle.player.creature : null;
+            foreach (var c in fighters)
+            {
+                int xp = Progression.ShareFor(c, reward, fighters.Count, progression);
+                if (xp <= 0) continue;
+                float before = progression.XpShare(c);
+                int was = c.level;
+                var ups = Progression.AddXp(c, xp, progression);
+                Debug.Log($"[EncounterDirector] {c.Name} +{xp} XP{(ups.Count > 0 ? $", Lv {was} -> {c.level}" : "")} " +
+                          $"({c.xp}/{progression.XpToNext(c.level)}){(c == onPad ? "" : " (in its pod)")}.");
+                if (c != onPad) continue;
+                runes.SetCaption($"{c.Name} gained {xp} XP!");
+                yield return stage.PlayXp(c, xp, before, ups);
+                if (ups.Count > 0) runes.SetCaption($"{c.Name} grew to Lv {c.level}!");
+            }
+            party.NotifyChanged();
+            if (onPad == null || !Progression.CanEvolve(onPad)) yield break;
+            runes.SetCaption($"What? {onPad.Name} is evolving!");
+            Dialogue.Say("evolve.first");
+            yield return stage.Evolve(onPad);
+            runes.SetCaption($"It became {onPad.Name}!");
+            party.NotifyChanged();
         }
 
         /// <summary>
@@ -609,12 +656,14 @@ namespace Diorama
                 pods.AdoptCradlePod(to, wild);
                 party.Add(wild);
                 Debug.Log($"[EncounterDirector] Caught {wild.Name}: pod {to + 1}.");
+                Caught?.Invoke(wild);
                 yield return pods.FlyHome(to, 0.7f);
             }
             else
             {
                 party.Add(wild);
                 Debug.Log($"[EncounterDirector] Caught {wild.Name}: pods full, sent to storage ({party.storage.Count}).");
+                Caught?.Invoke(wild);
                 runes.SetCaption($"Pods full: {wild.Name} went to the Sanctuary.");
                 Dialogue.Say("party.full");
                 yield return pods.StreakAway(slot);

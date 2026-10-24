@@ -1850,6 +1850,7 @@ MonoBehaviour:
   barGap: 0.022
   labelFontSize: 0.11
   popFontSize: 0.16
+  xpBarHeight: 0.4
 --- !u!114 &1078587927
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1884,6 +1885,7 @@ MonoBehaviour:
   hud: {fileID: 1078587926}
   padPrefab: {fileID: 4412776347471294513, guid: 7a70d73ca9feceb40969aae40a6c4ef9, type: 3}
   padSeconds: 0.4
+  progression: {fileID: 11400000, guid: c5e0845f05a2ec34a817839899fdc421, type: 2}
   pauseBetweenMoves: 0.45
 --- !u!1001 &1132406365
 PrefabInstance:
@@ -2201,6 +2203,7 @@ GameObject:
   - component: {fileID: 1499891277}
   - component: {fileID: 1499891276}
   - component: {fileID: 1499891275}
+  - component: {fileID: 1499891278}
   m_Layer: 0
   m_Name: Battle
   m_TagString: Untagged
@@ -2228,6 +2231,7 @@ MonoBehaviour:
   runes: {fileID: 382714127}
   pods: {fileID: 78739058}
   typeChart: {fileID: 11400000, guid: d07e763e31e40f44e90da37afbc060b8, type: 2}
+  progression: {fileID: 11400000, guid: c5e0845f05a2ec34a817839899fdc421, type: 2}
   grassTable: {fileID: 11400000, guid: 674dcb07c5696924dbbad850006068b4, type: 2}
   waterTable: {fileID: 11400000, guid: 5b47e44c4def61b419051ed86ed2fcb3, type: 2}
   grassChance: 0.125
@@ -2278,6 +2282,22 @@ Transform:
   - {fileID: 78739059}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1499891278
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1499891274}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4af38de640a47ee48af1338d2f366215, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.GrowthDirector
+  party: {fileID: 1499891276}
+  pods: {fileID: 78739058}
+  encounters: {fileID: 1499891275}
+  progression: {fileID: 11400000, guid: c5e0845f05a2ec34a817839899fdc421, type: 2}
 --- !u!1001 &1532703331
 PrefabInstance:
   m_ObjectHideFlags: 0

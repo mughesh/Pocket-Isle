@@ -32,8 +32,6 @@ namespace Diorama
         public static float FleeChance(int playerSpeed, int wildSpeed, int failedTries) =>
             Mathf.Clamp(0.3f + 0.4f * playerSpeed / Mathf.Max(1f, wildSpeed) + 0.15f * failedTries, 0.1f, 1f);
 
-        public static int XpReward(int wildLevel, bool rare) => (5 + 4 * wildLevel) * (rare ? 2 : 1);
-
         /// <summary>
         /// Catch chance: low HP helps most (full HP about 19%, one HP about 95% at equal levels), rare halves it,
         /// every level the wild one is above the player's creature takes 5% off (and below adds 5%, up to +20%).

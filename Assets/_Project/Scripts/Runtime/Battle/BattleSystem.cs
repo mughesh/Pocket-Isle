@@ -10,7 +10,7 @@ namespace Diorama
 
     public enum BattleEventKind
     {
-        MoveUsed, Missed, Damage, Shielded, AttackRaised, Healed, Fainted, FleeFailed, Fled, XpGained, Ended,
+        MoveUsed, Missed, Damage, Shielded, AttackRaised, Healed, Fainted, FleeFailed, Fled, Ended,
         Switched, CatchAttempt, BrokeFree,
     }
 
@@ -36,7 +36,6 @@ namespace Diorama
             BattleEventKind.Damage => $"{side} took {amount} ({effectiveness}{(shieldAbsorbed ? ", shield" : "")}), HP {hpAfter}",
             BattleEventKind.Healed => $"{side} healed {amount}, HP {hpAfter}",
             BattleEventKind.AttackRaised => $"{side} attack stage {amount}",
-            BattleEventKind.XpGained => $"{side} +{amount} XP",
             BattleEventKind.CatchAttempt => $"Catch: {amount} wobble(s), {(result == BattleResult.Caught ? "caught" : "broke free")}",
             BattleEventKind.Ended => $"Ended: {result}",
             _ => $"{kind} ({side})",
@@ -70,8 +69,9 @@ namespace Diorama
     /// When the player's creature faints and <c>hasReserve</c> says another one can fight, the battle goes on:
     /// <see cref="PlayerMustSwitch"/> is set until <see cref="Switch"/> brings the next one in (a free switch).
     /// A pod only has a chance once the wild HP bar is red (<see cref="BattleMath.RedHpShare"/>). When the wild creature faints
-    /// it is <see cref="WildDazed"/>: XP is paid, and the battle waits for one pod (<see cref="TryCatch"/>, a sure catch,
-    /// rares 75%) or <see cref="EndDaze"/> (it fades away: won).
+    /// it is <see cref="WildDazed"/>: the battle waits for one pod (<see cref="TryCatch"/>, a sure catch, rares 75%) or
+    /// <see cref="EndDaze"/> (it fades away: won). XP is not paid here: <see cref="Participants"/> says who fought, and
+    /// the encounter pays them after a win (<see cref="Progression"/>).
     /// </summary>
     public class BattleSystem
     {
@@ -82,7 +82,11 @@ namespace Diorama
         readonly SeededRandom _rnd;
         readonly Func<bool> _hasReserve;
         readonly List<BattleEvent> _turn = new List<BattleEvent>();
+        readonly List<CreatureInstance> _participants = new List<CreatureInstance>();
         int _failedFlees;
+
+        /// <summary>Every party creature that was out in this battle, in order (fainted ones included).</summary>
+        public IReadOnlyList<CreatureInstance> Participants => _participants;
 
         /// <summary>Raised for every event as it happens (the same ones the turn methods return).</summary>
         public event Action<BattleEvent> EventRaised;
@@ -109,6 +113,7 @@ namespace Diorama
             _chart = chart;
             _rnd = new SeededRandom(seed);
             _hasReserve = hasReserve;
+            _participants.Add(player);
         }
 
         public Battler Get(BattleSide side) => side == BattleSide.Player ? player : wild;
@@ -189,7 +194,7 @@ namespace Diorama
             return _turn;
         }
 
-        /// <summary>No pod reached the dazed wild creature in time: it fades away and the battle is won (XP already paid).</summary>
+        /// <summary>No pod reached the dazed wild creature in time: it fades away and the battle is won.</summary>
         public IReadOnlyList<BattleEvent> EndDaze()
         {
             _turn.Clear();
@@ -214,6 +219,7 @@ namespace Diorama
             bool free = PlayerMustSwitch;
             PlayerMustSwitch = false;
             player = new Battler(BattleSide.Player, next);
+            if (!_participants.Contains(next)) _participants.Add(next);
             Raise(new BattleEvent { kind = BattleEventKind.Switched, side = BattleSide.Player });
             if (!free) Act(wild, PickWildMove());
             return _turn;
@@ -306,13 +312,7 @@ namespace Diorama
             if (target.Hp > 0) return;
 
             Raise(new BattleEvent { kind = BattleEventKind.Fainted, side = target.side });
-            if (target == wild)
-            {
-                int xp = BattleMath.XpReward(wild.creature.level, wildIsRare);
-                player.creature.xp += xp;
-                Raise(new BattleEvent { kind = BattleEventKind.XpGained, side = BattleSide.Player, amount = xp });
-                WildDazed = true;
-            }
+            if (target == wild) WildDazed = true;
             else if (_hasReserve != null && _hasReserve()) PlayerMustSwitch = true;
             else End(BattleResult.Lost);
         }

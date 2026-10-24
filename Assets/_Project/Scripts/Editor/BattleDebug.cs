@@ -21,6 +21,33 @@ namespace Diorama.EditorTools
         public static void Run() => Choose(BattleRunes.RunIndex);
         public static void Catch() => ThrowCatchPod();
 
+        static GrowthDirector Growth => Object.FindFirstObjectByType<GrowthDirector>();
+
+        /// <summary>Like key X: +50 XP to the lead (outside battles).</summary>
+        public static void AddXp50()
+        {
+            var g = Growth;
+            if (g != null) g.AddXpToLead(50);
+        }
+
+        /// <summary>Like key L: the lead levels up.</summary>
+        public static void LevelUp()
+        {
+            var g = Growth;
+            if (g != null) g.LevelUpLead();
+        }
+
+        /// <summary>The lead one XP short of its next level (the next win levels it up on the pad).</summary>
+        public static void LeadAlmostLevel()
+        {
+            var party = Object.FindFirstObjectByType<Party>();
+            var d = Director;
+            var c = party != null ? party.Lead : null;
+            if (c == null || d == null || d.progression == null) return;
+            c.xp = d.progression.XpToNext(c.level) - 1;
+            Debug.Log($"[BattleDebug] {c.Name} Lv {c.level}, XP {c.xp}/{d.progression.XpToNext(c.level)}.");
+        }
+
         /// <summary>Wild HP to 20% (in the red: the cradle pod glows and has a real chance).</summary>
         public static void WildToRed() => WildHp(0.2f);
 

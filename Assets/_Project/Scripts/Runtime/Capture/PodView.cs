@@ -85,13 +85,25 @@ namespace Diorama
             if (!_hasBaseScale) BaseScale = transform.localScale;
         }
 
+        /// <summary>The species whose tiny copy is inside right now (it changes when the creature evolves).</summary>
+        public CreatureSpecies ShownSpecies => _shownSpecies;
+
+        CreatureSpecies _shownSpecies;
+
         /// <summary>Puts this creature in the pod (null = empty pod).</summary>
         public void Show(CreatureInstance creature)
         {
-            var oldSpecies = Creature != null ? Creature.species : null;
             Creature = creature;
-            var species = creature != null ? creature.species : null;
-            if (species == oldSpecies && (_mini != null || species == null)) return;
+            BuildMini(creature != null ? creature.species : null);
+        }
+
+        /// <summary>Shows a species' tiny copy without changing the creature (the in-pod evolution show).</summary>
+        public void ShowSpecies(CreatureSpecies species) => BuildMini(species);
+
+        void BuildMini(CreatureSpecies species)
+        {
+            if (species == _shownSpecies && (_mini != null || species == null)) return;
+            _shownSpecies = species;
             if (_mini != null) Destroy(_mini);
             _mini = null;
             _miniView = null;
@@ -99,7 +111,7 @@ namespace Diorama
             var prefab = species != null ? species.Prefab : null;
             if (prefab == null || miniAnchor == null) return;
             _mini = Instantiate(prefab, miniAnchor, false);
-            _mini.name = $"Mini {creature.Name}";
+            _mini.name = $"Mini {species.displayName}";
             foreach (var r in _mini.GetComponentsInChildren<Renderer>())
             {
                 // Toon body only: the outline pass is too thin to see at this size.

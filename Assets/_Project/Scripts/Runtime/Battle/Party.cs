@@ -92,6 +92,9 @@ namespace Diorama
             HealAll();
         }
 
+        /// <summary>Tells listeners a creature changed in place (XP, level, evolution).</summary>
+        public void NotifyChanged() => Changed?.Invoke();
+
         public void HealAll()
         {
             foreach (var c in members)

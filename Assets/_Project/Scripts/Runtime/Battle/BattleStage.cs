@@ -19,6 +19,8 @@ namespace Diorama
         [Tooltip("Round earth disc each creature stands on.")]
         public BattlePad padPrefab;
         public float padSeconds = 0.4f;
+        [Tooltip("XP curve, for the party creature's XP bar.")]
+        public ProgressionConfig progression;
 
         [Header("Timing (s)")]
         public float pauseBetweenMoves = 0.45f;
@@ -103,6 +105,7 @@ namespace Diorama
         {
             hud.RemoveBar(_playerBar);
             _playerBar = hud.AddBar(_player, player.Name, player.level, player.currentHp, player.MaxHp);
+            if (progression != null) hud.SetXp(_playerBar, progression.XpShare(player));
         }
 
         /// <summary>Island-local point on top of a pad (where a thrown pod lands).</summary>
@@ -427,10 +430,6 @@ namespace Diorama
                         caption("Got away safely!");
                         yield return Wait(0.5f);
                         break;
-                    case BattleEventKind.XpGained:
-                        if (_player != null) hud.PopText(_player.LocalTop + Vector3.up * 0.04f, $"+{e.amount} XP", Gold, 1f, 1.4f);
-                        yield return Wait(0.5f);
-                        break;
                 }
             }
         }
@@ -734,6 +733,135 @@ namespace Diorama
             shield.transform.localPosition = user.LocalCenter;
             float target = user.View.height * 0.72f * Zoom;
             if (shield.transform.localScale.x > target * 0.98f) shield.transform.localScale = Vector3.one * target;
+        }
+
+        // ---- growth: XP, level-ups, evolution ----
+
+        /// <summary>
+        /// On the pad after a win: "+21 XP" floats up and the XP bar fills; each level-up (about 0.4 s each) fills it
+        /// to the end, bursts a golden ring at the creature's feet, pops "Lv 6!", hops, and raises the HP bar.
+        /// <paramref name="startShare"/> is the bar before the XP; the creature already holds the result.
+        /// </summary>
+        public IEnumerator PlayXp(CreatureInstance c, int amount, float startShare, IReadOnlyList<LevelUp> ups)
+        {
+            var a = _player;
+            if (a == null || _playerBar == null || c == null) yield break;
+            hud.PopText(a.LocalTop + Vector3.up * 0.045f, $"+{amount} XP", Gold, 1f, 1.4f);
+            float share = startShare;
+            int hp = c.currentHp - SumHp(ups);
+            float fill = ups.Count > 0 ? 0.4f : 0.6f;
+            for (int i = 0; i < ups.Count; i++)
+            {
+                float from = share;
+                yield return Tween(fill, p => hud.SetXp(_playerBar, Mathf.Lerp(from, 1f, EaseInOut(p))));
+                var up = ups[i];
+                hp = c.IsFainted ? 0 : hp + up.hpGain;
+                int max = MaxHpAt(c, up.level);
+                hud.SetLevel(_playerBar, c.Name, up.level, hp, max);
+                LevelBurst(a, up.level);
+                share = 0f;
+                hud.SetXp(_playerBar, 0f);
+                yield return Wait(0.15f);
+            }
+            float to = progression != null ? progression.XpShare(c) : 1f;
+            float start = share;
+            yield return Tween(fill, p => hud.SetXp(_playerBar, Mathf.Lerp(start, to, EaseInOut(p))));
+            yield return Wait(ups.Count > 0 ? 0.4f : 0.3f);
+        }
+
+        static int SumHp(IReadOnlyList<LevelUp> ups)
+        {
+            int s = 0;
+            foreach (var u in ups) s += u.hpGain;
+            return s;
+        }
+
+        static int MaxHpAt(CreatureInstance c, int level) => BattleMath.MaxHp(c.species != null ? c.species.baseStats.hp : 1, level);
+
+        void LevelBurst(StageActor a, int level)
+        {
+            var feet = island.TileToLocal(a.tile, Cap + a.baseLift + 0.002f);
+            fx.Burst(island.transform.TransformPoint(feet), 22, Gold, World(0.045f), 0.6f, World(0.004f), Vector3.up * World(0.03f));
+            StartCoroutine(GoldRing(a));
+            hud.PopText(a.LocalTop + Vector3.up * 0.03f, $"Lv {level}!", Gold, 1.3f, 1.2f);
+            a.View.Hop();
+        }
+
+        IEnumerator GoldRing(StageActor a)
+        {
+            var ring = fx.Get(BattleFx.Shape.Ring);
+            ring.Set(Color.white, Gold, 1f);
+            yield return Tween(0.45f, p =>
+            {
+                if (a == null) return;
+                ring.transform.localPosition = island.TileToLocal(a.tile, Cap + a.baseLift + 0.002f);
+                ring.transform.localScale = Vector3.one * (TileSize * Zoom * (0.2f + 0.7f * p));
+                ring.SetAlpha(1f - p);
+            });
+            fx.Release(ring);
+        }
+
+        /// <summary>
+        /// Evolution on the pad: the creature glows white, then swaps between its old and new body at the same height,
+        /// faster and faster (about 2 s), a light burst, and the new form grows to its own size and hops.
+        /// Applies <see cref="Progression.Evolve"/> to <paramref name="c"/> (HP ratio, level, XP and nickname kept).
+        /// </summary>
+        public IEnumerator Evolve(CreatureInstance c)
+        {
+            var old = _player;
+            var next = c != null && c.species != null ? c.species.evolvesTo : null;
+            if (old == null || next == null || next.Prefab == null)
+            {
+                if (next != null && next.Prefab == null) Debug.LogError($"[BattleStage] {next.displayName} has no baked prefab; evolving without the show.");
+                Progression.Evolve(c);
+                yield break;
+            }
+            string oldName = c.Name;
+            var go = Instantiate(next.Prefab, island.transform);
+            go.name = $"Player {next.displayName}";
+            var nu = go.AddComponent<StageActor>();
+            nu.island = island;
+            nu.tile = old.tile;
+            nu.yaw = old.yaw;
+            nu.baseLift = old.baseLift;
+            nu.grow = 0f;
+            nu.Snap();
+            float same = old.View.height / Mathf.Max(1e-4f, nu.View.height);
+
+            yield return Tween(0.5f, p => old.View.SetFlash(p));
+            nu.View.SetFlash(1f);
+            float[] holds = { 0.5f, 0.42f, 0.34f, 0.26f, 0.2f, 0.14f, 0.1f };
+            bool showNew = false;
+            foreach (float h in holds)
+            {
+                showNew = !showNew;
+                old.grow = showNew ? 0f : 1f;
+                nu.grow = showNew ? same : 0f;
+                yield return Wait(h);
+            }
+            // Ends on the new form.
+            old.grow = 0f;
+            nu.grow = same;
+            Vector3 c0 = nu.WorldCenter;
+            fx.Burst(c0, 34, Color.white, World(0.07f), 0.6f, World(0.005f));
+            fx.Burst(c0, 24, Gold, World(0.05f), 0.8f, World(0.004f), Vector3.up * World(0.03f));
+            StartCoroutine(GoldRing(nu));
+            Progression.Evolve(c);
+            Destroy(old.gameObject);
+            _player = nu;
+            if (_playerBar != null) _playerBar.actor = nu;
+            yield return Tween(0.4f, p =>
+            {
+                nu.grow = Mathf.Lerp(same, 1f, EaseOutBack(p));
+                nu.View.SetFlash(1f - p);
+            });
+            nu.grow = 1f;
+            nu.View.SetFlash(0f);
+            nu.View.Hop();
+            hud.SetLevel(_playerBar, c.Name, c.level, c.currentHp, c.MaxHp);
+            hud.PopText(nu.LocalTop + Vector3.up * 0.03f, c.Name + "!", Gold, 1.2f, 1.4f);
+            Debug.Log($"[BattleStage] {oldName} evolved into {next.displayName} (Lv {c.level}, HP {c.currentHp}/{c.MaxHp}).");
+            yield return Wait(0.8f);
         }
 
         // ---- endings ----

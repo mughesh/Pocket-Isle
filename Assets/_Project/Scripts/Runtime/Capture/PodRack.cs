@@ -120,7 +120,7 @@ namespace Diorama
         float _partyGrab, _socketStep;
         readonly float[] _grow = new float[Party.Size];
         readonly float[] _slide = new float[Party.Size];
-        int _bigSlot = -1;
+        int _bigSlot = -1, _evolvingSlot = -1;
         float _bigUntil;
         float _cradleRefillAt = -1f, _cradleIn = 1f;
         MaterialPropertyBlock _socketBlock;
@@ -309,7 +309,7 @@ namespace Diorama
                     p = _pods[i] = Spawn($"Pod {i + 1}", i);
                     p.transform.localPosition = HomeLocal(i);
                 }
-                if (p.Creature != c) p.Show(c);
+                if (i != _evolvingSlot && (p.Creature != c || p.ShownSpecies != c.species)) p.Show(c);
             }
         }
 
@@ -503,7 +503,7 @@ namespace Diorama
         /// </summary>
         void UpdateFocus()
         {
-            int focus = -1;
+            int focus = _evolvingSlot;
             for (int i = 0; i < Party.Size && focus < 0; i++)
             {
                 var p = _pods[i];
@@ -727,6 +727,59 @@ namespace Diorama
                 yield return null;
             }
             if (t != null) t.localRotation = Quaternion.identity;
+        }
+
+        /// <summary>
+        /// The pod creature evolves in its pod (outside battles): the pod grows and glows white, its tiny creature swaps
+        /// between the two forms faster and faster (about 2 s), then a burst. Applies <see cref="Progression.Evolve"/>.
+        /// </summary>
+        public IEnumerator EvolveInPod(int slot)
+        {
+            var c = party.At(slot);
+            var p = Pod(slot);
+            if (!Progression.CanEvolve(c)) yield break;
+            var from = c.species;
+            var to = from.evolvesTo;
+            if (p == null || to.Prefab == null)
+            {
+                Progression.Evolve(c);
+                yield break;
+            }
+            _evolvingSlot = slot;
+            string oldName = c.Name;
+            for (float t = 0f; t < 0.4f; t += Time.deltaTime)
+            {
+                if (p == null) break;
+                p.Pulse = t / 0.4f;
+                yield return null;
+            }
+            float[] holds = { 0.5f, 0.42f, 0.34f, 0.26f, 0.2f, 0.14f, 0.1f };
+            bool showNew = false;
+            foreach (float h in holds)
+            {
+                showNew = !showNew;
+                if (p != null) p.ShowSpecies(showNew ? to : from);
+                yield return new WaitForSeconds(h);
+            }
+            Progression.Evolve(c);
+            if (p != null)
+            {
+                p.Show(c);
+                if (fx != null)
+                {
+                    fx.Burst(p.transform.position, 24, Color.white, World(0.04f), 0.5f, World(0.004f));
+                    fx.Burst(p.transform.position, 16, new Color(1f, 0.84f, 0.35f), World(0.03f), 0.7f, World(0.003f), Vector3.up * World(0.02f));
+                }
+                for (float t = 0f; t < 0.5f; t += Time.deltaTime)
+                {
+                    if (p == null) break;
+                    p.Pulse = 1f - t / 0.5f;
+                    yield return null;
+                }
+                if (p != null) p.Pulse = 0f;
+            }
+            _evolvingSlot = -1;
+            Debug.Log($"[PodRack] {oldName} evolved into {to.displayName} in pod {slot + 1}.");
         }
 
         /// <summary>The cradle pod now holds a party creature: it becomes pod <paramref name="slot"/> (a new empty pod fills the cradle).</summary>

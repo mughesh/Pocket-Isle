@@ -44,6 +44,8 @@ Names are placeholders. The step 5c dialogue system loads this (convert to data 
   - Spirit: It's dazed. Quick, a pod!
 - `capture.success.first` · once: Spirit: A new friend! It's in your pods now.
 - `party.full` · once: Spirit: Your pods are full. New friends go to the Sanctuary.
+- `evolve.first` · once · → nearPad (first evolution)
+  - Spirit: Look at that! They've grown into something new.
 - `shrine.first` · once
   - Spirit: A Hearth Shrine. Rest here to heal everyone and save.
   - Spirit: You can swap friends here too.

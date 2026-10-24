@@ -253,23 +253,23 @@ namespace Diorama.Tests
         // ---- end of battle ----
 
         [Test]
-        public void Win_FaintsWildAndGivesXp_ThenItIsDazedUntilTheWindowEnds()
+        public void Win_FaintsWild_ThenItIsDazedUntilTheWindowEnds()
         {
             var player = Creature(Element.Water, 30, 5, Attack(Element.Water, 50));
             var wild = Creature(Element.Fire, 5, 3, Attack(Element.Neutral, 10));
             wild.currentHp = 1;
             var b = new BattleSystem(player, wild, _chart, 5, wildIsRare: true);
             var kinds = b.PlayTurn(0).Select(e => e.kind).ToList();
-            CollectionAssert.AreEqual(new[] { BattleEventKind.MoveUsed, BattleEventKind.Damage, BattleEventKind.Fainted, BattleEventKind.XpGained }, kinds);
+            CollectionAssert.AreEqual(new[] { BattleEventKind.MoveUsed, BattleEventKind.Damage, BattleEventKind.Fainted }, kinds);
             Assert.IsTrue(b.WildDazed);
             Assert.IsFalse(b.IsOver);
-            Assert.AreEqual(BattleMath.XpReward(3, true), player.xp);
+            Assert.AreEqual(0, player.xp, "XP is paid by the encounter after the win, not mid-turn");
+            CollectionAssert.AreEqual(new[] { player }, b.Participants.ToArray());
             Assert.AreEqual(0, b.PlayTurn(0).Count, "no moves while it is dazed");
             Assert.AreEqual(0, b.TryFlee().Count);
             var end = b.EndDaze();
             Assert.AreEqual(BattleEventKind.Ended, end[0].kind);
             Assert.AreEqual(BattleResult.Won, b.Result, "no pod in time = won");
-            Assert.AreEqual(BattleMath.XpReward(3, true), player.xp, "XP paid once");
             Assert.AreEqual(0, b.PlayTurn(0).Count, "no turns after the end");
         }
 

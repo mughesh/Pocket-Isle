@@ -205,6 +205,15 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: Your pods are full. New friends go to the Sanctuary.
+  - id: evolve.first
+    once: 1
+    priority: 1
+    note: first evolution
+    target: nearPad
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Look at that! They've grown into something new.
   - id: shrine.first
     once: 1
     priority: 1
