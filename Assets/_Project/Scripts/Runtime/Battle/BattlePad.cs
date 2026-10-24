@@ -51,11 +51,20 @@ namespace Diorama
         public void Paint(Habitat habitat)
         {
             bool sand = habitat == Habitat.Water;
+            // A realm theme gives grass pads its grass ring and dirt sides.
+            Color ring = grassRing, earth = grassEarth;
+            var theme = island != null ? island.Theme : null;
+            if (theme != null)
+            {
+                var t = theme.Evaluate(RealmState.Restored);
+                ring = t.grass;
+                earth = t.dirt;
+            }
             var block = new MaterialPropertyBlock();
             // Ring colour everywhere, the sides below the top in earth / sand, and a round top patch in the middle.
-            block.SetColor(BaseColorId, sand ? wetRing : grassRing);
+            block.SetColor(BaseColorId, sand ? wetRing : ring);
             block.SetFloat(SockOnId, 1f);
-            block.SetColor(SockColorId, sand ? sandSide : grassEarth);
+            block.SetColor(SockColorId, sand ? sandSide : earth);
             block.SetFloat(SockYId, topHeight - 0.06f);
             block.SetVector(Patch0Id, new Vector4(0f, topHeight, 0f, 0.36f));
             block.SetColor(PatchColor0Id, sand ? sandTop : grassTop);

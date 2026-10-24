@@ -9,8 +9,10 @@ namespace Diorama
     /// Draws the floating island with GPU instancing, in two layers:
     /// - Footprint: the rocky base (dirt columns and hanging underside) in the shape of <see cref="map"/>. Fixed to
     ///   this transform; it never scrolls.
-    /// - Content: caps, trees, rocks and grass of <see cref="world"/> (or of <see cref="map"/> when there is no world),
-    ///   seen through the footprint like a window. <see cref="SetView"/> picks which part of the map shows and how
+    /// - Content: caps, trees, rocks, grass and props of <see cref="world"/> (or of <see cref="map"/> when there is no
+    ///   world), seen through the footprint like a window. Props come from the world's props layer (baked PropRecipes,
+    ///   one instanced draw per prop type, outline in the same material); a world's <see cref="RealmTheme"/> recolours
+    ///   everything by the realm's restoration (<see cref="RealmState"/>). <see cref="SetView"/> picks which part of the map shows and how
     ///   zoomed in it is. Content near the window edge sinks into the base and anything outside the footprint is
     ///   clipped in the shaders (DioramaWindow.hlsl).
     /// Only tiles inside the window are drawn; instance buffers are reused, so scrolling doesn't allocate.
@@ -42,8 +44,10 @@ namespace Diorama
         public Material capTallGrass;
         public Material capPath;
         public Material capWater;
+        [Tooltip("Hot spring caps (H). Diorama/Toon.")]
+        public Material capHotSpring;
 
-        [Header("Props")]
+        [Header("Trees and rocks")]
         public ToonPart trunk;
         public ToonPart leavesLow;
         public ToonPart leavesHigh;
@@ -53,6 +57,12 @@ namespace Diorama
         public Material grass;
         public int bladesPerGrassTile = 7;
         public int bladesPerTallGrassTile = 46;
+
+        [Header("Map props")]
+        [Tooltip("Diorama/Prop material, shared by every prop type (palettes go in property blocks).")]
+        public Material propMaterial;
+        [Tooltip("Steam puffs drawn over hot spring tiles.")]
+        public PropRecipe hotSpringSteam;
 
         /// <summary>Brightens the rocky sides (0..1, lerp to white). Driven by IslandHandle; not saved.</summary>
         [NonSerialized] public float rimHighlight;
@@ -90,8 +100,19 @@ namespace Diorama
         static readonly int ClearingSizeId = Shader.PropertyToID("_DioramaClearingSize");
         static readonly int ClearingViewId = Shader.PropertyToID("_DioramaClearingView");
         static readonly int ClearingWorldId = Shader.PropertyToID("_DioramaClearingWorld");
+        static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+        static readonly int OutlineColorId = Shader.PropertyToID("_OutlineColor");
+        static readonly int EmissiveId = Shader.PropertyToID("_Emissive");
+        static readonly int ClearColorId = Shader.PropertyToID("_ClearColor");
+        static readonly int ShortBaseId = Shader.PropertyToID("_ShortBase");
+        static readonly int ShortTipId = Shader.PropertyToID("_ShortTip");
+        static readonly int TallBaseId = Shader.PropertyToID("_TallBase");
+        static readonly int TallTipId = Shader.PropertyToID("_TallTip");
 
-        MaterialPropertyBlock _rimProps, _contentProps, _flashProps;
+        MaterialPropertyBlock _flashProps;
+
+        /// <summary>Which theme colour a batch takes (None = the material's own).</summary>
+        enum ThemeRole { None, Grass, TallGrass, Path, Water, HotSpring, Dirt, Underside, Trunk, LeavesLow, LeavesHigh, Rock, Blades }
 
         /// <summary>Fixed to the island (footprint) or part of the scrolling map (content, grouped by map cell).</summary>
         sealed class Batch
@@ -100,6 +121,11 @@ namespace Diorama
             public Material material;
             public bool rim;      // rocky sides; takes the hover highlight
             public bool content;  // map content; local matrices are map space, cellStart groups them by cell
+            public ThemeRole role;
+            public bool outline;  // Toon Outline material: the theme sets its outline colour
+            public int passes = 1; // draw calls per chunk (props draw their outline pass from the same material)
+            public Color color;   // current theme colour (caps: the tile flash uses it)
+            public MaterialPropertyBlock props;
             public readonly List<Matrix4x4> local = new List<Matrix4x4>();
             public int[] cellStart;
             public Matrix4x4[] world = Array.Empty<Matrix4x4>();
@@ -109,7 +135,9 @@ namespace Diorama
         readonly List<Batch> _batches = new List<Batch>();
         readonly List<Mesh> _meshes = new List<Mesh>();
         readonly HashSet<Material> _warned = new HashSet<Material>();
-        readonly Dictionary<char, Material> _capMaterials = new Dictionary<char, Material>();
+        readonly Dictionary<char, Batch> _capBatches = new Dictionary<char, Batch>();
+        int _builtVersion = -1;
+        PropRecipe _builtTreeProp;
         Bounds _localBounds;
         Matrix4x4 _lastLocalToWorld, _lastContentToWorld;
         bool _needsRebuild = true;
@@ -130,23 +158,41 @@ namespace Diorama
         // Tile flash (tall grass step).
         readonly Matrix4x4[] _flashMatrix = new Matrix4x4[1];
         Vector2Int _flashTile;
-        Material _flashMaterial;
+        Batch _flashBatch;
         float _flashStart = -1f, _flashSeconds;
 
         /// <summary>The map shown through the window: the world if set, else the island map.</summary>
         public IslandMap Content => world != null ? world : map;
 
+        /// <summary>The world's realm theme, if any.</summary>
+        public RealmTheme Theme => world != null ? world.theme : null;
+
+        PropRecipe ThemeTree
+        {
+            get
+            {
+                var t = Theme;
+                return t != null && t.treeProp != null && t.treeProp.bakedMesh != null ? t.treeProp : null;
+            }
+        }
+
+        /// <summary>Marks every island for a rebuild (after props are baked).</summary>
+        public static void RebuildAll()
+        {
+            foreach (var b in FindObjectsByType<IslandBuilder>(FindObjectsInactive.Include, FindObjectsSortMode.None)) b._needsRebuild = true;
+        }
+
         /// <summary>Current zoom factor (1 = the whole window, 3 = battle close-up).</summary>
         public float Zoom => _zoom;
 
-        /// <summary>Number of instanced draw calls issued per camera last frame (outlines count separately).</summary>
+        /// <summary>Number of instanced draw calls issued per camera last frame (outline passes count separately).</summary>
         public int DrawCallCount
         {
             get
             {
                 int n = 0;
                 foreach (var b in _batches)
-                    if (b.material != null) n += (InstanceCount(b) + MaxInstancesPerDraw - 1) / MaxInstancesPerDraw;
+                    if (b.material != null) n += (InstanceCount(b) + MaxInstancesPerDraw - 1) / MaxInstancesPerDraw * b.passes;
                 return n;
             }
         }
@@ -269,7 +315,7 @@ namespace Diorama
         public void FlashTile(Vector2Int tile, float seconds = 0.5f)
         {
             var content = Content;
-            if (content == null || !_capMaterials.TryGetValue(content.At(tile.y, tile.x), out _flashMaterial)) return;
+            if (content == null || !_capBatches.TryGetValue(content.At(tile.y, tile.x), out _flashBatch)) return;
             _flashTile = tile;
             _flashSeconds = Mathf.Max(0.05f, seconds);
             _flashStart = Time.time;
@@ -282,13 +328,15 @@ namespace Diorama
         {
             ReleaseMeshes();
             _batches.Clear();
-            _capMaterials.Clear();
+            _capBatches.Clear();
             _needsRebuild = false;
             _matricesDirty = true;
             BladeCount = 0;
             TileCount = 0;
             if (map == null) return;
             var content = Content;
+            _builtVersion = content.version;
+            var treeProp = _builtTreeProp = ThemeTree;
 
             var rnd = new SeededRandom(seed);
             float tile = map.tileSize, cap = map.capHeight;
@@ -300,8 +348,8 @@ namespace Diorama
             var undersideMesh = Keep(ProceduralMeshes.Box(new Vector3(tile * 0.86f, 1f, tile * 0.86f), new Vector3(0f, -0.5f, 0f), "IslandUnderside"));
 
             // ---- footprint: rocky base, fixed to the island ----
-            var columns = AddBatch(columnMesh, column, false);
-            var undersides = AddBatch(undersideMesh, underside, false);
+            var columns = AddBatch(columnMesh, column, false, ThemeRole.Dirt);
+            var undersides = AddBatch(undersideMesh, underside, false, ThemeRole.Underside);
             columns.rim = undersides.rim = true;
             for (int r = 0; r < rows; r++)
                 for (int c = 0; c < cols; c++)
@@ -324,49 +372,75 @@ namespace Diorama
             int crows = content.Rows, ccols = content.Columns, cells = crows * ccols;
             var caps = new Dictionary<char, Batch>
             {
-                { IslandMap.Grass, AddBatch(_capMesh, capGrass, true) },
-                { IslandMap.TallGrass, AddBatch(_capMesh, capTallGrass, true) },
-                { IslandMap.Path, AddBatch(_capMesh, capPath, true) },
-                { IslandMap.Water, AddBatch(_capMesh, capWater, true) },
+                { IslandMap.Grass, AddBatch(_capMesh, capGrass, true, ThemeRole.Grass) },
+                { IslandMap.TallGrass, AddBatch(_capMesh, capTallGrass, true, ThemeRole.TallGrass) },
+                { IslandMap.Path, AddBatch(_capMesh, capPath, true, ThemeRole.Path) },
+                { IslandMap.Water, AddBatch(_capMesh, capWater, true, ThemeRole.Water) },
+                { IslandMap.HotSpring, AddBatch(_capMesh, capHotSpring, true, ThemeRole.HotSpring) },
             };
             // Trees, rocks and the blocked border stand on grass. The border is drawn as forest.
             caps[IslandMap.Tree] = caps[IslandMap.Rock] = caps[IslandMap.Blocked] = caps[IslandMap.Grass];
-            foreach (var kv in caps) _capMaterials[kv.Key] = kv.Value.material;
+            foreach (var kv in caps) _capBatches[kv.Key] = kv.Value;
 
             var capBatches = new List<Batch>(new HashSet<Batch>(caps.Values));
+            bool hasHotSpring = false;
             ForEachCell(content, cells, capBatches, (r, c, ch) =>
             {
                 if (!caps.TryGetValue(ch, out var b)) return;
-                float y = ch == IslandMap.Water ? -WaterDrop : 0f;
+                hasHotSpring |= ch == IslandMap.HotSpring;
+                float y = ch == IslandMap.Water || ch == IslandMap.HotSpring ? -WaterDrop : 0f;
                 b.local.Add(Matrix4x4.Translate(MapPoint(new Vector2(c, r)) + Vector3.up * y));
                 TileCount++;
             });
 
-            // ---- trees (also the blocked border) ----
-            var trunkMesh = Keep(ProceduralMeshes.Cylinder(0.004f, 0.005f, 0.026f, 6, 0.013f, "TreeTrunk"));
-            var leafLowMesh = Keep(ProceduralMeshes.Cylinder(0f, 0.022f, 0.036f, 7, 0.038f, "TreeLeavesLow"));
-            var leafHighMesh = Keep(ProceduralMeshes.Cylinder(0f, 0.015f, 0.03f, 7, 0.058f, "TreeLeavesHigh"));
+            // ---- trees (also the blocked border): cone trees, or the theme's tree prop ----
             var treeBatches = new List<Batch>();
-            treeBatches.AddRange(AddPart(trunkMesh, trunk));
-            treeBatches.AddRange(AddPart(leafLowMesh, leavesLow));
-            treeBatches.AddRange(AddPart(leafHighMesh, leavesHigh));
+            if (treeProp != null) treeBatches.Add(AddProp(treeProp));
+            else
+            {
+                var trunkMesh = Keep(ProceduralMeshes.Cylinder(0.004f, 0.005f, 0.026f, 6, 0.013f, "TreeTrunk"));
+                var leafLowMesh = Keep(ProceduralMeshes.Cylinder(0f, 0.022f, 0.036f, 7, 0.038f, "TreeLeavesLow"));
+                var leafHighMesh = Keep(ProceduralMeshes.Cylinder(0f, 0.015f, 0.03f, 7, 0.058f, "TreeLeavesHigh"));
+                treeBatches.AddRange(AddPart(trunkMesh, trunk, ThemeRole.Trunk));
+                treeBatches.AddRange(AddPart(leafLowMesh, leavesLow, ThemeRole.LeavesLow));
+                treeBatches.AddRange(AddPart(leafHighMesh, leavesHigh, ThemeRole.LeavesHigh));
+            }
             ForEachCell(content, cells, treeBatches, (r, c, ch) =>
             {
                 if (ch != IslandMap.Tree && ch != IslandMap.Blocked) return;
                 Vector3 p = MapPoint(new Vector2(c, r));
                 float s = 0.9f + rnd.Next() * 0.35f;
                 float ry = rnd.Next() * 6.28f;
-                var m = Matrix4x4.TRS(new Vector3(p.x, cap, p.z), Quaternion.Euler(0f, -ry * Mathf.Rad2Deg, 0f), Vector3.one * s);
+                // Prop meshes are in tile units; cone trees are in metres.
+                var m = Matrix4x4.TRS(new Vector3(p.x, cap, p.z), Quaternion.Euler(0f, -ry * Mathf.Rad2Deg, 0f), Vector3.one * (treeProp != null ? s * tile : s));
                 foreach (var b in treeBatches) b.local.Add(m);
             });
 
-            // ---- rocks: two per rock tile ----
+            // ---- rocks: two per rock tile, and a stone rim where a hot spring meets land ----
             var rockMesh = Keep(ProceduralMeshes.Icosahedron(0.011f, "Rock"));
-            var rockBatches = AddPart(rockMesh, rock);
+            var rockBatches = AddPart(rockMesh, rock, ThemeRole.Rock);
             ForEachCell(content, cells, rockBatches, (r, c, ch) =>
             {
-                if (ch != IslandMap.Rock) return;
                 Vector3 p = MapPoint(new Vector2(c, r));
+                if (ch == IslandMap.HotSpring)
+                {
+                    foreach (var d in Sides)
+                    {
+                        char n = content.At(r + d.y, c + d.x);
+                        if (n == IslandMap.HotSpring || n == IslandMap.Water || n == IslandMap.Empty) continue;
+                        Vector3 edge = MapPoint(new Vector2(c + d.x * 0.42f, r + d.y * 0.42f));
+                        Vector3 along = new Vector3(-d.y, 0f, d.x) * tile; // map X is mirrored, the sign doesn't matter here
+                        for (int k = 0; k < 3; k++)
+                        {
+                            Vector3 at = edge + along * ((k - 1) * 0.33f + (rnd.Next() - 0.5f) * 0.1f);
+                            float s = 0.45f + rnd.Next() * 0.3f;
+                            var m = Matrix4x4.TRS(new Vector3(at.x, cap - 0.002f, at.z), MirroredEulerXYZ(rnd.Next(), rnd.Next() * 6f, rnd.Next()), new Vector3(s, s * 0.6f, s));
+                            foreach (var b in rockBatches) b.local.Add(m);
+                        }
+                    }
+                    return;
+                }
+                if (ch != IslandMap.Rock) return;
                 for (int k = 0; k < 2; k++)
                 {
                     float x = p.x - (rnd.Next() - 0.5f) * 0.025f;
@@ -380,7 +454,7 @@ namespace Diorama
 
             // ---- grass blades ----
             var bladeMesh = Keep(ProceduralMeshes.GrassBlade());
-            var blades = AddBatch(bladeMesh, grass, true);
+            var blades = AddBatch(bladeMesh, grass, true, ThemeRole.Blades);
             ForEachCell(content, cells, new List<Batch> { blades }, (r, c, ch) =>
             {
                 bool tall = ch == IslandMap.TallGrass;
@@ -400,9 +474,85 @@ namespace Diorama
             });
             BladeCount = blades.local.Count;
 
+            BuildProps(content, cells, cap, hasHotSpring);
+
             // Footprint plus room for zoomed-in trees above and the underside below.
             float halfX = cols * tile * 0.5f + 0.02f, halfZ = rows * tile * 0.5f + 0.02f;
             _localBounds = new Bounds(new Vector3(0f, 0.05f, 0f), new Vector3(halfX * 2f, 0.8f, halfZ * 2f));
+        }
+
+        static readonly Vector2Int[] Sides = { new Vector2Int(1, 0), new Vector2Int(-1, 0), new Vector2Int(0, 1), new Vector2Int(0, -1) };
+
+        /// <summary>
+        /// The world's props layer (one batch per prop type, footprint centred, facing the player unless the recipe
+        /// allows any yaw) and steam over hot springs. Own random sequence, so the terrain layout never shifts.
+        /// </summary>
+        void BuildProps(IslandMap content, int cells, float cap, bool hasHotSpring)
+        {
+            var wm = content as WorldMap;
+            var batches = new Dictionary<PropRecipe, Batch>();
+            Batch BatchFor(PropRecipe recipe)
+            {
+                if (recipe == null) return null;
+                if (!batches.TryGetValue(recipe, out var b)) batches[recipe] = b = recipe.bakedMesh != null ? AddProp(recipe) : null;
+                return b;
+            }
+
+            int rows = content.Rows, cols = content.Columns;
+            var missing = new HashSet<string>();
+            if (wm != null)
+                for (int r = 0; r < rows; r++)
+                    for (int c = 0; c < cols; c++)
+                    {
+                        char k = wm.PropAt(r, c);
+                        if (k == IslandMap.Empty) continue;
+                        if (!wm.TryGetProp(k, out var e)) missing.Add($"'{k}' (not in the legend)");
+                        else if (BatchFor(e.recipe) == null) missing.Add($"{e.recipe.name} (not baked)");
+                    }
+            var steam = hasHotSpring ? BatchFor(hotSpringSteam) : null;
+            if (hasHotSpring && steam == null)
+                Debug.LogWarning("[Diorama] Hot springs without steam: assign a baked Hot Spring Steam prop on the IslandBuilder.", this);
+            if (missing.Count > 0) Debug.LogWarning($"[Diorama] Props skipped: {string.Join(", ", missing)}. Tools > Pocket Isle > Props > Bake All.", this);
+            if (batches.Count == 0) return;
+            if (propMaterial == null)
+            {
+                Debug.LogError("[Diorama] The world has props but the IslandBuilder has no Prop Material (Diorama/Prop).", this);
+                return;
+            }
+
+            float tile = map.tileSize;
+            var rnd = new SeededRandom(seed * 7919 + 17);
+            var list = new List<Batch>();
+            foreach (var b in batches.Values) if (b != null) list.Add(b);
+            ForEachCell(content, cells, list, (r, c, ch) =>
+            {
+                if (steam != null && ch == IslandMap.HotSpring)
+                    for (int k = 0; k < 2; k++)
+                    {
+                        Vector3 at = MapPoint(new Vector2(c + (rnd.Next() - 0.5f) * 0.6f, r + (rnd.Next() - 0.5f) * 0.6f));
+                        float s = tile * (0.8f + rnd.Next() * 0.4f);
+                        steam.local.Add(Matrix4x4.TRS(new Vector3(at.x, cap, at.z), Quaternion.Euler(0f, rnd.Next() * 360f, 0f), Vector3.one * s));
+                    }
+                if (wm == null || !wm.TryGetProp(wm.PropAt(r, c), out var e)) return;
+                var b = BatchFor(e.recipe);
+                if (b == null) return;
+                var f = WorldMap.FootprintOf(e);
+                var recipe = e.recipe;
+                Vector3 p = MapPoint(new Vector2(c + (f.x - 1) * 0.5f, r + (f.y - 1) * 0.5f));
+                float yaw = recipe.randomYaw && f == Vector2Int.one
+                    ? rnd.Next() * 360f
+                    : (e.turned ? 90f : 0f) + (rnd.Next() * 2f - 1f) * recipe.yawJitter;
+                float scale = tile * (1f + (rnd.Next() * 2f - 1f) * recipe.scaleJitter);
+                b.local.Add(Matrix4x4.TRS(new Vector3(p.x, cap, p.z), Quaternion.Euler(0f, yaw, 0f), Vector3.one * scale));
+            });
+        }
+
+        Batch AddProp(PropRecipe recipe)
+        {
+            var b = AddBatch(recipe.bakedMesh, propMaterial, true);
+            b.passes = 2;
+            recipe.ApplyTo(b.props);
+            return b;
         }
 
         /// <summary>Runs <paramref name="add"/> for every content cell in row-major order and records where each cell's instances start.</summary>
@@ -489,17 +639,23 @@ namespace Diorama
             return mesh;
         }
 
-        Batch AddBatch(Mesh mesh, Material material, bool content)
+        Batch AddBatch(Mesh mesh, Material material, bool content, ThemeRole role = ThemeRole.None)
         {
-            var b = new Batch { mesh = mesh, material = material, content = content };
+            var b = new Batch { mesh = mesh, material = material, content = content, role = role, props = new MaterialPropertyBlock() };
+            if (content) b.props.SetFloat(WindowClipId, 1f);
             _batches.Add(b);
             return b;
         }
 
-        List<Batch> AddPart(Mesh mesh, ToonPart part)
+        List<Batch> AddPart(Mesh mesh, ToonPart part, ThemeRole role)
         {
-            var list = new List<Batch> { AddBatch(mesh, part.body, true) };
-            if (part.outline != null) list.Add(AddBatch(Keep(ProceduralMeshes.WithSmoothedNormals(mesh)), part.outline, true));
+            var list = new List<Batch> { AddBatch(mesh, part.body, true, role) };
+            if (part.outline != null)
+            {
+                var o = AddBatch(Keep(ProceduralMeshes.WithSmoothedNormals(mesh)), part.outline, true, role);
+                o.outline = true;
+                list.Add(o);
+            }
             return list;
         }
 
@@ -604,22 +760,20 @@ namespace Diorama
         /// <summary>Queues the island's instanced draws for one camera.</summary>
         public void Draw(Camera cam)
         {
+            var content = Content;
+            if (content != null && (content.version != _builtVersion || ThemeTree != _builtTreeProp)) _needsRebuild = true;
             if (_needsRebuild) Rebuild();
             if (_batches.Count == 0) return;
             UpdateWorldMatrices();
             SetWindowGlobals();
+            ApplyTheme();
 
             var bounds = TransformBounds(transform.localToWorldMatrix, _localBounds);
-            bool highlight = rimHighlight > 0.001f;
-            if (_rimProps == null)
+            if (_flashProps == null)
             {
-                _rimProps = new MaterialPropertyBlock();
-                _contentProps = new MaterialPropertyBlock();
-                _contentProps.SetFloat(WindowClipId, 1f);
                 _flashProps = new MaterialPropertyBlock();
                 _flashProps.SetFloat(WindowClipId, 1f);
             }
-            if (highlight) _rimProps.SetFloat(FlashId, rimHighlight);
             foreach (var b in _batches)
             {
                 int count = InstanceCount(b);
@@ -636,7 +790,7 @@ namespace Diorama
                     worldBounds = bounds,
                     shadowCastingMode = ShadowCastingMode.Off,
                     receiveShadows = false,
-                    matProps = b.content ? _contentProps : highlight && b.rim ? _rimProps : null,
+                    matProps = b.props,
                 };
                 for (int start = 0; start < count; start += MaxInstancesPerDraw)
                     Graphics.RenderMeshInstanced(rp, b.mesh, 0, b.world, Mathf.Min(MaxInstancesPerDraw, count - start), start);
@@ -644,9 +798,61 @@ namespace Diorama
             DrawFlash(cam, bounds);
         }
 
+        /// <summary>Theme colours for the current restoration, the rim highlight, and the restoration global for props.</summary>
+        void ApplyTheme()
+        {
+            RealmState.Sync();
+            foreach (var b in _batches)
+                if (b.rim) b.props.SetFloat(FlashId, rimHighlight);
+            var theme = Theme;
+            if (theme == null) return;
+            var t = theme.Evaluate(RealmState.Restored);
+            foreach (var b in _batches)
+            {
+                if (b.role == ThemeRole.None) continue;
+                if (b.role == ThemeRole.Blades)
+                {
+                    b.props.SetColor(ShortBaseId, t.shortBase);
+                    b.props.SetColor(ShortTipId, t.shortTip);
+                    b.props.SetColor(TallBaseId, t.tallBase);
+                    b.props.SetColor(TallTipId, t.tallTip);
+                    continue;
+                }
+                Color c = RoleColor(t, b.role);
+                b.color = c;
+                if (b.outline)
+                {
+                    // Like the creature outlines: colour x 0.28 in linear, then the theme tint.
+                    Color o = (c.linear * 0.28f).gamma * t.outlineTint;
+                    o.a = 1f;
+                    b.props.SetColor(OutlineColorId, o);
+                    continue;
+                }
+                b.props.SetColor(BaseColorId, c);
+                if (b.role == ThemeRole.LeavesLow || b.role == ThemeRole.LeavesHigh) b.props.SetFloat(EmissiveId, t.leafGlow);
+                if (b.role == ThemeRole.TallGrass) b.props.SetColor(ClearColorId, new Color(t.grass.r, t.grass.g, t.grass.b, 1f));
+            }
+        }
+
+        static Color RoleColor(in ThemeColors t, ThemeRole role) => role switch
+        {
+            ThemeRole.Grass => t.grass,
+            ThemeRole.TallGrass => t.tallGrass,
+            ThemeRole.Path => t.path,
+            ThemeRole.Water => t.water,
+            ThemeRole.HotSpring => t.hotSpring,
+            ThemeRole.Dirt => t.dirt,
+            ThemeRole.Underside => t.underside,
+            ThemeRole.Trunk => t.trunk,
+            ThemeRole.LeavesLow => t.leavesLow,
+            ThemeRole.LeavesHigh => t.leavesHigh,
+            ThemeRole.Rock => t.rock,
+            _ => Color.magenta,
+        };
+
         void DrawFlash(Camera cam, Bounds bounds)
         {
-            if (_flashStart < 0f || _flashMaterial == null || _capMesh == null) return;
+            if (_flashStart < 0f || _flashBatch == null || _flashBatch.material == null || _capMesh == null) return;
             float t = (Time.time - _flashStart) / _flashSeconds;
             if (t >= 1f)
             {
@@ -654,10 +860,11 @@ namespace Diorama
                 return;
             }
             _flashProps.SetFloat(FlashId, 0.75f * Mathf.Sin(t * Mathf.PI));
+            if (Theme != null) _flashProps.SetColor(BaseColorId, _flashBatch.color);
             // Slightly larger than the cap so it wins the depth test.
             var local = Matrix4x4.TRS(MapPoint(_flashTile) + Vector3.up * 0.0005f, Quaternion.identity, new Vector3(1.01f, 1.05f, 1.01f));
             _flashMatrix[0] = _lastContentToWorld * local;
-            var rp = new RenderParams(_flashMaterial)
+            var rp = new RenderParams(_flashBatch.material)
             {
                 camera = cam,
                 layer = gameObject.layer,

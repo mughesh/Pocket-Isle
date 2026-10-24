@@ -338,6 +338,7 @@ namespace Diorama.EditorTools
                 patches = patches.ToArray(),
                 patchColors = colors.ToArray(),
                 spec = r.spec,
+                glow = r.glow,
                 breathe = r.idle.breathe,
                 breatheSpeed = r.idle.breatheSpeed,
                 jiggle = r.idle.jiggle,

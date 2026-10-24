@@ -93,7 +93,8 @@ namespace Diorama.EditorTools
                 }
                 catch (Exception e)
                 {
-                    Log($"{cmd}: exception {e.GetType().Name}: {e.Message}");
+                    var inner = e.InnerException ?? e;
+                    Log($"{cmd}: exception {inner.GetType().Name}: {inner.Message}\n{inner.StackTrace}");
                 }
             }
         }

@@ -17,7 +17,7 @@ namespace Diorama
     /// Placeholder explorer: a cube that walks the world map tile by tile, shown through the island window, plus a
     /// small world-space label beside the island (last gesture, tile, zoom, placement).
     /// AutoWalk: a swipe sets the walking direction and the cube keeps walking until another swipe, a blocked tile
-    /// (water, tree, rock, border), or a tap stops it. HoldToWalk: same, but it also stops when the thumb returns to
+    /// (water, tree, rock, border, blocking prop), or a tap stops it. HoldToWalk: same, but it also stops when the thumb returns to
     /// rest (read from ThumbHoldProbe; in the Editor, releasing the arrow key). In both modes a second swipe in the
     /// same direction while moving switches to run, and turning keeps the current speed.
     /// Tap is context-sensitive: walking = stop; standing and facing water = fish (<see cref="OnFishTap"/>); otherwise
@@ -57,6 +57,9 @@ namespace Diorama
 
         /// <summary>Raised when the explorer arrives on a tall grass tile (column, row).</summary>
         public event Action<Vector2Int> OnTallGrassStep;
+
+        /// <summary>Raised whenever the explorer arrives on a tile (column, row).</summary>
+        public event Action<Vector2Int> OnStep;
 
         /// <summary>Raised on a tap while standing next to water and facing it (the water tile).</summary>
         public event Action<Vector2Int> OnFishTap;
@@ -108,7 +111,7 @@ namespace Diorama
         {
             if (window == null) Debug.LogError("[GestureTestPiece] No WorldWindow assigned; the map won't scroll or zoom.");
             _tile = _fromTile = island.world != null ? island.world.startTile : startTile;
-            if (!IslandMap.IsWalkable(Map.At(_tile.y, _tile.x)))
+            if (!Map.CanWalk(_tile))
                 Debug.LogWarning($"[GestureTestPiece] Start tile c{_tile.x} r{_tile.y} is '{Map.At(_tile.y, _tile.x)}', not walkable.");
 
             var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -207,10 +210,10 @@ namespace Diorama
         {
             var next = _tile + _heading;
             char ch = Map.At(next.y, next.x);
-            if (!IslandMap.IsWalkable(ch))
+            if (!Map.CanWalk(next))
             {
                 Stop();
-                _last += ch == IslandMap.Empty ? " - edge" : $" - blocked ({ch})";
+                _last += ch == IslandMap.Empty ? " - edge" : IslandMap.IsWalkable(ch) ? " - blocked (prop)" : $" - blocked ({ch})";
                 RefreshLabel();
                 return;
             }
@@ -257,7 +260,11 @@ namespace Diorama
             {
                 // Linear so consecutive steps join into a steady walk.
                 _stepT = Mathf.Min(1f, _stepT + Time.deltaTime / (_running ? runSeconds : walkSeconds));
-                if (_stepT >= 1f && Map.At(_tile.y, _tile.x) == IslandMap.TallGrass) OnTallGrassStep?.Invoke(_tile);
+                if (_stepT >= 1f)
+                {
+                    OnStep?.Invoke(_tile);
+                    if (Map.At(_tile.y, _tile.x) == IslandMap.TallGrass) OnTallGrassStep?.Invoke(_tile);
+                }
             }
             if (_stepT >= 1f && _heading != Vector2Int.zero) TryStep();
             UpdateExplorer();

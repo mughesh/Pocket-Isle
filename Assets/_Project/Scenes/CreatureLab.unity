@@ -250,11 +250,25 @@ MonoBehaviour:
   - {fileID: 11400000, guid: bf28c73db405a224da137bbcb4724879, type: 2}
   - {fileID: 11400000, guid: c1473e635e7776940a34b25e7b53b532, type: 2}
   - {fileID: 11400000, guid: e163c6002098afa4ea9295b9d4055e5a, type: 2}
+  - {fileID: 11400000, guid: bf37a5027a821e843afdd5fa3d92d9b4, type: 2}
+  props:
+  - {fileID: 11400000, guid: d5cc65e162e3da6408be3695c302e16a, type: 2}
+  - {fileID: 11400000, guid: 3fb99cd684ae5c84a84a770de91c9c13, type: 2}
+  - {fileID: 11400000, guid: 771dd8e345ee42345b16f0cd0367744c, type: 2}
+  - {fileID: 11400000, guid: 4bb563fb979735e47ab034d75c7f07ac, type: 2}
+  - {fileID: 11400000, guid: 782c07a7a06cda744b18f4eed5f22284, type: 2}
+  - {fileID: 11400000, guid: 35e9e53a4f6d9f741b81756370c354ab, type: 2}
+  - {fileID: 11400000, guid: 3fece9f9f9f86704bb929bb793c714ad, type: 2}
+  - {fileID: 11400000, guid: d23ec13ae9af1254e8ddece07b2a1f38, type: 2}
+  - {fileID: 11400000, guid: c6f92765d108a4c4a8aed7c4f9e97007, type: 2}
+  - {fileID: 11400000, guid: 0ac73cb048bf97d47a3575d6fea394b7, type: 2}
+  propMaterial: {fileID: 2100000, guid: 33f530888fd3dcd4984ea4cfbe1e6bad, type: 2}
   index: 0
   turntable: {fileID: 1723478441}
   turnSpeed: 25
   turning: 1
   displayScale: 8
+  propDisplayHeight: 0.42
 --- !u!4 &701006657
 Transform:
   m_ObjectHideFlags: 0

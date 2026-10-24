@@ -4,7 +4,7 @@ namespace Diorama
 {
     /// <summary>
     /// Island layout as a text grid, one character per tile:
-    /// G grass, T tall grass, P path, W water, F tree, R rock, X blocked border, '.' empty.
+    /// G grass, T tall grass, P path, W water, H hot spring, F tree, R rock, X blocked border, '.' empty.
     /// The island's own map is its footprint (the window shape); <see cref="WorldMap"/> is the bigger map it shows.
     /// </summary>
     /// <remarks>
@@ -22,6 +22,7 @@ namespace Diorama
         public const char Tree = 'F';
         public const char Rock = 'R';
         public const char Blocked = 'X';
+        public const char HotSpring = 'H';
 
         public const string PrototypeLayout =
             "..GGGGGGGGGG..\n" +
@@ -39,7 +40,7 @@ namespace Diorama
             ".GGGGGGGGGGGG.\n" +
             "..GGGGGGGGGG..";
 
-        [Tooltip("One row per line. G grass, T tall grass, P path, W water, F tree, R rock, '.' empty.")]
+        [Tooltip("One row per line. G grass, T tall grass, P path, W water, H hot spring, F tree, R rock, X border, '.' empty.")]
         [TextArea(14, 30)]
         public string layout = PrototypeLayout;
 
@@ -50,6 +51,9 @@ namespace Diorama
         public float capHeight = 0.006f;
 
         string[] _rows;
+
+        /// <summary>Goes up whenever the map changes (Inspector edits, generators), so the island knows to rebuild.</summary>
+        [System.NonSerialized] public int version;
 
         string[] RowsCache
         {
@@ -81,15 +85,19 @@ namespace Diorama
             return rows[row][column];
         }
 
-        /// <summary>True for tiles the explorer can stand on.</summary>
+        /// <summary>True for terrain the explorer can stand on (ignores props; see <see cref="CanWalk"/>).</summary>
         public static bool IsWalkable(char tile) =>
             tile == Grass || tile == TallGrass || tile == Path;
+
+        /// <summary>True if the explorer (and creatures) can stand on this tile (column, row): walkable terrain, no blocking prop.</summary>
+        public virtual bool CanWalk(Vector2Int tile) => IsWalkable(At(tile.y, tile.x));
 
         /// <summary>Replaces the layout from code (generators) and drops the row cache.</summary>
         public void SetLayout(string text)
         {
             layout = text;
             _rows = null;
+            version++;
         }
 
         /// <summary>Tile centre in island-local space, at cap-bottom height (y = 0).</summary>
@@ -99,6 +107,10 @@ namespace Diorama
             return new Vector3(-(column - cc) * tileSize, 0f, (row - cr) * tileSize);
         }
 
-        protected virtual void OnValidate() => _rows = null;
+        protected virtual void OnValidate()
+        {
+            _rows = null;
+            version++;
+        }
     }
 }

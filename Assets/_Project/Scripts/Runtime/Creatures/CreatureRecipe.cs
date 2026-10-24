@@ -184,6 +184,8 @@ namespace Diorama
         [Header("Look")]
         public CreaturePalette palette;
         [Range(0f, 2f)] public float spec = 0.2f;
+        [Tooltip("Self-lit body (glass, embers).")]
+        [Range(0f, 2f)] public float glow;
         public float outline = 0.035f;
         public IdleStyle idle;
 
@@ -231,7 +233,7 @@ namespace Diorama
             public List<PlacedPart> parts;
             public FaceSettings face;
             public CreaturePalette palette;
-            public float spec, outline;
+            public float spec, glow, outline;
             public IdleStyle idle;
             public int resolution, triangleBudget;
 
@@ -245,6 +247,7 @@ namespace Diorama
                 face = r.face;
                 palette = r.palette;
                 spec = r.spec;
+                glow = r.glow;
                 outline = r.outline;
                 idle = r.idle;
                 resolution = r.resolution;

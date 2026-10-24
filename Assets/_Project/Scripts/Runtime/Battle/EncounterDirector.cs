@@ -173,12 +173,14 @@ namespace Diorama
             yield return stage.WildAppears(rare, water ? (Vector2?)where : null);
             runes.Show(lead.species.moves);
             runes.SetCaption(rare ? $"A rare wild {wild.Name} appeared!" : $"A wild {wild.Name} appeared!");
+            if (rare) Dialogue.Say("rare.first");
             yield return new WaitForSeconds(0.3f);
             runes.SetCaption($"Go, {lead.Name}!");
             yield return stage.PodBurst();
             stage.ShowBars(lead, wild);
 
             var battle = new BattleSystem(lead, wild, typeChart, (int)(_rnd.Next() * int.MaxValue), rare);
+            Dialogue.Say("battle.first");
             while (!battle.IsOver)
             {
                 runes.SetCaption($"What will {lead.Name} do?");
@@ -188,11 +190,19 @@ namespace Diorama
                 runes.SetInteractable(false);
                 var events = _choice == BattleRunes.RunIndex ? battle.TryFlee() : battle.PlayTurn(_choice);
                 foreach (var e in events) Debug.Log($"[Battle] {e}");
+                foreach (var e in events)
+                    if (e.kind == BattleEventKind.Damage && e.effectiveness != Effectiveness.Normal)
+                    {
+                        Dialogue.Say("battle.types");
+                        break;
+                    }
                 yield return stage.Play(events, battle, runes.SetCaption);
             }
 
             Debug.Log($"[EncounterDirector] Battle over: {battle.Result}. {lead.Name} HP {lead.currentHp}/{lead.MaxHp}, XP {lead.xp}.");
             yield return stage.Outro(battle.Result);
+            if (battle.Result == BattleResult.Won) Dialogue.Say("battle.win.first");
+            else if (battle.Result == BattleResult.Lost) Dialogue.Say("battle.lose.first");
             if (battle.Result == BattleResult.Lost)
             {
                 party.HealAll();
@@ -269,7 +279,7 @@ namespace Diorama
             }
 
             bool InMap(Vector2Int t) => t.x >= 1 && t.y >= 1 && t.x < map.Columns - 1 && t.y < map.Rows - 1;
-            bool Free(Vector2Int t) => InMap(t) && IslandMap.IsWalkable(map.At(t.y, t.x));
+            bool Free(Vector2Int t) => InMap(t) && map.CanWalk(t);
             bool WildFree(Vector2Int t) => Free(t) || water && InMap(t) && map.At(t.y, t.x) == IslandMap.Water;
 
             float best = float.NegativeInfinity, bestAny = float.NegativeInfinity;

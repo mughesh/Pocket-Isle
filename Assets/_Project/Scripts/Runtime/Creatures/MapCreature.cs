@@ -88,7 +88,7 @@ namespace Diorama
             {
                 next = _tile + Steps[(start + i) % Steps.Length];
                 if (Mathf.Abs(next.x - homeTile.x) > wanderRadius || Mathf.Abs(next.y - homeTile.y) > wanderRadius) continue;
-                if (!IslandMap.IsWalkable(map.At(next.y, next.x)) || Occupied(next)) continue;
+                if (!map.CanWalk(next) || Occupied(next)) continue;
                 return true;
             }
             next = _tile;

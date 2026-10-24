@@ -16,6 +16,8 @@ namespace Diorama
         Torus,
         [Tooltip("Half space: a = point on the plane, b = outward normal. Use with Intersect to cut (flat feet).")]
         Plane,
+        [Tooltip("Box with rounded corners: a = centre, size = half extents, b.x = corner radius, rotation tilts it.")]
+        RoundBox,
     }
 
     public enum SdfBlend
@@ -42,7 +44,7 @@ namespace Diorama
         public Vector3 a;
         public Vector3 b;
         public Vector3 size;
-        [Tooltip("Euler degrees. Ellipsoid and torus only.")]
+        [Tooltip("Euler degrees. Ellipsoid, torus and round box only.")]
         public Vector3 rotation;
         [Tooltip("Lumpy surface (wool, clouds). Height in units; 0 = smooth.")]
         public float bumps;
@@ -172,6 +174,7 @@ namespace Diorama
                     return b;
                 }
                 case SdfKind.Torus: return new Bounds(p.a, Vector3.one * (2f * (p.size.x + p.size.y)));
+                case SdfKind.RoundBox: return new Bounds(p.a, Vector3.one * (2f * p.size.magnitude));
                 default: return new Bounds(p.a, Vector3.zero);
             }
         }
@@ -206,6 +209,15 @@ namespace Diorama
                     Vector3 q = pr.inverse * (p - s.a);
                     float ring = new Vector2(q.x, q.z).magnitude - s.size.x;
                     d = new Vector2(ring, q.y).magnitude - s.size.y;
+                    break;
+                }
+                case SdfKind.RoundBox:
+                {
+                    Vector3 q = pr.inverse * (p - s.a);
+                    float r = Mathf.Max(0f, s.b.x);
+                    Vector3 e = new Vector3(Mathf.Abs(q.x), Mathf.Abs(q.y), Mathf.Abs(q.z)) - s.size + Vector3.one * r;
+                    Vector3 o = Vector3.Max(e, Vector3.zero);
+                    d = o.magnitude + Mathf.Min(Mathf.Max(e.x, Mathf.Max(e.y, e.z)), 0f) - r;
                     break;
                 }
                 default:

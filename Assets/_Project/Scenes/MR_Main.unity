@@ -158,6 +158,64 @@ Transform:
   - {fileID: 1196775047}
   m_Father: {fileID: 301495222}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &232676576
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 232676578}
+  - component: {fileID: 232676577}
+  m_Layer: 0
+  m_Name: Dialogue Bubble
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &232676577
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 232676576}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bcd56d855f11e624da0b0ac5049e2828, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.DialogueBubble
+  hudMaterial: {fileID: 2100000, guid: 0656b6c4f92798e49a14cf09a2c6800e, type: 2}
+  grabGuard: {fileID: 270959111}
+  fontSize: 0.14
+  maxWidth: 0.2
+  padding: {x: 0.012, y: 0.009}
+  heightAbove: 0.045
+  spiritColor: {r: 1, g: 0.965, b: 0.89, a: 0.97}
+  keeperColor: {r: 0.97, g: 0.85, b: 0.71, a: 0.97}
+  heartColor: {r: 0.86, g: 0.92, b: 0.84, a: 0.97}
+  outlineColor: {r: 0.23, g: 0.16, b: 0.12, a: 1}
+  charsPerSecond: 45
+  holdBase: 1.2
+  holdPerChar: 0.05
+  maxViewAngle: 30
+--- !u!4 &232676578
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 232676576}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 733261510}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &270959108
 GameObject:
   m_ObjectHideFlags: 0
@@ -171,6 +229,7 @@ GameObject:
   - component: {fileID: 270959112}
   - component: {fileID: 270959111}
   - component: {fileID: 270959113}
+  - component: {fileID: 270959114}
   m_Layer: 0
   m_Name: Island
   m_TagString: Untagged
@@ -199,6 +258,7 @@ MonoBehaviour:
   capTallGrass: {fileID: 2100000, guid: 42253212180f95240bcaa2299efdb169, type: 2}
   capPath: {fileID: 2100000, guid: bcff0b71858c2e44e98eb7bdc6eba47a, type: 2}
   capWater: {fileID: 2100000, guid: 8bc8c229721a8564da2e89db1b0c3957, type: 2}
+  capHotSpring: {fileID: 2100000, guid: 251d048d070de074b9cc764ef806466c, type: 2}
   trunk:
     body: {fileID: 2100000, guid: d903ad2993f7bad49b873f04aeafe7fc, type: 2}
     outline: {fileID: 2100000, guid: 7f17fe4f4664e5e4698ff259acb9e251, type: 2}
@@ -214,6 +274,8 @@ MonoBehaviour:
   grass: {fileID: 2100000, guid: ef6e018ecdeb356428731ef8cd20a0bf, type: 2}
   bladesPerGrassTile: 7
   bladesPerTallGrassTile: 46
+  propMaterial: {fileID: 2100000, guid: 33f530888fd3dcd4984ea4cfbe1e6bad, type: 2}
+  hotSpringSteam: {fileID: 11400000, guid: 35e9e53a4f6d9f741b81756370c354ab, type: 2}
 --- !u!4 &270959110
 Transform:
   m_ObjectHideFlags: 0
@@ -233,6 +295,7 @@ Transform:
   - {fileID: 1132406366}
   - {fileID: 1078587925}
   - {fileID: 382714128}
+  - {fileID: 1847074512}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &270959111
@@ -299,6 +362,21 @@ MonoBehaviour:
   deadZoneTiles: 0
   defaultZoom: 3
   zoomSeconds: 0.6
+--- !u!114 &270959114
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 270959108}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc47bf137f867d14d9f9118c71f3cc60, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.RealmRestoration
+  island: {fileID: 270959109}
+  input: {fileID: 374318556}
+  fadeSeconds: 2
 --- !u!1 &301495217
 GameObject:
   m_ObjectHideFlags: 0
@@ -1118,6 +1196,58 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 200327675}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &733261508
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 733261510}
+  - component: {fileID: 733261509}
+  m_Layer: 0
+  m_Name: Dialogue
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &733261509
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 733261508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 529cc4fb419ff7f4c894152df42fcd36, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.Dialogue
+  script: {fileID: 11400000, guid: 98ce17761fce16747a5a30c583a77eab, type: 2}
+  bubble: {fileID: 232676577}
+  explorer: {fileID: 374318554}
+  input: {fileID: 374318556}
+  encounters: {fileID: 1499891275}
+  idleSeconds: 40
+  idleGap: 120
+--- !u!4 &733261510
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 733261508}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 232676578}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &886928184
 GameObject:
@@ -2227,6 +2357,57 @@ MonoBehaviour:
   _movementProvider: {fileID: 0}
   _handAligment: 0
   _handGrabPoses: []
+--- !u!1 &1847074511
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1847074512}
+  - component: {fileID: 1847074513}
+  m_Layer: 0
+  m_Name: Lantern Spirit
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1847074512
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1847074511}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 270959110}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1847074513
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1847074511}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2fbd39aab7a9504591accc89a71bcd7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.LanternSpirit
+  island: {fileID: 270959109}
+  prefab: {fileID: 2466602268610551922, guid: 15e19e2cc0c102247b1f09f1efb802ec, type: 3}
+  cornerOffset: {x: 0.05, y: 0.075, z: 0.04}
+  bobHeight: 0.006
+  bobSpeed: 1.1
+  speakLift: 0.012
+  speakBrighten: 0.18
 --- !u!1 &1994521897
 GameObject:
   m_ObjectHideFlags: 0
@@ -2567,3 +2748,4 @@ SceneRoots:
   - {fileID: 374318557}
   - {fileID: 542041139}
   - {fileID: 1499891277}
+  - {fileID: 733261510}

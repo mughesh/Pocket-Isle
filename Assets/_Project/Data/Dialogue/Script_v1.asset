@@ -1,0 +1,404 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e5160043a3c8cd4cb17d02e9809f8d9, type: 3}
+  m_Name: Script_v1
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.DialogueScript
+  triggers:
+  - id: intro.arrive
+    once: 1
+    priority: 1
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Oh! You're awake. Hello, big one.
+    - speaker: 0
+      speakerName: Spirit
+      text: I'm a Lantern Spirit. A small one. Very small.
+  - id: intro.world
+    once: 1
+    priority: 1
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The world broke into floating pieces. This is one of them.
+    - speaker: 0
+      speakerName: Spirit
+      text: Hold its rocky edge to move it. Put it wherever feels comfy.
+  - id: intro.explorer
+    once: 1
+    priority: 1
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: See the little explorer? Slide your thumb along your finger to walk.
+    - speaker: 0
+      speakerName: Spirit
+      text: Keep your thumb there to keep walking. Tap to stop.
+  - id: intro.starter
+    once: 1
+    priority: 1
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Every guardian needs a friend. Pick one!
+  - id: starter.kilnpot
+    once: 0
+    priority: 1
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Kilnpot! Warm as a fresh-baked pot.
+  - id: starter.pebbloop
+    once: 0
+    priority: 1
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Pebbloop! Bubbly, and very round.
+  - id: starter.pufflet
+    once: 0
+    priority: 1
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Pufflet! Light as a cloud, twice as fluffy.
+  - id: intro.statue
+    once: 1
+    priority: 1
+    note: first time near the statue
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: That statue... it has three empty holes.
+    - speaker: 0
+      speakerName: Spirit
+      text: I feel like I know it. Strange.
+  - id: tut.grass
+    once: 1
+    priority: 1
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Tall grass rustles when something's hiding in it.
+  - id: tut.pond
+    once: 1
+    priority: 1
+    note: first time next to water
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Face the water and tap. Something might bite!
+  - id: battle.first
+    once: 1
+    priority: 1
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Look at a rune and pinch. Or just poke it.
+  - id: battle.types
+    once: 1
+    priority: 1
+    note: first super or not-very effective hit
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Water beats Fire. Fire beats Wind. Wind beats Water.
+  - id: battle.win.first
+    once: 1
+    priority: 1
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: You did it! Your friend is getting stronger.
+  - id: battle.lose.first
+    once: 1
+    priority: 1
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Everyone's tired. Let's rest at the shrine.
+  - id: capture.first
+    once: 1
+    priority: 1
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: It's weak now. Grab a pod from the rim and flick it!
+  - id: capture.success.first
+    once: 1
+    priority: 1
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: A new friend! It's in your pods now.
+  - id: party.full
+    once: 1
+    priority: 1
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Your pods are full. New friends go to the Sanctuary.
+  - id: shrine.first
+    once: 1
+    priority: 1
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: A Hearth Shrine. Rest here to heal everyone and save.
+    - speaker: 0
+      speakerName: Spirit
+      text: You can swap friends here too.
+  - id: gate.first
+    once: 1
+    priority: 1
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: A Shard Gate. It leads to another piece of the world.
+    - speaker: 0
+      speakerName: Spirit
+      text: Step in when you're ready.
+  - id: rare.first
+    once: 1
+    priority: 1
+    note: first gold sparkle
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Ooh, sparkly! That one's rare.
+  - id: cw.arrive
+    once: 1
+    priority: 2
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Cinderwood... it used to glow all year round.
+    - speaker: 0
+      speakerName: Spirit
+      text: The leaves have gone grey. It's so cold.
+  - id: cw.village
+    once: 1
+    priority: 2
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The kilns are cold. Nobody's baking. That's never happened.
+  - id: cw.springs
+    once: 1
+    priority: 2
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Even the hot springs are only lukewarm.
+  - id: cw.log
+    once: 1
+    priority: 2
+    note: blocked by the fallen log
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: A fallen log. Too heavy for the little one.
+    - speaker: 0
+      speakerName: Spirit
+      text: But not for you. Reach in and lift it!
+  - id: cw.log.done
+    once: 0
+    priority: 2
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Strong hands!
+  - id: cw.temple
+    once: 1
+    priority: 2
+    note: first time at the temple door
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The forge temple. Something big is breathing in there.
+  - id: cw.bellows
+    once: 1
+    priority: 2
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: These bellows feed the forge. Squeeze your hand, open, squeeze.
+  - id: cw.brazier
+    once: 0
+    priority: 2
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: 'One lit! (then: Two! / All three!)'
+  - id: cw.door
+    once: 0
+    priority: 2
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The door's opening...
+  - id: cw.keeper.meet
+    once: 0
+    priority: 2
+    note: 
+    lines:
+    - speaker: 1
+      speakerName: Hearthstag
+      text: Stay back! If I share the fire, it will go out forever.
+    - speaker: 0
+      speakerName: Spirit
+      text: He's not mean. He's scared.
+    - speaker: 0
+      speakerName: Spirit
+      text: Let's calm him down.
+  - id: cw.keeper.shield
+    once: 1
+    priority: 2
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: His crown blocks everything. Maybe water can crack it?
+  - id: cw.keeper.shield.break
+    once: 0
+    priority: 2
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: It cracked! Now's our chance!
+  - id: cw.keeper.win
+    once: 0
+    priority: 2
+    note: 
+    lines:
+    - speaker: 1
+      speakerName: Hearthstag
+      text: ...It's warm. The forest is warm again.
+    - speaker: 1
+      speakerName: Hearthstag
+      text: I was so afraid of the dark. Thank you, guardian.
+    - speaker: 1
+      speakerName: Hearthstag
+      text: Take this shard. Mend what broke.
+  - id: cw.restored
+    once: 1
+    priority: 2
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Look! Cinderwood is glowing again!
+  - id: cw.shard.dock
+    once: 1
+    priority: 2
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The island's getting bigger. Did you feel that?
+  - id: statue.shard.1
+    once: 0
+    priority: 2
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The statue's warmer. And I feel... brighter?
+  - id: statue.shard.2
+    once: 0
+    priority: 2
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Two shards. I can almost remember something.
+  - id: statue.shard.3
+    once: 0
+    priority: 2
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Three! Something's waking up...
+  - id: heart.wake
+    once: 0
+    priority: 2
+    note: 
+    lines:
+    - speaker: 2
+      speakerName: Heart
+      text: ...Little light. You found your way back.
+    - speaker: 0
+      speakerName: Spirit
+      text: You... I know you. I'm part of you, aren't I?
+    - speaker: 2
+      speakerName: Heart
+      text: The world broke, and so did I. Show me it can be whole.
+  - id: heart.win
+    once: 0
+    priority: 2
+    note: 
+    lines:
+    - speaker: 2
+      speakerName: Heart
+      text: You've grown strong, little light. And you, guardian.
+    - speaker: 0
+      speakerName: Spirit
+      text: I'll miss you, big one. Come and visit, okay?
+    - speaker: 0
+      speakerName: Spirit
+      text: I'll be right here. In the middle of everything.
+  - id: end
+    once: 0
+    priority: 2
+    note: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: (glows, slots into the Heart's forehead)
+  idleHints:
+  - speaker: 0
+    speakerName: Spirit
+    text: Your friends get stronger every battle.
+  - speaker: 0
+    speakerName: Spirit
+    text: The other gates lead to water and wind. Just saying.
+  - speaker: 0
+    speakerName: Spirit
+    text: Psst. Rare ones hide in tall grass.
+  - speaker: 0
+    speakerName: Spirit
+    text: You can move the island anytime. Grab the edge.

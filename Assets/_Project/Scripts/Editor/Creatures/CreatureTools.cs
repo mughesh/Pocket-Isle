@@ -52,6 +52,8 @@ namespace Diorama.EditorTools
             turntable.SetParent(lab.transform, false);
             lab.turntable = turntable;
             lab.species = AllSpecies();
+            lab.props = PropBaker.AllRecipes();
+            lab.propMaterial = PropBaker.PropMaterial();
 
             var plinth = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             plinth.name = "Plinth";
@@ -84,8 +86,10 @@ namespace Diorama.EditorTools
                 foreach (var l in root.GetComponentsInChildren<CreatureLab>(true))
                 {
                     l.species = AllSpecies();
+                    l.props = PropBaker.AllRecipes();
+                    l.propMaterial = PropBaker.PropMaterial();
                     EditorUtility.SetDirty(l);
-                    Debug.Log($"[CreatureTools] Creature Lab now cycles {l.species.Count} species.");
+                    Debug.Log($"[CreatureTools] Creature Lab now cycles {l.species.Count} species and {l.props.Count} props.");
                 }
             EditorSceneManager.MarkSceneDirty(lab);
             EditorSceneManager.SaveScene(lab);
@@ -252,7 +256,7 @@ namespace Diorama.EditorTools
                     {
                         if (Mathf.Max(Mathf.Abs(dx), Mathf.Abs(dy)) != r) continue;
                         var t = want + new Vector2Int(dx, dy);
-                        if (IslandMap.IsWalkable(map.At(t.y, t.x)) && !taken.Contains(t)) return t;
+                        if (map.CanWalk(t) && !taken.Contains(t)) return t;
                     }
             return want;
         }
@@ -416,6 +420,18 @@ namespace Diorama.EditorTools
             DrawDefaultInspector();
             var lab = (CreatureLab)target;
             EditorGUILayout.Space();
+            var prop = lab.CurrentProp;
+            if (prop != null)
+            {
+                if (GUILayout.Button($"Rebake & reload {prop.name}", GUILayout.Height(28)))
+                {
+                    PropBaker.Bake(prop);
+                    if (Application.isPlaying) lab.Reload();
+                }
+                if (GUILayout.Button("Select prop recipe")) Selection.activeObject = prop;
+                EditorGUILayout.HelpBox("Play mode keys: Space / arrows cycle, T turntable, G restored / unrestored, 1 / 2 / 3 views.", MessageType.None);
+                return;
+            }
             var species = lab.CurrentSpecies;
             using (new EditorGUI.DisabledScope(species == null || species.recipe == null))
             {

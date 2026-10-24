@@ -81,6 +81,41 @@ namespace Diorama.EditorTools
             Render($"{ShotDir}/strip_{_stripCount++:00}.png");
         }
 
+        /// <summary>
+        /// Fires a long Spirit line for shots. The view clamp follows the real head (a Link headset on the desk points
+        /// anywhere), so it's switched off here.
+        /// </summary>
+        public static void SayTest()
+        {
+            var bubble = Object.FindFirstObjectByType<DialogueBubble>();
+            if (bubble != null) bubble.maxViewAngle = 180f;
+            Dialogue.Say("intro.explorer");
+        }
+
+        /// <summary>Realm restoration at once (no fade), for shots of both states.</summary>
+        public static void Unrestored() => RealmState.Restored = 0f;
+        public static void Restored() => RealmState.Restored = 1f;
+
+        /// <summary>Seated view and a close view of the island, rendered from island-relative poses (works with a headset on Link, which owns the main camera).</summary>
+        public static void IslandShots()
+        {
+            var island = Object.FindFirstObjectByType<IslandBuilder>();
+            if (island == null) return;
+            var t = island.transform;
+            foreach (var (name, eye, look) in new[]
+                     {
+                         ("seated", new Vector3(0f, 0.55f, 0.45f), new Vector3(0f, 0f, 0.05f)),
+                         ("close", new Vector3(0f, 0.26f, 0.26f), new Vector3(0f, 0f, -0.02f)),
+                     })
+            {
+                var pos = t.position + t.rotation * eye;
+                var rot = Quaternion.LookRotation(t.position + t.rotation * look - pos, Vector3.up);
+                string path = $"{ShotDir}/island_{name}_{(RealmState.Restored > 0.5f ? "restored" : "unrestored")}.png";
+                Render(path, pos, rot);
+                Debug.Log($"[BattleDebug] Screenshot {path}");
+            }
+        }
+
         public static void Move1Strip() { Choose(0); Strip(); }
         public static void Move2Strip() { Choose(1); Strip(); }
         public static void Move3Strip() { Choose(2); Strip(); }
@@ -111,10 +146,15 @@ namespace Diorama.EditorTools
         {
             var main = Camera.main;
             if (main == null) return;
+            Render(path, main.transform.position, main.transform.rotation);
+        }
+
+        static void Render(string path, Vector3 position, Quaternion rotation)
+        {
             Directory.CreateDirectory(ShotDir);
             var go = new GameObject("Shot Camera");
             var cam = go.AddComponent<Camera>();
-            cam.transform.SetPositionAndRotation(main.transform.position, main.transform.rotation);
+            cam.transform.SetPositionAndRotation(position, rotation);
             cam.fieldOfView = 55f;
             cam.nearClipPlane = 0.01f;
             cam.clearFlags = CameraClearFlags.SolidColor;
