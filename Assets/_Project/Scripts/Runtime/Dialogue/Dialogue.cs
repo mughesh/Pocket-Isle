@@ -18,11 +18,15 @@ namespace Diorama
     /// </summary>
     public class Dialogue : MonoBehaviour
     {
-        /// <summary>Something a line can point at: its world point (null while hidden) and a 0..1 highlight.</summary>
+        /// <summary>
+        /// Something a line can point at: its world point (null while hidden), a 0..1 pulse of its own (runes, pods), and
+        /// the radius (world metres) of the gold focus sphere round the point (<see cref="FocusHighlight"/>).
+        /// </summary>
         public class Target
         {
             public Func<Vector3?> point;
             public Action<float> pulse;
+            public Func<float> radius;
         }
 
         public enum TargetState { None, Active, Lost }
@@ -92,18 +96,23 @@ namespace Diorama
         public static bool IsTalking => _instance != null && _instance._current.HasValue;
 
         /// <summary>Registers a target anchor by id (leadPod, cradle, ...). Re-registering replaces it.</summary>
-        public static void RegisterTarget(string id, Func<Vector3?> point, Action<float> pulse) =>
-            _targets[id] = new Target { point = point, pulse = pulse };
+        public static void RegisterTarget(string id, Func<Vector3?> point, Action<float> pulse, Func<float> radius = null) =>
+            _targets[id] = new Target { point = point, pulse = pulse, radius = radius };
 
         /// <summary>Resolves ids with an argument, "prefix:arg" (tile:12,7).</summary>
         public static void RegisterTargetResolver(string prefix, Func<string, Target> resolve) => _resolvers[prefix] = resolve;
 
         /// <summary>The current line's target: Active with its world point, Lost once it disappeared, or None.</summary>
-        public static TargetState GetTarget(out Vector3 world)
+        public static TargetState GetTarget(out Vector3 world) => GetTarget(out world, out _);
+
+        /// <summary>The current line's target and its <see cref="Target"/> (for the focus sphere).</summary>
+        public static TargetState GetTarget(out Vector3 world, out Target target)
         {
             world = default;
+            target = null;
             var d = _instance;
             if (d == null || d._target == null) return TargetState.None;
+            target = d._target;
             if (d._targetLost) return TargetState.Lost;
             var p = d._target.point != null ? d._target.point() : null;
             if (!p.HasValue) return TargetState.Lost;
@@ -173,6 +182,7 @@ namespace Diorama
                             last = Time.time;
                             island.FlashTile(tile, 0.35f);
                         },
+                        radius = () => island == null || island.map == null ? 0f : 0.5f * island.map.tileSize * island.Zoom * island.transform.lossyScale.x,
                     };
                 });
             }

@@ -123,7 +123,7 @@ namespace Diorama
             _block = new MaterialPropertyBlock();
             explorer.OnStep += OnStep;
             explorer.OnBump += OnBump;
-            Dialogue.RegisterTarget("shrine", ShrinePoint, k => { });
+            Dialogue.RegisterTarget("shrine", ShrinePoint, k => { }, () => 1.6f * island.map.tileSize * island.Zoom * island.transform.lossyScale.x);
             Scan();
         }
 
@@ -193,6 +193,9 @@ namespace Diorama
             if (!outside) pods.SetExternalGaze(this, false);
             _gazed = outside && !window.IsZoomed && !explorer.Locked ? GazedShrine() : -1;
             pods.SetExternalGaze(this, _gazed >= 0);
+            if (_gazed >= 0)
+                FocusHighlight.Hover(island.transform.TransformPoint(island.TileToLocal(Center(_shrines[_gazed]), island.Content.capHeight)),
+                    1.2f * island.map.tileSize * island.Zoom * island.transform.lossyScale.x);
             for (int i = 0; i < _shrines.Count; i++) UpdateShrine(i, outside);
             if (outside) UpdatePinch();
         }

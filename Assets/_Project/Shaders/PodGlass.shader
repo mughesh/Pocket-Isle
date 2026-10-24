@@ -33,6 +33,7 @@ Shader "Diorama/Pod Glass"
             #pragma fragment frag
             #pragma multi_compile_instancing
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "DioramaWindow.hlsl"
 
             CBUFFER_START(UnityPerMaterial)
                 float4 _Tint;
@@ -125,6 +126,13 @@ Shader "Diorama/Pod Glass"
                 float glow = _Glow * (0.75 + 0.25 * sin(_Time.y * 4.0));
                 col += tint * glow * (0.5 + fres);
                 alpha = saturate(alpha + glow * 0.25);
+
+                // Hint target (gold) or gazed (white): a glowing rim (FocusHighlight globals).
+                float2 focus = DioramaFocusAmounts(TransformObjectToWorld(float3(0.0, 0.0, 0.0)));
+                float rimGlow = smoothstep(0.25, 0.9, fres);
+                col = lerp(col, _DioramaHoverColor.rgb * 1.2, rimGlow * focus.y * 0.8);
+                col = lerp(col, _DioramaHighlightColor.rgb * 1.4, rimGlow * focus.x);
+                alpha = saturate(alpha + rimGlow * (focus.x + 0.5 * focus.y));
 
                 // Fainted: cracks of light that flicker.
                 if (_Crack > 0.001)

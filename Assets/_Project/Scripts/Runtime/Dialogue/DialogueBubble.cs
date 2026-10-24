@@ -12,6 +12,9 @@ namespace Diorama
     /// typed in at <see cref="charsPerSecond"/>, held for <see cref="holdBase"/> + <see cref="holdPerChar"/> x characters.
     /// Faces the head, keeps a fixed real-world size (readable at 0.6-0.8 m) and is pulled inside the central view
     /// (<see cref="maxViewAngle"/> from the head's forward). Poke it, or look at it and pinch, to skip to the next line.
+    /// While the line has a target (step 7c), the bubble is smaller (<see cref="sideWidth"/> of the width, at most two
+    /// lines) and sits on the far side of the Spirit from the target, tail toward the Spirit, pushed further away if it
+    /// would touch the target in the player's view.
     /// </summary>
     public class DialogueBubble : MonoBehaviour
     {
@@ -29,6 +32,14 @@ namespace Diorama
         public Color keeperColor = new Color(0.97f, 0.85f, 0.71f, 0.97f);
         public Color heartColor = new Color(0.86f, 0.92f, 0.84f, 0.97f);
         public Color outlineColor = new Color(0.23f, 0.16f, 0.12f, 1f);
+
+        [Header("Pointing at a target")]
+        [Tooltip("Width share of the bubble while the line points at something.")]
+        [Range(0.3f, 1f)] public float sideWidth = 0.6f;
+        [Tooltip("At most this many lines while pointing (the text shrinks down to 70% to fit).")]
+        public int sideMaxLines = 2;
+        [Tooltip("Gap between the Spirit and the bubble's edge (metres).")]
+        public float sideGap = 0.012f;
 
         [Header("Timing")]
         public float charsPerSecond = 45f;
@@ -67,6 +78,8 @@ namespace Diorama
         Transform _anchor;
         Vector2 _size;
         float _shownAt, _typeSeconds, _holdSeconds, _appear;
+        bool _pointing;
+        float _sideSign = 1f;
         int _chars;
         bool _showing;
         readonly Hand[] _hands = new Hand[2];
@@ -144,15 +157,29 @@ namespace Diorama
             _root.gameObject.SetActive(true);
             _text.text = line.text;
             _text.maxVisibleCharacters = 99999;
+            _pointing = line.speaker == DialogueSpeaker.Spirit && Dialogue.GetTarget(out _) == Dialogue.TargetState.Active;
+            float width = _pointing ? maxWidth * sideWidth : maxWidth;
+            _text.fontSize = fontSize;
+            var pref = _text.GetPreferredValues(line.text, width, 1f);
+            if (_pointing)
+            {
+                // At most sideMaxLines lines: shrink the text a little if it runs longer.
+                float lineHeight = _text.GetPreferredValues("Ag", width, 1f).y;
+                for (int i = 0; i < 6 && pref.y > lineHeight * (sideMaxLines + 0.4f); i++)
+                {
+                    _text.fontSize *= 0.94f;
+                    lineHeight = _text.GetPreferredValues("Ag", width, 1f).y;
+                    pref = _text.GetPreferredValues(line.text, width, 1f);
+                }
+            }
             _text.ForceMeshUpdate();
-            var pref = _text.GetPreferredValues(line.text, maxWidth, 1f);
-            float w = Mathf.Min(maxWidth, pref.x), h = pref.y;
+            float w = Mathf.Min(width, pref.x), h = pref.y;
             _text.rectTransform.sizeDelta = new Vector2(w + 0.002f, h + 0.002f);
             _size = new Vector2(w + padding.x * 2f, h + padding.y * 2f);
             _panel.localScale = new Vector3(_size.x, _size.y, 1f);
             float tail = 0.016f;
             _tail.localScale = new Vector3(tail, tail, 1f);
-            _tail.localPosition = new Vector3(0f, -_size.y * 0.5f, 0.0005f);
+            PlaceTail();
             _clipper.Size = new Vector3(_size.x, _size.y, 0.02f);
 
             var back = line.speaker == DialogueSpeaker.Keeper ? keeperColor : line.speaker == DialogueSpeaker.Heart ? heartColor : spiritColor;
@@ -214,11 +241,53 @@ namespace Diorama
             GazePinch();
         }
 
+        /// <summary>Tail under the bubble, or (pointing) on the edge facing the Spirit.</summary>
+        void PlaceTail()
+        {
+            _tail.localPosition = _pointing
+                ? new Vector3(-_sideSign * _size.x * 0.5f, -_size.y * 0.15f, 0.0005f)
+                : new Vector3(0f, -_size.y * 0.5f, 0.0005f);
+        }
+
+        /// <summary>
+        /// Pointing: beside the Spirit on the far side from the target (as the player sees it), pushed sideways until it
+        /// doesn't touch the target's focus sphere in the view.
+        /// </summary>
+        Vector3 SidePosition(Camera cam, Vector3 spirit, Vector3 target, float radius)
+        {
+            Vector3 right = cam.transform.right;
+            float d = Vector3.Dot(spirit - target, right);
+            if (Mathf.Abs(d) > 0.004f) _sideSign = Mathf.Sign(d);
+            Vector3 pos = spirit + right * (_sideSign * (sideGap + _size.x * 0.5f)) + Vector3.up * (_size.y * 0.25f);
+            var head = cam.transform;
+            for (int i = 0; i < 3; i++)
+            {
+                Vector3 b = head.InverseTransformPoint(pos), t = head.InverseTransformPoint(target);
+                if (b.z < 0.05f || t.z < 0.05f) break;
+                // The target at the bubble's depth.
+                float k = b.z / t.z;
+                Vector2 tp = new Vector2(t.x, t.y) * k;
+                float tr = radius * k + 0.006f;
+                float dx = Mathf.Abs(tp.x - b.x) - _size.x * 0.5f, dy = Mathf.Abs(tp.y - b.y) - _size.y * 0.5f;
+                float ox = Mathf.Max(dx, 0f), oy = Mathf.Max(dy, 0f);
+                if (ox * ox + oy * oy >= tr * tr) break;
+                pos += right * (_sideSign * (tr - dx + 0.004f));
+            }
+            return pos;
+        }
+
         /// <summary>Above the anchor at a fixed real size, facing the head, inside the central view.</summary>
         void Place(bool snap)
         {
             var cam = Camera.main;
             Vector3 target = _anchor != null ? _anchor.position + Vector3.up * (heightAbove + _size.y * 0.5f) : _root.position;
+            if (_pointing && cam != null && _anchor != null && Dialogue.GetTarget(out var focus, out var t) == Dialogue.TargetState.Active)
+            {
+                float radius = t != null && t.radius != null ? t.radius() : 0.03f;
+                float before = _sideSign;
+                target = SidePosition(cam, _anchor.parent != null ? _anchor.parent.position + Vector3.up * 0.01f : _anchor.position, focus, Mathf.Max(radius, 0.02f));
+                if (before != _sideSign) PlaceTail();
+            }
             if (cam != null)
             {
                 Vector3 head = cam.transform.position, fwd = cam.transform.forward, dir = target - head;

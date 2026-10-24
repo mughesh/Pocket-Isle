@@ -96,6 +96,8 @@ namespace Diorama
         float Tile => island.map.tileSize;
         float Cap => island.Content.capHeight;
         float WorldScale => island.transform.lossyScale.x;
+        /// <summary>One lodge tile in world metres right now.</summary>
+        float TileWorld => Tile * island.Zoom * WorldScale;
 
         void Start()
         {
@@ -114,8 +116,9 @@ namespace Diorama
             swap.Returned += OnReturned;
             pods.LodgeDropped += OnRimDropped;
             explorer.OnStep += OnStep;
-            Dialogue.RegisterTarget("lodgeCenter", () => Active ? island.transform.TransformPoint(island.TileToLocal(new Vector2(3.5f, 3.5f), Cap + 0.4f * Tile)) : (Vector3?)null, k => { });
-            Dialogue.RegisterTarget("pedestal", () => Active ? island.transform.TransformPoint(PedestalTopLocal) : (Vector3?)null, k => { });
+            // The room as a whole has no outline to light (a tiny focus sphere): the beam alone points into it.
+            Dialogue.RegisterTarget("lodgeCenter", () => Active ? island.transform.TransformPoint(island.TileToLocal(new Vector2(3.5f, 3.5f), Cap + 0.4f * Tile)) : (Vector3?)null, k => { }, () => 0.0001f);
+            Dialogue.RegisterTarget("pedestal", () => Active ? island.transform.TransformPoint(PedestalTopLocal) : (Vector3?)null, k => { }, () => 0.75f * TileWorld);
             // Loaded inside before this Start ran.
             if (Active) OnEntered(lodge);
         }
@@ -615,8 +618,10 @@ namespace Diorama
                 else if (pick.Best >= 0) _gazed = _islings[pick.Best];
             }
             else _gazeId = -1;
-            foreach (var li in _islings)
-                if (li != null && li.View != null && li != _onPedestal) li.View.SetFlash(li == _gazed ? 0.25f : 0f);
+            // White = what you're looking at (FocusHighlight; gold is only for hints).
+            if (_gazed != null) FocusHighlight.Hover(island.transform.TransformPoint(_gazed.LocalCenter), 0.5f * TileWorld);
+            else if (_gazedComb >= 0) FocusHighlight.Hover(_comb[_gazedComb].transform.position, 0.3f * TileWorld);
+            else if (_gazedDoor) FocusHighlight.Hover(DoorWorld(0f), 0.9f * TileWorld);
             pods.SetExternalGaze(this, _gazed != null || _gazedComb >= 0 || _gazedDoor);
             UpdateDoorPalm(free);
             if (!free) return;

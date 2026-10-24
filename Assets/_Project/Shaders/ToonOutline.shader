@@ -50,6 +50,7 @@ Shader "Diorama/Toon Outline"
             {
                 float4 positionCS : SV_POSITION;
                 float3 islandPos  : TEXCOORD0;
+                float3 color      : TEXCOORD1;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
                 UNITY_VERTEX_OUTPUT_STEREO
             };
@@ -60,7 +61,9 @@ Shader "Diorama/Toon Outline"
                 UNITY_SETUP_INSTANCE_ID(v);
                 UNITY_TRANSFER_INSTANCE_ID(v, o);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-                float3 p = ToonDeform(v.positionOS.xyz, v.normalOS) + v.normalOS * _OutlineWidth;
+                float widen;
+                o.color = DioramaOutlineFocus(_OutlineColor.rgb, TransformObjectToWorld(float3(0.0, 0.0, 0.0)), widen);
+                float3 p = ToonDeform(v.positionOS.xyz, v.normalOS) + v.normalOS * _OutlineWidth * widen;
                 o.positionCS = TransformWorldToHClip(ToonWindowVertex(TransformObjectToWorld(p), o.islandPos));
                 return o;
             }
@@ -69,7 +72,7 @@ Shader "Diorama/Toon Outline"
             {
                 UNITY_SETUP_INSTANCE_ID(i);
                 DioramaWindowClip(i.islandPos, _WindowClip);
-                return float4(_OutlineColor.rgb, 1.0);
+                return float4(i.color, 1.0);
             }
             ENDHLSL
         }

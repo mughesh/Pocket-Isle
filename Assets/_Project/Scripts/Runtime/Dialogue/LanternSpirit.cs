@@ -7,7 +7,8 @@ namespace Diorama
     /// facing the head. A child of the island, so it follows when the island is moved or scaled. While it speaks it
     /// floats up a little and brightens. Its bubble anchor is registered with <see cref="Dialogue"/>.
     /// When a line has a target (<see cref="Dialogue.GetTarget"/>) it flies there in about <see cref="flySeconds"/>
-    /// (eased, small arc), hovers beside and above it on the player's side without covering it, and drifts home
+    /// (eased, small arc) and parks beside it (left or right as the player sees it, whichever is more open; never above
+    /// or in front of it), shining its lantern on it (<see cref="FocusHighlight"/>), and drifts home
     /// <see cref="lingerSeconds"/> after the line. It never leaves the central <see cref="fovHalfAngle"/> cone of the
     /// head: a target outside it makes the Spirit stop at the edge and lean toward it.
     /// </summary>
@@ -30,8 +31,8 @@ namespace Diorama
         public float flySeconds = 0.5f;
         [Tooltip("Arc height of a flight (island-local metres).")]
         public float flyArc = 0.02f;
-        [Tooltip("Hover point from the target: x sideways (away from where the player looks at it), y up, z toward the player (metres at island scale 1).")]
-        public Vector3 targetOffset = new Vector3(0.045f, 0.045f, 0.03f);
+        [Tooltip("Parking spot beside the target: x sideways as the player sees it, y up, z toward the player (metres at island scale 1). Keep y and z small so it never covers the target.")]
+        public Vector3 targetOffset = new Vector3(0.065f, 0.012f, 0f);
         [Tooltip("Stays by the target this long after the line ends (s).")]
         public float lingerSeconds = 1.5f;
         [Tooltip("Half angle of the head cone the Spirit stays inside (degrees).")]
@@ -41,6 +42,7 @@ namespace Diorama
         Transform _model, _anchor;
         float _speak, _speakTarget;
         bool _away, _clamped;
+        float _sideSign = 1f;
         Vector3 _targetWorld, _flyFrom, _lastGoal;
         float _flyStart = -999f, _lingerUntil = -999f;
 
@@ -60,6 +62,11 @@ namespace Diorama
             float top = _view != null ? _view.height * 1.25f : 0.06f;
             _anchor.localPosition = Vector3.up * top;
             Dialogue.RegisterSpeaker(DialogueSpeaker.Spirit, _anchor);
+            // The lantern (its glowing glass body): where the focus beam starts.
+            var lantern = new GameObject("Lantern").transform;
+            lantern.SetParent(go.transform, false);
+            lantern.localPosition = Vector3.up * (_view != null ? _view.centerHeight : 0.02f);
+            FocusHighlight.SetLantern(lantern);
             if (island != null && island.map != null) transform.localPosition = _lastGoal = HomeLocal();
         }
 
@@ -130,8 +137,9 @@ namespace Diorama
         }
 
         /// <summary>
-        /// Beside, above and in front of the target as the player sees it, offset sideways toward the island's middle so
-        /// it doesn't cover it; pulled back inside the head's view cone. Returned in the parent's space.
+        /// Beside the target as the player sees it, at about its height, on the more open side: inside the head's view
+        /// cone first, then toward the island's middle (so it stays over the island), keeping the side it already took
+        /// unless the other is clearly better. Pulled back inside the view cone. Returned in the parent's space.
         /// </summary>
         Vector3 TargetLocal(Vector3 target)
         {
@@ -142,10 +150,18 @@ namespace Diorama
             Vector3 toPlayer = head - target;
             toPlayer.y = 0f;
             toPlayer = toPlayer.sqrMagnitude > 1e-6f ? toPlayer.normalized : island.transform.forward;
-            Vector3 side = Vector3.Cross(Vector3.up, toPlayer);
-            Vector3 toMiddle = island.transform.position - target;
-            if (Vector3.Dot(side, toMiddle) < 0f) side = -side;
-            Vector3 world = target + (side * targetOffset.x + Vector3.up * targetOffset.y + toPlayer * targetOffset.z) * scale;
+            Vector3 side = Vector3.Cross(Vector3.up, toPlayer).normalized;
+            Vector3 lift = Vector3.up * targetOffset.y + toPlayer * targetOffset.z;
+            float Score(float sign)
+            {
+                Vector3 w = target + (side * sign * targetOffset.x + lift) * scale;
+                float score = Vector3.Dot(side * sign, (island.transform.position - target).normalized); // toward the middle
+                if (cam != null && Vector3.Angle(cam.transform.forward, w - head) > fovHalfAngle) score -= 2f;
+                if (sign == _sideSign) score += 0.35f; // stay put
+                return score;
+            }
+            _sideSign = Score(1f) >= Score(-1f) ? 1f : -1f;
+            Vector3 world = target + (side * _sideSign * targetOffset.x + lift) * scale;
 
             _clamped = false;
             if (cam != null)

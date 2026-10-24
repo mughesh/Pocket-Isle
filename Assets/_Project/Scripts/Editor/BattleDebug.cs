@@ -357,6 +357,27 @@ namespace Diorama.EditorTools
             Dialogue.Say("intro.explorer");
         }
 
+        /// <summary>Fires a targeted line (ignoring once) to see the gold focus, beam, Spirit and bubble placement.</summary>
+        public static void SayPedestal() => SayForced("lodge.swap.first");
+        public static void SayLeadPod() => SayForced("lodge.last");
+        public static void SayShrine() => SayForced("shrine.first");
+
+        static void SayForced(string id)
+        {
+            var bubble = Object.FindFirstObjectByType<DialogueBubble>();
+            if (bubble != null) bubble.maxViewAngle = 180f;
+            var spirit = Object.FindFirstObjectByType<LanternSpirit>();
+            if (spirit != null) spirit.fovHalfAngle = 180f;
+            var cam = Camera.main;
+            var island = Object.FindFirstObjectByType<IslandBuilder>();
+            if (cam != null && island != null)
+                Debug.Log($"[BattleDebug] Head in island space: {island.transform.InverseTransformPoint(cam.transform.position)}, forward {island.transform.InverseTransformDirection(cam.transform.forward)}.");
+            var d = Object.FindFirstObjectByType<Dialogue>();
+            if (d == null) return;
+            d.ClearAll();
+            d.Fire(id, true);
+        }
+
         /// <summary>Realm restoration at once (no fade), for shots of both states.</summary>
         public static void Unrestored() => RealmState.Restored = 0f;
         public static void Restored() => RealmState.Restored = 1f;

@@ -42,19 +42,15 @@ namespace Diorama
 
         void Start()
         {
-            Dialogue.RegisterTarget("nearPad", () => PadPoint(_playerPad), k => PulseActor(_player, k));
-            Dialogue.RegisterTarget("wildPad", () => PadPoint(_wildPad), k => PulseActor(_wild, k));
+            // The gold focus outline marks them (FocusHighlight); white flashes are for gaze hover only.
+            Dialogue.RegisterTarget("nearPad", () => PadPoint(_playerPad), k => { }, () => World(TileSize * 0.9f));
+            Dialogue.RegisterTarget("wildPad", () => PadPoint(_wildPad), k => { }, () => World(TileSize * 0.9f));
         }
 
         Vector3? PadPoint(BattlePad pad) =>
             this != null && pad != null ? island.transform.TransformPoint(island.TileToLocal(pad.tile, Cap + pad.TopLift)) : (Vector3?)null;
 
         // The creature on the pad flashes softly (the shared _Flash highlight).
-        static void PulseActor(StageActor a, float k)
-        {
-            if (a != null && a.View != null) a.View.SetFlash(0.3f * k);
-        }
-
         float Zoom => island.Zoom;
         float TileSize => island.map.tileSize;
         float Cap => island.Content.capHeight;

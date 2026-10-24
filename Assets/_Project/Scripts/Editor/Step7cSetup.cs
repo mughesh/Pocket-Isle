@@ -40,11 +40,55 @@ namespace Diorama.EditorTools
             room.archHeight = 0.76f;
             EditorUtility.SetDirty(room);
             log.Append("\n  lodge door: 2-tile glowing archway; leave by walking onto it, look + pinch, or palm over it (ring)");
+            Focus(log);
 
             EditorSceneManager.MarkSceneDirty(active);
             EditorSceneManager.SaveScene(active);
             AssetDatabase.SaveAssets();
             Debug.Log(log.ToString());
+        }
+
+        // ---- B: one focus language ----
+
+        /// <summary>FocusHighlight on the Dialogue object (gold target + lantern beam, white hover); the Spirit parks beside.</summary>
+        static void Focus(System.Text.StringBuilder log)
+        {
+            var dialogue = Object.FindFirstObjectByType<Dialogue>(FindObjectsInactive.Include);
+            var island = Object.FindFirstObjectByType<IslandBuilder>();
+            if (dialogue == null)
+            {
+                Debug.LogError("[Step7c] No Dialogue in MR_Main (run the dialogue setup first).");
+                return;
+            }
+            var focus = dialogue.GetComponent<FocusHighlight>();
+            if (focus == null) focus = Undo.AddComponent<FocusHighlight>(dialogue.gameObject);
+            focus.beamMaterial = BeamMaterial();
+            focus.island = island;
+            EditorUtility.SetDirty(focus);
+            var spirit = Object.FindFirstObjectByType<LanternSpirit>(FindObjectsInactive.Include);
+            if (spirit != null)
+            {
+                spirit.targetOffset = new Vector3(0.065f, 0.012f, 0f);
+                EditorUtility.SetDirty(spirit);
+            }
+            log.Append("\n  FocusHighlight on the Dialogue object (gold hint outline + lantern beam, white gaze hover); the Spirit parks beside targets");
+        }
+
+        static Material BeamMaterial()
+        {
+            const string path = "Assets/_Project/Materials/Props/LanternBeam.mat";
+            var shader = Shader.Find("Diorama/Lantern Beam");
+            if (shader == null) Debug.LogError("[Step7c] Shader Diorama/Lantern Beam not found.");
+            var m = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (m == null)
+            {
+                m = new Material(shader) { name = "LanternBeam" };
+                AssetDatabase.CreateAsset(m, path);
+            }
+            else if (shader != null && m.shader != shader) m.shader = shader;
+            m.renderQueue = 3012;
+            EditorUtility.SetDirty(m);
+            return m;
         }
 
         // ---- E: one material per renderer ----

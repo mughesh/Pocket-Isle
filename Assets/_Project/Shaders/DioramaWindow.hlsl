@@ -23,6 +23,37 @@ float4   _DioramaClearingWorld; // xyz = ellipse centre in world space (grass be
 // of the front edge, z = front-to-back depth. Front tiles go first, a ripple toward the back.
 float4   _DioramaSwap;
 
+// Focus language (step 7c, FocusHighlight): gold = "do this now" (the Spirit's hint target), white = what the gaze is
+// on. Spheres: xyz = world centre, w = radius in world metres (0 = off). Colours: rgb, a = strength (gold pulses).
+// Any outline whose object origin is inside a sphere takes its colour and grows; pods glow at the rim.
+float4   _DioramaHighlight;
+float4   _DioramaHighlightColor;
+float4   _DioramaHover;
+float4   _DioramaHoverColor;
+
+float DioramaInSphere(float4 sphere, float3 originWS)
+{
+    if (sphere.w <= 0.0) return 0.0;
+    return 1.0 - smoothstep(sphere.w * 0.85, sphere.w * 1.15, distance(originWS, sphere.xyz));
+}
+
+// Gold (hint target) and white (gazed) strengths for an object.
+float2 DioramaFocusAmounts(float3 originWS)
+{
+    float gold = DioramaInSphere(_DioramaHighlight, originWS) * _DioramaHighlightColor.a;
+    float hover = DioramaInSphere(_DioramaHover, originWS) * _DioramaHoverColor.a * (1.0 - gold);
+    return float2(gold, hover);
+}
+
+// Outline colour and width scale for an object at originWS.
+float3 DioramaOutlineFocus(float3 col, float3 originWS, out float widthScale)
+{
+    float2 k = DioramaFocusAmounts(originWS);
+    widthScale = 1.0 + 1.3 * k.x + 0.45 * k.y;
+    col = lerp(col, _DioramaHoverColor.rgb, k.y);
+    return lerp(col, _DioramaHighlightColor.rgb, k.x);
+}
+
 float DioramaSwapSink(float3 islandOrigin)
 {
     if (_DioramaSwap.x <= 0.0) return 0.0;

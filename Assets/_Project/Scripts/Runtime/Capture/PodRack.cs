@@ -170,9 +170,9 @@ namespace Diorama
             _quad = BattleHud.VerticalQuad();
             if (hudMaterial != null) _card = new PodCard(hudMaterial, _quad);
             Layout();
-            Dialogue.RegisterTarget("leadPod", () => PointOf(party.LeadSlot), k => PulseOf(party.LeadSlot, k));
+            Dialogue.RegisterTarget("leadPod", () => PointOf(party.LeadSlot), k => PulseOf(party.LeadSlot, k), () => FocusRadius(party.LeadSlot));
             // The cradle stays a target while a shattered pod is being replaced.
-            Dialogue.RegisterTarget("cradle", () => CradleVisible ? HomeWorld(CradleSlot) : (Vector3?)null, k => PulseOf(CradleSlot, k));
+            Dialogue.RegisterTarget("cradle", () => CradleVisible ? HomeWorld(CradleSlot) : (Vector3?)null, k => PulseOf(CradleSlot, k), () => FocusRadius(CradleSlot));
         }
 
         Vector3? PointOf(int slot)
@@ -180,6 +180,13 @@ namespace Diorama
             if (this == null) return null;
             var p = Pod(slot);
             return p != null && p.gameObject.activeInHierarchy ? p.transform.position : (Vector3?)null;
+        }
+
+        /// <summary>Gold focus sphere round a pod (just the pod, not its neighbours).</summary>
+        float FocusRadius(int slot)
+        {
+            var p = Pod(slot);
+            return (p != null ? p.WorldRadius : podPrefab.radius * island.transform.lossyScale.x) * 1.2f;
         }
 
         void PulseOf(int slot, float k)
@@ -539,6 +546,7 @@ namespace Diorama
                 else _gazed = pick.Best;
             }
             IsGazed = _gazed >= 0 || _gazedEmpty >= 0 || _externalGaze.Count > 0;
+            if (_gazed >= 0) FocusHighlight.Hover(_pods[_gazed].transform.position, _pods[_gazed].WorldRadius * 1.2f);
             UpdateFocus();
 
             for (int h = 0; h < 2; h++)

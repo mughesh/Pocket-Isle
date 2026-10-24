@@ -265,6 +265,7 @@ Shader "Diorama/Prop"
                 float  slot       : TEXCOORD1;
                 float3 normalOS   : TEXCOORD2;
                 float3 positionWS : TEXCOORD3;
+                float3 focus      : TEXCOORD4; // x gold, y white hover
                 UNITY_VERTEX_INPUT_INSTANCE_ID
                 UNITY_VERTEX_OUTPUT_STEREO
             };
@@ -277,7 +278,9 @@ Shader "Diorama/Prop"
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
                 float flicker, size;
                 float3 p = PropMotion(v.positionOS.xyz, v.uv0, v.uv1, PropHash(), flicker, size);
-                p += v.normalOS * _OutlineWidth * size;
+                float2 focus = DioramaFocusAmounts(TransformObjectToWorld(float3(0.0, 0.0, 0.0)));
+                o.focus = float3(focus, 0.0);
+                p += v.normalOS * _OutlineWidth * size * (1.0 + 1.3 * focus.x + 0.45 * focus.y);
                 o.positionWS = PropWindowVertex(p, o.islandPos);
                 o.positionCS = TransformWorldToHClip(o.positionWS);
                 o.slot = v.uv0.x;
@@ -295,6 +298,8 @@ Shader "Diorama/Prop"
                 PropPaint(i.slot, i.normalOS, c, glow, tip);
                 float3 col = c * 0.28; // like the creature outlines: base colour x 0.28 in linear
                 if (_WindowClip > 0.5) col = DioramaFocus(col, DioramaMapPoint(i.positionWS, _WindowClip).xz);
+                col = lerp(col, _DioramaHoverColor.rgb, i.focus.y);
+                col = lerp(col, _DioramaHighlightColor.rgb, i.focus.x);
                 return float4(col, 1.0);
             }
             ENDHLSL
