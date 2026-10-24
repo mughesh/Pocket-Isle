@@ -188,6 +188,73 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1499891277}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &155307357
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 155307359}
+  - component: {fileID: 155307358}
+  m_Layer: 0
+  m_Name: Lodge Room
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &155307358
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 155307357}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54db574f22b5d99458668efcc119eb9d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.LodgeRoom
+  island: {fileID: 270959109}
+  swap: {fileID: 221433162}
+  lodge: {fileID: 11400000, guid: d856d518a6f0ad34dbd5d32a3ad3fa1e, type: 2}
+  explorer: {fileID: 374318554}
+  party: {fileID: 1499891276}
+  pods: {fileID: 78739058}
+  progression: {fileID: 11400000, guid: c5e0845f05a2ec34a817839899fdc421, type: 2}
+  fx: {fileID: 1078587927}
+  hudMaterial: {fileID: 2100000, guid: 0656b6c4f92798e49a14cf09a2c6800e, type: 2}
+  grabGuard: {fileID: 270959111}
+  pedestalTile: {x: 4, y: 5}
+  pedestalTop: 0.5
+  doorTiles:
+  - {x: 3, y: 7}
+  - {x: 4, y: 7}
+  cozyTiles:
+  - {x: 2, y: 1}
+  - {x: 5, y: 1}
+  - {x: 6, y: 2}
+  honeycombCenter: {x: 1.5, y: 0}
+  maxInRoom: 12
+  grabSize: 0.07
+  dropDistance: 0.06
+--- !u!4 &155307359
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 155307357}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &200327674
 GameObject:
   m_ObjectHideFlags: 0
@@ -3386,3 +3453,4 @@ SceneRoots:
   - {fileID: 261742742}
   - {fileID: 1541842444}
   - {fileID: 221433163}
+  - {fileID: 155307359}

@@ -108,7 +108,15 @@ namespace Diorama
 
         readonly System.Collections.Generic.HashSet<object> _externalGaze = new System.Collections.Generic.HashSet<object>();
 
-        /// <summary>A slot to highlight (the shelf's selection), or -1.</summary>
+        /// <summary>
+        /// In the Hearth Lodge: party pods can be grabbed outside battle; letting one go raises <see cref="LodgeDropped"/>
+        /// (slot, island-local position and velocity) instead of flying it home (the lodge decides).
+        /// </summary>
+        public bool LodgeMode { get; set; }
+
+        public event Action<int, Vector3, Vector3> LodgeDropped;
+
+        /// <summary>A slot to highlight (a lodge selection), or -1.</summary>
         public int SelectedSlot { get; set; } = -1;
 
         public bool AnyHeld
@@ -354,7 +362,7 @@ namespace Diorama
         /// <summary>Can this pod be grabbed or picked right now?</summary>
         bool CanUse(int slot)
         {
-            if (!InBattle) return false;
+            if (!InBattle) return LodgeMode && slot < Party.Size && party.At(slot) != null;
             if (slot == CradleSlot) return CradleGrab && CradleVisible;
             return PartyGrab && slot != ActiveSlot && party.CanFight(slot);
         }
@@ -374,6 +382,11 @@ namespace Diorama
             bool usable = CanUse(slot) && Thrown != null;
             Debug.Log($"[PodRack] Released {p.name} at {velocityWorld.magnitude:0.00} m/s{(usable ? "" : " (not usable now: back to its socket)")}.");
             p.Detached = true;
+            if (LodgeMode && !InBattle && slot < Party.Size && LodgeDropped != null)
+            {
+                LodgeDropped(slot, pos, vel);
+                return;
+            }
             if (usable) Thrown(slot, pos, vel);
             else StartCoroutine(FlyHome(slot));
         }
@@ -678,7 +691,7 @@ namespace Diorama
             var rim = handle != null ? handle.rimInteractable : null;
             if (rim == null) return;
             bool reaching = false;
-            if (InBattle && (PartyGrab || CradleGrab) && rim.SelectingInteractors.Count == 0)
+            if ((InBattle && (PartyGrab || CradleGrab) || LodgeMode && !InBattle) && rim.SelectingInteractors.Count == 0)
                 for (int h = 0; h < 2 && !reaching; h++)
                 {
                     var hand = HandLookup.Refresh(ref _hands[h], h == 0 ? Handedness.Left : Handedness.Right);
@@ -857,6 +870,15 @@ namespace Diorama
             }
             _evolvingSlot = -1;
             Debug.Log($"[PodRack] {oldName} evolved into {to.displayName} in pod {slot + 1}.");
+        }
+
+        /// <summary>Removes a (detached) party pod at once; the rack makes pods again for whatever the slots hold now.</summary>
+        public void Discard(int slot)
+        {
+            var p = Pod(slot);
+            if (p == null) return;
+            Destroy(p.gameObject);
+            _pods[slot] = null;
         }
 
         /// <summary>The cradle pod now holds a party creature: it becomes pod <paramref name="slot"/> (a new empty pod fills the cradle).</summary>

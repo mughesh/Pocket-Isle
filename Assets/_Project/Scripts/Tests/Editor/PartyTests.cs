@@ -69,6 +69,23 @@ namespace Diorama.Tests
         }
 
         [Test]
+        public void Lodge_DepositGoesToTheFront_BringForwardWakesASleeper()
+        {
+            var a = C("A");
+            var b = C("B");
+            var s1 = C("S1");
+            var s2 = C("S2");
+            _party.members.AddRange(new[] { a, b });
+            _party.storage.AddRange(new[] { s1, s2 });
+            Assert.IsTrue(_party.Deposit(1));
+            CollectionAssert.AreEqual(new[] { b, s1, s2 }, _party.storage, "a dropped pod joins the room (front of storage)");
+            Assert.IsTrue(_party.BringForward(2));
+            CollectionAssert.AreEqual(new[] { s2, b, s1 }, _party.storage);
+            Assert.IsFalse(_party.BringForward(0), "already in front");
+            Assert.IsFalse(_party.BringForward(5));
+        }
+
+        [Test]
         public void Deposit_NeverEmptiesThePods()
         {
             var a = C("A");

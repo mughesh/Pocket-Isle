@@ -98,6 +98,27 @@ namespace Diorama.EditorTools
             shrines.beaconWidth = 0.04f;
             EditorUtility.SetDirty(shrines);
             log.Append("\n  shrines lead into the lodge (palm over the flame or look + pinch), beacon material Materials/Props/Beacon.mat");
+
+            // ---- C: the lodge room ----
+            var room = Object.FindFirstObjectByType<LodgeRoom>(FindObjectsInactive.Include);
+            if (room == null)
+            {
+                var go = new GameObject("Lodge Room");
+                Undo.RegisterCreatedObjectUndo(go, "Lodge Room");
+                room = go.AddComponent<LodgeRoom>();
+            }
+            room.island = island;
+            room.swap = swap;
+            room.lodge = lodge;
+            room.explorer = explorer;
+            room.party = director.party;
+            room.pods = director.pods;
+            room.progression = director.progression;
+            room.fx = director.pods != null ? director.pods.fx : null;
+            room.hudMaterial = director.pods != null ? director.pods.hudMaterial : null;
+            room.grabGuard = shrines.grabGuard;
+            EditorUtility.SetDirty(room);
+            log.Append("\n  'Lodge Room' wired (room Islings, honeycomb, pedestal card, swaps, door)");
         }
 
         static Material BeaconMaterial()

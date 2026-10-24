@@ -64,6 +64,66 @@ namespace Diorama.EditorTools
             if (s != null) Debug.Log($"[BattleDebug] Leave lodge: {s.Return()}");
         }
 
+        static LodgeRoom Room => Object.FindFirstObjectByType<LodgeRoom>();
+
+        /// <summary>Lodge: the first room Isling hops onto the pedestal (its card shows).</summary>
+        public static void LodgeInspect()
+        {
+            var r = Room;
+            if (r != null) r.Inspect(r.First);
+        }
+
+        /// <summary>Lodge: the pedestal Isling swaps with rim pod 2 (look + pinch path).</summary>
+        public static void LodgeSwapPod2()
+        {
+            var r = Room;
+            if (r != null) Debug.Log($"[BattleDebug] Pedestal swap with pod 2: {r.DebugPedestalSwap(1)}");
+        }
+
+        /// <summary>Lodge: rim pod 2 dropped on the floor (into the room).</summary>
+        public static void LodgeDropPod2()
+        {
+            var r = Room;
+            if (r != null) r.DebugDropRimPod(1);
+        }
+
+        /// <summary>Lodge: rim pod 1 dropped on the floor (refused when it's the last one).</summary>
+        public static void LodgeDropPod1()
+        {
+            var r = Room;
+            if (r != null) r.DebugDropRimPod(0);
+        }
+
+        /// <summary>
+        /// Rough per-eye draw cost right now: the island's instanced draws plus every enabled scene renderer's material
+        /// passes (outline materials count as their own draw), and the triangles they submit.
+        /// </summary>
+        public static void DrawCost()
+        {
+            var island = Object.FindFirstObjectByType<IslandBuilder>();
+            int draws = island != null ? island.DrawCallCount : 0, rendererDraws = 0;
+            long tris = 0;
+            foreach (var r in Object.FindObjectsByType<Renderer>(FindObjectsSortMode.None))
+            {
+                if (!r.enabled || !r.gameObject.activeInHierarchy) continue;
+                if (r is ParticleSystemRenderer) { rendererDraws++; continue; }
+                var mf = r.GetComponent<MeshFilter>();
+                var mesh = mf != null ? mf.sharedMesh : r is SkinnedMeshRenderer smr ? smr.sharedMesh : null;
+                int mats = r.sharedMaterials.Length;
+                rendererDraws += mats;
+                if (mesh != null) tris += (long)mesh.triangles.Length / 3 * mats;
+            }
+            Debug.Log($"[BattleDebug] Draw cost: island {draws} instanced draws ({(island != null ? island.InstanceTotal : 0)} instances), " +
+                      $"{rendererDraws} renderer draws ({tris / 1000}k tris in plain renderers), inside: {SceneSwap.IsInside}.");
+        }
+
+        /// <summary>Lodge: the first honeycomb sleeper comes out.</summary>
+        public static void LodgeWake()
+        {
+            var r = Room;
+            if (r != null) r.Wake(0);
+        }
+
         /// <summary>Like key K: save now.</summary>
         public static void SaveNow()
         {

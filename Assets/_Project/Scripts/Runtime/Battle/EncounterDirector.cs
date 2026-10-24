@@ -666,7 +666,7 @@ namespace Diorama
                 party.Add(wild);
                 Debug.Log($"[EncounterDirector] Caught {wild.Name}: pods full, sent to storage ({party.storage.Count}).");
                 Caught?.Invoke(wild);
-                runes.SetCaption($"Pods full: {wild.Name} went to the Sanctuary.");
+                runes.SetCaption($"Pods full: {wild.Name} will wait at the Hearth Lodge.");
                 Dialogue.Say("party.full");
                 yield return pods.StreakAway(slot);
             }

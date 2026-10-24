@@ -6,7 +6,7 @@ namespace Diorama
 {
     /// <summary>
     /// The player's creatures: up to <see cref="Size"/> in the rim pods (slot order = pod order) plus a storage list for
-    /// catches that don't fit (the Sanctuary later). Lead = the first pod creature that can still fight.
+    /// catches that don't fit (they live in the Hearth Lodge). Lead = the first pod creature that can still fight.
     /// Lives in the scene (not an asset), so Play mode changes don't stick.
     /// </summary>
     public class Party : MonoBehaviour
@@ -115,12 +115,26 @@ namespace Diorama
             return true;
         }
 
-        /// <summary>Moves pod <paramref name="slot"/>'s creature to storage. Refused for the last creature in the pods.</summary>
+        /// <summary>
+        /// Moves pod <paramref name="slot"/>'s creature to storage (at the front: the lodge shows the first ones in the
+        /// room). Refused for the last creature in the pods.
+        /// </summary>
         public bool Deposit(int slot)
         {
             if (members.Count <= 1 || slot < 0 || slot >= members.Count) return false;
-            storage.Add(members[slot]);
+            storage.Insert(0, members[slot]);
             members.RemoveAt(slot);
+            Changed?.Invoke();
+            return true;
+        }
+
+        /// <summary>Moves a storage creature to the front (the lodge: out of a honeycomb pod into the room).</summary>
+        public bool BringForward(int storageIndex)
+        {
+            if (storageIndex <= 0 || storageIndex >= storage.Count) return false;
+            var c = storage[storageIndex];
+            storage.RemoveAt(storageIndex);
+            storage.Insert(0, c);
             Changed?.Invoke();
             return true;
         }

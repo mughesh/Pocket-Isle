@@ -6,8 +6,9 @@ using UnityEngine;
 namespace Diorama.EditorTools
 {
     /// <summary>
-    /// The Hearth Lodge interior (step 7b): an 8 x 8 WorldMap of wooden floor (P tiles) and its warm Lodge theme
-    /// (wood floor, warm stone base, hearth light). Row 0 is the back wall, row 7 the open front with the door.
+    /// The Hearth Lodge interior (step 7b): an 8 x 8 WorldMap of wooden floor (P tiles) dressed with the lodge props
+    /// (dollhouse cutaway: back wall and back half of the side walls only), and its warm Lodge theme (wood floor, warm
+    /// stone base, hearth light). Row 0 is the back wall, row 7 the open front with the door.
     /// Re-running rewrites both (same files, references survive).
     /// </summary>
     static class LodgeTools
@@ -59,18 +60,38 @@ namespace Diorama.EditorTools
             return lodge;
         }
 
-        /// <summary>Props grid (none yet; the lodge room section fills it).</summary>
+        /// <summary>
+        /// The room: back wall of arches with the hearth (centre) and the honeycomb pod wall (left), side walls on the
+        /// back half (turned), a rug in the middle, cushions by the hearth, the pedestal front centre, the door on the
+        /// front edge. Writes and bakes the props. Keep LodgeRoom's tiles (pedestal, door, cushions) in sync.
+        /// </summary>
         static void WriteProps(WorldMap lodge, StringBuilder log)
         {
-            var empty = new StringBuilder();
-            for (int r = 0; r < Size; r++)
+            var recipes = PropKit.WriteLodgeProps();
+            AssetDatabase.SaveAssets();
+            foreach (var r in recipes.Values) PropBaker.Bake(r);
+            lodge.propLegend = new List<PropLegend>
             {
-                empty.Append(new string(IslandMap.Empty, Size));
-                if (r < Size - 1) empty.Append('\n');
-            }
-            lodge.propLegend = new List<PropLegend>();
-            lodge.SetProps(empty.ToString());
+                Entry('w', recipes["LodgeWall"]), Entry('v', recipes["LodgeWall"], true), Entry('E', recipes["LodgeHearth"]),
+                Entry('C', recipes["LodgeHoneycomb"]), Entry('U', recipes["LodgeRug"]), Entry('c', recipes["LodgeCushion"]),
+                Entry('Q', recipes["LodgePedestal"]), Entry('D', recipes["LodgeDoor"]),
+            };
+            // 8 x 8, row 0 = back. Multi-tile props: the key sits on their top-left tile.
+            string grid =
+                "wC.E.www\n" +
+                "v.c..c.v\n" +
+                "v.....cv\n" +
+                "v..U...v\n" +
+                "........\n" +
+                "....Q...\n" +
+                "........\n" +
+                "...D....";
+            lodge.SetProps(grid);
+            log.Append($"\n  lodge props: {recipes.Count} written and baked (wall, hearth, honeycomb, rug, cushion, pedestal, door)");
         }
+
+        static PropLegend Entry(char key, PropRecipe recipe, bool turned = false) =>
+            new PropLegend { key = key.ToString(), recipe = recipe, turned = turned };
 
         static Color Hex(string hex) => ColorUtility.TryParseHtmlString(hex, out var c) ? c : Color.magenta;
 

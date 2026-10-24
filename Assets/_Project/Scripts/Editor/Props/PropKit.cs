@@ -330,6 +330,136 @@ namespace Diorama.EditorTools
             return shrine;
         }
 
+        /// <summary>
+        /// Hearth Lodge props (step 7b, interior): wall arch segment, big lit hearth (2 x 1), honeycomb pod wall (2 x 1,
+        /// six cells; LodgeRoom puts sleeping pods in them, keep the cell offsets in sync), rug (2 x 2), cushion,
+        /// inspect pedestal, door threshold (2 x 1). Warm wood, cream and ember light. Returns them by name.
+        /// </summary>
+        public static Dictionary<string, PropRecipe> WriteLodgeProps()
+        {
+            DioramaSceneSetup.EnsureFolder(Root);
+            DioramaSceneSetup.EnsureFolder($"{Root}/Shapes");
+            var cream = C("#D8BE96");
+            var oak = C("#7A5236");
+            var stone = C("#B8AA96");
+            var ember = C("#FFB04A", 1.2f);
+            var all = new Dictionary<string, PropRecipe>();
+
+            var wall = Recipe("LodgeWall", new Vector2Int(1, 1), true, false, 700);
+            wall.palette = Palette(cream, oak, stone, Moss, ember, C("#8E6E54"));
+            wall.yawJitter = 0f;
+            wall.scaleJitter = 0f;
+            wall.pieces = new List<PropPiece>
+            {
+                Piece(PShape("LodgeWall_Stone",
+                    Box(new Vector3(0f, 0.62f, 0f), new Vector3(0.5f, 0.62f, 0.13f), 0.03f, 0f),
+                    Ell(new Vector3(0f, 0.6f, 0.13f), new Vector3(0.27f, 0.4f, 0.06f), 0.02f).Sub(),
+                    Floor(0f)), PropSlot.Stone),
+                Piece(PShape("LodgeWall_Beam",
+                    Box(new Vector3(0f, 1.27f, 0f), new Vector3(0.52f, 0.05f, 0.17f), 0.015f, 0f)), PropSlot.Wood),
+            };
+            all["LodgeWall"] = wall;
+
+            var hearth = Recipe("LodgeHearth", new Vector2Int(2, 1), true, false, 2200);
+            hearth.palette = Palette(cream, oak, stone, Moss, ember, C("#5A3A26"));
+            hearth.yawJitter = 0f;
+            hearth.scaleJitter = 0f;
+            hearth.pieces = new List<PropPiece>
+            {
+                Piece(PShape("LodgeHearth_Stone",
+                    Box(new Vector3(0f, 0.55f, -0.08f), new Vector3(0.92f, 0.55f, 0.34f), 0.08f, 0f),
+                    Ell(new Vector3(0f, 0.34f, 0.26f), new Vector3(0.46f, 0.32f, 0.3f), 0.03f).Sub(),
+                    Box(new Vector3(0f, 1.38f, -0.18f), new Vector3(0.36f, 0.32f, 0.2f), 0.05f, 0.04f),
+                    Floor(0f)), PropSlot.Stone),
+                Piece(PShape("LodgeHearth_Mantel",
+                    Box(new Vector3(0f, 1.03f, 0.06f), new Vector3(1.0f, 0.055f, 0.3f), 0.02f, 0f)), PropSlot.Wood),
+                Piece(PShape("LodgeHearth_Logs",
+                    Cone(new Vector3(-0.3f, 0.08f, 0.12f), new Vector3(0.3f, 0.08f, 0.2f), 0.06f, 0.06f, 0f),
+                    Cone(new Vector3(0.28f, 0.1f, 0.1f), new Vector3(-0.25f, 0.12f, 0.22f), 0.055f, 0.055f, 0.02f)), PropSlot.Accent),
+                Piece(PShape("LodgeHearth_Fire",
+                    Sphere(new Vector3(0f, 0.2f, 0.14f), 0.17f),
+                    Cone(new Vector3(0f, 0.22f, 0.14f), new Vector3(0f, 0.6f, 0.1f), 0.15f, 0.02f, 0.08f),
+                    Cone(new Vector3(0.14f, 0.2f, 0.14f), new Vector3(0.22f, 0.45f, 0.12f), 0.07f, 0.01f, 0.06f),
+                    Cone(new Vector3(-0.14f, 0.2f, 0.16f), new Vector3(-0.2f, 0.42f, 0.12f), 0.065f, 0.01f, 0.06f)),
+                    PropSlot.Glow, PropMotion.Flicker, 0.03f),
+            };
+            all["LodgeHearth"] = hearth;
+
+            var comb = Recipe("LodgeHoneycomb", new Vector2Int(2, 1), true, false, 2000);
+            comb.palette = Palette(cream, oak, stone, Moss, ember, C("#E3A23B"));
+            comb.yawJitter = 0f;
+            comb.scaleJitter = 0f;
+            var frame = new List<SdfPrimitive>
+            {
+                Box(new Vector3(0f, 0.68f, -0.1f), new Vector3(0.95f, 0.62f, 0.18f), 0.05f, 0f),
+            };
+            // Keep in sync with LodgeRoom.Cells.
+            foreach (float y in new[] { 0.42f, 0.96f })
+                foreach (float x in new[] { -0.55f, 0f, 0.55f })
+                    frame.Add(Cone(new Vector3(x, y, 0.2f), new Vector3(x, y, -0.05f), 0.21f, 0.21f, 0.02f).Sub());
+            frame.Add(Floor(0f));
+            comb.pieces = new List<PropPiece>
+            {
+                Piece(PShape("LodgeHoneycomb_Frame", frame.ToArray()), PropSlot.Wood),
+                Piece(PShape("LodgeHoneycomb_Back",
+                    Box(new Vector3(0f, 0.68f, -0.07f), new Vector3(0.86f, 0.56f, 0.03f), 0.01f, 0f)), PropSlot.Accent),
+            };
+            all["LodgeHoneycomb"] = comb;
+
+            var rug = Recipe("LodgeRug", new Vector2Int(2, 2), false, false, 600);
+            rug.palette = Palette(cream, oak, stone, Moss, ember, C("#9E3B2E"));
+            rug.yawJitter = 0f;
+            rug.scaleJitter = 0f;
+            rug.outline = 0f;
+            rug.pieces = new List<PropPiece>
+            {
+                Piece(PShape("LodgeRug_Weave", Ell(new Vector3(0f, 0.012f, 0f), new Vector3(0.86f, 0.016f, 0.74f), 0f)), PropSlot.Accent),
+                Piece(PShape("LodgeRug_Inner", Ell(new Vector3(0f, 0.02f, 0f), new Vector3(0.55f, 0.012f, 0.46f), 0f)), PropSlot.Clay),
+            };
+            all["LodgeRug"] = rug;
+
+            var cushion = Recipe("LodgeCushion", new Vector2Int(1, 1), false, true, 400);
+            cushion.palette = Palette(cream, oak, stone, Moss, ember, C("#D9A441"));
+            cushion.pieces = new List<PropPiece>
+            {
+                Piece(PShape("LodgeCushion_Body", Ell(new Vector3(0f, 0.09f, 0f), new Vector3(0.3f, 0.09f, 0.28f), 0f)), PropSlot.Accent),
+            };
+            all["LodgeCushion"] = cushion;
+
+            var pedestal = Recipe("LodgePedestal", new Vector2Int(1, 1), true, false, 700);
+            pedestal.palette = Palette(cream, oak, stone, Moss, ember, Smoke);
+            pedestal.yawJitter = 0f;
+            pedestal.scaleJitter = 0f;
+            pedestal.pieces = new List<PropPiece>
+            {
+                Piece(PShape("LodgePedestal_Stone",
+                    Cone(new Vector3(0f, 0f, 0f), new Vector3(0f, 0.43f, 0f), 0.3f, 0.22f, 0f),
+                    Ell(new Vector3(0f, 0.46f, 0f), new Vector3(0.36f, 0.045f, 0.36f), 0.03f),
+                    Floor(0f)), PropSlot.Stone),
+                Piece(PShape("LodgePedestal_Ring",
+                    Torus(new Vector3(0f, 0.5f, 0f), 0.3f, 0.022f, Vector3.zero, 0f)), PropSlot.Glow, PropMotion.Flicker, 0.002f),
+            };
+            all["LodgePedestal"] = pedestal;
+
+            var door = Recipe("LodgeDoor", new Vector2Int(2, 1), false, false, 500);
+            door.palette = Palette(cream, oak, stone, Moss, ember, Smoke);
+            door.yawJitter = 0f;
+            door.scaleJitter = 0f;
+            door.pieces = new List<PropPiece>
+            {
+                Piece(PShape("LodgeDoor_Threshold",
+                    Box(new Vector3(0f, 0.014f, 0.25f), new Vector3(0.8f, 0.014f, 0.14f), 0.01f, 0f)), PropSlot.Glow, PropMotion.Flicker, 0.001f),
+                Piece(PShape("LodgeDoor_Posts",
+                    Box(new Vector3(0.86f, 0.22f, 0.3f), new Vector3(0.07f, 0.22f, 0.07f), 0.02f, 0f),
+                    Box(new Vector3(-0.86f, 0.22f, 0.3f), new Vector3(0.07f, 0.22f, 0.07f), 0.02f, 0f),
+                    Floor(0f)), PropSlot.Wood),
+            };
+            all["LodgeDoor"] = door;
+
+            foreach (var r in all.Values) EditorUtility.SetDirty(r);
+            return all;
+        }
+
         // ---- themes ----
 
         static void WriteThemes(PropRecipe autumnTree)
