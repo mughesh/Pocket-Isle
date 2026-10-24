@@ -44,6 +44,12 @@ namespace Diorama
         /// <summary>Poke or gaze + pinch.</summary>
         public event Action Skipped;
 
+        /// <summary>The head is looking at the shown bubble (its pinch wins over tile gaze).</summary>
+        public bool IsGazed { get; private set; }
+
+        /// <summary>A fingertip is hovering or pressing the shown bubble.</summary>
+        public bool IsBeingPoked => _showing && _poke != null && _poke.State != InteractableState.Normal;
+
         static readonly int BackColorId = Shader.PropertyToID("_BackColor");
         static readonly int BorderColorId = Shader.PropertyToID("_BorderColor");
         static readonly int FillId = Shader.PropertyToID("_Fill");
@@ -177,7 +183,7 @@ namespace Diorama
 
         public void Hide()
         {
-            _showing = false;
+            _showing = false; // IsGazed clears next frame, so a skipping pinch doesn't also reach tile gaze
             _root.gameObject.SetActive(false);
         }
 
@@ -190,7 +196,11 @@ namespace Diorama
 
         void Update()
         {
-            if (!_showing) return;
+            if (!_showing)
+            {
+                IsGazed = false;
+                return;
+            }
             float t = Time.time - _shownAt;
             _text.maxVisibleCharacters = Mathf.Min(_chars, Mathf.CeilToInt(t * charsPerSecond));
             _appear = Mathf.Min(1f, t / 0.15f);
@@ -235,6 +245,7 @@ namespace Diorama
                 Vector3 hit = o + d * (-o.z / d.z);
                 looking = Mathf.Abs(hit.x) < _size.x * 0.6f && Mathf.Abs(hit.y) < _size.y * 0.8f;
             }
+            IsGazed = looking;
             for (int h = 0; h < 2; h++)
             {
                 var hand = HandLookup.Refresh(ref _hands[h], h == 0 ? Handedness.Left : Handedness.Right);

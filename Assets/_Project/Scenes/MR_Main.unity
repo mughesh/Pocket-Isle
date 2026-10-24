@@ -726,11 +726,14 @@ MonoBehaviour:
   placer: {fileID: 374318555}
   probe: {fileID: 374318558}
   cubeMaterial: {fileID: 2100000, guid: 465021766fd4ece4294b3a58730b1c8e, type: 2}
-  moveMode: 1
+  moveMode: 0
   startTile: {x: 10, y: 7}
-  cubeSize: 0.028
-  walkSeconds: 0.6
-  runSeconds: 0.3
+  cubeSize: 0.018
+  walkSeconds: 0.4
+  runSeconds: 0.2
+  maxPathSteps: 40
+  runPathSteps: 8
+  showDebugLabels: 0
   holdReleaseMm: 5
   holdGraceSeconds: 0.25
   hopHeight: 0.012
@@ -766,6 +769,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.MicrogestureInput
   repeatGuard: 0.15
   grabGuard: {fileID: 270959111}
+  pinchTapGuard: 0.35
+  burstGap: 0.45
 --- !u!4 &374318557
 Transform:
   m_ObjectHideFlags: 0
@@ -788,7 +793,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 374318553}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 18e27ac93438f1d44b1da882da9b1f7c, type: 3}
   m_Name: 
@@ -850,6 +855,99 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 270959110}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &441767165
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 441767169}
+  - component: {fileID: 441767168}
+  - component: {fileID: 441767167}
+  - component: {fileID: 441767166}
+  m_Layer: 0
+  m_Name: Tile Input
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &441767166
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 441767165}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b25c68c52c1641942adc9d6cd63a63a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.TileGaze
+  island: {fileID: 270959109}
+  explorer: {fileID: 374318554}
+  cursor: {fileID: 441767168}
+  grabGuard: {fileID: 270959111}
+  bubble: {fileID: 232676577}
+--- !u!114 &441767167
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 441767165}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 094737c05c1b9934499be8c710ff5337, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.TileTouch
+  island: {fileID: 270959109}
+  explorer: {fileID: 374318554}
+  cursor: {fileID: 441767168}
+  grabGuard: {fileID: 270959111}
+  bubble: {fileID: 232676577}
+  hoverHeight: 0.03
+  dipHeight: 0.005
+  liftMargin: 0.008
+  maxSpeed: 0.6
+  maxDepth: 0.02
+--- !u!114 &441767168
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 441767165}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2610d1582e705f54aaf9f863c7cc0b88, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.TileCursor
+  island: {fileID: 270959109}
+  explorer: {fileID: 374318554}
+  hudMaterial: {fileID: 2100000, guid: 0656b6c4f92798e49a14cf09a2c6800e, type: 2}
+  reachableColor: {r: 0.62, g: 0.96, b: 0.58, a: 0.95}
+  blockedColor: {r: 0.72, g: 0.72, b: 0.72, a: 0.6}
+  markerColor: {r: 1, g: 0.82, b: 0.42, a: 0.95}
+  ringSize: 0.92
+  lift: 0.002
+--- !u!4 &441767169
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 441767165}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &509277689
 GameObject:
@@ -2749,3 +2847,4 @@ SceneRoots:
   - {fileID: 542041139}
   - {fileID: 1499891277}
   - {fileID: 733261510}
+  - {fileID: 441767169}

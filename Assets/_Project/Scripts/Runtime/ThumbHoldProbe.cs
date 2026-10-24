@@ -57,6 +57,7 @@ namespace Diorama
             _label.outlineWidth = 0.2f;
             _label.outlineColor = new Color32(20, 30, 25, 255);
             _label.rectTransform.sizeDelta = new Vector2(0.2f, 0.08f);
+            DebugLabels.Track(go);
 
             if (input != null) input.Gesture += OnGesture;
             else Debug.LogError("[ThumbHoldProbe] No MicrogestureInput assigned.");

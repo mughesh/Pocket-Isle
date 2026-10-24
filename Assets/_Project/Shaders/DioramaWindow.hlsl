@@ -33,6 +33,15 @@ float3 DioramaMapPoint(float3 positionWS, float on)
     return on > 0.5 ? mul(_DioramaWorldToMap, float4(positionWS, 1.0)).xyz : positionWS;
 }
 
+// Stable 0..1 hash of a map-space point (per-instance phases and shades). Map positions are recovered from world space
+// every frame, so they wobble by ~1e-6 m while the map scrolls; a plain sin hash amplifies that into a new random value
+// each frame (effects and shades jittered only while walking). Snapping to a 1 mm grid first keeps it fixed.
+float DioramaStableHash(float2 mapXZ)
+{
+    float2 q = floor(mapXZ * 1000.0 + 0.5);
+    return frac(sin(dot(q, float2(12.9898, 78.233))) * 43758.5453);
+}
+
 // 0..1 inside the clearing ellipse (soft edge), ignoring the fade.
 float DioramaClearingShape(float2 mapXZ)
 {

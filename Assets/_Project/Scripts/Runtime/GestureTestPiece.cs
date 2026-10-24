@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -15,7 +16,9 @@ namespace Diorama
 
     /// <summary>
     /// Placeholder explorer: a cube that walks the world map tile by tile, shown through the island window, plus a
-    /// small world-space label beside the island (last gesture, tile, zoom, placement).
+    /// small world-space debug label beside the island (last gesture, tile, zoom, placement; see <see cref="DebugLabels"/>).
+    /// <see cref="GoTo"/> walks an A* path to a tile (<see cref="ExplorerPath"/>; used by TileTouch and TileGaze); any
+    /// swipe or tap cancels it.
     /// AutoWalk: a swipe sets the walking direction and the cube keeps walking until another swipe, a blocked tile
     /// (water, tree, rock, border, blocking prop), or a tap stops it. HoldToWalk: same, but it also stops when the thumb returns to
     /// rest (read from ThumbHoldProbe; in the Editor, releasing the arrow key). In both modes a second swipe in the
@@ -35,16 +38,26 @@ namespace Diorama
         public Material cubeMaterial;
 
         [Tooltip("Can be switched live in Play mode.")]
-        public MoveMode moveMode = MoveMode.HoldToWalk;
+        public MoveMode moveMode = MoveMode.AutoWalk;
 
         [Tooltip("Start tile (column, row) when the island has no world map; a world map has its own start tile.")]
         public Vector2Int startTile = new Vector2Int(10, 7);
 
-        public float cubeSize = 0.028f;   // map metres at zoom 1
+        public float cubeSize = 0.018f;   // map metres at zoom 1
         [Tooltip("Seconds per tile when walking.")]
-        public float walkSeconds = 0.6f;
+        public float walkSeconds = 0.4f;
         [Tooltip("Seconds per tile when running.")]
-        public float runSeconds = 0.3f;
+        public float runSeconds = 0.2f;
+
+        [Header("Go to tile")]
+        [Tooltip("Longest path GoTo will walk, in steps.")]
+        public int maxPathSteps = ExplorerPath.DefaultMaxSteps;
+        [Tooltip("Paths longer than this many steps are run instead of walked.")]
+        public int runPathSteps = 8;
+
+        [Header("Debug")]
+        [Tooltip("Shows the world-space debug labels at start. Five quick left-hand thumb taps toggle them (development builds).")]
+        public bool showDebugLabels;
 
         [Header("Hold to walk")]
         [Tooltip("Stop when the thumb comes back within this distance (mm) of its rest point.")]
@@ -64,6 +77,9 @@ namespace Diorama
         /// <summary>Raised on a tap while standing next to water and facing it (the water tile).</summary>
         public event Action<Vector2Int> OnFishTap;
 
+        /// <summary>The GoTo target changed: a tile, or null when the explorer arrived or the path was cancelled.</summary>
+        public event Action<Vector2Int?> DestinationChanged;
+
         Transform _cube;
         TextMeshPro _label;
         Vector2Int _tile, _fromTile;
@@ -78,6 +94,9 @@ namespace Diorama
         int _count;
         string _last = "none yet";
         bool _zoomedIn;
+        readonly List<Vector2Int> _path = new List<Vector2Int>();
+        int _pathIndex;
+        Vector2Int? _destination;
 
         IslandMap Map => island.Content;
 
@@ -86,6 +105,12 @@ namespace Diorama
 
         /// <summary>Direction of the last swipe (column, row step); starts facing away from the player.</summary>
         public Vector2Int Facing => _facing;
+
+        /// <summary>The tile a GoTo path is heading for, if any.</summary>
+        public Vector2Int? Destination => _destination;
+
+        /// <summary>False while a battle or the battle zoom is on (no walking, no GoTo).</summary>
+        public bool CanMove => !_locked && !Zoomed;
 
         /// <summary>
         /// Where the explorer stands relative to its tile, in tiles (battles move it behind the party creature's pad).
@@ -102,7 +127,11 @@ namespace Diorama
             set
             {
                 _locked = value;
-                if (value) Stop();
+                if (value)
+                {
+                    Stop();
+                    CancelPath();
+                }
                 RefreshLabel();
             }
         }
@@ -130,10 +159,13 @@ namespace Diorama
             _label.outlineWidth = 0.2f;
             _label.outlineColor = new Color32(20, 30, 25, 255);
             _label.rectTransform.sizeDelta = new Vector2(0.22f, 0.12f);
+            DebugLabels.Visible = showDebugLabels;
+            DebugLabels.Track(labelGo);
 
             input.Gesture += OnGesture;
+            input.TapBurst += OnTapBurst;
             if (placer != null) placer.Placed += PositionLabel;
-            if (probe == null) Debug.LogError("[GestureTestPiece] No ThumbHoldProbe assigned; HoldToWalk will stop right after each swipe.");
+            if (probe == null && moveMode == MoveMode.HoldToWalk) Debug.LogError("[GestureTestPiece] No ThumbHoldProbe assigned; HoldToWalk will stop right after each swipe.");
             PositionLabel();
             UpdateExplorer();
             RefreshLabel();
@@ -141,11 +173,64 @@ namespace Diorama
 
         void OnDestroy()
         {
-            if (input != null) input.Gesture -= OnGesture;
+            if (input != null)
+            {
+                input.Gesture -= OnGesture;
+                input.TapBurst -= OnTapBurst;
+            }
             if (placer != null) placer.Placed -= PositionLabel;
         }
 
         bool Zoomed => window != null && window.IsZoomed;
+
+        void OnTapBurst(int count, GestureSource source)
+        {
+            if (count != 5 || source != GestureSource.LeftHand || !(Debug.isDebugBuild || Application.isEditor)) return;
+            DebugLabels.Visible = !DebugLabels.Visible;
+            Debug.Log($"[GestureTestPiece] Debug labels {(DebugLabels.Visible ? "on" : "off")}.");
+        }
+
+        /// <summary>
+        /// Walks to <paramref name="target"/> along the shortest walkable path (run when it is longer than
+        /// <see cref="runPathSteps"/>). False when the explorer can't move now or the tile can't be reached.
+        /// </summary>
+        public bool GoTo(Vector2Int target)
+        {
+            if (!CanMove || target == _tile) return false;
+            if (!ExplorerPath.Find(Map, _tile, target, _path, maxPathSteps))
+            {
+                Debug.Log($"[GestureTestPiece] GoTo c{target.x} r{target.y}: no path within {maxPathSteps} steps.");
+                return false;
+            }
+            Stop();
+            _pathIndex = 0;
+            _running = _path.Count > runPathSteps;
+            SetDestination(target);
+            _last = $"GoTo c{target.x} r{target.y} ({_path.Count} steps)";
+            Debug.Log($"[GestureTestPiece] {_last}, {(_running ? "running" : "walking")}.");
+            if (_stepT >= 1f) TryStep();
+            RefreshLabel();
+            return true;
+        }
+
+        /// <summary>True when GoTo would walk to <paramref name="target"/> right now.</summary>
+        public bool CanReach(Vector2Int target) => CanMove && target != _tile && ExplorerPath.CanReach(Map, _tile, target, maxPathSteps);
+
+        bool FollowingPath => _destination.HasValue;
+
+        void CancelPath()
+        {
+            if (!FollowingPath) return;
+            _path.Clear();
+            _running = false;
+            SetDestination(null);
+        }
+
+        void SetDestination(Vector2Int? tile)
+        {
+            _destination = tile;
+            DestinationChanged?.Invoke(tile);
+        }
 
         void OnGesture(ThumbGesture gesture, GestureSource source)
         {
@@ -162,6 +247,19 @@ namespace Diorama
             if (_locked)
             {
                 _last += " - battle, ignored";
+            }
+            else if (FollowingPath)
+            {
+                // Any swipe or tap cancels a GoTo; a swipe then walks its own way.
+                CancelPath();
+                _last += " - path cancelled";
+                if (gesture != ThumbGesture.Tap && !Zoomed)
+                {
+                    _heading = _facing = d;
+                    _source = source;
+                    _swipeTime = Time.unscaledTime;
+                    if (_stepT >= 1f) TryStep();
+                }
             }
             else if (gesture == ThumbGesture.Tap)
             {
@@ -208,6 +306,29 @@ namespace Diorama
 
         void TryStep()
         {
+            if (FollowingPath)
+            {
+                if (_pathIndex >= _path.Count)
+                {
+                    CancelPath();
+                    RefreshLabel();
+                    return;
+                }
+                var step = _path[_pathIndex++];
+                if (!Map.CanWalk(step) || (step - _tile).sqrMagnitude != 1)
+                {
+                    _last += " - path blocked";
+                    CancelPath();
+                    RefreshLabel();
+                    return;
+                }
+                _facing = step - _tile;
+                _fromTile = _tile;
+                _tile = step;
+                _stepT = 0f;
+                RefreshLabel();
+                return;
+            }
             var next = _tile + _heading;
             char ch = Map.At(next.y, next.x);
             if (!Map.CanWalk(next))
@@ -266,7 +387,7 @@ namespace Diorama
                     if (Map.At(_tile.y, _tile.x) == IslandMap.TallGrass) OnTallGrassStep?.Invoke(_tile);
                 }
             }
-            if (_stepT >= 1f && _heading != Vector2Int.zero) TryStep();
+            if (_stepT >= 1f && (_heading != Vector2Int.zero || FollowingPath)) TryStep();
             UpdateExplorer();
 
             // Face the label to the user (yaw only).
@@ -309,7 +430,9 @@ namespace Diorama
         {
             if (_label == null) return;
             string place = placer != null ? placer.Status : "-";
-            string move = _locked ? "Battle" : _zoomedIn ? "Zoomed" : _heading == Vector2Int.zero ? "Stopped" : $"{(_running ? "Run" : "Walk")} {HeadingName(_heading)}";
+            string move = _locked ? "Battle" : _zoomedIn ? "Zoomed"
+                : FollowingPath ? $"{(_running ? "Run" : "Walk")} to c{_destination.Value.x} r{_destination.Value.y}"
+                : _heading == Vector2Int.zero ? "Stopped" : $"{(_running ? "Run" : "Walk")} {HeadingName(_heading)}";
             _label.text = $"<b>Mode:</b> {moveMode}\n<b>Last:</b> {_last}\n<b>Count:</b> {_count}\n<b>Tile:</b> c{_tile.x} r{_tile.y}  <b>{move}</b>\n<b>Place:</b> {place}";
         }
 

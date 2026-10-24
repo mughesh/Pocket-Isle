@@ -116,6 +116,21 @@ namespace Diorama.EditorTools
             }
         }
 
+        /// <summary>GoTo the farthest reachable tile within 6 steps (tests pathfinding in Play mode).</summary>
+        public static void GoTo()
+        {
+            var e = Object.FindFirstObjectByType<GestureTestPiece>();
+            if (e == null) return;
+            Vector2Int best = e.Tile;
+            for (int dx = -6; dx <= 6; dx++)
+                for (int dy = -6; dy <= 6; dy++)
+                {
+                    var t = e.Tile + new Vector2Int(dx, dy);
+                    if (Mathf.Abs(dx) + Mathf.Abs(dy) > Mathf.Abs(best.x - e.Tile.x) + Mathf.Abs(best.y - e.Tile.y) && e.CanReach(t)) best = t;
+                }
+            Debug.Log($"[BattleDebug] GoTo c{best.x} r{best.y}: {e.GoTo(best)}");
+        }
+
         public static void Move1Strip() { Choose(0); Strip(); }
         public static void Move2Strip() { Choose(1); Strip(); }
         public static void Move3Strip() { Choose(2); Strip(); }

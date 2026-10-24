@@ -33,6 +33,14 @@ namespace Diorama
         public float fontSize = 0.11f;
         public float captionFontSize = 0.12f;
 
+        [Header("Facing")]
+        [Tooltip("The row faces the head's direction at battle start, then drifts at most this far (degrees, yaw).")]
+        public float maxDrift = 15f;
+        [Tooltip("How fast it drifts toward the head (1/s).")]
+        public float driftSpeed = 1.5f;
+        [Tooltip("Leans the row back toward the head by this much (degrees). The head is above, so a full look-at tilted it too far.")]
+        public float tiltBack = 12f;
+
         [Header("Poke")]
         [Tooltip("How far the plate travels in when pressed (island-local metres).")]
         public float pressDepth = 0.008f;
@@ -73,6 +81,7 @@ namespace Diorama
         readonly bool[] _wasPinching = new bool[2];
         StageActor _avoidA, _avoidB;
         float _avoid;
+        float _baseYaw, _yaw;
         bool _loggedPokeHover, _loggedPokeSelect, _reportedInteractors;
 
         void Awake()
@@ -303,7 +312,10 @@ namespace Diorama
             Chosen?.Invoke(index);
         }
 
-        /// <summary>Keeps the row above the middle of the near rim (the side toward the player), facing the head.</summary>
+        /// <summary>
+        /// Keeps the row above the middle of the near rim (the side toward the player). It faces the head's direction
+        /// at battle start (yaw on the island, slightly leaned back), then only drifts within <see cref="maxDrift"/>.
+        /// </summary>
         void PlaceRow(bool snap)
         {
             if (island == null || island.map == null) return;
@@ -311,11 +323,20 @@ namespace Diorama
             var cam = Camera.main;
             if (cam != null && Covers(cam.transform.position)) _avoid = Mathf.MoveTowards(_avoid, 1f, Time.deltaTime * 3f);
             _row.localPosition = new Vector3(b.center.x, island.map.capHeight, b.max.z) + offset + avoidOffset * _avoid;
-            if (cam == null) return;
-            Vector3 away = _row.position - cam.transform.position;
-            if (away.sqrMagnitude < 1e-6f) return;
-            var target = Quaternion.LookRotation(away, Vector3.up);
-            _row.rotation = snap ? target : Quaternion.Slerp(_row.rotation, target, 1f - Mathf.Exp(-Time.deltaTime * 4f));
+            if (cam != null)
+            {
+                // Head direction projected on the island, as a yaw in island space (the row's front looks toward -Z).
+                Vector3 away = island.transform.InverseTransformDirection(_row.position - cam.transform.position);
+                away.y = 0f;
+                if (away.sqrMagnitude > 1e-8f)
+                {
+                    float headYaw = Mathf.Atan2(away.x, away.z) * Mathf.Rad2Deg;
+                    if (snap) _baseYaw = _yaw = headYaw;
+                    float target = _baseYaw + Mathf.Clamp(Mathf.DeltaAngle(_baseYaw, headYaw), -maxDrift, maxDrift);
+                    _yaw = Mathf.LerpAngle(_yaw, target, 1f - Mathf.Exp(-Time.deltaTime * driftSpeed));
+                }
+            }
+            _row.rotation = island.transform.rotation * Quaternion.Euler(tiltBack, _yaw, 0f);
         }
 
         /// <summary>True when the row (runes and caption) sits between the head and either creature's body.</summary>

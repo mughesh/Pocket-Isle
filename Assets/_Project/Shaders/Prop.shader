@@ -70,7 +70,7 @@ Shader "Diorama/Prop"
     float PropHash()
     {
         float3 o = DioramaMapPoint(PropOrigin(), _WindowClip);
-        return frac(sin(dot(o.xz, float2(127.1, 311.7))) * 43758.5453);
+        return DioramaStableHash(o.xz);
     }
 
     // Object-space motion. flicker scales the glow; size scales the outline (steam shrinks to nothing).

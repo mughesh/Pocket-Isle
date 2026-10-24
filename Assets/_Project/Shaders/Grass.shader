@@ -110,7 +110,7 @@ Shader "Diorama/Grass"
                 o.h = h;
                 o.tall = step(_TallThreshold * scale, height) * (1.0 - clear);
                 o.mapXZ = mapBase.xz;
-                o.variation = frac(sin(dot(mapBase.xz, float2(127.1, 311.7))) * 43758.5453);
+                o.variation = DioramaStableHash(mapBase.xz);
                 return o;
             }
 

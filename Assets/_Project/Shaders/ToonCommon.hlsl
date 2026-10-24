@@ -82,7 +82,7 @@ float3 ToonDeform(float3 positionOS, float3 normalOS)
 float ToonOriginHash()
 {
     float3 o = DioramaMapPoint(UNITY_MATRIX_M._m03_m13_m23, _WindowClip);
-    return frac(sin(dot(o.xz, float2(127.1, 311.7))) * 43758.5453);
+    return DioramaStableHash(o.xz);
 }
 
 float3 ToonWindowOrigin()

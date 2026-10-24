@@ -83,9 +83,10 @@ namespace Diorama
             main.loop = false;
             main.playOnAwake = false;
             main.maxParticles = maxParticles;
-            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            // Simulated in the island's space, so dots stay with the island while it moves or the map scrolls.
+            main.simulationSpace = ParticleSystemSimulationSpace.Local;
             main.startSpeed = 0f;
-            main.scalingMode = ParticleSystemScalingMode.Shape;
+            main.scalingMode = ParticleSystemScalingMode.Hierarchy;
             var emission = _particles.emission;
             emission.enabled = false;
             var shape = _particles.shape;
@@ -114,13 +115,16 @@ namespace Diorama
         public void Burst(Vector3 position, int count, Color color, float speed, float life, float size, Vector3 up = default, float gravity = 0f)
         {
             if (_particles == null) return;
+            // The API takes world space; the system simulates locally (hierarchy scaling), so convert.
+            var t = _particles.transform;
+            float toLocal = 1f / Mathf.Max(1e-4f, t.lossyScale.x);
             var p = new ParticleSystem.EmitParams { applyShapeToPosition = false };
             for (int i = 0; i < count; i++)
             {
-                p.position = position;
-                p.velocity = Random.onUnitSphere * (speed * Random.Range(0.35f, 1f)) + up - Vector3.up * (gravity * 0.3f);
+                p.position = t.InverseTransformPoint(position);
+                p.velocity = t.InverseTransformVector(Random.onUnitSphere * (speed * Random.Range(0.35f, 1f)) + up - Vector3.up * (gravity * 0.3f));
                 p.startColor = color;
-                p.startSize = size * particleSize * Random.Range(0.6f, 1.2f);
+                p.startSize = size * particleSize * Random.Range(0.6f, 1.2f) * toLocal;
                 p.startLifetime = life * Random.Range(0.6f, 1.2f);
                 _particles.Emit(p, 1);
             }

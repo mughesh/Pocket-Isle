@@ -311,6 +311,19 @@ namespace Diorama
             return new Vector2(-m.x / TileSize, m.z / TileSize);
         }
 
+        /// <summary>True when an island-local point lies over a footprint tile (x and z only).</summary>
+        public bool FootprintContains(Vector3 local)
+        {
+            if (map == null) return false;
+            float tile = map.tileSize;
+            int c = Mathf.RoundToInt((map.Columns - 1) * 0.5f - local.x / tile);
+            int r = Mathf.RoundToInt((map.Rows - 1) * 0.5f + local.z / tile);
+            return map.At(r, c) != IslandMap.Empty;
+        }
+
+        /// <summary>Island-local height of the cap tops for the current view.</summary>
+        public float CapTopLocal => TileToLocal(Vector2.zero, Content != null ? Content.capHeight : 0f).y;
+
         /// <summary>Flashes the cap of one map tile for a moment.</summary>
         public void FlashTile(Vector2Int tile, float seconds = 0.5f)
         {
