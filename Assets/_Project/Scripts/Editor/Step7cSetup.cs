@@ -41,6 +41,13 @@ namespace Diorama.EditorTools
             EditorUtility.SetDirty(room);
             log.Append("\n  lodge door: 2-tile glowing archway; leave by walking onto it, look + pinch, or palm over it (ring)");
             Focus(log);
+            DialogueTools.Import();
+            var guide = room.GetComponent<LodgeGuide>();
+            if (guide == null) guide = Undo.AddComponent<LodgeGuide>(room.gameObject);
+            guide.room = room;
+            guide.swap = room.swap;
+            EditorUtility.SetDirty(guide);
+            log.Append("\n  Script_v1 reimported; 'Lodge Guide' on the Lodge Room (first-visit hint chain: inspect, take, leave, exit)");
 
             EditorSceneManager.MarkSceneDirty(active);
             EditorSceneManager.SaveScene(active);

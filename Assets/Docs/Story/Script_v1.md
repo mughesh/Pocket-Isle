@@ -3,7 +3,8 @@
 Lantern Spirit = **Spirit**. The creatures are **Islings** (never "creature" in a line). Bubbles are short: one idea per line, ≤ ~70 characters.
 Format: `trigger_id` · speaker · lines (shown in order). **once** = only the first time.
 Optional `· → target` (before the lines): the Spirit flies to that anchor while saying them and it pulses
-(`leadPod`, `cradle`, `runes`, `nearPad`, `wildPad`, `shrine`, `lodgeCenter`, `pedestal`, `tile:x,y`). No target = it stays home.
+(`leadPod`, `cradle`, `runes`, `nearPad`, `wildPad`, `shrine`, `lodgeCenter`, `pedestal`, `lodgeIsling`, `rimSocket`, `rimPod`,
+`lodgeDoor`, `tile:x,y`). No target = it stays home. The target glows gold and the Spirit shines its lantern on it (step 7c).
 Names are placeholders. The step 5c dialogue system loads this (convert to data asset).
 
 ## Opening (Still Isle)
@@ -48,10 +49,16 @@ Names are placeholders. The step 5c dialogue system loads this (convert to data 
   - Spirit: Look at that! They've grown into something new.
 - `shrine.first` · once · → shrine (first time a shrine comes into the window)
   - Spirit: A Hearth Shrine! Warm your hand over the flame.
-- `lodge.first` · once · → lodgeCenter (first time inside the Hearth Lodge)
+- `lodge.first` · once · → lodgeCenter (first time inside the Hearth Lodge; the lodge hint chain starts, step 7c)
   - Spirit: This is the Hearth Lodge. Islings you've caught rest here.
-- `lodge.swap.first` · once · → pedestal (first Isling on the pedestal)
-  - Spirit: Pick one up and set it on the rim to bring it along.
+- `lodge.inspect` · once · → lodgeIsling (chain 2: waits for an inspect, comes back after 15 s)
+  - Spirit: Look at one and pinch to see how it's doing.
+- `lodge.take` · once · → pedestal (chain 3, after the first inspect; then the gold moves to a rim socket)
+  - Spirit: Pick it up and set it in a pod on the rim to bring it along.
+- `lodge.leave` · once · → rimPod (chain 4, after the first swap)
+  - Spirit: To leave one here, toss its pod onto the floor.
+- `lodge.exit` · once · → lodgeDoor (chain 5, after chain 4 or 30 s)
+  - Spirit: The door takes you back outside.
 - `lodge.last` · → leadPod (the last rim pod refuses to leave)
   - Spirit: Keep at least one Isling with you!
 - `gate.first` · once

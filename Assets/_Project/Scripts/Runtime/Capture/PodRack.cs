@@ -172,6 +172,12 @@ namespace Diorama
             Layout();
             Dialogue.RegisterTarget("leadPod", () => PointOf(party.LeadSlot), k => PulseOf(party.LeadSlot, k), () => FocusRadius(party.LeadSlot));
             // The cradle stays a target while a shattered pod is being replaced.
+            // Lodge hints: where an Isling can join (the next empty socket, else the last pod to swap with) and a pod
+            // that may be let go (never the only one).
+            Dialogue.RegisterTarget("rimSocket", () => party.members.Count < Party.Size ? HomeWorld(party.members.Count) : PointOf(party.members.Count - 1),
+                k => { }, () => FocusRadius(Mathf.Min(party.members.Count, Party.Size - 1)));
+            Dialogue.RegisterTarget("rimPod", () => party.members.Count > 1 ? PointOf(party.members.Count - 1) : null,
+                k => PulseOf(party.members.Count - 1, k), () => FocusRadius(party.members.Count - 1));
             Dialogue.RegisterTarget("cradle", () => CradleVisible ? HomeWorld(CradleSlot) : (Vector3?)null, k => PulseOf(CradleSlot, k), () => FocusRadius(CradleSlot));
         }
 

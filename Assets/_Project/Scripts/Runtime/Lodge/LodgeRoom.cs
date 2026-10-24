@@ -93,6 +93,9 @@ namespace Diorama
 
         public bool Active => swap != null && swap.Inside && swap.Interior == lodge;
 
+        /// <summary>The player did something in the lodge: "inspect" (pedestal), "swap" (an Isling joined the pods), "deposit" (a rim pod let go). LodgeGuide listens.</summary>
+        public event System.Action<string> Acted;
+
         float Tile => island.map.tileSize;
         float Cap => island.Content.capHeight;
         float WorldScale => island.transform.lossyScale.x;
@@ -119,6 +122,8 @@ namespace Diorama
             // The room as a whole has no outline to light (a tiny focus sphere): the beam alone points into it.
             Dialogue.RegisterTarget("lodgeCenter", () => Active ? island.transform.TransformPoint(island.TileToLocal(new Vector2(3.5f, 3.5f), Cap + 0.4f * Tile)) : (Vector3?)null, k => { }, () => 0.0001f);
             Dialogue.RegisterTarget("pedestal", () => Active ? island.transform.TransformPoint(PedestalTopLocal) : (Vector3?)null, k => { }, () => 0.75f * TileWorld);
+            Dialogue.RegisterTarget("lodgeIsling", NearestWanderer, k => { }, () => 0.5f * TileWorld);
+            Dialogue.RegisterTarget("lodgeDoor", () => Active ? DoorWorld(0.3f) : (Vector3?)null, k => { }, () => 0.9f * TileWorld);
             // Loaded inside before this Start ran.
             if (Active) OnEntered(lodge);
         }
@@ -137,6 +142,25 @@ namespace Diorama
         }
 
         Vector3 PedestalTopLocal => island.TileToLocal(pedestalTile, Cap + pedestalTop * Tile);
+
+        /// <summary>The room Isling nearest the explorer (not on the pedestal, not held), for the inspect hint.</summary>
+        Vector3? NearestWanderer()
+        {
+            if (this == null || !Active) return null;
+            LodgeIsling best = null;
+            float bestSq = float.MaxValue;
+            foreach (var li in _islings)
+            {
+                if (li == null || li.Leaving || li.Hidden || li == _onPedestal) continue;
+                float d = (island.LocalToTile(li.LocalCenter) - explorer.Tile).sqrMagnitude;
+                if (d < bestSq)
+                {
+                    bestSq = d;
+                    best = li;
+                }
+            }
+            return best != null ? island.transform.TransformPoint(best.LocalCenter) : (Vector3?)null;
+        }
 
         void OnEntered(WorldMap map)
         {
@@ -380,6 +404,7 @@ namespace Diorama
                 Vector2 near = island.LocalToTile(island.transform.InverseTransformPoint(pods.HomeWorld(slot)));
                 if (party.SwapWithStorage(index, slot))
                 {
+                    Acted?.Invoke("swap");
                     _spawnHint = FreeTileNear(near);
                     Burst(pods.HomeWorld(slot));
                     Debug.Log($"[LodgeRoom] {li.Isling.Name} into pod {slot + 1}{(outgoing != null ? $"; {outgoing.Name} pops out into the room" : " (new pod)")}.");
@@ -421,6 +446,7 @@ namespace Diorama
                 return;
             }
             pods.Discard(slot);
+            Acted?.Invoke("deposit");
             Vector2 at = island.LocalToTile(local);
             _spawnHint = FreeTileNear(at);
             Burst(island.transform.TransformPoint(local));
@@ -456,6 +482,7 @@ namespace Diorama
             var outgoing = party.At(slot);
             Close();
             if (index < 0 || !party.SwapWithStorage(index, slot)) return true;
+            Acted?.Invoke("swap");
             _spawnHint = FreeTileNear(pedestalTile + Vector2Int.down);
             Burst(pods.HomeWorld(slot));
             Debug.Log($"[LodgeRoom] Look + pinch: {li.Isling.Name} into pod {slot + 1}{(outgoing != null ? $", {outgoing.Name} out into the room" : "")}.");
@@ -477,8 +504,8 @@ namespace Diorama
             _onPedestal = li;
             li.ToPedestal(pedestalTile, pedestalTop * Tile);
             _card.Show(li.Isling, progression, PedestalTopLocal + Vector3.up * (li.View.height * island.Zoom + 0.012f));
-            Dialogue.Say("lodge.swap.first");
             Debug.Log($"[LodgeRoom] {li.Isling.Name} on the pedestal.");
+            Acted?.Invoke("inspect");
         }
 
         /// <summary>The first room Isling (BattleDebug).</summary>

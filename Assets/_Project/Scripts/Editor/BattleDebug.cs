@@ -358,7 +358,7 @@ namespace Diorama.EditorTools
         }
 
         /// <summary>Fires a targeted line (ignoring once) to see the gold focus, beam, Spirit and bubble placement.</summary>
-        public static void SayPedestal() => SayForced("lodge.swap.first");
+        public static void SayPedestal() => SayForced("lodge.take");
         public static void SayLeadPod() => SayForced("lodge.last");
         public static void SayShrine() => SayForced("shrine.first");
 

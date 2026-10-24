@@ -226,21 +226,48 @@ MonoBehaviour:
   - id: lodge.first
     once: 1
     priority: 1
-    note: first time inside the Hearth Lodge
+    note: first time inside the Hearth Lodge; the lodge hint chain starts, step 7c
     target: lodgeCenter
     lines:
     - speaker: 0
       speakerName: Spirit
       text: This is the Hearth Lodge. Islings you've caught rest here.
-  - id: lodge.swap.first
+  - id: lodge.inspect
     once: 1
     priority: 1
-    note: first Isling on the pedestal
+    note: 'chain 2: waits for an inspect, comes back after 15 s'
+    target: lodgeIsling
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Look at one and pinch to see how it's doing.
+  - id: lodge.take
+    once: 1
+    priority: 1
+    note: chain 3, after the first inspect; then the gold moves to a rim socket
     target: pedestal
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Pick one up and set it on the rim to bring it along.
+      text: Pick it up and set it in a pod on the rim to bring it along.
+  - id: lodge.leave
+    once: 1
+    priority: 1
+    note: chain 4, after the first swap
+    target: rimPod
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: To leave one here, toss its pod onto the floor.
+  - id: lodge.exit
+    once: 1
+    priority: 1
+    note: chain 5, after chain 4 or 30 s
+    target: lodgeDoor
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The door takes you back outside.
   - id: lodge.last
     once: 0
     priority: 1

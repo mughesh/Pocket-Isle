@@ -120,6 +120,13 @@ namespace Diorama
             return TargetState.Active;
         }
 
+        /// <summary>A registered target by id (also "prefix:arg"), for hints that point without a line (LodgeGuide).</summary>
+        public static bool TryGetTarget(string id, out Target target)
+        {
+            target = Resolve(id);
+            return target != null;
+        }
+
         static Target Resolve(string id)
         {
             if (string.IsNullOrEmpty(id)) return null;
@@ -311,6 +318,15 @@ namespace Diorama
             Debug.Log($"[Dialogue] Debug D: {id} ({_debugIndex + 1}/{script.triggers.Count}).");
             ClearAll();
             Fire(id, true);
+        }
+
+        /// <summary>Stops a trigger's lines (showing or queued): its hint was acted on already.</summary>
+        public static void Cancel(string triggerId)
+        {
+            var d = _instance;
+            if (d == null) return;
+            d._queue.RemoveAll(q => q.trigger == triggerId);
+            if (d._current.HasValue && d._current.Value.trigger == triggerId) d.Next();
         }
 
         /// <summary>Drops everything queued and closes the bubble.</summary>
