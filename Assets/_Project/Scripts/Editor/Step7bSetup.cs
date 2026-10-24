@@ -121,7 +121,7 @@ namespace Diorama.EditorTools
             log.Append("\n  'Lodge Room' wired (room Islings, honeycomb, pedestal card, swaps, door)");
         }
 
-        static Material BeaconMaterial()
+        internal static Material BeaconMaterial()
         {
             const string path = "Assets/_Project/Materials/Props/Beacon.mat";
             var shader = Shader.Find("Diorama/Beacon");

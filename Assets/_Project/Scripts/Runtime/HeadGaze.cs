@@ -8,6 +8,7 @@ namespace Diorama
     /// Adaptive (default): the offset is most of the vertical angle between head forward and the direction to the
     /// island centre, clamped and smoothed, so it suits the island at waist height and at eye level.
     /// Without a HeadGaze in the scene the ray falls back to the fixed default offset (and says so once).
+    /// Picking (step 7c) uses a narrow cone around the ray, not the thin ray: <see cref="ConePick"/>.
     /// </summary>
     [DefaultExecutionOrder(-40)]
     public class HeadGaze : MonoBehaviour
@@ -81,6 +82,65 @@ namespace Diorama
             var head = cam.transform;
             ray = new Ray(head.position, Quaternion.AngleAxis(pitch, head.right) * head.forward);
             return true;
+        }
+
+        // ---- cone picking ----
+
+        /// <summary>Half angle of the gaze cone (degrees): a target this far off the ray still counts.</summary>
+        public const float ConeHalfAngle = 2f;
+        /// <summary>Smallest gaze volume of anything selectable: radius in metres at island scale 1 (a 4 cm ball).</summary>
+        public const float MinRadius = 0.02f;
+        /// <summary>The current target's distance from the ray counts this much when comparing (no flicker between neighbours).</summary>
+        public const float Sticky = 0.7f;
+
+        static readonly float ConeTan = Mathf.Tan(ConeHalfAngle * Mathf.Deg2Rad);
+
+        /// <summary>Radius of the cone at <paramref name="distance"/> along the ray (world metres).</summary>
+        public static float ConeRadius(float distance) => Mathf.Max(0f, distance) * ConeTan;
+
+        /// <summary>
+        /// Does the gaze cone touch a ball of <paramref name="radius"/> round <paramref name="centre"/> (a sphere cast
+        /// sized by distance)? <paramref name="off"/> = the centre's distance from the ray (lower = nearer the middle).
+        /// </summary>
+        public static bool InCone(Ray ray, Vector3 centre, float radius, out float off)
+        {
+            Vector3 to = centre - ray.origin;
+            float along = Vector3.Dot(to, ray.direction);
+            off = float.MaxValue;
+            if (along <= 0f) return false;
+            off = (to - ray.direction * along).magnitude;
+            return off <= radius + along * ConeTan;
+        }
+
+        /// <summary>
+        /// Picks one of several targets with the gaze cone: among the ones it touches, the one nearest the ray centre;
+        /// the current target gets the <see cref="Sticky"/> bonus. Use as a local: new, Consider each, read Best.
+        /// </summary>
+        public struct ConePick
+        {
+            readonly Ray _ray;
+            readonly int _current;
+            float _bestOff;
+            public int Best;
+
+            public ConePick(Ray ray, int current)
+            {
+                _ray = ray;
+                _current = current;
+                _bestOff = float.MaxValue;
+                Best = -1;
+            }
+
+            /// <summary>Target <paramref name="id"/> (not -1): a ball round <paramref name="centre"/>, radius world metres.</summary>
+            public bool Consider(int id, Vector3 centre, float radius)
+            {
+                if (!InCone(_ray, centre, radius, out float off)) return false;
+                if (id == _current) off *= Sticky;
+                if (off >= _bestOff) return false;
+                _bestOff = off;
+                Best = id;
+                return true;
+            }
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]

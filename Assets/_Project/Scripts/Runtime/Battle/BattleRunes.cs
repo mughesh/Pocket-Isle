@@ -477,15 +477,26 @@ namespace Diorama
             bool near = Mathf.Abs(hit.x) < HalfRow + spacing && Mathf.Abs(hit.y) < runeSize.y * 2.5f;
             _reticle.enabled = near;
             if (near) _reticle.transform.localPosition = new Vector3(hit.x, hit.y, -0.002f / Mathf.Max(1e-4f, scale));
+            // Gaze cone: each plate (at least the 4 cm minimum) grows by the cone's radius at the row; the one whose
+            // centre is nearest wins, the hovered one a little stickier.
+            float cone = HeadGaze.ConeRadius((_row.TransformPoint(hit) - ray.origin).magnitude) / Mathf.Max(1e-4f, scale);
+            float min = HeadGaze.MinRadius * (island != null ? island.transform.lossyScale.x : 1f) / Mathf.Max(1e-4f, scale);
+            int best = -1;
+            float bestScore = float.MaxValue;
             for (int i = 0; i < _runes.Length; i++)
             {
                 if (!_runes[i].shown) continue;
                 Vector3 p = hit - _runes[i].root.localPosition;
-                // A little bigger than the plate, so the gaze doesn't flicker between runes.
-                float half = i == RunIndex ? PlateSize(i).x * 0.5f + 0.006f : spacing * 0.5f;
-                if (Mathf.Abs(p.x) < half && Mathf.Abs(p.y) < runeSize.y * 0.75f) return _runes[i].usable ? i : -1;
+                float hx = Mathf.Max(PlateSize(i).x * 0.5f, min), hy = Mathf.Max(runeSize.y * 0.5f, min);
+                if (Mathf.Abs(p.x) > hx + cone || Mathf.Abs(p.y) > hy + cone) continue;
+                float score = Mathf.Max(Mathf.Abs(p.x) / hx, Mathf.Abs(p.y) / hy) * (i == _hovered ? HeadGaze.Sticky : 1f);
+                if (score < bestScore)
+                {
+                    bestScore = score;
+                    best = i;
+                }
             }
-            return -1;
+            return best >= 0 && _runes[best].usable ? best : -1;
         }
 
         void Paint()

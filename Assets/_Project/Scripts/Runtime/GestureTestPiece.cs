@@ -74,6 +74,9 @@ namespace Diorama
         /// <summary>Raised whenever the explorer arrives on a tile (column, row).</summary>
         public event Action<Vector2Int> OnStep;
 
+        /// <summary>Raised when a walk is stopped by a prop (the blocked tile): walking into a building's doorway.</summary>
+        public event Action<Vector2Int> OnBump;
+
         /// <summary>Raised on a tap while standing next to water and facing it (the water tile).</summary>
         public event Action<Vector2Int> OnFishTap;
 
@@ -355,6 +358,7 @@ namespace Diorama
                 Stop();
                 _last += ch == IslandMap.Empty ? " - edge" : IslandMap.IsWalkable(ch) ? " - blocked (prop)" : $" - blocked ({ch})";
                 RefreshLabel();
+                if (ch != IslandMap.Empty && IslandMap.IsWalkable(ch)) OnBump?.Invoke(next);
                 return;
             }
             _fromTile = _tile;

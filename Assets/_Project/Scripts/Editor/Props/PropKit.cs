@@ -333,7 +333,7 @@ namespace Diorama.EditorTools
         /// <summary>
         /// Hearth Lodge props (step 7b, interior): wall arch segment, big lit hearth (2 x 1), honeycomb pod wall (2 x 1,
         /// six cells; LodgeRoom puts sleeping pods in them, keep the cell offsets in sync), rug (2 x 2), cushion,
-        /// inspect pedestal, door threshold (2 x 1). Warm wood, cream and ember light. Returns them by name.
+        /// inspect pedestal, door archway (2 x 1). Warm wood, cream and ember light. Returns them by name.
         /// </summary>
         public static Dictionary<string, PropRecipe> WriteLodgeProps()
         {
@@ -441,19 +441,29 @@ namespace Diorama.EditorTools
             };
             all["LodgePedestal"] = pedestal;
 
-            var door = Recipe("LodgeDoor", new Vector2Int(2, 1), false, false, 500);
+            var door = Recipe("LodgeDoor", new Vector2Int(2, 1), false, false, 1200);
             door.palette = Palette(cream, oak, stone, Moss, ember, Smoke);
             door.yawJitter = 0f;
             door.scaleJitter = 0f;
+            // A 2-tile glowing archway on the open front edge (about 0.78 tile tall, LodgeRoom.archHeight): a rounded oak
+            // arch on two little feet, lined with a warm glowing band, and the glowing threshold under it.
             door.pieces = new List<PropPiece>
             {
-                Piece(PShape("LodgeDoor_Threshold",
-                    Box(new Vector3(0f, 0.014f, 0.25f), new Vector3(0.8f, 0.014f, 0.14f), 0.01f, 0f)), PropSlot.Glow, PropMotion.Flicker, 0.001f),
-                Piece(PShape("LodgeDoor_Posts",
-                    Box(new Vector3(0.86f, 0.22f, 0.3f), new Vector3(0.07f, 0.22f, 0.07f), 0.02f, 0f),
-                    Box(new Vector3(-0.86f, 0.22f, 0.3f), new Vector3(0.07f, 0.22f, 0.07f), 0.02f, 0f),
+                Piece(PShape("LodgeDoor_Frame",
+                    Ell(new Vector3(0f, 0f, 0.3f), new Vector3(0.94f, 0.78f, 0.08f), 0f),
+                    Ell(new Vector3(0f, 0f, 0.3f), new Vector3(0.74f, 0.62f, 0.2f), 0.02f).Sub(),
+                    Box(new Vector3(0.86f, 0.03f, 0.3f), new Vector3(0.1f, 0.03f, 0.1f), 0.01f, 0.02f),
+                    Box(new Vector3(-0.86f, 0.03f, 0.3f), new Vector3(0.1f, 0.03f, 0.1f), 0.01f, 0.02f),
                     Floor(0f)), PropSlot.Wood),
+                Piece(PShape("LodgeDoor_Glow",
+                    Ell(new Vector3(0f, 0f, 0.3f), new Vector3(0.76f, 0.64f, 0.04f), 0f),
+                    Ell(new Vector3(0f, 0f, 0.3f), new Vector3(0.67f, 0.55f, 0.1f), 0.01f).Sub(),
+                    Floor(0f)), PropSlot.Glow, PropMotion.Flicker, 0.002f),
+                Piece(PShape("LodgeDoor_Threshold",
+                    Box(new Vector3(0f, 0.014f, 0.25f), new Vector3(0.72f, 0.014f, 0.14f), 0.01f, 0f)), PropSlot.Glow, PropMotion.Flicker, 0.001f),
             };
+            if (AssetDatabase.LoadAssetAtPath<SdfShape>($"{Root}/Shapes/LodgeDoor_Posts.asset") != null)
+                AssetDatabase.DeleteAsset($"{Root}/Shapes/LodgeDoor_Posts.asset");
             all["LodgeDoor"] = door;
 
             foreach (var r in all.Values) EditorUtility.SetDirty(r);

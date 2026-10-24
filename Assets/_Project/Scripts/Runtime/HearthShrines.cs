@@ -10,8 +10,8 @@ namespace Diorama
     /// Hearth Shrines on the world map: 2 x 2 props whose recipe is <see cref="RecipeName"/>, each with a soft flame
     /// beacon above it (seen from across the window). Standing on any tile touching a shrine, its flame leans toward
     /// the player and brightens and a glow ring appears over the bowl. To go in: hold a palm over the bowl, facing down,
-    /// for <see cref="holdSeconds"/> (the ring fills), or look + pinch the shrine (from farther away the explorer walks
-    /// there first). Then the flame flares, a warm wave heals the rim pods, <see cref="Rested"/> fires (the save
+    /// for <see cref="holdSeconds"/> (the ring fills), look + pinch the shrine (from farther away the explorer walks
+    /// there first), or walk into its doorway from the front. Then the flame flares, a warm wave heals the rim pods, <see cref="Rested"/> fires (the save
     /// listens) and the island swaps into the Hearth Lodge (<see cref="SceneSwap"/>). The last shrine used is where
     /// the explorer returns after losing (<see cref="RespawnTile"/>, outside).
     /// The Spirit's <c>shrine.first</c> line plays the first time a shrine comes into the window.
@@ -85,6 +85,7 @@ namespace Diorama
         readonly List<Vector2Int> _shrines = new List<Vector2Int>();
         readonly List<Beacon> _beacons = new List<Beacon>();
         readonly Hand[] _hands = new Hand[2];
+        readonly PalmHover _palm = new PalmHover();
         readonly bool[] _wasPinching = { true, true };
         WorldMap _scanned;
         int _scannedVersion = -1;
@@ -121,13 +122,18 @@ namespace Diorama
             _quad = BattleHud.VerticalQuad();
             _block = new MaterialPropertyBlock();
             explorer.OnStep += OnStep;
+            explorer.OnBump += OnBump;
             Dialogue.RegisterTarget("shrine", ShrinePoint, k => { });
             Scan();
         }
 
         void OnDestroy()
         {
-            if (explorer != null) explorer.OnStep -= OnStep;
+            if (explorer != null)
+            {
+                explorer.OnStep -= OnStep;
+                explorer.OnBump -= OnBump;
+            }
             if (_quad != null) Destroy(_quad);
         }
 
@@ -202,7 +208,7 @@ namespace Diorama
             b.near = Mathf.MoveTowards(b.near, near ? 1f : 0f, Time.deltaTime * 3f);
 
             // Warm your hand: the ring fills while a palm faces down over the bowl.
-            bool warming = near && PalmOverBowl(island.transform.TransformPoint(local));
+            bool warming = near && _palm.IsOver(island.transform.TransformPoint(local), island.transform.up, palmReach, palmFacing, grabGuard);
             b.hold = warming ? b.hold + Time.deltaTime : Mathf.MoveTowards(b.hold, 0f, Time.deltaTime * 2f);
             if (b.hold >= holdSeconds)
             {
@@ -255,51 +261,18 @@ namespace Diorama
             return dx >= -1 && dx <= 2 && dy >= -1 && dy <= 2 && !(dx >= 0 && dx <= 1 && dy >= 0 && dy <= 1);
         }
 
-        /// <summary>A tracked palm, facing down, within reach above the bowl (world point).</summary>
-        bool PalmOverBowl(Vector3 bowl)
-        {
-            Vector3 up = island.transform.up;
-            for (int h = 0; h < 2; h++)
-            {
-                bool left = h == 0;
-                var hand = HandLookup.Refresh(ref _hands[h], left ? Handedness.Left : Handedness.Right);
-                if (grabGuard != null && grabGuard.IsHandBusy(left)) continue;
-                if (!HandLookup.TryGetJoint(hand, HandJointId.HandPalm, out var palm) ||
-                    !HandLookup.TryGetJoint(hand, HandJointId.HandWristRoot, out var wrist) ||
-                    !HandLookup.TryGetJoint(hand, HandJointId.HandIndex1, out var index) ||
-                    !HandLookup.TryGetJoint(hand, HandJointId.HandPinky1, out var pinky)) continue;
-                Vector3 d = palm - bowl;
-                float above = Vector3.Dot(d, up);
-                if (above < -0.01f || above > palmReach * 1.5f || (d - up * above).magnitude > palmReach) continue;
-                // Palm normal from the knuckles, mirrored per hand (works whatever the joint axes are).
-                Vector3 n = Vector3.Cross(index - wrist, pinky - wrist).normalized;
-                if (!left) n = -n;
-                if (Vector3.Dot(n, -up) > palmFacing) return true;
-            }
-            return false;
-        }
-
         int GazedShrine()
         {
             if (!HeadGaze.TryGetRay(out var ray)) return -1;
-            float scale = island.transform.lossyScale.x * island.map.tileSize * island.Zoom;
-            int best = -1;
-            float bestOff = 1.1f * scale;
+            float tile = island.transform.lossyScale.x * island.map.tileSize * island.Zoom;
+            var pick = new HeadGaze.ConePick(ray, _gazed);
             for (int i = 0; i < _shrines.Count; i++)
             {
                 Vector3 local = island.TileToLocal(Center(_shrines[i]), island.Content.capHeight + 0.8f * island.map.tileSize);
                 if (!island.FootprintContains(local)) continue;
-                Vector3 to = island.transform.TransformPoint(local) - ray.origin;
-                float along = Vector3.Dot(to, ray.direction);
-                if (along <= 0f) continue;
-                float off = (to - ray.direction * along).magnitude;
-                if (off < bestOff)
-                {
-                    bestOff = off;
-                    best = i;
-                }
+                pick.Consider(i, island.transform.TransformPoint(local), Mathf.Max(HeadGaze.MinRadius * island.transform.lossyScale.x, 0.9f * tile));
             }
-            return best;
+            return pick.Best;
         }
 
         void UpdatePinch()
@@ -345,6 +318,20 @@ namespace Diorama
             var s = _shrines[_pending];
             _pending = -1;
             if (IsTouching(s, tile)) StartCoroutine(Enter(s));
+        }
+
+        /// <summary>Walking into the hut's front (the doorway faces the trail, +rows) goes in, like any building.</summary>
+        void OnBump(Vector2Int blocked)
+        {
+            if (_entering || !Outside) return;
+            foreach (var s in _shrines)
+            {
+                bool doorway = blocked.y == s.y + 1 && (blocked.x == s.x || blocked.x == s.x + 1);
+                if (!doorway || explorer.Tile != blocked + Vector2Int.up) continue;
+                Debug.Log($"[HearthShrines] Walked into the shrine's doorway c{s.x} r{s.y}.");
+                StartCoroutine(Enter(s));
+                return;
+            }
         }
 
         /// <summary>Flame flare, heal wave, save (Rested), then the swap into the lodge.</summary>

@@ -16,7 +16,7 @@ namespace Diorama
     /// - grab a rim pod and drop or toss it on the floor: that Isling joins the room (never the last one: it wobbles and
     ///   the Spirit says so);
     /// - with an Isling on the pedestal, look + pinch a rim pod (or the empty socket) = the same swap;
-    /// - walk onto the door tiles, or look + pinch the door: back outside.
+    /// - walk onto either door tile, look + pinch the door arch, or hold a palm over it (a ring fills): back outside.
     /// </summary>
     public class LodgeRoom : MonoBehaviour
     {
@@ -37,9 +37,18 @@ namespace Diorama
         [Tooltip("Pedestal top above the floor (prop tile units).")]
         public float pedestalTop = 0.5f;
         public Vector2Int[] doorTiles = { new Vector2Int(3, 7), new Vector2Int(4, 7) };
+        [Tooltip("Door arch height (prop tile units; matches PropKit's LodgeDoor).")]
+        public float archHeight = 0.76f;
         public Vector2Int[] cozyTiles = { new Vector2Int(2, 1), new Vector2Int(5, 1), new Vector2Int(6, 2) };
         [Tooltip("Centre of the honeycomb pod wall (lodge tiles; its anchor plus half its footprint).")]
         public Vector2 honeycombCenter = new Vector2(1.5f, 0f);
+
+        [Header("Leave by palm over the arch (like entering)")]
+        [Tooltip("Diorama/Beacon material (the filling ring).")]
+        public Material beaconMaterial;
+        public float palmReach = 0.08f;
+        [Range(0f, 1f)] public float palmFacing = 0.6f;
+        public float palmHoldSeconds = 0.8f;
 
         [Header("Limits and sizes")]
         [Tooltip("Islings walking the room (the next six sleep in the honeycomb). Each costs about 9 draws (body pieces, outlines, eyes): lower it if the lodge drops frames.")]
@@ -71,8 +80,14 @@ namespace Diorama
         IslingCard _card;
         Mesh _quad;
         LodgeIsling _onPedestal, _gazed;
-        int _gazedComb = -1;
+        int _gazedComb = -1, _gazeId = -1;
         bool _gazedDoor;
+        const int CombId = 100, DoorId = 200; // gaze pick ids
+        readonly PalmHover _palm = new PalmHover();
+        float _doorHold;
+        Transform _doorRing;
+        MeshRenderer _doorRingRenderer;
+        MaterialPropertyBlock _block;
         Vector2Int? _spawnHint;
         readonly HashSet<IslingSpecies> _warned = new HashSet<IslingSpecies>();
 
@@ -92,6 +107,9 @@ namespace Diorama
             }
             _quad = BattleHud.VerticalQuad();
             _card = new IslingCard(hudMaterial, _quad, island.transform);
+            _block = new MaterialPropertyBlock();
+            MakeDoorRing();
+            if (beaconMaterial == null) Debug.LogError("[LodgeRoom] No beacon material: leaving by palm works but shows no ring (Set Up MR_Main (7c)).", this);
             swap.Entered += OnEntered;
             swap.Returned += OnReturned;
             pods.LodgeDropped += OnRimDropped;
@@ -144,6 +162,8 @@ namespace Diorama
             if (pods.PickHandler == OnRimPicked) pods.PickHandler = null;
             pods.SetExternalGaze(this, false);
             pods.SelectedSlot = -1;
+            _doorHold = 0f;
+            if (_doorRing != null) _doorRing.gameObject.SetActive(false);
         }
 
         void Update()
@@ -487,9 +507,77 @@ namespace Diorama
                 if (d == tile)
                 {
                     Debug.Log("[LodgeRoom] Out the door.");
-                    swap.Return();
+                    Leave();
                     return;
                 }
+        }
+
+        /// <summary>The middle of the door arch's opening, <paramref name="height"/> tiles above the floor (world).</summary>
+        Vector3 DoorWorld(float height) => island.transform.TransformPoint(DoorLocal(height));
+
+        Vector3 DoorLocal(float height) => island.TileToLocal(DoorCenter, Cap + height * Tile);
+
+        Vector2 DoorCenter
+        {
+            get
+            {
+                Vector2 sum = Vector2.zero;
+                foreach (var d in doorTiles) sum += d;
+                return doorTiles.Length > 0 ? sum / doorTiles.Length : new Vector2(3.5f, 7f);
+            }
+        }
+
+        static readonly int ModeId = Shader.PropertyToID("_Mode");
+        static readonly int FillId = Shader.PropertyToID("_Fill");
+        static readonly int IntensityId = Shader.PropertyToID("_Intensity");
+
+        /// <summary>Hold a palm over the arch (like over a shrine's flame): the ring fills, then out you go.</summary>
+        void UpdateDoorPalm(bool free)
+        {
+            Vector3 top = DoorLocal(archHeight + 0.15f);
+            bool warming = free && _palm.IsOver(island.transform.TransformPoint(top), island.transform.up, palmReach, palmFacing, grabGuard);
+            _doorHold = warming ? _doorHold + Time.deltaTime : Mathf.MoveTowards(_doorHold, 0f, Time.deltaTime * 2f);
+            if (_doorRing != null)
+            {
+                bool show = free && (_doorHold > 0.01f || _gazedDoor);
+                _doorRing.gameObject.SetActive(show);
+                if (show)
+                {
+                    _doorRing.localPosition = top;
+                    _doorRing.localRotation = Quaternion.Euler(90f, 0f, 0f);
+                    _doorRing.localScale = Vector3.one * Tile * island.Zoom * 1.3f;
+                    _block.Clear();
+                    _block.SetFloat(ModeId, 1f);
+                    _block.SetFloat(FillId, Mathf.Clamp01(_doorHold / palmHoldSeconds));
+                    _block.SetFloat(IntensityId, 1.2f);
+                    _doorRingRenderer.SetPropertyBlock(_block);
+                }
+            }
+            if (_doorHold < palmHoldSeconds) return;
+            _doorHold = 0f;
+            Debug.Log("[LodgeRoom] Palm held over the door arch.");
+            Leave();
+        }
+
+        void Leave()
+        {
+            if (SceneSwap.IsBusy) return;
+            Close();
+            swap.Return();
+        }
+
+        void MakeDoorRing()
+        {
+            if (beaconMaterial == null) return;
+            var go = new GameObject("Lodge Door Ring");
+            go.transform.SetParent(island.transform, false);
+            go.AddComponent<MeshFilter>().sharedMesh = _quad;
+            _doorRingRenderer = go.AddComponent<MeshRenderer>();
+            _doorRingRenderer.sharedMaterial = beaconMaterial;
+            _doorRingRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            _doorRingRenderer.receiveShadows = false;
+            _doorRing = go.transform;
+            go.SetActive(false);
         }
 
         void Burst(Vector3 world)
@@ -507,41 +595,30 @@ namespace Diorama
             _gazedDoor = false;
             if (free && HeadGaze.TryGetRay(out var ray))
             {
-                float best = float.MaxValue;
-                float r = 0.6f * Tile * island.Zoom * WorldScale;
-                foreach (var li in _islings)
+                // Gaze cone over everything selectable (at least the 4 cm minimum each): Islings 0.., honeycomb pods
+                // CombId + k, the door arch DoorId; the one nearest the ray wins, the current one is a little stickier.
+                float tile = Tile * island.Zoom * WorldScale, min = HeadGaze.MinRadius * WorldScale;
+                var pick = new HeadGaze.ConePick(ray, _gazeId);
+                for (int i = 0; i < _islings.Count; i++)
                 {
+                    var li = _islings[i];
                     if (li == null || li.Leaving || li.Hidden) continue;
-                    float off = Off(ray, island.transform.TransformPoint(li.LocalCenter));
-                    if (off < r && off < best)
-                    {
-                        best = off;
-                        _gazed = li;
-                    }
+                    pick.Consider(i, island.transform.TransformPoint(li.LocalCenter), Mathf.Max(min, 0.45f * tile));
                 }
                 for (int k = 0; k < _comb.Length; k++)
-                {
-                    if (_comb[k] == null) continue;
-                    float off = Off(ray, _comb[k].transform.position);
-                    if (off < r * 0.6f && off < best)
-                    {
-                        best = off;
-                        _gazed = null;
-                        _gazedComb = k;
-                    }
-                }
-                Vector3 door = island.transform.TransformPoint(island.TileToLocal(new Vector2(3.5f, 7f), Cap + 0.2f * Tile));
-                float doorOff = Off(ray, door);
-                if (doorOff < r * 1.2f && doorOff < best)
-                {
-                    _gazed = null;
-                    _gazedComb = -1;
-                    _gazedDoor = true;
-                }
+                    if (_comb[k] != null) pick.Consider(CombId + k, _comb[k].transform.position, Mathf.Max(min, 0.3f * tile));
+                // The whole arch (two tiles wide, about 0.8 tile tall) plus a margin.
+                pick.Consider(DoorId, DoorWorld(0.4f), Mathf.Max(min, 1.15f * tile));
+                _gazeId = pick.Best;
+                if (pick.Best >= DoorId) _gazedDoor = true;
+                else if (pick.Best >= CombId) _gazedComb = pick.Best - CombId;
+                else if (pick.Best >= 0) _gazed = _islings[pick.Best];
             }
+            else _gazeId = -1;
             foreach (var li in _islings)
                 if (li != null && li.View != null && li != _onPedestal) li.View.SetFlash(li == _gazed ? 0.25f : 0f);
             pods.SetExternalGaze(this, _gazed != null || _gazedComb >= 0 || _gazedDoor);
+            UpdateDoorPalm(free);
             if (!free) return;
 
             for (int h = 0; h < 2; h++)
@@ -570,22 +647,14 @@ namespace Diorama
             }
         }
 
-        static float Off(Ray ray, Vector3 point)
-        {
-            Vector3 to = point - ray.origin;
-            float along = Vector3.Dot(to, ray.direction);
-            return along <= 0f ? float.MaxValue : (to - ray.direction * along).magnitude;
-        }
-
         void Pinch()
         {
             if (_gazed != null) Inspect(_gazed);
             else if (_gazedComb >= 0) Wake(_gazedComb);
             else if (_gazedDoor)
             {
-                Debug.Log("[LodgeRoom] Look + pinch on the door.");
-                Close();
-                swap.Return();
+                Debug.Log("[LodgeRoom] Look + pinch on the door arch.");
+                Leave();
             }
             // A pinch on nothing (not a rim pod either) closes the card.
             else if (_card.Visible && !pods.IsGazed) Close();

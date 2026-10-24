@@ -232,11 +232,16 @@ MonoBehaviour:
   doorTiles:
   - {x: 3, y: 7}
   - {x: 4, y: 7}
+  archHeight: 0.76
   cozyTiles:
   - {x: 2, y: 1}
   - {x: 5, y: 1}
   - {x: 6, y: 2}
   honeycombCenter: {x: 1.5, y: 0}
+  beaconMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  palmReach: 0.08
+  palmFacing: 0.6
+  palmHoldSeconds: 0.8
   maxInRoom: 12
   grabSize: 0.07
   dropDistance: 0.06

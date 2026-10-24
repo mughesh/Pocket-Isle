@@ -10,26 +10,46 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bb15570c66aa7e84ebdc3a6c27a865c7, type: 3}
-  m_Name: LodgeDoor_Posts
+  m_Name: LodgeDoor_Frame
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.SdfShape
   primitives:
-  - kind: 5
+  - kind: 1
     blend: 0
     k: 0
     mirrorX: 0
-    a: {x: 0.86, y: 0.22, z: 0.3}
-    b: {x: 0.02, y: 0, z: 0}
-    size: {x: 0.07, y: 0.22, z: 0.07}
+    a: {x: 0, y: 0, z: 0.3}
+    b: {x: 0, y: 0, z: 0}
+    size: {x: 0.94, y: 0.78, z: 0.08}
+    rotation: {x: 0, y: 0, z: 0}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 1
+    blend: 1
+    k: 0.02
+    mirrorX: 0
+    a: {x: 0, y: 0, z: 0.3}
+    b: {x: 0, y: 0, z: 0}
+    size: {x: 0.74, y: 0.62, z: 0.2}
     rotation: {x: 0, y: 0, z: 0}
     bumps: 0
     bumpFrequency: 0
   - kind: 5
     blend: 0
-    k: 0
+    k: 0.02
     mirrorX: 0
-    a: {x: -0.86, y: 0.22, z: 0.3}
-    b: {x: 0.02, y: 0, z: 0}
-    size: {x: 0.07, y: 0.22, z: 0.07}
+    a: {x: 0.86, y: 0.03, z: 0.3}
+    b: {x: 0.01, y: 0, z: 0}
+    size: {x: 0.1, y: 0.03, z: 0.1}
+    rotation: {x: 0, y: 0, z: 0}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 5
+    blend: 0
+    k: 0.02
+    mirrorX: 0
+    a: {x: -0.86, y: 0.03, z: 0.3}
+    b: {x: 0.01, y: 0, z: 0}
+    size: {x: 0.1, y: 0.03, z: 0.1}
     rotation: {x: 0, y: 0, z: 0}
     bumps: 0
     bumpFrequency: 0

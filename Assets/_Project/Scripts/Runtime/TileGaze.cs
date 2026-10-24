@@ -26,6 +26,8 @@ namespace Diorama
         readonly bool[] _wasPinching = { true, true };
         Vector2Int _reachTile = new Vector2Int(int.MinValue, 0);
         bool _reachable;
+        Vector2Int? _stickyTile;
+        const float StickyMargin = 0.15f; // tiles
 
         void Update()
         {
@@ -64,15 +66,26 @@ namespace Diorama
         {
             tile = default;
             hit = default;
-            if (!HeadGaze.TryGetRay(out var ray)) return false;
+            if (!HeadGaze.TryGetRay(out var ray))
+            {
+                _stickyTile = null;
+                return false;
+            }
             var t = island.transform;
             Vector3 o = t.InverseTransformPoint(ray.origin);
             Vector3 d = t.InverseTransformDirection(ray.direction);
             float top = island.CapTopLocal;
+            var sticky = _stickyTile;
+            _stickyTile = null;
             if (d.y > -1e-4f || o.y <= top) return false;
             hit = o + d * ((top - o.y) / d.y);
             if (!island.FootprintContains(hit)) return false;
-            tile = Vector2Int.RoundToInt(island.LocalToTile(hit));
+            Vector2 at = island.LocalToTile(hit);
+            tile = Vector2Int.RoundToInt(at);
+            // Sticky: the tile under the gaze stays picked a little past its edge (no flicker on the border).
+            if (sticky.HasValue && Mathf.Abs(at.x - sticky.Value.x) < 0.5f + StickyMargin && Mathf.Abs(at.y - sticky.Value.y) < 0.5f + StickyMargin)
+                tile = sticky.Value;
+            _stickyTile = tile;
             return island.Content.At(tile.y, tile.x) != IslandMap.Empty;
         }
     }

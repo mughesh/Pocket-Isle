@@ -13,6 +13,24 @@ MonoBehaviour:
   m_Name: LodgeDoor
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.PropRecipe
   pieces:
+  - shape: {fileID: 11400000, guid: 9836930af96016b4ab51ddc9ae615f66, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 1
+    motion: 0
+    motionAmount: 0
+  - shape: {fileID: 11400000, guid: b3ec6d7690ed8604c817436870c40aa1, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 4
+    motion: 2
+    motionAmount: 0.002
   - shape: {fileID: 11400000, guid: 3ed4cc1e784cb2c42adb916fcc9fa4fa, type: 2}
     part: {fileID: 0}
     position: {x: 0, y: 0, z: 0}
@@ -22,15 +40,6 @@ MonoBehaviour:
     slot: 4
     motion: 2
     motionAmount: 0.001
-  - shape: {fileID: 11400000, guid: 587dbd441a0d67b42af93f0e90d0f6c6, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 1
-    motion: 0
-    motionAmount: 0
   palette:
   - restored: {r: 0.906353, g: 0.77309567, b: 0.61279535, a: 1}
     unrestored: {r: 0.84705883, g: 0.74509805, b: 0.5882353, a: 1}
@@ -63,5 +72,5 @@ MonoBehaviour:
   yawJitter: 0
   scaleJitter: 0
   resolution: 40
-  triangleBudget: 500
+  triangleBudget: 1200
   bakedMesh: {fileID: 4300000, guid: 5d61667ffbdb9ec4185044476d47ed22, type: 2}

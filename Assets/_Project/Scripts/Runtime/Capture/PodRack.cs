@@ -66,7 +66,7 @@ namespace Diorama
         [Header("Input")]
         [Tooltip("A fingertip this many pod radii from the centre pokes it.")]
         public float pokeRadius = 1.4f;
-        [Tooltip("The gaze ray picks a pod within this many pod radii.")]
+        [Tooltip("Gaze volume diameter in pod radii (radius = half of this, at least HeadGaze.MinRadius); the gaze cone adds to it.")]
         public float gazeRadius = 2.2f;
         [Tooltip("A pinch with the index tip this close to a pod (m) is a grab, not a gaze pinch.")]
         public float grabPinchDistance = 0.08f;
@@ -151,6 +151,7 @@ namespace Diorama
         float _cradleRefillAt = -1f, _cradleIn = 1f;
         float _waveStart = -1f;
         int _gazedEmpty = -1;
+        const int EmptyId = 1000; // gaze pick id of the empty socket
         MaterialPropertyBlock _socketBlock;
 
         static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
@@ -514,34 +515,28 @@ namespace Diorama
 
         void UpdateInput()
         {
-            // Gaze: the pod closest to the ray, within gazeRadius pod radii.
+            // Gaze cone: the pod nearest the ray among those within gazeRadius pod radii (at least the 4 cm minimum);
+            // with a pick handler (the lodge), the next empty socket can be looked at too.
+            int previous = _gazed >= 0 ? _gazed : _gazedEmpty >= 0 ? EmptyId + _gazedEmpty : -1;
             _gazed = -1;
+            _gazedEmpty = -1;
             if (HeadGaze.TryGetRay(out var ray))
             {
-                float best = float.MaxValue;
+                float min = HeadGaze.MinRadius * island.transform.lossyScale.x;
+                var pick = new HeadGaze.ConePick(ray, previous);
                 for (int i = 0; i < _pods.Length; i++)
                 {
                     var p = _pods[i];
                     if (p == null || p.Detached || !Pointable(i)) continue;
-                    Vector3 to = p.transform.position - ray.origin;
-                    float along = Vector3.Dot(to, ray.direction);
-                    if (along <= 0f) continue;
-                    float off = (to - ray.direction * along).magnitude / Mathf.Max(1e-5f, p.WorldRadius);
-                    if (off < gazeRadius && off < best)
-                    {
-                        best = off;
-                        _gazed = i;
-                    }
+                    pick.Consider(i, p.transform.position, Mathf.Max(min, p.WorldRadius * gazeRadius * 0.5f));
                 }
-            }
-            // With a pick handler (the shelf), the next empty socket can be looked at too.
-            _gazedEmpty = -1;
-            if (_gazed < 0 && PickHandler != null && !InBattle && party.members.Count < Party.Size && HeadGaze.TryGetRay(out var r2))
-            {
-                int slot = party.members.Count;
-                Vector3 at = HomeWorld(slot), to = at - r2.origin;
-                float along = Vector3.Dot(to, r2.direction);
-                if (along > 0f && (to - r2.direction * along).magnitude < podPrefab.radius * island.transform.lossyScale.x * gazeRadius) _gazedEmpty = slot;
+                if (PickHandler != null && !InBattle && party.members.Count < Party.Size)
+                {
+                    int slot = party.members.Count;
+                    pick.Consider(EmptyId + slot, HomeWorld(slot), Mathf.Max(min, podPrefab.radius * island.transform.lossyScale.x * gazeRadius * 0.5f));
+                }
+                if (pick.Best >= EmptyId) _gazedEmpty = pick.Best - EmptyId;
+                else _gazed = pick.Best;
             }
             IsGazed = _gazed >= 0 || _gazedEmpty >= 0 || _externalGaze.Count > 0;
             UpdateFocus();
