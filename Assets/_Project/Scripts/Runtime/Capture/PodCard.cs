@@ -33,7 +33,7 @@ namespace Diorama
         float _until, _appear;
         Vector3 _anchor;
 
-        public CreatureInstance Showing { get; private set; }
+        public IslingInstance Showing { get; private set; }
         public bool Visible => _root.gameObject.activeSelf;
 
         public PodCard(Material hud, Mesh quad)
@@ -119,7 +119,7 @@ namespace Diorama
         }
 
         /// <summary>Shows the card for this creature above <paramref name="anchorWorld"/> for <paramref name="seconds"/>.</summary>
-        public void Show(CreatureInstance c, Vector3 anchorWorld, float seconds)
+        public void Show(IslingInstance c, Vector3 anchorWorld, float seconds)
         {
             if (c == null) return;
             Showing = c;

@@ -14,15 +14,15 @@ namespace Diorama
         public const int Size = 6;
 
         [Tooltip("The rim pods, in order (at most 6).")]
-        public List<CreatureInstance> members = new List<CreatureInstance>();
+        public List<IslingInstance> members = new List<IslingInstance>();
         [Tooltip("Caught while the pods were full.")]
-        public List<CreatureInstance> storage = new List<CreatureInstance>();
+        public List<IslingInstance> storage = new List<IslingInstance>();
 
         /// <summary>A creature joined (pods or storage) or the party was healed.</summary>
         public event Action Changed;
 
         /// <summary>The first creature that can still fight, or null.</summary>
-        public CreatureInstance Lead
+        public IslingInstance Lead
         {
             get
             {
@@ -48,7 +48,7 @@ namespace Diorama
         public bool AllFainted => LeadSlot < 0;
 
         /// <summary>The creature in pod <paramref name="slot"/>, or null.</summary>
-        public CreatureInstance At(int slot) => slot >= 0 && slot < members.Count && slot < Size ? members[slot] : null;
+        public IslingInstance At(int slot) => slot >= 0 && slot < members.Count && slot < Size ? members[slot] : null;
 
         public bool CanFight(int slot)
         {
@@ -57,7 +57,7 @@ namespace Diorama
         }
 
         /// <summary>Pod index of a party creature, or -1.</summary>
-        public int SlotOf(CreatureInstance creature) => creature == null ? -1 : members.IndexOf(creature);
+        public int SlotOf(IslingInstance creature) => creature == null ? -1 : members.IndexOf(creature);
 
         /// <summary>The first creature after <paramref name="except"/> that can fight (wraps), or -1.</summary>
         public int NextFighter(int except)
@@ -71,7 +71,7 @@ namespace Diorama
         }
 
         /// <summary>Adds a caught creature to the first free pod (returns its index) or to storage (returns -1).</summary>
-        public int Add(CreatureInstance creature)
+        public int Add(IslingInstance creature)
         {
             if (creature == null) return -1;
             int slot = -1;
@@ -140,10 +140,10 @@ namespace Diorama
         }
 
         /// <summary>Replaces everything (loading a save).</summary>
-        public void Restore(List<CreatureInstance> pods, List<CreatureInstance> stored)
+        public void Restore(List<IslingInstance> pods, List<IslingInstance> stored)
         {
-            members = pods ?? new List<CreatureInstance>();
-            storage = stored ?? new List<CreatureInstance>();
+            members = pods ?? new List<IslingInstance>();
+            storage = stored ?? new List<IslingInstance>();
             Changed?.Invoke();
         }
 

@@ -4,22 +4,22 @@ using UnityEngine;
 namespace Diorama
 {
     /// <summary>
-    /// One caught or wild creature: species, level, HP, XP, nickname. Plain data, serializable for the save file.
+    /// One caught or wild Isling (the game's creatures): species, level, HP, XP, nickname. Plain data, serializable.
     /// Stats come from the species' base stats scaled by level (<see cref="BattleMath"/>).
     /// </summary>
     [Serializable]
-    public class CreatureInstance
+    public class IslingInstance
     {
-        public CreatureSpecies species;
+        public IslingSpecies species;
         [Min(1)] public int level = 1;
         [Tooltip("Current HP. Use Heal() after creating one in the Inspector.")]
         public int currentHp;
         [Min(0)] public int xp;
         public string nickname;
 
-        public CreatureInstance() { }
+        public IslingInstance() { }
 
-        public CreatureInstance(CreatureSpecies species, int level)
+        public IslingInstance(IslingSpecies species, int level)
         {
             this.species = species;
             this.level = Mathf.Max(1, level);

@@ -75,7 +75,7 @@ namespace Diorama
         public event System.Action<BattleResult> BattleEnded;
 
         /// <summary>A wild creature was caught (it is already in the party or storage).</summary>
-        public event System.Action<CreatureInstance> Caught;
+        public event System.Action<IslingInstance> Caught;
 
         /// <summary>The battle being played, or null (testing).</summary>
         public BattleSystem CurrentBattle { get; private set; }
@@ -300,12 +300,12 @@ namespace Diorama
                     runes.HideMoves();
                     yield return stage.RecallPlayer(pods.HomeWorld(_activeSlot));
                     pods.ActiveSlot = -1;
-                    yield return SendOut($"{battle.player.creature.Name} needs a rest. Toss in another pod!");
+                    yield return SendOut($"{battle.player.isling.Name} needs a rest. Toss in another pod!");
                     battle.Switch(party.At(_activeSlot));
                     continue;
                 }
 
-                runes.SetCaption(prompt ?? $"What will {battle.player.creature.Name} do?");
+                runes.SetCaption(prompt ?? $"What will {battle.player.isling.Name} do?");
                 prompt = null;
                 _act = default;
                 _waiting = true;
@@ -341,7 +341,7 @@ namespace Diorama
                         yield return pods.FlyHome(act.index);
                         continue;
                     }
-                    var leaving = battle.player.creature;
+                    var leaving = battle.player.isling;
                     events = battle.Switch(party.At(act.index));
                     Debug.Log($"[EncounterDirector] Switch: {leaving.Name} out, {party.At(act.index).Name} in.");
                     runes.SetCaption($"Come back, {leaving.Name}!");
@@ -367,7 +367,7 @@ namespace Diorama
             }
 
             pods.CradlePulse = false;
-            var me = battle.player.creature;
+            var me = battle.player.isling;
             Debug.Log($"[EncounterDirector] Battle over: {battle.Result}. {me.Name} HP {me.currentHp}/{me.MaxHp}, XP {me.xp}. " +
                       $"Party {party.members.Count}/{Party.Size}, storage {party.storage.Count}.");
             if (battle.Result == BattleResult.Won || battle.Result == BattleResult.Caught) yield return Reward(battle, wild, rare);
@@ -382,13 +382,13 @@ namespace Diorama
         /// After a win: every creature that fought gets its XP. The one on the pad shows it (XP bar, level-ups) and, if
         /// due, evolves there; the others evolve in their pods after the zoom-out (<see cref="GrowthDirector"/>).
         /// </summary>
-        IEnumerator Reward(BattleSystem battle, CreatureInstance wild, bool rare)
+        IEnumerator Reward(BattleSystem battle, IslingInstance wild, bool rare)
         {
             if (progression == null) yield break;
             runes.HideMoves();
             int reward = progression.Reward(wild.level, rare);
             var fighters = battle.Participants;
-            var onPad = stage.Player != null ? battle.player.creature : null;
+            var onPad = stage.Player != null ? battle.player.isling : null;
             foreach (var c in fighters)
             {
                 int xp = Progression.ShareFor(c, reward, fighters.Count, progression);
@@ -422,7 +422,7 @@ namespace Diorama
             if (red == pods.CradleGlow) return;
             pods.CradleGlow = red;
             if (!red) return;
-            Debug.Log($"[EncounterDirector] Wild {battle.wild.creature.Name} is in the red ({battle.wild.Hp}/{battle.wild.MaxHp}): the cradle pod glows.");
+            Debug.Log($"[EncounterDirector] Wild {battle.wild.isling.Name} is in the red ({battle.wild.Hp}/{battle.wild.MaxHp}): the cradle pod glows.");
             pods.PresentCradle();
             if (!battle.WildDazed) Dialogue.Say("capture.first");
         }
@@ -431,7 +431,7 @@ namespace Diorama
         /// The cradle pod was thrown or picked: a miss drops it back into the cradle (reports false, no turn used); a hit
         /// flies it to the wild creature and plays the catch (<see cref="BattleSystem.LastCatch"/> holds the events).
         /// </summary>
-        IEnumerator CatchThrow(Act act, BattleSystem battle, CreatureInstance wild, System.Action<bool> hit)
+        IEnumerator CatchThrow(Act act, BattleSystem battle, IslingInstance wild, System.Action<bool> hit)
         {
             Vector3 target = stage.Wild.LocalCenter;
             bool thrown = act.kind == ActKind.PodThrow;
@@ -457,7 +457,7 @@ namespace Diorama
         /// The wild creature fainted and slumps, dazed: the cradle pod pulses and a throw (or look + pinch on it) catches
         /// it for sure. After <see cref="dazedSeconds"/> without a hit it fades out and the battle is won.
         /// </summary>
-        IEnumerator Dazed(BattleSystem battle, CreatureInstance wild)
+        IEnumerator Dazed(BattleSystem battle, IslingInstance wild)
         {
             UpdateCradle(battle);
             pods.CradlePulse = true;
@@ -609,7 +609,7 @@ namespace Diorama
         /// The pod hit: the wild creature goes in, the pod drops and wobbles, then it's caught or the glass cracks and
         /// shatters and the creature bursts out (always, above red: <paramref name="locked"/>). A new pod fills the cradle.
         /// </summary>
-        IEnumerator PlayCatch(IReadOnlyList<BattleEvent> events, CreatureInstance wild, BattleSystem battle, bool locked)
+        IEnumerator PlayCatch(IReadOnlyList<BattleEvent> events, IslingInstance wild, BattleSystem battle, bool locked)
         {
             if (events.Count == 0) yield break;
             var e = events[0];

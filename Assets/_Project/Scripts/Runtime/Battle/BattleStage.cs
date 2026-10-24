@@ -65,7 +65,7 @@ namespace Diorama
         // ---- setup ----
 
         /// <summary>Puts a creature on the stage, hidden (grow 0) until an entrance plays.</summary>
-        public StageActor Spawn(CreatureInstance creature, BattleSide side, Vector2 tile, Vector2 facing)
+        public StageActor Spawn(IslingInstance creature, BattleSide side, Vector2 tile, Vector2 facing)
         {
             var prefab = creature.species != null ? creature.species.Prefab : null;
             if (prefab == null)
@@ -88,20 +88,20 @@ namespace Diorama
             return actor;
         }
 
-        public void ShowBars(CreatureInstance player, CreatureInstance wild)
+        public void ShowBars(IslingInstance player, IslingInstance wild)
         {
             ShowPlayerBar(player);
             ShowWildBar(wild);
         }
 
-        public void ShowWildBar(CreatureInstance wild)
+        public void ShowWildBar(IslingInstance wild)
         {
             hud.RemoveBar(_wildBar);
             _wildBar = hud.AddBar(_wild, wild.Name, wild.level, wild.currentHp, wild.MaxHp);
         }
 
         /// <summary>HP bar for the party creature on the field (after a switch).</summary>
-        public void ShowPlayerBar(CreatureInstance player)
+        public void ShowPlayerBar(IslingInstance player)
         {
             hud.RemoveBar(_playerBar);
             _playerBar = hud.AddBar(_player, player.Name, player.level, player.currentHp, player.MaxHp);
@@ -393,7 +393,7 @@ namespace Diorama
             {
                 var e = events[i];
                 var self = Actor(e.side);
-                string who = battle.Get(e.side).creature.Name;
+                string who = battle.Get(e.side).isling.Name;
                 switch (e.kind)
                 {
                     case BattleEventKind.MoveUsed:
@@ -477,7 +477,7 @@ namespace Diorama
             var target = Actor(side == BattleSide.Player ? BattleSide.Wild : BattleSide.Player);
             if (user == null || target == null) yield break;
             var style = ElementStyle.Of(move.element);
-            var userStyle = ElementStyle.Of(battle.Get(side).creature.Element);
+            var userStyle = ElementStyle.Of(battle.Get(side).isling.Element);
             Action impact = () => { if (outcome.HasValue) Impact(outcome.Value, user, target, userStyle); };
 
             if (move.kind == MoveKind.Support)
@@ -742,7 +742,7 @@ namespace Diorama
         /// to the end, bursts a golden ring at the creature's feet, pops "Lv 6!", hops, and raises the HP bar.
         /// <paramref name="startShare"/> is the bar before the XP; the creature already holds the result.
         /// </summary>
-        public IEnumerator PlayXp(CreatureInstance c, int amount, float startShare, IReadOnlyList<LevelUp> ups)
+        public IEnumerator PlayXp(IslingInstance c, int amount, float startShare, IReadOnlyList<LevelUp> ups)
         {
             var a = _player;
             if (a == null || _playerBar == null || c == null) yield break;
@@ -776,7 +776,7 @@ namespace Diorama
             return s;
         }
 
-        static int MaxHpAt(CreatureInstance c, int level) => BattleMath.MaxHp(c.species != null ? c.species.baseStats.hp : 1, level);
+        static int MaxHpAt(IslingInstance c, int level) => BattleMath.MaxHp(c.species != null ? c.species.baseStats.hp : 1, level);
 
         void LevelBurst(StageActor a, int level)
         {
@@ -806,7 +806,7 @@ namespace Diorama
         /// faster and faster (about 2 s), a light burst, and the new form grows to its own size and hops.
         /// Applies <see cref="Progression.Evolve"/> to <paramref name="c"/> (HP ratio, level, XP and nickname kept).
         /// </summary>
-        public IEnumerator Evolve(CreatureInstance c)
+        public IEnumerator Evolve(IslingInstance c)
         {
             var old = _player;
             var next = c != null && c.species != null ? c.species.evolvesTo : null;

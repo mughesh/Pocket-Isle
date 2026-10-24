@@ -68,9 +68,9 @@ namespace Diorama.EditorTools
             Debug.Log($"[CreatureTools] Creature Lab saved to {LabPath} with {lab.species.Count} species. Press Play; Space cycles.");
         }
 
-        static List<CreatureSpecies> AllSpecies() =>
-            AssetDatabase.FindAssets("t:CreatureSpecies")
-                .Select(g => AssetDatabase.LoadAssetAtPath<CreatureSpecies>(AssetDatabase.GUIDToAssetPath(g)))
+        static List<IslingSpecies> AllSpecies() =>
+            AssetDatabase.FindAssets("t:IslingSpecies")
+                .Select(g => AssetDatabase.LoadAssetAtPath<IslingSpecies>(AssetDatabase.GUIDToAssetPath(g)))
                 .Where(s => s != null)
                 .OrderBy(s => System.Array.IndexOf(LabOrder, s.name) is int i && i >= 0 ? i : 99)
                 .ThenBy(s => s.name)
@@ -223,7 +223,7 @@ namespace Diorama.EditorTools
             var report = new StringBuilder("[CreatureTools] Starters in MR_Main:");
             for (int i = 0; i < Starters.Length; i++)
             {
-                var species = AssetDatabase.LoadAssetAtPath<CreatureSpecies>($"Assets/_Project/Data/Creatures/Species/{Starters[i]}.asset");
+                var species = AssetDatabase.LoadAssetAtPath<IslingSpecies>($"Assets/_Project/Data/Creatures/Species/{Starters[i]}.asset");
                 if (species == null || species.Prefab == null)
                 {
                     Debug.LogError($"[CreatureTools] {Starters[i]} is not baked yet (Bake All first).");

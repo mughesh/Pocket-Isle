@@ -33,7 +33,7 @@ namespace Diorama
             Mathf.Max(1, Mathf.RoundToInt((rewardBase + rewardPerLevel * Mathf.Max(1, wildLevel)) * (rare ? rareMultiplier : 1f)));
 
         /// <summary>0..1 progress toward the next level (1 at the cap).</summary>
-        public float XpShare(CreatureInstance c) =>
+        public float XpShare(IslingInstance c) =>
             c == null ? 0f : c.level >= levelCap ? 1f : Mathf.Clamp01(c.xp / (float)XpToNext(c.level));
     }
 }

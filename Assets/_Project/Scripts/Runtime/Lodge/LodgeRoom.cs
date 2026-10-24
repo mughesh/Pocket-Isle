@@ -74,7 +74,7 @@ namespace Diorama
         int _gazedComb = -1;
         bool _gazedDoor;
         Vector2Int? _spawnHint;
-        readonly HashSet<CreatureSpecies> _warned = new HashSet<CreatureSpecies>();
+        readonly HashSet<IslingSpecies> _warned = new HashSet<IslingSpecies>();
 
         public bool Active => swap != null && swap.Inside && swap.Interior == lodge;
 
@@ -155,7 +155,7 @@ namespace Diorama
             UpdateGrabbers();
             UpdateInput();
             if (_onPedestal != null && _card.Visible)
-                _card.Show(_onPedestal.Creature, progression, PedestalTopLocal + Vector3.up * (_onPedestal.View.height * island.Zoom + 0.012f));
+                _card.Show(_onPedestal.Isling, progression, PedestalTopLocal + Vector3.up * (_onPedestal.View.height * island.Zoom + 0.012f));
         }
 
         // ---- who is where ----
@@ -173,7 +173,7 @@ namespace Diorama
                     _islings.RemoveAt(i);
                     continue;
                 }
-                int index = storage.IndexOf(li.Creature);
+                int index = storage.IndexOf(li.Isling);
                 if (index >= 0 && index < inRoom) continue;
                 if (_grabbers.TryGetValue(li, out var g) && g.grab != null && g.grab.IsHeld) continue;
                 if (li == _onPedestal) Close();
@@ -186,7 +186,7 @@ namespace Diorama
             for (int i = 0; i < inRoom && spawned < 2; i++)
             {
                 var c = storage[i];
-                if (_islings.Exists(l => l.Creature == c)) continue;
+                if (_islings.Exists(l => l.Isling == c)) continue;
                 Spawn(c, _spawnHint ?? FreeTile());
                 _spawnHint = null;
                 spawned++;
@@ -209,7 +209,7 @@ namespace Diorama
                     var grab = p.GetComponent<PodGrab>();
                     if (grab != null) grab.CanGrab = false;
                 }
-                if (p.Creature != c || p.ShownSpecies != c.species) p.Show(c);
+                if (p.Isling != c || p.ShownSpecies != c.species) p.Show(c);
                 p.BaseScale = Vector3.one * (island.Zoom * 0.85f);
                 p.transform.localPosition = CombLocal(k);
                 p.transform.localRotation = Quaternion.identity;
@@ -223,7 +223,7 @@ namespace Diorama
             return island.TileToLocal(new Vector2(honeycombCenter.x - cell.x, honeycombCenter.y + cell.z), Cap + cell.y * Tile);
         }
 
-        void Spawn(CreatureInstance c, Vector2Int tile)
+        void Spawn(IslingInstance c, Vector2Int tile)
         {
             var prefab = c.species != null ? c.species.Prefab : null;
             if (prefab == null)
@@ -293,8 +293,8 @@ namespace Diorama
         void MakeGrabber(LodgeIsling li)
         {
             var p = Instantiate(pods.podPrefab, island.transform, false);
-            p.name = $"Grab {li.Creature.Name}";
-            p.Show(li.Creature);
+            p.name = $"Grab {li.Isling.Name}";
+            p.Show(li.Isling);
             var g = new Grabber { pod = p, grab = p.GetComponent<PodGrab>() };
             ShowPod(g, false);
             if (g.grab != null)
@@ -317,7 +317,7 @@ namespace Diorama
         {
             if (g.pod.glass != null) g.pod.glass.enabled = on;
             if (g.pod.band != null) g.pod.band.enabled = on;
-            g.pod.CreatureOut = !on;
+            g.pod.IslingOut = !on;
         }
 
         void UpdateGrabbers()
@@ -343,14 +343,14 @@ namespace Diorama
             if (li == _onPedestal) Close();
             li.Hidden = true;
             ShowPod(g, true);
-            Debug.Log($"[LodgeRoom] Picked up {li.Creature.Name}: it curls into a pod.");
+            Debug.Log($"[LodgeRoom] Picked up {li.Isling.Name}: it curls into a pod.");
         }
 
         void OnIslingReleased(LodgeIsling li)
         {
             if (li == null || !_grabbers.TryGetValue(li, out var g) || g.pod == null) return;
             int slot = pods.NearestSocket(g.pod.transform.position, dropDistance * WorldScale);
-            int index = party.storage.IndexOf(li.Creature);
+            int index = party.storage.IndexOf(li.Isling);
             if (slot >= 0 && index >= 0)
             {
                 var outgoing = party.At(slot);
@@ -359,7 +359,7 @@ namespace Diorama
                 {
                     _spawnHint = FreeTileNear(near);
                     Burst(pods.HomeWorld(slot));
-                    Debug.Log($"[LodgeRoom] {li.Creature.Name} into pod {slot + 1}{(outgoing != null ? $"; {outgoing.Name} pops out into the room" : " (new pod)")}.");
+                    Debug.Log($"[LodgeRoom] {li.Isling.Name} into pod {slot + 1}{(outgoing != null ? $"; {outgoing.Name} pops out into the room" : " (new pod)")}.");
                     return; // Sync removes this Isling and spawns the outgoing one.
                 }
             }
@@ -368,7 +368,7 @@ namespace Diorama
             li.PopAt(FreeTileNear(at));
             ShowPod(g, false);
             Burst(g.pod.transform.position);
-            Debug.Log($"[LodgeRoom] {li.Creature.Name} dropped on the floor.");
+            Debug.Log($"[LodgeRoom] {li.Isling.Name} dropped on the floor.");
         }
 
         // ---- a rim pod dropped in the lodge ----
@@ -429,13 +429,13 @@ namespace Diorama
         {
             if (!Active || _onPedestal == null) return false;
             var li = _onPedestal;
-            int index = party.storage.IndexOf(li.Creature);
+            int index = party.storage.IndexOf(li.Isling);
             var outgoing = party.At(slot);
             Close();
             if (index < 0 || !party.SwapWithStorage(index, slot)) return true;
             _spawnHint = FreeTileNear(pedestalTile + Vector2Int.down);
             Burst(pods.HomeWorld(slot));
-            Debug.Log($"[LodgeRoom] Look + pinch: {li.Creature.Name} into pod {slot + 1}{(outgoing != null ? $", {outgoing.Name} out into the room" : "")}.");
+            Debug.Log($"[LodgeRoom] Look + pinch: {li.Isling.Name} into pod {slot + 1}{(outgoing != null ? $", {outgoing.Name} out into the room" : "")}.");
             return true;
         }
 
@@ -453,9 +453,9 @@ namespace Diorama
             Close();
             _onPedestal = li;
             li.ToPedestal(pedestalTile, pedestalTop * Tile);
-            _card.Show(li.Creature, progression, PedestalTopLocal + Vector3.up * (li.View.height * island.Zoom + 0.012f));
+            _card.Show(li.Isling, progression, PedestalTopLocal + Vector3.up * (li.View.height * island.Zoom + 0.012f));
             Dialogue.Say("lodge.swap.first");
-            Debug.Log($"[LodgeRoom] {li.Creature.Name} on the pedestal.");
+            Debug.Log($"[LodgeRoom] {li.Isling.Name} on the pedestal.");
         }
 
         /// <summary>The first room Isling (BattleDebug).</summary>

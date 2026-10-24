@@ -304,9 +304,9 @@ namespace Diorama.EditorTools
             return r;
         }
 
-        internal static CreatureSpecies Species(string name, Element element, CreatureRecipe recipe, CreatureSpecies evolvesTo, int level)
+        internal static IslingSpecies Species(string name, Element element, CreatureRecipe recipe, IslingSpecies evolvesTo, int level)
         {
-            var s = Asset<CreatureSpecies>($"{Root}/Species/{name}.asset");
+            var s = Asset<IslingSpecies>($"{Root}/Species/{name}.asset");
             s.displayName = name;
             s.element = element;
             s.recipe = recipe;

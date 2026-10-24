@@ -46,20 +46,20 @@ namespace Diorama
     public class Battler
     {
         public readonly BattleSide side;
-        public readonly CreatureInstance creature;
+        public readonly IslingInstance isling;
         public int attackStage;
         public bool shielded;
 
-        public Battler(BattleSide side, CreatureInstance creature)
+        public Battler(BattleSide side, IslingInstance isling)
         {
             this.side = side;
-            this.creature = creature;
+            this.isling = isling;
         }
 
-        public MoveData[] Moves => creature.species != null && creature.species.moves != null ? creature.species.moves : Array.Empty<MoveData>();
-        public int Hp => creature.currentHp;
-        public int MaxHp => creature.MaxHp;
-        public float Attack => creature.Attack * BattleMath.StageMultiplier(attackStage);
+        public MoveData[] Moves => isling.species != null && isling.species.moves != null ? isling.species.moves : Array.Empty<MoveData>();
+        public int Hp => isling.currentHp;
+        public int MaxHp => isling.MaxHp;
+        public float Attack => isling.Attack * BattleMath.StageMultiplier(attackStage);
     }
 
     /// <summary>
@@ -82,11 +82,11 @@ namespace Diorama
         readonly SeededRandom _rnd;
         readonly Func<bool> _hasReserve;
         readonly List<BattleEvent> _turn = new List<BattleEvent>();
-        readonly List<CreatureInstance> _participants = new List<CreatureInstance>();
+        readonly List<IslingInstance> _participants = new List<IslingInstance>();
         int _failedFlees;
 
         /// <summary>Every party creature that was out in this battle, in order (fainted ones included).</summary>
-        public IReadOnlyList<CreatureInstance> Participants => _participants;
+        public IReadOnlyList<IslingInstance> Participants => _participants;
 
         /// <summary>Raised for every event as it happens (the same ones the turn methods return).</summary>
         public event Action<BattleEvent> EventRaised;
@@ -104,7 +104,7 @@ namespace Diorama
         public bool CatchUnlocked => !IsOver && (WildDazed || BattleMath.CatchUnlocked(wild.Hp, wild.MaxHp));
 
         /// <param name="hasReserve">True while another party creature (not the one fighting) can still fight.</param>
-        public BattleSystem(CreatureInstance player, CreatureInstance wild, TypeChart chart, int seed, bool wildIsRare = false,
+        public BattleSystem(IslingInstance player, IslingInstance wild, TypeChart chart, int seed, bool wildIsRare = false,
             Func<bool> hasReserve = null)
         {
             this.player = new Battler(BattleSide.Player, player);
@@ -127,7 +127,7 @@ namespace Diorama
             var moves = player.Moves;
             if (moveIndex < 0 || moveIndex >= moves.Length || moves[moveIndex] == null)
             {
-                Debug.LogError($"[BattleSystem] {player.creature.Name} has no move in slot {moveIndex}.");
+                Debug.LogError($"[BattleSystem] {player.isling.Name} has no move in slot {moveIndex}.");
                 return _turn;
             }
             var playerMove = moves[moveIndex];
@@ -144,7 +144,7 @@ namespace Diorama
         {
             _turn.Clear();
             if (IsOver || PlayerMustSwitch || WildDazed) return _turn;
-            float chance = BattleMath.FleeChance(player.creature.Speed, wild.creature.Speed, _failedFlees);
+            float chance = BattleMath.FleeChance(player.isling.Speed, wild.isling.Speed, _failedFlees);
             if (_rnd.Next() < chance)
             {
                 Raise(new BattleEvent { kind = BattleEventKind.Fled, side = BattleSide.Player });
@@ -163,7 +163,7 @@ namespace Diorama
         /// <summary>Chance that a pod thrown now catches the wild creature.</summary>
         public float CatchChance => WildDazed
             ? BattleMath.DazedCatchChance(wildIsRare)
-            : BattleMath.CatchChance(wild.Hp, wild.MaxHp, wildIsRare, wild.creature.level, player.creature.level);
+            : BattleMath.CatchChance(wild.Hp, wild.MaxHp, wildIsRare, wild.isling.level, player.isling.level);
 
         /// <summary>
         /// A pod hit the wild creature: it wobbles, then it's caught or breaks free (and gets its move; a dazed one runs
@@ -212,10 +212,10 @@ namespace Diorama
         /// Sends in another party creature. After a faint (<see cref="PlayerMustSwitch"/>) it is free; otherwise it uses
         /// the turn and the wild creature attacks the newcomer. Attack stages and shields don't carry over.
         /// </summary>
-        public IReadOnlyList<BattleEvent> Switch(CreatureInstance next)
+        public IReadOnlyList<BattleEvent> Switch(IslingInstance next)
         {
             _turn.Clear();
-            if (IsOver || WildDazed || next == null || next.IsFainted || next == player.creature) return _turn;
+            if (IsOver || WildDazed || next == null || next.IsFainted || next == player.isling) return _turn;
             bool free = PlayerMustSwitch;
             PlayerMustSwitch = false;
             player = new Battler(BattleSide.Player, next);
@@ -228,7 +228,7 @@ namespace Diorama
         /// <summary>Faster creature first; a tie is a coin flip.</summary>
         public bool PlayerGoesFirst()
         {
-            int p = player.creature.Speed, w = wild.creature.Speed;
+            int p = player.isling.Speed, w = wild.isling.Speed;
             return p != w ? p > w : _rnd.Next() < 0.5f;
         }
 
@@ -263,7 +263,7 @@ namespace Diorama
 
         void Act(Battler user, MoveData move)
         {
-            if (move == null || user.creature.IsFainted) return; // no usable move, or fainted earlier this turn
+            if (move == null || user.isling.IsFainted) return; // no usable move, or fainted earlier this turn
             var target = Other(user);
             Raise(new BattleEvent { kind = BattleEventKind.MoveUsed, side = user.side, move = move });
 
@@ -281,7 +281,7 @@ namespace Diorama
                         break;
                     case SupportEffect.Heal:
                         int heal = Mathf.Min(user.MaxHp - user.Hp, Mathf.Max(1, Mathf.RoundToInt(user.MaxHp * move.healShare)));
-                        user.creature.currentHp += heal;
+                        user.isling.currentHp += heal;
                         Raise(new BattleEvent { kind = BattleEventKind.Healed, side = user.side, move = move, amount = heal, hpAfter = user.Hp });
                         break;
                 }
@@ -293,17 +293,17 @@ namespace Diorama
                 Raise(new BattleEvent { kind = BattleEventKind.Missed, side = user.side, move = move });
                 return;
             }
-            var effectiveness = _chart != null ? _chart.Matchup(move.element, target.creature.Element) : Effectiveness.Normal;
+            var effectiveness = _chart != null ? _chart.Matchup(move.element, target.isling.Element) : Effectiveness.Normal;
             float typeMul = _chart != null ? _chart.Multiplier(effectiveness) : 1f;
             float roll = Mathf.Lerp(BattleMath.RollMin, BattleMath.RollMax, _rnd.Next());
-            int damage = BattleMath.Damage(user.creature.level, move.power, user.Attack, target.creature.Defense, typeMul, roll);
+            int damage = BattleMath.Damage(user.isling.level, move.power, user.Attack, target.isling.Defense, typeMul, roll);
             bool absorbed = target.shielded;
             if (absorbed)
             {
                 damage = Mathf.Max(1, damage / 2);
                 target.shielded = false;
             }
-            target.creature.currentHp = Mathf.Max(0, target.Hp - damage);
+            target.isling.currentHp = Mathf.Max(0, target.Hp - damage);
             Raise(new BattleEvent
             {
                 kind = BattleEventKind.Damage, side = target.side, move = move, amount = damage, hpAfter = target.Hp,

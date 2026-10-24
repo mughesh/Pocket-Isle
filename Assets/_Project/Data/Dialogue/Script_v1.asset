@@ -57,7 +57,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Every guardian needs a friend. Pick one!
+      text: Every guardian needs an Isling friend. Pick one!
   - id: starter.kilnpot
     once: 0
     priority: 1
@@ -105,7 +105,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Tall grass rustles when something's hiding in it.
+      text: Tall grass rustles when an Isling is hiding in it.
   - id: tut.pond
     once: 1
     priority: 1
@@ -181,7 +181,7 @@ MonoBehaviour:
   - id: capture.dazed.first
     once: 1
     priority: 1
-    note: first dazed wild creature
+    note: first dazed wild Isling
     target: cradle
     lines:
     - speaker: 0
@@ -195,7 +195,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: A new friend! It's in your pods now.
+      text: A new Isling! It's in your pods now.
   - id: party.full
     once: 1
     priority: 1
@@ -493,7 +493,7 @@ MonoBehaviour:
   idleHints:
   - speaker: 0
     speakerName: Spirit
-    text: Your friends get stronger every battle.
+    text: Your Islings get stronger every battle.
   - speaker: 0
     speakerName: Spirit
     text: The other gates lead to water and wind. Just saying.

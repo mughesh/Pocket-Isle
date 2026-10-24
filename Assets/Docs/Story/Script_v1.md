@@ -1,6 +1,6 @@
 # Pocket Isle — script v1 (Oct 24)
 
-Lantern Spirit = **Spirit**. Bubbles are short: one idea per line, ≤ ~70 characters.
+Lantern Spirit = **Spirit**. The creatures are **Islings** (never "creature" in a line). Bubbles are short: one idea per line, ≤ ~70 characters.
 Format: `trigger_id` · speaker · lines (shown in order). **once** = only the first time.
 Optional `· → target` (before the lines): the Spirit flies to that anchor while saying them and it pulses
 (`leadPod`, `cradle`, `runes`, `nearPad`, `wildPad`, `shrine`, `lodgeCenter`, `pedestal`, `tile:x,y`). No target = it stays home.
@@ -17,7 +17,7 @@ Names are placeholders. The step 5c dialogue system loads this (convert to data 
   - Spirit: See the little explorer? Slide your thumb along your finger to walk.
   - Spirit: Keep your thumb there to keep walking. Tap to stop.
 - `intro.starter` · once
-  - Spirit: Every guardian needs a friend. Pick one!
+  - Spirit: Every guardian needs an Isling friend. Pick one!
 - `starter.kilnpot` · Spirit: Kilnpot! Warm as a fresh-baked pot.
 - `starter.pebbloop` · Spirit: Pebbloop! Bubbly, and very round.
 - `starter.pufflet` · Spirit: Pufflet! Light as a cloud, twice as fluffy.
@@ -26,7 +26,7 @@ Names are placeholders. The step 5c dialogue system loads this (convert to data 
   - Spirit: I feel like I know it. Strange.
 
 ## Tutorials
-- `tut.grass` · once: Spirit: Tall grass rustles when something's hiding in it.
+- `tut.grass` · once: Spirit: Tall grass rustles when an Isling is hiding in it.
 - `tut.pond` · once (first time next to water): Spirit: Face the water and tap. Something might bite!
 - `pod.first` · once · → leadPod (encounter start)
   - Spirit: Grab your friend's pod from the rim and toss it in!
@@ -40,9 +40,9 @@ Names are placeholders. The step 5c dialogue system loads this (convert to data 
   - Spirit: It's weak now. Grab the big pod and flick it!
 - `capture.locked` · once · → cradle (a pod thrown above red shatters)
   - Spirit: Weaken it first!
-- `capture.dazed.first` · once · → cradle (first dazed wild creature)
+- `capture.dazed.first` · once · → cradle (first dazed wild Isling)
   - Spirit: It's dazed. Quick, a pod!
-- `capture.success.first` · once: Spirit: A new friend! It's in your pods now.
+- `capture.success.first` · once: Spirit: A new Isling! It's in your pods now.
 - `party.full` · once: Spirit: Your pods are full. New friends will wait for you at the Hearth Lodge.
 - `evolve.first` · once · → nearPad (first evolution)
   - Spirit: Look at that! They've grown into something new.
@@ -107,7 +107,7 @@ Names are placeholders. The step 5c dialogue system loads this (convert to data 
 - `end` · Spirit: (glows, slots into the Heart's forehead)
 
 ## Idle hints (random, rare, only when nothing is happening for ~40 s)
-- Spirit: Your friends get stronger every battle.
+- Spirit: Your Islings get stronger every battle.
 - Spirit: The other gates lead to water and wind. Just saying.
 - Spirit: Psst. Rare ones hide in tall grass.
 - Spirit: You can move the island anytime. Grab the edge.

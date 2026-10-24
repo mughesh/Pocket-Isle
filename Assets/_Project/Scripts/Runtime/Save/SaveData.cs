@@ -7,7 +7,7 @@ namespace Diorama
 {
     /// <summary>One creature in the save: species id (<see cref="SpeciesRegistry"/>), level, XP, HP, nickname.</summary>
     [Serializable]
-    public class SavedCreature
+    public class SavedIsling
     {
         public string species;
         public int level;
@@ -32,8 +32,8 @@ namespace Diorama
 
         public int version = CurrentVersion;
         public string savedAt;
-        public List<SavedCreature> party = new List<SavedCreature>();
-        public List<SavedCreature> storage = new List<SavedCreature>();
+        public List<SavedIsling> party = new List<SavedIsling>();
+        public List<SavedIsling> storage = new List<SavedIsling>();
         public int explorerX, explorerY;
         public int facingX, facingY = -1;
         public bool hasShrine;
@@ -123,13 +123,13 @@ namespace Diorama
             if (File.Exists(path)) File.Delete(path);
         }
 
-        public static SavedCreature ToSaved(CreatureInstance c) => new SavedCreature
+        public static SavedIsling ToSaved(IslingInstance c) => new SavedIsling
         {
             species = SpeciesRegistry.IdOf(c.species), level = c.level, xp = c.xp, hp = c.currentHp, nickname = c.nickname,
         };
 
         /// <summary>Back to a creature; null (with the reason) for a species the registry doesn't know.</summary>
-        public static CreatureInstance FromSaved(SavedCreature s, SpeciesRegistry registry, out string problem)
+        public static IslingInstance FromSaved(SavedIsling s, SpeciesRegistry registry, out string problem)
         {
             problem = null;
             var species = registry != null && s != null ? registry.Find(s.species) : null;
@@ -138,23 +138,23 @@ namespace Diorama
                 problem = $"unknown species '{(s != null ? s.species : "null")}'";
                 return null;
             }
-            var c = new CreatureInstance(species, Mathf.Max(1, s.level)) { xp = Mathf.Max(0, s.xp), nickname = s.nickname };
+            var c = new IslingInstance(species, Mathf.Max(1, s.level)) { xp = Mathf.Max(0, s.xp), nickname = s.nickname };
             c.currentHp = Mathf.Clamp(s.hp, 0, c.MaxHp);
             return c;
         }
 
-        public static List<SavedCreature> ToSaved(IEnumerable<CreatureInstance> list)
+        public static List<SavedIsling> ToSaved(IEnumerable<IslingInstance> list)
         {
-            var result = new List<SavedCreature>();
+            var result = new List<SavedIsling>();
             foreach (var c in list)
                 if (c != null && c.species != null) result.Add(ToSaved(c));
             return result;
         }
 
         /// <summary>Creatures the registry knows; the unknown ones are reported in <paramref name="problems"/> and skipped.</summary>
-        public static List<CreatureInstance> FromSaved(IEnumerable<SavedCreature> list, SpeciesRegistry registry, List<string> problems)
+        public static List<IslingInstance> FromSaved(IEnumerable<SavedIsling> list, SpeciesRegistry registry, List<string> problems)
         {
-            var result = new List<CreatureInstance>();
+            var result = new List<IslingInstance>();
             if (list == null) return result;
             foreach (var s in list)
             {

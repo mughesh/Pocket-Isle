@@ -304,7 +304,7 @@ namespace Diorama
                     p.transform.localRotation = Quaternion.identity;
                     if (i < Party.Size) p.BaseScale = Vector3.one * FocusScale(i);
                 }
-                p.CreatureOut = i == ActiveSlot;
+                p.IslingOut = i == ActiveSlot;
                 float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * 6f);
                 p.Glow = i == CradleSlot ? (CradlePulse ? 0.9f + 0.6f * pulse : CradleGlow ? 0.8f : 0f)
                     : Mathf.Max(i == GlowSlot || i == SelectedSlot ? 1f : 0f, WaveGlow(i));
@@ -338,7 +338,7 @@ namespace Diorama
                     p = _pods[i] = Spawn($"Pod {i + 1}", i);
                     p.transform.localPosition = HomeLocal(i);
                 }
-                if (i != _evolvingSlot && (p.Creature != c || p.ShownSpecies != c.species)) p.Show(c);
+                if (i != _evolvingSlot && (p.Isling != c || p.ShownSpecies != c.species)) p.Show(c);
             }
         }
 
@@ -601,7 +601,7 @@ namespace Diorama
             }
             if (focus < 0 && _card != null && _card.Visible)
                 for (int i = 0; i < Party.Size && focus < 0; i++)
-                    if (_pods[i] != null && _pods[i].Creature == _card.Showing && !_pods[i].Detached) focus = i;
+                    if (_pods[i] != null && _pods[i].Isling == _card.Showing && !_pods[i].Detached) focus = i;
             if (focus < 0 && _gazed >= 0 && _gazed < Party.Size) focus = _gazed;
             if (focus < 0) focus = NearestToHands();
             if (focus >= 0)
@@ -672,16 +672,16 @@ namespace Diorama
         void ShowCard(int slot, string how)
         {
             var p = _pods[slot];
-            if (_card == null || p == null || p.Creature == null) return;
-            if (_card.Visible && _card.Showing == p.Creature && how == "gaze + pinch")
+            if (_card == null || p == null || p.Isling == null) return;
+            if (_card.Visible && _card.Showing == p.Isling && how == "gaze + pinch")
             {
                 _card.Hide();
                 return;
             }
             Vector3 up = island.transform.up;
             Vector3 anchor = p.transform.position + up * World(0.055f) + island.transform.forward * World(0.03f);
-            _card.Show(p.Creature, anchor, cardSeconds);
-            Debug.Log($"[PodRack] Card for {p.Creature.Name} ({how}).");
+            _card.Show(p.Isling, anchor, cardSeconds);
+            Debug.Log($"[PodRack] Card for {p.Isling.Name} ({how}).");
         }
 
         // ---- rim guard ----
@@ -882,7 +882,7 @@ namespace Diorama
         }
 
         /// <summary>The cradle pod now holds a party creature: it becomes pod <paramref name="slot"/> (a new empty pod fills the cradle).</summary>
-        public void AdoptCradlePod(int slot, CreatureInstance creature)
+        public void AdoptCradlePod(int slot, IslingInstance creature)
         {
             var p = _pods[CradleSlot];
             _pods[CradleSlot] = null;

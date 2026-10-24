@@ -37,7 +37,7 @@ namespace Diorama.EditorTools
             foreach (var o in Selection.objects)
             {
                 if (o is CreatureRecipe r) recipes.Add(r);
-                else if (o is CreatureSpecies s && s.recipe != null) recipes.Add(s.recipe);
+                else if (o is IslingSpecies s && s.recipe != null) recipes.Add(s.recipe);
             }
             if (recipes.Count == 0)
             {

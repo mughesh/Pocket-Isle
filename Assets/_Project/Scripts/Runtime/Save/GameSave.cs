@@ -83,7 +83,7 @@ namespace Diorama
 
         void OnRested(Vector2Int shrine) => Save("shrine", true);
 
-        void OnCaught(CreatureInstance c)
+        void OnCaught(IslingInstance c)
         {
             _caught.Add(SpeciesRegistry.IdOf(c.species));
             Save("catch");
@@ -182,7 +182,7 @@ namespace Diorama
                 if (c != null && c.species != null) _caught.Add(SpeciesRegistry.IdOf(c.species));
         }
 
-        static string Describe(List<CreatureInstance> list) =>
+        static string Describe(List<IslingInstance> list) =>
             string.Join(", ", list.Where(c => c != null).Select(c => $"{c.Name} Lv {c.level}"));
 
         // ---- save ----

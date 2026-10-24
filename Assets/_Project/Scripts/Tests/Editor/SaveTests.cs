@@ -35,9 +35,9 @@ namespace Diorama.Tests
             return o;
         }
 
-        CreatureSpecies Species(string id)
+        IslingSpecies Species(string id)
         {
-            var s = Make<CreatureSpecies>();
+            var s = Make<IslingSpecies>();
             s.name = id;
             s.displayName = id;
             _registry.species.Add(s);
@@ -49,9 +49,9 @@ namespace Diorama.Tests
         {
             var kilnpot = Species("Kilnpot");
             var waxle = Species("Waxle");
-            var lead = new CreatureInstance(kilnpot, 9) { xp = 17, nickname = "Pip" };
+            var lead = new IslingInstance(kilnpot, 9) { xp = 17, nickname = "Pip" };
             lead.currentHp = 11;
-            var stored = new CreatureInstance(waxle, 4);
+            var stored = new IslingInstance(waxle, 4);
             var data = new SaveData
             {
                 party = SaveGame.ToSaved(new[] { lead }),
@@ -117,7 +117,7 @@ namespace Diorama.Tests
         public void UnknownSpecies_IsSkippedAndReported()
         {
             Species("Kilnpot");
-            var saved = new List<SavedCreature> { new SavedCreature { species = "Kilnpot", level = 5, hp = 10 }, new SavedCreature { species = "Gone", level = 5 } };
+            var saved = new List<SavedIsling> { new SavedIsling { species = "Kilnpot", level = 5, hp = 10 }, new SavedIsling { species = "Gone", level = 5 } };
             var problems = new List<string>();
             var list = SaveGame.FromSaved(saved, _registry, problems);
             Assert.AreEqual(1, list.Count);

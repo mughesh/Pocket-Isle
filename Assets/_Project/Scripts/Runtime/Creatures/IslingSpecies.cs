@@ -15,18 +15,18 @@ namespace Diorama
     }
 
     /// <summary>
-    /// A species: name, element, look (recipe), evolution and battle numbers (base stats and three moves:
+    /// An Isling species: name, element, look (recipe), evolution and battle numbers (base stats and three moves:
     /// an element attack, a Neutral attack and a support).
     /// </summary>
-    [CreateAssetMenu(menuName = "Pocket Isle/Creatures/Species", fileName = "Species")]
-    public class CreatureSpecies : ScriptableObject
+    [CreateAssetMenu(menuName = "Pocket Isle/Islings/Species", fileName = "Species")]
+    public class IslingSpecies : ScriptableObject
     {
         public string displayName;
         public Element element;
         public CreatureRecipe recipe;
 
         [Header("Evolution")]
-        public CreatureSpecies evolvesTo;
+        public IslingSpecies evolvesTo;
         [Min(0)] public int evolveLevel;
 
         [Header("Battle")]

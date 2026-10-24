@@ -426,7 +426,7 @@ namespace Diorama.EditorTools
             Debug.Log($"[FireKit] Wrote 12 parts, 7 fire recipes and species to {Root}.");
         }
 
-        static CreatureSpecies FireSpecies(string name, CreatureRecipe recipe, CreatureSpecies evolvesTo, int level,
+        static IslingSpecies FireSpecies(string name, CreatureRecipe recipe, IslingSpecies evolvesTo, int level,
                                            int hp, int attack, int defense, int speed)
         {
             var s = Species(name, Element.Fire, recipe, evolvesTo, level);

@@ -10,18 +10,18 @@ namespace Diorama
     [CreateAssetMenu(menuName = "Pocket Isle/Creatures/Species Registry", fileName = "SpeciesRegistry")]
     public class SpeciesRegistry : ScriptableObject
     {
-        public List<CreatureSpecies> species = new List<CreatureSpecies>();
+        public List<IslingSpecies> species = new List<IslingSpecies>();
 
-        Dictionary<string, CreatureSpecies> _byId;
+        Dictionary<string, IslingSpecies> _byId;
 
-        public static string IdOf(CreatureSpecies s) => s != null ? s.name : string.Empty;
+        public static string IdOf(IslingSpecies s) => s != null ? s.name : string.Empty;
 
         /// <summary>The species with this id, or null.</summary>
-        public CreatureSpecies Find(string id)
+        public IslingSpecies Find(string id)
         {
             if (_byId == null || _byId.Count != species.Count)
             {
-                _byId = new Dictionary<string, CreatureSpecies>();
+                _byId = new Dictionary<string, IslingSpecies>();
                 foreach (var s in species)
                     if (s != null) _byId[s.name] = s;
             }

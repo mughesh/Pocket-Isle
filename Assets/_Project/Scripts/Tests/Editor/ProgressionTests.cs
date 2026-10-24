@@ -26,9 +26,9 @@ namespace Diorama.Tests
             return o;
         }
 
-        CreatureSpecies Species(string name, int hp = 40)
+        IslingSpecies Species(string name, int hp = 40)
         {
-            var s = Make<CreatureSpecies>();
+            var s = Make<IslingSpecies>();
             s.name = name;
             s.displayName = name;
             s.baseStats = new BaseStats { hp = hp, attack = 10, defense = 10, speed = 10 };
@@ -48,7 +48,7 @@ namespace Diorama.Tests
         [Test]
         public void AddXp_BelowTheNextLevel_JustAdds()
         {
-            var c = new CreatureInstance(Species("A"), 5);
+            var c = new IslingInstance(Species("A"), 5);
             Assert.AreEqual(0, Progression.AddXp(c, 39, _config).Count);
             Assert.AreEqual(5, c.level);
             Assert.AreEqual(39, c.xp);
@@ -57,7 +57,7 @@ namespace Diorama.Tests
         [Test]
         public void AddXp_SeveralLevelsAtOnce_CarriesTheRest()
         {
-            var c = new CreatureInstance(Species("A"), 5);
+            var c = new IslingInstance(Species("A"), 5);
             // 40 (5->6) + 46 (6->7) + 52 (7->8) = 138, plus 7 left over.
             var ups = Progression.AddXp(c, 145, _config);
             Assert.AreEqual(3, ups.Count);
@@ -69,7 +69,7 @@ namespace Diorama.Tests
         [Test]
         public void LevelUp_RaisesMaxHpAndCurrentHpByTheSameAmount()
         {
-            var c = new CreatureInstance(Species("A", 40), 5);
+            var c = new IslingInstance(Species("A", 40), 5);
             c.currentHp = 10;
             int max = c.MaxHp;
             var ups = Progression.AddXp(c, 40, _config);
@@ -78,7 +78,7 @@ namespace Diorama.Tests
             Assert.AreEqual(gain, ups[0].hpGain);
             Assert.AreEqual(10 + gain, c.currentHp);
 
-            var fainted = new CreatureInstance(Species("B", 40), 5) { currentHp = 0 };
+            var fainted = new IslingInstance(Species("B", 40), 5) { currentHp = 0 };
             Progression.AddXp(fainted, 40, _config);
             Assert.AreEqual(6, fainted.level);
             Assert.AreEqual(0, fainted.currentHp, "fainted stays fainted until healed");
@@ -88,7 +88,7 @@ namespace Diorama.Tests
         public void LevelCap_StopsLevelsAndXp()
         {
             _config.levelCap = 7;
-            var c = new CreatureInstance(Species("A"), 6);
+            var c = new IslingInstance(Species("A"), 6);
             Progression.AddXp(c, 10000, _config);
             Assert.AreEqual(7, c.level);
             Assert.AreEqual(0, c.xp);
@@ -99,7 +99,7 @@ namespace Diorama.Tests
         [Test]
         public void Share_FullToEveryFighter_FaintedToo()
         {
-            var c = new CreatureInstance(Species("A"), 5) { currentHp = 0 };
+            var c = new IslingInstance(Species("A"), 5) { currentHp = 0 };
             Assert.AreEqual(25, Progression.ShareFor(c, 25, 3, _config));
             _config.faintedShare = false;
             Assert.AreEqual(0, Progression.ShareFor(c, 25, 3, _config));
@@ -112,7 +112,7 @@ namespace Diorama.Tests
             var big = Species("Big", 80);
             small.evolvesTo = big;
             small.evolveLevel = 12;
-            var c = new CreatureInstance(small, 11) { nickname = "Pip", xp = 3 };
+            var c = new IslingInstance(small, 11) { nickname = "Pip", xp = 3 };
             Assert.IsFalse(Progression.CanEvolve(c));
             c.level = 12;
             c.currentHp = c.MaxHp / 2;
@@ -131,7 +131,7 @@ namespace Diorama.Tests
         {
             var lone = Species("Lone");
             lone.evolveLevel = 5;
-            var c = new CreatureInstance(lone, 20);
+            var c = new IslingInstance(lone, 20);
             Assert.IsFalse(Progression.CanEvolve(c));
             Assert.IsFalse(Progression.Evolve(c));
             Assert.AreEqual(lone, c.species);

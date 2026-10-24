@@ -48,14 +48,14 @@ namespace Diorama.Tests
             return m;
         }
 
-        CreatureInstance Creature(Element element, int speed, int level, params MoveData[] moves)
+        IslingInstance Creature(Element element, int speed, int level, params MoveData[] moves)
         {
-            var s = Make<CreatureSpecies>();
+            var s = Make<IslingSpecies>();
             s.displayName = $"{element} creature";
             s.element = element;
             s.baseStats = new BaseStats { hp = 40, attack = 10, defense = 10, speed = speed };
             s.moves = moves;
-            return new CreatureInstance(s, level);
+            return new IslingInstance(s, level);
         }
 
         // ---- type chart ----
@@ -231,7 +231,7 @@ namespace Diorama.Tests
             b.PlayTurn(0);
             Assert.AreEqual(1, b.player.attackStage);
             Assert.AreEqual(1.5f, BattleMath.StageMultiplier(1), 1e-5f);
-            Assert.AreEqual(b.player.creature.Attack * 1.5f, b.player.Attack, 1e-4f);
+            Assert.AreEqual(b.player.isling.Attack * 1.5f, b.player.Attack, 1e-4f);
         }
 
         [Test]
@@ -289,8 +289,8 @@ namespace Diorama.Tests
         public void EncounterTable_RollsWeightsAndLevels()
         {
             var table = Make<EncounterTable>();
-            var common = Make<CreatureSpecies>();
-            var rare = Make<CreatureSpecies>();
+            var common = Make<IslingSpecies>();
+            var rare = Make<IslingSpecies>();
             table.entries = new[]
             {
                 new EncounterTable.Entry { species = common, minLevel = 3, maxLevel = 5, weight = 95f },
@@ -439,7 +439,7 @@ namespace Diorama.Tests
             b.player.attackStage = 2;
             var events = b.Switch(second);
             Assert.AreEqual(BattleEventKind.Switched, events[0].kind);
-            Assert.AreSame(second, b.player.creature);
+            Assert.AreSame(second, b.player.isling);
             Assert.AreEqual(0, b.player.attackStage, "stages don't carry over");
             var hit = events.First(e => e.kind == BattleEventKind.Damage);
             Assert.AreEqual(BattleSide.Player, hit.side);

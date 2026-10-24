@@ -8,7 +8,8 @@ Prompts for Claude Code: `Assets/Docs/Prompts/step-NN-*.md`. Design: `Assets/Doc
 - Step 6 fixes 2 (no Catch rune, pod always in the cradle and shatters above red, rim pods grow on gaze, gaze 5° lower):
   committed f69d96f, **headset test pending**.
 - Step 7 (ahead of plan): XP / levels / evolution (53b10df), Hearth Shrine + storage shelf (e14f949), save / load +
-  pause (next commit). All **headset test pending**; flat Editor Play smoke tests passed. Spatial anchors not done (cut #5).
+  pause (68190d0). Step 7b (shrine interior): scene swap + 2 x 2 shrine (a39f01e), Hearth Lodge (6b03d79), Islings
+  rename (next commit). All **headset test pending**; flat Editor Play smoke tests passed. Spatial anchors not done (cut #5).
 
 ## Principle
 - **Every system data-driven** (ScriptableObjects): species, moves, type chart, maps, temples, dialogue.
@@ -50,7 +51,8 @@ Keeper fight phases, opening script. Concept images via Antigravity in batches.
 ## Cut list (first to go first)
 1. Golden Berry crafting
 2. Creatures beyond 4 per element (10 stays the stretch)
-3. Sanctuary island → simple counter + shelf at a Hearth Shrine
+3. Sanctuary island → **done this way (step 7b): the Hearth Lodge interior behind each shrine** (scene swap built
+   there, reused for step 8 gates and the step 9 temple arena)
 4. Table snap (keep the shadow)
 5. Spatial-anchor persistence
 6. Galewick, then Lilymere: finale wakes on the shards that exist (shard count is data)

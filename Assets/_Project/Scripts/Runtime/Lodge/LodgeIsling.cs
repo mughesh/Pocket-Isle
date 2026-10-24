@@ -13,7 +13,7 @@ namespace Diorama
     public class LodgeIsling : MonoBehaviour
     {
         public IslandBuilder island;
-        public CreatureInstance Creature { get; private set; }
+        public IslingInstance Isling { get; private set; }
         public CreatureView View { get; private set; }
         public Vector2Int Tile => _tile;
         public bool OnPedestal { get; private set; }
@@ -33,10 +33,10 @@ namespace Diorama
         public bool Asleep => _sleepUntil > Time.time;
         public bool Leaving => _leaving;
 
-        public void Init(LodgeRoom room, CreatureInstance creature, Vector2Int tile)
+        public void Init(LodgeRoom room, IslingInstance creature, Vector2Int tile)
         {
             _room = room;
-            Creature = creature;
+            Isling = creature;
             View = GetComponent<CreatureView>();
             View.lookAtPlayer = true;
             _tile = _from = tile;

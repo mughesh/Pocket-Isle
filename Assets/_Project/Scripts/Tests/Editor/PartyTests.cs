@@ -24,12 +24,12 @@ namespace Diorama.Tests
             _made.Clear();
         }
 
-        CreatureInstance C(string name)
+        IslingInstance C(string name)
         {
-            var s = ScriptableObject.CreateInstance<CreatureSpecies>();
+            var s = ScriptableObject.CreateInstance<IslingSpecies>();
             _made.Add(s);
             s.name = s.displayName = name;
-            return new CreatureInstance(s, 5);
+            return new IslingInstance(s, 5);
         }
 
         [Test]

@@ -120,9 +120,11 @@ Debug toggle: G (Editor) or three quick left-hand thumb taps (dev builds), 2 s f
 Avoided for originality: lizards, foxes, cats, pigs, moths, pinecones (all used by Pokémon fire types).
 
 ## Core loop
-explore → tall grass encounter → battle → capture → party / Sanctuary → Temple Keeper → shard → statue
+explore → tall grass encounter → battle → capture → party / Hearth Lodge → Temple Keeper → shard → statue
 
-## Creatures
+## Islings (the creatures)
+- **Name (decided Oct 24): Islings.** Every line, card, toast and label says Isling / Islings, never "creature"
+  or "Pokémon". (Code: gameplay types are `IslingSpecies` / `IslingInstance`; the art pipeline keeps its Creature* names.)
 - **Target 10 species per element** (~30 base + ~30 evolutions + 3 Keepers + the Heart creature).
 - Ship in tiers: **4 per element guaranteed, 7 if on track, 10 stretch.** Region 1 gets its full set first.
 - **1 evolution per species** as the base rule; a few rare 3-stage lines are optional later.
@@ -151,19 +153,28 @@ explore → tall grass encounter → battle → capture → party / Sanctuary �
 
 ## Capture
 - Weaken, then flick a glass pod (brass band). Lower HP = better chance.
-- **Catch rule (Oct 24):** the Catch rune is locked (dim; picking it gives "Weaken it first!", no turn used) until the
-  wild HP bar is red (≤ 25%). Then it pops open and the big catch pod (6 cm) appears in the cradle. A fainted wild
-  creature is **dazed for 8 s**: a pod catches it for sure (rares 75%); no throw = it fades out, battle won, XP as usual.
+- **Catch rule (Oct 24, fixes 2):** no Catch rune. The big empty pod (6 cm) waits in the cradle from the moment the
+  wild Isling appears and can always be thrown. Above red HP it wobbles once and shatters (turn used, "Weaken it
+  first!" the first time); in the red (≤ 25%) it glows and has a real chance; a fainted wild Isling is **dazed for
+  8 s** (the pod pulses): a pod catches it for sure (rares 75%); no throw = it fades out, battle won, XP as usual.
 - **Golden Berry** (rare): craft from berries (bushes regrow on real-time timers) + orbs (one per temple,
   plus hidden spots). Befriends a wild creature without battle. Rare creatures and Keepers refuse it.
   First feature to cut if late.
 
 ## Party and collection
 - **Party:** 6 glass pods in sockets on the island's rocky rim. Pinch one for stats; pull one to send it out.
-- **7th catch and beyond:** flies to the Sanctuary automatically (light streak off the island).
-- **Hearth Shrine:** rest to heal the party and save; the only place to swap party and Sanctuary creatures.
-- **Sanctuary island:** a second small island you summon any time. Caught creatures roam it, one corner per element.
-  Pick any up to inspect it in your hand. Counter "Caught 10 / 30". Uncaught species are not shown.
+- **7th catch and beyond:** goes to the Hearth Lodge automatically (light streak off the island).
+- **Hearth Shrine (decided Oct 24, step 7b):** a 2 x 2 stone hut with a flame beacon, visible from across the window.
+  Stand on any tile touching it (its flame leans toward you), then **warm your hand over the flame** (palm down over
+  the bowl, 0.8 s, a ring fills) or look + pinch it: flame flares, a warm wave heals the rim pods, the game saves, and
+  the island **swaps into the Hearth Lodge** (content sinks, the base tints, the room rises). Losing everything
+  returns you outside the last shrine used.
+- **Hearth Lodge (replaces the Sanctuary island, cut list #3):** a small dollhouse room inside the rim (back wall and
+  half side walls, hearth, honeycomb pod wall, rug, cushions, pedestal, door). Up to 12 stored Islings wander, doze by
+  the hearth and hop; the rest sleep in the honeycomb pods. Look + pinch (or poke) one: it hops onto the pedestal with
+  its full card (Lv, element, HP, XP, moves, ATK / DEF / SPD). Grab one and drop it on a rim socket to bring it along
+  (swap if full); toss a rim pod onto the floor to leave it in the lodge (never the last one). Walk out the door.
+  The same scene swap opens realm gates (step 8) and temple arenas (step 9). Counter "Caught 10 / 30" later.
 
 ## Opening (first 5 minutes)
 1. A broken shard drifts into your room and unfolds into the Still Isle. The explorer wakes.

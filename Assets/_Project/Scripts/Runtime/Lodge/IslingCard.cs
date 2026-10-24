@@ -30,7 +30,7 @@ namespace Diorama
         bool _shown;
 
         public bool Visible => _shown;
-        public CreatureInstance Showing { get; private set; }
+        public IslingInstance Showing { get; private set; }
 
         public IslingCard(Material hud, Mesh quad, Transform parent)
         {
@@ -78,7 +78,7 @@ namespace Diorama
         }
 
         /// <summary>Shows the card for <paramref name="c"/> at an island-local point (its bottom centre).</summary>
-        public void Show(CreatureInstance c, ProgressionConfig progression, Vector3 local)
+        public void Show(IslingInstance c, ProgressionConfig progression, Vector3 local)
         {
             if (c == null || c.species == null) return;
             Showing = c;

@@ -12,7 +12,7 @@ namespace Diorama
         [Serializable]
         public struct Entry
         {
-            public CreatureSpecies species;
+            public IslingSpecies species;
             [Min(1)] public int minLevel;
             [Min(1)] public int maxLevel;
             [Tooltip("Relative chance. Rares should add up to about 5% of the total.")]
@@ -25,7 +25,7 @@ namespace Diorama
         public Entry[] entries = Array.Empty<Entry>();
 
         /// <summary>Picks an entry by weight and a level in its range. False when the table is empty.</summary>
-        public bool Roll(SeededRandom rnd, out CreatureInstance creature, out bool rare)
+        public bool Roll(SeededRandom rnd, out IslingInstance creature, out bool rare)
         {
             creature = null;
             rare = false;
@@ -41,7 +41,7 @@ namespace Diorama
                 pick -= e.weight;
                 if (pick >= 0f) continue;
                 int lo = Mathf.Max(1, Mathf.Min(e.minLevel, e.maxLevel)), hi = Mathf.Max(lo, e.maxLevel);
-                creature = new CreatureInstance(e.species, lo + Mathf.Min(hi - lo, (int)(rnd.Next() * (hi - lo + 1))));
+                creature = new IslingInstance(e.species, lo + Mathf.Min(hi - lo, (int)(rnd.Next() * (hi - lo + 1))));
                 rare = e.rare;
                 return true;
             }

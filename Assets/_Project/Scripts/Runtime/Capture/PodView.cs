@@ -43,11 +43,11 @@ namespace Diorama
         /// <summary>0..1: white cracks race over the glass (the pod is about to shatter).</summary>
         public float Shatter { get; set; }
         /// <summary>Hides the tiny creature (it is out on the battle field).</summary>
-        public bool CreatureOut { get; set; }
+        public bool IslingOut { get; set; }
         /// <summary>Someone else moves this pod (a flight); its rack leaves it alone.</summary>
         public bool Detached { get; set; }
 
-        public CreatureInstance Creature { get; private set; }
+        public IslingInstance Isling { get; private set; }
 
         GameObject _mini;
         CreatureView _miniView;
@@ -86,21 +86,21 @@ namespace Diorama
         }
 
         /// <summary>The species whose tiny copy is inside right now (it changes when the creature evolves).</summary>
-        public CreatureSpecies ShownSpecies => _shownSpecies;
+        public IslingSpecies ShownSpecies => _shownSpecies;
 
-        CreatureSpecies _shownSpecies;
+        IslingSpecies _shownSpecies;
 
         /// <summary>Puts this creature in the pod (null = empty pod).</summary>
-        public void Show(CreatureInstance creature)
+        public void Show(IslingInstance creature)
         {
-            Creature = creature;
+            Isling = creature;
             BuildMini(creature != null ? creature.species : null);
         }
 
         /// <summary>Shows a species' tiny copy without changing the creature (the in-pod evolution show).</summary>
-        public void ShowSpecies(CreatureSpecies species) => BuildMini(species);
+        public void ShowSpecies(IslingSpecies species) => BuildMini(species);
 
-        void BuildMini(CreatureSpecies species)
+        void BuildMini(IslingSpecies species)
         {
             if (species == _shownSpecies && (_mini != null || species == null)) return;
             _shownSpecies = species;
@@ -141,14 +141,14 @@ namespace Diorama
 
         void Update()
         {
-            bool fainted = Creature != null && Creature.IsFainted;
+            bool fainted = Isling != null && Isling.IsFainted;
             _glow = Mathf.MoveTowards(_glow, fainted ? 0f : Glow, Time.deltaTime * 3f);
             _hover = Mathf.MoveTowards(_hover, Hover, Time.deltaTime * 6f);
             transform.localScale = BaseScale * (1f + 0.1f * _hover + 0.08f * Pulse);
 
             if (_mini != null)
             {
-                _mini.SetActive(!CreatureOut);
+                _mini.SetActive(!IslingOut);
                 if (_miniView != null && fainted != _miniFainted)
                 {
                     _miniFainted = fainted;
@@ -164,8 +164,8 @@ namespace Diorama
 
             if (glass != null)
             {
-                bool full = Creature != null && Creature.species != null && !CreatureOut;
-                var tint = full ? Color.Lerp(emptyTint, ElementStyle.Of(Creature.Element).main, 0.45f) : emptyTint;
+                bool full = Isling != null && Isling.species != null && !IslingOut;
+                var tint = full ? Color.Lerp(emptyTint, ElementStyle.Of(Isling.Element).main, 0.45f) : emptyTint;
                 glass.GetPropertyBlock(_glassBlock);
                 _glassBlock.SetColor(TintId, tint);
                 _glassBlock.SetFloat(GlowId, _glow + 0.4f * _hover + 0.8f * Pulse);

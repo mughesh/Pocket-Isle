@@ -119,8 +119,8 @@ namespace Diorama.EditorTools
                 AssetDatabase.CreateAsset(r, path);
             }
             r.species.Clear();
-            foreach (var guid in AssetDatabase.FindAssets("t:CreatureSpecies", new[] { SpeciesDir }))
-                r.species.Add(AssetDatabase.LoadAssetAtPath<CreatureSpecies>(AssetDatabase.GUIDToAssetPath(guid)));
+            foreach (var guid in AssetDatabase.FindAssets("t:IslingSpecies", new[] { SpeciesDir }))
+                r.species.Add(AssetDatabase.LoadAssetAtPath<IslingSpecies>(AssetDatabase.GUIDToAssetPath(guid)));
             r.species.Sort((a, b) => string.CompareOrdinal(a.name, b.name));
             EditorUtility.SetDirty(r);
             return r;
@@ -150,8 +150,8 @@ namespace Diorama.EditorTools
             var sb = new System.Text.StringBuilder();
             void Set(string from, string to, int level)
             {
-                var a = AssetDatabase.LoadAssetAtPath<CreatureSpecies>($"{SpeciesDir}/{from}.asset");
-                var b = AssetDatabase.LoadAssetAtPath<CreatureSpecies>($"{SpeciesDir}/{to}.asset");
+                var a = AssetDatabase.LoadAssetAtPath<IslingSpecies>($"{SpeciesDir}/{from}.asset");
+                var b = AssetDatabase.LoadAssetAtPath<IslingSpecies>($"{SpeciesDir}/{to}.asset");
                 if (a == null || b == null)
                 {
                     Debug.LogError($"[Step7] Species {from} or {to} is missing in {SpeciesDir}.");

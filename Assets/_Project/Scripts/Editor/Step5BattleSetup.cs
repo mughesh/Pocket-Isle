@@ -97,7 +97,7 @@ namespace Diorama.EditorTools
                 WriteData();
                 chart = AssetDatabase.LoadAssetAtPath<TypeChart>(BattleRoot + "/TypeChart.asset");
             }
-            var kilnpot = AssetDatabase.LoadAssetAtPath<CreatureSpecies>(SpeciesRoot + "/Kilnpot.asset");
+            var kilnpot = AssetDatabase.LoadAssetAtPath<IslingSpecies>(SpeciesRoot + "/Kilnpot.asset");
 
             var report = new StringBuilder("[Step5] Battle added to MR_Main:");
             foreach (var name in OldWanderers)
@@ -137,7 +137,7 @@ namespace Diorama.EditorTools
             var root = GameObject.Find("Battle");
             if (root == null) root = new GameObject("Battle");
             var party = Component<Party>(root);
-            if (party.members.Count == 0) party.members.Add(new CreatureInstance(kilnpot, 5));
+            if (party.members.Count == 0) party.members.Add(new IslingInstance(kilnpot, 5));
             var director = Component<EncounterDirector>(root);
             director.explorer = explorer;
             director.window = window;
@@ -279,7 +279,7 @@ namespace Diorama.EditorTools
 
         static void SetMoves(StringBuilder report, string species, params MoveData[] moves)
         {
-            var s = AssetDatabase.LoadAssetAtPath<CreatureSpecies>($"{SpeciesRoot}/{species}.asset");
+            var s = AssetDatabase.LoadAssetAtPath<IslingSpecies>($"{SpeciesRoot}/{species}.asset");
             if (s == null)
             {
                 Debug.LogError($"[Step5] Species {species} not found (write the starter and fire kits first).");
@@ -292,7 +292,7 @@ namespace Diorama.EditorTools
 
         static EncounterTable.Entry Entry(string species, int min, int max, float weight, bool rare = false)
         {
-            var s = AssetDatabase.LoadAssetAtPath<CreatureSpecies>($"{SpeciesRoot}/{species}.asset");
+            var s = AssetDatabase.LoadAssetAtPath<IslingSpecies>($"{SpeciesRoot}/{species}.asset");
             if (s == null) Debug.LogError($"[Step5] Species {species} not found for the encounter table.");
             return new EncounterTable.Entry { species = s, minLevel = min, maxLevel = max, weight = weight, rare = rare };
         }

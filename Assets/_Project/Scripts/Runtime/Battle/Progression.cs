@@ -12,7 +12,7 @@ namespace Diorama
 
     /// <summary>
     /// XP, levels and evolution rules, no Unity objects in the loop (EditMode-tested).
-    /// <see cref="CreatureInstance.xp"/> is the progress toward the next level; a level-up carries the rest over.
+    /// <see cref="IslingInstance.xp"/> is the progress toward the next level; a level-up carries the rest over.
     /// </summary>
     public static class Progression
     {
@@ -20,7 +20,7 @@ namespace Diorama
         /// Adds XP and applies every level-up it reaches (up to the cap). Each one raises max HP, and current HP by the
         /// same amount (a fainted creature stays at 0 until healed). Returns the level-ups in order.
         /// </summary>
-        public static List<LevelUp> AddXp(CreatureInstance c, int amount, ProgressionConfig config)
+        public static List<LevelUp> AddXp(IslingInstance c, int amount, ProgressionConfig config)
         {
             var ups = new List<LevelUp>();
             if (c == null || c.species == null || config == null || amount <= 0) return ups;
@@ -44,7 +44,7 @@ namespace Diorama
         }
 
         /// <summary>The XP each of these creatures gets for a win (the config's share rules).</summary>
-        public static int ShareFor(CreatureInstance c, int reward, int fighters, ProgressionConfig config)
+        public static int ShareFor(IslingInstance c, int reward, int fighters, ProgressionConfig config)
         {
             if (c == null || config == null) return 0;
             if (c.IsFainted && !config.faintedShare) return 0;
@@ -52,7 +52,7 @@ namespace Diorama
         }
 
         /// <summary>True when the creature's species evolves and it has reached the level.</summary>
-        public static bool CanEvolve(CreatureInstance c)
+        public static bool CanEvolve(IslingInstance c)
         {
             if (c == null || c.species == null) return false;
             var next = c.species.evolvesTo;
@@ -60,7 +60,7 @@ namespace Diorama
         }
 
         /// <summary>Turns the creature into its next form. Keeps the HP ratio, level, XP and nickname.</summary>
-        public static bool Evolve(CreatureInstance c)
+        public static bool Evolve(IslingInstance c)
         {
             if (!CanEvolve(c)) return false;
             float ratio = c.MaxHp > 0 ? c.currentHp / (float)c.MaxHp : 0f;

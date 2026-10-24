@@ -202,8 +202,8 @@ namespace Diorama.EditorTools
             var d = Director;
             var b = d != null ? d.CurrentBattle : null;
             if (b == null) { Debug.LogWarning("[BattleDebug] No battle running."); return; }
-            b.wild.creature.currentHp = Mathf.Max(1, Mathf.FloorToInt(b.wild.MaxHp * share));
-            Debug.Log($"[BattleDebug] Wild {b.wild.creature.Name} HP {b.wild.Hp}/{b.wild.MaxHp}.");
+            b.wild.isling.currentHp = Mathf.Max(1, Mathf.FloorToInt(b.wild.MaxHp * share));
+            Debug.Log($"[BattleDebug] Wild {b.wild.isling.Name} HP {b.wild.Hp}/{b.wild.MaxHp}.");
         }
 
         /// <summary>Look + pinch on the cradle pod: an aimed catch throw.</summary>
@@ -228,10 +228,10 @@ namespace Diorama.EditorTools
             var hud = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Battle/Hud.mat");
             var quad = BattleHud.VerticalQuad();
             var card = new PodCard(hud, quad);
-            foreach (var guid in AssetDatabase.FindAssets("t:CreatureSpecies"))
+            foreach (var guid in AssetDatabase.FindAssets("t:IslingSpecies"))
             {
-                var species = AssetDatabase.LoadAssetAtPath<CreatureSpecies>(AssetDatabase.GUIDToAssetPath(guid));
-                card.Show(new CreatureInstance(species, 12), Vector3.zero, 1f);
+                var species = AssetDatabase.LoadAssetAtPath<IslingSpecies>(AssetDatabase.GUIDToAssetPath(guid));
+                card.Show(new IslingInstance(species, 12), Vector3.zero, 1f);
                 Debug.Log($"[CardFit] {species.displayName}: {card.Describe()}");
             }
             var root = GameObject.Find("Pod Card");

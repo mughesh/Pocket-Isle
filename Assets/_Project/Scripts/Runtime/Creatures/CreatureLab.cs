@@ -12,7 +12,7 @@ namespace Diorama
     /// </summary>
     public class CreatureLab : MonoBehaviour
     {
-        public List<CreatureSpecies> species = new List<CreatureSpecies>();
+        public List<IslingSpecies> species = new List<IslingSpecies>();
         public List<PropRecipe> props = new List<PropRecipe>();
         [Tooltip("Diorama/Prop material for showing props.")]
         public Material propMaterial;
@@ -33,7 +33,7 @@ namespace Diorama
         int Count => species.Count + props.Count;
 
         public CreatureView Current => _current;
-        public CreatureSpecies CurrentSpecies => index < species.Count && species.Count > 0 ? species[Mathf.Clamp(index, 0, species.Count - 1)] : null;
+        public IslingSpecies CurrentSpecies => index < species.Count && species.Count > 0 ? species[Mathf.Clamp(index, 0, species.Count - 1)] : null;
         public PropRecipe CurrentProp => index >= species.Count && index - species.Count < props.Count ? props[index - species.Count] : null;
 
         void Start()
