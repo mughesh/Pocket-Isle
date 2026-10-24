@@ -158,6 +158,15 @@ namespace Diorama
         /// <summary>Tells listeners a creature changed in place (XP, level, evolution).</summary>
         public void NotifyChanged() => Changed?.Invoke();
 
+        /// <summary>Swaps two storage places (the lodge: a honeycomb sleeper and a room Isling trade places).</summary>
+        public bool SwapStorage(int a, int b)
+        {
+            if (a == b || a < 0 || b < 0 || a >= storage.Count || b >= storage.Count) return false;
+            (storage[a], storage[b]) = (storage[b], storage[a]);
+            NotifyChanged();
+            return true;
+        }
+
         public void HealAll()
         {
             foreach (var c in members)

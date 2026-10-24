@@ -77,6 +77,15 @@ namespace Diorama
         /// <summary>A wild creature was caught (it is already in the party or storage).</summary>
         public event System.Action<IslingInstance> Caught;
 
+        [Tooltip("Species not caught yet show up this many times as often (duplicates still spawn).")]
+        public float uncaughtWeight = 2f;
+
+        /// <summary>Has this species been caught? Set by the save (GameSave). Null = all count as caught (no boost, no "New!").</summary>
+        public System.Func<IslingSpecies, bool> IsCaught;
+
+        /// <summary>Species ids met in battle so far (the first meeting of an uncaught one gets a "New!" sparkle). Saved.</summary>
+        public readonly HashSet<string> Seen = new HashSet<string>();
+
         /// <summary>The battle being played, or null (testing).</summary>
         public BattleSystem CurrentBattle { get; private set; }
 
@@ -205,7 +214,7 @@ namespace Diorama
             InBattle = true;
             explorer.Locked = true;
             MapCreature.HideAll = true;
-            if (!table.Roll(_rnd, out var wild, out bool rare))
+            if (!table.Roll(_rnd, out var wild, out bool rare, IsCaught, uncaughtWeight))
             {
                 Debug.LogError($"[EncounterDirector] {table.name} has no species to roll.", table);
                 yield return Finish(false);
@@ -261,6 +270,13 @@ namespace Diorama
             pods.InBattle = true;
             pods.CradleVisible = true;
             pods.CradleGlow = pods.CradlePulse = false;
+            // First meeting with a species not caught yet: a little "New!" sparkle as it appears.
+            bool isNew = IsCaught != null && wild.species != null && !IsCaught(wild.species) && Seen.Add(SpeciesRegistry.IdOf(wild.species));
+            if (isNew)
+            {
+                Debug.Log($"[EncounterDirector] First meeting with {wild.species.displayName}: New!");
+                StartCoroutine(NewSparkle());
+            }
             yield return stage.WildAppears(rare, water ? (Vector2?)where : null);
             runes.ShowRunOnly();
             runes.SetCaption(rare ? $"A rare wild {wild.Name} appeared!" : $"A wild {wild.Name} appeared!");
@@ -708,6 +724,12 @@ namespace Diorama
             explorer.Locked = false;
             MapCreature.HideAll = false;
             InBattle = false;
+        }
+
+        IEnumerator NewSparkle()
+        {
+            yield return new WaitForSeconds(0.25f);
+            if (stage.Wild != null) stage.CatchSparkle(stage.Wild.WorldCenter, "New!");
         }
 
         /// <summary>Clearing, pads and dim fade in or out together with the zoom.</summary>

@@ -38,8 +38,16 @@ namespace Diorama.EditorTools
             }
             room.beaconMaterial = Step7bSetup.BeaconMaterial();
             room.archHeight = 0.76f;
+            room.maxInRoom = 8;
             EditorUtility.SetDirty(room);
-            log.Append("\n  lodge door: 2-tile glowing archway; leave by walking onto it, look + pinch, or palm over it (ring)");
+            log.Append("\n  lodge door: 2-tile glowing archway; leave by walking onto it, look + pinch, or palm over it (ring); 8 Islings in the room, the rest in honeycomb pages");
+            var director = Object.FindFirstObjectByType<EncounterDirector>();
+            if (director != null)
+            {
+                director.uncaughtWeight = 2f;
+                EditorUtility.SetDirty(director);
+                log.Append("\n  encounters: species not caught yet count 2x, first meeting sparkles 'New!'");
+            }
             Focus(log);
             DialogueTools.Import();
             var guide = room.GetComponent<LodgeGuide>();

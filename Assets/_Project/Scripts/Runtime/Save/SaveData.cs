@@ -41,6 +41,8 @@ namespace Diorama
         public List<SavedRealm> realms = new List<SavedRealm>();
         public List<string> said = new List<string>();
         public List<string> caught = new List<string>();
+        /// <summary>Species met in battle (step 7c: "New!" only the first time).</summary>
+        public List<string> seen = new List<string>();
         public string walkMode;
 
         [Header("Inside an interior (the explorer fields above are then the outdoor return tile)")]

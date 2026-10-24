@@ -24,21 +24,25 @@ namespace Diorama
         public Habitat habitat;
         public Entry[] entries = Array.Empty<Entry>();
 
-        /// <summary>Picks an entry by weight and a level in its range. False when the table is empty.</summary>
-        public bool Roll(SeededRandom rnd, out IslingInstance creature, out bool rare)
+        /// <summary>
+        /// Picks an entry by weight and a level in its range. False when the table is empty.
+        /// Species not caught yet (<paramref name="isCaught"/> false) count <paramref name="uncaughtWeight"/> times.
+        /// </summary>
+        public bool Roll(SeededRandom rnd, out IslingInstance creature, out bool rare, Func<IslingSpecies, bool> isCaught = null, float uncaughtWeight = 1f)
         {
             creature = null;
             rare = false;
+            float Weight(Entry e) => e.species == null ? 0f : e.weight * (isCaught != null && !isCaught(e.species) ? uncaughtWeight : 1f);
             float total = 0f;
-            foreach (var e in entries)
-                if (e.species != null) total += e.weight;
+            foreach (var e in entries) total += Weight(e);
             if (total <= 0f) return false;
 
             float pick = rnd.Next() * total;
             foreach (var e in entries)
             {
-                if (e.species == null || e.weight <= 0f) continue;
-                pick -= e.weight;
+                float w = Weight(e);
+                if (w <= 0f) continue;
+                pick -= w;
                 if (pick >= 0f) continue;
                 int lo = Mathf.Max(1, Mathf.Min(e.minLevel, e.maxLevel)), hi = Mathf.Max(lo, e.maxLevel);
                 creature = new IslingInstance(e.species, lo + Mathf.Min(hi - lo, (int)(rnd.Next() * (hi - lo + 1))));

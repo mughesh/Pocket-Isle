@@ -57,6 +57,7 @@ namespace Diorama
                 enabled = false;
                 return;
             }
+            if (encounters != null) encounters.IsCaught = s => s != null && _caught.Contains(SpeciesRegistry.IdOf(s));
             Load();
             _ready = true;
             if (shrines != null) shrines.Rested += OnRested;
@@ -156,6 +157,11 @@ namespace Diorama
             Dialogue.RestoreSaid(data.said);
             _caught.Clear();
             foreach (var id in data.caught) _caught.Add(id);
+            if (encounters != null && data.seen != null)
+            {
+                encounters.Seen.Clear();
+                foreach (var id in data.seen) encounters.Seen.Add(id);
+            }
             NoteParty();
             if (Enum.TryParse(data.walkMode, out MoveMode mode)) explorer.moveMode = mode;
             if (data.inside)
@@ -213,6 +219,7 @@ namespace Diorama
                     hasShrine = shrines != null && shrines.LastShrine.HasValue,
                     said = Dialogue.Said.ToList(),
                     caught = _caught.ToList(),
+                    seen = encounters != null ? encounters.Seen.ToList() : new List<string>(),
                     walkMode = explorer.moveMode.ToString(),
                 };
                 if (data.hasShrine)

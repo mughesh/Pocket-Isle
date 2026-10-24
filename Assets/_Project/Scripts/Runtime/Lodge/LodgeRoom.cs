@@ -7,10 +7,11 @@ namespace Diorama
 {
     /// <summary>
     /// The Hearth Lodge while it shows (<see cref="SceneSwap"/> into <see cref="lodge"/>): the first
-    /// <see cref="maxInRoom"/> stored Islings live in the room (<see cref="LodgeIsling"/>); the next ones sleep in the
-    /// honeycomb pods. What the hands can do:
+    /// <see cref="maxInRoom"/> stored Islings live in the room (<see cref="LodgeIsling"/>); the rest sleep in the
+    /// honeycomb, six cells a page (a small page arrow beside it when there are more; poke it or look + pinch).
+    /// What the hands can do:
     /// - look + pinch (or poke) an Isling: it hops onto the pedestal and its full card shows (pinch elsewhere closes it);
-    /// - look + pinch a honeycomb pod: that Isling comes out into the room (the last one in the room goes to sleep);
+    /// - look + pinch a honeycomb pod: that Isling comes out into the room (the one that has wandered longest goes to sleep);
     /// - grab an Isling (it curls into a pod) and drop it on a rim socket: empty = joins the party, full = swap (the rim
     ///   Isling pops out into the room); dropped anywhere else it pops back out on the floor;
     /// - grab a rim pod and drop or toss it on the floor: that Isling joins the room (never the last one: it wobbles and
@@ -51,8 +52,8 @@ namespace Diorama
         public float palmHoldSeconds = 0.8f;
 
         [Header("Limits and sizes")]
-        [Tooltip("Islings walking the room (the next six sleep in the honeycomb). Each costs about 9 draws (body pieces, outlines, eyes): lower it if the lodge drops frames.")]
-        [Range(1, 16)] public int maxInRoom = 12;
+        [Tooltip("Islings walking the room (the rest sleep in the honeycomb). Each costs about 9 draws (body pieces, outlines, eyes): lower it if the lodge drops frames.")]
+        [Range(1, 16)] public int maxInRoom = 8;
         [Tooltip("Grab volume of an Isling in the room (diameter, island-local metres).")]
         public float grabSize = 0.07f;
         [Tooltip("A dropped Isling pod lands in a rim socket within this distance (island-local metres).")]
@@ -80,9 +81,12 @@ namespace Diorama
         IslingCard _card;
         Mesh _quad;
         LodgeIsling _onPedestal, _gazed;
-        int _gazedComb = -1, _gazeId = -1;
-        bool _gazedDoor;
-        const int CombId = 100, DoorId = 200; // gaze pick ids
+        int _gazedComb = -1, _gazeId = -1, _page;
+        bool _gazedDoor, _gazedPage;
+        const int CombId = 100, DoorId = 200, PageId = 300; // gaze pick ids
+        Transform _pageArrow;
+        TMPro.TextMeshPro _pageText;
+        readonly Dictionary<LodgeIsling, float> _since = new Dictionary<LodgeIsling, float>();
         readonly PalmHover _palm = new PalmHover();
         float _doorHold;
         Transform _doorRing;
@@ -170,7 +174,7 @@ namespace Diorama
             Sync();
             Dialogue.Say("lodge.first");
             Debug.Log($"[LodgeRoom] Inside: {Mathf.Min(maxInRoom, party.storage.Count)} Isling(s) in the room, " +
-                      $"{Mathf.Clamp(party.storage.Count - maxInRoom, 0, Cells.Length)} asleep in the honeycomb, {party.members.Count} in the pods.");
+                      $"{Mathf.Max(0, party.storage.Count - maxInRoom)} asleep in the honeycomb ({Cells.Length} a page), {party.members.Count} in the pods.");
         }
 
         void OnReturned(WorldMap map)
@@ -178,6 +182,9 @@ namespace Diorama
             Close();
             foreach (var i in _islings) if (i != null) Destroy(i.gameObject);
             _islings.Clear();
+            _since.Clear();
+            _page = 0;
+            if (_pageArrow != null) _pageArrow.gameObject.SetActive(false);
             foreach (var g in _grabbers.Values) if (g.pod != null) Destroy(g.pod.gameObject);
             _grabbers.Clear();
             for (int k = 0; k < _comb.Length; k++)
@@ -238,9 +245,12 @@ namespace Diorama
                 _spawnHint = null;
                 spawned++;
             }
+            int sleepers = Mathf.Max(0, storage.Count - maxInRoom), pages = Mathf.Max(1, (sleepers + Cells.Length - 1) / Cells.Length);
+            if (_page >= pages) _page = 0;
+            UpdatePageArrow(pages);
             for (int k = 0; k < _comb.Length; k++)
             {
-                int index = maxInRoom + k;
+                int index = maxInRoom + _page * Cells.Length + k;
                 var c = index < storage.Count ? storage[index] : null;
                 var p = _comb[k];
                 if (c == null)
@@ -284,6 +294,7 @@ namespace Diorama
             li.island = island;
             li.Init(this, c, tile);
             _islings.Add(li);
+            _since[li] = Time.time;
             MakeGrabber(li);
         }
 
@@ -521,10 +532,21 @@ namespace Diorama
         /// <summary>A honeycomb sleeper comes out into the room (the last one in the room goes to sleep in its place).</summary>
         public void Wake(int k)
         {
-            int index = maxInRoom + k;
+            int index = maxInRoom + _page * Cells.Length + k;
             if (index >= party.storage.Count) return;
             var c = party.storage[index];
-            party.BringForward(index);
+            // The Isling that has wandered longest (not on the pedestal, not held) takes the sleeper's cell.
+            LodgeIsling oldest = null;
+            foreach (var li in _islings)
+            {
+                if (li == null || li.Leaving || li == _onPedestal || _grabbers.TryGetValue(li, out var g) && g.grab != null && g.grab.IsHeld) continue;
+                float since = _since.TryGetValue(li, out float t) ? t : 0f;
+                if (oldest == null || since < (_since.TryGetValue(oldest, out float o) ? o : 0f)) oldest = li;
+            }
+            int sleeper = oldest != null ? party.storage.IndexOf(oldest.Isling) : -1;
+            if (sleeper >= 0 && sleeper < maxInRoom) party.SwapStorage(index, sleeper);
+            else party.BringForward(index);
+            if (oldest != null) Debug.Log($"[LodgeRoom] {oldest.Isling.Name} (wandering longest) goes to sleep in the honeycomb.");
             _spawnHint = FreeTileNear(honeycombCenter + Vector2.up * 1.5f);
             Burst(island.transform.TransformPoint(CombLocal(k)));
             Debug.Log($"[LodgeRoom] {c.Name} wakes up and hops out of the honeycomb.");
@@ -610,6 +632,46 @@ namespace Diorama
             go.SetActive(false);
         }
 
+        static float Sq(float x) => x * x;
+        readonly bool[] _pagePoked = new bool[2];
+
+        /// <summary>More sleepers than cells: a small "1/3 >" beside the honeycomb (poke or look + pinch for the next page).</summary>
+        void UpdatePageArrow(int pages)
+        {
+            if (_pageArrow == null)
+            {
+                var go = new GameObject("Honeycomb Page");
+                go.transform.SetParent(island.transform, false);
+                _pageText = go.AddComponent<TMPro.TextMeshPro>();
+                _pageText.fontSize = 0.12f;
+                _pageText.alignment = TMPro.TextAlignmentOptions.Center;
+                _pageText.rectTransform.sizeDelta = new Vector2(0.06f, 0.02f);
+                _pageText.fontStyle = TMPro.FontStyles.Bold;
+                _pageArrow = go.transform;
+            }
+            bool show = pages > 1;
+            if (_pageArrow.gameObject.activeSelf != show) _pageArrow.gameObject.SetActive(show);
+            if (!show) return;
+            _pageText.text = $"{_page + 1}/{pages} >";
+            // Beside the honeycomb (toward the room's middle), at the height of its upper row.
+            _pageArrow.localPosition = island.TileToLocal(new Vector2(honeycombCenter.x + 1.35f, honeycombCenter.y + 0.2f), Cap + 0.7f * Tile);
+            var cam = Camera.main;
+            if (cam != null)
+            {
+                Vector3 away = _pageArrow.position - cam.transform.position;
+                if (away.sqrMagnitude > 1e-6f) _pageArrow.rotation = Quaternion.LookRotation(away, island.transform.up);
+            }
+            _pageArrow.localScale = Vector3.one;
+        }
+
+        public void NextPage(string how)
+        {
+            int sleepers = Mathf.Max(0, party.storage.Count - maxInRoom), pages = Mathf.Max(1, (sleepers + Cells.Length - 1) / Cells.Length);
+            if (pages <= 1) return;
+            _page = (_page + 1) % pages;
+            Debug.Log($"[LodgeRoom] Honeycomb page {_page + 1}/{pages} ({how}).");
+        }
+
         void Burst(Vector3 world)
         {
             if (fx != null) fx.Burst(world, 14, new Color(1f, 0.85f, 0.5f), 0.03f * WorldScale, 0.45f, 0.003f * WorldScale);
@@ -623,6 +685,7 @@ namespace Diorama
             _gazed = null;
             _gazedComb = -1;
             _gazedDoor = false;
+            _gazedPage = false;
             if (free && HeadGaze.TryGetRay(out var ray))
             {
                 // Gaze cone over everything selectable (at least the 4 cm minimum each): Islings 0.., honeycomb pods
@@ -637,10 +700,12 @@ namespace Diorama
                 }
                 for (int k = 0; k < _comb.Length; k++)
                     if (_comb[k] != null) pick.Consider(CombId + k, _comb[k].transform.position, Mathf.Max(min, 0.3f * tile));
+                if (_pageArrow != null && _pageArrow.gameObject.activeSelf) pick.Consider(PageId, _pageArrow.position, Mathf.Max(min, 0.3f * tile));
                 // The whole arch (two tiles wide, about 0.8 tile tall) plus a margin.
                 pick.Consider(DoorId, DoorWorld(0.4f), Mathf.Max(min, 1.15f * tile));
                 _gazeId = pick.Best;
-                if (pick.Best >= DoorId) _gazedDoor = true;
+                if (pick.Best >= PageId) _gazedPage = true;
+                else if (pick.Best >= DoorId) _gazedDoor = true;
                 else if (pick.Best >= CombId) _gazedComb = pick.Best - CombId;
                 else if (pick.Best >= 0) _gazed = _islings[pick.Best];
             }
@@ -649,7 +714,8 @@ namespace Diorama
             if (_gazed != null) FocusHighlight.Hover(island.transform.TransformPoint(_gazed.LocalCenter), 0.5f * TileWorld);
             else if (_gazedComb >= 0) FocusHighlight.Hover(_comb[_gazedComb].transform.position, 0.3f * TileWorld);
             else if (_gazedDoor) FocusHighlight.Hover(DoorWorld(0f), 0.9f * TileWorld);
-            pods.SetExternalGaze(this, _gazed != null || _gazedComb >= 0 || _gazedDoor);
+            if (_pageText != null) _pageText.color = _gazedPage ? Color.white : new Color(1f, 0.8f, 0.4f);
+            pods.SetExternalGaze(this, _gazed != null || _gazedComb >= 0 || _gazedDoor || _gazedPage);
             UpdateDoorPalm(free);
             if (!free) return;
 
@@ -671,6 +737,10 @@ namespace Diorama
                     }
                 if (poked >= 0 && poked != _poked[h] && _islings[poked] != _onPedestal) Inspect(_islings[poked]);
                 _poked[h] = poked;
+                bool pagePoke = tracked && _pageArrow != null && _pageArrow.gameObject.activeSelf &&
+                                (tip - _pageArrow.position).sqrMagnitude < Sq(0.3f * TileWorld);
+                if (pagePoke && !_pagePoked[h]) NextPage("poke");
+                _pagePoked[h] = pagePoke;
 
                 bool pinching = tracked && hand.GetIndexFingerIsPinching();
                 bool busy = grabGuard != null && grabGuard.IsHandBusy(left);
@@ -683,6 +753,7 @@ namespace Diorama
         {
             if (_gazed != null) Inspect(_gazed);
             else if (_gazedComb >= 0) Wake(_gazedComb);
+            else if (_gazedPage) NextPage("look + pinch");
             else if (_gazedDoor)
             {
                 Debug.Log("[LodgeRoom] Look + pinch on the door arch.");

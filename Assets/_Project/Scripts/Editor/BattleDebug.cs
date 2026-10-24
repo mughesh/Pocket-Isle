@@ -176,6 +176,25 @@ namespace Diorama.EditorTools
             s.Pick(best, "BattleDebug");
         }
 
+        /// <summary>Every CreatureView in the scene with its island-local position and parent (finding strays).</summary>
+        public static void ListCreatures()
+        {
+            var island = Object.FindFirstObjectByType<IslandBuilder>();
+            foreach (var v in Object.FindObjectsByType<CreatureView>(FindObjectsSortMode.None))
+            {
+                if (!v.gameObject.activeInHierarchy) continue;
+                Vector3 p = island != null ? island.transform.InverseTransformPoint(v.transform.position) : v.transform.position;
+                Debug.Log($"[BattleDebug] {v.name} at {p:F3} scale {v.transform.lossyScale.x:F3} under {(v.transform.parent != null ? v.transform.parent.name : "-")}");
+            }
+        }
+
+        /// <summary>Lodge: the honeycomb's next page.</summary>
+        public static void LodgePage()
+        {
+            var r = Room;
+            if (r != null) r.NextPage("debug");
+        }
+
         /// <summary>Puts 14 level 4 creatures from the grass table in storage (two shelf pages).</summary>
         public static void FillStorage()
         {

@@ -86,6 +86,43 @@ namespace Diorama.Tests
         }
 
         [Test]
+        public void Lodge_SwapStorage_TradesASleeperAndARoomIsling()
+        {
+            var r1 = C("R1");
+            var r2 = C("R2");
+            var s1 = C("S1");
+            _party.storage.AddRange(new[] { r1, r2, s1 });
+            Assert.IsTrue(_party.SwapStorage(2, 0), "the sleeper wakes into the oldest wanderer's place");
+            CollectionAssert.AreEqual(new[] { s1, r2, r1 }, _party.storage);
+            Assert.IsFalse(_party.SwapStorage(1, 1));
+            Assert.IsFalse(_party.SwapStorage(0, 3));
+        }
+
+        [Test]
+        public void Encounters_UncaughtSpeciesCountTwice()
+        {
+            var caught = ScriptableObject.CreateInstance<IslingSpecies>();
+            var fresh = ScriptableObject.CreateInstance<IslingSpecies>();
+            var table = ScriptableObject.CreateInstance<EncounterTable>();
+            _made.Add(caught);
+            _made.Add(fresh);
+            _made.Add(table);
+            table.entries = new[]
+            {
+                new EncounterTable.Entry { species = caught, minLevel = 2, maxLevel = 2, weight = 1f },
+                new EncounterTable.Entry { species = fresh, minLevel = 2, maxLevel = 2, weight = 1f },
+            };
+            var rnd = new SeededRandom(7);
+            int freshCount = 0, rolls = 3000;
+            for (int i = 0; i < rolls; i++)
+            {
+                Assert.IsTrue(table.Roll(rnd, out var c, out _, s => s == caught, 2f));
+                if (c.species == fresh) freshCount++;
+            }
+            Assert.AreEqual(2f / 3f, freshCount / (float)rolls, 0.04f, "uncaught: 2 of 3 rolls");
+        }
+
+        [Test]
         public void Deposit_NeverEmptiesThePods()
         {
             var a = C("A");
