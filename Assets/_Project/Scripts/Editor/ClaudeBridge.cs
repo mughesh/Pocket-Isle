@@ -50,7 +50,12 @@ namespace Diorama.EditorTools
                 if (cmd.Length == 0) continue;
                 try
                 {
-                    if (cmd == "refresh")
+                    if (cmd == "refresh" && EditorApplication.isPlaying)
+                    {
+                        // A recompile during Play reloads scripts mid-session: ISDK and our runtime state break and Stop can crash.
+                        Log("refresh: refused, Play mode is running (send stop first)");
+                    }
+                    else if (cmd == "refresh")
                     {
                         AssetDatabase.Refresh();
                         Log("refresh: ok");

@@ -188,7 +188,7 @@ namespace Diorama
         }
 
         /// <summary>Unit quad in XY (u runs along +X), centred.</summary>
-        internal static Mesh VerticalQuad()
+        public static Mesh VerticalQuad()
         {
             var mesh = new Mesh { name = "Hud Quad" };
             mesh.SetVertices(new[] { new Vector3(-0.5f, -0.5f, 0f), new Vector3(0.5f, -0.5f, 0f), new Vector3(-0.5f, 0.5f, 0f), new Vector3(0.5f, 0.5f, 0f) });

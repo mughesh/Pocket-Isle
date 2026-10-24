@@ -69,6 +69,9 @@ namespace Diorama
     /// the presentation to animate. The same seed and choices always give the same battle.
     /// When the player's creature faints and <c>hasReserve</c> says another one can fight, the battle goes on:
     /// <see cref="PlayerMustSwitch"/> is set until <see cref="Switch"/> brings the next one in (a free switch).
+    /// Catching unlocks when the wild HP bar is red (<see cref="BattleMath.RedHpShare"/>). When the wild creature faints
+    /// it is <see cref="WildDazed"/>: XP is paid, and the battle waits for one pod (<see cref="TryCatch"/>, a sure catch,
+    /// rares 75%) or <see cref="EndDaze"/> (it fades away: won).
     /// </summary>
     public class BattleSystem
     {
@@ -90,6 +93,12 @@ namespace Diorama
         /// <summary>The player's creature fainted and another can fight: only <see cref="Switch"/> works until then.</summary>
         public bool PlayerMustSwitch { get; private set; }
 
+        /// <summary>The wild creature fainted and slumps on its pad: only a pod or <see cref="EndDaze"/> now.</summary>
+        public bool WildDazed { get; private set; }
+
+        /// <summary>A pod can be thrown: the wild HP bar is red, or it is dazed.</summary>
+        public bool CatchUnlocked => !IsOver && (WildDazed || BattleMath.CatchUnlocked(wild.Hp, wild.MaxHp));
+
         /// <param name="hasReserve">True while another party creature (not the one fighting) can still fight.</param>
         public BattleSystem(CreatureInstance player, CreatureInstance wild, TypeChart chart, int seed, bool wildIsRare = false,
             Func<bool> hasReserve = null)
@@ -109,7 +118,7 @@ namespace Diorama
         public IReadOnlyList<BattleEvent> PlayTurn(int moveIndex)
         {
             _turn.Clear();
-            if (IsOver || PlayerMustSwitch) return _turn;
+            if (IsOver || PlayerMustSwitch || WildDazed) return _turn;
             var moves = player.Moves;
             if (moveIndex < 0 || moveIndex >= moves.Length || moves[moveIndex] == null)
             {
@@ -129,7 +138,7 @@ namespace Diorama
         public IReadOnlyList<BattleEvent> TryFlee()
         {
             _turn.Clear();
-            if (IsOver || PlayerMustSwitch) return _turn;
+            if (IsOver || PlayerMustSwitch || WildDazed) return _turn;
             float chance = BattleMath.FleeChance(player.creature.Speed, wild.creature.Speed, _failedFlees);
             if (_rnd.Next() < chance)
             {
@@ -143,14 +152,23 @@ namespace Diorama
             return _turn;
         }
 
-        /// <summary>Chance that a pod thrown now catches the wild creature.</summary>
-        public float CatchChance => BattleMath.CatchChance(wild.Hp, wild.MaxHp, wildIsRare, wild.creature.level, player.creature.level);
+        /// <summary>The events of the last <see cref="TryCatch"/> (until the next turn method runs).</summary>
+        public IReadOnlyList<BattleEvent> LastCatch { get; private set; } = Array.Empty<BattleEvent>();
 
-        /// <summary>A pod hit the wild creature: it wobbles, then it's caught or breaks free (and gets its move).</summary>
+        /// <summary>Chance that a pod thrown now catches the wild creature.</summary>
+        public float CatchChance => WildDazed
+            ? BattleMath.DazedCatchChance(wildIsRare)
+            : BattleMath.CatchChance(wild.Hp, wild.MaxHp, wildIsRare, wild.creature.level, player.creature.level);
+
+        /// <summary>
+        /// A pod hit the wild creature: it wobbles, then it's caught or breaks free (and gets its move; a dazed one runs
+        /// off instead, which ends the battle as won). Nothing happens while catching is locked.
+        /// </summary>
         public IReadOnlyList<BattleEvent> TryCatch()
         {
             _turn.Clear();
-            if (IsOver || PlayerMustSwitch) return _turn;
+            LastCatch = _turn;
+            if (IsOver || PlayerMustSwitch || !CatchUnlocked) return _turn;
             float chance = CatchChance, roll = _rnd.Next();
             bool caught = roll < chance;
             Raise(new BattleEvent
@@ -164,8 +182,23 @@ namespace Diorama
                 return _turn;
             }
             Raise(new BattleEvent { kind = BattleEventKind.BrokeFree, side = BattleSide.Wild });
-            Act(wild, PickWildMove());
+            if (WildDazed) EndDazeInTurn();
+            else Act(wild, PickWildMove());
             return _turn;
+        }
+
+        /// <summary>No pod reached the dazed wild creature in time: it fades away and the battle is won (XP already paid).</summary>
+        public IReadOnlyList<BattleEvent> EndDaze()
+        {
+            _turn.Clear();
+            if (WildDazed && !IsOver) EndDazeInTurn();
+            return _turn;
+        }
+
+        void EndDazeInTurn()
+        {
+            WildDazed = false;
+            End(BattleResult.Won);
         }
 
         /// <summary>
@@ -175,7 +208,7 @@ namespace Diorama
         public IReadOnlyList<BattleEvent> Switch(CreatureInstance next)
         {
             _turn.Clear();
-            if (IsOver || next == null || next.IsFainted || next == player.creature) return _turn;
+            if (IsOver || WildDazed || next == null || next.IsFainted || next == player.creature) return _turn;
             bool free = PlayerMustSwitch;
             PlayerMustSwitch = false;
             player = new Battler(BattleSide.Player, next);
@@ -276,7 +309,7 @@ namespace Diorama
                 int xp = BattleMath.XpReward(wild.creature.level, wildIsRare);
                 player.creature.xp += xp;
                 Raise(new BattleEvent { kind = BattleEventKind.XpGained, side = BattleSide.Player, amount = xp });
-                End(BattleResult.Won);
+                WildDazed = true;
             }
             else if (_hasReserve != null && _hasReserve()) PlayerMustSwitch = true;
             else End(BattleResult.Lost);

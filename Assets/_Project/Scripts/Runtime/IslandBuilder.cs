@@ -93,6 +93,7 @@ namespace Diorama
         static readonly int WorldToIslandId = Shader.PropertyToID("_DioramaWorldToIsland");
         static readonly int IslandToWorldId = Shader.PropertyToID("_DioramaIslandToWorld");
         static readonly int WorldToMapId = Shader.PropertyToID("_DioramaWorldToMap");
+        static readonly int MapToWorldId = Shader.PropertyToID("_DioramaMapToWorld");
         static readonly int FootprintId = Shader.PropertyToID("_DioramaFootprint");
         static readonly int FootprintUvId = Shader.PropertyToID("_DioramaFootprintUV");
         static readonly int WindowId = Shader.PropertyToID("_DioramaWindow");
@@ -268,6 +269,9 @@ namespace Diorama
         }
 
         Vector2 ViewCenter => _hasView ? _viewCenter : CenteredView;
+
+        /// <summary>Map tile (fractions) at the middle of the island window right now.</summary>
+        public Vector2 ViewCenterTile => ViewCenter;
         Vector2 ZoomPivot => _hasView ? _zoomPivot : CenteredView;
 
         float TileSize => map != null ? map.tileSize : 0.05f;
@@ -754,6 +758,7 @@ namespace Diorama
             Shader.SetGlobalMatrix(IslandToWorldId, l2w);
             Shader.SetGlobalMatrix(WorldToIslandId, l2w.inverse);
             Shader.SetGlobalMatrix(WorldToMapId, (l2w * ContentToLocal).inverse);
+            Shader.SetGlobalMatrix(MapToWorldId, l2w * ContentToLocal);
             Shader.SetGlobalTexture(FootprintId, _edgeTexture);
             Shader.SetGlobalVector(FootprintUvId, _edgeUv);
             // x: clip plane (column top), y: sinking band half width in footprint tiles (zoomed tiles past it are cut at

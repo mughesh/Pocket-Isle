@@ -38,6 +38,21 @@ namespace Diorama
         public StageActor Player => _player;
         public StageActor Wild => _wild;
 
+        void Start()
+        {
+            Dialogue.RegisterTarget("nearPad", () => PadPoint(_playerPad), k => PulseActor(_player, k));
+            Dialogue.RegisterTarget("wildPad", () => PadPoint(_wildPad), k => PulseActor(_wild, k));
+        }
+
+        Vector3? PadPoint(BattlePad pad) =>
+            this != null && pad != null ? island.transform.TransformPoint(island.TileToLocal(pad.tile, Cap + pad.TopLift)) : (Vector3?)null;
+
+        // The creature on the pad flashes softly (the shared _Flash highlight).
+        static void PulseActor(StageActor a, float k)
+        {
+            if (a != null && a.View != null) a.View.SetFlash(0.3f * k);
+        }
+
         float Zoom => island.Zoom;
         float TileSize => island.map.tileSize;
         float Cap => island.Content.capHeight;
@@ -371,11 +386,17 @@ namespace Diorama
                         yield return Wait(pauseBetweenMoves);
                         break;
                     case BattleEventKind.Fainted:
-                        caption($"{(e.side == BattleSide.Wild ? "Wild " : "")}{who} fainted!");
+                        bool dazed = e.side == BattleSide.Wild && battle.WildDazed;
+                        caption(dazed ? $"Wild {who} is dazed!" : $"{(e.side == BattleSide.Wild ? "Wild " : "")}{who} fainted!");
                         if (self != null)
                         {
                             fx.Burst(self.WorldCenter, 20, Smoke, World(0.03f), 0.7f, World(0.005f), Vector3.up * World(0.02f));
-                            self.View.Faint();
+                            if (dazed)
+                            {
+                                self.View.Daze();
+                                StartCoroutine(DizzyStars(self));
+                            }
+                            else self.View.Faint();
                             DropShieldOf(e.side, true);
                         }
                         yield return Wait(0.8f);
@@ -395,6 +416,37 @@ namespace Diorama
                         break;
                 }
             }
+        }
+
+        /// <summary>Three little gold stars circling a dazed creature's head while it stays dazed.</summary>
+        IEnumerator DizzyStars(StageActor a)
+        {
+            float t = 0f;
+            while (a != null && a.View != null && a.View.IsDazed && a.grow > 0.5f)
+            {
+                t += Time.deltaTime;
+                if (Time.frameCount % 3 == 0)
+                {
+                    Vector3 top = island.transform.TransformPoint(a.LocalTop);
+                    for (int i = 0; i < 3; i++)
+                    {
+                        float ang = t * 4f + i * Mathf.PI * 2f / 3f;
+                        Vector3 off = (island.transform.right * Mathf.Cos(ang) + island.transform.forward * Mathf.Sin(ang)) * World(0.012f);
+                        fx.Burst(top + off, 1, Gold, World(0.002f), 0.25f, World(0.0035f));
+                    }
+                }
+                yield return null;
+            }
+        }
+
+        /// <summary>No pod reached the dazed wild creature in time: it fades out (the outro then has nothing left to do for it).</summary>
+        public IEnumerator FadeWild()
+        {
+            var a = _wild;
+            if (a == null) yield break;
+            fx.Burst(a.WorldCenter, 18, new Color(1f, 0.88f, 0.54f), World(0.04f), 0.5f, World(0.004f));
+            yield return Tween(0.5f, p => a.grow = 1f - EaseInOut(p));
+            RemoveWild();
         }
 
         static bool IsOutcome(BattleEventKind k) =>

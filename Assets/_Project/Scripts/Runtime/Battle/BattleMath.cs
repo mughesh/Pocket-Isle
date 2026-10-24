@@ -46,6 +46,15 @@ namespace Diorama
             return Mathf.Clamp(0.95f * (1f - 0.8f * hpShare) * (rare ? 0.45f : 1f) * levels, 0.05f, 0.95f);
         }
 
+        /// <summary>HP share at or below which the HP bar turns red and catching unlocks.</summary>
+        public const float RedHpShare = 0.25f;
+
+        /// <summary>Catching is locked until the wild creature's HP bar is red (or it is dazed).</summary>
+        public static bool CatchUnlocked(int hp, int maxHp) => hp <= maxHp * RedHpShare;
+
+        /// <summary>A pod thrown at a dazed (fainted) wild creature: a sure catch, rares 75%.</summary>
+        public static float DazedCatchChance(bool rare) => rare ? 0.75f : 1f;
+
         /// <summary>How often the pod wobbles: 3 on a catch; on a miss 1-3, more the closer the roll was.</summary>
         public static int CatchWobbles(float roll, float chance)
         {

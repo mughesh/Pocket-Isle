@@ -27,6 +27,8 @@ namespace Diorama
         public int priority = 1;
         [Tooltip("The script's comment, e.g. when it fires.")]
         public string note;
+        [Tooltip("Where the Spirit flies while saying these lines: leadPod, cradle, catchRune, runes, nearPad, wildPad, tile:x,y. Empty = stays home.")]
+        public string target;
         public List<DialogueLine> lines = new List<DialogueLine>();
     }
 

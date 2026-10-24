@@ -8,7 +8,8 @@ namespace Diorama
     /// <summary>
     /// The party pods on the island's front rim and the catch cradle. Six brass sockets sit in the rocky side just under
     /// the cap, across the right part of the front face (the Spirit has the near-left corner); pod i holds party slot i.
-    /// The cradle floats above the near-right corner and holds an empty pod during battles.
+    /// The cradle floats above the near-right corner and holds an empty pod, twice the party pod's size, once catching
+    /// is unlocked. Grab volumes are bigger than the glass (party 5 cm, cradle 8 cm across) without overlapping.
     /// Outside battle: poke a pod, or look at it and pinch, for its stats card.
     /// In battle (flags set by <see cref="EncounterDirector"/>): pods that may be used can be grabbed (ISDK) and
     /// thrown (<see cref="Thrown"/>), or looked at + pinched (<see cref="Picked"/>). While a hand reaches for a pod
@@ -40,7 +41,13 @@ namespace Diorama
 
         [Header("Cradle")]
         [Tooltip("From the near-right footprint corner: x inward, y above the cap, z inward (island-local metres).")]
-        public Vector3 cradleOffset = new Vector3(0.075f, 0.06f, 0.035f);
+        public Vector3 cradleOffset = new Vector3(0.075f, 0.1f, 0.035f);
+        [Tooltip("Cradle pod size relative to a party pod.")]
+        public float cradleScale = 2f;
+
+        [Header("Grab volumes (diameter, metres at island scale 1)")]
+        public float partyGrabSize = 0.05f;
+        public float cradleGrabSize = 0.08f;
 
         [Header("Input")]
         [Tooltip("A fingertip this many pod radii from the centre pokes it.")]
@@ -67,6 +74,8 @@ namespace Diorama
         public int ActiveSlot { get; set; } = -1;
         public int GlowSlot { get; set; } = -1;
         public bool CradleGlow { get; set; }
+        /// <summary>The cradle pod glows and pulses (the dazed window).</summary>
+        public bool CradlePulse { get; set; }
         /// <summary>The gaze is on a pod (its pinch wins over tile gaze).</summary>
         public bool IsGazed { get; private set; }
 
@@ -94,6 +103,7 @@ namespace Diorama
         readonly int[] _poked = { -1, -1 };
         int _gazed = -1;
         bool _rimPaused, _laidOut;
+        float _partyGrab;
         MaterialPropertyBlock _socketBlock;
 
         static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
@@ -112,6 +122,22 @@ namespace Diorama
             _quad = BattleHud.VerticalQuad();
             if (hudMaterial != null) _card = new PodCard(hudMaterial, _quad);
             Layout();
+            Dialogue.RegisterTarget("leadPod", () => PointOf(party.LeadSlot), k => PulseOf(party.LeadSlot, k));
+            Dialogue.RegisterTarget("cradle", () => CradleVisible ? PointOf(CradleSlot) : null, k => PulseOf(CradleSlot, k));
+        }
+
+        Vector3? PointOf(int slot)
+        {
+            if (this == null) return null;
+            var p = Pod(slot);
+            return p != null && p.gameObject.activeInHierarchy ? p.transform.position : (Vector3?)null;
+        }
+
+        void PulseOf(int slot, float k)
+        {
+            if (this == null) return;
+            for (int i = 0; i < _pods.Length; i++)
+                if (_pods[i] != null) _pods[i].Pulse = i == slot ? k : 0f;
         }
 
         void OnDisable() => ResumeRim();
@@ -161,6 +187,9 @@ namespace Diorama
                     _sockets[i].shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 }
             }
+            // Grab volumes may not overlap their neighbours.
+            _partyGrab = Mathf.Min(partyGrabSize, Mathf.Abs(step) * 0.96f);
+            if (_partyGrab < partyGrabSize) Debug.Log($"[PodRack] Party grab volume {_partyGrab * 100f:0.0} cm (sockets {Mathf.Abs(step) * 100f:0.0} cm apart).");
             var b = island.LocalBounds;
             _cradlePos = new Vector3(b.min.x + cradleOffset.x, map.capHeight + cradleOffset.y, b.max.z - cradleOffset.z);
             _cradle = new GameObject("Catch Cradle").transform;
@@ -170,7 +199,8 @@ namespace Diorama
             {
                 var ring = new GameObject("Cradle Ring");
                 ring.transform.SetParent(_cradle, false);
-                ring.transform.localPosition = Vector3.down * (podPrefab.radius * 0.75f);
+                ring.transform.localPosition = Vector3.down * (podPrefab.radius * 0.75f * cradleScale);
+                ring.transform.localScale = Vector3.one * cradleScale;
                 ring.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
                 ring.AddComponent<MeshFilter>().sharedMesh = socketMesh;
                 _cradleRing = ring.AddComponent<MeshRenderer>();
@@ -219,7 +249,9 @@ namespace Diorama
                     p.transform.localRotation = Quaternion.identity;
                 }
                 p.CreatureOut = i == ActiveSlot;
-                p.Glow = i == CradleSlot ? (CradleGlow ? 1f : 0.25f) : i == GlowSlot ? 1f : 0f;
+                float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * 6f);
+                p.Glow = i == CradleSlot ? (CradlePulse ? 0.55f + 0.45f * pulse : CradleGlow ? 1f : 0.25f) : i == GlowSlot ? 1f : 0f;
+                if (!p.Detached && !held) p.SetGrabDiameter(i == CradleSlot ? cradleGrabSize : _partyGrab);
             }
             for (int i = 0; i < Party.Size; i++)
             {
@@ -310,6 +342,7 @@ namespace Diorama
                 if (u >= 1f) _cradlePop = -1f;
                 else pop = Mathf.Sin(u * Mathf.PI) * 0.35f;
             }
+            if (CradlePulse) pop += 0.06f * Mathf.Sin(Time.time * 6f);
             _cradle.localPosition = HomeLocal(CradleSlot);
             _cradle.localScale = Vector3.one * (Mathf.SmoothStep(0f, 1f, _cradleShown) * (1f + pop));
             var pod = _pods[CradleSlot];
@@ -321,7 +354,7 @@ namespace Diorama
             }
             if (pod != null && !pod.Detached && !(Grab(pod) != null && Grab(pod).IsHeld))
             {
-                pod.BaseScale = Vector3.one * (Mathf.SmoothStep(0f, 1f, _cradleShown) * (1f + pop));
+                pod.BaseScale = Vector3.one * (cradleScale * Mathf.SmoothStep(0f, 1f, _cradleShown) * (1f + pop));
                 if (_cradleShown <= 0.001f)
                 {
                     Destroy(pod.gameObject);
@@ -339,6 +372,16 @@ namespace Diorama
         }
 
         float World(float local) => local * island.transform.lossyScale.x;
+
+        /// <summary>Resting size of a slot's pod: party pods 1, the cradle pod <see cref="cradleScale"/>.</summary>
+        float HomeScale(int slot) => slot == CradleSlot ? cradleScale : 1f;
+
+        /// <summary>Island-local height of a pod's centre above what it sits on (its current radius).</summary>
+        public float RestHeight(int slot)
+        {
+            var p = Pod(slot);
+            return podPrefab.radius * (p != null ? p.BaseScale.x : HomeScale(slot));
+        }
 
         // ---- poke, gaze + pinch ----
 
@@ -445,7 +488,11 @@ namespace Diorama
                     {
                         if (!HandLookup.TryGetJoint(hand, joint, out var p)) continue;
                         for (int i = 0; i < _pods.Length && !reaching; i++)
-                            if (_pods[i] != null && CanUse(i) && (_pods[i].transform.position - p).sqrMagnitude < Sq(rimGuardDistance)) reaching = true;
+                        {
+                            // At least the grab volume plus a little: the hand must not reach it before the guard pauses the rim.
+                            float guard = Mathf.Max(rimGuardDistance, World((i == CradleSlot ? cradleGrabSize : _partyGrab) * 0.5f + 0.03f));
+                            if (_pods[i] != null && CanUse(i) && (_pods[i].transform.position - p).sqrMagnitude < Sq(guard)) reaching = true;
+                        }
                     }
                 }
             if (reaching && !_rimPaused)
@@ -500,24 +547,31 @@ namespace Diorama
             t.localRotation = Quaternion.identity;
         }
 
-        /// <summary>Flies the pod back to its socket or the cradle and hands it back to the rack.</summary>
+        /// <summary>
+        /// Flies the pod back to its socket or the cradle and hands it back to the rack, growing or shrinking to that
+        /// slot's size on the way (a caught cradle pod shrinks to party size).
+        /// </summary>
         public IEnumerator FlyHome(int slot, float seconds = 0.45f)
         {
             var p = _pods[slot];
             if (p == null) yield break;
             p.Detached = true;
             var t = p.transform;
-            Vector3 from = t.localPosition;
+            Vector3 from = t.localPosition, s0 = p.BaseScale, s1 = Vector3.one * HomeScale(slot);
             Vector3 control = (from + HomeLocal(slot)) * 0.5f + Vector3.up * 0.05f;
             Quaternion r0 = t.localRotation;
             for (float u = 0f; u < 1f; u += Time.deltaTime / seconds)
             {
                 if (t == null) yield break;
-                t.localPosition = Bezier(from, control, HomeLocal(slot), Mathf.SmoothStep(0f, 1f, u));
+                float k = Mathf.SmoothStep(0f, 1f, u);
+                t.localPosition = Bezier(from, control, HomeLocal(slot), k);
                 t.localRotation = Quaternion.Slerp(r0, Quaternion.identity, u);
+                p.BaseScale = Vector3.Lerp(s0, s1, k);
                 yield return null;
             }
-            if (p != null) p.Detached = false;
+            if (p == null) yield break;
+            p.BaseScale = s1;
+            p.Detached = false;
         }
 
         /// <summary>A throw that missed: falls along its path, bounces with a puff and comes back.</summary>
@@ -563,8 +617,7 @@ namespace Diorama
             if (_pods[slot] != null) Destroy(_pods[slot].gameObject);
             _pods[slot] = p;
             p.name = $"Pod {slot + 1}";
-            p.Show(creature);
-            p.BaseScale = Vector3.one;
+            p.Show(creature); // keeps its cradle size: FlyHome shrinks it on the way to the socket
         }
 
         /// <summary>The pod breaks open (the creature got out): a burst, and it is gone (a new one fills the cradle).</summary>

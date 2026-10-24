@@ -1,6 +1,7 @@
 // Environment props (PropRecipe, baked by Tools > Pocket Isle > Props): banded toon lighting like Diorama/Toon, with
 // the colour picked per vertex from a 6-slot palette (uv0.x) that blends from the unrestored to the restored colours
-// by the global _RealmRestored. Glows scale with it too, so kilns and lanterns go cold. Motion per piece (uv0.y):
+// by the global _RealmRestored. Glow-slot lights sputter dim at 0 and burn steady at 1; other glows scale with it.
+// Motion per piece (uv0.y):
 // sway, flicker (glow + wobble) or steam (puffs in a loop around the piece centre, uv1). The palette comes from a
 // property block per prop type, so each type is one instanced draw plus its outline pass (same material).
 // Island window sinking / clipping and the battle clearing: DioramaWindow.hlsl.
@@ -130,18 +131,39 @@ Shader "Diorama/Prop"
         return lerp(ash, rest, PropRestored());
     }
 
-    // Colour and glow of a fragment: the slot, or the tip slot on up-facing faces of the tips slot.
-    void PropPaint(float slot, float3 normalOS, out float3 c, out float glow)
+    // Colour and glow of a fragment: the slot, or the tip slot on up-facing faces of the tips slot (tip = that mask).
+    void PropPaint(float slot, float3 normalOS, out float3 c, out float glow, out float tip)
     {
         slot = round(slot);
         c = PropSlotColor(slot);
         glow = PropGlow(slot);
+        tip = 0.0;
         if (_Tips.w > 0.5 && abs(slot - _Tips.x) < 0.5)
         {
-            float m = smoothstep(_Tips.z, _Tips.z + 0.12, normalize(normalOS).y);
-            c = lerp(c, PropSlotColor(_Tips.y), m);
-            glow = lerp(glow, PropGlow(_Tips.y), m);
+            tip = smoothstep(_Tips.z, _Tips.z + 0.12, normalize(normalOS).y);
+            c = lerp(c, PropSlotColor(_Tips.y), tip);
+            glow = lerp(glow, PropGlow(_Tips.y), tip);
         }
+    }
+
+    // Unlit (unrestored) flames and lanterns: dim and irregular, dropping out and catching again. 0..1.
+    float PropSputter(float hash)
+    {
+        float t = _Time.y;
+        float step = floor(t * 6.0 + hash * 40.0);
+        float n = frac(sin(step * 12.9898 + hash * 78.233) * 43758.5453);
+        float lit = n < 0.28 ? 0.08 : n < 0.45 ? 0.45 : 1.0;
+        return lit * (0.7 + 0.3 * sin(t * 23.0 + hash * 9.0));
+    }
+
+    // How much a fragment's glow shows for the realm's state: the Glow slot sputters dim at 0 and burns steady at 1,
+    // glowing leaf tips pulse gently only when restored, everything else simply scales with the restoration.
+    float PropGlowLevel(float slot, float tip, float hash, float flicker)
+    {
+        float r = PropRestored();
+        if (abs(round(slot) - 4.0) < 0.5) return lerp(0.3 * PropSputter(hash), 1.0, r) * flicker;
+        float pulse = 0.8 + 0.2 * sin(_Time.y * 1.7 + hash * 6.283);
+        return r * lerp(flicker, pulse, tip);
     }
     ENDHLSL
 
@@ -188,7 +210,7 @@ Shader "Diorama/Prop"
                 o.positionCS = TransformWorldToHClip(o.positionWS);
                 o.normalOS = v.normalOS;
                 o.normalWS = TransformObjectToWorldNormal(v.normalOS);
-                o.paint = float4(v.uv0.x, flicker, 1.0 + (hash - 0.5) * 0.08, 0.0);
+                o.paint = float4(v.uv0.x, flicker, 1.0 + (hash - 0.5) * 0.08, hash);
                 return o;
             }
 
@@ -199,8 +221,8 @@ Shader "Diorama/Prop"
                 DioramaWindowClip(i.islandPos, _WindowClip);
 
                 float3 c;
-                float glow;
-                PropPaint(i.paint.x, i.normalOS, c, glow);
+                float glow, tip;
+                PropPaint(i.paint.x, i.normalOS, c, glow, tip);
                 c *= i.paint.z;
 
                 float3 L = _MainLightPosition.xyz;
@@ -214,7 +236,10 @@ Shader "Diorama/Prop"
                 col += rim * 0.32 * lerp(float3(1.0, 1.0, 1.0), c, 0.35) * smoothstep(-0.3, 0.2, ndl);
                 float3 h = normalize(L + v);
                 col += smoothstep(0.93, 0.95, dot(n, h)) * _Spec * 0.55;
-                col += c * glow * PropRestored() * i.paint.y;
+                float level = PropGlowLevel(i.paint.x, tip, i.paint.w, i.paint.y);
+                col += c * glow * level;
+                // Burning lights get a soft halo at their silhouette when restored.
+                col += c * glow * rim * 0.9 * PropRestored() * step(abs(round(i.paint.x) - 4.0), 0.5);
                 if (_WindowClip > 0.5) col = DioramaFocus(col, DioramaMapPoint(i.positionWS, _WindowClip).xz);
                 return float4(col, 1.0);
             }
@@ -266,7 +291,8 @@ Shader "Diorama/Prop"
                 DioramaWindowClip(i.islandPos, _WindowClip);
                 float3 c;
                 float glow;
-                PropPaint(i.slot, i.normalOS, c, glow);
+                float tip;
+                PropPaint(i.slot, i.normalOS, c, glow, tip);
                 float3 col = c * 0.28; // like the creature outlines: base colour x 0.28 in linear
                 if (_WindowClip > 0.5) col = DioramaFocus(col, DioramaMapPoint(i.positionWS, _WindowClip).xz);
                 return float4(col, 1.0);

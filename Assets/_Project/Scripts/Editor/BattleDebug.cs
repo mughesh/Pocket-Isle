@@ -33,6 +33,28 @@ namespace Diorama.EditorTools
             Pick(party.NextFighter(rack.ActiveSlot));
         }
 
+        /// <summary>Edit mode: builds a pod card for every species and logs whether the name fits (panel width, name size).</summary>
+        public static void CardFit()
+        {
+            // Building the card marks the open scene dirty, and a later test run then stops on a "save?" dialog:
+            // a clean scene is saved again afterwards (nothing in it changed once the card is gone).
+            var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+            bool wasClean = !scene.isDirty;
+            var hud = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Battle/Hud.mat");
+            var quad = BattleHud.VerticalQuad();
+            var card = new PodCard(hud, quad);
+            foreach (var guid in AssetDatabase.FindAssets("t:CreatureSpecies"))
+            {
+                var species = AssetDatabase.LoadAssetAtPath<CreatureSpecies>(AssetDatabase.GUIDToAssetPath(guid));
+                card.Show(new CreatureInstance(species, 12), Vector3.zero, 1f);
+                Debug.Log($"[CardFit] {species.displayName}: {card.Describe()}");
+            }
+            var root = GameObject.Find("Pod Card");
+            if (root != null) Object.DestroyImmediate(root);
+            Object.DestroyImmediate(quad);
+            if (wasClean && !Application.isPlaying) UnityEditor.SceneManagement.EditorSceneManager.SaveScene(scene);
+        }
+
         static void Pick(int slot)
         {
             var d = Director;

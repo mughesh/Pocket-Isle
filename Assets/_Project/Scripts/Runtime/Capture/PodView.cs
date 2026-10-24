@@ -37,6 +37,8 @@ namespace Diorama
         public float Glow { get; set; }
         /// <summary>Hover target 0..1 (gaze or a fingertip near it): a little bigger and brighter.</summary>
         public float Hover { get; set; }
+        /// <summary>Dialogue highlight 0..1 (a hint points at this pod): brighter and a little bigger.</summary>
+        public float Pulse { get; set; }
         /// <summary>Hides the tiny creature (it is out on the battle field).</summary>
         public bool CreatureOut { get; set; }
         /// <summary>Someone else moves this pod (a flight); its rack leaves it alone.</summary>
@@ -54,6 +56,13 @@ namespace Diorama
 
         /// <summary>World radius right now.</summary>
         public float WorldRadius => radius * transform.lossyScale.x;
+
+        /// <summary>Sets the grab volume (the pod's sphere collider) to this diameter in metres at island scale 1.</summary>
+        public void SetGrabDiameter(float diameter)
+        {
+            var col = GetComponent<SphereCollider>();
+            if (col != null) col.radius = diameter * 0.5f / Mathf.Max(1e-4f, BaseScale.x);
+        }
 
         /// <summary>Scale the rack wants (hover adds on top). Set it instead of localScale.</summary>
         public Vector3 BaseScale
@@ -110,7 +119,7 @@ namespace Diorama
             bool fainted = Creature != null && Creature.IsFainted;
             _glow = Mathf.MoveTowards(_glow, fainted ? 0f : Glow, Time.deltaTime * 3f);
             _hover = Mathf.MoveTowards(_hover, Hover, Time.deltaTime * 6f);
-            transform.localScale = BaseScale * (1f + 0.15f * _hover);
+            transform.localScale = BaseScale * (1f + 0.1f * _hover + 0.08f * Pulse);
 
             if (_mini != null)
             {
@@ -134,7 +143,7 @@ namespace Diorama
                 var tint = full ? Color.Lerp(emptyTint, ElementStyle.Of(Creature.Element).main, 0.45f) : emptyTint;
                 glass.GetPropertyBlock(_glassBlock);
                 _glassBlock.SetColor(TintId, tint);
-                _glassBlock.SetFloat(GlowId, _glow + 0.4f * _hover);
+                _glassBlock.SetFloat(GlowId, _glow + 0.4f * _hover + 0.8f * Pulse);
                 _glassBlock.SetFloat(GreyId, fainted ? 1f : 0f);
                 _glassBlock.SetFloat(CrackId, fainted ? 1f : 0f);
                 glass.SetPropertyBlock(_glassBlock);

@@ -8,9 +8,10 @@ namespace Diorama.EditorTools
     /// <summary>
     /// Writes the first Cinderwood props (kiln, paper lantern post, brazier cold / lit, berry bush, autumn tree,
     /// fallen log, stone lantern, pot cluster, hot spring steam) and the Cinderwood and Test realm themes.
-    /// Realm look (decided Oct 24): the unrestored state is the everyday look, warm but a bit muted with the lights out
-    /// (<see cref="Muted"/>); the restored state is brighter with glowing leaf tips (<see cref="Brighter"/>).
-    /// <see cref="ApplyRealmLook"/> re-applies that to the existing assets without touching shapes or meshes.
+    /// Realm look (decided Oct 24, step 6 fixes): the unrestored state is the everyday bright look; "not flowing" is shown
+    /// by stillness (lights sputter, no embers or steam), not colour loss. Restored is a touch warmer and brighter
+    /// (<see cref="Warmer"/>) with glowing leaf tips. <see cref="ApplyRealmLook"/> re-applies that to the existing assets
+    /// without touching shapes or meshes.
     /// Concept: Docs/ConceptArt/01_realms_diorama_sheet.png (Cinderwood panel) and Concepts_01_Summary.md.
     /// Shape units are tiles (1 = 5 cm at zoom 1), +Z faces the player. Like the creature kits this only seeds the
     /// assets; tune them in the Inspector afterwards. Re-running overwrites them (same files, references survive).
@@ -36,16 +37,7 @@ namespace Diorama.EditorTools
 
         // ---- realm look ----
 
-        /// <summary>Unrestored colour: less saturated and a little darker; glowing parts go dark (lights out).</summary>
-        internal static Color Muted(Color c, float glow = 0f)
-        {
-            Color.RGBToHSV(c, out float h, out float sat, out float v);
-            var m = Color.HSVToRGB(h, sat * 0.72f, v * (glow >= 0.5f ? 0.55f : 0.88f));
-            m.a = c.a;
-            return m;
-        }
-
-        /// <summary>Restored colour: a little more saturated and brighter.</summary>
+        /// <summary>The step 6 restored look, now the everyday (unrestored) island palette: a little more saturated and brighter.</summary>
         internal static Color Brighter(Color c)
         {
             Color.RGBToHSV(c, out float h, out float sat, out float v);
@@ -54,8 +46,21 @@ namespace Diorama.EditorTools
             return b;
         }
 
-        /// <summary>A prop colour from its restored hex; the unrestored one is <see cref="Muted"/>.</summary>
-        static PropColor C(string hex, float glow = 0f) => new PropColor(Hex(hex), Muted(Hex(hex), glow), glow);
+        /// <summary>Restored colour: about 6% warmer and brighter than the everyday one.</summary>
+        internal static Color Warmer(Color c)
+        {
+            Color.RGBToHSV(c, out float h, out float sat, out float v);
+            // A small hue nudge toward orange (0.08) on top of the brightness.
+            float hue = Mathf.Repeat(h + Mathf.Clamp(Mathf.DeltaAngle(h * 360f, 29f) / 360f, -0.01f, 0.01f), 1f);
+            var w = Color.HSVToRGB(hue, Mathf.Min(1f, sat * 1.06f), Mathf.Min(1f, v * 1.07f));
+            w.a = c.a;
+            return w;
+        }
+
+        /// <summary>A prop colour from its everyday hex (unrestored); restored is <see cref="Warmer"/>.</summary>
+        static PropColor C(string hex, float glow = 0f) => new PropColor(Warmer(Hex(hex)), Hex(hex), glow);
+
+        static bool Same(Color a, Color b) => Mathf.Abs(a.r - b.r) + Mathf.Abs(a.g - b.g) + Mathf.Abs(a.b - b.b) < 0.01f;
 
         [MenuItem("Tools/Pocket Isle/Props/Apply Realm Look (palettes only)", priority = 22)]
         public static void ApplyRealmLook()
@@ -65,15 +70,22 @@ namespace Diorama.EditorTools
             {
                 if (r.palette == null) continue;
                 for (int i = 0; i < r.palette.Length; i++)
-                    r.palette[i].unrestored = Muted(r.palette[i].restored, r.palette[i].glow);
+                {
+                    // The everyday colour: already applied (restored = Warmer(unrestored)) keeps unrestored; otherwise
+                    // the old restored colour is the everyday one (the step 6 muted unrestored is dropped).
+                    var c = r.palette[i];
+                    var everyday = Same(Warmer(c.unrestored), c.restored) ? c.unrestored : c.restored;
+                    r.palette[i].unrestored = everyday;
+                    r.palette[i].restored = Warmer(everyday);
+                }
                 EditorUtility.SetDirty(r);
                 props++;
             }
             var cinder = Theme("Cinderwood");
             if (cinder != null) CinderwoodColors(cinder);
             AssetDatabase.SaveAssets();
-            Debug.Log($"[PropKit] Realm look: {props} prop palettes muted for the unrestored state; Cinderwood theme " +
-                      $"{(cinder != null ? "brighter when restored, muted when not, starts unrestored" : "missing (write the prop kit first)")}.");
+            Debug.Log($"[PropKit] Realm look: {props} prop palettes bright when unrestored, a touch warmer when restored; Cinderwood theme " +
+                      $"{(cinder != null ? "the same, starts unrestored" : "missing (write the prop kit first)")}.");
         }
 
         // ---- Cinderwood palette ----
@@ -304,8 +316,8 @@ namespace Diorama.EditorTools
         }
 
         /// <summary>
-        /// Cinderwood island colours from the base look (the Oct 23 restored palette): unrestored = muted (the state players
-        /// spend most time in, so the scene starts there), restored = brighter with glowing leaf tips.
+        /// Cinderwood island colours: unrestored = the bright step 6 restored palette (the state players spend most time in,
+        /// so the scene starts there), restored = a touch warmer with glowing leaf tips.
         /// </summary>
         static void CinderwoodColors(RealmTheme cinder)
         {
@@ -318,8 +330,9 @@ namespace Diorama.EditorTools
                 trunk = Hex("#4A3328"), leavesLow = Hex("#B5452A"), leavesHigh = Hex("#D98E32"), rock = Hex("#9A9086"),
                 leafGlow = 0.12f, outlineTint = Color.white,
             };
-            cinder.restored = Map(baseLook, Brighter, 0.35f);
-            cinder.unrestored = Map(baseLook, c => Muted(c), 0f);
+            var everyday = Map(baseLook, Brighter, 0f);
+            cinder.unrestored = everyday;
+            cinder.restored = Map(everyday, Warmer, 0.35f);
             cinder.startRestored = 0f;
             EditorUtility.SetDirty(cinder);
         }

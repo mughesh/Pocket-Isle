@@ -86,9 +86,20 @@ namespace Diorama.EditorTools
         static int PriorityOf(string section) =>
             section.StartsWith("Opening") || section.StartsWith("Tutorials") ? 1 : 2;
 
-        /// <summary>After the id: "· once", "· once (note)", "· once: Spirit: text", "· Spirit: text", or nothing.</summary>
+        static readonly Regex TargetFlag = new Regex(@"·?\s*→\s*([A-Za-z][\w:,]*)");
+
+        /// <summary>
+        /// After the id: "· once", "· once (note)", "· once: Spirit: text", "· Spirit: text", or nothing, plus an optional
+        /// target anchor anywhere before the text: "· → cradle" (the Spirit flies there for these lines).
+        /// </summary>
         static void ParseFlags(DialogueTrigger t, string rest, int n, StringBuilder warnings)
         {
+            var target = TargetFlag.Match(rest);
+            if (target.Success)
+            {
+                t.target = target.Groups[1].Value;
+                rest = rest.Remove(target.Index, target.Length);
+            }
             rest = rest.Trim().TrimStart('·').Trim();
             if (rest.StartsWith("once"))
             {

@@ -88,6 +88,20 @@ Beat the Keeper → the element flows again, the realm visibly revives, its shar
 - **Temple:** pump the forge bellows (open/close hand) → heat flows through pipes → lights 3 braziers → Keeper door opens.
 - **Hearthstag fight:** ember-crown shield blocks damage until hit by a Water move (or 3 hits of anything), then open for 2 turns; repeats.
 
+### Look of the two states (decided Oct 24)
+The element "not flowing" shows as things being **still and unlit**, not as colour loss. The bright palette is the
+default; restoring the realm makes things **move and glow**.
+
+| | Unrestored (default, most play time) | Restored |
+|---|---|---|
+| Palette | The bright Cinderwood palette | Same, about 6% warmer and brighter, leaf tips glow |
+| Lanterns, lantern posts, kilns, braziers | Dim, irregular sputtering flicker (drops out, catches again) | Bright, steady warm glow, gentle flicker, soft halo |
+| Embers | None | Drifting embers rising through the trees and over tall grass |
+| Hot springs | Still water, no steam | Steam puffs |
+| Leaves | Static colour | Slight glow pulse on the tips |
+
+Debug toggle: G (Editor) or three quick left-hand thumb taps (dev builds), 2 s fade.
+
 ### Fire roster (placeholders; evolutions at a set level)
 | Creature | Concept | Evolves to | Rarity |
 |---|---|---|---|
@@ -137,6 +151,9 @@ explore → tall grass encounter → battle → capture → party / Sanctuary �
 
 ## Capture
 - Weaken, then flick a glass pod (brass band). Lower HP = better chance.
+- **Catch rule (Oct 24):** the Catch rune is locked (dim; picking it gives "Weaken it first!", no turn used) until the
+  wild HP bar is red (≤ 25%). Then it pops open and the big catch pod (6 cm) appears in the cradle. A fainted wild
+  creature is **dazed for 8 s**: a pod catches it for sure (rares 75%); no throw = it fades out, battle won, XP as usual.
 - **Golden Berry** (rare): craft from berries (bushes regrow on real-time timers) + orbs (one per temple,
   plus hidden spots). Befriends a wild creature without battle. Rare creatures and Keepers refuse it.
   First feature to cut if late.

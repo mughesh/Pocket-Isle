@@ -14,6 +14,49 @@ namespace Diorama.Tests
             api.Execute(new ExecutionSettings(new Filter { testMode = TestMode.EditMode, assemblyNames = new[] { "Diorama.Tests.Editor" } }));
         }
 
+        /// <summary>
+        /// Calls every [Test] in this assembly directly (with [SetUp] / [TearDown]), without the Test Runner. Its pipeline
+        /// can stall at the prebuild step while the Editor is in the background; these tests are plain, so this is enough.
+        /// </summary>
+        public static void Direct()
+        {
+            int pass = 0, fail = 0;
+            var failures = new StringBuilder();
+            foreach (var type in typeof(TestRun).Assembly.GetTypes())
+            {
+                var methods = type.GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+                System.Reflection.MethodInfo setUp = null, tearDown = null;
+                foreach (var m in methods)
+                {
+                    if (m.IsDefined(typeof(NUnit.Framework.SetUpAttribute), true)) setUp = m;
+                    if (m.IsDefined(typeof(NUnit.Framework.TearDownAttribute), true)) tearDown = m;
+                }
+                foreach (var m in methods)
+                {
+                    if (!m.IsDefined(typeof(NUnit.Framework.TestAttribute), true)) continue;
+                    var fixture = System.Activator.CreateInstance(type);
+                    try
+                    {
+                        if (setUp != null) setUp.Invoke(fixture, null);
+                        m.Invoke(fixture, null);
+                        pass++;
+                    }
+                    catch (System.Exception e)
+                    {
+                        fail++;
+                        var inner = e is System.Reflection.TargetInvocationException && e.InnerException != null ? e.InnerException : e;
+                        failures.Append($"\n  FAIL {type.Name}.{m.Name}: {inner.Message}");
+                    }
+                    finally
+                    {
+                        try { if (tearDown != null) tearDown.Invoke(fixture, null); }
+                        catch (System.Exception e) { failures.Append($"\n  TEARDOWN {type.Name}.{m.Name}: {e.Message}"); }
+                    }
+                }
+            }
+            Debug.Log($"[TestRun] Direct: {pass} passed, {fail} failed.{failures}");
+        }
+
         class Callbacks : ICallbacks
         {
             readonly StringBuilder _failures = new StringBuilder();

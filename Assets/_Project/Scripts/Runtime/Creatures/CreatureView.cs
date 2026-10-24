@@ -197,8 +197,8 @@ namespace Diorama
         float _headYaw;
         float _hopStart = -1f;
         bool _landedRaised;
-        bool _fainted;
-        float _faint;
+        bool _fainted, _dazed;
+        float _faint, _daze;
 
         void OnEnable()
         {
@@ -236,9 +236,19 @@ namespace Diorama
             ApplyStyles();
         }
 
+        /// <summary>Slumps a little and sways slowly with eyes shut (knocked out but still there), until <see cref="Revive"/>.</summary>
+        public void Daze()
+        {
+            _dazed = true;
+            _hopStart = -1f;
+        }
+
+        public bool IsDazed => _dazed;
+
         public void Revive()
         {
             _fainted = false;
+            _dazed = false;
             _breatheScale = 1f;
             ApplyStyles();
         }
@@ -438,7 +448,7 @@ namespace Diorama
                 _blinkStart = t;
                 _nextBlink = t + 2.5f + UnityEngine.Random.value * 3f;
             }
-            bool closed = _fainted || _blinkStart >= 0f && t - _blinkStart < 0.12f;
+            bool closed = _fainted || _dazed || _blinkStart >= 0f && t - _blinkStart < 0.12f;
             foreach (var e in eyes)
             {
                 if (e == null || e.transform == null) continue;
@@ -501,10 +511,13 @@ namespace Diorama
             }
 
             _faint = Mathf.MoveTowards(_faint, _fainted ? 1f : 0f, dt / 0.4f);
-            float f = Mathf.SmoothStep(0f, 1f, _faint);
+            _daze = Mathf.MoveTowards(_daze, _dazed && !_fainted ? 1f : 0f, dt / 0.4f);
+            float f = Mathf.SmoothStep(0f, 1f, _faint), d = Mathf.SmoothStep(0f, 1f, _daze);
             // Lying on its side, the body's half width is its new height above the ground.
             y = Mathf.Lerp(y, rigPosition.y + sideRestHeight - centerHeight, f);
-            float roll = Mathf.Sin((t + _timeOffset) * (idle.swaySpeed > 0f ? idle.swaySpeed : 1.2f)) * idle.sway * (1f - f) + 90f * f;
+            y -= centerHeight * 0.12f * d; // dazed: sags a little
+            float roll = Mathf.Sin((t + _timeOffset) * (idle.swaySpeed > 0f ? idle.swaySpeed : 1.2f)) * idle.sway * (1f - f) * (1f - d) + 90f * f
+                         + d * (14f + 12f * Mathf.Sin((t + _timeOffset) * 1.6f));
 
             // The rig origin is at the feet; turn around the body centre instead.
             var rotation = Quaternion.Euler(0f, _headYaw, roll);

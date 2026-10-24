@@ -2,6 +2,8 @@
 
 Lantern Spirit = **Spirit**. Bubbles are short: one idea per line, ≤ ~70 characters.
 Format: `trigger_id` · speaker · lines (shown in order). **once** = only the first time.
+Optional `· → target` (before the lines): the Spirit flies to that anchor while saying them and it pulses
+(`leadPod`, `cradle`, `catchRune`, `runes`, `nearPad`, `wildPad`, `tile:x,y`). No target = it stays home.
 Names are placeholders. The step 5c dialogue system loads this (convert to data asset).
 
 ## Opening (Still Isle)
@@ -26,14 +28,20 @@ Names are placeholders. The step 5c dialogue system loads this (convert to data 
 ## Tutorials
 - `tut.grass` · once: Spirit: Tall grass rustles when something's hiding in it.
 - `tut.pond` · once (first time next to water): Spirit: Face the water and tap. Something might bite!
-- `battle.first` · once
+- `pod.first` · once · → leadPod (encounter start)
+  - Spirit: Grab your friend's pod from the rim and toss it in!
+- `battle.first` · once · → runes
   - Spirit: Look at a rune and pinch. Or just poke it.
 - `battle.types` · once (first super or not-very effective hit)
   - Spirit: Water beats Fire. Fire beats Wind. Wind beats Water.
 - `battle.win.first` · once: Spirit: You did it! Your friend is getting stronger.
 - `battle.lose.first` · once: Spirit: Everyone's tired. Let's rest at the shrine.
-- `capture.first` · once
-  - Spirit: It's weak now. Grab a pod from the rim and flick it!
+- `capture.first` · once · → cradle (first time the wild HP bar is red)
+  - Spirit: It's weak now. Grab the big pod and flick it!
+- `capture.locked` · → catchRune (Catch picked above red)
+  - Spirit: Weaken it first!
+- `capture.dazed.first` · once · → cradle (first dazed wild creature)
+  - Spirit: It's dazed. Quick, a pod!
 - `capture.success.first` · once: Spirit: A new friend! It's in your pods now.
 - `party.full` · once: Spirit: Your pods are full. New friends go to the Sanctuary.
 - `shrine.first` · once

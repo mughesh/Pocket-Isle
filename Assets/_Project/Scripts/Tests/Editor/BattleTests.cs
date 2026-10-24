@@ -153,7 +153,8 @@ namespace Diorama.Tests
             {
                 var b = new BattleSystem(Creature(Element.Fire, 10, 5, a), Creature(Element.Wind, 10, 5, a), _chart, 42);
                 var log = new List<string>();
-                while (!b.IsOver) log.AddRange(b.PlayTurn(0).Select(e => e.ToString()));
+                // A fainted wild creature is dazed (waiting for a pod), not over.
+                for (int turn = 0; turn < 100 && !b.IsOver && !b.WildDazed; turn++) log.AddRange(b.PlayTurn(0).Select(e => e.ToString()));
                 return string.Join("|", log);
             }
             Assert.AreEqual(Run(), Run());
@@ -252,16 +253,23 @@ namespace Diorama.Tests
         // ---- end of battle ----
 
         [Test]
-        public void Win_FaintsWildAndGivesXp()
+        public void Win_FaintsWildAndGivesXp_ThenItIsDazedUntilTheWindowEnds()
         {
             var player = Creature(Element.Water, 30, 5, Attack(Element.Water, 50));
             var wild = Creature(Element.Fire, 5, 3, Attack(Element.Neutral, 10));
             wild.currentHp = 1;
             var b = new BattleSystem(player, wild, _chart, 5, wildIsRare: true);
             var kinds = b.PlayTurn(0).Select(e => e.kind).ToList();
-            CollectionAssert.AreEqual(new[] { BattleEventKind.MoveUsed, BattleEventKind.Damage, BattleEventKind.Fainted, BattleEventKind.XpGained, BattleEventKind.Ended }, kinds);
-            Assert.AreEqual(BattleResult.Won, b.Result);
+            CollectionAssert.AreEqual(new[] { BattleEventKind.MoveUsed, BattleEventKind.Damage, BattleEventKind.Fainted, BattleEventKind.XpGained }, kinds);
+            Assert.IsTrue(b.WildDazed);
+            Assert.IsFalse(b.IsOver);
             Assert.AreEqual(BattleMath.XpReward(3, true), player.xp);
+            Assert.AreEqual(0, b.PlayTurn(0).Count, "no moves while it is dazed");
+            Assert.AreEqual(0, b.TryFlee().Count);
+            var end = b.EndDaze();
+            Assert.AreEqual(BattleEventKind.Ended, end[0].kind);
+            Assert.AreEqual(BattleResult.Won, b.Result, "no pod in time = won");
+            Assert.AreEqual(BattleMath.XpReward(3, true), player.xp, "XP paid once");
             Assert.AreEqual(0, b.PlayTurn(0).Count, "no turns after the end");
         }
 
@@ -336,7 +344,7 @@ namespace Diorama.Tests
             for (int seed = 0; seed < 100; seed++)
             {
                 var wild = Creature(Element.Fire, 10, 5, tackle);
-                wild.currentHp = wild.MaxHp / 2;
+                wild.currentHp = Mathf.FloorToInt(wild.MaxHp * BattleMath.RedHpShare);
                 var b = new BattleSystem(Creature(Element.Water, 10, 5, tackle), wild, _chart, seed);
                 var events = b.TryCatch();
                 Assert.AreEqual(BattleEventKind.CatchAttempt, events[0].kind);
@@ -357,9 +365,55 @@ namespace Diorama.Tests
                     Assert.AreEqual(BattleSide.Wild, events[2].side);
                 }
             }
-            // Half HP at equal levels is about 57%.
-            Assert.That(caught, Is.InRange(40, 75));
+            // A quarter HP at equal levels is about 76%.
+            Assert.That(caught, Is.InRange(60, 92));
             Assert.Greater(broke, 0);
+        }
+
+        [Test]
+        public void Catch_LockedAboveRed_UnlockedAtRed()
+        {
+            var tackle = Attack(Element.Neutral);
+            var wild = Creature(Element.Fire, 20, 5, tackle);
+            var b = new BattleSystem(Creature(Element.Water, 10, 5, tackle), wild, _chart, 1);
+            wild.currentHp = Mathf.FloorToInt(wild.MaxHp * BattleMath.RedHpShare) + 1;
+            Assert.IsFalse(b.CatchUnlocked);
+            Assert.AreEqual(0, b.TryCatch().Count, "locked: the pod does nothing, no turn used");
+            wild.currentHp = Mathf.FloorToInt(wild.MaxHp * BattleMath.RedHpShare);
+            Assert.IsTrue(b.CatchUnlocked);
+            Assert.Greater(b.TryCatch().Count, 0);
+        }
+
+        [Test]
+        public void Dazed_SureCatch_RaresThreeQuarters()
+        {
+            Assert.AreEqual(1f, BattleMath.DazedCatchChance(false));
+            Assert.AreEqual(0.75f, BattleMath.DazedCatchChance(true));
+            var tackle = Attack(Element.Neutral, power: 200);
+            int rareCaught = 0;
+            for (int seed = 0; seed < 100; seed++)
+            {
+                foreach (bool rare in new[] { false, true })
+                {
+                    var wild = Creature(Element.Fire, 5, 5, tackle);
+                    wild.currentHp = 1;
+                    var b = new BattleSystem(Creature(Element.Water, 500, 5, tackle), wild, _chart, seed, rare);
+                    b.PlayTurn(0);
+                    Assert.IsTrue(b.WildDazed);
+                    Assert.IsTrue(b.CatchUnlocked);
+                    Assert.AreEqual(BattleMath.DazedCatchChance(rare), b.CatchChance);
+                    var events = b.TryCatch();
+                    Assert.IsTrue(b.IsOver, "a pod at a dazed one always ends the battle");
+                    if (!rare) Assert.AreEqual(BattleResult.Caught, b.Result);
+                    else if (b.Result == BattleResult.Caught) rareCaught++;
+                    else
+                    {
+                        Assert.AreEqual(BattleResult.Won, b.Result, "a rare that breaks free runs off: won");
+                        Assert.IsFalse(events.Any(e => e.kind == BattleEventKind.MoveUsed), "a dazed one doesn't attack");
+                    }
+                }
+            }
+            Assert.That(rareCaught, Is.InRange(60, 90));
         }
 
         // ---- switching ----

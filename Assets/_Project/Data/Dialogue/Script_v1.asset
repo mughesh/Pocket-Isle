@@ -17,6 +17,7 @@ MonoBehaviour:
     once: 1
     priority: 1
     note: 
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -28,6 +29,7 @@ MonoBehaviour:
     once: 1
     priority: 1
     note: 
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -39,6 +41,7 @@ MonoBehaviour:
     once: 1
     priority: 1
     note: 
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -50,6 +53,7 @@ MonoBehaviour:
     once: 1
     priority: 1
     note: 
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -58,6 +62,7 @@ MonoBehaviour:
     once: 0
     priority: 1
     note: 
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -66,6 +71,7 @@ MonoBehaviour:
     once: 0
     priority: 1
     note: 
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -74,6 +80,7 @@ MonoBehaviour:
     once: 0
     priority: 1
     note: 
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -82,6 +89,7 @@ MonoBehaviour:
     once: 1
     priority: 1
     note: first time near the statue
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -93,6 +101,7 @@ MonoBehaviour:
     once: 1
     priority: 1
     note: 
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -101,14 +110,25 @@ MonoBehaviour:
     once: 1
     priority: 1
     note: first time next to water
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
       text: Face the water and tap. Something might bite!
+  - id: pod.first
+    once: 1
+    priority: 1
+    note: encounter start
+    target: leadPod
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Grab your friend's pod from the rim and toss it in!
   - id: battle.first
     once: 1
     priority: 1
     note: 
+    target: runes
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -117,6 +137,7 @@ MonoBehaviour:
     once: 1
     priority: 1
     note: first super or not-very effective hit
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -125,6 +146,7 @@ MonoBehaviour:
     once: 1
     priority: 1
     note: 
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -133,6 +155,7 @@ MonoBehaviour:
     once: 1
     priority: 1
     note: 
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -140,15 +163,35 @@ MonoBehaviour:
   - id: capture.first
     once: 1
     priority: 1
-    note: 
+    note: first time the wild HP bar is red
+    target: cradle
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: It's weak now. Grab a pod from the rim and flick it!
+      text: It's weak now. Grab the big pod and flick it!
+  - id: capture.locked
+    once: 0
+    priority: 1
+    note: Catch picked above red
+    target: catchRune
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Weaken it first!
+  - id: capture.dazed.first
+    once: 1
+    priority: 1
+    note: first dazed wild creature
+    target: cradle
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: It's dazed. Quick, a pod!
   - id: capture.success.first
     once: 1
     priority: 1
     note: 
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -157,6 +200,7 @@ MonoBehaviour:
     once: 1
     priority: 1
     note: 
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -165,6 +209,7 @@ MonoBehaviour:
     once: 1
     priority: 1
     note: 
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -176,6 +221,7 @@ MonoBehaviour:
     once: 1
     priority: 1
     note: 
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -187,6 +233,7 @@ MonoBehaviour:
     once: 1
     priority: 1
     note: first gold sparkle
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -195,6 +242,7 @@ MonoBehaviour:
     once: 1
     priority: 2
     note: 
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -206,6 +254,7 @@ MonoBehaviour:
     once: 1
     priority: 2
     note: 
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -214,6 +263,7 @@ MonoBehaviour:
     once: 1
     priority: 2
     note: 
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -222,6 +272,7 @@ MonoBehaviour:
     once: 1
     priority: 2
     note: blocked by the fallen log
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -233,6 +284,7 @@ MonoBehaviour:
     once: 0
     priority: 2
     note: 
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -241,6 +293,7 @@ MonoBehaviour:
     once: 1
     priority: 2
     note: first time at the temple door
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -249,6 +302,7 @@ MonoBehaviour:
     once: 1
     priority: 2
     note: 
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -257,6 +311,7 @@ MonoBehaviour:
     once: 0
     priority: 2
     note: 
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -265,6 +320,7 @@ MonoBehaviour:
     once: 0
     priority: 2
     note: 
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -273,6 +329,7 @@ MonoBehaviour:
     once: 0
     priority: 2
     note: 
+    target: 
     lines:
     - speaker: 1
       speakerName: Hearthstag
@@ -287,6 +344,7 @@ MonoBehaviour:
     once: 1
     priority: 2
     note: 
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -295,6 +353,7 @@ MonoBehaviour:
     once: 0
     priority: 2
     note: 
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -303,6 +362,7 @@ MonoBehaviour:
     once: 0
     priority: 2
     note: 
+    target: 
     lines:
     - speaker: 1
       speakerName: Hearthstag
@@ -317,6 +377,7 @@ MonoBehaviour:
     once: 1
     priority: 2
     note: 
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -325,6 +386,7 @@ MonoBehaviour:
     once: 1
     priority: 2
     note: 
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -333,6 +395,7 @@ MonoBehaviour:
     once: 0
     priority: 2
     note: 
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -341,6 +404,7 @@ MonoBehaviour:
     once: 0
     priority: 2
     note: 
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -349,6 +413,7 @@ MonoBehaviour:
     once: 0
     priority: 2
     note: 
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -357,6 +422,7 @@ MonoBehaviour:
     once: 0
     priority: 2
     note: 
+    target: 
     lines:
     - speaker: 2
       speakerName: Heart
@@ -371,6 +437,7 @@ MonoBehaviour:
     once: 0
     priority: 2
     note: 
+    target: 
     lines:
     - speaker: 2
       speakerName: Heart
@@ -385,6 +452,7 @@ MonoBehaviour:
     once: 0
     priority: 2
     note: 
+    target: 
     lines:
     - speaker: 0
       speakerName: Spirit
