@@ -119,6 +119,67 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &78739057
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 78739059}
+  - component: {fileID: 78739058}
+  m_Layer: 0
+  m_Name: Pod Rack
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &78739058
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 78739057}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ade966179338847abc2604058034e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.PodRack
+  island: {fileID: 270959109}
+  party: {fileID: 1499891276}
+  podPrefab: {fileID: 2461426601937518530, guid: e869452f9fe504b42af0e22b32e4ba40, type: 3}
+  handle: {fileID: 270959111}
+  fx: {fileID: 1078587927}
+  hudMaterial: {fileID: 2100000, guid: 0656b6c4f92798e49a14cf09a2c6800e, type: 2}
+  socketMesh: {fileID: 4300000, guid: 659a9cd844d20ce4ca465ae3c2e631e2, type: 2}
+  socketMaterial: {fileID: 2100000, guid: 6d560b85a19c2dd448fa64742823a9ec, type: 2}
+  faceShare: 0.67
+  socketDepth: 0.03
+  podOut: 0.011
+  cradleOffset: {x: 0.075, y: 0.06, z: 0.035}
+  pokeRadius: 1.4
+  gazeRadius: 2.2
+  grabPinchDistance: 0.08
+  rimGuardDistance: 0.07
+  cardSeconds: 4
+--- !u!4 &78739059
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 78739057}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1499891277}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &200327674
 GameObject:
   m_ObjectHideFlags: 0
@@ -843,9 +904,9 @@ MonoBehaviour:
   grabGuard: {fileID: 270959111}
   hudMaterial: {fileID: 2100000, guid: 0656b6c4f92798e49a14cf09a2c6800e, type: 2}
   offset: {x: 0, y: 0.05, z: 0.02}
-  avoidOffset: {x: 0, y: -0.05, z: 0.035}
-  runeSize: {x: 0.085, y: 0.04}
-  spacing: 0.095
+  avoidOffset: {x: 0, y: 0.045, z: 0.045}
+  runeSize: {x: 0.08, y: 0.04}
+  spacing: 0.088
   fontSize: 0.11
   captionFontSize: 0.12
   maxDrift: 15
@@ -1446,6 +1507,7 @@ MonoBehaviour:
   cursor: {fileID: 908141540}
   grabGuard: {fileID: 270959111}
   bubble: {fileID: 232676577}
+  pods: {fileID: 78739058}
 --- !u!114 &908141539
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2042,6 +2104,7 @@ MonoBehaviour:
   party: {fileID: 1499891276}
   stage: {fileID: 1078587928}
   runes: {fileID: 382714127}
+  pods: {fileID: 78739058}
   typeChart: {fileID: 11400000, guid: d07e763e31e40f44e90da37afbc060b8, type: 2}
   grassTable: {fileID: 11400000, guid: 674dcb07c5696924dbbad850006068b4, type: 2}
   waterTable: {fileID: 11400000, guid: 5b47e44c4def61b419051ed86ed2fcb3, type: 2}
@@ -2053,6 +2116,10 @@ MonoBehaviour:
   focusDim: 0.25
   rippleSeconds: 1
   seed: 0
+  autoSendSeconds: 6
+  catchAimAngle: 25
+  sendAimAngle: 45
+  minThrowSpeed: 0.35
 --- !u!114 &1499891276
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2071,6 +2138,7 @@ MonoBehaviour:
     currentHp: 40
     xp: 0
     nickname: 
+  storage: []
 --- !u!4 &1499891277
 Transform:
   m_ObjectHideFlags: 0
@@ -2083,7 +2151,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 78739059}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1532703331

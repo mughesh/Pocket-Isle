@@ -9,12 +9,12 @@ using UnityEngine.InputSystem;
 namespace Diorama
 {
     /// <summary>
-    /// The battle choices: three move runes and a Run rune floating just above the island's near rim, facing the head,
-    /// with a caption line above them. Pick with head gaze (soft reticle from the centre eye; Quest 3 has no eye
+    /// The battle choices: three move runes, a Catch rune and a Run rune floating just above the island's near rim,
+    /// facing the head, with a caption line above them. Pick with head gaze (soft reticle from the centre eye; Quest 3 has no eye
     /// tracking) and a pinch on either hand, or poke a rune with an index finger (Interaction SDK poke: each rune is a
     /// PokeInteractable on a clipped plane, and its plate presses in).
     /// The row moves down and closer if it would cover a battling creature from the head's view.
-    /// Editor: 1-4 pick directly, Enter picks the rune under the gaze.
+    /// Editor: 1-5 pick directly, Enter picks the rune under the gaze.
     /// </summary>
     public class BattleRunes : MonoBehaviour
     {
@@ -45,10 +45,12 @@ namespace Diorama
         [Tooltip("How far the plate travels in when pressed (island-local metres).")]
         public float pressDepth = 0.008f;
 
-        /// <summary>0-2 = move slot, 3 = run.</summary>
+        /// <summary>0-2 = move slot, 3 = catch, 4 = run.</summary>
         public event Action<int> Chosen;
 
-        public const int RunIndex = 3;
+        public const int CatchIndex = 3;
+        public const int RunIndex = 4;
+        const int Count = 5;
 
         class Rune
         {
@@ -69,7 +71,7 @@ namespace Diorama
         static readonly int RadiusId = Shader.PropertyToID("_Radius");
         static readonly int BorderId = Shader.PropertyToID("_Border");
 
-        readonly Rune[] _runes = new Rune[4];
+        readonly Rune[] _runes = new Rune[Count];
         Transform _row;
         TextMeshPro _caption;
         MeshRenderer _reticle;
@@ -103,7 +105,7 @@ namespace Diorama
             {
                 var root = new GameObject($"Rune {i + 1}").transform;
                 root.SetParent(_row, false);
-                root.localPosition = new Vector3((i - 1.5f) * spacing, 0f, 0f);
+                root.localPosition = new Vector3((i - (Count - 1) * 0.5f) * spacing, 0f, 0f);
                 var rune = new Rune { root = root };
                 BuildPoke(rune, i);
                 _runes[i] = rune;
@@ -203,8 +205,11 @@ namespace Diorama
             else Debug.Log($"[BattleRunes] Poke interactors: {active} active of {all.Length}:{names}");
         }
 
-        /// <summary>Shows the row with these three moves plus Run. Not pickable until <see cref="SetInteractable"/>.</summary>
-        public void Show(MoveData[] moves)
+        /// <summary>Half the row width (rune centres to the outer edge).</summary>
+        float HalfRow => (Count - 1) * 0.5f * spacing + runeSize.x * 0.5f;
+
+        /// <summary>Shows the row with these three moves plus Catch and Run. Not pickable until <see cref="SetInteractable"/>.</summary>
+        public void Show(MoveData[] moves, bool canCatch = true)
         {
             gameObject.SetActive(true);
             for (int i = 0; i < 3; i++)
@@ -216,6 +221,9 @@ namespace Diorama
                 string kind = m == null ? "" : m.kind == MoveKind.Support ? "Support" : m.element.ToString();
                 r.label.text = m != null ? $"<b>{m.Name}</b>\n<size=70%>{kind}</size>" : "-";
             }
+            _runes[CatchIndex].usable = canCatch;
+            _runes[CatchIndex].tint = new Color(0.86f, 0.66f, 0.3f);
+            _runes[CatchIndex].label.text = "<b>Catch</b>\n<size=70%>Pod</size>";
             _runes[RunIndex].usable = true;
             _runes[RunIndex].tint = new Color(0.55f, 0.58f, 0.56f);
             _runes[RunIndex].label.text = "<b>Run</b>";
@@ -277,7 +285,8 @@ namespace Diorama
                 if (kb.digit1Key.wasPressedThisFrame) Pick(0, "key");
                 else if (kb.digit2Key.wasPressedThisFrame) Pick(1, "key");
                 else if (kb.digit3Key.wasPressedThisFrame) Pick(2, "key");
-                else if (kb.digit4Key.wasPressedThisFrame) Pick(RunIndex, "key");
+                else if (kb.digit4Key.wasPressedThisFrame) Pick(CatchIndex, "key");
+                else if (kb.digit5Key.wasPressedThisFrame) Pick(RunIndex, "key");
                 else if (kb.enterKey.wasPressedThisFrame && _hovered >= 0) Pick(_hovered, "gaze + Enter");
                 if (!_interactable) return;
             }
@@ -306,7 +315,7 @@ namespace Diorama
         void Pick(int index, string how)
         {
             if (index < 0 || index >= _runes.Length || !_runes[index].usable) return;
-            Debug.Log($"[BattleRunes] Picked {(index == RunIndex ? "Run" : $"move {index + 1}")} by {how}.");
+            Debug.Log($"[BattleRunes] Picked {(index == RunIndex ? "Run" : index == CatchIndex ? "Catch" : $"move {index + 1}")} by {how}.");
             _interactable = false;
             Paint();
             Chosen?.Invoke(index);
@@ -359,7 +368,7 @@ namespace Diorama
         bool Covers(Vector3 head, StageActor actor)
         {
             if (actor == null) return false;
-            float halfW = spacing * 1.5f + runeSize.x * 0.5f, top = runeSize.y * 0.5f + 0.03f, bottom = -runeSize.y * 0.5f;
+            float halfW = HalfRow, top = runeSize.y * 0.5f + 0.03f, bottom = -runeSize.y * 0.5f;
             var t = island.transform;
             Vector3[] points = { actor.WorldCenter, t.TransformPoint(actor.LocalTop), t.TransformPoint(actor.island.TileToLocal(actor.tile, actor.island.Content.capHeight + actor.baseLift)) };
             Vector3 o = _row.InverseTransformPoint(head);
@@ -390,7 +399,7 @@ namespace Diorama
             }
             Vector3 hit = o + d * (-o.z / d.z);
             float scale = _row.lossyScale.x;
-            bool near = Mathf.Abs(hit.x) < spacing * 2.6f && Mathf.Abs(hit.y) < runeSize.y * 2.5f;
+            bool near = Mathf.Abs(hit.x) < HalfRow + spacing && Mathf.Abs(hit.y) < runeSize.y * 2.5f;
             _reticle.enabled = near;
             if (near) _reticle.transform.localPosition = new Vector3(hit.x, hit.y, -0.002f / Mathf.Max(1e-4f, scale));
             for (int i = 0; i < _runes.Length; i++)

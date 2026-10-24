@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -8,9 +9,12 @@ namespace Diorama
     /// Wild encounters and the battle flow. Each step onto tall grass may roll the grass table; a tap while facing water
     /// rolls the water table. Then: the explorer stops, the grass rustles (or the water ripples), the view centres on
     /// the stage and zooms in, a clearing opens (grass parts, props sink, the rest dims) and two pads rise: the party
-    /// creature's near the player, back to them, the wild one's 2-3 tiles farther, facing them. The battle runs turn by
-    /// turn from the runes until someone faints or the player runs. Then everything returns and walking resumes.
-    /// Editor: B starts a grass encounter on the spot.
+    /// creature's near the player, back to them, the wild one's 2-3 tiles farther, facing them. The player sends a
+    /// creature out by throwing (or dropping) a rim pod onto the island, look + pinch on a pod, or waiting
+    /// <see cref="autoSendSeconds"/>. The battle runs turn by turn from the runes and the pods (throw another party pod to
+    /// switch, flick the cradle pod at the wild creature to catch it) until someone is caught, faints for good or the
+    /// player runs. Losing the whole party sends the explorer back to spawn, healed. Then walking resumes.
+    /// Editor: B starts a grass encounter on the spot; in battle C throws the cradle pod, X switches to the next pod.
     /// </summary>
     public class EncounterDirector : MonoBehaviour
     {
@@ -20,6 +24,7 @@ namespace Diorama
         public Party party;
         public BattleStage stage;
         public BattleRunes runes;
+        public PodRack pods;
         public TypeChart typeChart;
 
         [Header("Encounter tables (this region)")]
@@ -43,17 +48,39 @@ namespace Diorama
         [Tooltip("0 = a new random seed every session.")]
         public int seed;
 
+        [Header("Pods")]
+        [Tooltip("The lead pod is sent out by itself after this long (s).")]
+        public float autoSendSeconds = 6f;
+        [Tooltip("A catch throw homes in when it heads within this angle of the wild creature (degrees, flat).")]
+        public float catchAimAngle = 25f;
+        [Tooltip("A send-out throw lands on the pad when it heads within this angle of it (degrees, flat); a drop above the island always does.")]
+        public float sendAimAngle = 45f;
+        [Tooltip("Slowest release that counts as a throw (m/s).")]
+        public float minThrowSpeed = 0.35f;
+
         public bool InBattle { get; private set; }
+
+        enum ActKind { None, Move, Run, Catch, PodThrow, PodPick }
+
+        struct Act
+        {
+            public ActKind kind;
+            public int index;
+            public Vector3 pos, vel; // pod throws: island-local release point and velocity
+        }
 
         SeededRandom _rnd;
         int _stepsSinceBattle = int.MaxValue / 2;
-        int _choice = -1;
+        Act _act;
+        bool _waiting;
+        int _activeSlot = -1;
+        StageLayout _layout;
 
         void Start()
         {
-            if (explorer == null || window == null || island == null || party == null || stage == null || runes == null || typeChart == null)
+            if (explorer == null || window == null || island == null || party == null || stage == null || runes == null || pods == null || typeChart == null)
             {
-                Debug.LogError("[EncounterDirector] Missing references (run Tools > Diorama > Step 5 > 2. Add Battle to MR_Main).", this);
+                Debug.LogError("[EncounterDirector] Missing references (run Tools > Diorama > Step 5 > 2. Add Battle to MR_Main, then Tools > Pocket Isle > Set Up MR_Main (6 capture)).", this);
                 enabled = false;
                 return;
             }
@@ -66,6 +93,8 @@ namespace Diorama
             explorer.OnTallGrassStep += OnTallGrassStep;
             explorer.OnFishTap += OnFishTap;
             runes.Chosen += OnChosen;
+            pods.Thrown += OnPodThrown;
+            pods.Picked += OnPodPicked;
         }
 
         void OnDestroy()
@@ -76,12 +105,27 @@ namespace Diorama
                 explorer.OnFishTap -= OnFishTap;
             }
             if (runes != null) runes.Chosen -= OnChosen;
+            if (pods != null)
+            {
+                pods.Thrown -= OnPodThrown;
+                pods.Picked -= OnPodPicked;
+            }
         }
 
         void Update()
         {
             var kb = Keyboard.current;
-            if (kb != null && kb.bKey.wasPressedThisFrame) StartEncounter(Habitat.Grass);
+            if (kb == null) return;
+            if (kb.bKey.wasPressedThisFrame) StartEncounter(Habitat.Grass);
+            if (!Application.isEditor) return;
+            if (kb.cKey.wasPressedThisFrame) DebugPick(PodRack.CradleSlot);
+            if (kb.xKey.wasPressedThisFrame) DebugPick(party.NextFighter(_activeSlot));
+        }
+
+        /// <summary>Same as look + pinch on a pod (testing: Editor keys, the Claude bridge).</summary>
+        public void DebugPick(int slot)
+        {
+            if (slot >= 0) OnPodPicked(slot);
         }
 
         /// <summary>Starts an encounter on the spot (testing: Editor key B, the Claude bridge, the context menu).</summary>
@@ -112,7 +156,28 @@ namespace Diorama
             StartCoroutine(Encounter(waterTable, waterTile));
         }
 
-        void OnChosen(int index) => _choice = index;
+        void OnChosen(int index)
+        {
+            if (!_waiting || _act.kind != ActKind.None) return;
+            _act = new Act
+            {
+                kind = index == BattleRunes.RunIndex ? ActKind.Run : index == BattleRunes.CatchIndex ? ActKind.Catch : ActKind.Move,
+                index = index,
+            };
+        }
+
+        void OnPodThrown(int slot, Vector3 pos, Vector3 vel)
+        {
+            if (_waiting && _act.kind == ActKind.None) _act = new Act { kind = ActKind.PodThrow, index = slot, pos = pos, vel = vel };
+            else StartCoroutine(pods.FlyHome(slot));
+        }
+
+        void OnPodPicked(int slot)
+        {
+            if (!_waiting || _act.kind != ActKind.None) return;
+            bool usable = slot == PodRack.CradleSlot ? pods.CradleGrab : pods.PartyGrab && slot != _activeSlot && party.CanFight(slot);
+            if (usable) _act = new Act { kind = ActKind.PodPick, index = slot };
+        }
 
         IEnumerator Encounter(EncounterTable table, Vector2Int where)
         {
@@ -122,28 +187,28 @@ namespace Diorama
             if (!table.Roll(_rnd, out var wild, out bool rare))
             {
                 Debug.LogError($"[EncounterDirector] {table.name} has no species to roll.", table);
-                yield return Finish();
+                yield return Finish(false);
                 yield break;
             }
             var lead = party.Lead;
             if (lead == null)
             {
-                // Temporary until step 6 adds the losing rules (shrine, heal): never block the test.
+                // Shouldn't happen (losing heals the party); never block the game.
                 party.HealAll();
                 lead = party.Lead;
-                Debug.Log("[EncounterDirector] Whole party had fainted; healed it (temporary rule until step 6).");
+                Debug.LogWarning("[EncounterDirector] Whole party had fainted at an encounter; healed it.");
             }
             if (lead == null || wild.species.Prefab == null || lead.species.Prefab == null)
             {
                 Debug.LogError("[EncounterDirector] Can't battle: empty party or an unbaked species.");
-                yield return Finish();
+                yield return Finish(false);
                 yield break;
             }
 
             bool water = table.habitat == Habitat.Water;
-            var layout = Layout(water);
+            var layout = _layout = Layout(water);
             Debug.Log($"[EncounterDirector] {(water ? "Water" : "Grass")} encounter: wild {wild.Name} lv {wild.level}{(rare ? " (rare)" : "")} " +
-                      $"on pad c{layout.wildPad.x} r{layout.wildPad.y}, {lead.Name} lv {lead.level} on pad c{layout.myPad.x} r{layout.myPad.y}, " +
+                      $"on pad c{layout.wildPad.x} r{layout.wildPad.y}, lead {lead.Name} lv {lead.level} for pad c{layout.myPad.x} r{layout.myPad.y}, " +
                       $"zoom x{layout.zoom:F2}{(layout.fallback ? " (fallback pads: no free pair)" : "")}.");
 
             explorer.StandOffset = layout.explorerSpot - explorer.Tile;
@@ -168,27 +233,94 @@ namespace Diorama
             }
 
             stage.Spawn(wild, BattleSide.Wild, layout.wildPad, layout.myPad);
-            stage.Spawn(lead, BattleSide.Player, layout.myPad, layout.wildPad);
-            runes.Avoid(stage.Player, stage.Wild);
+            runes.Avoid(null, stage.Wild);
             yield return stage.WildAppears(rare, water ? (Vector2?)where : null);
             runes.Show(lead.species.moves);
             runes.SetCaption(rare ? $"A rare wild {wild.Name} appeared!" : $"A wild {wild.Name} appeared!");
             if (rare) Dialogue.Say("rare.first");
-            yield return new WaitForSeconds(0.3f);
-            runes.SetCaption($"Go, {lead.Name}!");
-            yield return stage.PodBurst();
-            stage.ShowBars(lead, wild);
+            pods.InBattle = true;
+            pods.CradleVisible = true;
+            yield return new WaitForSeconds(0.6f);
 
-            var battle = new BattleSystem(lead, wild, typeChart, (int)(_rnd.Next() * int.MaxValue), rare);
+            _activeSlot = -1;
+            yield return SendOut("Grab a pod and toss it in!");
+            stage.ShowWildBar(wild);
+
+            var battle = new BattleSystem(party.At(_activeSlot), wild, typeChart, (int)(_rnd.Next() * int.MaxValue), rare, HasReserve);
             Dialogue.Say("battle.first");
+            string prompt = null;
             while (!battle.IsOver)
             {
-                runes.SetCaption($"What will {lead.Name} do?");
-                _choice = -1;
+                if (battle.PlayerMustSwitch)
+                {
+                    yield return stage.RecallPlayer(pods.HomeWorld(_activeSlot));
+                    pods.ActiveSlot = -1;
+                    yield return SendOut($"{battle.player.creature.Name} needs a rest. Toss in another pod!");
+                    battle.Switch(party.At(_activeSlot));
+                    continue;
+                }
+
+                runes.SetCaption(prompt ?? $"What will {battle.player.creature.Name} do?");
+                prompt = null;
+                _act = default;
+                _waiting = true;
+                pods.PartyGrab = pods.CradleGrab = true;
                 runes.SetInteractable(true);
-                while (_choice < 0) yield return null;
+                while (_act.kind == ActKind.None) yield return null;
+                var act = _act;
+                _waiting = false;
                 runes.SetInteractable(false);
-                var events = _choice == BattleRunes.RunIndex ? battle.TryFlee() : battle.PlayTurn(_choice);
+                pods.PartyGrab = pods.CradleGrab = false;
+
+                IReadOnlyList<BattleEvent> events;
+                if (act.kind == ActKind.Move) events = battle.PlayTurn(act.index);
+                else if (act.kind == ActKind.Run) events = battle.TryFlee();
+                else if (act.kind == ActKind.Catch)
+                {
+                    pods.PresentCradle();
+                    prompt = $"Flick the pod at the wild {wild.Name}!";
+                    continue;
+                }
+                else if (act.index == PodRack.CradleSlot)
+                {
+                    Vector3 target = stage.Wild.LocalCenter;
+                    bool thrown = act.kind == ActKind.PodThrow;
+                    if (thrown && !Aimed(act, target, catchAimAngle))
+                    {
+                        Debug.Log($"[EncounterDirector] Catch throw missed ({ThrowInfo(act, target)}).");
+                        runes.SetCaption("Missed!");
+                        yield return pods.Miss(PodRack.CradleSlot, act.vel);
+                        prompt = $"Missed! Flick it right at {wild.Name}.";
+                        continue;
+                    }
+                    Debug.Log($"[EncounterDirector] Catch pod {(thrown ? $"thrown ({ThrowInfo(act, target)})" : "sent by look + pinch")}, chance {battle.CatchChance:P0}.");
+                    runes.SetCaption("Go, pod!");
+                    yield return pods.FlyTo(PodRack.CradleSlot, target, thrown ? act.vel : Vector3.zero, FlightSeconds(act, target));
+                    events = battle.TryCatch();
+                    yield return PlayCatch(events, wild);
+                }
+                else
+                {
+                    Vector3 pad = PodOnPad();
+                    if (act.kind == ActKind.PodThrow && !OntoIsland(act, pad))
+                    {
+                        Debug.Log($"[EncounterDirector] Switch throw went wide ({ThrowInfo(act, pad)}): pod back to its socket.");
+                        yield return pods.FlyHome(act.index);
+                        continue;
+                    }
+                    var leaving = battle.player.creature;
+                    events = battle.Switch(party.At(act.index));
+                    Debug.Log($"[EncounterDirector] Switch: {leaving.Name} out, {party.At(act.index).Name} in.");
+                    runes.SetCaption($"Come back, {leaving.Name}!");
+                    bool landed = false;
+                    var thrownVel = act.kind == ActKind.PodThrow ? act.vel : Vector3.zero;
+                    StartCoroutine(Then(pods.FlyTo(act.index, pad, thrownVel, FlightSeconds(act, pad)), () => landed = true));
+                    yield return stage.RecallPlayer(pods.HomeWorld(_activeSlot));
+                    pods.ActiveSlot = -1;
+                    while (!landed) yield return null;
+                    yield return Land(act.index);
+                }
+
                 foreach (var e in events) Debug.Log($"[Battle] {e}");
                 foreach (var e in events)
                     if (e.kind == BattleEventKind.Damage && e.effectiveness != Effectiveness.Normal)
@@ -197,23 +329,178 @@ namespace Diorama
                         break;
                     }
                 yield return stage.Play(events, battle, runes.SetCaption);
+                if (!battle.IsOver && battle.wild.Hp < battle.wild.MaxHp * 0.5f)
+                {
+                    Dialogue.Say("capture.first");
+                    pods.CradleGlow = true;
+                }
             }
 
-            Debug.Log($"[EncounterDirector] Battle over: {battle.Result}. {lead.Name} HP {lead.currentHp}/{lead.MaxHp}, XP {lead.xp}.");
+            var me = battle.player.creature;
+            Debug.Log($"[EncounterDirector] Battle over: {battle.Result}. {me.Name} HP {me.currentHp}/{me.MaxHp}, XP {me.xp}. " +
+                      $"Party {party.members.Count}/{Party.Size}, storage {party.storage.Count}.");
             yield return stage.Outro(battle.Result);
             if (battle.Result == BattleResult.Won) Dialogue.Say("battle.win.first");
             else if (battle.Result == BattleResult.Lost) Dialogue.Say("battle.lose.first");
-            if (battle.Result == BattleResult.Lost)
-            {
-                party.HealAll();
-                Debug.Log("[EncounterDirector] Lost: party healed (temporary rule until step 6).");
-            }
-            yield return Finish();
+            yield return Finish(battle.Result == BattleResult.Lost);
         }
 
-        IEnumerator Finish()
+        bool HasReserve()
+        {
+            for (int i = 0; i < Party.Size; i++)
+                if (i != _activeSlot && party.CanFight(i)) return true;
+            return false;
+        }
+
+        /// <summary>Island-local point a pod lands on: the top of the party creature's pad.</summary>
+        Vector3 PodOnPad() => stage.PadTopLocal(BattleSide.Player) + Vector3.up * pods.podPrefab.radius;
+
+        float WorldSpeed(Act act) => act.vel.magnitude * island.transform.lossyScale.x;
+
+        bool Aimed(Act act, Vector3 target, float maxAngle) =>
+            WorldSpeed(act) >= minThrowSpeed && PodRack.AimAngle(act.pos, act.vel, target) <= maxAngle;
+
+        /// <summary>A drop above the island, or a throw toward the pad.</summary>
+        bool OntoIsland(Act act, Vector3 pad) =>
+            island.FootprintContains(act.pos) && act.pos.y > island.CapTopLocal - 0.01f || Aimed(act, pad, sendAimAngle);
+
+        string ThrowInfo(Act act, Vector3 target) =>
+            $"{WorldSpeed(act):0.00} m/s, {PodRack.AimAngle(act.pos, act.vel, target):0} deg off";
+
+        /// <summary>Longer flights for farther targets; a look + pinch starts at the pod's rest spot.</summary>
+        float FlightSeconds(Act act, Vector3 target)
+        {
+            var pod = pods.Pod(act.index);
+            Vector3 from = act.kind == ActKind.PodThrow || pod == null ? act.pos : pod.transform.localPosition;
+            return Mathf.Clamp(0.25f + Vector3.Distance(from, target) * 1.2f, 0.3f, 0.65f);
+        }
+
+        /// <summary>
+        /// Waits for a pod to be thrown or dropped onto the island (or look + pinch, or <see cref="autoSendSeconds"/>
+        /// without anyone holding a pod: the lead goes), flies it to the pad and brings the creature out.
+        /// Sets <see cref="_activeSlot"/>.
+        /// </summary>
+        IEnumerator SendOut(string caption)
+        {
+            runes.SetCaption(caption);
+            int lead = party.LeadSlot;
+            pods.ActiveSlot = -1;
+            pods.GlowSlot = lead;
+            pods.PartyGrab = true;
+            pods.CradleGrab = false;
+            _act = default;
+            _waiting = true;
+            Vector3 pad = PodOnPad();
+            float idle = 0f;
+            int chosen = -1;
+            string how = "";
+            Vector3 vel = Vector3.zero;
+            while (chosen < 0)
+            {
+                var act = _act;
+                if (act.kind == ActKind.PodThrow || act.kind == ActKind.PodPick)
+                {
+                    _act = default;
+                    idle = 0f;
+                    if (act.index == PodRack.CradleSlot) { }
+                    else if (act.kind == ActKind.PodPick) { chosen = act.index; how = "look + pinch"; }
+                    else if (OntoIsland(act, pad)) { chosen = act.index; vel = act.vel; how = $"throw ({ThrowInfo(act, pad)})"; }
+                    else
+                    {
+                        Debug.Log($"[EncounterDirector] Send-out throw went wide ({ThrowInfo(act, pad)}): pod back to its socket.");
+                        StartCoroutine(pods.FlyHome(act.index));
+                    }
+                }
+                else if (act.kind != ActKind.None) _act = default; // the runes aren't pickable yet
+                else if (pods.AnyHeld) idle = 0f;
+                else if ((idle += Time.deltaTime) >= autoSendSeconds) { chosen = lead; how = $"auto after {autoSendSeconds:0} s"; }
+                if (chosen < 0) yield return null;
+            }
+            _waiting = false;
+            pods.PartyGrab = false;
+            pods.GlowSlot = -1;
+            Debug.Log($"[EncounterDirector] Send out pod {chosen + 1} ({party.At(chosen).Name}) by {how}.");
+            yield return pods.FlyTo(chosen, pad, vel, 0.45f);
+            yield return Land(chosen);
+        }
+
+        /// <summary>The pod is on the pad: the creature pops out, the empty pod flies home, bars and runes update.</summary>
+        IEnumerator Land(int slot)
+        {
+            var c = party.At(slot);
+            _activeSlot = slot;
+            pods.ActiveSlot = slot;
+            stage.Spawn(c, BattleSide.Player, _layout.myPad, _layout.wildPad);
+            runes.Avoid(stage.Player, stage.Wild);
+            runes.SetCaption($"Go, {c.Name}!");
+            StartCoroutine(pods.FlyHome(slot, 0.5f));
+            yield return stage.PodBurst();
+            stage.ShowPlayerBar(c);
+            runes.Show(c.species.moves);
+        }
+
+        /// <summary>The pod hit: the wild creature goes in, the pod drops and wobbles, then it's caught or breaks out.</summary>
+        IEnumerator PlayCatch(IReadOnlyList<BattleEvent> events, CreatureInstance wild)
+        {
+            if (events.Count == 0) yield break;
+            var e = events[0];
+            bool caught = e.result == BattleResult.Caught;
+            const int slot = PodRack.CradleSlot;
+            var pod = pods.Pod(slot);
+            if (pod == null) yield break;
+            yield return stage.SuckIntoPod(pod.transform.position);
+            yield return pods.FlyTo(slot, stage.PadTopLocal(BattleSide.Wild) + Vector3.up * pods.podPrefab.radius, Vector3.zero, 0.3f, 0.005f);
+            yield return new WaitForSeconds(0.25f);
+            for (int i = 0; i < e.amount; i++)
+            {
+                yield return pods.Wobble(slot);
+                yield return new WaitForSeconds(0.3f);
+            }
+            if (!caught)
+            {
+                pods.Burst(slot);
+                yield return stage.BreakFree();
+                runes.SetCaption($"Oh no! {wild.Name} broke free!");
+                yield return new WaitForSeconds(0.5f);
+                yield break;
+            }
+
+            stage.CatchSparkle(pod.transform.position, "Caught!");
+            stage.RemoveWild();
+            runes.SetCaption($"Gotcha! {wild.Name} joined you!");
+            Dialogue.Say("capture.success.first");
+            yield return new WaitForSeconds(0.7f);
+            if (!party.IsFull)
+            {
+                int to = party.members.Count;
+                pods.AdoptCradlePod(to, wild);
+                party.Add(wild);
+                Debug.Log($"[EncounterDirector] Caught {wild.Name}: pod {to + 1}.");
+                yield return pods.FlyHome(to, 0.7f);
+            }
+            else
+            {
+                party.Add(wild);
+                Debug.Log($"[EncounterDirector] Caught {wild.Name}: pods full, sent to storage ({party.storage.Count}).");
+                runes.SetCaption($"Pods full: {wild.Name} went to the Sanctuary.");
+                Dialogue.Say("party.full");
+                yield return pods.StreakAway(slot);
+            }
+        }
+
+        static IEnumerator Then(IEnumerator routine, System.Action done)
+        {
+            yield return routine;
+            done();
+        }
+
+        IEnumerator Finish(bool lost)
         {
             runes.Hide();
+            pods.InBattle = pods.PartyGrab = pods.CradleGrab = pods.CradleVisible = pods.CradleGlow = false;
+            pods.ActiveSlot = pods.GlowSlot = -1;
+            _waiting = false;
+            _activeSlot = -1;
             explorer.StandOffset = Vector2.zero;
             window.SetFocus(null);
             StartCoroutine(stage.RisePads(false));
@@ -225,6 +512,13 @@ namespace Diorama
             }
             island.clearingStrength = island.clearingDim = 0f;
             stage.Cleanup();
+            if (lost)
+            {
+                // The shrine replaces spawn in step 7.
+                explorer.Teleport(explorer.SpawnTile);
+                party.HealAll();
+                Debug.Log("[EncounterDirector] Lost: explorer back at spawn, party healed.");
+            }
             _stepsSinceBattle = 0;
             explorer.Locked = false;
             MapCreature.HideAll = false;

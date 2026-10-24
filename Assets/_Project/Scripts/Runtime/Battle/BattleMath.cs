@@ -33,5 +33,25 @@ namespace Diorama
             Mathf.Clamp(0.3f + 0.4f * playerSpeed / Mathf.Max(1f, wildSpeed) + 0.15f * failedTries, 0.1f, 1f);
 
         public static int XpReward(int wildLevel, bool rare) => (5 + 4 * wildLevel) * (rare ? 2 : 1);
+
+        /// <summary>
+        /// Catch chance: low HP helps most (full HP about 19%, one HP about 95% at equal levels), rare halves it,
+        /// every level the wild one is above the player's creature takes 5% off (and below adds 5%, up to +20%).
+        /// Always 5-95%.
+        /// </summary>
+        public static float CatchChance(int hp, int maxHp, bool rare, int wildLevel, int playerLevel)
+        {
+            float hpShare = Mathf.Clamp01(hp / (float)Mathf.Max(1, maxHp));
+            float levels = Mathf.Clamp(1f + 0.05f * (playerLevel - wildLevel), 0.6f, 1.2f);
+            return Mathf.Clamp(0.95f * (1f - 0.8f * hpShare) * (rare ? 0.45f : 1f) * levels, 0.05f, 0.95f);
+        }
+
+        /// <summary>How often the pod wobbles: 3 on a catch; on a miss 1-3, more the closer the roll was.</summary>
+        public static int CatchWobbles(float roll, float chance)
+        {
+            if (roll < chance) return 3;
+            float miss = (roll - chance) / Mathf.Max(1e-4f, 1f - chance);
+            return miss < 0.25f ? 3 : miss < 0.6f ? 2 : 1;
+        }
     }
 }

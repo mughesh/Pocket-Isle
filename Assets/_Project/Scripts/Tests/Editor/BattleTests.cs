@@ -300,5 +300,144 @@ namespace Diorama.Tests
             }
             Assert.That(rares, Is.InRange(60, 140)); // about 5%
         }
+
+        // ---- catching ----
+
+        [Test]
+        public void CatchChance_LowHpRarityAndLevel()
+        {
+            float full = BattleMath.CatchChance(20, 20, false, 5, 5);
+            float half = BattleMath.CatchChance(10, 20, false, 5, 5);
+            float low = BattleMath.CatchChance(1, 20, false, 5, 5);
+            Assert.That(full, Is.EqualTo(0.19f).Within(0.01f));
+            Assert.Less(full, half);
+            Assert.Less(half, low);
+            Assert.Less(BattleMath.CatchChance(10, 20, true, 5, 5), half, "rare is harder");
+            Assert.Less(BattleMath.CatchChance(10, 20, false, 9, 5), half, "a higher level wild one is harder");
+            Assert.Greater(BattleMath.CatchChance(10, 20, false, 3, 7), half, "a lower level wild one is easier");
+            Assert.AreEqual(0.95f, BattleMath.CatchChance(0, 20, false, 1, 50), 1e-5f);
+            Assert.That(BattleMath.CatchChance(20, 20, true, 50, 1), Is.InRange(0.05f, 0.06f), "worst case stays catchable");
+        }
+
+        [Test]
+        public void CatchWobbles_ThreeOnSuccessFewerOnBadMisses()
+        {
+            Assert.AreEqual(3, BattleMath.CatchWobbles(0.1f, 0.5f));
+            Assert.AreEqual(3, BattleMath.CatchWobbles(0.55f, 0.5f));
+            Assert.AreEqual(2, BattleMath.CatchWobbles(0.7f, 0.5f));
+            Assert.AreEqual(1, BattleMath.CatchWobbles(0.95f, 0.5f));
+        }
+
+        [Test]
+        public void TryCatch_SuccessEndsTheBattle_FailureGivesTheWildOneATurn()
+        {
+            var tackle = Attack(Element.Neutral);
+            int caught = 0, broke = 0;
+            for (int seed = 0; seed < 100; seed++)
+            {
+                var wild = Creature(Element.Fire, 10, 5, tackle);
+                wild.currentHp = wild.MaxHp / 2;
+                var b = new BattleSystem(Creature(Element.Water, 10, 5, tackle), wild, _chart, seed);
+                var events = b.TryCatch();
+                Assert.AreEqual(BattleEventKind.CatchAttempt, events[0].kind);
+                Assert.That(events[0].amount, Is.InRange(1, 3));
+                if (events[0].result == BattleResult.Caught)
+                {
+                    caught++;
+                    Assert.AreEqual(3, events[0].amount);
+                    Assert.AreEqual(BattleResult.Caught, b.Result);
+                    Assert.AreEqual(BattleEventKind.Ended, events[events.Count - 1].kind);
+                }
+                else
+                {
+                    broke++;
+                    Assert.IsFalse(b.IsOver);
+                    Assert.AreEqual(BattleEventKind.BrokeFree, events[1].kind);
+                    Assert.AreEqual(BattleEventKind.MoveUsed, events[2].kind);
+                    Assert.AreEqual(BattleSide.Wild, events[2].side);
+                }
+            }
+            // Half HP at equal levels is about 57%.
+            Assert.That(caught, Is.InRange(40, 75));
+            Assert.Greater(broke, 0);
+        }
+
+        // ---- switching ----
+
+        [Test]
+        public void Switch_UsesTheTurn_TheWildOneHitsTheNewcomer()
+        {
+            var tackle = Attack(Element.Neutral);
+            var first = Creature(Element.Water, 10, 5, tackle);
+            var second = Creature(Element.Fire, 10, 5, tackle);
+            var b = new BattleSystem(first, Creature(Element.Wind, 10, 5, tackle), _chart, 3);
+            b.player.attackStage = 2;
+            var events = b.Switch(second);
+            Assert.AreEqual(BattleEventKind.Switched, events[0].kind);
+            Assert.AreSame(second, b.player.creature);
+            Assert.AreEqual(0, b.player.attackStage, "stages don't carry over");
+            var hit = events.First(e => e.kind == BattleEventKind.Damage);
+            Assert.AreEqual(BattleSide.Player, hit.side);
+            Assert.AreEqual(second.MaxHp - hit.amount, second.currentHp);
+            Assert.AreEqual(first.MaxHp, first.currentHp, "the one that left wasn't hit");
+            Assert.AreEqual(0, b.Switch(second).Count, "can't switch to the one already fighting");
+        }
+
+        [Test]
+        public void Faint_WithReserve_KeepsTheBattleGoing_UntilAFreeSwitch()
+        {
+            var tackle = Attack(Element.Neutral, power: 200);
+            var weak = Creature(Element.Water, 1, 5, tackle);
+            var fresh = Creature(Element.Fire, 1, 5, tackle);
+            var wild = Creature(Element.Wind, 50, 5, tackle);
+            wild.currentHp = wild.MaxHp * 10; // survives anything
+            var b = new BattleSystem(weak, wild, _chart, 1, false, () => !fresh.IsFainted);
+            var events = b.PlayTurn(0);
+            Assert.IsTrue(weak.IsFainted);
+            Assert.IsFalse(b.IsOver);
+            Assert.IsTrue(b.PlayerMustSwitch);
+            Assert.IsFalse(events.Any(e => e.kind == BattleEventKind.MoveUsed && e.side == BattleSide.Player), "a fainted creature doesn't act");
+            Assert.AreEqual(0, b.PlayTurn(0).Count, "no moves until the switch");
+            Assert.AreEqual(0, b.TryCatch().Count);
+            events = b.Switch(fresh);
+            Assert.AreEqual(1, events.Count, "a switch after a faint is free");
+            Assert.IsFalse(b.PlayerMustSwitch);
+            b.PlayTurn(0);
+            Assert.AreEqual(BattleResult.Lost, b.Result, "no reserve left");
+        }
+
+        [Test]
+        public void Party_LeadAddAndStorage()
+        {
+            var go = new GameObject("Party");
+            try
+            {
+                var party = go.AddComponent<Party>();
+                var tackle = Attack(Element.Neutral);
+                var a = Creature(Element.Fire, 10, 5, tackle);
+                var b = Creature(Element.Water, 10, 5, tackle);
+                party.members.Add(a);
+                party.members.Add(b);
+                Assert.AreSame(a, party.Lead);
+                a.currentHp = 0;
+                Assert.AreEqual(1, party.LeadSlot);
+                Assert.AreEqual(1, party.NextFighter(0));
+                b.currentHp = 0;
+                Assert.IsTrue(party.AllFainted);
+                int changed = 0;
+                party.Changed += () => changed++;
+                for (int i = 2; i < Party.Size; i++) Assert.AreEqual(i, party.Add(Creature(Element.Wind, 10, 3, tackle)));
+                Assert.IsTrue(party.IsFull);
+                Assert.AreEqual(-1, party.Add(Creature(Element.Wind, 10, 3, tackle)), "full: goes to storage");
+                Assert.AreEqual(1, party.storage.Count);
+                party.HealAll();
+                Assert.AreSame(a, party.Lead);
+                Assert.AreEqual(6, changed); // four pods, one stored, one heal
+            }
+            finally
+            {
+                Object.DestroyImmediate(go);
+            }
+        }
     }
 }

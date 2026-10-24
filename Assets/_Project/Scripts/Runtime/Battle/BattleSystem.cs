@@ -6,13 +6,18 @@ namespace Diorama
 {
     public enum BattleSide { Player, Wild }
 
-    public enum BattleResult { None, Won, Lost, Fled }
+    public enum BattleResult { None, Won, Lost, Fled, Caught }
 
-    public enum BattleEventKind { MoveUsed, Missed, Damage, Shielded, AttackRaised, Healed, Fainted, FleeFailed, Fled, XpGained, Ended }
+    public enum BattleEventKind
+    {
+        MoveUsed, Missed, Damage, Shielded, AttackRaised, Healed, Fainted, FleeFailed, Fled, XpGained, Ended,
+        Switched, CatchAttempt, BrokeFree,
+    }
 
     /// <summary>
     /// One thing that happened in a turn, in order. <see cref="side"/> is the creature it happened to: the user of a
     /// move for MoveUsed / Missed / Shielded / AttackRaised / Healed, the one hit for Damage.
+    /// CatchAttempt: <see cref="amount"/> = wobbles, <see cref="result"/> = Caught on success.
     /// </summary>
     public struct BattleEvent
     {
@@ -32,6 +37,7 @@ namespace Diorama
             BattleEventKind.Healed => $"{side} healed {amount}, HP {hpAfter}",
             BattleEventKind.AttackRaised => $"{side} attack stage {amount}",
             BattleEventKind.XpGained => $"{side} +{amount} XP",
+            BattleEventKind.CatchAttempt => $"Catch: {amount} wobble(s), {(result == BattleResult.Caught ? "caught" : "broke free")}",
             BattleEventKind.Ended => $"Ended: {result}",
             _ => $"{kind} ({side})",
         };
@@ -59,15 +65,19 @@ namespace Diorama
 
     /// <summary>
     /// 1v1 wild battle rules, no Unity objects in the loop: turn order by speed, accuracy, damage, support effects,
-    /// fainting, flee. Each call plays a whole turn and returns what happened, in order, for the presentation to
-    /// animate. The same seed and choices always give the same battle.
+    /// fainting, flee, catching and switching. Each call plays a whole turn and returns what happened, in order, for
+    /// the presentation to animate. The same seed and choices always give the same battle.
+    /// When the player's creature faints and <c>hasReserve</c> says another one can fight, the battle goes on:
+    /// <see cref="PlayerMustSwitch"/> is set until <see cref="Switch"/> brings the next one in (a free switch).
     /// </summary>
     public class BattleSystem
     {
-        public readonly Battler player, wild;
+        public Battler player { get; private set; }
+        public readonly Battler wild;
         public readonly bool wildIsRare;
         readonly TypeChart _chart;
         readonly SeededRandom _rnd;
+        readonly Func<bool> _hasReserve;
         readonly List<BattleEvent> _turn = new List<BattleEvent>();
         int _failedFlees;
 
@@ -77,13 +87,19 @@ namespace Diorama
         public BattleResult Result { get; private set; }
         public bool IsOver => Result != BattleResult.None;
 
-        public BattleSystem(CreatureInstance player, CreatureInstance wild, TypeChart chart, int seed, bool wildIsRare = false)
+        /// <summary>The player's creature fainted and another can fight: only <see cref="Switch"/> works until then.</summary>
+        public bool PlayerMustSwitch { get; private set; }
+
+        /// <param name="hasReserve">True while another party creature (not the one fighting) can still fight.</param>
+        public BattleSystem(CreatureInstance player, CreatureInstance wild, TypeChart chart, int seed, bool wildIsRare = false,
+            Func<bool> hasReserve = null)
         {
             this.player = new Battler(BattleSide.Player, player);
             this.wild = new Battler(BattleSide.Wild, wild);
             this.wildIsRare = wildIsRare;
             _chart = chart;
             _rnd = new SeededRandom(seed);
+            _hasReserve = hasReserve;
         }
 
         public Battler Get(BattleSide side) => side == BattleSide.Player ? player : wild;
@@ -93,7 +109,7 @@ namespace Diorama
         public IReadOnlyList<BattleEvent> PlayTurn(int moveIndex)
         {
             _turn.Clear();
-            if (IsOver) return _turn;
+            if (IsOver || PlayerMustSwitch) return _turn;
             var moves = player.Moves;
             if (moveIndex < 0 || moveIndex >= moves.Length || moves[moveIndex] == null)
             {
@@ -113,7 +129,7 @@ namespace Diorama
         public IReadOnlyList<BattleEvent> TryFlee()
         {
             _turn.Clear();
-            if (IsOver) return _turn;
+            if (IsOver || PlayerMustSwitch) return _turn;
             float chance = BattleMath.FleeChance(player.creature.Speed, wild.creature.Speed, _failedFlees);
             if (_rnd.Next() < chance)
             {
@@ -124,6 +140,47 @@ namespace Diorama
             _failedFlees++;
             Raise(new BattleEvent { kind = BattleEventKind.FleeFailed, side = BattleSide.Player });
             Act(wild, PickWildMove());
+            return _turn;
+        }
+
+        /// <summary>Chance that a pod thrown now catches the wild creature.</summary>
+        public float CatchChance => BattleMath.CatchChance(wild.Hp, wild.MaxHp, wildIsRare, wild.creature.level, player.creature.level);
+
+        /// <summary>A pod hit the wild creature: it wobbles, then it's caught or breaks free (and gets its move).</summary>
+        public IReadOnlyList<BattleEvent> TryCatch()
+        {
+            _turn.Clear();
+            if (IsOver || PlayerMustSwitch) return _turn;
+            float chance = CatchChance, roll = _rnd.Next();
+            bool caught = roll < chance;
+            Raise(new BattleEvent
+            {
+                kind = BattleEventKind.CatchAttempt, side = BattleSide.Wild, amount = BattleMath.CatchWobbles(roll, chance),
+                result = caught ? BattleResult.Caught : BattleResult.None,
+            });
+            if (caught)
+            {
+                End(BattleResult.Caught);
+                return _turn;
+            }
+            Raise(new BattleEvent { kind = BattleEventKind.BrokeFree, side = BattleSide.Wild });
+            Act(wild, PickWildMove());
+            return _turn;
+        }
+
+        /// <summary>
+        /// Sends in another party creature. After a faint (<see cref="PlayerMustSwitch"/>) it is free; otherwise it uses
+        /// the turn and the wild creature attacks the newcomer. Attack stages and shields don't carry over.
+        /// </summary>
+        public IReadOnlyList<BattleEvent> Switch(CreatureInstance next)
+        {
+            _turn.Clear();
+            if (IsOver || next == null || next.IsFainted || next == player.creature) return _turn;
+            bool free = PlayerMustSwitch;
+            PlayerMustSwitch = false;
+            player = new Battler(BattleSide.Player, next);
+            Raise(new BattleEvent { kind = BattleEventKind.Switched, side = BattleSide.Player });
+            if (!free) Act(wild, PickWildMove());
             return _turn;
         }
 
@@ -165,7 +222,7 @@ namespace Diorama
 
         void Act(Battler user, MoveData move)
         {
-            if (move == null) return; // a creature with no usable move skips its turn
+            if (move == null || user.creature.IsFainted) return; // no usable move, or fainted earlier this turn
             var target = Other(user);
             Raise(new BattleEvent { kind = BattleEventKind.MoveUsed, side = user.side, move = move });
 
@@ -221,6 +278,7 @@ namespace Diorama
                 Raise(new BattleEvent { kind = BattleEventKind.XpGained, side = BattleSide.Player, amount = xp });
                 End(BattleResult.Won);
             }
+            else if (_hasReserve != null && _hasReserve()) PlayerMustSwitch = true;
             else End(BattleResult.Lost);
         }
 

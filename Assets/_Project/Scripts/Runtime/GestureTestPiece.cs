@@ -139,7 +139,7 @@ namespace Diorama
         void Start()
         {
             if (window == null) Debug.LogError("[GestureTestPiece] No WorldWindow assigned; the map won't scroll or zoom.");
-            _tile = _fromTile = island.world != null ? island.world.startTile : startTile;
+            _tile = _fromTile = SpawnTile;
             if (!Map.CanWalk(_tile))
                 Debug.LogWarning($"[GestureTestPiece] Start tile c{_tile.x} r{_tile.y} is '{Map.At(_tile.y, _tile.x)}', not walkable.");
 
@@ -214,6 +214,22 @@ namespace Diorama
         }
 
         /// <summary>True when GoTo would walk to <paramref name="target"/> right now.</summary>
+        /// <summary>The world's start tile (the respawn point until shrines exist).</summary>
+        public Vector2Int SpawnTile => island.world != null ? island.world.startTile : startTile;
+
+        /// <summary>Puts the explorer on a tile at once (losing a battle sends it back to spawn).</summary>
+        public void Teleport(Vector2Int tile)
+        {
+            Stop();
+            CancelPath();
+            _tile = _fromTile = tile;
+            _stepT = 1f;
+            _facing = new Vector2Int(0, -1);
+            UpdateExplorer();
+            RefreshLabel();
+            Debug.Log($"[GestureTestPiece] Teleported to c{tile.x} r{tile.y}.");
+        }
+
         public bool CanReach(Vector2Int target) => CanMove && target != _tile && ExplorerPath.CanReach(Map, _tile, target, maxPathSteps);
 
         bool FollowingPath => _destination.HasValue;

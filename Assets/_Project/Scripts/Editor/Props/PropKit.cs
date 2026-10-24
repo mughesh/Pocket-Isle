@@ -8,6 +8,9 @@ namespace Diorama.EditorTools
     /// <summary>
     /// Writes the first Cinderwood props (kiln, paper lantern post, brazier cold / lit, berry bush, autumn tree,
     /// fallen log, stone lantern, pot cluster, hot spring steam) and the Cinderwood and Test realm themes.
+    /// Realm look (decided Oct 24): the unrestored state is the everyday look, warm but a bit muted with the lights out
+    /// (<see cref="Muted"/>); the restored state is brighter with glowing leaf tips (<see cref="Brighter"/>).
+    /// <see cref="ApplyRealmLook"/> re-applies that to the existing assets without touching shapes or meshes.
     /// Concept: Docs/ConceptArt/01_realms_diorama_sheet.png (Cinderwood panel) and Concepts_01_Summary.md.
     /// Shape units are tiles (1 = 5 cm at zoom 1), +Z faces the player. Like the creature kits this only seeds the
     /// assets; tune them in the Inspector afterwards. Re-running overwrites them (same files, references survive).
@@ -31,15 +34,57 @@ namespace Diorama.EditorTools
         public static PropRecipe Load(string name) => AssetDatabase.LoadAssetAtPath<PropRecipe>($"{Root}/{name}.asset");
         public static RealmTheme Theme(string name) => AssetDatabase.LoadAssetAtPath<RealmTheme>($"{Root}/Themes/{name}.asset");
 
+        // ---- realm look ----
+
+        /// <summary>Unrestored colour: less saturated and a little darker; glowing parts go dark (lights out).</summary>
+        internal static Color Muted(Color c, float glow = 0f)
+        {
+            Color.RGBToHSV(c, out float h, out float sat, out float v);
+            var m = Color.HSVToRGB(h, sat * 0.72f, v * (glow >= 0.5f ? 0.55f : 0.88f));
+            m.a = c.a;
+            return m;
+        }
+
+        /// <summary>Restored colour: a little more saturated and brighter.</summary>
+        internal static Color Brighter(Color c)
+        {
+            Color.RGBToHSV(c, out float h, out float sat, out float v);
+            var b = Color.HSVToRGB(h, Mathf.Min(1f, sat * 1.1f), Mathf.Min(1f, v * 1.08f));
+            b.a = c.a;
+            return b;
+        }
+
+        /// <summary>A prop colour from its restored hex; the unrestored one is <see cref="Muted"/>.</summary>
+        static PropColor C(string hex, float glow = 0f) => new PropColor(Hex(hex), Muted(Hex(hex), glow), glow);
+
+        [MenuItem("Tools/Pocket Isle/Props/Apply Realm Look (palettes only)", priority = 22)]
+        public static void ApplyRealmLook()
+        {
+            int props = 0;
+            foreach (var r in PropBaker.AllRecipes())
+            {
+                if (r.palette == null) continue;
+                for (int i = 0; i < r.palette.Length; i++)
+                    r.palette[i].unrestored = Muted(r.palette[i].restored, r.palette[i].glow);
+                EditorUtility.SetDirty(r);
+                props++;
+            }
+            var cinder = Theme("Cinderwood");
+            if (cinder != null) CinderwoodColors(cinder);
+            AssetDatabase.SaveAssets();
+            Debug.Log($"[PropKit] Realm look: {props} prop palettes muted for the unrestored state; Cinderwood theme " +
+                      $"{(cinder != null ? "brighter when restored, muted when not, starts unrestored" : "missing (write the prop kit first)")}.");
+        }
+
         // ---- Cinderwood palette ----
-        static readonly PropColor Clay = new PropColor(Hex("#C27542"), Hex("#8F8780"));
-        static readonly PropColor Wood = new PropColor(Hex("#6B4A33"), Hex("#57524D"));
-        static readonly PropColor Stone = new PropColor(Hex("#A39A8E"), Hex("#8C8883"));
-        static readonly PropColor Iron = new PropColor(Hex("#3D3633"), Hex("#4A4744"));
-        static readonly PropColor Leaf = new PropColor(Hex("#C4482A"), Hex("#A0978A"));
-        static readonly PropColor Moss = new PropColor(Hex("#6B7A52"), Hex("#8E8C84"));
-        static readonly PropColor Ember = new PropColor(Hex("#FFB347"), Hex("#3A3A3A"), 1f);
-        static readonly PropColor Smoke = new PropColor(Hex("#EDE5D8"), Hex("#B5B0A8"), 0.2f);
+        static readonly PropColor Clay = C("#C27542");
+        static readonly PropColor Wood = C("#6B4A33");
+        static readonly PropColor Stone = C("#A39A8E");
+        static readonly PropColor Iron = C("#3D3633");
+        static readonly PropColor Leaf = C("#C4482A");
+        static readonly PropColor Moss = C("#6B7A52");
+        static readonly PropColor Ember = C("#FFB347", 1f);
+        static readonly PropColor Smoke = C("#EDE5D8", 0.2f);
 
         public static void Write()
         {
@@ -71,8 +116,8 @@ namespace Diorama.EditorTools
 
             // ---- paper lantern on a post with an arm ----
             var lantern = Recipe("LanternPost", new Vector2Int(1, 1), true, false, 900);
-            lantern.palette = Palette(Clay, Wood, Stone, Leaf, new PropColor(Hex("#FFC86B"), Hex("#4A4744"), 1.1f),
-                new PropColor(Hex("#7A2E22"), Hex("#56524F")));
+            lantern.palette = Palette(Clay, Wood, Stone, Leaf, C("#FFC86B", 1.1f),
+                C("#7A2E22"));
             lantern.yawJitter = 35f;
             lantern.pieces = new List<PropPiece>
             {
@@ -98,8 +143,8 @@ namespace Diorama.EditorTools
                 Cone(new Vector3(0f, 0.6f, 0f), new Vector3(0f, 0.88f, 0f), 0.1f, 0.015f, 0.1f),
                 Cone(new Vector3(0.05f, 0.6f, 0f), new Vector3(0.1f, 0.78f, 0.02f), 0.05f, 0.01f, 0.06f),
                 Cone(new Vector3(-0.05f, 0.6f, 0.02f), new Vector3(-0.08f, 0.74f, -0.02f), 0.045f, 0.01f, 0.06f));
-            var coldCoal = new PropColor(Hex("#4A4442"), Hex("#3F3C3A"));
-            var hotEmber = new PropColor(Hex("#FF8A3D"), Hex("#3A3A3A"), 1.2f);
+            var coldCoal = C("#4A4442");
+            var hotEmber = C("#FF8A3D", 1.2f);
 
             var brazier = Recipe("Brazier", new Vector2Int(1, 1), true, true, 1000);
             brazier.palette = Palette(Clay, Wood, Iron, Leaf, hotEmber, coldCoal);
@@ -124,7 +169,7 @@ namespace Diorama.EditorTools
                 Floor(0f),
             };
             var bush = Recipe("BerryBush", new Vector2Int(1, 1), true, true, 1100);
-            bush.palette = Palette(Clay, Wood, Stone, Moss, Ember, new PropColor(Hex("#E0342A"), Hex("#6E6A66"), 0.25f));
+            bush.palette = Palette(Clay, Wood, Stone, Moss, Ember, C("#E0342A", 0.25f));
             bush.pieces = new List<PropPiece>
             {
                 Piece(PShape("BerryBush_Leaves", leafPrims), PropSlot.Leaf),
@@ -133,8 +178,8 @@ namespace Diorama.EditorTools
 
             // ---- autumn tree: round russet canopy with glowing leaf tips ----
             var tree = Recipe("AutumnTree", new Vector2Int(1, 1), true, true, 900);
-            tree.palette = Palette(Clay, new PropColor(Hex("#4A3328"), Hex("#3D3936")), Stone, Leaf,
-                new PropColor(Hex("#F3A33A"), Hex("#B8B0A4"), 0.5f), Smoke);
+            tree.palette = Palette(Clay, C("#4A3328"), Stone, Leaf,
+                C("#F3A33A", 0.5f), Smoke);
             tree.tips = new PropTips { on = true, onSlot = PropSlot.Leaf, tipSlot = PropSlot.Glow, at = 0.55f };
             tree.scaleJitter = 0.12f;
             tree.pieces = new List<PropPiece>
@@ -156,7 +201,7 @@ namespace Diorama.EditorTools
 
             // ---- fallen mossy log, 2x1, blocks the path (the hand puzzle will lift it later) ----
             var log = Recipe("FallenLog", new Vector2Int(2, 1), true, false, 1200);
-            log.palette = Palette(Clay, Wood, Stone, Moss, Ember, new PropColor(Hex("#D9B07A"), Hex("#A8A29A")));
+            log.palette = Palette(Clay, Wood, Stone, Moss, Ember, C("#D9B07A"));
             log.yawJitter = 6f;
             log.scaleJitter = 0.04f;
             log.pieces = new List<PropPiece>
@@ -176,7 +221,7 @@ namespace Diorama.EditorTools
 
             // ---- stone path lantern ----
             var stoneLantern = Recipe("StoneLantern", new Vector2Int(1, 1), true, false, 900);
-            stoneLantern.palette = Palette(Clay, Wood, Stone, Leaf, new PropColor(Hex("#FFC060"), Hex("#3A3A3A"), 1f), Smoke);
+            stoneLantern.palette = Palette(Clay, Wood, Stone, Leaf, C("#FFC060", 1f), Smoke);
             stoneLantern.pieces = new List<PropPiece>
             {
                 Piece(PShape("StoneLantern_Stone",
@@ -196,7 +241,7 @@ namespace Diorama.EditorTools
 
             // ---- small pot cluster (walk-through decor) ----
             var pots = Recipe("PotCluster", new Vector2Int(1, 1), false, true, 900);
-            pots.palette = Palette(Clay, Wood, Stone, Leaf, Ember, new PropColor(Hex("#4A3B34"), Hex("#5A5652")));
+            pots.palette = Palette(Clay, Wood, Stone, Leaf, Ember, C("#4A3B34"));
             pots.pieces = new List<PropPiece>
             {
                 Piece(PShape("PotCluster_Clay",
@@ -214,7 +259,7 @@ namespace Diorama.EditorTools
 
             // ---- hot spring steam (placed by the island on H tiles) ----
             var steam = Recipe("HotSpringSteam", new Vector2Int(1, 1), false, true, 400);
-            steam.palette = Palette(Clay, Wood, Stone, Leaf, Ember, new PropColor(Hex("#F2EDE4"), Hex("#B5B0A8"), 0.25f));
+            steam.palette = Palette(Clay, Wood, Stone, Leaf, Ember, C("#F2EDE4", 0.25f));
             steam.outline = 0.015f;
             steam.pieces = new List<PropPiece>
             {
@@ -231,27 +276,8 @@ namespace Diorama.EditorTools
         static void WriteThemes(PropRecipe autumnTree)
         {
             var cinder = Asset<RealmTheme>($"{Root}/Themes/Cinderwood.asset");
-            cinder.restored = new ThemeColors
-            {
-                grass = Hex("#C7863A"), tallGrass = Hex("#A9482B"), path = Hex("#E2C79B"),
-                water = Hex("#4E9DB0"), hotSpring = Hex("#5FC4B4"),
-                shortBase = Hex("#9C5A24"), shortTip = Hex("#E9B35A"), tallBase = Hex("#7E2E1C"), tallTip = Hex("#E5641E"),
-                dirt = Hex("#8A5634"), underside = Hex("#5E534D"),
-                trunk = Hex("#4A3328"), leavesLow = Hex("#B5452A"), leavesHigh = Hex("#D98E32"), rock = Hex("#9A9086"),
-                leafGlow = 0.12f, outlineTint = Color.white,
-            };
-            cinder.unrestored = new ThemeColors
-            {
-                grass = Hex("#9C968C"), tallGrass = Hex("#847E76"), path = Hex("#BDB6AA"),
-                water = Hex("#6C858B"), hotSpring = Hex("#7D9592"),
-                shortBase = Hex("#6E6A64"), shortTip = Hex("#B4AEA4"), tallBase = Hex("#5C5853"), tallTip = Hex("#A39D94"),
-                dirt = Hex("#6E6159"), underside = Hex("#4D4845"),
-                trunk = Hex("#3D3936"), leavesLow = Hex("#A0978A"), leavesHigh = Hex("#B3AB9F"), rock = Hex("#85817C"),
-                leafGlow = 0f, outlineTint = Color.white,
-            };
+            CinderwoodColors(cinder);
             cinder.treeProp = autumnTree;
-            cinder.startRestored = 1f;
-            EditorUtility.SetDirty(cinder);
 
             // Test: the island materials' current colours; unrestored = the same, mostly greyed.
             var test = Asset<RealmTheme>($"{Root}/Themes/Test.asset");
@@ -276,6 +302,35 @@ namespace Diorama.EditorTools
             test.startRestored = 1f;
             EditorUtility.SetDirty(test);
         }
+
+        /// <summary>
+        /// Cinderwood island colours from the base look (the Oct 23 restored palette): unrestored = muted (the state players
+        /// spend most time in, so the scene starts there), restored = brighter with glowing leaf tips.
+        /// </summary>
+        static void CinderwoodColors(RealmTheme cinder)
+        {
+            var baseLook = new ThemeColors
+            {
+                grass = Hex("#C7863A"), tallGrass = Hex("#A9482B"), path = Hex("#E2C79B"),
+                water = Hex("#4E9DB0"), hotSpring = Hex("#5FC4B4"),
+                shortBase = Hex("#9C5A24"), shortTip = Hex("#E9B35A"), tallBase = Hex("#7E2E1C"), tallTip = Hex("#E5641E"),
+                dirt = Hex("#8A5634"), underside = Hex("#5E534D"),
+                trunk = Hex("#4A3328"), leavesLow = Hex("#B5452A"), leavesHigh = Hex("#D98E32"), rock = Hex("#9A9086"),
+                leafGlow = 0.12f, outlineTint = Color.white,
+            };
+            cinder.restored = Map(baseLook, Brighter, 0.35f);
+            cinder.unrestored = Map(baseLook, c => Muted(c), 0f);
+            cinder.startRestored = 0f;
+            EditorUtility.SetDirty(cinder);
+        }
+
+        static ThemeColors Map(ThemeColors c, System.Func<Color, Color> f, float leafGlow) => new ThemeColors
+        {
+            grass = f(c.grass), tallGrass = f(c.tallGrass), path = f(c.path), water = f(c.water), hotSpring = f(c.hotSpring),
+            shortBase = f(c.shortBase), shortTip = f(c.shortTip), tallBase = f(c.tallBase), tallTip = f(c.tallTip),
+            dirt = f(c.dirt), underside = f(c.underside), trunk = f(c.trunk), leavesLow = f(c.leavesLow),
+            leavesHigh = f(c.leavesHigh), rock = f(c.rock), leafGlow = leafGlow, outlineTint = c.outlineTint,
+        };
 
         static ThemeColors Greyed(ThemeColors c, float amount)
         {

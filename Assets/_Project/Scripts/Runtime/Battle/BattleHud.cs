@@ -78,6 +78,14 @@ namespace Diorama
             return bar;
         }
 
+        /// <summary>Removes one bar (a creature left the field).</summary>
+        public void RemoveBar(Bar bar)
+        {
+            if (bar == null) return;
+            if (bar.root != null) Destroy(bar.root.gameObject);
+            _bars.Remove(bar);
+        }
+
         /// <summary>The bar slides to the new value.</summary>
         public void SetHp(Bar bar, int hp)
         {

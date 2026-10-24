@@ -19,6 +19,50 @@ namespace Diorama.EditorTools
         public static void Move2() => Choose(1);
         public static void Move3() => Choose(2);
         public static void Run() => Choose(BattleRunes.RunIndex);
+        public static void Catch() => Choose(BattleRunes.CatchIndex);
+
+        /// <summary>Look + pinch on the cradle pod: an aimed catch throw.</summary>
+        public static void ThrowCatchPod() => Pick(PodRack.CradleSlot);
+
+        /// <summary>Look + pinch on the next party pod that can fight: a switch (or the send-out).</summary>
+        public static void SwitchNext()
+        {
+            var party = Object.FindFirstObjectByType<Party>();
+            var rack = Object.FindFirstObjectByType<PodRack>();
+            if (party == null || rack == null) return;
+            Pick(party.NextFighter(rack.ActiveSlot));
+        }
+
+        static void Pick(int slot)
+        {
+            var d = Director;
+            if (d != null) d.DebugPick(slot);
+        }
+
+        /// <summary>Fills the empty pods with level 4 creatures from the grass table (party-full testing).</summary>
+        public static void FillParty()
+        {
+            var party = Object.FindFirstObjectByType<Party>();
+            var d = Director;
+            if (party == null || d == null || d.grassTable == null) return;
+            var rnd = new SeededRandom(5);
+            while (!party.IsFull && d.grassTable.Roll(rnd, out var c, out _))
+            {
+                c.level = 4;
+                c.Heal();
+                party.Add(c);
+            }
+            Debug.Log($"[BattleDebug] Party now {party.members.Count}/{Party.Size}.");
+        }
+
+        /// <summary>Every pod creature but the first faints (losing / forced switch testing).</summary>
+        public static void FaintMostOfParty()
+        {
+            var party = Object.FindFirstObjectByType<Party>();
+            if (party == null) return;
+            for (int i = 1; i < party.members.Count; i++) party.members[i].currentHp = 0;
+            Debug.Log("[BattleDebug] Pods 2+ fainted.");
+        }
 
         static void Start(Habitat habitat)
         {

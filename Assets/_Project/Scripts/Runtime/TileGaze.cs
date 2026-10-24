@@ -19,6 +19,8 @@ namespace Diorama
         public IslandHandle grabGuard;
         [Tooltip("Optional. A bubble under the gaze takes the pinch.")]
         public DialogueBubble bubble;
+        [Tooltip("Optional. A rim pod under the gaze takes the pinch.")]
+        public PodRack pods;
 
         readonly Hand[] _hands = new Hand[2];
         readonly bool[] _wasPinching = { true, true };
@@ -29,7 +31,7 @@ namespace Diorama
         {
             if (island == null || explorer == null || island.map == null) return;
             bool onTile = TryGetGazeTile(out var tile, out var hit);
-            bool bubbleFirst = bubble != null && bubble.IsGazed;
+            bool bubbleFirst = bubble != null && bubble.IsGazed || pods != null && pods.IsGazed;
             bool usable = onTile && !bubbleFirst && explorer.CanMove;
             if (usable)
             {

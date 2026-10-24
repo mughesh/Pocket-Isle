@@ -73,8 +73,29 @@ namespace Diorama
 
         public void ShowBars(CreatureInstance player, CreatureInstance wild)
         {
-            _playerBar = hud.AddBar(_player, player.Name, player.level, player.currentHp, player.MaxHp);
+            ShowPlayerBar(player);
+            ShowWildBar(wild);
+        }
+
+        public void ShowWildBar(CreatureInstance wild)
+        {
+            hud.RemoveBar(_wildBar);
             _wildBar = hud.AddBar(_wild, wild.Name, wild.level, wild.currentHp, wild.MaxHp);
+        }
+
+        /// <summary>HP bar for the party creature on the field (after a switch).</summary>
+        public void ShowPlayerBar(CreatureInstance player)
+        {
+            hud.RemoveBar(_playerBar);
+            _playerBar = hud.AddBar(_player, player.Name, player.level, player.currentHp, player.MaxHp);
+        }
+
+        /// <summary>Island-local point on top of a pad (where a thrown pod lands).</summary>
+        public Vector3 PadTopLocal(BattleSide side)
+        {
+            var pad = side == BattleSide.Player ? _playerPad : _wildPad;
+            if (pad == null) return island.TileToLocal(Vector2.zero, Cap);
+            return island.TileToLocal(pad.tile, Cap + pad.TopLift);
         }
 
         /// <summary>Removes both creatures, shields and labels.</summary>
@@ -225,7 +246,7 @@ namespace Diorama
             a.View.Hop();
         }
 
-        /// <summary>Placeholder for the pod throw (step 6): a burst of light and the creature grows in.</summary>
+        /// <summary>The thrown pod opens on the pad: a burst of light and the party creature grows in.</summary>
         public IEnumerator PodBurst()
         {
             var a = _player;
@@ -245,6 +266,87 @@ namespace Diorama
             fx.Release(ring);
             a.grow = 1f;
             a.View.Hop();
+        }
+
+        // ---- pods: recall, capture ----
+
+        /// <summary>The party creature turns to light and streams back into its pod at <paramref name="podWorld"/>; then it is gone.</summary>
+        public IEnumerator RecallPlayer(Vector3 podWorld)
+        {
+            var a = _player;
+            if (a == null) yield break;
+            var light = new Color(1f, 0.88f, 0.54f);
+            Vector3 from = a.WorldCenter;
+            yield return Tween(0.4f, p =>
+            {
+                a.View.SetFlash(Mathf.Min(1f, p * 2.5f));
+                a.grow = 1f - EaseInOut(p);
+                if (Time.frameCount % 2 == 0)
+                    fx.Burst(Vector3.Lerp(from, podWorld, p), 3, light, World(0.01f), 0.3f, World(0.004f));
+            });
+            fx.Burst(podWorld, 10, light, World(0.02f), 0.35f, World(0.003f));
+            RemovePlayer();
+        }
+
+        /// <summary>Removes the party creature and its HP bar at once.</summary>
+        public void RemovePlayer()
+        {
+            DropShield(ref _playerShield, false);
+            hud.RemoveBar(_playerBar);
+            _playerBar = null;
+            if (_player != null) Destroy(_player.gameObject);
+            _player = null;
+        }
+
+        /// <summary>The wild creature flashes white and shrinks into the pod at <paramref name="podWorld"/>.</summary>
+        public IEnumerator SuckIntoPod(Vector3 podWorld)
+        {
+            var a = _wild;
+            if (a == null) yield break;
+            DropShieldOf(BattleSide.Wild, true);
+            Vector3 from = a.WorldCenter;
+            var light = new Color(1f, 0.95f, 0.8f);
+            yield return Tween(0.45f, p =>
+            {
+                a.View.SetFlash(Mathf.Min(1f, p * 3f));
+                a.grow = 1f - EaseInOut(p);
+                if (Time.frameCount % 2 == 0) fx.Burst(Vector3.Lerp(from, podWorld, p), 3, light, World(0.008f), 0.25f, World(0.004f));
+            });
+            a.grow = 0f;
+        }
+
+        /// <summary>The wild creature bursts back out of the pod.</summary>
+        public IEnumerator BreakFree()
+        {
+            var a = _wild;
+            if (a == null) yield break;
+            fx.Burst(a.WorldCenter, 24, Color.white, World(0.06f), 0.4f, World(0.004f));
+            yield return Tween(0.3f, p =>
+            {
+                a.grow = EaseOutBack(p);
+                a.View.SetFlash(1f - p);
+            });
+            a.grow = 1f;
+            a.View.SetFlash(0f);
+            a.View.Hop();
+        }
+
+        /// <summary>Caught: the wild creature and its bar go away.</summary>
+        public void RemoveWild()
+        {
+            DropShield(ref _wildShield, false);
+            hud.RemoveBar(_wildBar);
+            _wildBar = null;
+            if (_wild != null) Destroy(_wild.gameObject);
+            _wild = null;
+        }
+
+        /// <summary>Sparkles and a "Caught!" pop at a world point.</summary>
+        public void CatchSparkle(Vector3 world, string text)
+        {
+            var gold = new Color(1f, 0.84f, 0.35f);
+            fx.Burst(world, 30, gold, World(0.05f), 0.8f, World(0.004f), Vector3.up * World(0.03f));
+            hud.PopText(island.transform.InverseTransformPoint(world) + Vector3.up * 0.03f, text, gold, 0.9f, 1.4f);
         }
 
         // ---- turns ----
