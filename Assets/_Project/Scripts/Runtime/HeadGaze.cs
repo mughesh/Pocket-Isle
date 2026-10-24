@@ -12,7 +12,7 @@ namespace Diorama
     [DefaultExecutionOrder(-40)]
     public class HeadGaze : MonoBehaviour
     {
-        public const float DefaultOffset = 18f;
+        public const float DefaultOffset = 23f;
 
         public IslandBuilder island;
         [Tooltip("Fixed downward pitch (degrees) when not adaptive, or when there is no island.")]
@@ -20,9 +20,9 @@ namespace Diorama
         [Tooltip("Pitch toward the island centre instead of a fixed offset.")]
         public bool adaptive = true;
         [Tooltip("Adaptive: share of the angle between head forward and the island centre that is taken up.")]
-        [Range(0f, 1f)] public float share = 0.75f;
+        [Range(0f, 1f)] public float share = 0.85f;
         [Tooltip("Adaptive: clamp (degrees).")]
-        public float maxOffset = 25f;
+        public float maxOffset = 30f;
         [Tooltip("Adaptive: smoothing time (s).")]
         public float smoothSeconds = 0.3f;
 

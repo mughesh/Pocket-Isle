@@ -371,17 +371,28 @@ namespace Diorama.Tests
         }
 
         [Test]
-        public void Catch_LockedAboveRed_UnlockedAtRed()
+        public void Catch_AboveRedAlwaysBreaksAndUsesTheTurn_ChanceAtRed()
         {
             var tackle = Attack(Element.Neutral);
-            var wild = Creature(Element.Fire, 20, 5, tackle);
-            var b = new BattleSystem(Creature(Element.Water, 10, 5, tackle), wild, _chart, 1);
-            wild.currentHp = Mathf.FloorToInt(wild.MaxHp * BattleMath.RedHpShare) + 1;
-            Assert.IsFalse(b.CatchUnlocked);
-            Assert.AreEqual(0, b.TryCatch().Count, "locked: the pod does nothing, no turn used");
-            wild.currentHp = Mathf.FloorToInt(wild.MaxHp * BattleMath.RedHpShare);
-            Assert.IsTrue(b.CatchUnlocked);
-            Assert.Greater(b.TryCatch().Count, 0);
+            for (int seed = 0; seed < 50; seed++)
+            {
+                var wild = Creature(Element.Fire, 20, 5, tackle);
+                var b = new BattleSystem(Creature(Element.Water, 10, 5, tackle), wild, _chart, seed);
+                wild.currentHp = Mathf.FloorToInt(wild.MaxHp * BattleMath.RedHpShare) + 1;
+                Assert.IsFalse(b.CatchUnlocked);
+                var events = b.TryCatch();
+                Assert.AreEqual(BattleEventKind.CatchAttempt, events[0].kind);
+                Assert.AreEqual(1, events[0].amount, "one wobble, then it breaks");
+                Assert.AreNotEqual(BattleResult.Caught, events[0].result);
+                Assert.AreEqual(BattleEventKind.BrokeFree, events[1].kind);
+                Assert.IsTrue(events.Any(e => e.kind == BattleEventKind.MoveUsed && e.side == BattleSide.Wild), "the wild creature gets its move");
+                Assert.IsFalse(b.IsOver);
+            }
+            var w = Creature(Element.Fire, 20, 5, tackle);
+            var red = new BattleSystem(Creature(Element.Water, 10, 5, tackle), w, _chart, 1);
+            w.currentHp = Mathf.FloorToInt(w.MaxHp * BattleMath.RedHpShare);
+            Assert.IsTrue(red.CatchUnlocked);
+            Assert.Greater(red.CatchChance, 0.5f);
         }
 
         [Test]

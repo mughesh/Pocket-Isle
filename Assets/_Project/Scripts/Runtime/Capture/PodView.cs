@@ -31,6 +31,7 @@ namespace Diorama
         static readonly int GlowId = Shader.PropertyToID("_Glow");
         static readonly int GreyId = Shader.PropertyToID("_Grey");
         static readonly int CrackId = Shader.PropertyToID("_Crack");
+        static readonly int ShatterId = Shader.PropertyToID("_Shatter");
         static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
 
         /// <summary>Glow target 0..1 (lead pod, armed cradle pod).</summary>
@@ -39,6 +40,8 @@ namespace Diorama
         public float Hover { get; set; }
         /// <summary>Dialogue highlight 0..1 (a hint points at this pod): brighter and a little bigger.</summary>
         public float Pulse { get; set; }
+        /// <summary>0..1: white cracks race over the glass (the pod is about to shatter).</summary>
+        public float Shatter { get; set; }
         /// <summary>Hides the tiny creature (it is out on the battle field).</summary>
         public bool CreatureOut { get; set; }
         /// <summary>Someone else moves this pod (a flight); its rack leaves it alone.</summary>
@@ -114,6 +117,16 @@ namespace Diorama
             if (_miniView != null) _miniView.lookAtPlayer = false;
         }
 
+        /// <summary>Unparents the brass band (to the pod's parent) so it can fall on its own; the pod stops tinting it.</summary>
+        public Transform DetachBand()
+        {
+            if (band == null) return null;
+            var t = band.transform;
+            t.SetParent(transform.parent, true);
+            band = null;
+            return t;
+        }
+
         void Update()
         {
             bool fainted = Creature != null && Creature.IsFainted;
@@ -146,6 +159,7 @@ namespace Diorama
                 _glassBlock.SetFloat(GlowId, _glow + 0.4f * _hover + 0.8f * Pulse);
                 _glassBlock.SetFloat(GreyId, fainted ? 1f : 0f);
                 _glassBlock.SetFloat(CrackId, fainted ? 1f : 0f);
+                _glassBlock.SetFloat(ShatterId, Shatter);
                 glass.SetPropertyBlock(_glassBlock);
             }
             if (band != null)

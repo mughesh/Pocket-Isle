@@ -1,5 +1,6 @@
 // Glass bubble of a capture pod: clear in the middle, tinted and bright at the edge (fresnel), a fixed soft highlight,
-// a pulsing glow (lead pod, hover), and a fainted look: greyed, cloudier, with faint cracks of flickering light.
+// a pulsing glow (lead pod, hover), a fainted look (greyed, cloudier, with faint cracks of flickering light) and
+// white cracks just before a pod shatters.
 // Alpha blended; writes alpha as coverage (separate alpha blend) so it also shows over passthrough.
 Shader "Diorama/Pod Glass"
 {
@@ -12,6 +13,7 @@ Shader "Diorama/Pod Glass"
         _Grey ("Fainted (grey)", Range(0, 1)) = 0
         _Crack ("Crack Light", Range(0, 1)) = 0
         _CrackScale ("Crack Scale (1/m)", Float) = 140
+        _Shatter ("Shatter Cracks", Range(0, 1)) = 0
     }
 
     SubShader
@@ -40,6 +42,7 @@ Shader "Diorama/Pod Glass"
                 float _Grey;
                 float _Crack;
                 float _CrackScale;
+                float _Shatter;
             CBUFFER_END
 
             struct Attributes
@@ -131,6 +134,15 @@ Shader "Diorama/Pod Glass"
                     float3 crackCol = float3(1.0, 0.75, 0.45);
                     col = lerp(col, crackCol * 1.4, lines * _Crack * flicker);
                     alpha = saturate(alpha + lines * _Crack * flicker * 0.7);
+                }
+                // About to shatter: bright white cracks that widen fast.
+                if (_Shatter > 0.001)
+                {
+                    float d = CrackLines(i.posOS * _CrackScale * 0.45);
+                    float lines = 1.0 - smoothstep(0.005, 0.01 + 0.09 * _Shatter, d);
+                    float k = lines * saturate(_Shatter * 1.6);
+                    col = lerp(col, float3(1.6, 1.6, 1.6), k);
+                    alpha = saturate(alpha + k);
                 }
                 return half4(col, alpha);
             }

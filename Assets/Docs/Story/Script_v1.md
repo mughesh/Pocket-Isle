@@ -3,7 +3,7 @@
 Lantern Spirit = **Spirit**. Bubbles are short: one idea per line, ≤ ~70 characters.
 Format: `trigger_id` · speaker · lines (shown in order). **once** = only the first time.
 Optional `· → target` (before the lines): the Spirit flies to that anchor while saying them and it pulses
-(`leadPod`, `cradle`, `catchRune`, `runes`, `nearPad`, `wildPad`, `tile:x,y`). No target = it stays home.
+(`leadPod`, `cradle`, `runes`, `nearPad`, `wildPad`, `tile:x,y`). No target = it stays home.
 Names are placeholders. The step 5c dialogue system loads this (convert to data asset).
 
 ## Opening (Still Isle)
@@ -38,7 +38,7 @@ Names are placeholders. The step 5c dialogue system loads this (convert to data 
 - `battle.lose.first` · once: Spirit: Everyone's tired. Let's rest at the shrine.
 - `capture.first` · once · → cradle (first time the wild HP bar is red)
   - Spirit: It's weak now. Grab the big pod and flick it!
-- `capture.locked` · → catchRune (Catch picked above red)
+- `capture.locked` · once · → cradle (a pod thrown above red shatters)
   - Spirit: Weaken it first!
 - `capture.dazed.first` · once · → cradle (first dazed wild creature)
   - Spirit: It's dazed. Quick, a pod!

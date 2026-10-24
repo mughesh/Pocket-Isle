@@ -9,14 +9,15 @@ using UnityEngine.InputSystem;
 namespace Diorama
 {
     /// <summary>
-    /// The battle choices: three move runes, a Catch rune and a Run rune floating just above the island's near rim,
+    /// The battle choices: three move runes and a smaller Run rune floating just above the island's near rim,
     /// facing the head, with a caption line above them. Pick with head gaze (soft reticle from the centre eye; Quest 3 has no eye
     /// tracking) and a pinch on either hand, or poke a rune with an index finger (Interaction SDK poke: each rune is a
     /// PokeInteractable on a clipped plane, and its plate presses in).
     /// The row moves down and closer if it would cover a battling creature from the head's view.
-    /// The Catch rune is locked (dim, no glow) until <see cref="SetCatchLocked"/> opens it with a pop; picking it while
-    /// locked raises <see cref="CatchLockedPicked"/> instead of <see cref="Chosen"/> (a hint, no turn used).
-    /// Editor: 1-5 pick directly, Enter picks the rune under the gaze.
+    /// Before a creature is out only Run shows (<see cref="ShowRunOnly"/>); its moves pop in one after another when it
+    /// lands (<see cref="Show"/>) and shrink away while a switch pod flies (<see cref="HideMoves"/>). Catching has no
+    /// rune: the cradle pod is always there.
+    /// Editor: 1-3 pick a move, 4 Run, Enter picks the rune under the gaze.
     /// </summary>
     public class BattleRunes : MonoBehaviour
     {
@@ -47,15 +48,16 @@ namespace Diorama
         [Tooltip("How far the plate travels in when pressed (island-local metres).")]
         public float pressDepth = 0.008f;
 
-        /// <summary>0-2 = move slot, 3 = catch, 4 = run.</summary>
+        [Tooltip("Run plate width relative to a move rune.")]
+        public float runWidth = 0.7f;
+        [Tooltip("Delay between the move runes popping in (s).")]
+        public float popStagger = 0.1f;
+
+        /// <summary>0-2 = move slot, 3 = run.</summary>
         public event Action<int> Chosen;
 
-        /// <summary>The Catch rune was picked while locked.</summary>
-        public event Action CatchLockedPicked;
-
-        public const int CatchIndex = 3;
-        public const int RunIndex = 4;
-        const int Count = 5;
+        public const int RunIndex = 3;
+        const int Count = 4;
 
         class Rune
         {
@@ -66,9 +68,11 @@ namespace Diorama
             public PokeInteractable poke;
             public Color tint;
             public bool usable;
+            public bool shown;
+            public float appear;    // 0..1, scales the visual in (and out)
+            public float appearAt;  // time it may start popping in
             public float hover;
-            public float pop = 1f; // 0..1 after an unlock
-            public float pulse;    // dialogue highlight
+            public float pulse;     // dialogue highlight
         }
 
         static readonly int BackColorId = Shader.PropertyToID("_BackColor");
@@ -85,7 +89,6 @@ namespace Diorama
         Mesh _quad;
         MaterialPropertyBlock _block;
         bool _interactable;
-        bool _catchLocked = true;
         int _hovered = -1;
         readonly Hand[] _hands = new Hand[2];
         readonly bool[] _wasPinching = new bool[2];
@@ -101,12 +104,11 @@ namespace Diorama
             _block = new MaterialPropertyBlock();
             Build();
             Hide();
-            Dialogue.RegisterTarget("catchRune", () => RunePoint(CatchIndex), k => PulseRunes(CatchIndex, CatchIndex, k));
             Dialogue.RegisterTarget("runes", () => RunePoint(1), k => PulseRunes(0, 2, k));
         }
 
         Vector3? RunePoint(int index) =>
-            this != null && gameObject.activeInHierarchy ? _runes[index].root.position : (Vector3?)null;
+            this != null && gameObject.activeInHierarchy && _runes[index].shown ? _runes[index].root.position : (Vector3?)null;
 
         void PulseRunes(int from, int to, float k)
         {
@@ -124,9 +126,9 @@ namespace Diorama
             {
                 var root = new GameObject($"Rune {i + 1}").transform;
                 root.SetParent(_row, false);
-                root.localPosition = new Vector3((i - (Count - 1) * 0.5f) * spacing, 0f, 0f);
+                root.localPosition = new Vector3(RuneX(i), 0f, 0f);
                 var rune = new Rune { root = root };
-                BuildPoke(rune, i);
+                BuildPoke(rune, i, PlateSize(i));
                 _runes[i] = rune;
             }
             _caption = MakeText(_row, captionFontSize);
@@ -154,7 +156,19 @@ namespace Diorama
         /// PokeInteractableVisual pushes it toward the base while a finger presses.
         /// The row's front faces the head along -Z, so the plane normal faces backward (-Z).
         /// </summary>
-        void BuildPoke(Rune rune, int index)
+        /// <summary>Plate size: Run is narrower.</summary>
+        Vector2 PlateSize(int index) => index == RunIndex ? new Vector2(runeSize.x * runWidth, runeSize.y) : runeSize;
+
+        /// <summary>Rune centre along the row: three moves at <see cref="spacing"/>, Run tucked closer at the right end.</summary>
+        float RuneX(int index)
+        {
+            float runGap = spacing - runeSize.x * (1f - runWidth) * 0.5f;
+            float width = 2f * spacing + runGap;
+            float x = index == RunIndex ? 2f * spacing + runGap : index * spacing;
+            return x - width * 0.5f;
+        }
+
+        void BuildPoke(Rune rune, int index, Vector2 size)
         {
             var surfaceGo = new GameObject("Poke Surface");
             surfaceGo.transform.SetParent(rune.root, false);
@@ -162,7 +176,7 @@ namespace Diorama
             var plane = surfaceGo.AddComponent<PlaneSurface>();
             plane.InjectAllPlaneSurface(PlaneSurface.NormalFacing.Backward, false);
             var clipper = surfaceGo.AddComponent<BoundsClipper>();
-            clipper.Size = new Vector3(runeSize.x, runeSize.y, 0.02f);
+            clipper.Size = new Vector3(size.x, size.y, 0.02f);
             var clipped = surfaceGo.AddComponent<ClippedPlaneSurface>();
             clipped.InjectAllClippedPlaneSurface(plane, new IBoundsClipper[] { clipper });
             var poke = surfaceGo.AddComponent<PokeInteractable>();
@@ -178,7 +192,7 @@ namespace Diorama
 
             var plateGo = new GameObject("Plate");
             plateGo.transform.SetParent(visual, false);
-            plateGo.transform.localScale = new Vector3(runeSize.x, runeSize.y, 1f);
+            plateGo.transform.localScale = new Vector3(size.x, size.y, 1f);
             plateGo.AddComponent<MeshFilter>().sharedMesh = _quad;
             rune.plate = plateGo.AddComponent<MeshRenderer>();
             rune.plate.sharedMaterial = hudMaterial;
@@ -200,7 +214,7 @@ namespace Diorama
                 _loggedPokeSelect = true;
                 Debug.Log($"[BattleRunes] Poke select on rune {index + 1} (first time).");
             }
-            if (_interactable) Pick(index, "poke");
+            if (_interactable && _runes[index].shown && _runes[index].appear > 0.6f) Pick(index, "poke");
         }
 
         /// <summary>
@@ -225,12 +239,53 @@ namespace Diorama
         }
 
         /// <summary>Half the row width (rune centres to the outer edge).</summary>
-        float HalfRow => (Count - 1) * 0.5f * spacing + runeSize.x * 0.5f;
+        float HalfRow => Mathf.Max(-RuneX(0) + runeSize.x * 0.5f, RuneX(RunIndex) + PlateSize(RunIndex).x * 0.5f);
 
-        /// <summary>Shows the row with these three moves plus Catch and Run. Not pickable until <see cref="SetInteractable"/>.</summary>
-        public void Show(MoveData[] moves)
+        /// <summary>Battle start, no creature out yet: the row with only the Run rune.</summary>
+        public void ShowRunOnly()
+        {
+            bool wasHidden = !gameObject.activeSelf;
+            Open();
+            for (int i = 0; i < 3; i++) SetShown(_runes[i], false, 0f);
+            SetShown(_runes[RunIndex], true, 0f);
+            if (wasHidden) PlaceRow(true);
+            Paint();
+        }
+
+        /// <summary>Shrinks the move runes away (a switch pod is flying); Run stays.</summary>
+        public void HideMoves()
+        {
+            for (int i = 0; i < 3; i++) SetShown(_runes[i], false, 0f);
+        }
+
+        void SetShown(Rune r, bool shown, float delay)
+        {
+            if (shown && !r.shown) r.appearAt = Time.time + delay;
+            r.shown = shown;
+            r.poke.gameObject.SetActive(shown);
+        }
+
+        void Open()
         {
             gameObject.SetActive(true);
+            _runes[RunIndex].usable = true;
+            _runes[RunIndex].tint = new Color(0.55f, 0.58f, 0.56f);
+            _runes[RunIndex].label.text = "<b>Run</b>";
+            if (!_reportedInteractors)
+            {
+                _reportedInteractors = true;
+                ReportPokeInteractors();
+            }
+        }
+
+        /// <summary>
+        /// The creature is out: its three moves pop in one after another (Run stays). Not pickable until
+        /// <see cref="SetInteractable"/>.
+        /// </summary>
+        public void Show(MoveData[] moves)
+        {
+            bool wasHidden = !gameObject.activeSelf;
+            Open();
             for (int i = 0; i < 3; i++)
             {
                 var m = moves != null && i < moves.Length ? moves[i] : null;
@@ -239,27 +294,24 @@ namespace Diorama
                 r.tint = m != null ? ElementStyle.Of(m.element).main : Color.gray;
                 string kind = m == null ? "" : m.kind == MoveKind.Support ? "Support" : m.element.ToString();
                 r.label.text = m != null ? $"<b>{m.Name}</b>\n<size=70%>{kind}</size>" : "-";
+                if (r.shown) r.appear = 0f; // re-pop with the new moves
+                r.shown = false;
+                SetShown(r, true, i * popStagger);
             }
-            _runes[CatchIndex].usable = true; // locked still answers (with a hint)
-            _runes[CatchIndex].tint = new Color(0.86f, 0.66f, 0.3f);
-            _runes[CatchIndex].label.text = "<b>Catch</b>\n<size=70%>Pod</size>";
-            _runes[RunIndex].usable = true;
-            _runes[RunIndex].tint = new Color(0.55f, 0.58f, 0.56f);
-            _runes[RunIndex].label.text = "<b>Run</b>";
+            SetShown(_runes[RunIndex], true, 0f);
             _hovered = -1;
-            if (!_reportedInteractors)
-            {
-                _reportedInteractors = true;
-                ReportPokeInteractors();
-            }
-            PlaceRow(true);
+            if (wasHidden) PlaceRow(true);
             Paint();
         }
 
         public void Hide()
         {
             _interactable = false;
-            _catchLocked = true;
+            foreach (var r in _runes)
+            {
+                SetShown(r, false, 0f);
+                r.appear = 0f;
+            }
             _avoidA = _avoidB = null;
             _avoid = 0f;
             gameObject.SetActive(false);
@@ -280,17 +332,6 @@ namespace Diorama
             Paint();
         }
 
-        /// <summary>Locks or unlocks the Catch rune; unlocking pops it and starts its glow.</summary>
-        public void SetCatchLocked(bool locked)
-        {
-            if (locked == _catchLocked) return;
-            _catchLocked = locked;
-            if (!locked) _runes[CatchIndex].pop = 0f;
-            Paint();
-        }
-
-        public bool CatchLocked => _catchLocked;
-
         public void SetCaption(string text)
         {
             if (_caption != null) _caption.text = text;
@@ -304,9 +345,12 @@ namespace Diorama
             {
                 var r = _runes[i];
                 r.hover = Mathf.MoveTowards(r.hover, i == _hovered ? 1f : 0f, Time.deltaTime * 8f);
-                r.pop = Mathf.Min(1f, r.pop + Time.deltaTime / 0.45f);
+                bool popping = r.shown && Time.time >= r.appearAt;
+                r.appear = Mathf.MoveTowards(r.appear, popping ? 1f : 0f, Time.deltaTime / (popping ? 0.25f : 0.15f));
+                float a = r.shown ? EaseOutBack(r.appear) : r.appear;
+                r.visual.gameObject.SetActive(r.appear > 0.001f);
                 // Scale the visual only: the poke surface keeps its size.
-                r.visual.localScale = Vector3.one * (1f + 0.12f * r.hover + 0.08f * r.pulse + 0.3f * Mathf.Sin(r.pop * Mathf.PI) * (1f - r.pop));
+                r.visual.localScale = Vector3.one * (Mathf.Max(0.001f, a) * (1f + 0.12f * r.hover + 0.08f * r.pulse));
             }
             Paint();
             if (!_interactable) return;
@@ -317,8 +361,7 @@ namespace Diorama
                 if (kb.digit1Key.wasPressedThisFrame) Pick(0, "key");
                 else if (kb.digit2Key.wasPressedThisFrame) Pick(1, "key");
                 else if (kb.digit3Key.wasPressedThisFrame) Pick(2, "key");
-                else if (kb.digit4Key.wasPressedThisFrame) Pick(CatchIndex, "key");
-                else if (kb.digit5Key.wasPressedThisFrame) Pick(RunIndex, "key");
+                else if (kb.digit4Key.wasPressedThisFrame) Pick(RunIndex, "key");
                 else if (kb.enterKey.wasPressedThisFrame && _hovered >= 0) Pick(_hovered, "gaze + Enter");
                 if (!_interactable) return;
             }
@@ -346,14 +389,8 @@ namespace Diorama
 
         void Pick(int index, string how)
         {
-            if (index < 0 || index >= _runes.Length || !_runes[index].usable) return;
-            if (index == CatchIndex && _catchLocked)
-            {
-                Debug.Log($"[BattleRunes] Catch picked while locked ({how}): hint, no turn.");
-                CatchLockedPicked?.Invoke();
-                return;
-            }
-            Debug.Log($"[BattleRunes] Picked {(index == RunIndex ? "Run" : index == CatchIndex ? "Catch" : $"move {index + 1}")} by {how}.");
+            if (index < 0 || index >= _runes.Length || !_runes[index].usable || !_runes[index].shown) return;
+            Debug.Log($"[BattleRunes] Picked {(index == RunIndex ? "Run" : $"move {index + 1}")} by {how}.");
             _interactable = false;
             Paint();
             Chosen?.Invoke(index);
@@ -442,9 +479,11 @@ namespace Diorama
             if (near) _reticle.transform.localPosition = new Vector3(hit.x, hit.y, -0.002f / Mathf.Max(1e-4f, scale));
             for (int i = 0; i < _runes.Length; i++)
             {
+                if (!_runes[i].shown) continue;
                 Vector3 p = hit - _runes[i].root.localPosition;
                 // A little bigger than the plate, so the gaze doesn't flicker between runes.
-                if (Mathf.Abs(p.x) < spacing * 0.5f && Mathf.Abs(p.y) < runeSize.y * 0.75f) return _runes[i].usable ? i : -1;
+                float half = i == RunIndex ? PlateSize(i).x * 0.5f + 0.006f : spacing * 0.5f;
+                if (Mathf.Abs(p.x) < half && Mathf.Abs(p.y) < runeSize.y * 0.75f) return _runes[i].usable ? i : -1;
             }
             return -1;
         }
@@ -455,10 +494,8 @@ namespace Diorama
             {
                 var r = _runes[i];
                 if (r == null || r.plate == null) continue;
-                bool locked = i == CatchIndex && _catchLocked;
-                float dim = _interactable && r.usable && !locked ? 1f : 0.45f;
-                // An open Catch rune glows: a slow pulse on the border plus a flash when it pops open.
-                float glow = (i == CatchIndex && !locked ? 0.35f + 0.25f * Mathf.Sin(Time.time * 4f) + 0.6f * (1f - r.pop) : 0f) + 0.7f * r.pulse;
+                float dim = _interactable && r.usable ? 1f : 0.45f;
+                float glow = 0.7f * r.pulse;
                 var back = Color.Lerp(new Color(0.07f, 0.09f, 0.08f), r.tint, Mathf.Lerp(0.3f, 0.6f, dim) + 0.25f * r.hover + 0.2f * glow);
                 back.a = 0.9f * Mathf.Lerp(0.6f, 1f, dim);
                 var border = Color.Lerp(r.tint, Color.white, Mathf.Clamp01(r.hover * 0.6f + glow));
@@ -467,7 +504,7 @@ namespace Diorama
                 _block.SetColor(BackColorId, back);
                 _block.SetColor(BorderColorId, border);
                 _block.SetFloat(FillId, 0f);
-                _block.SetFloat(AspectId, runeSize.x / runeSize.y);
+                _block.SetFloat(AspectId, PlateSize(i).x / runeSize.y);
                 _block.SetFloat(RadiusId, 0.3f);
                 _block.SetFloat(BorderId, 0.07f + 0.05f * r.hover + 0.04f * glow);
                 r.plate.SetPropertyBlock(_block);
@@ -475,6 +512,13 @@ namespace Diorama
                 c.a = Mathf.Lerp(0.5f, 1f, dim);
                 r.label.color = c;
             }
+        }
+
+        static float EaseOutBack(float t)
+        {
+            const float c = 1.7f;
+            t -= 1f;
+            return 1f + (c + 1f) * t * t * t + c * t * t;
         }
 
         static TextMeshPro MakeText(Transform parent, float size)

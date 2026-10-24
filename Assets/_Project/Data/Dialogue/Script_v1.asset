@@ -170,10 +170,10 @@ MonoBehaviour:
       speakerName: Spirit
       text: It's weak now. Grab the big pod and flick it!
   - id: capture.locked
-    once: 0
+    once: 1
     priority: 1
-    note: Catch picked above red
-    target: catchRune
+    note: a pod thrown above red shatters
+    target: cradle
     lines:
     - speaker: 0
       speakerName: Spirit

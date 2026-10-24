@@ -69,7 +69,7 @@ namespace Diorama
     /// the presentation to animate. The same seed and choices always give the same battle.
     /// When the player's creature faints and <c>hasReserve</c> says another one can fight, the battle goes on:
     /// <see cref="PlayerMustSwitch"/> is set until <see cref="Switch"/> brings the next one in (a free switch).
-    /// Catching unlocks when the wild HP bar is red (<see cref="BattleMath.RedHpShare"/>). When the wild creature faints
+    /// A pod only has a chance once the wild HP bar is red (<see cref="BattleMath.RedHpShare"/>). When the wild creature faints
     /// it is <see cref="WildDazed"/>: XP is paid, and the battle waits for one pod (<see cref="TryCatch"/>, a sure catch,
     /// rares 75%) or <see cref="EndDaze"/> (it fades away: won).
     /// </summary>
@@ -96,7 +96,7 @@ namespace Diorama
         /// <summary>The wild creature fainted and slumps on its pad: only a pod or <see cref="EndDaze"/> now.</summary>
         public bool WildDazed { get; private set; }
 
-        /// <summary>A pod can be thrown: the wild HP bar is red, or it is dazed.</summary>
+        /// <summary>A pod can catch: the wild HP bar is red, or it is dazed (before that a pod always breaks).</summary>
         public bool CatchUnlocked => !IsOver && (WildDazed || BattleMath.CatchUnlocked(wild.Hp, wild.MaxHp));
 
         /// <param name="hasReserve">True while another party creature (not the one fighting) can still fight.</param>
@@ -162,18 +162,20 @@ namespace Diorama
 
         /// <summary>
         /// A pod hit the wild creature: it wobbles, then it's caught or breaks free (and gets its move; a dazed one runs
-        /// off instead, which ends the battle as won). Nothing happens while catching is locked.
+        /// off instead, which ends the battle as won). Above red HP (<see cref="CatchUnlocked"/> false) the pod always
+        /// breaks after one wobble, and it still uses the turn.
         /// </summary>
         public IReadOnlyList<BattleEvent> TryCatch()
         {
             _turn.Clear();
             LastCatch = _turn;
-            if (IsOver || PlayerMustSwitch || !CatchUnlocked) return _turn;
-            float chance = CatchChance, roll = _rnd.Next();
+            if (IsOver || PlayerMustSwitch) return _turn;
+            bool locked = !CatchUnlocked;
+            float chance = locked ? 0f : CatchChance, roll = _rnd.Next();
             bool caught = roll < chance;
             Raise(new BattleEvent
             {
-                kind = BattleEventKind.CatchAttempt, side = BattleSide.Wild, amount = BattleMath.CatchWobbles(roll, chance),
+                kind = BattleEventKind.CatchAttempt, side = BattleSide.Wild, amount = locked ? 1 : BattleMath.CatchWobbles(roll, chance),
                 result = caught ? BattleResult.Caught : BattleResult.None,
             });
             if (caught)

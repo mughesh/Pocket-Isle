@@ -19,7 +19,22 @@ namespace Diorama.EditorTools
         public static void Move2() => Choose(1);
         public static void Move3() => Choose(2);
         public static void Run() => Choose(BattleRunes.RunIndex);
-        public static void Catch() => Choose(BattleRunes.CatchIndex);
+        public static void Catch() => ThrowCatchPod();
+
+        /// <summary>Wild HP to 20% (in the red: the cradle pod glows and has a real chance).</summary>
+        public static void WildToRed() => WildHp(0.2f);
+
+        /// <summary>Wild HP to 1 (the next hit makes it dazed).</summary>
+        public static void WildToOne() => WildHp(0f);
+
+        static void WildHp(float share)
+        {
+            var d = Director;
+            var b = d != null ? d.CurrentBattle : null;
+            if (b == null) { Debug.LogWarning("[BattleDebug] No battle running."); return; }
+            b.wild.creature.currentHp = Mathf.Max(1, Mathf.FloorToInt(b.wild.MaxHp * share));
+            Debug.Log($"[BattleDebug] Wild {b.wild.creature.Name} HP {b.wild.Hp}/{b.wild.MaxHp}.");
+        }
 
         /// <summary>Look + pinch on the cradle pod: an aimed catch throw.</summary>
         public static void ThrowCatchPod() => Pick(PodRack.CradleSlot);
@@ -121,8 +136,20 @@ namespace Diorama.EditorTools
             }
             var t = island.transform;
             cam.transform.position = t.position + t.rotation * new Vector3(0f, 0.55f, 0.45f);
-            cam.transform.LookAt(t.position + t.rotation * new Vector3(0f, 0f, 0.05f));
+            var rack = _lookPod >= 0 ? Object.FindFirstObjectByType<PodRack>() : null;
+            var pod = rack != null ? rack.Pod(_lookPod) : null;
+            Vector3 look = pod != null ? pod.transform.position : t.position + t.rotation * new Vector3(0f, 0f, 0.05f);
+            // The gaze ray pitches down from head forward: aim the head that much higher so the ray hits the target.
+            var gaze = Object.FindFirstObjectByType<HeadGaze>();
+            cam.transform.LookAt(look);
+            if (pod != null && gaze != null) cam.transform.Rotate(-gaze.CurrentOffset, 0f, 0f, Space.Self);
         }
+
+        static int _lookPod = -1;
+
+        /// <summary>Seated camera aims its gaze at rim pod 2 (or back at the island): tests the gaze-grow.</summary>
+        public static void LookAtPod2() { _lookPod = 1; SeatCamera(); }
+        public static void LookAtIsland() { _lookPod = -1; SeatCamera(); }
 
         /// <summary>A shot every 0.12 s for 2.4 s (strip_00..19), to see effects mid-flight.</summary>
         public static void Strip()

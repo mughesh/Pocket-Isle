@@ -163,6 +163,11 @@ MonoBehaviour:
   cradleScale: 2
   partyGrabSize: 0.05
   cradleGrabSize: 0.08
+  focusScale: 2
+  growSeconds: 0.15
+  shrinkDelay: 0.3
+  handFocusDistance: 0.1
+  cradleRefillSeconds: 1
   pokeRadius: 1.4
   gazeRadius: 2.2
   grabPinchDistance: 0.08
@@ -918,6 +923,8 @@ MonoBehaviour:
   driftSpeed: 1.5
   maxTilt: 40
   pressDepth: 0.008
+  runWidth: 0.7
+  popStagger: 0.1
 --- !u!4 &382714128
 Transform:
   m_ObjectHideFlags: 0
@@ -1568,10 +1575,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.HeadGaze
   island: {fileID: 270959109}
-  offset: 18
+  offset: 23
   adaptive: 1
-  share: 0.75
-  maxOffset: 25
+  share: 0.85
+  maxOffset: 30
   smoothSeconds: 0.3
 --- !u!4 &908141542
 Transform:

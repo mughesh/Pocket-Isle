@@ -13,10 +13,11 @@ namespace Diorama
     /// creature out by throwing (or dropping) a rim pod onto the island, look + pinch on a pod, or waiting
     /// <see cref="autoSendSeconds"/>. The battle runs turn by turn from the runes and the pods (throw another party pod to
     /// switch, flick the cradle pod at the wild creature to catch it) until someone is caught, faints for good or the
-    /// player runs. Catching unlocks when the wild HP bar turns red: the Catch rune pops open and the cradle pod appears
-    /// (before that the rune only gives a hint). A fainted wild creature is dazed for <see cref="dazedSeconds"/>: a pod
-    /// catches it for sure, otherwise it fades out and the battle is won. Losing the whole party sends the explorer back
-    /// to spawn, healed. Then walking resumes.
+    /// player runs. Only Run shows until the party creature lands; then its moves pop in. The empty cradle pod is there
+    /// from the moment the wild creature appears and can always be thrown: above red HP it wobbles once and shatters
+    /// (the turn is used); in the red it glows and has a real chance; a fainted wild creature is dazed for
+    /// <see cref="dazedSeconds"/> (the pod pulses) and a pod catches it for sure, otherwise it fades out and the battle
+    /// is won. Losing the whole party sends the explorer back to spawn, healed. Then walking resumes.
     /// Editor: B starts a grass encounter on the spot; in battle C throws the cradle pod, X switches to the next pod.
     /// </summary>
     public class EncounterDirector : MonoBehaviour
@@ -65,7 +66,10 @@ namespace Diorama
 
         public bool InBattle { get; private set; }
 
-        enum ActKind { None, Move, Run, Catch, PodThrow, PodPick }
+        /// <summary>The battle being played, or null (testing).</summary>
+        public BattleSystem CurrentBattle { get; private set; }
+
+        enum ActKind { None, Move, Run, PodThrow, PodPick }
 
         struct Act
         {
@@ -98,7 +102,6 @@ namespace Diorama
             explorer.OnTallGrassStep += OnTallGrassStep;
             explorer.OnFishTap += OnFishTap;
             runes.Chosen += OnChosen;
-            runes.CatchLockedPicked += OnCatchLocked;
             pods.Thrown += OnPodThrown;
             pods.Picked += OnPodPicked;
         }
@@ -110,11 +113,7 @@ namespace Diorama
                 explorer.OnTallGrassStep -= OnTallGrassStep;
                 explorer.OnFishTap -= OnFishTap;
             }
-            if (runes != null)
-            {
-                runes.Chosen -= OnChosen;
-                runes.CatchLockedPicked -= OnCatchLocked;
-            }
+            if (runes != null) runes.Chosen -= OnChosen;
             if (pods != null)
             {
                 pods.Thrown -= OnPodThrown;
@@ -171,16 +170,9 @@ namespace Diorama
             if (!_waiting || _act.kind != ActKind.None) return;
             _act = new Act
             {
-                kind = index == BattleRunes.RunIndex ? ActKind.Run : index == BattleRunes.CatchIndex ? ActKind.Catch : ActKind.Move,
+                kind = index == BattleRunes.RunIndex ? ActKind.Run : ActKind.Move,
                 index = index,
             };
-        }
-
-        void OnCatchLocked()
-        {
-            if (!_waiting) return;
-            runes.SetCaption("Weaken it first!");
-            Dialogue.Say("capture.locked");
         }
 
         void OnPodThrown(int slot, Vector3 pos, Vector3 vel)
@@ -249,26 +241,40 @@ namespace Diorama
                 yield return new WaitForSeconds(zoomSeconds + 0.1f);
             }
 
+            var gaze = FindFirstObjectByType<HeadGaze>();
+            Debug.Log($"[EncounterDirector] Gaze offset now {(gaze != null ? gaze.CurrentOffset : HeadGaze.DefaultOffset):0.0} deg " +
+                      $"(adaptive {(gaze != null && gaze.adaptive ? $"{gaze.share:0.00} share, max {gaze.maxOffset:0}" : "off")}).");
             stage.Spawn(wild, BattleSide.Wild, layout.wildPad, layout.myPad);
             runes.Avoid(null, stage.Wild);
+            pods.InBattle = true;
+            pods.CradleVisible = true;
+            pods.CradleGlow = pods.CradlePulse = false;
             yield return stage.WildAppears(rare, water ? (Vector2?)where : null);
-            runes.Show(lead.species.moves);
+            runes.ShowRunOnly();
             runes.SetCaption(rare ? $"A rare wild {wild.Name} appeared!" : $"A wild {wild.Name} appeared!");
             if (rare) Dialogue.Say("rare.first");
-            pods.InBattle = true;
-            pods.CradleVisible = false;
-            runes.SetCatchLocked(true);
             yield return new WaitForSeconds(0.6f);
 
             _activeSlot = -1;
             Dialogue.Say("pod.first");
-            yield return SendOut("Grab a pod and toss it in!");
+            bool fledEarly = false;
+            yield return SendOut("Grab a pod and toss it in!", () => fledEarly = true);
+            if (fledEarly)
+            {
+                // Run before anything was sent out: the wild one hasn't engaged yet, so it always works.
+                Debug.Log("[EncounterDirector] Ran before sending a creature out.");
+                runes.SetCaption("Got away safely!");
+                yield return new WaitForSeconds(0.5f);
+                yield return stage.Outro(BattleResult.Fled);
+                yield return Finish(false);
+                yield break;
+            }
             stage.ShowWildBar(wild);
 
-            var battle = new BattleSystem(party.At(_activeSlot), wild, typeChart, (int)(_rnd.Next() * int.MaxValue), rare, HasReserve);
+            var battle = CurrentBattle = new BattleSystem(party.At(_activeSlot), wild, typeChart, (int)(_rnd.Next() * int.MaxValue), rare, HasReserve);
             Dialogue.Say("battle.first");
             string prompt = null;
-            UpdateCatchLock(battle);
+            UpdateCradle(battle);
             while (!battle.IsOver)
             {
                 if (battle.WildDazed)
@@ -278,6 +284,7 @@ namespace Diorama
                 }
                 if (battle.PlayerMustSwitch)
                 {
+                    runes.HideMoves();
                     yield return stage.RecallPlayer(pods.HomeWorld(_activeSlot));
                     pods.ActiveSlot = -1;
                     yield return SendOut($"{battle.player.creature.Name} needs a rest. Toss in another pod!");
@@ -290,7 +297,7 @@ namespace Diorama
                 _act = default;
                 _waiting = true;
                 pods.PartyGrab = true;
-                pods.CradleGrab = battle.CatchUnlocked;
+                pods.CradleGrab = true;
                 runes.SetInteractable(true);
                 while (_act.kind == ActKind.None) yield return null;
                 var act = _act;
@@ -301,12 +308,6 @@ namespace Diorama
                 IReadOnlyList<BattleEvent> events;
                 if (act.kind == ActKind.Move) events = battle.PlayTurn(act.index);
                 else if (act.kind == ActKind.Run) events = battle.TryFlee();
-                else if (act.kind == ActKind.Catch)
-                {
-                    pods.PresentCradle();
-                    prompt = $"Flick the pod at the wild {wild.Name}!";
-                    continue;
-                }
                 else if (act.index == PodRack.CradleSlot)
                 {
                     bool hit = false;
@@ -331,6 +332,7 @@ namespace Diorama
                     events = battle.Switch(party.At(act.index));
                     Debug.Log($"[EncounterDirector] Switch: {leaving.Name} out, {party.At(act.index).Name} in.");
                     runes.SetCaption($"Come back, {leaving.Name}!");
+                    runes.HideMoves();
                     bool landed = false;
                     var thrownVel = act.kind == ActKind.PodThrow ? act.vel : Vector3.zero;
                     StartCoroutine(Then(pods.FlyTo(act.index, pad, thrownVel, FlightSeconds(act, pad)), () => landed = true));
@@ -348,7 +350,7 @@ namespace Diorama
                         break;
                     }
                 yield return stage.Play(events, battle, runes.SetCaption);
-                UpdateCatchLock(battle);
+                UpdateCradle(battle);
             }
 
             pods.CradlePulse = false;
@@ -361,15 +363,17 @@ namespace Diorama
             yield return Finish(battle.Result == BattleResult.Lost);
         }
 
-        /// <summary>Opens the Catch rune and brings out the cradle once the wild HP bar is red (first time: the Spirit's hint).</summary>
-        void UpdateCatchLock(BattleSystem battle)
+        /// <summary>
+        /// The cradle pod shows the catch state: plain glass above red, a warm glow in the red (first time: a pop and the
+        /// Spirit's hint), a strong pulse while dazed (set by <see cref="Dazed"/>).
+        /// </summary>
+        void UpdateCradle(BattleSystem battle)
         {
-            bool open = battle.CatchUnlocked;
-            runes.SetCatchLocked(!open);
-            if (!open || pods.CradleVisible) return;
-            Debug.Log($"[EncounterDirector] Wild {battle.wild.creature.Name} is in the red ({battle.wild.Hp}/{battle.wild.MaxHp}): catching unlocked.");
-            pods.CradleVisible = true;
-            pods.CradleGlow = true;
+            bool red = battle.CatchUnlocked;
+            if (red == pods.CradleGlow) return;
+            pods.CradleGlow = red;
+            if (!red) return;
+            Debug.Log($"[EncounterDirector] Wild {battle.wild.creature.Name} is in the red ({battle.wild.Hp}/{battle.wild.MaxHp}): the cradle pod glows.");
             pods.PresentCradle();
             if (!battle.WildDazed) Dialogue.Say("capture.first");
         }
@@ -390,11 +394,13 @@ namespace Diorama
                 hit(false);
                 yield break;
             }
-            Debug.Log($"[EncounterDirector] Catch pod {(thrown ? $"thrown ({ThrowInfo(act, target)})" : "sent by look + pinch")}, chance {battle.CatchChance:P0}{(battle.WildDazed ? " (dazed)" : "")}.");
+            bool locked = !battle.CatchUnlocked;
+            Debug.Log($"[EncounterDirector] Catch pod {(thrown ? $"thrown ({ThrowInfo(act, target)})" : "sent by look + pinch")}, " +
+                      $"{(locked ? "above red: it will break" : $"chance {battle.CatchChance:P0}")}{(battle.WildDazed ? " (dazed)" : "")}.");
             runes.SetCaption("Go, pod!");
             pods.CradlePulse = false;
             yield return pods.FlyTo(PodRack.CradleSlot, target, thrown ? act.vel : Vector3.zero, FlightSeconds(act, target));
-            yield return PlayCatch(battle.TryCatch(), wild, battle);
+            yield return PlayCatch(battle.TryCatch(), wild, battle, locked);
             hit(true);
         }
 
@@ -404,7 +410,7 @@ namespace Diorama
         /// </summary>
         IEnumerator Dazed(BattleSystem battle, CreatureInstance wild)
         {
-            UpdateCatchLock(battle);
+            UpdateCradle(battle);
             pods.CradlePulse = true;
             Dialogue.Say("capture.dazed.first");
             Debug.Log($"[EncounterDirector] Wild {wild.Name} is dazed: {dazedSeconds:0} s to throw a pod.");
@@ -433,6 +439,7 @@ namespace Diorama
                 bool hit = false;
                 yield return CatchThrow(act, battle, wild, h => hit = h);
                 if (hit) yield break;
+                yield return pods.WaitForCradlePod();
                 pods.CradlePulse = true;
                 runes.SetCaption($"Missed! {wild.Name} is still dazed. Throw again!");
             }
@@ -479,7 +486,7 @@ namespace Diorama
         /// without anyone holding a pod: the lead goes), flies it to the pad and brings the creature out.
         /// Sets <see cref="_activeSlot"/>.
         /// </summary>
-        IEnumerator SendOut(string caption)
+        IEnumerator SendOut(string caption, System.Action ran = null)
         {
             runes.SetCaption(caption);
             int lead = party.LeadSlot;
@@ -494,9 +501,19 @@ namespace Diorama
             int chosen = -1;
             string how = "";
             Vector3 vel = Vector3.zero;
+            if (ran != null) runes.SetInteractable(true); // only Run shows
             while (chosen < 0)
             {
                 var act = _act;
+                if (act.kind == ActKind.Run && ran != null)
+                {
+                    _waiting = false;
+                    runes.SetInteractable(false);
+                    pods.PartyGrab = false;
+                    pods.GlowSlot = -1;
+                    ran();
+                    yield break;
+                }
                 if (act.kind == ActKind.PodThrow || act.kind == ActKind.PodPick)
                 {
                     _act = default;
@@ -510,12 +527,13 @@ namespace Diorama
                         StartCoroutine(pods.FlyHome(act.index));
                     }
                 }
-                else if (act.kind != ActKind.None) _act = default; // the runes aren't pickable yet
+                else if (act.kind != ActKind.None) _act = default; // no moves before a creature is out
                 else if (pods.AnyHeld) idle = 0f;
                 else if ((idle += Time.deltaTime) >= autoSendSeconds) { chosen = lead; how = $"auto after {autoSendSeconds:0} s"; }
                 if (chosen < 0) yield return null;
             }
             _waiting = false;
+            runes.SetInteractable(false);
             pods.PartyGrab = false;
             pods.GlowSlot = -1;
             Debug.Log($"[EncounterDirector] Send out pod {chosen + 1} ({party.At(chosen).Name}) by {how}.");
@@ -538,8 +556,11 @@ namespace Diorama
             runes.Show(c.species.moves);
         }
 
-        /// <summary>The pod hit: the wild creature goes in, the pod drops and wobbles, then it's caught or breaks out.</summary>
-        IEnumerator PlayCatch(IReadOnlyList<BattleEvent> events, CreatureInstance wild, BattleSystem battle)
+        /// <summary>
+        /// The pod hit: the wild creature goes in, the pod drops and wobbles, then it's caught or the glass cracks and
+        /// shatters and the creature bursts out (always, above red: <paramref name="locked"/>). A new pod fills the cradle.
+        /// </summary>
+        IEnumerator PlayCatch(IReadOnlyList<BattleEvent> events, CreatureInstance wild, BattleSystem battle, bool locked)
         {
             if (events.Count == 0) yield break;
             var e = events[0];
@@ -557,7 +578,12 @@ namespace Diorama
             }
             if (!caught)
             {
-                pods.Burst(slot);
+                if (locked)
+                {
+                    runes.SetCaption("Weaken it first!");
+                    Dialogue.Say("capture.locked");
+                }
+                yield return pods.Shatter(slot, ElementStyle.Of(wild.Element).main);
                 yield return stage.BreakFree();
                 if (battle.IsOver)
                 {
@@ -603,6 +629,7 @@ namespace Diorama
 
         IEnumerator Finish(bool lost)
         {
+            CurrentBattle = null;
             runes.Hide();
             pods.InBattle = pods.PartyGrab = pods.CradleGrab = pods.CradleVisible = pods.CradleGlow = pods.CradlePulse = false;
             pods.ActiveSlot = pods.GlowSlot = -1;

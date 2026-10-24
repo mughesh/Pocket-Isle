@@ -330,20 +330,37 @@ namespace Diorama
             a.grow = 0f;
         }
 
-        /// <summary>The wild creature bursts back out of the pod.</summary>
+        /// <summary>The wild creature bursts back out of the pod with a squash and stretch and an angry little shake.</summary>
         public IEnumerator BreakFree()
         {
             var a = _wild;
             if (a == null) yield break;
-            fx.Burst(a.WorldCenter, 24, Color.white, World(0.06f), 0.4f, World(0.004f));
-            yield return Tween(0.3f, p =>
+            yield return Tween(0.35f, p =>
             {
                 a.grow = EaseOutBack(p);
                 a.View.SetFlash(1f - p);
+                float s = Mathf.Sin(p * Mathf.PI);
+                a.squash = new Vector3(1f - 0.22f * s, 1f + 0.35f * s, 1f - 0.22f * s);
             });
             a.grow = 1f;
             a.View.SetFlash(0f);
-            a.View.Hop();
+            // Lands: a quick squash, then shakes it off.
+            yield return Tween(0.12f, p =>
+            {
+                float s = Mathf.Sin(p * Mathf.PI);
+                a.squash = new Vector3(1f + 0.2f * s, 1f - 0.25f * s, 1f + 0.2f * s);
+            });
+            float yaw0 = a.yaw;
+            var huff = new Color(0.95f, 0.45f, 0.35f);
+            fx.Burst(island.transform.TransformPoint(a.LocalTop), 6, huff, World(0.015f), 0.35f, World(0.004f), Vector3.up * World(0.02f));
+            yield return Tween(0.4f, p =>
+            {
+                float w = Mathf.Sin(p * Mathf.PI * 8f) * (1f - p);
+                a.yaw = yaw0 + w * 14f;
+                a.squash = new Vector3(1f + 0.05f * w, 1f, 1f);
+            });
+            a.yaw = yaw0;
+            a.squash = Vector3.one;
         }
 
         /// <summary>Caught: the wild creature and its bar go away.</summary>
