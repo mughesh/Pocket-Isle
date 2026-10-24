@@ -217,14 +217,14 @@ namespace Diorama
         /// <summary>The world's start tile (the respawn point until shrines exist).</summary>
         public Vector2Int SpawnTile => island.world != null ? island.world.startTile : startTile;
 
-        /// <summary>Puts the explorer on a tile at once (losing a battle sends it back to spawn).</summary>
-        public void Teleport(Vector2Int tile)
+        /// <summary>Puts the explorer on a tile at once (losing a battle sends it back to a shrine; loading a save).</summary>
+        public void Teleport(Vector2Int tile, Vector2Int? facing = null)
         {
             Stop();
             CancelPath();
             _tile = _fromTile = tile;
             _stepT = 1f;
-            _facing = new Vector2Int(0, -1);
+            _facing = facing.HasValue && facing.Value.sqrMagnitude == 1 ? facing.Value : new Vector2Int(0, -1);
             UpdateExplorer();
             RefreshLabel();
             Debug.Log($"[GestureTestPiece] Teleported to c{tile.x} r{tile.y}.");

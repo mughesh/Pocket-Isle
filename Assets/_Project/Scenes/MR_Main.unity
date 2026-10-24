@@ -2496,6 +2496,71 @@ MonoBehaviour:
   wanderRadius: 2
   hopInterval: {x: 3, y: 7}
   moveChance: 0.6
+--- !u!1 &1541842441
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1541842444}
+  - component: {fileID: 1541842443}
+  - component: {fileID: 1541842442}
+  m_Layer: 0
+  m_Name: Game Save
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1541842442
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1541842441}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85f25fa3a92a7d44eaba2806a6f8eafd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.GamePause
+--- !u!114 &1541842443
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1541842441}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f2fd4957eb04e241be7e6edbc0b1870, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.GameSave
+  party: {fileID: 1499891276}
+  explorer: {fileID: 374318554}
+  shrines: {fileID: 261742741}
+  encounters: {fileID: 1499891275}
+  realm: {fileID: 270959114}
+  registry: {fileID: 11400000, guid: 520e7c86330e4ec478d9211900d5bd4b, type: 2}
+  hud: {fileID: 1078587926}
+  spirit: {fileID: 1847074512}
+--- !u!4 &1541842444
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1541842441}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1583412946
 GameObject:
   m_ObjectHideFlags: 0
@@ -3316,3 +3381,4 @@ SceneRoots:
   - {fileID: 908141542}
   - {fileID: 744621268}
   - {fileID: 261742742}
+  - {fileID: 1541842444}

@@ -51,6 +51,14 @@ namespace Diorama
 
         public void Toggle() => FadeTo(_to > 0.5f ? 0f : 1f);
 
+        /// <summary>Sets the restoration at once, no fade (loading a save).</summary>
+        public void SetNow(float restored)
+        {
+            RealmState.Restored = restored;
+            _from = _to = RealmState.Restored;
+            _t = 1f;
+        }
+
         // Exactly three quick taps (five toggle the debug labels, see DebugLabels).
         void OnTapBurst(int count, GestureSource source)
         {

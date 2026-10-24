@@ -6,8 +6,8 @@ namespace Diorama.EditorTools
 {
     /// <summary>
     /// Step 7: the progression config (Data/Battle/Progression), evolution levels on the species, the GrowthDirector;
-    /// the Hearth Shrines (<see cref="ShrineTools"/>) with their scene object and the storage shelf; and the dialogue
-    /// script re-imported. Safe to re-run.
+    /// the Hearth Shrines (<see cref="ShrineTools"/>) with their scene object and the storage shelf; the species
+    /// registry and the Game Save object (save / load, pause); and the dialogue script re-imported. Safe to re-run.
     /// </summary>
     static class Step7Setup
     {
@@ -90,10 +90,52 @@ namespace Diorama.EditorTools
             EditorUtility.SetDirty(director);
             log.Append("\n  'Hearth Shrines' and 'Storage Shelf' objects wired; losing returns to the last shrine");
 
+            // ---- D: save / load, pause ----
+            var registry = Registry();
+            var save = Find<GameSave>("Game Save");
+            save.party = director.party;
+            save.explorer = director.explorer;
+            save.shrines = shrines;
+            save.encounters = director;
+            save.realm = island != null ? island.GetComponent<RealmRestoration>() : null;
+            save.registry = registry;
+            save.hud = Object.FindFirstObjectByType<BattleHud>(FindObjectsInactive.Include);
+            var spirit = Object.FindFirstObjectByType<LanternSpirit>(FindObjectsInactive.Include);
+            save.spirit = spirit != null ? spirit.transform : null;
+            EditorUtility.SetDirty(save);
+            if (!save.TryGetComponent(out GamePause _)) Undo.AddComponent<GamePause>(save.gameObject);
+            log.Append($"\n  'Game Save' (GameSave + GamePause), registry with {registry.species.Count} species" +
+                       $"{(save.realm == null ? "; WARNING no RealmRestoration on the island" : "")}{(save.spirit == null ? "; WARNING no Lantern Spirit for the Saved puff" : "")}");
+
             EditorSceneManager.MarkSceneDirty(active);
             EditorSceneManager.SaveScene(active);
             AssetDatabase.SaveAssets();
             Debug.Log(log.ToString());
+        }
+
+        [MenuItem("Tools/Pocket Isle/Delete Save", priority = 60)]
+        static void DeleteSave()
+        {
+            SaveGame.Delete(GameSave.SavePath);
+            Debug.Log($"[Step7] Deleted {GameSave.SavePath}. Next Play starts a new game (stopping Play autosaves again).");
+        }
+
+        /// <summary>Data/Creatures/SpeciesRegistry with every species asset (ids = asset names).</summary>
+        static SpeciesRegistry Registry()
+        {
+            const string path = "Assets/_Project/Data/Creatures/SpeciesRegistry.asset";
+            var r = AssetDatabase.LoadAssetAtPath<SpeciesRegistry>(path);
+            if (r == null)
+            {
+                r = ScriptableObject.CreateInstance<SpeciesRegistry>();
+                AssetDatabase.CreateAsset(r, path);
+            }
+            r.species.Clear();
+            foreach (var guid in AssetDatabase.FindAssets("t:CreatureSpecies", new[] { SpeciesDir }))
+                r.species.Add(AssetDatabase.LoadAssetAtPath<CreatureSpecies>(AssetDatabase.GUIDToAssetPath(guid)));
+            r.species.Sort((a, b) => string.CompareOrdinal(a.name, b.name));
+            EditorUtility.SetDirty(r);
+            return r;
         }
 
         /// <summary>A scene object with this component (made on the first run, found after).</summary>

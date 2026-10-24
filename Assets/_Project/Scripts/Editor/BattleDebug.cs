@@ -48,6 +48,31 @@ namespace Diorama.EditorTools
             Debug.Log($"[BattleDebug] {c.Name} Lv {c.level}, XP {c.xp}/{d.progression.XpToNext(c.level)}.");
         }
 
+        /// <summary>Like key K: save now.</summary>
+        public static void SaveNow()
+        {
+            var s = Object.FindFirstObjectByType<GameSave>();
+            if (s != null) s.Save("BattleDebug", true);
+        }
+
+        /// <summary>Like Shift+K: delete the save.</summary>
+        public static void DeleteSave()
+        {
+            var s = Object.FindFirstObjectByType<GameSave>();
+            if (s != null) s.DeleteSave();
+            else SaveGame.Delete(GameSave.SavePath);
+        }
+
+        /// <summary>Like key P: pause / resume.</summary>
+        public static void Pause() => SetPause(true);
+        public static void Resume() => SetPause(false);
+
+        static void SetPause(bool on)
+        {
+            var p = Object.FindFirstObjectByType<GamePause>();
+            if (p != null) p.SetPaused(on);
+        }
+
         /// <summary>Walks the explorer to the nearest Hearth Shrine's front tile (it rests there).</summary>
         public static void GoToShrine()
         {

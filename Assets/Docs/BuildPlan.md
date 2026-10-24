@@ -3,6 +3,13 @@
 Revised Oct 22 (v3) for the full game in `GameDesign.md`. Systems first, then one complete realm, then more content.
 Prompts for Claude Code: `Assets/Docs/Prompts/step-NN-*.md`. Design: `Assets/Docs/GameDesign.md`.
 
+## Status (Oct 24, Claude Code)
+- Steps 1–6 and step 6 fixes: passed on the headset (`pre-goa` at aa3cd20).
+- Step 6 fixes 2 (no Catch rune, pod always in the cradle and shatters above red, rim pods grow on gaze, gaze 5° lower):
+  committed f69d96f, **headset test pending**.
+- Step 7 (ahead of plan): XP / levels / evolution (53b10df), Hearth Shrine + storage shelf (e14f949), save / load +
+  pause (next commit). All **headset test pending**; flat Editor Play smoke tests passed. Spatial anchors not done (cut #5).
+
 ## Principle
 - **Every system data-driven** (ScriptableObjects): species, moves, type chart, maps, temples, dialogue.
   Content after Nov 10 should be data entry, not new code.

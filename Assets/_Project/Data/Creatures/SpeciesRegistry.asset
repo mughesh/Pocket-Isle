@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5aeb6008a092bd42a307e34c55dc4e6, type: 3}
+  m_Name: SpeciesRegistry
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.SpeciesRegistry
+  species:
+  - {fileID: 11400000, guid: 44d82e91744f67e4a993758eede3bbb1, type: 2}
+  - {fileID: 11400000, guid: c1473e635e7776940a34b25e7b53b532, type: 2}
+  - {fileID: 11400000, guid: bf28c73db405a224da137bbcb4724879, type: 2}
+  - {fileID: 11400000, guid: e163c6002098afa4ea9295b9d4055e5a, type: 2}
+  - {fileID: 11400000, guid: dee1246386885fe4692153f955a5bf48, type: 2}
+  - {fileID: 11400000, guid: 4e0827bf455d6eb4c853967a75296d1d, type: 2}
+  - {fileID: 11400000, guid: bf37a5027a821e843afdd5fa3d92d9b4, type: 2}
+  - {fileID: 11400000, guid: 1aef1af9fe20cb64aad07a7dd1e50e38, type: 2}
+  - {fileID: 11400000, guid: 3e6a8bbe90a2d0447b3543119e52c28a, type: 2}
+  - {fileID: 11400000, guid: 11737ef7d2b67d84b8a98e2c3f8eeb9d, type: 2}
+  - {fileID: 11400000, guid: fb46257ae3b4b0144a5861244b1b96f6, type: 2}
+  - {fileID: 11400000, guid: e7c3963a9c30b4e42bc8e0dffffc34f3, type: 2}

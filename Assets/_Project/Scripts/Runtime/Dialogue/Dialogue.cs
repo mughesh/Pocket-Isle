@@ -66,6 +66,13 @@ namespace Diorama
         /// <summary>Trigger ids already said (once triggers). Step 7 saves and restores these.</summary>
         public static IEnumerable<string> Said => _instance != null ? _instance._said : Array.Empty<string>();
 
+        /// <summary>Lines already said in an earlier session (loading a save): "once" lines stay quiet.</summary>
+        public static void RestoreSaid(IEnumerable<string> ids)
+        {
+            if (_instance == null || ids == null) return;
+            foreach (var id in ids) _instance._said.Add(id);
+        }
+
         /// <summary>Queues every line of a trigger. Does nothing without a Dialogue in the scene.</summary>
         public static void Say(string triggerId)
         {
