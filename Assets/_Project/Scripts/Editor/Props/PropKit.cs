@@ -278,9 +278,46 @@ namespace Diorama.EditorTools
                 Piece(PShape("HotSpringSteam_Puff", SmokePuff(0.14f)), PropSlot.Accent, PropMotion.Steam, 0.07f, new Vector3(0f, 0.16f, 0f)),
             };
 
+            WriteHearthShrine();
             WriteThemes(tree);
             AssetDatabase.SaveAssets();
-            Debug.Log("[PropKit] Wrote 10 Cinderwood props and the Cinderwood / Test themes to Data/Props. Bake them: Tools > Pocket Isle > Props > Bake All.");
+            Debug.Log("[PropKit] Wrote 11 Cinderwood props and the Cinderwood / Test themes to Data/Props. Bake them: Tools > Pocket Isle > Props > Bake All.");
+        }
+
+        /// <summary>
+        /// Hearth Shrine (step 7): a small stone hearth with a flame in its arched mouth (facing the player, +Z) and a
+        /// mossy cap like the Lantern Spirit's, hinting they're linked. Heal / save / swap point.
+        /// </summary>
+        public static PropRecipe WriteHearthShrine()
+        {
+            DioramaSceneSetup.EnsureFolder(Root);
+            DioramaSceneSetup.EnsureFolder($"{Root}/Shapes");
+            var shrine = Recipe("HearthShrine", new Vector2Int(1, 1), true, false, 1500);
+            shrine.palette = Palette(Clay, Wood, Stone, C("#7E9468"), C("#FFB04A", 1.2f), Smoke);
+            shrine.yawJitter = 0f;
+            shrine.scaleJitter = 0f;
+            shrine.resolution = 30;
+            shrine.pieces = new List<PropPiece>
+            {
+                Piece(PShape("HearthShrine_Stone",
+                    Box(new Vector3(0f, 0.05f, 0f), new Vector3(0.3f, 0.05f, 0.27f), 0.03f, 0f),
+                    Box(new Vector3(0f, 0.3f, 0f), new Vector3(0.22f, 0.22f, 0.19f), 0.05f, 0.04f),
+                    Ell(new Vector3(0f, 0.22f, 0.2f), new Vector3(0.11f, 0.15f, 0.09f), 0.03f).Sub(),
+                    Torus(new Vector3(0f, 0.2f, 0.18f), 0.12f, 0.03f, new Vector3(90f, 0f, 0f), 0.03f),
+                    Floor(0f)), PropSlot.Stone),
+                Piece(PShape("HearthShrine_Flame",
+                    Sphere(new Vector3(0f, 0.15f, 0.15f), 0.075f),
+                    Cone(new Vector3(0f, 0.16f, 0.15f), new Vector3(0f, 0.33f, 0.14f), 0.065f, 0.01f, 0.07f),
+                    Cone(new Vector3(0.04f, 0.15f, 0.15f), new Vector3(0.07f, 0.26f, 0.16f), 0.035f, 0.008f, 0.05f)),
+                    PropSlot.Glow, PropMotion.Flicker, 0.02f),
+                Piece(PShape("HearthShrine_Cap",
+                    Ell(new Vector3(0f, 0.56f, 0f), new Vector3(0.29f, 0.16f, 0.26f)),
+                    Plane(new Vector3(0f, 0.5f, 0f), Vector3.down, 0.02f)), PropSlot.Leaf, PropMotion.Sway, 0.01f),
+                Piece(PShape("HearthShrine_Tip",
+                    Sphere(new Vector3(0f, 0.74f, 0f), 0.05f, 0f)), PropSlot.Glow, PropMotion.Flicker, 0.004f),
+            };
+            EditorUtility.SetDirty(shrine);
+            return shrine;
         }
 
         // ---- themes ----

@@ -3,7 +3,7 @@
 Lantern Spirit = **Spirit**. Bubbles are short: one idea per line, ≤ ~70 characters.
 Format: `trigger_id` · speaker · lines (shown in order). **once** = only the first time.
 Optional `· → target` (before the lines): the Spirit flies to that anchor while saying them and it pulses
-(`leadPod`, `cradle`, `runes`, `nearPad`, `wildPad`, `tile:x,y`). No target = it stays home.
+(`leadPod`, `cradle`, `runes`, `nearPad`, `wildPad`, `shrine`, `tile:x,y`). No target = it stays home.
 Names are placeholders. The step 5c dialogue system loads this (convert to data asset).
 
 ## Opening (Still Isle)
@@ -46,7 +46,7 @@ Names are placeholders. The step 5c dialogue system loads this (convert to data 
 - `party.full` · once: Spirit: Your pods are full. New friends go to the Sanctuary.
 - `evolve.first` · once · → nearPad (first evolution)
   - Spirit: Look at that! They've grown into something new.
-- `shrine.first` · once
+- `shrine.first` · once · → shrine
   - Spirit: A Hearth Shrine. Rest here to heal everyone and save.
   - Spirit: You can swap friends here too.
 - `gate.first` · once

@@ -92,6 +92,55 @@ namespace Diorama
             HealAll();
         }
 
+        /// <summary>
+        /// Swaps storage creature <paramref name="storageIndex"/> with pod <paramref name="slot"/>; a slot just past the
+        /// last filled pod adds it to the pods instead (it leaves storage). The pods never end up empty.
+        /// </summary>
+        public bool SwapWithStorage(int storageIndex, int slot)
+        {
+            if (storageIndex < 0 || storageIndex >= storage.Count || slot < 0 || slot >= Size || slot > members.Count) return false;
+            var incoming = storage[storageIndex];
+            if (incoming == null || incoming.species == null) return false;
+            if (slot == members.Count)
+            {
+                storage.RemoveAt(storageIndex);
+                members.Add(incoming);
+            }
+            else
+            {
+                storage[storageIndex] = members[slot];
+                members[slot] = incoming;
+            }
+            Changed?.Invoke();
+            return true;
+        }
+
+        /// <summary>Moves pod <paramref name="slot"/>'s creature to storage. Refused for the last creature in the pods.</summary>
+        public bool Deposit(int slot)
+        {
+            if (members.Count <= 1 || slot < 0 || slot >= members.Count) return false;
+            storage.Add(members[slot]);
+            members.RemoveAt(slot);
+            Changed?.Invoke();
+            return true;
+        }
+
+        /// <summary>Replaces everything (loading a save).</summary>
+        public void Restore(List<CreatureInstance> pods, List<CreatureInstance> stored)
+        {
+            members = pods ?? new List<CreatureInstance>();
+            storage = stored ?? new List<CreatureInstance>();
+            Changed?.Invoke();
+        }
+
+        /// <summary>Heals the pods and storage (a Hearth Shrine).</summary>
+        public void HealEveryone()
+        {
+            foreach (var c in storage)
+                if (c != null && c.species != null) c.Heal();
+            HealAll();
+        }
+
         /// <summary>Tells listeners a creature changed in place (XP, level, evolution).</summary>
         public void NotifyChanged() => Changed?.Invoke();
 

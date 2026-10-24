@@ -5,8 +5,9 @@ using UnityEngine;
 namespace Diorama.EditorTools
 {
     /// <summary>
-    /// Step 7: the progression config (Data/Battle/Progression), evolution levels on the species, the GrowthDirector,
-    /// and the dialogue script re-imported. Safe to re-run.
+    /// Step 7: the progression config (Data/Battle/Progression), evolution levels on the species, the GrowthDirector;
+    /// the Hearth Shrines (<see cref="ShrineTools"/>) with their scene object and the storage shelf; and the dialogue
+    /// script re-imported. Safe to re-run.
     /// </summary>
     static class Step7Setup
     {
@@ -56,10 +57,53 @@ namespace Diorama.EditorTools
             EditorUtility.SetDirty(growth);
             log.Append($"\n  GrowthDirector on {director.name}; progression wired to the director and the stage");
 
+            // ---- C: Hearth Shrines and the storage shelf ----
+            var island = Object.FindFirstObjectByType<IslandBuilder>();
+            var rack = director.pods;
+            if (island != null && island.world != null)
+            {
+                log.Append("\n  " + ShrineTools.SetUp(island.world));
+                island.Rebuild();
+            }
+            else Debug.LogError("[Step7] The island has no world map; no shrines placed.");
+
+            var shelf = Find<StorageShelf>("Storage Shelf");
+            shelf.island = island;
+            shelf.party = director.party;
+            shelf.pods = rack;
+            shelf.podPrefab = rack.podPrefab;
+            shelf.hudMaterial = rack.hudMaterial;
+            shelf.fx = rack.fx;
+            shelf.grabGuard = rack.handle;
+            shelf.offset = new Vector3(-0.04f, 0.15f, 0.06f);
+            EditorUtility.SetDirty(shelf);
+
+            var shrines = Find<HearthShrines>("Hearth Shrines");
+            shrines.island = island;
+            shrines.explorer = director.explorer;
+            shrines.party = director.party;
+            shrines.pods = rack;
+            shrines.shelf = shelf;
+            shrines.fx = rack.fx;
+            EditorUtility.SetDirty(shrines);
+            director.shrines = shrines;
+            EditorUtility.SetDirty(director);
+            log.Append("\n  'Hearth Shrines' and 'Storage Shelf' objects wired; losing returns to the last shrine");
+
             EditorSceneManager.MarkSceneDirty(active);
             EditorSceneManager.SaveScene(active);
             AssetDatabase.SaveAssets();
             Debug.Log(log.ToString());
+        }
+
+        /// <summary>A scene object with this component (made on the first run, found after).</summary>
+        static T Find<T>(string name) where T : Component
+        {
+            var c = Object.FindFirstObjectByType<T>(FindObjectsInactive.Include);
+            if (c != null) return c;
+            var go = new GameObject(name);
+            Undo.RegisterCreatedObjectUndo(go, name);
+            return go.AddComponent<T>();
         }
 
         static ProgressionConfig ProgressionAsset()

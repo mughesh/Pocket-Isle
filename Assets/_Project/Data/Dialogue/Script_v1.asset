@@ -218,7 +218,7 @@ MonoBehaviour:
     once: 1
     priority: 1
     note: 
-    target: 
+    target: shrine
     lines:
     - speaker: 0
       speakerName: Spirit

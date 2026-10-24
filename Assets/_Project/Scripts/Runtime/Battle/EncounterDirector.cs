@@ -19,7 +19,7 @@ namespace Diorama
     /// <see cref="dazedSeconds"/> (the pod pulses) and a pod catches it for sure, otherwise it fades out and the battle
     /// is won. After a win (fainted or caught) every creature that fought gets XP (<see cref="Progression"/>): the one
     /// on the pad shows it (XP bar, level-ups) and evolves there if due. Losing the whole party sends the explorer back
-    /// to spawn, healed. Then walking resumes.
+    /// to the last Hearth Shrine used (spawn without one), healed. Then walking resumes.
     /// Editor: B starts a grass encounter on the spot; in battle C throws the cradle pod, X switches to the next pod.
     /// </summary>
     public class EncounterDirector : MonoBehaviour
@@ -33,6 +33,8 @@ namespace Diorama
         public PodRack pods;
         public TypeChart typeChart;
         public ProgressionConfig progression;
+        [Tooltip("Losing sends the explorer to the last shrine used (the start tile without one).")]
+        public HearthShrines shrines;
 
         [Header("Encounter tables (this region)")]
         public EncounterTable grassTable;
@@ -697,10 +699,10 @@ namespace Diorama
             stage.Cleanup();
             if (lost)
             {
-                // The shrine replaces spawn in step 7.
-                explorer.Teleport(explorer.SpawnTile);
+                bool atShrine = shrines != null && shrines.LastShrine.HasValue;
+                explorer.Teleport(shrines != null ? shrines.RespawnTile : explorer.SpawnTile);
                 party.HealAll();
-                Debug.Log("[EncounterDirector] Lost: explorer back at spawn, party healed.");
+                Debug.Log($"[EncounterDirector] Lost: explorer back at {(atShrine ? "the last shrine" : "spawn")}, party healed.");
             }
             _stepsSinceBattle = 0;
             explorer.Locked = false;

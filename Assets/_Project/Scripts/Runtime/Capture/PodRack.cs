@@ -93,6 +93,18 @@ namespace Diorama
         /// <summary>The gaze is on a pod (its pinch wins over tile gaze).</summary>
         public bool IsGazed { get; private set; }
 
+        /// <summary>
+        /// Outside battles: replaces the stats card on look + pinch (the storage shelf at a shrine). Gets the slot, which
+        /// can be an empty socket just past the last pod; returns true when it handled the pick.
+        /// </summary>
+        public Func<int, bool> PickHandler { get; set; }
+
+        /// <summary>Something beside the rack has the gaze (the storage shelf): counts as <see cref="IsGazed"/>.</summary>
+        public bool ExternalGaze { get; set; }
+
+        /// <summary>A slot to highlight (the shelf's selection), or -1.</summary>
+        public int SelectedSlot { get; set; } = -1;
+
         public bool AnyHeld
         {
             get
@@ -123,6 +135,8 @@ namespace Diorama
         int _bigSlot = -1, _evolvingSlot = -1;
         float _bigUntil;
         float _cradleRefillAt = -1f, _cradleIn = 1f;
+        float _waveStart = -1f;
+        int _gazedEmpty = -1;
         MaterialPropertyBlock _socketBlock;
 
         static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
@@ -278,7 +292,8 @@ namespace Diorama
                 }
                 p.CreatureOut = i == ActiveSlot;
                 float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * 6f);
-                p.Glow = i == CradleSlot ? (CradlePulse ? 0.9f + 0.6f * pulse : CradleGlow ? 0.8f : 0f) : i == GlowSlot ? 1f : 0f;
+                p.Glow = i == CradleSlot ? (CradlePulse ? 0.9f + 0.6f * pulse : CradleGlow ? 0.8f : 0f)
+                    : Mathf.Max(i == GlowSlot || i == SelectedSlot ? 1f : 0f, WaveGlow(i));
                 if (!p.Detached && !held) p.SetGrabDiameter(i == CradleSlot ? cradleGrabSize : _partyGrab * FocusScale(i));
             }
             for (int i = 0; i < Party.Size; i++)
@@ -412,6 +427,50 @@ namespace Diorama
             while (CradleVisible && (_pods[CradleSlot] == null || _cradleIn < 1f)) yield return null;
         }
 
+        /// <summary>A warm glow rolls along the rim pods, left to right (a Hearth Shrine heals them).</summary>
+        public void WarmWave()
+        {
+            _waveStart = Time.time;
+            for (int i = 0; i < Party.Size; i++)
+                if (_pods[i] != null) StartCoroutine(WaveBurst(i, i * 0.08f));
+        }
+
+        IEnumerator WaveBurst(int slot, float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            var p = _pods[slot];
+            if (p != null && fx != null) fx.Burst(p.transform.position, 8, new Color(1f, 0.75f, 0.4f), World(0.02f), 0.5f, World(0.003f), Vector3.up * World(0.02f));
+        }
+
+        float WaveGlow(int slot)
+        {
+            if (_waveStart < 0f) return 0f;
+            float u = Time.time - _waveStart - slot * 0.08f;
+            if (u > 2f && slot == Party.Size - 1) _waveStart = -1f;
+            return u <= 0f || u >= 0.8f ? 0f : 1.6f * Mathf.Sin(u / 0.8f * Mathf.PI);
+        }
+
+        /// <summary>
+        /// The socket nearest a world point within <paramref name="maxWorld"/> metres, counting the filled pods and the
+        /// next empty socket (a storage pod dropped there joins the party), or -1.
+        /// </summary>
+        public int NearestSocket(Vector3 world, float maxWorld)
+        {
+            int best = -1;
+            float bestSq = maxWorld * maxWorld;
+            int last = Mathf.Min(Party.Size - 1, party.members.Count);
+            for (int i = 0; i <= last; i++)
+            {
+                float d = (HomeWorld(i) - world).sqrMagnitude;
+                if (d < bestSq)
+                {
+                    bestSq = d;
+                    best = i;
+                }
+            }
+            return best;
+        }
+
         /// <summary>The cradle pod pops up and glows (the wild creature is in the red).</summary>
         public void PresentCradle()
         {
@@ -456,7 +515,16 @@ namespace Diorama
                     }
                 }
             }
-            IsGazed = _gazed >= 0;
+            // With a pick handler (the shelf), the next empty socket can be looked at too.
+            _gazedEmpty = -1;
+            if (_gazed < 0 && PickHandler != null && !InBattle && party.members.Count < Party.Size && HeadGaze.TryGetRay(out var r2))
+            {
+                int slot = party.members.Count;
+                Vector3 at = HomeWorld(slot), to = at - r2.origin;
+                float along = Vector3.Dot(to, r2.direction);
+                if (along > 0f && (to - r2.direction * along).magnitude < podPrefab.radius * island.transform.lossyScale.x * gazeRadius) _gazedEmpty = slot;
+            }
+            IsGazed = _gazed >= 0 || _gazedEmpty >= 0 || ExternalGaze;
             UpdateFocus();
 
             for (int h = 0; h < 2; h++)
@@ -480,9 +548,12 @@ namespace Diorama
                 // Gaze + pinch (not a pinch that grabs a pod).
                 bool pinching = tracked && hand.GetIndexFingerIsPinching();
                 bool busy = handle != null && handle.IsHandBusy(left);
-                if (pinching && !_wasPinching[h] && !busy && _gazed >= 0 && !NearAnyPod(tip, grabPinchDistance))
+                int target = _gazed >= 0 ? _gazed : _gazedEmpty;
+                if (pinching && !_wasPinching[h] && !busy && target >= 0 && !NearAnyPod(tip, grabPinchDistance))
                 {
-                    if (InBattle)
+                    if (!InBattle && PickHandler != null && PickHandler(target)) { }
+                    else if (_gazed < 0) { }
+                    else if (InBattle)
                     {
                         Debug.Log($"[PodRack] Gaze + pinch ({(left ? "left" : "right")}) on {_pods[_gazed].name}.");
                         Picked?.Invoke(_gazed);

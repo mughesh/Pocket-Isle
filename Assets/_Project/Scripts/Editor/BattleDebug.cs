@@ -48,6 +48,36 @@ namespace Diorama.EditorTools
             Debug.Log($"[BattleDebug] {c.Name} Lv {c.level}, XP {c.xp}/{d.progression.XpToNext(c.level)}.");
         }
 
+        /// <summary>Walks the explorer to the nearest Hearth Shrine's front tile (it rests there).</summary>
+        public static void GoToShrine()
+        {
+            var s = Object.FindFirstObjectByType<HearthShrines>();
+            var e = Object.FindFirstObjectByType<GestureTestPiece>();
+            if (s == null || e == null || s.Shrines.Count == 0) return;
+            var best = s.Shrines[0];
+            foreach (var t in s.Shrines)
+                if ((t - e.Tile).sqrMagnitude < (best - e.Tile).sqrMagnitude) best = t;
+            var front = best + Vector2Int.up;
+            Debug.Log($"[BattleDebug] GoTo shrine front c{front.x} r{front.y}: {e.GoTo(front)}");
+        }
+
+        /// <summary>Puts 14 level 4 creatures from the grass table in storage (two shelf pages).</summary>
+        public static void FillStorage()
+        {
+            var party = Object.FindFirstObjectByType<Party>();
+            var d = Director;
+            if (party == null || d == null || d.grassTable == null) return;
+            var rnd = new SeededRandom(11);
+            for (int i = 0; i < 14 && d.grassTable.Roll(rnd, out var c, out _); i++)
+            {
+                c.level = 4;
+                c.Heal();
+                party.storage.Add(c);
+            }
+            party.NotifyChanged();
+            Debug.Log($"[BattleDebug] Storage now {party.storage.Count}.");
+        }
+
         /// <summary>Wild HP to 20% (in the red: the cradle pod glows and has a real chance).</summary>
         public static void WildToRed() => WildHp(0.2f);
 
