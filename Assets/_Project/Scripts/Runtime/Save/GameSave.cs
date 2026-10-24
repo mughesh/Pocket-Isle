@@ -23,6 +23,8 @@ namespace Diorama
         public EncounterDirector encounters;
         public RealmRestoration realm;
         public SpeciesRegistry registry;
+        [Tooltip("Interiors (Hearth Lodge): saved inside = loaded inside.")]
+        public SceneSwap swap;
         [Tooltip("For the \"Saved\" puff.")]
         public BattleHud hud;
         [Tooltip("The puff appears above it (the Lantern Spirit).")]
@@ -36,7 +38,15 @@ namespace Diorama
         /// <summary>Species ids caught so far (for the future "Caught 10 / 30" counter).</summary>
         public IReadOnlyCollection<string> Caught => _caught;
 
-        string RealmId => explorer != null && explorer.island != null && explorer.island.world != null ? explorer.island.world.name : "none";
+        /// <summary>The outdoor realm (its world map's name), also while an interior shows.</summary>
+        string RealmId
+        {
+            get
+            {
+                var world = swap != null ? swap.Outdoor : explorer != null && explorer.island != null ? explorer.island.world : null;
+                return world != null ? world.name : "none";
+            }
+        }
 
         void Start()
         {
@@ -55,7 +65,10 @@ namespace Diorama
                 encounters.Caught += OnCaught;
                 encounters.BattleEnded += OnBattleEnded;
             }
+            if (swap != null) swap.Finished += OnSwapFinished;
         }
+
+        void OnSwapFinished(bool inside) => Save(inside ? "entered " + swap.Interior.name : "left the interior");
 
         void OnDestroy()
         {
@@ -65,6 +78,7 @@ namespace Diorama
                 encounters.Caught -= OnCaught;
                 encounters.BattleEnded -= OnBattleEnded;
             }
+            if (swap != null) swap.Finished -= OnSwapFinished;
         }
 
         void OnRested(Vector2Int shrine) => Save("shrine", true);
@@ -144,10 +158,20 @@ namespace Diorama
             foreach (var id in data.caught) _caught.Add(id);
             NoteParty();
             if (Enum.TryParse(data.walkMode, out MoveMode mode)) explorer.moveMode = mode;
+            if (data.inside)
+            {
+                var interior = swap != null ? swap.FindInterior(data.interior) : null;
+                if (interior == null) problems.Add($"saved inside '{data.interior}', which isn't a known interior: outside instead");
+                else
+                {
+                    swap.SetReturn(explorer.Tile, explorer.Facing);
+                    swap.EnterNow(interior, new Vector2Int(data.insideX, data.insideY), new Vector2Int(data.insideFacingX, data.insideFacingY));
+                }
+            }
 
             foreach (var p in problems) Debug.LogWarning($"[GameSave] {p}");
             Debug.Log($"[GameSave] Loaded {SavePath} (saved {data.savedAt}): {Describe(party.members)}; storage {party.storage.Count}; " +
-                      $"explorer c{explorer.Tile.x} r{explorer.Tile.y}; last shrine {(data.hasShrine ? $"c{data.shrineX} r{data.shrineY}" : "none")}; " +
+                      $"explorer c{data.explorerX} r{data.explorerY}{(data.inside ? $" (inside {data.interior} at c{data.insideX} r{data.insideY})" : "")}; last shrine {(data.hasShrine ? $"c{data.shrineX} r{data.shrineY}" : "none")}; " +
                       $"realm {RealmState.Restored:0.##}; {data.said.Count} lines said; {_caught.Count} species caught; {explorer.moveMode}.");
         }
 
@@ -169,14 +193,23 @@ namespace Diorama
             if (!_ready || !enabled) return;
             try
             {
+                bool inside = swap != null && swap.Inside;
+                var outdoor = inside ? swap.ReturnTile : explorer.Tile;
+                var outdoorFacing = inside ? swap.ReturnFacing : explorer.Facing;
                 var data = new SaveData
                 {
                     party = SaveGame.ToSaved(party.members),
                     storage = SaveGame.ToSaved(party.storage),
-                    explorerX = explorer.Tile.x,
-                    explorerY = explorer.Tile.y,
-                    facingX = explorer.Facing.x,
-                    facingY = explorer.Facing.y,
+                    explorerX = outdoor.x,
+                    explorerY = outdoor.y,
+                    facingX = outdoorFacing.x,
+                    facingY = outdoorFacing.y,
+                    inside = inside,
+                    interior = inside ? swap.Interior.name : null,
+                    insideX = explorer.Tile.x,
+                    insideY = explorer.Tile.y,
+                    insideFacingX = explorer.Facing.x,
+                    insideFacingY = explorer.Facing.y,
                     hasShrine = shrines != null && shrines.LastShrine.HasValue,
                     said = Dialogue.Said.ToList(),
                     caught = _caught.ToList(),
@@ -187,9 +220,10 @@ namespace Diorama
                     data.shrineX = shrines.LastShrine.Value.x;
                     data.shrineY = shrines.LastShrine.Value.y;
                 }
-                data.SetRestored(RealmId, RealmState.Restored);
+                data.SetRestored(RealmId, swap != null ? swap.OutdoorRestored : RealmState.Restored);
                 SaveGame.Write(SavePath, data);
-                Debug.Log($"[GameSave] Saved ({reason}): {data.party.Count} pods, {data.storage.Count} in storage, explorer c{data.explorerX} r{data.explorerY}.");
+                Debug.Log($"[GameSave] Saved ({reason}): {data.party.Count} pods, {data.storage.Count} in storage, explorer c{data.explorerX} r{data.explorerY}" +
+                          $"{(inside ? $", inside {data.interior} at c{data.insideX} r{data.insideY}" : "")}.");
                 if (puff) Puff();
             }
             catch (Exception e)

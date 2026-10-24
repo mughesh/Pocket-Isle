@@ -99,8 +99,14 @@ namespace Diorama
         /// </summary>
         public Func<int, bool> PickHandler { get; set; }
 
-        /// <summary>Something beside the rack has the gaze (the storage shelf): counts as <see cref="IsGazed"/>.</summary>
-        public bool ExternalGaze { get; set; }
+        /// <summary>Something else has the gaze (a shrine, a lodge Isling): counts as <see cref="IsGazed"/>, so tile gaze doesn't walk.</summary>
+        public void SetExternalGaze(object owner, bool on)
+        {
+            if (on) _externalGaze.Add(owner);
+            else _externalGaze.Remove(owner);
+        }
+
+        readonly System.Collections.Generic.HashSet<object> _externalGaze = new System.Collections.Generic.HashSet<object>();
 
         /// <summary>A slot to highlight (the shelf's selection), or -1.</summary>
         public int SelectedSlot { get; set; } = -1;
@@ -524,7 +530,7 @@ namespace Diorama
                 float along = Vector3.Dot(to, r2.direction);
                 if (along > 0f && (to - r2.direction * along).magnitude < podPrefab.radius * island.transform.lossyScale.x * gazeRadius) _gazedEmpty = slot;
             }
-            IsGazed = _gazed >= 0 || _gazedEmpty >= 0 || ExternalGaze;
+            IsGazed = _gazed >= 0 || _gazedEmpty >= 0 || _externalGaze.Count > 0;
             UpdateFocus();
 
             for (int h = 0; h < 2; h++)

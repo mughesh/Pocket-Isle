@@ -39,6 +39,9 @@ namespace Diorama
         public string props = string.Empty;
         public List<PropLegend> propLegend = new List<PropLegend>();
 
+        [Tooltip("Content zoom while this map shows (interiors smaller than the island window: the lodge ~1.6). 1 = outdoor maps.")]
+        [Min(0.1f)] public float viewZoom = 1f;
+
         [Header("Look")]
         [Tooltip("Realm colours (restored / unrestored). Empty = the island materials' own colours.")]
         public RealmTheme theme;

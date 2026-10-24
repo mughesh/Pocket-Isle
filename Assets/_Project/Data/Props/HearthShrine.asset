@@ -22,15 +22,6 @@ MonoBehaviour:
     slot: 2
     motion: 0
     motionAmount: 0
-  - shape: {fileID: 11400000, guid: 7238ade13f6b53349af7402550b93d4a, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 4
-    motion: 2
-    motionAmount: 0.02
   - shape: {fileID: 11400000, guid: e2814b8752677f74b8e858b3cdeb3834, type: 2}
     part: {fileID: 0}
     position: {x: 0, y: 0, z: 0}
@@ -39,8 +30,8 @@ MonoBehaviour:
     mirrorX: 0
     slot: 3
     motion: 1
-    motionAmount: 0.01
-  - shape: {fileID: 11400000, guid: 015d67bd2dbfcd947a207bccf2044a09, type: 2}
+    motionAmount: 0.008
+  - shape: {fileID: 11400000, guid: f244fe6d5c9144d4eaf584874db8c090, type: 2}
     part: {fileID: 0}
     position: {x: 0, y: 0, z: 0}
     rotation: {x: 0, y: 0, z: 0}
@@ -48,7 +39,16 @@ MonoBehaviour:
     mirrorX: 0
     slot: 4
     motion: 2
-    motionAmount: 0.004
+    motionAmount: 0.003
+  - shape: {fileID: 11400000, guid: 7238ade13f6b53349af7402550b93d4a, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 4
+    motion: 2
+    motionAmount: 0.03
   palette:
   - restored: {r: 0.8140393, g: 0.50571483, b: 0.24471544, a: 1}
     unrestored: {r: 0.7607843, g: 0.45882353, b: 0.25882354, a: 1}
@@ -75,11 +75,11 @@ MonoBehaviour:
     at: 0
   spec: 0.15
   outline: 0.022
-  footprint: {x: 1, y: 1}
+  footprint: {x: 2, y: 2}
   blocksWalking: 1
   randomYaw: 0
   yawJitter: 0
   scaleJitter: 0
-  resolution: 30
-  triangleBudget: 1500
+  resolution: 40
+  triangleBudget: 2600
   bakedMesh: {fileID: 4300000, guid: 81906fc399d022f49b741f902ea27887, type: 2}

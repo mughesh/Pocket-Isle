@@ -48,6 +48,22 @@ namespace Diorama.EditorTools
             Debug.Log($"[BattleDebug] {c.Name} Lv {c.level}, XP {c.xp}/{d.progression.XpToNext(c.level)}.");
         }
 
+        /// <summary>Scene swap into the Hearth Lodge (no shrine needed).</summary>
+        public static void EnterLodge()
+        {
+            var s = Object.FindFirstObjectByType<SceneSwap>();
+            var lodge = s != null ? s.FindInterior("Lodge") : null;
+            if (lodge == null) { Debug.LogWarning("[BattleDebug] No SceneSwap or Lodge interior."); return; }
+            Debug.Log($"[BattleDebug] Enter lodge: {s.Enter(lodge, lodge.startTile)}");
+        }
+
+        /// <summary>Scene swap back outside.</summary>
+        public static void LeaveLodge()
+        {
+            var s = Object.FindFirstObjectByType<SceneSwap>();
+            if (s != null) Debug.Log($"[BattleDebug] Leave lodge: {s.Return()}");
+        }
+
         /// <summary>Like key K: save now.</summary>
         public static void SaveNow()
         {
@@ -82,8 +98,20 @@ namespace Diorama.EditorTools
             var best = s.Shrines[0];
             foreach (var t in s.Shrines)
                 if ((t - e.Tile).sqrMagnitude < (best - e.Tile).sqrMagnitude) best = t;
-            var front = best + Vector2Int.up;
+            var front = best + new Vector2Int(0, 2);
             Debug.Log($"[BattleDebug] GoTo shrine front c{front.x} r{front.y}: {e.GoTo(front)}");
+        }
+
+        /// <summary>Like look + pinch on the nearest shrine: walks next to it if needed, then goes into the lodge.</summary>
+        public static void PickShrine()
+        {
+            var s = Object.FindFirstObjectByType<HearthShrines>();
+            var e = Object.FindFirstObjectByType<GestureTestPiece>();
+            if (s == null || e == null || s.Shrines.Count == 0) return;
+            int best = 0;
+            for (int i = 1; i < s.Shrines.Count; i++)
+                if ((s.Shrines[i] - e.Tile).sqrMagnitude < (s.Shrines[best] - e.Tile).sqrMagnitude) best = i;
+            s.Pick(best, "BattleDebug");
         }
 
         /// <summary>Puts 14 level 4 creatures from the grass table in storage (two shelf pages).</summary>
@@ -358,6 +386,9 @@ namespace Diorama.EditorTools
             Directory.CreateDirectory(ShotDir);
             var go = new GameObject("Shot Camera");
             var cam = go.AddComponent<Camera>();
+            // Never an XR camera: with Link running, every new stereo camera takes an XR reference space and the
+            // runtime crashed Unity once the limit was reached (Oct 24).
+            cam.stereoTargetEye = StereoTargetEyeMask.None;
             cam.transform.SetPositionAndRotation(position, rotation);
             cam.fieldOfView = 55f;
             cam.nearClipPlane = 0.01f;

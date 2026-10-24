@@ -73,6 +73,12 @@ namespace Diorama
         [Tooltip("Restoration when a scene starts (1 = restored).")]
         [Range(0f, 1f)] public float startRestored = 1f;
 
+        [Header("Light (interiors)")]
+        [Tooltip("While this map shows, the main light takes this colour and intensity (interiors: warm hearth light).")]
+        public bool overrideLight;
+        public Color lightColor = Color.white;
+        [Min(0f)] public float lightIntensity = 1f;
+
         public ThemeColors Evaluate(float restoredAmount) => ThemeColors.Lerp(unrestored, restored, Mathf.Clamp01(restoredAmount));
     }
 }

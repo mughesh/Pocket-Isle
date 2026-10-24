@@ -43,6 +43,12 @@ namespace Diorama
         public List<string> caught = new List<string>();
         public string walkMode;
 
+        [Header("Inside an interior (the explorer fields above are then the outdoor return tile)")]
+        public bool inside;
+        public string interior;
+        public int insideX, insideY;
+        public int insideFacingX, insideFacingY = -1;
+
         public float RestoredFor(string realm, float fallback)
         {
             foreach (var r in realms)

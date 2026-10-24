@@ -16,6 +16,9 @@ namespace Diorama
     ///   zoomed in it is. Content near the window edge sinks into the base and anything outside the footprint is
     ///   clipped in the shaders (DioramaWindow.hlsl).
     /// Only tiles inside the window are drawn; instance buffers are reused, so scrolling doesn't allocate.
+    /// Each content map's instances are built once and kept (<see cref="Prepare"/>), so a scene swap back to a map seen
+    /// before (<see cref="SceneSwap"/>: the outdoor map after the lodge) costs nothing; <see cref="swapSink"/> sinks the
+    /// content front to back during the swap and <see cref="rimTheme"/> tints the rocky base toward the next map.
     /// Without a world it shows the island map centred, which is the Step 1 prototype layout (same seed, same order).
     /// </summary>
     [ExecuteAlways]
@@ -72,6 +75,12 @@ namespace Diorama
         /// <summary>How much content outside the clearing darkens (0..1), usually faded with the zoom.</summary>
         [NonSerialized] public float clearingDim;
 
+        /// <summary>Scene swap: 0 = content shown, 1 = all content sunk into the base (front first). Driven by SceneSwap.</summary>
+        [NonSerialized] public float swapSink;
+        /// <summary>Scene swap: the rocky base blends from the content's theme toward this one by <see cref="rimTint"/>.</summary>
+        [NonSerialized] public RealmTheme rimTheme;
+        [NonSerialized] public float rimTint;
+
         // Fixed sizes from the prototype, in metres. The cap mesh reaches down to the column top (-CapSkirt) so
         // water, which sits CapSkirt lower, still shows above the column.
         const float ColumnDepth = 0.04f;
@@ -101,6 +110,7 @@ namespace Diorama
         static readonly int ClearingSizeId = Shader.PropertyToID("_DioramaClearingSize");
         static readonly int ClearingViewId = Shader.PropertyToID("_DioramaClearingView");
         static readonly int ClearingWorldId = Shader.PropertyToID("_DioramaClearingWorld");
+        static readonly int SwapId = Shader.PropertyToID("_DioramaSwap");
         static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
         static readonly int OutlineColorId = Shader.PropertyToID("_OutlineColor");
         static readonly int EmissiveId = Shader.PropertyToID("_Emissive");
@@ -133,19 +143,36 @@ namespace Diorama
             public int count;
         }
 
-        readonly List<Batch> _batches = new List<Batch>();
-        readonly List<Mesh> _meshes = new List<Mesh>();
+        /// <summary>Everything built for one content map (kept while switching maps).</summary>
+        sealed class Built
+        {
+            public IslandMap content;
+            public int version = -1;
+            public PropRecipe tree;
+            public readonly List<Batch> batches = new List<Batch>();
+            public readonly List<Mesh> meshes = new List<Mesh>();
+            public readonly Dictionary<char, Batch> caps = new Dictionary<char, Batch>();
+            public Mesh capMesh;
+            public int tiles, blades;
+        }
+
+        readonly List<Built> _cache = new List<Built>();
+        Built _built = new Built();
+        List<Batch> _batches => _built.batches;
+        List<Mesh> _meshes => _built.meshes;
+        Dictionary<char, Batch> _capBatches => _built.caps;
         readonly HashSet<Material> _warned = new HashSet<Material>();
-        readonly Dictionary<char, Batch> _capBatches = new Dictionary<char, Batch>();
-        int _builtVersion = -1;
-        PropRecipe _builtTreeProp;
         Bounds _localBounds;
         Matrix4x4 _lastLocalToWorld, _lastContentToWorld;
         bool _needsRebuild = true;
         bool _matricesDirty = true;
         Texture2D _edgeTexture;
         Vector4 _edgeUv;
-        Mesh _capMesh;
+        Mesh _capMesh
+        {
+            get => _built.capMesh;
+            set => _built.capMesh = value;
+        }
 
         // View: map tile (column, row) at the island centre, zoom pivot tile and zoom factor.
         Vector2 _viewCenter, _zoomPivot;
@@ -343,17 +370,60 @@ namespace Diorama
         /// <summary>Rebuilds all instances from the maps. Call after changing fields from code.</summary>
         public void Rebuild()
         {
-            ReleaseMeshes();
-            _batches.Clear();
-            _capBatches.Clear();
+            ReleaseCache();
             _needsRebuild = false;
+            if (_edgeTexture != null) ReleaseObject(_edgeTexture);
+            _edgeTexture = null;
+            BuildCurrent();
+        }
+
+        /// <summary>
+        /// Makes the current content ready to draw now: reuses its kept build when it is still valid, builds it otherwise.
+        /// Called by every draw; SceneSwap calls it at the bottom of a swap so nothing is built while content rises.
+        /// </summary>
+        public void Prepare()
+        {
+            if (_needsRebuild)
+            {
+                Rebuild();
+                return;
+            }
+            var content = Content;
+            if (content == null) return;
+            if (_built.content == content && _built.version == content.version && _built.tree == ThemeTree) return;
+            var kept = _cache.Find(b => b.content == content);
+            if (kept != null && kept.version == content.version && kept.tree == ThemeTree)
+            {
+                _built = kept;
+                TileCount = kept.tiles;
+                BladeCount = kept.blades;
+                _matricesDirty = true;
+                _flashStart = -1f;
+                return;
+            }
+            if (kept != null)
+            {
+                foreach (var m in kept.meshes) ReleaseObject(m);
+                _cache.Remove(kept);
+            }
+            BuildCurrent();
+        }
+
+        /// <summary>Builds the current content into a new kept entry (the footprint edge texture is shared).</summary>
+        void BuildCurrent()
+        {
+            double t0 = Time.realtimeSinceStartupAsDouble;
+            _built = new Built();
+            _cache.Add(_built);
             _matricesDirty = true;
+            _flashStart = -1f;
             BladeCount = 0;
             TileCount = 0;
             if (map == null) return;
             var content = Content;
-            _builtVersion = content.version;
-            var treeProp = _builtTreeProp = ThemeTree;
+            _built.content = content;
+            _built.version = content.version;
+            var treeProp = _built.tree = ThemeTree;
 
             var rnd = new SeededRandom(seed);
             float tile = map.tileSize, cap = map.capHeight;
@@ -383,7 +453,7 @@ namespace Diorama
                     float depth = Mathf.Max(0.02f, 0.17f - dc * 0.022f + rnd.Next() * 0.035f);
                     undersides.local.Add(Matrix4x4.TRS(new Vector3(p.x, -CapSkirt - ColumnDepth, p.z), Quaternion.identity, new Vector3(1f, depth, 1f)));
                 }
-            BuildEdgeTexture();
+            if (_edgeTexture == null) BuildEdgeTexture();
 
             // ---- content: map space, grouped by cell ----
             int crows = content.Rows, ccols = content.Columns, cells = crows * ccols;
@@ -496,6 +566,11 @@ namespace Diorama
             // Footprint plus room for zoomed-in trees above and the underside below.
             float halfX = cols * tile * 0.5f + 0.02f, halfZ = rows * tile * 0.5f + 0.02f;
             _localBounds = new Bounds(new Vector3(0f, 0.05f, 0f), new Vector3(halfX * 2f, 0.8f, halfZ * 2f));
+            _built.tiles = TileCount;
+            _built.blades = BladeCount;
+            if (Application.isPlaying)
+                Debug.Log($"[Diorama] Built {content.name}: {TileCount} tiles, {BladeCount} blades, {_batches.Count} batches in " +
+                          $"{(Time.realtimeSinceStartupAsDouble - t0) * 1000.0:0} ms ({_cache.Count} map(s) kept).");
         }
 
         static readonly Vector2Int[] Sides = { new Vector2Int(1, 0), new Vector2Int(-1, 0), new Vector2Int(0, 1), new Vector2Int(0, -1) };
@@ -678,10 +753,17 @@ namespace Diorama
 
         void ReleaseMeshes()
         {
-            foreach (var m in _meshes) ReleaseObject(m);
-            _meshes.Clear();
+            ReleaseCache();
             ReleaseObject(_edgeTexture);
             _edgeTexture = null;
+        }
+
+        void ReleaseCache()
+        {
+            foreach (var b in _cache)
+                foreach (var m in b.meshes) ReleaseObject(m);
+            _cache.Clear();
+            _built = new Built();
         }
 
         static void ReleaseObject(UnityEngine.Object o)
@@ -773,14 +855,13 @@ namespace Diorama
             Shader.SetGlobalVector(ClearingSizeId, new Vector4(_clearRadii.x * tile, _clearRadii.y * tile, clearingStrength, clearingDim));
             Shader.SetGlobalVector(ClearingViewId, new Vector4(v.x, v.z, _clearViewWidth * tile, 0f));
             Shader.SetGlobalVector(ClearingWorldId, (l2w * ContentToLocal).MultiplyPoint3x4(c));
+            Shader.SetGlobalVector(SwapId, new Vector4(swapSink, _localBounds.max.z, Mathf.Max(0.01f, _localBounds.size.z), 0f));
         }
 
         /// <summary>Queues the island's instanced draws for one camera.</summary>
         public void Draw(Camera cam)
         {
-            var content = Content;
-            if (content != null && (content.version != _builtVersion || ThemeTree != _builtTreeProp)) _needsRebuild = true;
-            if (_needsRebuild) Rebuild();
+            Prepare();
             if (_batches.Count == 0) return;
             UpdateWorldMatrices();
             SetWindowGlobals();
@@ -825,6 +906,8 @@ namespace Diorama
             var theme = Theme;
             if (theme == null) return;
             var t = theme.Evaluate(RealmState.Restored);
+            bool tint = rimTheme != null && rimTint > 0f;
+            var next = tint ? rimTheme.Evaluate(RealmState.Restored) : default;
             foreach (var b in _batches)
             {
                 if (b.role == ThemeRole.None) continue;
@@ -837,6 +920,7 @@ namespace Diorama
                     continue;
                 }
                 Color c = RoleColor(t, b.role);
+                if (tint && b.rim) c = Color.Lerp(c, RoleColor(next, b.role), rimTint);
                 b.color = c;
                 if (b.outline)
                 {

@@ -92,6 +92,28 @@ namespace Diorama.Tests
         }
 
         [Test]
+        public void InsideAnInterior_KeepsTheOutdoorReturnTileAndTheInsideTile()
+        {
+            var data = new SaveData
+            {
+                explorerX = 33, explorerY = 27, facingX = 1, facingY = 0,
+                inside = true, interior = "Lodge", insideX = 3, insideY = 6, insideFacingX = 0, insideFacingY = -1,
+            };
+            SaveGame.Write(_path, data);
+            Assert.AreEqual(SaveGame.ReadResult.Loaded, SaveGame.Read(_path, out var back, out _));
+            Assert.IsTrue(back.inside);
+            Assert.AreEqual("Lodge", back.interior);
+            Assert.AreEqual(new Vector2Int(33, 27), new Vector2Int(back.explorerX, back.explorerY), "outdoor return tile");
+            Assert.AreEqual(new Vector2Int(3, 6), new Vector2Int(back.insideX, back.insideY));
+
+            // A step 7 save (no interior fields) reads as outside.
+            File.WriteAllText(_path, "{\"version\":1,\"explorerX\":5,\"explorerY\":6}");
+            Assert.AreEqual(SaveGame.ReadResult.Loaded, SaveGame.Read(_path, out back, out _));
+            Assert.IsFalse(back.inside);
+            Assert.AreEqual(5, back.explorerX);
+        }
+
+        [Test]
         public void UnknownSpecies_IsSkippedAndReported()
         {
             Species("Kilnpot");

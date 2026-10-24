@@ -153,7 +153,7 @@ namespace Diorama
         public void StartEncounter(Habitat habitat)
         {
             var table = habitat == Habitat.Water ? waterTable : grassTable;
-            if (InBattle || table == null || window.IsZoomed) return;
+            if (InBattle || table == null || window.IsZoomed || SceneSwap.IsInside || SceneSwap.IsBusy) return;
             StartCoroutine(Encounter(table, habitat == Habitat.Water ? explorer.Tile + explorer.Facing : explorer.Tile));
         }
 
@@ -165,7 +165,7 @@ namespace Diorama
 
         void OnTallGrassStep(Vector2Int tile)
         {
-            if (InBattle || grassTable == null) return;
+            if (InBattle || grassTable == null || SceneSwap.IsInside) return;
             if (++_stepsSinceBattle <= graceSteps) return;
             if (_rnd.Next() >= grassChance) return;
             StartCoroutine(Encounter(grassTable, tile));

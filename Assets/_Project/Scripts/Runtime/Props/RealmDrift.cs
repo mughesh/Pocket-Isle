@@ -58,7 +58,8 @@ namespace Diorama
 
         void LateUpdate()
         {
-            if (island == null || island.map == null || island.Content == null)
+            // Not indoors (scene swap): embers and leaves belong to the outdoor realm.
+            if (island == null || island.map == null || island.Content == null || SceneSwap.IsInside || SceneSwap.IsBusy)
             {
                 _renderer.enabled = false;
                 return;

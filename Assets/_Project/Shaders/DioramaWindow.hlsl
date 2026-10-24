@@ -19,6 +19,17 @@ float4   _DioramaClearingSize;  // x = radius along the axis, y = radius across,
 float4   _DioramaClearingView;  // xy = end of the view corridor toward the player (map xz), z = corridor half width
 float4   _DioramaClearingWorld; // xyz = ellipse centre in world space (grass bends away from it)
 
+// Scene swap (SceneSwap: shrine -> lodge, gates, temples): x = progress 0..1 (1 = all content sunk), y = island-local z
+// of the front edge, z = front-to-back depth. Front tiles go first, a ripple toward the back.
+float4   _DioramaSwap;
+
+float DioramaSwapSink(float3 islandOrigin)
+{
+    if (_DioramaSwap.x <= 0.0) return 0.0;
+    float delay = saturate((_DioramaSwap.y - islandOrigin.z) / max(_DioramaSwap.z, 1e-4)) * 0.6;
+    return smoothstep(delay, delay + 0.4, _DioramaSwap.x);
+}
+
 float DioramaEdgeDistance(float2 islandXZ)
 {
     float2 uv = float2(_DioramaFootprintUV.x + _DioramaFootprintUV.y * islandXZ.x,
@@ -86,7 +97,7 @@ float3 DioramaWindowVertexSink(float3 positionWS, float on, float3 originWS, flo
     if (on < 0.5) return positionWS;
     float3 origin = mul(_DioramaWorldToIsland, float4(originWS, 1.0)).xyz;
     float s = DioramaEdgeDistance(origin.xz);
-    float sink = max(1.0 - smoothstep(-_DioramaWindow.y, _DioramaWindow.y, s), extraSink);
+    float sink = max(max(1.0 - smoothstep(-_DioramaWindow.y, _DioramaWindow.y, s), extraSink), DioramaSwapSink(origin));
     islandPos.y -= _DioramaWindow.z * sink;
     return mul(_DioramaIslandToWorld, float4(islandPos, 1.0)).xyz;
 }

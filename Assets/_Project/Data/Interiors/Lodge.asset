@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8376f4ae30d857a45a9d450ac2b7be0f, type: 3}
+  m_Name: Lodge
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.WorldMap
+  layout: 'PPPPPPPP
+
+    PPPPPPPP
+
+    PPPPPPPP
+
+    PPPPPPPP
+
+    PPPPPPPP
+
+    PPPPPPPP
+
+    PPPPPPPP
+
+    PPPPPPPP'
+  tileSize: 0.05
+  capHeight: 0.006
+  seed: 1234
+  startTile: {x: 3, y: 6}
+  props: '........
+
+    ........
+
+    ........
+
+    ........
+
+    ........
+
+    ........
+
+    ........
+
+    ........'
+  propLegend: []
+  viewZoom: 1.6
+  theme: {fileID: 11400000, guid: 366cdeb7b4073f44bb3c017f25e29cb1, type: 2}

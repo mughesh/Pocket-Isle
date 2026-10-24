@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bb15570c66aa7e84ebdc3a6c27a865c7, type: 3}
-  m_Name: HearthShrine_Tip
+  m_Name: HearthShrine_Door
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.SdfShape
   primitives:
-  - kind: 0
+  - kind: 1
     blend: 0
-    k: 0
+    k: 0.1
     mirrorX: 0
-    a: {x: 0, y: 0.74, z: 0}
+    a: {x: 0, y: 0.3, z: 0.36}
     b: {x: 0, y: 0, z: 0}
-    size: {x: 0.05, y: 0, z: 0}
+    size: {x: 0.2, y: 0.28, z: 0.08}
     rotation: {x: 0, y: 0, z: 0}
     bumps: 0
     bumpFrequency: 0

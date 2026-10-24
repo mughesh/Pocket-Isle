@@ -118,6 +118,9 @@ namespace Diorama
         /// </summary>
         public Vector2 StandOffset { get; set; }
 
+        /// <summary>Scales the explorer (scene swaps shrink it into its tile and pop it up on the entry tile).</summary>
+        public float Shrink { get; set; } = 1f;
+
         Vector2 _standOffset;
 
         /// <summary>While locked (battles) all gestures are ignored and the explorer stands still.</summary>
@@ -431,7 +434,7 @@ namespace Diorama
                 else hop = hopHeight * 4f * u * (1f - u);
             }
             _cube.localPosition = island.TileToLocal(p, Map.capHeight + cubeSize * 0.5f + hop);
-            _cube.localScale = Vector3.one * (cubeSize * island.Zoom);
+            _cube.localScale = Vector3.one * (cubeSize * island.Zoom * Mathf.Max(0.001f, Shrink));
         }
 
         void PositionLabel()

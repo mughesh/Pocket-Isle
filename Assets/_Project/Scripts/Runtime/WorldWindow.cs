@@ -21,6 +21,25 @@ namespace Diorama
         public float defaultZoom = 3f;
         public float zoomSeconds = 0.6f;
 
+        /// <summary>
+        /// The current map's own zoom (interiors: the lodge shows its small room bigger), on top of the battle zoom.
+        /// <see cref="IsZoomed"/> ignores it, so the explorer still walks. Setting it re-centres at once.
+        /// </summary>
+        public float MapZoom
+        {
+            get => _mapZoom;
+            set
+            {
+                _mapZoom = Mathf.Max(0.1f, value);
+                _hasCenter = false;
+                _focus = null;
+                _easing = false;
+                Apply();
+            }
+        }
+
+        float _mapZoom = 1f;
+
         /// <summary>True while zoomed in or zooming either way.</summary>
         public bool IsZoomed => _zoomTo > 1.0001f || _zoom > 1.0001f;
 
@@ -123,7 +142,8 @@ namespace Diorama
         {
             if (island == null) return;
             if (!_hasCenter) _center = island.CenteredView;
-            island.SetView(_center, _pivot, _zoom);
+            // A map zoom alone scales around the view centre; a battle zoom keeps its own pivot.
+            island.SetView(_center, _zoom > 1.0001f ? _pivot : _center, _zoom * _mapZoom);
         }
 
         Vector2 CenterBias()
@@ -137,10 +157,10 @@ namespace Diorama
         {
             var fp = island.map;
             var world = World;
-            return new Vector2(ClampAxis(center.x, fp.Columns, world.Columns), ClampAxis(center.y, fp.Rows, world.Rows));
+            return new Vector2(ClampAxis(center.x, fp.Columns / _mapZoom, world.Columns), ClampAxis(center.y, fp.Rows / _mapZoom, world.Rows));
         }
 
-        static float ClampAxis(float v, int window, int map)
+        static float ClampAxis(float v, float window, int map)
         {
             float half = (window - 1) * 0.5f;
             float lo = half, hi = map - 1 - half;

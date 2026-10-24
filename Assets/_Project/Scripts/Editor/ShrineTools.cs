@@ -6,9 +6,10 @@ using UnityEngine;
 namespace Diorama.EditorTools
 {
     /// <summary>
-    /// Step 7: the Hearth Shrine prop (written, baked) and two shrines on a world map: one 2-5 tiles from the start and
-    /// one near the tall grass closest to the start, each on free grass with a walkable front tile (+row, where the
-    /// explorer stands to rest). Re-running moves them (earlier shrines are removed first).
+    /// Step 7 / 7b: the Hearth Shrine prop (2 x 2, written, baked) and two shrines on a world map: one 3-6 tiles from
+    /// the start and one near the tall grass closest to the start, each on free grass with free space around it and a
+    /// walkable front row (+row, toward the player). The anchor is the shrine's top-left tile (lowest column and row).
+    /// Re-running moves them (earlier shrines are removed first).
     /// </summary>
     static class ShrineTools
     {
@@ -51,11 +52,17 @@ namespace Diorama.EditorTools
             bool Walk(Vector2Int t) => In(t) && IslandMap.IsWalkable(world.At(t)) && props[t.y, t.x] == IslandMap.Empty;
             bool Free(Vector2Int t)
             {
-                var front = t + Vector2Int.up;
-                if (!In(t) || world.At(t) != IslandMap.Grass || reserved.Contains(t) || !Walk(front)) return false;
-                for (int dy = -1; dy <= 1; dy++)
-                    for (int dx = -1; dx <= 1; dx++)
-                        if (props[t.y + dy, t.x + dx] != IslandMap.Empty) return false;
+                for (int dy = 0; dy <= 1; dy++)
+                    for (int dx = 0; dx <= 1; dx++)
+                    {
+                        var q = t + new Vector2Int(dx, dy);
+                        if (!In(q) || world.At(q) != IslandMap.Grass || reserved.Contains(q)) return false;
+                    }
+                // The front row is walkable; nothing else stands in the ring around it.
+                if (!Walk(t + new Vector2Int(0, 2)) || !Walk(t + new Vector2Int(1, 2))) return false;
+                for (int dy = -1; dy <= 2; dy++)
+                    for (int dx = -1; dx <= 2; dx++)
+                        if (!In(t + new Vector2Int(dx, dy)) || props[t.y + dy, t.x + dx] != IslandMap.Empty) return false;
                 return true;
             }
             Vector2Int? Pick(Vector2Int center, int from, int to, System.Func<Vector2Int, bool> extra)
@@ -67,7 +74,7 @@ namespace Diorama.EditorTools
             }
 
             var placed = new List<Vector2Int>();
-            var a = Pick(start, 2, 5, t => true);
+            var a = Pick(start, 3, 6, t => true);
             if (a.HasValue) placed.Add(a.Value);
 
             Vector2Int? grass = null;
@@ -79,7 +86,7 @@ namespace Diorama.EditorTools
                         break;
                     }
             Vector2Int? b = grass.HasValue
-                ? Pick(grass.Value, 1, 4, t => placed.All(p => Mathf.Max(Mathf.Abs(p.x - t.x), Mathf.Abs(p.y - t.y)) >= 4))
+                ? Pick(grass.Value, 1, 5, t => placed.All(p => Mathf.Max(Mathf.Abs(p.x - t.x), Mathf.Abs(p.y - t.y)) >= 5))
                 : null;
             if (b.HasValue) placed.Add(b.Value);
             foreach (var t in placed) props[t.y, t.x] = ShrineKey;
@@ -93,7 +100,7 @@ namespace Diorama.EditorTools
             world.SetProps(sb.ToString());
             EditorUtility.SetDirty(world);
             AssetDatabase.SaveAssets();
-            string Where(Vector2Int? t) => t.HasValue ? $"c{t.Value.x} r{t.Value.y} (rest on c{t.Value.x} r{t.Value.y + 1})" : "NOT PLACED (no free tile)";
+            string Where(Vector2Int? t) => t.HasValue ? $"c{t.Value.x}-{t.Value.x + 1} r{t.Value.y}-{t.Value.y + 1}" : "NOT PLACED (no free space)";
             return $"shrines (props key '{ShrineKey}'): near spawn {Where(a)}; near the tall grass at " +
                    $"{(grass.HasValue ? $"c{grass.Value.x} r{grass.Value.y}" : "?")}: {Where(b)}";
         }

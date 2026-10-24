@@ -3,7 +3,7 @@
 Lantern Spirit = **Spirit**. Bubbles are short: one idea per line, ≤ ~70 characters.
 Format: `trigger_id` · speaker · lines (shown in order). **once** = only the first time.
 Optional `· → target` (before the lines): the Spirit flies to that anchor while saying them and it pulses
-(`leadPod`, `cradle`, `runes`, `nearPad`, `wildPad`, `shrine`, `tile:x,y`). No target = it stays home.
+(`leadPod`, `cradle`, `runes`, `nearPad`, `wildPad`, `shrine`, `lodgeCenter`, `pedestal`, `tile:x,y`). No target = it stays home.
 Names are placeholders. The step 5c dialogue system loads this (convert to data asset).
 
 ## Opening (Still Isle)
@@ -43,12 +43,17 @@ Names are placeholders. The step 5c dialogue system loads this (convert to data 
 - `capture.dazed.first` · once · → cradle (first dazed wild creature)
   - Spirit: It's dazed. Quick, a pod!
 - `capture.success.first` · once: Spirit: A new friend! It's in your pods now.
-- `party.full` · once: Spirit: Your pods are full. New friends go to the Sanctuary.
+- `party.full` · once: Spirit: Your pods are full. New friends will wait for you at the Hearth Lodge.
 - `evolve.first` · once · → nearPad (first evolution)
   - Spirit: Look at that! They've grown into something new.
-- `shrine.first` · once · → shrine
-  - Spirit: A Hearth Shrine. Rest here to heal everyone and save.
-  - Spirit: You can swap friends here too.
+- `shrine.first` · once · → shrine (first time a shrine comes into the window)
+  - Spirit: A Hearth Shrine! Warm your hand over the flame.
+- `lodge.first` · once · → lodgeCenter (first time inside the Hearth Lodge)
+  - Spirit: This is the Hearth Lodge. Islings you've caught rest here.
+- `lodge.swap.first` · once · → pedestal (first Isling on the pedestal)
+  - Spirit: Pick one up and set it on the rim to bring it along.
+- `lodge.last` · → leadPod (the last rim pod refuses to leave)
+  - Spirit: Keep at least one Isling with you!
 - `gate.first` · once
   - Spirit: A Shard Gate. It leads to another piece of the world.
   - Spirit: Step in when you're ready.

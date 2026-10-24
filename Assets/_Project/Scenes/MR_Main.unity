@@ -227,6 +227,57 @@ Transform:
   - {fileID: 1196775047}
   m_Father: {fileID: 301495222}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &221433161
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 221433163}
+  - component: {fileID: 221433162}
+  m_Layer: 0
+  m_Name: Scene Swap
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &221433162
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 221433161}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 810320bacb7cc7044a2771b6523415e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.SceneSwap
+  island: {fileID: 270959109}
+  window: {fileID: 270959113}
+  explorer: {fileID: 374318554}
+  sun: {fileID: 367221215}
+  interiors:
+  - {fileID: 11400000, guid: d856d518a6f0ad34dbd5d32a3ad3fa1e, type: 2}
+  seconds: 1.2
+--- !u!4 &221433163
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 221433161}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &232676576
 GameObject:
   m_ObjectHideFlags: 0
@@ -315,11 +366,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.HearthShrines
   island: {fileID: 270959109}
+  window: {fileID: 270959113}
   explorer: {fileID: 374318554}
   party: {fileID: 1499891276}
   pods: {fileID: 78739058}
-  shelf: {fileID: 744621267}
   fx: {fileID: 1078587927}
+  swap: {fileID: 221433162}
+  lodge: {fileID: 11400000, guid: d856d518a6f0ad34dbd5d32a3ad3fa1e, type: 2}
+  beaconMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  grabGuard: {fileID: 270959111}
+  bowlHeight: 1.42
+  beaconHeight: 0.22
+  beaconWidth: 0.04
+  palmReach: 0.08
+  palmFacing: 0.6
+  holdSeconds: 0.8
 --- !u!4 &261742742
 Transform:
   m_ObjectHideFlags: 0
@@ -1386,64 +1447,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 232676578}
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &744621266
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 744621268}
-  - component: {fileID: 744621267}
-  m_Layer: 0
-  m_Name: Storage Shelf
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &744621267
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 744621266}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ffedcf33702162145b87c7b726d2adb2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Diorama.Runtime::Diorama.StorageShelf
-  island: {fileID: 270959109}
-  party: {fileID: 1499891276}
-  pods: {fileID: 78739058}
-  podPrefab: {fileID: 2461426601937518530, guid: e869452f9fe504b42af0e22b32e4ba40, type: 3}
-  hudMaterial: {fileID: 2100000, guid: 0656b6c4f92798e49a14cf09a2c6800e, type: 2}
-  fx: {fileID: 1078587927}
-  grabGuard: {fileID: 270959111}
-  offset: {x: -0.04, y: 0.15, z: 0.06}
-  maxTilt: 40
-  spacing: 0.042
-  rowGap: 0.05
-  grabSize: 0.04
-  dropDistance: 0.05
-  gazeRadius: 2.2
---- !u!4 &744621268
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 744621266}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &886928184
@@ -2544,6 +2547,7 @@ MonoBehaviour:
   encounters: {fileID: 1499891275}
   realm: {fileID: 270959114}
   registry: {fileID: 11400000, guid: 520e7c86330e4ec478d9211900d5bd4b, type: 2}
+  swap: {fileID: 221433162}
   hud: {fileID: 1078587926}
   spirit: {fileID: 1847074512}
 --- !u!4 &1541842444
@@ -3379,6 +3383,6 @@ SceneRoots:
   - {fileID: 1499891277}
   - {fileID: 733261510}
   - {fileID: 908141542}
-  - {fileID: 744621268}
   - {fileID: 261742742}
   - {fileID: 1541842444}
+  - {fileID: 221433163}
