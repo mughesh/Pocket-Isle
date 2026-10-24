@@ -86,6 +86,7 @@ MonoBehaviour:
   glass: {fileID: 1218557526444436376}
   band: {fileID: 824013802217953984}
   miniAnchor: {fileID: 4082060364227401672}
+  miniMaterial: {fileID: 2100000, guid: aea15eff506f397418e0534380444e5b, type: 2}
   radius: 0.015
   miniHeight: 0.017
   spinSpeed: 30

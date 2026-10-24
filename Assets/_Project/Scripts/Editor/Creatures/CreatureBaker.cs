@@ -109,9 +109,9 @@ namespace Diorama.EditorTools
             view.hopHeight = r.height * 0.3f;
 
             // body
-            var bodyRenderer = AddRenderer(model, "Body", bodyMesh, mats.toon, r.outline > 0f ? mats.outline : null);
+            var bodyRenderer = AddRenderer(model, "Body", bodyMesh, r.outline > 0f ? mats.toon : mats.plain);
             view.pieces.Add(new CreatureView.Piece { renderer = bodyRenderer, style = BodyStyle(r, b.min.y) });
-            report.drawCalls += bodyRenderer.sharedMaterials.Length;
+            report.drawCalls += r.outline > 0f ? 2 : 1;
 
             // parts
             var instances = new List<List<Transform>>();
@@ -201,7 +201,7 @@ namespace Diorama.EditorTools
                         go.localScale = new Vector3(d.size.x, d.size.y, 0.02f);
                         mesh = shared.disc;
                     }
-                    var rend = AddRenderer(go, mesh, mats.toon, null);
+                    var rend = AddRenderer(go, mesh, mats.plain);
                     var style = new PieceStyle { baseColor = r.palette[d.color], top = r.palette[d.color], spec = 0f };
                     view.pieces.Add(new CreatureView.Piece { renderer = rend, style = style });
                     report.faceTriangles += mesh.triangles.Length / 3;
@@ -227,7 +227,7 @@ namespace Diorama.EditorTools
         // ---- pieces ----
 
         static Transform AddPart(Transform parent, PlacedPart placed, bool mirrored, string name, Mesh mesh,
-                                 (Material toon, Material outline, Material eye) mats, CreatureRecipe.Resolved r, CreatureView view)
+                                 (Material toon, Material plain, Material eye) mats, CreatureRecipe.Resolved r, CreatureView view)
         {
             var part = placed.part;
             var t = new GameObject(name).transform;
@@ -246,7 +246,7 @@ namespace Diorama.EditorTools
             t.localScale = scale;
 
             var st = part.style;
-            var rend = AddRenderer(t, mesh, mats.toon, st.outline > 0f ? mats.outline : null);
+            var rend = AddRenderer(t, mesh, st.outline > 0f ? mats.toon : mats.plain);
             Color baseColor = r.palette[st.color];
             var style = new PieceStyle
             {
@@ -351,19 +351,19 @@ namespace Diorama.EditorTools
         // Prototype: outline = base colour * 0.28 in linear space.
         static Color OutlineColor(Color c) => (c.linear * 0.28f).gamma;
 
-        static MeshRenderer AddRenderer(Transform parent, string name, Mesh mesh, Material toon, Material outline)
+        static MeshRenderer AddRenderer(Transform parent, string name, Mesh mesh, Material material)
         {
             var t = new GameObject(name).transform;
             t.SetParent(parent, false);
-            return AddRenderer(t, mesh, toon, outline);
+            return AddRenderer(t, mesh, material);
         }
 
-        static MeshRenderer AddRenderer(Transform t, Mesh mesh, Material toon, Material outline)
+        static MeshRenderer AddRenderer(Transform t, Mesh mesh, Material material)
         {
             t.gameObject.AddComponent<MeshFilter>().sharedMesh = mesh;
             var rend = t.gameObject.AddComponent<MeshRenderer>();
-            // A second material on a single-submesh mesh draws the same mesh again: the inverted-hull outline.
-            rend.sharedMaterials = outline != null ? new[] { toon, outline } : new[] { toon };
+            // One material: Creature draws the inverted-hull outline as its second pass, Creature_Plain doesn't.
+            rend.sharedMaterial = material;
             Quiet(rend);
             return rend;
         }
@@ -537,10 +537,26 @@ namespace Diorama.EditorTools
 
         // ---- materials ----
 
-        public static (Material toon, Material outline, Material eye) Materials()
+        /// <summary>
+        /// Creature (Diorama/Toon with its Outline pass on), Creature_Plain (the same without the outline pass: pieces
+        /// with outline 0, face decals, pod minis) and the eye material.
+        /// </summary>
+        public static (Material toon, Material plain, Material eye) Materials()
         {
             DioramaSceneSetup.EnsureFolder(MaterialDir);
-            return (Mat("Diorama/Toon", "Creature"), Mat("Diorama/Toon Outline", "Creature_Outline"), Mat("Diorama/Creature Eye", "Creature_Eye"));
+            var toon = Mat("Diorama/Toon", "Creature");
+            var plain = Mat("Diorama/Toon", "Creature_Plain");
+            SetOutlinePass(toon, true);
+            SetOutlinePass(plain, false);
+            return (toon, plain, Mat("Diorama/Creature Eye", "Creature_Eye"));
+        }
+
+        /// <summary>Turns a Diorama/Toon material's Outline pass (LightMode SRPDefaultUnlit) on or off.</summary>
+        public static void SetOutlinePass(Material m, bool on)
+        {
+            if (m == null || m.GetShaderPassEnabled("SRPDefaultUnlit") == on) return;
+            m.SetShaderPassEnabled("SRPDefaultUnlit", on);
+            EditorUtility.SetDirty(m);
         }
 
         static Material Mat(string shaderName, string name)

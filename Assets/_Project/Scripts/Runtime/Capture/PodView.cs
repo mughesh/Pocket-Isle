@@ -15,6 +15,8 @@ namespace Diorama
         public MeshRenderer band;
         [Tooltip("The tiny creature goes here (pod centre).")]
         public Transform miniAnchor;
+        [Tooltip("Body material for the Isling inside (Creature_Plain: Diorama/Toon without the outline pass).")]
+        public Material miniMaterial;
         [Tooltip("Glass radius at scale 1 (metres).")]
         public float radius = 0.015f;
         [Tooltip("Height of the tiny creature inside (metres at scale 1).")]
@@ -114,9 +116,8 @@ namespace Diorama
             _mini.name = $"Mini {species.displayName}";
             foreach (var r in _mini.GetComponentsInChildren<Renderer>())
             {
-                // Toon body only: the outline pass is too thin to see at this size.
-                var mats = r.sharedMaterials;
-                if (mats.Length > 1) r.sharedMaterials = new[] { mats[0] };
+                // No outline: too thin to see at this size (the plain material has the outline pass off).
+                if (miniMaterial != null && r.sharedMaterial != null && r.sharedMaterial.shader == miniMaterial.shader) r.sharedMaterial = miniMaterial;
                 r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             }
             foreach (var c in _mini.GetComponentsInChildren<Collider>()) Destroy(c);

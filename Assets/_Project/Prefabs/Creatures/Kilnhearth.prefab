@@ -157,7 +157,6 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 6341736eee647fb479bb80872f600c5d, type: 2}
-  - {fileID: 2100000, guid: f4d3b456fe1b055428d23c0c83c4f47f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -248,7 +247,6 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 6341736eee647fb479bb80872f600c5d, type: 2}
-  - {fileID: 2100000, guid: f4d3b456fe1b055428d23c0c83c4f47f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -429,7 +427,6 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 6341736eee647fb479bb80872f600c5d, type: 2}
-  - {fileID: 2100000, guid: f4d3b456fe1b055428d23c0c83c4f47f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -511,6 +508,7 @@ MonoBehaviour:
     hover: 0
     bob: 0
     sway: 2
+    swaySpeed: 0
   pieces:
   - renderer: {fileID: 4681082365337812653}
     style:
@@ -522,6 +520,8 @@ MonoBehaviour:
       bellyDirection: {x: 0, y: 0, z: 1}
       bellyAt: 0
       bellyMaxY: 0
+      bellyDrips: 0
+      bellyDripLength: 0
       socks: 1
       socksColor: {r: 0.25537255, g: 0.15257473, b: 0.12630588, a: 1}
       socksY: -0.62
@@ -532,6 +532,11 @@ MonoBehaviour:
       spots: 0
       spotColor: {r: 0.48313728, g: 0.15287842, b: 0.10352939, a: 1}
       spotScale: 0
+      cracks: 0
+      crackColor: {r: 0, g: 0, b: 0, a: 0}
+      crackScale: 0
+      crackWidth: 0
+      crackPulse: 0
       patches:
       - {x: 0, y: -0.36, z: 0.4, w: 0.26}
       - {x: 0.16, y: 0.32, z: 0.36, w: 0.12}
@@ -564,6 +569,8 @@ MonoBehaviour:
       bellyDirection: {x: 0, y: 0.15, z: 1}
       bellyAt: 0.75
       bellyMaxY: 9
+      bellyDrips: 0
+      bellyDripLength: 0
       socks: 0
       socksColor: {r: 0, g: 0, b: 0, a: 0}
       socksY: 0
@@ -574,6 +581,11 @@ MonoBehaviour:
       spots: 0
       spotColor: {r: 0, g: 0, b: 0, a: 0}
       spotScale: 0
+      cracks: 0
+      crackColor: {r: 0, g: 0, b: 0, a: 0}
+      crackScale: 0
+      crackWidth: 0
+      crackPulse: 0
       patches: []
       patchColors: []
       spec: 0.15
@@ -594,6 +606,8 @@ MonoBehaviour:
       bellyDirection: {x: 0, y: 0.15, z: 1}
       bellyAt: 0.75
       bellyMaxY: 9
+      bellyDrips: 0
+      bellyDripLength: 0
       socks: 0
       socksColor: {r: 0, g: 0, b: 0, a: 0}
       socksY: 0
@@ -604,6 +618,11 @@ MonoBehaviour:
       spots: 0
       spotColor: {r: 0, g: 0, b: 0, a: 0}
       spotScale: 0
+      cracks: 0
+      crackColor: {r: 0, g: 0, b: 0, a: 0}
+      crackScale: 0
+      crackWidth: 0
+      crackPulse: 0
       patches: []
       patchColors: []
       spec: 0.15
@@ -624,6 +643,8 @@ MonoBehaviour:
       bellyDirection: {x: 0, y: 0, z: 1}
       bellyAt: 0
       bellyMaxY: 9
+      bellyDrips: 0
+      bellyDripLength: 0
       socks: 0
       socksColor: {r: 0, g: 0, b: 0, a: 0}
       socksY: 0
@@ -634,6 +655,11 @@ MonoBehaviour:
       spots: 0
       spotColor: {r: 0, g: 0, b: 0, a: 0}
       spotScale: 0
+      cracks: 0
+      crackColor: {r: 0, g: 0, b: 0, a: 0}
+      crackScale: 0
+      crackWidth: 0
+      crackPulse: 0
       patches: []
       patchColors: []
       spec: 0.25
@@ -654,6 +680,8 @@ MonoBehaviour:
       bellyDirection: {x: 0, y: 0, z: 1}
       bellyAt: 0
       bellyMaxY: 9
+      bellyDrips: 0
+      bellyDripLength: 0
       socks: 0
       socksColor: {r: 0, g: 0, b: 0, a: 0}
       socksY: 0
@@ -664,6 +692,11 @@ MonoBehaviour:
       spots: 0
       spotColor: {r: 0, g: 0, b: 0, a: 0}
       spotScale: 0
+      cracks: 0
+      crackColor: {r: 0, g: 0, b: 0, a: 0}
+      crackScale: 0
+      crackWidth: 0
+      crackPulse: 0
       patches: []
       patchColors: []
       spec: 0
@@ -684,6 +717,8 @@ MonoBehaviour:
       bellyDirection: {x: 0, y: 0, z: 1}
       bellyAt: 0
       bellyMaxY: 9
+      bellyDrips: 0
+      bellyDripLength: 0
       socks: 0
       socksColor: {r: 0, g: 0, b: 0, a: 0}
       socksY: 0
@@ -694,6 +729,11 @@ MonoBehaviour:
       spots: 0
       spotColor: {r: 0, g: 0, b: 0, a: 0}
       spotScale: 0
+      cracks: 0
+      crackColor: {r: 0, g: 0, b: 0, a: 0}
+      crackScale: 0
+      crackWidth: 0
+      crackPulse: 0
       patches: []
       patchColors: []
       spec: 0
@@ -714,6 +754,8 @@ MonoBehaviour:
       bellyDirection: {x: 0, y: 0, z: 0}
       bellyAt: 0
       bellyMaxY: 0
+      bellyDrips: 0
+      bellyDripLength: 0
       socks: 0
       socksColor: {r: 0, g: 0, b: 0, a: 0}
       socksY: 0
@@ -724,6 +766,11 @@ MonoBehaviour:
       spots: 0
       spotColor: {r: 0, g: 0, b: 0, a: 0}
       spotScale: 0
+      cracks: 0
+      crackColor: {r: 0, g: 0, b: 0, a: 0}
+      crackScale: 0
+      crackWidth: 0
+      crackPulse: 0
       patches: []
       patchColors: []
       spec: 0
@@ -744,6 +791,8 @@ MonoBehaviour:
       bellyDirection: {x: 0, y: 0, z: 0}
       bellyAt: 0
       bellyMaxY: 0
+      bellyDrips: 0
+      bellyDripLength: 0
       socks: 0
       socksColor: {r: 0, g: 0, b: 0, a: 0}
       socksY: 0
@@ -754,6 +803,11 @@ MonoBehaviour:
       spots: 0
       spotColor: {r: 0, g: 0, b: 0, a: 0}
       spotScale: 0
+      cracks: 0
+      crackColor: {r: 0, g: 0, b: 0, a: 0}
+      crackScale: 0
+      crackWidth: 0
+      crackPulse: 0
       patches: []
       patchColors: []
       spec: 0
@@ -967,7 +1021,6 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 6341736eee647fb479bb80872f600c5d, type: 2}
-  - {fileID: 2100000, guid: f4d3b456fe1b055428d23c0c83c4f47f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1057,7 +1110,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 6341736eee647fb479bb80872f600c5d, type: 2}
+  - {fileID: 2100000, guid: aea15eff506f397418e0534380444e5b, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1148,7 +1201,6 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 6341736eee647fb479bb80872f600c5d, type: 2}
-  - {fileID: 2100000, guid: f4d3b456fe1b055428d23c0c83c4f47f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1238,7 +1290,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 6341736eee647fb479bb80872f600c5d, type: 2}
+  - {fileID: 2100000, guid: aea15eff506f397418e0534380444e5b, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1330,7 +1382,6 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 6341736eee647fb479bb80872f600c5d, type: 2}
-  - {fileID: 2100000, guid: f4d3b456fe1b055428d23c0c83c4f47f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

@@ -96,7 +96,7 @@ namespace Diorama.EditorTools
 
         /// <summary>
         /// Rough per-eye draw cost right now: the island's instanced draws plus every enabled scene renderer's material
-        /// passes (outline materials count as their own draw), and the triangles they submit.
+        /// passes (a Toon material's own Outline pass counts as a second draw), and the triangles they submit.
         /// </summary>
         public static void DrawCost()
         {
@@ -109,7 +109,9 @@ namespace Diorama.EditorTools
                 if (r is ParticleSystemRenderer) { rendererDraws++; continue; }
                 var mf = r.GetComponent<MeshFilter>();
                 var mesh = mf != null ? mf.sharedMesh : r is SkinnedMeshRenderer smr ? smr.sharedMesh : null;
-                int mats = r.sharedMaterials.Length;
+                int mats = 0;
+                foreach (var m in r.sharedMaterials)
+                    if (m != null) mats += m.passCount > 1 && m.GetShaderPassEnabled("SRPDefaultUnlit") && m.FindPass("Outline") >= 0 ? 2 : 1;
                 rendererDraws += mats;
                 if (mesh != null) tris += (long)mesh.triangles.Length / 3 * mats;
             }

@@ -56,7 +56,7 @@ Shader "Diorama/Toon"
         _DeformPivotY ("Breathe Pivot Height", Float) = 0
         [HideInInspector] _TimeOffset ("Time Offset", Float) = 0
 
-        [Header(Outline (read by Diorama Toon Outline))]
+        [Header(Outline (own Outline pass, also read by Diorama Toon Outline))]
         _OutlineWidth ("Outline Width", Float) = 0.035
         _OutlineColor ("Outline Colour", Color) = (0.1, 0.1, 0.1, 1)
 
@@ -176,6 +176,63 @@ Shader "Diorama/Toon"
                 col = lerp(col, float3(1.0, 1.0, 1.0), _Flash);
                 if (_WindowClip > 0.5) col = DioramaFocus(col, mapXZ);
                 return float4(col, 1.0);
+            }
+            ENDHLSL
+        }
+
+        // Inverted-hull outline as a second pass of the same material (step 7c: one material per renderer, SRP Batcher
+        // friendly). Materials that never outline turn this pass off (Material.SetShaderPassEnabled("SRPDefaultUnlit",
+        // false)); per renderer, _OutlineWidth <= 0 collapses it.
+        Pass
+        {
+            Name "Outline"
+            Tags { "LightMode" = "SRPDefaultUnlit" }
+            Cull Front
+            ZWrite On
+
+            HLSLPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+            #pragma multi_compile_instancing
+
+            #include "ToonCommon.hlsl"
+
+            struct Attributes
+            {
+                float4 positionOS : POSITION;
+                float3 normalOS   : NORMAL;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
+            };
+
+            struct Varyings
+            {
+                float4 positionCS : SV_POSITION;
+                float3 islandPos  : TEXCOORD0;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
+                UNITY_VERTEX_OUTPUT_STEREO
+            };
+
+            Varyings vert(Attributes v)
+            {
+                Varyings o = (Varyings)0;
+                UNITY_SETUP_INSTANCE_ID(v);
+                UNITY_TRANSFER_INSTANCE_ID(v, o);
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+                if (_OutlineWidth <= 0.0)
+                {
+                    o.positionCS = float4(0.0, 0.0, -2.0, 1.0); // outside the clip volume: nothing drawn
+                    return o;
+                }
+                float3 p = ToonDeform(v.positionOS.xyz, v.normalOS) + v.normalOS * _OutlineWidth;
+                o.positionCS = TransformWorldToHClip(ToonWindowVertex(TransformObjectToWorld(p), o.islandPos));
+                return o;
+            }
+
+            float4 frag(Varyings i) : SV_Target
+            {
+                UNITY_SETUP_INSTANCE_ID(i);
+                DioramaWindowClip(i.islandPos, _WindowClip);
+                return float4(_OutlineColor.rgb, 1.0);
             }
             ENDHLSL
         }

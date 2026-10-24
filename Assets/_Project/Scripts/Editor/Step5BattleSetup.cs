@@ -216,12 +216,11 @@ namespace Diorama.EditorTools
                 Object.DestroyImmediate(built);
             }
             var body = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Creatures/Creature.mat");
-            var outline = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Creatures/Creature_Outline.mat");
 
             var go = new GameObject("BattlePad");
             go.AddComponent<MeshFilter>().sharedMesh = mesh;
             var r = go.AddComponent<MeshRenderer>();
-            r.sharedMaterials = new[] { body, outline };
+            r.sharedMaterial = body; // Diorama/Toon draws its outline as a second pass
             r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             r.receiveShadows = false;
             go.AddComponent<BattlePad>();

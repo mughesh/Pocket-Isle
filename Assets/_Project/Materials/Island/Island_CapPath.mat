@@ -18,7 +18,8 @@ Material:
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
-  disabledShaderPasses: []
+  disabledShaderPasses:
+  - SRPDEFAULTUNLIT
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
@@ -26,9 +27,18 @@ Material:
     m_Ints: []
     m_Floats:
     - _BellyAt: 0.5
+    - _BellyDripLen: 0.8
+    - _BellyDrips: 0
     - _BellyMaxY: 9
     - _BellyOn: 0
     - _Breathe: 0
+    - _BreatheSpeed: 2.6
+    - _ClearSink: 0
+    - _CrackOn: 0
+    - _CrackPulse: 0
+    - _CrackScale: 2.5
+    - _CrackWidth: 0.04
+    - _DeformPivotY: 0
     - _Emissive: 0
     - _Flash: 0
     - _Grad: 0
@@ -40,17 +50,34 @@ Material:
     - _Spec: 0
     - _SpotOn: 0
     - _SpotScale: 9
+    - _TimeOffset: 0
     - _TipAt: 9
     - _TipOn: 0
+    - _WindowClip: 0
     m_Colors:
     - _BaseColor: {r: 0.9019608, g: 0.8, b: 0.58431375, a: 1}
     - _BellyColor: {r: 1, g: 1, b: 1, a: 1}
     - _BellyDir: {r: 0, g: 0, b: 1, a: 0}
+    - _ClearColor: {r: 0, g: 0, b: 0, a: 0}
+    - _CrackColor: {r: 1, g: 0.39999998, b: 0.09999997, a: 1}
     - _OutlineColor: {r: 0.50804526, g: 0.4480548, b: 0.32115185, a: 0.28}
+    - _Patch0: {r: 0, g: 0, b: 0, a: 0}
+    - _Patch1: {r: 0, g: 0, b: 0, a: 0}
+    - _Patch2: {r: 0, g: 0, b: 0, a: 0}
+    - _Patch3: {r: 0, g: 0, b: 0, a: 0}
+    - _Patch4: {r: 0, g: 0, b: 0, a: 0}
+    - _Patch5: {r: 0, g: 0, b: 0, a: 0}
+    - _PatchColor0: {r: 0, g: 0, b: 0, a: 1}
+    - _PatchColor1: {r: 0, g: 0, b: 0, a: 1}
+    - _PatchColor2: {r: 0, g: 0, b: 0, a: 1}
+    - _PatchColor3: {r: 0, g: 0, b: 0, a: 1}
+    - _PatchColor4: {r: 0, g: 0, b: 0, a: 1}
+    - _PatchColor5: {r: 0, g: 0, b: 0, a: 1}
     - _SockColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpotColor: {r: 0, g: 0, b: 0, a: 1}
     - _TipAxis: {r: 0, g: 1, b: 0, a: 0}
     - _TipColor: {r: 0, g: 0, b: 0, a: 1}
     - _TopColor: {r: 1, g: 1, b: 1, a: 1}
+    - _WindowOrigin: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
