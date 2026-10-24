@@ -35,6 +35,13 @@ and restore the world. Each restored region docks onto your island.
 - **Story hook:** the world shattered into floating pieces, one per element. Each Shard Keeper (region boss)
   was frightened or corrupted by the shattering. They aren't evil. Beat one and it calms, giving up its shard.
 
+## Controls (decided Oct 24)
+- **Walk, three ways, one path system:** (1) thumb swipe = auto-walk until tap / obstacle / new swipe, same swipe
+  again = run; (2) **touch a tile** with a fingertip (dip and lift) = walk there; (3) **look at a tile + pinch** =
+  walk there (reclined players). Thumb-hold walking dropped (accidental stops, tiring). Walk 0.4 s/tile, run 0.2.
+- Tap: stop while walking, hop when standing, fish when facing water.
+- Battle runes: poke or look + pinch; the panel faces you at battle start, drifts at most ±15°.
+
 ## World structure
 - **The Still Isle (hub, neutral).** Where the game starts. A statue in the centre with 3 empty sockets,
   never explained. Each shard you bring changes it a little (cracks glow, moss falls). Third shard wakes it.
@@ -113,6 +120,9 @@ explore → tall grass encounter → battle → capture → party / Sanctuary �
 - **Stage = the island itself, zoomed in.** Grass rustles → in ~0.6 s the map content scales ~3× around the
   encounter tile inside the fixed rocky base/rim; tiles beyond the rim are clipped (same clipping as the
   scrolling window). Creatures end up hand-sized on real tiles. Zoom back out after. No second stage to place.
+- **Battle space (Oct 23):** a clearing opens (grass bends flat, trees/rocks in the way sink), two round earth pads
+  rise under the creatures (sand pads at ponds), the rest of the island dims. **Pokémon framing:** your creature
+  on the near pad, back to you; the wild one on the far pad, facing you. Runes use ISDK poke + gaze/pinch.
 - **Flow:** grab a pod from the rim → toss it onto the island → your creature pops out facing the wild one →
   move runes float just above the near rim → weaken → flick a pod to capture → zoom out.
 - **1v1, turn-based, switch any time** from the party of 6 (switching uses your turn). Flee from wild battles.
