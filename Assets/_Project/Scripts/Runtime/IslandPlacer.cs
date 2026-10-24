@@ -15,7 +15,9 @@ namespace Diorama
     /// The island is parented to the camera rig's TrackingSpace: MRUK world locking moves that transform after the
     /// room loads, and the island has to move with it or it is left behind (it ended up on the floor).
     /// Startup waits until the centre eye has a real pose; over Link, OVRPlugin can report the head as tracked
-    /// while the camera is still at the rig origin.
+    /// while the camera is still at the rig origin. After a recenter it waits until the head pose has changed and the
+    /// head and TrackingSpace have stopped moving (MRUK world lock shifts TrackingSpace after a recenter; placing
+    /// before that left the island off to the side), logging both poses before and after.
     /// </summary>
     public class IslandPlacer : MonoBehaviour
     {
@@ -35,6 +37,11 @@ namespace Diorama
 
         [Tooltip("Wait at most this long for a real head pose before placing anyway (flat Editor Play has none).")]
         public float trackingTimeout = 10f;
+
+        [Tooltip("After a recenter, place once the head and TrackingSpace have held still this many frames...")]
+        public int settleFrames = 4;
+        [Tooltip("...or after this long at most (s).")]
+        public float settleTimeout = 1.5f;
 
         /// <summary>Short text for debug labels.</summary>
         public string Status { get; private set; } = "starting";
@@ -132,12 +139,68 @@ namespace Diorama
             else Debug.LogWarning("[IslandPlacer] No OVRCameraRig tracking space; island stays in world space.");
         }
 
-        void OnRecentered() => StartCoroutine(PlaceAfterFrames("Quest recenter", 2));
+        Coroutine _recenter;
 
-        IEnumerator PlaceAfterFrames(string reason, int frames)
+        void OnRecentered()
         {
-            for (int i = 0; i < frames; i++) yield return null; // the camera picks up the new pose
-            Place(reason);
+            if (_recenter != null) StopCoroutine(_recenter);
+            _recenter = StartCoroutine(PlaceWhenSettled());
+        }
+
+        Transform Space => Rig != null && Rig.trackingSpace != null ? Rig.trackingSpace : null;
+
+        string PoseText()
+        {
+            var head = Head;
+            var space = Space;
+            string h = head != null ? $"head {head.position:F2} yaw {head.eulerAngles.y:0} (local {head.localPosition:F2})" : "no head";
+            string t = space != null ? $"TrackingSpace {space.position:F2} yaw {space.eulerAngles.y:0}" : "no TrackingSpace";
+            return $"{h}, {t}";
+        }
+
+        IEnumerator PlaceWhenSettled()
+        {
+            var head = Head;
+            var space = Space;
+            Debug.Log($"[IslandPlacer] Recenter: before {PoseText()}.");
+            Vector3 startLocal = head != null ? head.localPosition : Vector3.zero;
+            Quaternion startLocalRot = head != null ? head.localRotation : Quaternion.identity;
+            float t = 0f;
+            int still = 0, frames = 0;
+            Vector3 lastHead = default, lastSpace = default;
+            Quaternion lastHeadRot = default, lastSpaceRot = default;
+            bool changed = head == null;
+            while (t < settleTimeout)
+            {
+                yield return null;
+                t += Time.unscaledDeltaTime;
+                frames++;
+                if (head == null) break;
+                // The recenter shows up as a jump in the head's tracking-space pose.
+                changed |= (head.localPosition - startLocal).sqrMagnitude > 1e-6f || Quaternion.Angle(head.localRotation, startLocalRot) > 0.5f;
+                Vector3 sp = space != null ? space.position : Vector3.zero;
+                Quaternion sr = space != null ? space.rotation : Quaternion.identity;
+                bool moved = (head.position - lastHead).sqrMagnitude > 4e-6f || Quaternion.Angle(head.rotation, lastHeadRot) > 0.5f ||
+                             (sp - lastSpace).sqrMagnitude > 1e-6f || Quaternion.Angle(sr, lastSpaceRot) > 0.2f;
+                lastHead = head.position;
+                lastHeadRot = head.rotation;
+                lastSpace = sp;
+                lastSpaceRot = sr;
+                still = moved ? 0 : still + 1;
+                if (changed && frames >= 2 && still >= settleFrames) break;
+            }
+            Debug.Log($"[IslandPlacer] Recenter: settled after {frames} frames ({t:0.00} s{(t >= settleTimeout ? ", timed out" : "")}, head pose changed: {changed}). After {PoseText()}.");
+            Place("Quest recenter");
+            _recenter = null;
+            // A second look, to catch TrackingSpace moving the island after it was placed.
+            yield return new WaitForSecondsRealtime(1f);
+            if (island != null && Head != null)
+            {
+                Vector3 to = island.transform.position - Head.position;
+                to.y = 0f;
+                float off = Vector3.SignedAngle(Flat(Head.forward), to, Vector3.up);
+                Debug.Log($"[IslandPlacer] Recenter +1 s: island {to.magnitude:F2} m away, {off:0} deg from head forward. {PoseText()}.");
+            }
         }
 
         void OnValidate()

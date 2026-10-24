@@ -235,10 +235,9 @@ namespace Diorama
 
         void GazePinch()
         {
-            var cam = Camera.main;
-            if (cam == null) return;
-            Vector3 o = _root.InverseTransformPoint(cam.transform.position);
-            Vector3 d = _root.InverseTransformDirection(cam.transform.forward);
+            if (!HeadGaze.TryGetRay(out var ray)) return;
+            Vector3 o = _root.InverseTransformPoint(ray.origin);
+            Vector3 d = _root.InverseTransformDirection(ray.direction);
             bool looking = false;
             if (d.z > 1e-4f)
             {

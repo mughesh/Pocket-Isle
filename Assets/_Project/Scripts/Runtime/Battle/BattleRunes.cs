@@ -38,8 +38,8 @@ namespace Diorama
         public float maxDrift = 15f;
         [Tooltip("How fast it drifts toward the head (1/s).")]
         public float driftSpeed = 1.5f;
-        [Tooltip("Leans the row back toward the head by this much (degrees). The head is above, so a full look-at tilted it too far.")]
-        public float tiltBack = 12f;
+        [Tooltip("The row pitches back so its face points at the eyes, clamped to this (degrees).")]
+        public float maxTilt = 40f;
 
         [Header("Poke")]
         [Tooltip("How far the plate travels in when pressed (island-local metres).")]
@@ -81,7 +81,7 @@ namespace Diorama
         readonly bool[] _wasPinching = new bool[2];
         StageActor _avoidA, _avoidB;
         float _avoid;
-        float _baseYaw, _yaw;
+        float _baseYaw, _yaw, _tilt;
         bool _loggedPokeHover, _loggedPokeSelect, _reportedInteractors;
 
         void Awake()
@@ -314,7 +314,8 @@ namespace Diorama
 
         /// <summary>
         /// Keeps the row above the middle of the near rim (the side toward the player). It faces the head's direction
-        /// at battle start (yaw on the island, slightly leaned back), then only drifts within <see cref="maxDrift"/>.
+        /// at battle start (yaw on the island), then only drifts within <see cref="maxDrift"/>; it pitches back so its face
+        /// points at the eyes (0 to <see cref="maxTilt"/>).
         /// </summary>
         void PlaceRow(bool snap)
         {
@@ -327,16 +328,25 @@ namespace Diorama
             {
                 // Head direction projected on the island, as a yaw in island space (the row's front looks toward -Z).
                 Vector3 away = island.transform.InverseTransformDirection(_row.position - cam.transform.position);
+                float below = -away.y;
                 away.y = 0f;
                 if (away.sqrMagnitude > 1e-8f)
                 {
                     float headYaw = Mathf.Atan2(away.x, away.z) * Mathf.Rad2Deg;
-                    if (snap) _baseYaw = _yaw = headYaw;
+                    // Head above the row = positive pitch (top leans away, face turns up to the eyes).
+                    float tilt = Mathf.Clamp(Mathf.Atan2(below, away.magnitude) * Mathf.Rad2Deg, 0f, maxTilt);
+                    if (snap)
+                    {
+                        _baseYaw = _yaw = headYaw;
+                        _tilt = tilt;
+                    }
                     float target = _baseYaw + Mathf.Clamp(Mathf.DeltaAngle(_baseYaw, headYaw), -maxDrift, maxDrift);
-                    _yaw = Mathf.LerpAngle(_yaw, target, 1f - Mathf.Exp(-Time.deltaTime * driftSpeed));
+                    float k = 1f - Mathf.Exp(-Time.deltaTime * driftSpeed);
+                    _yaw = Mathf.LerpAngle(_yaw, target, k);
+                    _tilt = Mathf.Lerp(_tilt, tilt, k);
                 }
             }
-            _row.rotation = island.transform.rotation * Quaternion.Euler(tiltBack, _yaw, 0f);
+            _row.rotation = island.transform.rotation * Quaternion.Euler(_tilt, _yaw, 0f);
         }
 
         /// <summary>True when the row (runes and caption) sits between the head and either creature's body.</summary>
@@ -365,15 +375,14 @@ namespace Diorama
 
         int GazeHover()
         {
-            var cam = Camera.main;
-            if (cam == null)
+            if (!HeadGaze.TryGetRay(out var ray))
             {
                 _reticle.enabled = false;
                 return -1;
             }
             // The row faces the head: its plane is z = 0 in row space, the front looks toward -Z.
-            Vector3 o = _row.InverseTransformPoint(cam.transform.position);
-            Vector3 d = _row.InverseTransformDirection(cam.transform.forward);
+            Vector3 o = _row.InverseTransformPoint(ray.origin);
+            Vector3 d = _row.InverseTransformDirection(ray.direction);
             if (d.z <= 1e-4f)
             {
                 _reticle.enabled = false;

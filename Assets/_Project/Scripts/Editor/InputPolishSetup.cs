@@ -7,13 +7,14 @@ namespace Diorama.EditorTools
     /// <summary>
     /// Step 5d scene wiring: swipe auto-walk at the new speeds, thumb-hold probe off, debug labels hidden, smaller
     /// explorer cube, and a "Tile Input" object with the tile cursor, fingertip touch and gaze + pinch pickers.
+    /// Step 5e: the lowered gaze ray (HeadGaze on Tile Input) and the island handle's battle-zoom check for idle facing.
     /// </summary>
     static class InputPolishSetup
     {
         const string ScenePath = "Assets/_Project/Scenes/MR_Main.unity";
         const string HudPath = "Assets/_Project/Materials/Battle/Hud.mat";
 
-        [MenuItem("Tools/Pocket Isle/Set Up MR_Main (5d tile input)", priority = 40)]
+        [MenuItem("Tools/Pocket Isle/Set Up MR_Main (5d-5e input)", priority = 40)]
         public static void SetUpMain()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)
@@ -52,6 +53,14 @@ namespace Diorama.EditorTools
             var old = GameObject.Find("Tile Input");
             if (old != null) Object.DestroyImmediate(old);
             var go = new GameObject("Tile Input");
+            var headGaze = go.AddComponent<HeadGaze>();
+            headGaze.island = island;
+            if (handle != null)
+            {
+                Undo.RecordObject(handle, "5e handle");
+                handle.window = Object.FindFirstObjectByType<WorldWindow>();
+                handle.autoFace = true;
+            }
             var cursor = go.AddComponent<TileCursor>();
             cursor.island = island;
             cursor.explorer = explorer;
@@ -71,7 +80,7 @@ namespace Diorama.EditorTools
 
             EditorSceneManager.MarkSceneDirty(active);
             EditorSceneManager.SaveScene(active);
-            Debug.Log($"[InputPolish] MR_Main: AutoWalk 0.4/0.2 s, thumb probe off, Tile Input added{(handle == null ? " (no IslandHandle: no grab guard)" : "")}{(bubble == null ? " (no dialogue bubble)" : "")}.");
+            Debug.Log($"[InputPolish] MR_Main: AutoWalk 0.4/0.2 s, thumb probe off, Tile Input + HeadGaze added, island auto-facing on{(handle == null ? " (no IslandHandle: no grab guard)" : "")}{(bubble == null ? " (no dialogue bubble)" : "")}.");
         }
     }
 }

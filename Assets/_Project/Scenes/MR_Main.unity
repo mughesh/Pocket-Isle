@@ -320,6 +320,12 @@ MonoBehaviour:
   - {fileID: 1736066350}
   minScaleFactor: 0.5
   maxScaleFactor: 2
+  autoFace: 1
+  faceSeconds: 0.25
+  idleAngle: 35
+  idleSeconds: 1.5
+  idleTurnSeconds: 1
+  window: {fileID: 270959113}
   nearRimDistance: 0.05
   highlight: 0.15
   highlightFadeSeconds: 0.12
@@ -755,6 +761,8 @@ MonoBehaviour:
   belowEye: 0.55
   seatedEyeHeight: 1.15
   trackingTimeout: 3
+  settleFrames: 4
+  settleTimeout: 1.5
 --- !u!114 &374318556
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -840,6 +848,9 @@ MonoBehaviour:
   spacing: 0.095
   fontSize: 0.11
   captionFontSize: 0.12
+  maxDrift: 15
+  driftSpeed: 1.5
+  maxTilt: 40
   pressDepth: 0.008
 --- !u!4 &382714128
 Transform:
@@ -855,99 +866,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 270959110}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &441767165
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 441767169}
-  - component: {fileID: 441767168}
-  - component: {fileID: 441767167}
-  - component: {fileID: 441767166}
-  m_Layer: 0
-  m_Name: Tile Input
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &441767166
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 441767165}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b25c68c52c1641942adc9d6cd63a63a3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Diorama.Runtime::Diorama.TileGaze
-  island: {fileID: 270959109}
-  explorer: {fileID: 374318554}
-  cursor: {fileID: 441767168}
-  grabGuard: {fileID: 270959111}
-  bubble: {fileID: 232676577}
---- !u!114 &441767167
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 441767165}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 094737c05c1b9934499be8c710ff5337, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Diorama.Runtime::Diorama.TileTouch
-  island: {fileID: 270959109}
-  explorer: {fileID: 374318554}
-  cursor: {fileID: 441767168}
-  grabGuard: {fileID: 270959111}
-  bubble: {fileID: 232676577}
-  hoverHeight: 0.03
-  dipHeight: 0.005
-  liftMargin: 0.008
-  maxSpeed: 0.6
-  maxDepth: 0.02
---- !u!114 &441767168
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 441767165}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2610d1582e705f54aaf9f863c7cc0b88, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Diorama.Runtime::Diorama.TileCursor
-  island: {fileID: 270959109}
-  explorer: {fileID: 374318554}
-  hudMaterial: {fileID: 2100000, guid: 0656b6c4f92798e49a14cf09a2c6800e, type: 2}
-  reachableColor: {r: 0.62, g: 0.96, b: 0.58, a: 0.95}
-  blockedColor: {r: 0.72, g: 0.72, b: 0.72, a: 0.6}
-  markerColor: {r: 1, g: 0.82, b: 0.42, a: 0.95}
-  ringSize: 0.92
-  lift: 0.002
---- !u!4 &441767169
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 441767165}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &509277689
 GameObject:
@@ -1483,6 +1401,118 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 904585642}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &908141537
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 908141542}
+  - component: {fileID: 908141541}
+  - component: {fileID: 908141540}
+  - component: {fileID: 908141539}
+  - component: {fileID: 908141538}
+  m_Layer: 0
+  m_Name: Tile Input
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &908141538
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 908141537}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b25c68c52c1641942adc9d6cd63a63a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.TileGaze
+  island: {fileID: 270959109}
+  explorer: {fileID: 374318554}
+  cursor: {fileID: 908141540}
+  grabGuard: {fileID: 270959111}
+  bubble: {fileID: 232676577}
+--- !u!114 &908141539
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 908141537}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 094737c05c1b9934499be8c710ff5337, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.TileTouch
+  island: {fileID: 270959109}
+  explorer: {fileID: 374318554}
+  cursor: {fileID: 908141540}
+  grabGuard: {fileID: 270959111}
+  bubble: {fileID: 232676577}
+  hoverHeight: 0.03
+  dipHeight: 0.005
+  liftMargin: 0.008
+  maxSpeed: 0.6
+  maxDepth: 0.02
+--- !u!114 &908141540
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 908141537}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2610d1582e705f54aaf9f863c7cc0b88, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.TileCursor
+  island: {fileID: 270959109}
+  explorer: {fileID: 374318554}
+  hudMaterial: {fileID: 2100000, guid: 0656b6c4f92798e49a14cf09a2c6800e, type: 2}
+  reachableColor: {r: 0.62, g: 0.96, b: 0.58, a: 0.95}
+  blockedColor: {r: 0.72, g: 0.72, b: 0.72, a: 0.6}
+  markerColor: {r: 1, g: 0.82, b: 0.42, a: 0.95}
+  ringSize: 0.92
+  lift: 0.002
+--- !u!114 &908141541
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 908141537}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8d7d6b37a7a1a446903d06ae0dc6047, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.HeadGaze
+  island: {fileID: 270959109}
+  offset: 18
+  adaptive: 1
+  share: 0.75
+  maxOffset: 25
+  smoothSeconds: 0.3
+--- !u!4 &908141542
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 908141537}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -2847,4 +2877,4 @@ SceneRoots:
   - {fileID: 542041139}
   - {fileID: 1499891277}
   - {fileID: 733261510}
-  - {fileID: 441767169}
+  - {fileID: 908141542}

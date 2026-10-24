@@ -116,6 +116,20 @@ namespace Diorama.EditorTools
             }
         }
 
+        /// <summary>Runs the island placer's recenter path (as if the Quest recentered).</summary>
+        public static void Recenter()
+        {
+            var p = Object.FindFirstObjectByType<IslandPlacer>();
+            if (p != null) p.SendMessage("OnRecentered");
+        }
+
+        /// <summary>Turns the island 60 degrees away from the head, to test idle facing.</summary>
+        public static void TurnIsland()
+        {
+            var i = Object.FindFirstObjectByType<IslandBuilder>();
+            if (i != null) i.transform.rotation *= Quaternion.Euler(0f, 60f, 0f);
+        }
+
         /// <summary>GoTo the farthest reachable tile within 6 steps (tests pathfinding in Play mode).</summary>
         public static void GoTo()
         {
