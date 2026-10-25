@@ -54,19 +54,42 @@ namespace Diorama
         /// <summary>The last shrine used (anchor tile), or null. Saved and loaded with the game.</summary>
         public Vector2Int? LastShrine { get; set; }
 
-        /// <summary>Where the explorer goes after losing: in front of the last shrine, or the world's start tile.</summary>
-        public Vector2Int RespawnTile
+        /// <summary>The map the last shrine is on (world map name). Saved and loaded with the game.</summary>
+        public string LastShrineMap { get; set; }
+
+        /// <summary>Where the explorer goes after losing on this map: in front of its last shrine, or the world's start tile.</summary>
+        public Vector2Int RespawnTile => RespawnOn(OutdoorMap as WorldMap) ?? explorer.SpawnTile;
+
+        /// <summary>The walkable tile in front of the last shrine if it is on <paramref name="map"/>, else null.</summary>
+        Vector2Int? RespawnOn(WorldMap map)
         {
-            get
+            if (!LastShrine.HasValue || map == null || map.name != LastShrineMap) return null;
+            var s = LastShrine.Value;
+            if (!map.TryGetProp(map.PropAt(s.y, s.x), out var e) || e.recipe == null || e.recipe.name != RecipeName) return null;
+            var front = s + new Vector2Int(0, 2);
+            if (map.CanWalk(front)) return front;
+            foreach (var t in Touching(s))
+                if (map.CanWalk(t)) return t;
+            return null;
+        }
+
+        /// <summary>
+        /// Losing everything: back in front of the last shrine, on its own map (travelling there at once if needed), or
+        /// the current map's start tile without one.
+        /// </summary>
+        public void Respawn()
+        {
+            var here = OutdoorMap as WorldMap;
+            var shrineMap = swap != null && !string.IsNullOrEmpty(LastShrineMap) ? swap.FindWorld(LastShrineMap) : null;
+            if (shrineMap != null && shrineMap != here && RespawnOn(shrineMap) is Vector2Int there)
             {
-                if (!LastShrine.HasValue || !_shrines.Contains(LastShrine.Value)) return explorer.SpawnTile;
-                var s = LastShrine.Value;
-                var front = s + new Vector2Int(0, 2);
-                if (OutdoorMap.CanWalk(front)) return front;
-                foreach (var t in Touching(s))
-                    if (OutdoorMap.CanWalk(t)) return t;
-                return explorer.SpawnTile;
+                swap.TravelNow(shrineMap, there, new Vector2Int(0, -1));
+                Debug.Log($"[HearthShrines] Respawn at the shrine on {shrineMap.name} c{there.x} r{there.y}.");
+                return;
             }
+            if (!string.IsNullOrEmpty(LastShrineMap) && shrineMap == null)
+                Debug.LogError($"[HearthShrines] The last shrine's map '{LastShrineMap}' isn't in the scene swap's worlds: respawning here.", this);
+            explorer.Teleport(RespawnTile);
         }
 
         public IReadOnlyList<Vector2Int> Shrines => _shrines;
@@ -344,6 +367,7 @@ namespace Diorama
             _entering = true;
             explorer.Locked = true;
             LastShrine = shrine;
+            LastShrineMap = OutdoorMap != null ? OutdoorMap.name : null;
             party.HealEveryone();
             pods.WarmWave();
             StartCoroutine(Flare(shrine));

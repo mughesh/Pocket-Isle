@@ -16,7 +16,7 @@ namespace Diorama.EditorTools
     /// Shape units are tiles (1 = 5 cm at zoom 1), +Z faces the player. Like the creature kits this only seeds the
     /// assets; tune them in the Inspector afterwards. Re-running overwrites them (same files, references survive).
     /// </summary>
-    public static class PropKit
+    public static partial class PropKit
     {
         const string Root = "Assets/_Project/Data/Props";
 

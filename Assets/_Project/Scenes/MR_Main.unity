@@ -348,9 +348,13 @@ MonoBehaviour:
   island: {fileID: 270959109}
   window: {fileID: 270959113}
   explorer: {fileID: 374318554}
+  realm: {fileID: 270959114}
   sun: {fileID: 367221215}
   interiors:
   - {fileID: 11400000, guid: d856d518a6f0ad34dbd5d32a3ad3fa1e, type: 2}
+  worlds:
+  - {fileID: 11400000, guid: ab0469af29722704f949fec768f94b68, type: 2}
+  - {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
   seconds: 1.2
 --- !u!4 &221433163
 Transform:
@@ -522,7 +526,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.IslandBuilder
   map: {fileID: 11400000, guid: 02a8766f02fce1f41867418f88b1c36b, type: 2}
-  world: {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
+  world: {fileID: 11400000, guid: ab0469af29722704f949fec768f94b68, type: 2}
   seed: 7
   column: {fileID: 2100000, guid: 9713c6c0478a20d42ad0c527671d1d01, type: 2}
   underside: {fileID: 2100000, guid: 93dba253338bffb44acaff7f568fcf55, type: 2}
@@ -2247,6 +2251,7 @@ MonoBehaviour:
   island: {fileID: 270959109}
   explorer: {fileID: 374318554}
   homeTile: {x: 26, y: 25}
+  map: {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
   wander: 1
   wanderRadius: 2
   hopInterval: {x: 3, y: 7}
@@ -2400,6 +2405,7 @@ MonoBehaviour:
   island: {fileID: 270959109}
   explorer: {fileID: 374318554}
   homeTile: {x: 30, y: 25}
+  map: {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
   wander: 1
   wanderRadius: 2
   hopInterval: {x: 3, y: 7}
@@ -2508,8 +2514,8 @@ MonoBehaviour:
   typeChart: {fileID: 11400000, guid: d07e763e31e40f44e90da37afbc060b8, type: 2}
   progression: {fileID: 11400000, guid: c5e0845f05a2ec34a817839899fdc421, type: 2}
   shrines: {fileID: 261742741}
-  grassTable: {fileID: 11400000, guid: 674dcb07c5696924dbbad850006068b4, type: 2}
-  waterTable: {fileID: 11400000, guid: 5b47e44c4def61b419051ed86ed2fcb3, type: 2}
+  firstSpecies: {fileID: 11400000, guid: fb46257ae3b4b0144a5861244b1b96f6, type: 2}
+  firstLevel: 3
   grassChance: 0.125
   graceSteps: 3
   zoomRange: {x: 2.2, y: 3}
@@ -2660,6 +2666,7 @@ MonoBehaviour:
   island: {fileID: 270959109}
   explorer: {fileID: 374318554}
   homeTile: {x: 28, y: 24}
+  map: {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
   wander: 1
   wanderRadius: 2
   hopInterval: {x: 3, y: 7}
@@ -3096,6 +3103,58 @@ MonoBehaviour:
   targetOffset: {x: 0.065, y: 0.012, z: 0}
   lingerSeconds: 1.5
   fovHalfAngle: 35
+--- !u!1 &1858573326
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1858573328}
+  - component: {fileID: 1858573327}
+  m_Layer: 0
+  m_Name: Shard Gates
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1858573327
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1858573326}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ec01de3f85d83344a449775bfd76a98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.ShardGates
+  island: {fileID: 270959109}
+  window: {fileID: 270959113}
+  explorer: {fileID: 374318554}
+  swap: {fileID: 221433162}
+  pods: {fileID: 78739058}
+  fx: {fileID: 1078587927}
+  portalMaterial: {fileID: 2100000, guid: c44ab4528771f3c43b6d4c78e2eb6871, type: 2}
+  grabGuard: {fileID: 270959111}
+--- !u!4 &1858573328
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1858573326}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1954810186
 GameObject:
   m_ObjectHideFlags: 0
@@ -3553,3 +3612,4 @@ SceneRoots:
   - {fileID: 221433163}
   - {fileID: 155307359}
   - {fileID: 1059021441}
+  - {fileID: 1858573328}

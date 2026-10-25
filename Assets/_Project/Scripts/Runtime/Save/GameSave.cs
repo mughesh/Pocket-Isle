@@ -66,10 +66,16 @@ namespace Diorama
                 encounters.Caught += OnCaught;
                 encounters.BattleEnded += OnBattleEnded;
             }
-            if (swap != null) swap.Finished += OnSwapFinished;
+            if (swap != null)
+            {
+                swap.Finished += OnSwapFinished;
+                swap.TravelFinished += OnTravelFinished;
+            }
         }
 
         void OnSwapFinished(bool inside) => Save(inside ? "entered " + swap.Interior.name : "left the interior");
+
+        void OnTravelFinished(WorldMap to) => Save("travelled to " + to.name);
 
         void OnDestroy()
         {
@@ -79,7 +85,11 @@ namespace Diorama
                 encounters.Caught -= OnCaught;
                 encounters.BattleEnded -= OnBattleEnded;
             }
-            if (swap != null) swap.Finished -= OnSwapFinished;
+            if (swap != null)
+            {
+                swap.Finished -= OnSwapFinished;
+                swap.TravelFinished -= OnTravelFinished;
+            }
         }
 
         void OnRested(Vector2Int shrine) => Save("shrine", true);
@@ -147,13 +157,27 @@ namespace Diorama
             }
             party.Restore(pods.Take(Party.Size).ToList(), stored);
 
+            // Every realm's restoration first, so the map we land on reads its own.
+            if (realm != null)
+            {
+                realm.Forget();
+                foreach (var r in data.realms) realm.Remember(r.realm, r.restored);
+            }
             var tile = new Vector2Int(data.explorerX, data.explorerY);
             var facing = new Vector2Int(data.facingX, data.facingY);
-            if (explorer.island != null && explorer.island.Content != null && explorer.island.Content.CanWalk(tile)) explorer.Teleport(tile, facing);
-            else problems.Add($"explorer tile c{tile.x} r{tile.y} isn't walkable (map changed?): left at spawn");
+            var world = swap != null && !string.IsNullOrEmpty(data.map) ? swap.FindWorld(data.map) : null;
+            if (world == null) problems.Add($"saved on map '{data.map}', which isn't in the scene swap's worlds: staying on {RealmId}");
+            if (world != null && world.CanWalk(tile)) swap.TravelNow(world, tile, facing);
+            else if (world == null && explorer.island != null && explorer.island.Content != null && explorer.island.Content.CanWalk(tile)) explorer.Teleport(tile, facing);
+            else problems.Add($"explorer tile c{tile.x} r{tile.y} isn't walkable on {(world != null ? world.name : RealmId)} (map changed?): left at spawn");
 
-            if (shrines != null) shrines.LastShrine = data.hasShrine ? new Vector2Int(data.shrineX, data.shrineY) : (Vector2Int?)null;
-            if (realm != null) realm.SetNow(data.RestoredFor(RealmId, RealmState.Restored));
+            if (shrines != null)
+            {
+                shrines.LastShrine = data.hasShrine ? new Vector2Int(data.shrineX, data.shrineY) : (Vector2Int?)null;
+                shrines.LastShrineMap = data.hasShrine ? data.shrineMap : null;
+            }
+            if (encounters != null) encounters.FirstEncounterDone = data.firstEncounterDone;
+            if (realm != null) realm.SetNow(data.RestoredFor(RealmId, realm.Recall(swap != null ? swap.Outdoor : explorer.island.world)));
             Dialogue.RestoreSaid(data.said);
             _caught.Clear();
             foreach (var id in data.caught) _caught.Add(id);
@@ -177,7 +201,7 @@ namespace Diorama
 
             foreach (var p in problems) Debug.LogWarning($"[GameSave] {p}");
             Debug.Log($"[GameSave] Loaded {SavePath} (saved {data.savedAt}): {Describe(party.members)}; storage {party.storage.Count}; " +
-                      $"explorer c{data.explorerX} r{data.explorerY}{(data.inside ? $" (inside {data.interior} at c{data.insideX} r{data.insideY})" : "")}; last shrine {(data.hasShrine ? $"c{data.shrineX} r{data.shrineY}" : "none")}; " +
+                      $"{data.map} c{data.explorerX} r{data.explorerY}{(data.inside ? $" (inside {data.interior} at c{data.insideX} r{data.insideY})" : "")}; last shrine {(data.hasShrine ? $"c{data.shrineX} r{data.shrineY}" : "none")}; " +
                       $"realm {RealmState.Restored:0.##}; {data.said.Count} lines said; {_caught.Count} species caught; {explorer.moveMode}.");
         }
 
@@ -206,6 +230,7 @@ namespace Diorama
                 {
                     party = SaveGame.ToSaved(party.members),
                     storage = SaveGame.ToSaved(party.storage),
+                    map = RealmId,
                     explorerX = outdoor.x,
                     explorerY = outdoor.y,
                     facingX = outdoorFacing.x,
@@ -217,6 +242,8 @@ namespace Diorama
                     insideFacingX = explorer.Facing.x,
                     insideFacingY = explorer.Facing.y,
                     hasShrine = shrines != null && shrines.LastShrine.HasValue,
+                    shrineMap = shrines != null ? shrines.LastShrineMap : null,
+                    firstEncounterDone = encounters != null && encounters.FirstEncounterDone,
                     said = Dialogue.Said.ToList(),
                     caught = _caught.ToList(),
                     seen = encounters != null ? encounters.Seen.ToList() : new List<string>(),
@@ -227,6 +254,8 @@ namespace Diorama
                     data.shrineX = shrines.LastShrine.Value.x;
                     data.shrineY = shrines.LastShrine.Value.y;
                 }
+                if (realm != null)
+                    foreach (var r in realm.Remembered) data.SetRestored(r.Key, r.Value);
                 data.SetRestored(RealmId, swap != null ? swap.OutdoorRestored : RealmState.Restored);
                 SaveGame.Write(SavePath, data);
                 Debug.Log($"[GameSave] Saved ({reason}): {data.party.Count} pods, {data.storage.Count} in storage, explorer c{data.explorerX} r{data.explorerY}" +

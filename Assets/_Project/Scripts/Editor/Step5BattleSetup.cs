@@ -146,8 +146,13 @@ namespace Diorama.EditorTools
             director.stage = stage;
             director.runes = runes;
             director.typeChart = chart;
-            director.grassTable = AssetDatabase.LoadAssetAtPath<EncounterTable>(BattleRoot + "/Encounters_TestGrass.asset");
-            director.waterTable = AssetDatabase.LoadAssetAtPath<EncounterTable>(BattleRoot + "/Encounters_TestWater.asset");
+            // Encounter tables live on each world map since step 8.
+            if (island.world != null)
+            {
+                island.world.grassTable = AssetDatabase.LoadAssetAtPath<EncounterTable>(BattleRoot + "/Encounters_TestGrass.asset");
+                island.world.waterTable = AssetDatabase.LoadAssetAtPath<EncounterTable>(BattleRoot + "/Encounters_TestWater.asset");
+                EditorUtility.SetDirty(island.world);
+            }
             foreach (var c in new Component[] { fx, hudComp, stage, runes, party, director }) EditorUtility.SetDirty(c);
 
             EditorSceneManager.MarkSceneDirty(scene);

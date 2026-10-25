@@ -6,11 +6,13 @@ using UnityEngine;
 namespace Diorama
 {
     /// <summary>
-    /// Switches the island's content to another <see cref="WorldMap"/> and back: shrine to Hearth Lodge now, realm gates
-    /// (step 8) and temple arenas (step 9) later. The swap takes <see cref="seconds"/>: the content sinks into the base
-    /// front to back while the rocky base tints toward the next map's theme and the explorer shrinks into its tile; at
-    /// the bottom the map, zoom (<see cref="WorldMap.viewZoom"/>) and light change; then the next map rises and the
-    /// explorer pops up on the entry tile. <see cref="Return"/> goes back to the outdoor map, tile and facing.
+    /// Switches the island's content to another <see cref="WorldMap"/>: shrine to Hearth Lodge and back (interiors),
+    /// Shard Gates between realms (<see cref="Travel"/>, step 8), temple arenas (step 9) later. The swap takes
+    /// <see cref="seconds"/>: the content sinks into the base front to back while the rocky base tints toward the next
+    /// map's theme and the explorer shrinks into its tile; at the bottom the map, zoom (<see cref="WorldMap.viewZoom"/>)
+    /// and light change; then the next map rises and the explorer pops up on the entry tile. <see cref="Return"/> goes
+    /// back to the outdoor map, tile and facing. Travel replaces the outdoor map itself (the save, the lodge and losing
+    /// all follow it); each realm keeps its own restoration (<see cref="RealmRestoration"/>).
     /// Inside an interior the realm restoration reads as 1 (interior props burn steady) and map creatures hide.
     /// </summary>
     public class SceneSwap : MonoBehaviour
@@ -18,11 +20,17 @@ namespace Diorama
         public IslandBuilder island;
         public WorldWindow window;
         public GestureTestPiece explorer;
+        [Tooltip("Keeps each realm's restoration while another map shows.")]
+        public RealmRestoration realm;
         [Tooltip("The main light (interiors can recolour it). Empty = RenderSettings.sun.")]
         public Light sun;
         [Tooltip("Every interior map a save can name (by asset name).")]
         public List<WorldMap> interiors = new List<WorldMap>();
+        [Tooltip("Every outdoor map a save can name (by asset name): the hub and the realms.")]
+        public List<WorldMap> worlds = new List<WorldMap>();
         public float seconds = 1.2f;
+
+        enum Kind { Enter, Return, Travel }
 
         static SceneSwap _instance;
 
@@ -47,8 +55,12 @@ namespace Diorama
         public event Action<WorldMap> Entered;
         /// <summary>At the bottom of a swap back outside.</summary>
         public event Action<WorldMap> Returned;
-        /// <summary>A swap finished rising (inside = true when it went in).</summary>
+        /// <summary>An interior swap finished rising (inside = true when it went in).</summary>
         public event Action<bool> Finished;
+        /// <summary>At the bottom of a travel (from, to), also for <see cref="TravelNow"/>.</summary>
+        public event Action<WorldMap, WorldMap> Travelled;
+        /// <summary>A travel finished rising on this map.</summary>
+        public event Action<WorldMap> TravelFinished;
 
         WorldMap _outdoor;
         float _outdoorRestored;
@@ -70,16 +82,19 @@ namespace Diorama
                 Debug.LogError("[SceneSwap] Needs the island, world window and explorer (Set Up MR_Main (7b lodge)).", this);
                 enabled = false;
             }
+            if (realm == null) Debug.LogError("[SceneSwap] No RealmRestoration: realms forget their restoration when you travel (Set Up MR_Main (8 hub)).", this);
             if (sun == null) sun = RenderSettings.sun;
         }
 
         public WorldMap FindInterior(string name) => interiors.Find(m => m != null && m.name == name);
 
+        public WorldMap FindWorld(string name) => worlds.Find(m => m != null && m.name == name);
+
         /// <summary>Swaps into <paramref name="interior"/> with the explorer on <paramref name="entryTile"/>. False while busy or already inside.</summary>
         public bool Enter(WorldMap interior, Vector2Int entryTile, Vector2Int? facing = null)
         {
             if (!enabled || Busy || Inside || interior == null) return false;
-            StartCoroutine(Swap(interior, entryTile, facing ?? new Vector2Int(0, -1), true));
+            StartCoroutine(Swap(interior, entryTile, facing ?? new Vector2Int(0, -1), Kind.Enter));
             return true;
         }
 
@@ -87,8 +102,30 @@ namespace Diorama
         public bool Return()
         {
             if (!enabled || Busy || !Inside) return false;
-            StartCoroutine(Swap(_outdoor, ReturnTile, ReturnFacing, false));
+            StartCoroutine(Swap(_outdoor, ReturnTile, ReturnFacing, Kind.Return));
             return true;
+        }
+
+        /// <summary>Travels to another outdoor map (a Shard Gate). False while busy, inside, or already there.</summary>
+        public bool Travel(WorldMap to, Vector2Int tile, Vector2Int facing)
+        {
+            if (!enabled || Busy || Inside || to == null || to == island.world) return false;
+            StartCoroutine(Swap(to, tile, facing, Kind.Travel));
+            return true;
+        }
+
+        /// <summary>Shows another outdoor map at once (loading a save, respawning at a shrine on another map).</summary>
+        public void TravelNow(WorldMap to, Vector2Int tile, Vector2Int facing)
+        {
+            if (to == null || island == null) return;
+            if (to == island.world)
+            {
+                explorer.Teleport(tile, facing);
+                return;
+            }
+            SwapAtBottom(to, tile, facing, Kind.Travel);
+            island.Prepare();
+            Debug.Log($"[SceneSwap] Now on {to.name} at c{tile.x} r{tile.y}.");
         }
 
         /// <summary>Puts the island inside at once (loading a save made inside). The explorer stands outside already.</summary>
@@ -96,20 +133,20 @@ namespace Diorama
         {
             if (!enabled || interior == null || Inside) return;
             var light = LightFor(interior.theme, true);
-            SwapAtBottom(interior, tile, facing, true);
+            SwapAtBottom(interior, tile, facing, Kind.Enter);
             SetLight(light, light, 1f);
             island.Prepare();
             Finished?.Invoke(true);
         }
 
-        IEnumerator Swap(WorldMap to, Vector2Int tile, Vector2Int facing, bool entering)
+        IEnumerator Swap(WorldMap to, Vector2Int tile, Vector2Int facing, Kind kind)
         {
             Busy = true;
             explorer.Locked = true;
             double t0 = Time.realtimeSinceStartupAsDouble;
             float half = Mathf.Max(0.1f, seconds * 0.5f);
             var fromLight = LightNow();
-            var toLight = LightFor(to.theme, entering);
+            var toLight = LightFor(to.theme, kind == Kind.Enter);
             island.rimTheme = to.theme;
             for (float t = 0f; t < half; t += Time.deltaTime)
             {
@@ -123,7 +160,7 @@ namespace Diorama
             island.swapSink = 1f;
             explorer.Shrink = 0f;
             double b0 = Time.realtimeSinceStartupAsDouble;
-            SwapAtBottom(to, tile, facing, entering);
+            SwapAtBottom(to, tile, facing, kind);
             island.Prepare();
             double bottomMs = (Time.realtimeSinceStartupAsDouble - b0) * 1000.0;
             for (float t = 0f; t < half; t += Time.deltaTime)
@@ -141,15 +178,17 @@ namespace Diorama
             SetLight(fromLight, toLight, 1f);
             explorer.Locked = false;
             Busy = false;
-            Debug.Log($"[SceneSwap] {(entering ? $"Inside {to.name}" : $"Back outside on {to.name}")} at c{tile.x} r{tile.y}: " +
-                      $"{(Time.realtimeSinceStartupAsDouble - t0):0.00} s, swap at the bottom {bottomMs:0.0} ms.");
-            Finished?.Invoke(entering);
+            string what = kind == Kind.Enter ? $"Inside {to.name}" : kind == Kind.Return ? $"Back outside on {to.name}" : $"Travelled to {to.name}";
+            Debug.Log($"[SceneSwap] {what} at c{tile.x} r{tile.y}: {(Time.realtimeSinceStartupAsDouble - t0):0.00} s, swap at the bottom {bottomMs:0.0} ms.");
+            if (kind == Kind.Travel) TravelFinished?.Invoke(to);
+            else Finished?.Invoke(kind == Kind.Enter);
         }
 
         /// <summary>The hidden moment: map, zoom, explorer, restoration, map creatures.</summary>
-        void SwapAtBottom(WorldMap to, Vector2Int tile, Vector2Int facing, bool entering)
+        void SwapAtBottom(WorldMap to, Vector2Int tile, Vector2Int facing, Kind kind)
         {
-            if (entering)
+            var from = island.world;
+            if (kind == Kind.Enter)
             {
                 _outdoor = island.world;
                 _outdoorRestored = RealmState.Restored;
@@ -159,17 +198,32 @@ namespace Diorama
                     ReturnFacing = explorer.Facing;
                 }
             }
+            else if (kind == Kind.Travel && realm != null) realm.Remember(from, RealmState.Restored);
             island.world = to;
             island.rimTint = 0f;
             island.rimTheme = null;
             window.MapZoom = to.viewZoom;
             explorer.Teleport(tile, facing);
-            Inside = entering;
-            Interior = entering ? to : null;
-            MapCreature.HideAll = entering;
-            RealmState.Restored = entering ? 1f : _outdoorRestored;
-            if (entering) Entered?.Invoke(to);
-            else Returned?.Invoke(to);
+            Inside = kind == Kind.Enter;
+            Interior = Inside ? to : null;
+            MapCreature.HideAll = Inside;
+            switch (kind)
+            {
+                case Kind.Enter:
+                    RealmState.Restored = 1f;
+                    Entered?.Invoke(to);
+                    break;
+                case Kind.Return:
+                    RealmState.Restored = _outdoorRestored;
+                    Returned?.Invoke(to);
+                    break;
+                default:
+                    float restored = realm != null ? realm.Recall(to) : to.theme != null ? to.theme.startRestored : 1f;
+                    if (realm != null) realm.SetNow(restored);
+                    else RealmState.Restored = restored;
+                    Travelled?.Invoke(from, to);
+                    break;
+            }
         }
 
         /// <summary>Puts the explorer back outside for a save made inside (before <see cref="EnterNow"/>).</summary>

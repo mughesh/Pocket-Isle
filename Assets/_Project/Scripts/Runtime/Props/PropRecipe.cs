@@ -89,7 +89,7 @@ namespace Diorama
         public float outline = 0.022f;
 
         [Header("Placement")]
-        [Tooltip("Tiles covered (columns, rows), 1x1 up to 2x2. The map char sits on the first tile; the rest extend to +column / +row.")]
+        [Tooltip("Tiles covered (columns, rows), 1x1 up to 3x3. The map char sits on the first tile; the rest extend to +column / +row.")]
         public Vector2Int footprint = Vector2Int.one;
         public bool blocksWalking = true;
         [Tooltip("Any yaw (1x1 only). Off = faces the player, plus the jitter below.")]
@@ -106,7 +106,7 @@ namespace Diorama
         [Tooltip("Written by the baker.")]
         public Mesh bakedMesh;
 
-        public Vector2Int Footprint => new Vector2Int(Mathf.Clamp(footprint.x, 1, 2), Mathf.Clamp(footprint.y, 1, 2));
+        public Vector2Int Footprint => new Vector2Int(Mathf.Clamp(footprint.x, 1, 3), Mathf.Clamp(footprint.y, 1, 3));
 
         public PropColor Color(PropSlot slot) =>
             palette != null && (int)slot < palette.Length ? palette[(int)slot] : new PropColor(UnityEngine.Color.magenta, UnityEngine.Color.magenta);

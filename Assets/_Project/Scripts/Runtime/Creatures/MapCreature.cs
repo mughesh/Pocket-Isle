@@ -16,6 +16,8 @@ namespace Diorama
         [Tooltip("Optional: keeps clear of the explorer's tile.")]
         public GestureTestPiece explorer;
         public Vector2Int homeTile;
+        [Tooltip("The map it lives on; it only shows while the island shows that map. Empty = every map.")]
+        public WorldMap map;
 
         [Header("Idle hops")]
         public bool wander = true;
@@ -62,7 +64,7 @@ namespace Diorama
 
         void Update()
         {
-            if (!wander || island == null || _view.IsFainted) return;
+            if (!wander || island == null || _view.IsFainted || map != null && island.world != map) return;
             if (Time.time >= _nextHop && !_view.IsHopping)
             {
                 _nextHop = Time.time + Random.Range(hopInterval.x, hopInterval.y);
@@ -82,13 +84,13 @@ namespace Diorama
 
         bool TryPickStep(out Vector2Int next)
         {
-            var map = island.Content;
+            var content = island.Content;
             int start = Random.Range(0, Steps.Length);
             for (int i = 0; i < Steps.Length; i++)
             {
                 next = _tile + Steps[(start + i) % Steps.Length];
                 if (Mathf.Abs(next.x - homeTile.x) > wanderRadius || Mathf.Abs(next.y - homeTile.y) > wanderRadius) continue;
-                if (!map.CanWalk(next) || Occupied(next)) continue;
+                if (!content.CanWalk(next) || Occupied(next)) continue;
                 return true;
             }
             next = _tile;
@@ -134,7 +136,7 @@ namespace Diorama
             float margin = island.map.tileSize * 0.5f;
             bool inside = local.x > b.min.x - margin && local.x < b.max.x + margin &&
                           local.z > b.min.z - margin && local.z < b.max.z + margin;
-            bool show = inside && !(Application.isPlaying && HideAll);
+            bool show = inside && (map == null || island.world == map) && !(Application.isPlaying && HideAll);
             if (_view.rig != null && _view.rig.gameObject.activeSelf != show) _view.rig.gameObject.SetActive(show);
         }
     }

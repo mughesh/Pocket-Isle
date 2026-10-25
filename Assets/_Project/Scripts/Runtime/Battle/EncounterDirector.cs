@@ -36,9 +36,18 @@ namespace Diorama
         [Tooltip("Losing sends the explorer to the last shrine used (the start tile without one).")]
         public HearthShrines shrines;
 
-        [Header("Encounter tables (this region)")]
-        public EncounterTable grassTable;
-        public EncounterTable waterTable;
+        [Header("First encounter (new game)")]
+        [Tooltip("The first tall grass step of a new game always meets this one (easy to beat and catch).")]
+        public IslingSpecies firstSpecies;
+        [Min(1)] public int firstLevel = 3;
+
+        /// <summary>The scripted first encounter has happened (saved).</summary>
+        public bool FirstEncounterDone { get; set; }
+
+        /// <summary>The current outdoor map's tall grass table (each map has its own: <see cref="WorldMap.grassTable"/>).</summary>
+        public EncounterTable GrassTable => island != null && island.world != null ? island.world.grassTable : null;
+        /// <summary>The current outdoor map's water table.</summary>
+        public EncounterTable WaterTable => island != null && island.world != null ? island.world.waterTable : null;
 
         [Header("Tuning")]
         [Tooltip("Chance per step onto tall grass.")]
@@ -113,9 +122,8 @@ namespace Diorama
                 enabled = false;
                 return;
             }
-            if (grassTable == null) Debug.LogError("[EncounterDirector] No grass encounter table; tall grass won't trigger battles.", this);
             if (progression == null) Debug.LogError("[EncounterDirector] No ProgressionConfig; wins pay no XP (Tools > Pocket Isle > Set Up MR_Main (7 progression)).", this);
-            if (waterTable == null) Debug.LogError("[EncounterDirector] No water encounter table; fishing won't work.", this);
+            if (firstSpecies == null) Debug.LogError("[EncounterDirector] No first-encounter species: a new game's first grass rolls the table (Set Up MR_Main (8 hub)).", this);
             MapCreature.HideAll = false;
             int s = seed != 0 ? seed : System.Environment.TickCount;
             _rnd = new SeededRandom(s);
@@ -161,8 +169,8 @@ namespace Diorama
         /// <summary>Starts an encounter on the spot (testing: Editor key B, the Claude bridge, the context menu).</summary>
         public void StartEncounter(Habitat habitat)
         {
-            var table = habitat == Habitat.Water ? waterTable : grassTable;
-            if (InBattle || table == null || window.IsZoomed || SceneSwap.IsInside || SceneSwap.IsBusy) return;
+            var table = habitat == Habitat.Water ? WaterTable : GrassTable;
+            if (InBattle || table == null || party.members.Count == 0 || window.IsZoomed || SceneSwap.IsInside || SceneSwap.IsBusy) return;
             StartCoroutine(Encounter(table, habitat == Habitat.Water ? explorer.Tile + explorer.Facing : explorer.Tile));
         }
 
@@ -174,16 +182,34 @@ namespace Diorama
 
         void OnTallGrassStep(Vector2Int tile)
         {
-            if (InBattle || grassTable == null || SceneSwap.IsInside) return;
+            var table = GrassTable;
+            if (InBattle || SceneSwap.IsInside || party.members.Count == 0) return;
+            if (table == null)
+            {
+                Debug.LogError($"[EncounterDirector] {island.world.name} has no grass table: tall grass won't trigger battles.", island.world);
+                return;
+            }
+            if (!FirstEncounterDone && firstSpecies != null)
+            {
+                Debug.Log($"[EncounterDirector] First encounter of the game (scripted): {firstSpecies.name} Lv {firstLevel}.");
+                StartCoroutine(Encounter(table, tile, new IslingInstance(firstSpecies, firstLevel)));
+                return;
+            }
             if (++_stepsSinceBattle <= graceSteps) return;
             if (_rnd.Next() >= grassChance) return;
-            StartCoroutine(Encounter(grassTable, tile));
+            StartCoroutine(Encounter(table, tile));
         }
 
         void OnFishTap(Vector2Int waterTile)
         {
-            if (InBattle || waterTable == null) return;
-            StartCoroutine(Encounter(waterTable, waterTile));
+            var table = WaterTable;
+            if (InBattle || party.members.Count == 0) return;
+            if (table == null)
+            {
+                Debug.LogError($"[EncounterDirector] {island.world.name} has no water table: fishing won't work.", island.world);
+                return;
+            }
+            StartCoroutine(Encounter(table, waterTile));
         }
 
         void OnChosen(int index)
@@ -209,12 +235,15 @@ namespace Diorama
             if (usable) _act = new Act { kind = ActKind.PodPick, index = slot };
         }
 
-        IEnumerator Encounter(EncounterTable table, Vector2Int where)
+        IEnumerator Encounter(EncounterTable table, Vector2Int where, IslingInstance scripted = null)
         {
             InBattle = true;
             explorer.Locked = true;
             MapCreature.HideAll = true;
-            if (!table.Roll(_rnd, out var wild, out bool rare, IsCaught, uncaughtWeight))
+            FirstEncounterDone = true;
+            var wild = scripted;
+            bool rare = false;
+            if (wild == null && !table.Roll(_rnd, out wild, out rare, IsCaught, uncaughtWeight))
             {
                 Debug.LogError($"[EncounterDirector] {table.name} has no species to roll.", table);
                 yield return Finish(false);
@@ -716,7 +745,8 @@ namespace Diorama
             if (lost)
             {
                 bool atShrine = shrines != null && shrines.LastShrine.HasValue;
-                explorer.Teleport(shrines != null ? shrines.RespawnTile : explorer.SpawnTile);
+                if (shrines != null) shrines.Respawn();
+                else explorer.Teleport(explorer.SpawnTile);
                 party.HealAll();
                 Debug.Log($"[EncounterDirector] Lost: explorer back at {(atShrine ? "the last shrine" : "spawn")}, party healed.");
             }

@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8376f4ae30d857a45a9d450ac2b7be0f, type: 3}
-  m_Name: WorldMap_Test
+  m_Name: WorldMap_Cinderwood
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.WorldMap
   layout: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
@@ -179,7 +179,7 @@ MonoBehaviour:
 
     ........................................................
 
-    ........................................................
+    ..............................Z.........................
 
     ........................L.........Y.....................
 
@@ -272,5 +272,22 @@ MonoBehaviour:
   - key: Y
     recipe: {fileID: 11400000, guid: b4ff74f9eeb49724995b03596b7d6943, type: 2}
     turned: 0
+  - key: Z
+    recipe: {fileID: 11400000, guid: 22df831919cb43d41a95a73e294ddda4, type: 2}
+    turned: 0
   viewZoom: 1
   theme: {fileID: 11400000, guid: 19d20160e4c769e41a975af21b11f3b8, type: 2}
+  grassTable: {fileID: 11400000, guid: 674dcb07c5696924dbbad850006068b4, type: 2}
+  waterTable: {fileID: 11400000, guid: 5b47e44c4def61b419051ed86ed2fcb3, type: 2}
+  realm: cinderwood
+  arrivalLine: realm.cinderwood.first
+  gates:
+  - id: home
+    tile: {x: 30, y: 26}
+    to: {fileID: 11400000, guid: ab0469af29722704f949fec768f94b68, type: 2}
+    arrive: {x: 3, y: 16}
+    arriveFacing: {x: 0, y: 1}
+    isSealed: 0
+    portal: {r: 1, g: 0.85, b: 0.48, a: 1}
+    firstSeenLine: 
+  landmarks: []

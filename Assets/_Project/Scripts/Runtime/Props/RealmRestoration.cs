@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -6,7 +7,8 @@ namespace Diorama
     /// <summary>
     /// Sets the realm's restoration (<see cref="RealmState"/>) when the scene starts, from the island world's theme,
     /// and fades it for testing: G in the Editor, or three quick left-hand thumb taps in a development build.
-    /// The story will drive <see cref="FadeTo"/> later.
+    /// The story will drive <see cref="FadeTo"/> later. Remembers each realm's value while another map shows
+    /// (<see cref="Remember"/> / <see cref="Recall"/>, keyed by the world map's name; the save keeps them).
     /// </summary>
     [ExecuteAlways]
     public class RealmRestoration : MonoBehaviour
@@ -17,6 +19,30 @@ namespace Diorama
         public float fadeSeconds = 2f;
 
         float _from, _to, _t = 1f;
+        readonly Dictionary<string, float> _byRealm = new Dictionary<string, float>();
+
+        /// <summary>Realms left behind (map name, restoration). The current map's value is <see cref="RealmState.Restored"/>.</summary>
+        public IReadOnlyDictionary<string, float> Remembered => _byRealm;
+
+        public void Remember(WorldMap map, float restored)
+        {
+            if (map != null) Remember(map.name, restored);
+        }
+
+        public void Remember(string realm, float restored)
+        {
+            if (!string.IsNullOrEmpty(realm)) _byRealm[realm] = Mathf.Clamp01(restored);
+        }
+
+        /// <summary>The map's remembered restoration, or its theme's start value the first time.</summary>
+        public float Recall(WorldMap map)
+        {
+            if (map == null) return 1f;
+            if (_byRealm.TryGetValue(map.name, out float v)) return v;
+            return map.theme != null ? map.theme.startRestored : 1f;
+        }
+
+        public void Forget() => _byRealm.Clear();
 
         float StartValue
         {

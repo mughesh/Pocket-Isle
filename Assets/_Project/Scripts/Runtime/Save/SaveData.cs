@@ -28,16 +28,22 @@ namespace Diorama
     [Serializable]
     public class SaveData
     {
-        public const int CurrentVersion = 1;
+        public const int CurrentVersion = 2;
 
         public int version = CurrentVersion;
         public string savedAt;
         public List<SavedIsling> party = new List<SavedIsling>();
         public List<SavedIsling> storage = new List<SavedIsling>();
+        /// <summary>The outdoor map (world map asset name) the explorer is on (step 8: the hub or a realm).</summary>
+        public string map;
         public int explorerX, explorerY;
         public int facingX, facingY = -1;
         public bool hasShrine;
         public int shrineX, shrineY;
+        /// <summary>The map the last shrine is on (losing everything returns there).</summary>
+        public string shrineMap;
+        /// <summary>The scripted first encounter (step 8) has happened.</summary>
+        public bool firstEncounterDone;
         public List<SavedRealm> realms = new List<SavedRealm>();
         public List<string> said = new List<string>();
         public List<string> caught = new List<string>();
@@ -112,12 +118,38 @@ namespace Diorama
             {
                 problem = e.Message;
             }
-            if (problem == null) return ReadResult.Loaded;
+            if (problem == null)
+            {
+                Migrate(data);
+                return ReadResult.Loaded;
+            }
             data = null;
             string bad = Path.Combine(Path.GetDirectoryName(path) ?? string.Empty, BadFileName);
             if (File.Exists(bad)) File.Delete(bad);
             File.Move(path, bad);
             return ReadResult.Bad;
+        }
+
+        /// <summary>Version 1 saves were all made on the test map (step 8 renamed it Cinderwood).</summary>
+        public const string LegacyRealm = "WorldMap_Test";
+        public const string LegacyMap = "WorldMap_Cinderwood";
+
+        /// <summary>
+        /// Brings an older save up to <see cref="SaveData.CurrentVersion"/>. v1 -> v2: the map, the shrine's map and the
+        /// realm ids become Cinderwood (renamed test map), and the scripted first encounter counts as done.
+        /// </summary>
+        public static void Migrate(SaveData data)
+        {
+            if (data == null || data.version >= SaveData.CurrentVersion) return;
+            if (data.version < 2)
+            {
+                if (string.IsNullOrEmpty(data.map)) data.map = LegacyMap;
+                if (data.hasShrine && string.IsNullOrEmpty(data.shrineMap)) data.shrineMap = data.map;
+                foreach (var r in data.realms)
+                    if (r.realm == LegacyRealm) r.realm = LegacyMap;
+                data.firstEncounterDone = true;
+            }
+            data.version = SaveData.CurrentVersion;
         }
 
         public static void Delete(string path)

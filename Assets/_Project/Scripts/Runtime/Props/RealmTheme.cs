@@ -73,6 +73,12 @@ namespace Diorama
         [Tooltip("Restoration when a scene starts (1 = restored).")]
         [Range(0f, 1f)] public float startRestored = 1f;
 
+        [Header("Drift (RealmDrift)")]
+        [Tooltip("Scales the rising embers (Cinderwood 1, the calm Still Isle 0).")]
+        [Range(0f, 1f)] public float embers = 1f;
+        [Tooltip("Scales the falling leaves.")]
+        [Range(0f, 1f)] public float leaves = 1f;
+
         [Header("Light (interiors)")]
         [Tooltip("While this map shows, the main light takes this colour and intensity (interiors: warm hearth light).")]
         public bool overrideLight;

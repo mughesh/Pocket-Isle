@@ -13,6 +13,15 @@ MonoBehaviour:
   m_Name: Script_v1
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.DialogueScript
   triggers:
+  - id: intro.shard
+    once: 1
+    priority: 1
+    note: only if the shard isn't touched within 3 s
+    target: shard
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Oh! Something's here. Touch it?
   - id: intro.arrive
     once: 1
     priority: 1
@@ -29,7 +38,7 @@ MonoBehaviour:
     once: 1
     priority: 1
     note: 
-    target: 
+    target: rim
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -37,23 +46,11 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: Hold its rocky edge to move it. Put it wherever feels comfy.
-  - id: intro.explorer
-    once: 1
-    priority: 1
-    note: 
-    target: 
-    lines:
-    - speaker: 0
-      speakerName: Spirit
-      text: See the little explorer? Slide your thumb along your finger to walk.
-    - speaker: 0
-      speakerName: Spirit
-      text: Keep your thumb there to keep walking. Tap to stop.
   - id: intro.starter
     once: 1
     priority: 1
     note: 
-    target: 
+    target: starterPods
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -85,11 +82,23 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: Pufflet! Light as a cloud, twice as fluffy.
+  - id: intro.explorer
+    once: 1
+    priority: 1
+    note: 
+    target: tile:21,22
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: See the little explorer? Swipe your thumb along your finger to walk.
+    - speaker: 0
+      speakerName: Spirit
+      text: Tap your thumb to stop. Or just look at a spot and pinch.
   - id: intro.statue
     once: 1
     priority: 1
-    note: first time near the statue
-    target: 
+    note: first time within ~3 tiles of the statue
+    target: landmark:statue
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -97,6 +106,45 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: I feel like I know it. Strange.
+  - id: gate.sealed
+    once: 0
+    priority: 2
+    note: walking into or pinching a sealed gate
+    target: gate:last
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: This one's still asleep. Maybe later.
+  - id: gate.fire.first
+    once: 1
+    priority: 2
+    note: first time the fire gate comes into the window
+    target: gate:fire
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: That arch is warm. It leads somewhere.
+  - id: realm.cinderwood.first
+    once: 1
+    priority: 2
+    note: first arrival in Cinderwood
+    target: tile:30,29
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Cinderwood. The fire here has gone quiet.
+    - speaker: 0
+      speakerName: Spirit
+      text: Let's find out why.
+  - id: hub.return.first
+    once: 1
+    priority: 2
+    note: first time back in the hub from a realm
+    target: landmark:statue
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Home again. The statue looks... different?
   - id: tut.grass
     once: 1
     priority: 1

@@ -1,0 +1,201 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8376f4ae30d857a45a9d450ac2b7be0f, type: 3}
+  m_Name: WorldMap_StillIsle
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.WorldMap
+  layout: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    XFGFFFFFFGFGFFFFFFFFFGFFGFFFFX
+
+    XFFGGFGGGGFFGGGGGGGGGFGFGGGGFX
+
+    XFGGGGGGGGGGGGPPGGGGGGGGGGGGFX
+
+    XFFGFFFGGGGGGGGPGGGGGTTTTFGFFX
+
+    XFGGFFFGRGGGGGGPGGGGGTTTFFFGFX
+
+    XFGGFFFGGGGGGGGPGGGGGRFFFFFGFX
+
+    XFGFFFFFGRGGGGGPGGGGGGFFFFFGFX
+
+    XFFGFFFGGFGGGGGPGGGGGFGGGGGGGX
+
+    XFGGGGGGFFFGGGGPGGGGFFFGGGGGFX
+
+    XGGGGGGGGFGGGGGPGGGGGFGGGGGFFX
+
+    XFFGGGGGGGGGGGGPGRGGGGGGGGGFFX
+
+    XGGGGGGGGGGGGGGPGGGGGGGGGGGGFX
+
+    XFFGGGGGGGGGGGGPGGGGGGGGGGGGFX
+
+    XFGGGGGGGGGGGGPPPGGGGGGGGGGGFX
+
+    XFGGGGGGGGGGGPPPPPGGGGGGGGGGFX
+
+    XFPPGGGGGGGGPPPPPPPGGGGGGGPPFX
+
+    XFPPPPPPPPPPPPPPPPPPPPPPPPPPFX
+
+    XFGGGGGGGGGGPPPPPPPGGGGGGGGGGX
+
+    XFGWWWWWGGGGGPPPPPGGGTTTGGGGGX
+
+    XFGWWWWWGGGGGGPPPGGGTTTTTGGGFX
+
+    XFGWWWWWGGGGGGPPPGGGTTTTTGGGFX
+
+    XFGGGGPGGGPPGGPPPGGGTTTTTGGGFX
+
+    XFGGRGPPPPPPPPPPPPPPPPGGGGGGFX
+
+    XFGGGGGGGGGGGGGGGGGGGGGGGGGGFX
+
+    XFGGFGGGGGGGGGGRGGGGGGGGGFGGGX
+
+    XFGFFFGGGGGGGGGGGGGGGGGGFFFGGX
+
+    XFGGFGGGGGGGGGGGGGGGGGGGGFGGGX
+
+    XFFFFFFFGFFFFFFGFGFFFFFFFFFFGX
+
+    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+  tileSize: 0.05
+  capHeight: 0.006
+  seed: 808
+  startTile: {x: 15, y: 22}
+  props: '..............................
+
+    ..............................
+
+    .............lw.l.............
+
+    ...........b..................
+
+    ............b.................
+
+    .............b......b.........
+
+    ..............................
+
+    .....................b........
+
+    .......b......................
+
+    ..............................
+
+    ..............................
+
+    ....b.........................
+
+    .........b...........b........
+
+    ............l.....l....b......
+
+    ..............................
+
+    ..f.l.....b..............lg...
+
+    ..............S...............
+
+    ..............................
+
+    ..............................
+
+    ..............................
+
+    ........s.Y...................
+
+    ........s...l.....l...........
+
+    .........s....................
+
+    .........................b....
+
+    ..........................b...
+
+    ..............................
+
+    ......b.......................
+
+    ..............................
+
+    ..............................
+
+    ..............................'
+  propLegend:
+  - key: S
+    recipe: {fileID: 11400000, guid: 4e524cd358b9b874f9c8ac964bd660a2, type: 2}
+    turned: 0
+  - key: f
+    recipe: {fileID: 11400000, guid: 166d589c7b84f7440a8533ff62677e6c, type: 2}
+    turned: 0
+  - key: w
+    recipe: {fileID: 11400000, guid: 060247c819eb9194baa615ac5e0a699d, type: 2}
+    turned: 0
+  - key: g
+    recipe: {fileID: 11400000, guid: 5ed00ec5cf5c1fb4dac984c6ddfec929, type: 2}
+    turned: 0
+  - key: Y
+    recipe: {fileID: 11400000, guid: b4ff74f9eeb49724995b03596b7d6943, type: 2}
+    turned: 0
+  - key: l
+    recipe: {fileID: 11400000, guid: e5433c33ffbd7ef4e8a155c7e9b5a866, type: 2}
+    turned: 0
+  - key: b
+    recipe: {fileID: 11400000, guid: 69f099619857df94f80e6b02d355f761, type: 2}
+    turned: 0
+  - key: s
+    recipe: {fileID: 11400000, guid: cc9a99a98bf9cd94999ebf9174b7800f, type: 2}
+    turned: 0
+  viewZoom: 1
+  theme: {fileID: 11400000, guid: 573607c9578eb9a4bb3fec0f01fdf495, type: 2}
+  grassTable: {fileID: 11400000, guid: 019ec2e8b4e80634d82706540465e2a9, type: 2}
+  waterTable: {fileID: 11400000, guid: 58716727d743c2d4f8da387d8ad39c50, type: 2}
+  realm: stillisle
+  arrivalLine: hub.return.first
+  gates:
+  - id: fire
+    tile: {x: 2, y: 15}
+    to: {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
+    arrive: {x: 30, y: 27}
+    arriveFacing: {x: 0, y: 1}
+    isSealed: 0
+    portal: {r: 1, g: 0.55, b: 0.22, a: 1}
+    firstSeenLine: gate.fire.first
+  - id: water
+    tile: {x: 14, y: 2}
+    to: {fileID: 0}
+    arrive: {x: 0, y: 0}
+    arriveFacing: {x: 0, y: 0}
+    isSealed: 1
+    portal: {r: 0.36, g: 0.72, b: 1, a: 1}
+    firstSeenLine: 
+  - id: wind
+    tile: {x: 26, y: 15}
+    to: {fileID: 0}
+    arrive: {x: 0, y: 0}
+    arriveFacing: {x: 0, y: 0}
+    isSealed: 1
+    portal: {r: 0.86, g: 0.95, b: 1, a: 1}
+    firstSeenLine: 
+  landmarks:
+  - name: start
+    tile: {x: 15, y: 22}
+  - name: statue
+    tile: {x: 15, y: 17}
+  - name: firstGrass
+    tile: {x: 21, y: 22}
+  - name: pond
+    tile: {x: 6, y: 22}

@@ -17,6 +17,46 @@ namespace Diorama
         public char Key => string.IsNullOrEmpty(key) ? '.' : key[0];
     }
 
+    /// <summary>A named tile on a map (story beats, hint targets: the first tall grass, the statue, the pond).</summary>
+    [Serializable]
+    public struct Landmark
+    {
+        public string name;
+        public Vector2Int tile;
+    }
+
+    /// <summary>
+    /// A Shard Gate on this map: the gate prop's anchor tile (top-left of its footprint), where it leads and where the
+    /// explorer arrives there. Entered from the tile in front of it (+row). Sealed gates bump.
+    /// </summary>
+    [Serializable]
+    public struct GateLink
+    {
+        [Tooltip("fire / water / wind / home. Names the dialogue lines (gate.fire.first) and the portal look.")]
+        public string id;
+        [Tooltip("Anchor tile of the gate prop (its top-left tile).")]
+        public Vector2Int tile;
+        [Tooltip("The map it leads to. Empty = sealed.")]
+        public WorldMap to;
+        [Tooltip("Arrival tile on that map (in front of its return gate).")]
+        public Vector2Int arrive;
+        public Vector2Int arriveFacing;
+        [Tooltip("Asleep: the portal is dark under a stone seal and walking in only bumps.")]
+        public bool isSealed;
+        [Tooltip("Portal shimmer colour.")]
+        public Color portal;
+        [Tooltip("Optional dialogue trigger the first time the gate comes into the window (gate.fire.first).")]
+        public string firstSeenLine;
+
+        public bool Open => !isSealed && to != null;
+
+        /// <summary>True for the gate's two tiles.</summary>
+        public bool Covers(Vector2Int t) => t.y == tile.y && (t.x == tile.x || t.x == tile.x + 1);
+
+        /// <summary>The tile in front of one of its two tiles (0 or 1), where the explorer enters from.</summary>
+        public Vector2Int Front(int side) => tile + new Vector2Int(side, 1);
+    }
+
     /// <summary>
     /// A realm map: a large tile grid, same codes as <see cref="IslandMap"/> plus X (blocked border), and a second
     /// grid of the same size for props ('.' = none, other characters from <see cref="propLegend"/>).
@@ -45,6 +85,30 @@ namespace Diorama
         [Header("Look")]
         [Tooltip("Realm colours (restored / unrestored). Empty = the island materials' own colours.")]
         public RealmTheme theme;
+
+        [Header("Encounters (outdoor maps)")]
+        public EncounterTable grassTable;
+        public EncounterTable waterTable;
+
+        [Header("Story")]
+        [Tooltip("Realm id for story lines (stillisle, cinderwood).")]
+        public string realm;
+        [Tooltip("Optional dialogue trigger when a Shard Gate brings you here (realm.cinderwood.first, hub.return.first).")]
+        public string arrivalLine;
+        public List<GateLink> gates = new List<GateLink>();
+        public List<Landmark> landmarks = new List<Landmark>();
+
+        public bool TryGetLandmark(string landmark, out Vector2Int tile)
+        {
+            foreach (var l in landmarks)
+                if (l.name == landmark)
+                {
+                    tile = l.tile;
+                    return true;
+                }
+            tile = default;
+            return false;
+        }
 
         string[] _propRows;
         Dictionary<char, PropLegend> _legend;

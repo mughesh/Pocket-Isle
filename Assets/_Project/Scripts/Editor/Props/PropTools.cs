@@ -14,7 +14,7 @@ namespace Diorama.EditorTools
     public static class PropTools
     {
         const string ScenePath = "Assets/_Project/Scenes/MR_Main.unity";
-        const string WorldPath = "Assets/_Project/Data/WorldMap_Test.asset";
+        const string WorldPath = "Assets/_Project/Data/WorldMap_Cinderwood.asset";
 
         // Props grid characters.
         const char Kiln = 'K', Lantern = 'L', Brazier = 'B', BrazierLit = 'b', Bush = 'U', Tree = 'A',
@@ -38,7 +38,7 @@ namespace Diorama.EditorTools
             var island = Object.FindFirstObjectByType<IslandBuilder>();
             if (world == null || island == null)
             {
-                Debug.LogError("[PropTools] Needs Data/WorldMap_Test and the island in MR_Main (Step 3 menus).");
+                Debug.LogError("[PropTools] Needs Data/WorldMap_Cinderwood and the island in MR_Main (Step 3 menus).");
                 return;
             }
 

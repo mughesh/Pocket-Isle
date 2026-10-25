@@ -192,6 +192,18 @@ namespace Diorama
                         radius = () => island == null || island.map == null ? 0f : 0.5f * island.map.tileSize * island.Zoom * island.transform.lossyScale.x,
                     };
                 });
+                // A named tile on the current map (WorldMap.landmarks), a tile up: big props like the statue.
+                RegisterTargetResolver("landmark", arg => new Target
+                {
+                    point = () =>
+                    {
+                        if (island == null || island.world == null || !island.world.TryGetLandmark(arg, out var tile)) return null;
+                        var local = island.TileToLocal(tile, island.Content.capHeight + island.map.tileSize);
+                        return island.FootprintContains(local) ? island.transform.TransformPoint(local) : (Vector3?)null;
+                    },
+                    pulse = k => { },
+                    radius = () => island == null || island.map == null ? 0f : 1.4f * island.map.tileSize * island.Zoom * island.transform.lossyScale.x,
+                });
             }
         }
 

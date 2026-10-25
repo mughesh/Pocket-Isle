@@ -135,7 +135,7 @@ namespace Diorama
 
             // A full room for the last two scenes.
             var rnd = new SeededRandom(11);
-            while (party.storage.Count < 14 && encounters.grassTable != null && encounters.grassTable.Roll(rnd, out var c, out _))
+            while (party.storage.Count < 14 && encounters.GrassTable != null && encounters.GrassTable.Roll(rnd, out var c, out _))
             {
                 c.level = 4;
                 c.Heal();

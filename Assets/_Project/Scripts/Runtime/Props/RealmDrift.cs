@@ -38,7 +38,15 @@ namespace Diorama
         int _builtVersion = -1;
 
         /// <summary>0..1 share of the weighted tiles that show one right now.</summary>
-        float Amount => kind == Kind.Embers ? RealmState.Restored : 1f - RealmState.Restored;
+        float Amount
+        {
+            get
+            {
+                var theme = island != null ? island.Theme : null;
+                if (kind == Kind.Embers) return RealmState.Restored * (theme != null ? theme.embers : 1f);
+                return (1f - RealmState.Restored) * (theme != null ? theme.leaves : 1f);
+            }
+        }
 
         void Awake()
         {

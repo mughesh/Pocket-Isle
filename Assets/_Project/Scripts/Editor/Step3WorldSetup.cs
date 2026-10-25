@@ -14,7 +14,7 @@ namespace Diorama.EditorTools
     static class Step3WorldSetup
     {
         const string ScenePath = "Assets/_Project/Scenes/MR_Main.unity";
-        const string WorldPath = "Assets/_Project/Data/WorldMap_Test.asset";
+        const string WorldPath = "Assets/_Project/Data/WorldMap_Cinderwood.asset";
         const int Size = 56;
 
         [MenuItem("Tools/Diorama/Step 3/1. Generate Test World")]

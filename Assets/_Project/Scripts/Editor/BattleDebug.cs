@@ -200,9 +200,9 @@ namespace Diorama.EditorTools
         {
             var party = Object.FindFirstObjectByType<Party>();
             var d = Director;
-            if (party == null || d == null || d.grassTable == null) return;
+            if (party == null || d == null || d.GrassTable == null) return;
             var rnd = new SeededRandom(11);
-            for (int i = 0; i < 14 && d.grassTable.Roll(rnd, out var c, out _); i++)
+            for (int i = 0; i < 14 && d.GrassTable.Roll(rnd, out var c, out _); i++)
             {
                 c.level = 4;
                 c.Heal();
@@ -272,9 +272,9 @@ namespace Diorama.EditorTools
         {
             var party = Object.FindFirstObjectByType<Party>();
             var d = Director;
-            if (party == null || d == null || d.grassTable == null) return;
+            if (party == null || d == null || d.GrassTable == null) return;
             var rnd = new SeededRandom(5);
-            while (!party.IsFull && d.grassTable.Roll(rnd, out var c, out _))
+            while (!party.IsFull && d.GrassTable.Roll(rnd, out var c, out _))
             {
                 c.level = 4;
                 c.Heal();
@@ -483,7 +483,7 @@ namespace Diorama.EditorTools
             Render(path, main.transform.position, main.transform.rotation);
         }
 
-        static void Render(string path, Vector3 position, Quaternion rotation)
+        internal static void Render(string path, Vector3 position, Quaternion rotation)
         {
             Directory.CreateDirectory(ShotDir);
             var go = new GameObject("Shot Camera");

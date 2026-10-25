@@ -4,27 +4,41 @@ Lantern Spirit = **Spirit**. The creatures are **Islings** (never "creature" in 
 Format: `trigger_id` · speaker · lines (shown in order). **once** = only the first time.
 Optional `· → target` (before the lines): the Spirit flies to that anchor while saying them and it pulses
 (`leadPod`, `cradle`, `runes`, `nearPad`, `wildPad`, `shrine`, `lodgeCenter`, `pedestal`, `lodgeIsling`, `rimSocket`, `rimPod`,
-`lodgeDoor`, `tile:x,y`). No target = it stays home. The target glows gold and the Spirit shines its lantern on it (step 7c).
+`lodgeDoor`, `tile:x,y`, step 8: `shard`, `rim`, `starterPods`, `landmark:name` (WorldMap landmarks: `statue`, `firstGrass`, `pond`), `gate:fire` / `gate:water` / `gate:wind` /
+`gate:home`, `gate:last`). No target = it stays home. The target glows gold and the Spirit shines its lantern on it (step 7c).
 Names are placeholders. The step 5c dialogue system loads this (convert to data asset).
 
 ## Opening (Still Isle)
+- `intro.shard` · once · → shard (only if the shard isn't touched within 3 s)
+  - Spirit: Oh! Something's here. Touch it?
 - `intro.arrive` · once
   - Spirit: Oh! You're awake. Hello, big one.
   - Spirit: I'm a Lantern Spirit. A small one. Very small.
-- `intro.world` · once
+- `intro.world` · once · → rim
   - Spirit: The world broke into floating pieces. This is one of them.
   - Spirit: Hold its rocky edge to move it. Put it wherever feels comfy.
-- `intro.explorer` · once
-  - Spirit: See the little explorer? Slide your thumb along your finger to walk.
-  - Spirit: Keep your thumb there to keep walking. Tap to stop.
-- `intro.starter` · once
+- `intro.starter` · once · → starterPods
   - Spirit: Every guardian needs an Isling friend. Pick one!
 - `starter.kilnpot` · Spirit: Kilnpot! Warm as a fresh-baked pot.
 - `starter.pebbloop` · Spirit: Pebbloop! Bubbly, and very round.
 - `starter.pufflet` · Spirit: Pufflet! Light as a cloud, twice as fluffy.
-- `intro.statue` · once (first time near the statue)
+- `intro.explorer` · once · → tile:21,22
+  - Spirit: See the little explorer? Swipe your thumb along your finger to walk.
+  - Spirit: Tap your thumb to stop. Or just look at a spot and pinch.
+- `intro.statue` · once · → landmark:statue (first time within ~3 tiles of the statue)
   - Spirit: That statue... it has three empty holes.
   - Spirit: I feel like I know it. Strange.
+
+## Shard Gates and realms (step 8)
+- `gate.sealed` · → gate:last (walking into or pinching a sealed gate)
+  - Spirit: This one's still asleep. Maybe later.
+- `gate.fire.first` · once · → gate:fire (first time the fire gate comes into the window)
+  - Spirit: That arch is warm. It leads somewhere.
+- `realm.cinderwood.first` · once · → tile:30,29 (first arrival in Cinderwood)
+  - Spirit: Cinderwood. The fire here has gone quiet.
+  - Spirit: Let's find out why.
+- `hub.return.first` · once · → landmark:statue (first time back in the hub from a realm)
+  - Spirit: Home again. The statue looks... different?
 
 ## Tutorials
 - `tut.grass` · once: Spirit: Tall grass rustles when an Isling is hiding in it.
