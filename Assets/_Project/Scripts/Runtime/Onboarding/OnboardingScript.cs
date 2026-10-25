@@ -14,6 +14,11 @@ namespace Diorama
         AboveIsland,
         /// <summary>Floating above the lesson's target (a gold tile).</summary>
         AboveTarget,
+        /// <summary>
+        /// Palm on the side of the island's rocky base (step 8d, the palm grab): one hand on its own side, both hands on
+        /// the left and right sides. The clip is turned so its palm faces the island.
+        /// </summary>
+        IslandSides,
     }
 
     /// <summary>

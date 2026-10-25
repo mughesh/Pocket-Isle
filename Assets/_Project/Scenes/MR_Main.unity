@@ -240,8 +240,10 @@ MonoBehaviour:
   - {x: 6, y: 2}
   honeycombCenter: {x: 1.5, y: 0}
   beaconMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
-  palmReach: 0.08
-  palmFacing: 0.6
+  palm:
+    facing: 0.5
+    height: {x: 0.03, y: 0.15}
+    radius: 0.06
   palmHoldSeconds: 0.8
   maxInRoom: 8
   grabSize: 0.07
@@ -476,8 +478,10 @@ MonoBehaviour:
   bowlHeight: 1.42
   beaconHeight: 0.22
   beaconWidth: 0.04
-  palmReach: 0.08
-  palmFacing: 0.6
+  palm:
+    facing: 0.5
+    height: {x: 0.03, y: 0.15}
+    radius: 0.06
   holdSeconds: 0.8
 --- !u!4 &261742742
 Transform:
@@ -594,7 +598,6 @@ MonoBehaviour:
   placer: {fileID: 374318555}
   rimInteractable: {fileID: 1736066356}
   rimColliders:
-  - {fileID: 1736066361}
   - {fileID: 1736066360}
   - {fileID: 1736066359}
   - {fileID: 1736066358}
@@ -608,8 +611,6 @@ MonoBehaviour:
   idleTurnSeconds: 1
   window: {fileID: 270959113}
   nearRimDistance: 0.05
-  highlight: 0.15
-  highlightFadeSeconds: 0.12
 --- !u!114 &270959112
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2583,6 +2584,9 @@ MonoBehaviour:
   wristFingers: {x: -0.35, y: 0.25, z: 1}
   wristDorsal: {x: 1, y: 0.35, z: 0.25}
   bothSpread: 0.18
+  sideDrop: 0.05
+  sideOut: 0.02
+  sideFingers: {x: 0, y: -0.35, z: 1}
   fadeSeconds: 0.3
   struggleLoops: 3
   struggleSpeed: 0.6
@@ -2744,6 +2748,72 @@ MonoBehaviour:
   pods: {fileID: 78739058}
   encounters: {fileID: 1499891275}
   progression: {fileID: 11400000, guid: c5e0845f05a2ec34a817839899fdc421, type: 2}
+--- !u!1 &1522577912
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1522577914}
+  - component: {fileID: 1522577913}
+  m_Layer: 0
+  m_Name: Island Grab Frame
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1522577913
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1522577912}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10572ed637401604ba9656cac48dd558, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.IslandGrabFrame
+  island: {fileID: 270959109}
+  handle: {fileID: 270959111}
+  window: {fileID: 270959113}
+  pods: {fileID: 78739058}
+  material: {fileID: 2100000, guid: 796a9a767f0010447b33719eb17e264b, type: 2}
+  height: 0
+  outset: 0.008
+  cornerRadius: 0.03
+  cornerSegments: 8
+  sideSegments: 10
+  width: {x: 0.003, y: 0.0045, z: 0.005}
+  showDistance: 0.1
+  nearSpread: 0.12
+  farLevel: 0.25
+  nearLevel: 0.55
+  hoverLevel: 1
+  grabbedLevel: 1.1
+  color: {r: 0.95, g: 0.97, b: 1, a: 1}
+  grabbedColor: {r: 1, g: 0.82, b: 0.45, a: 1}
+  grabbedTint: 0.45
+  fadeInSeconds: 0.12
+  fadeSeconds: 0.3
+--- !u!4 &1522577914
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1522577912}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1532703331
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2834,6 +2904,55 @@ MonoBehaviour:
   wanderRadius: 2
   hopInterval: {x: 3, y: 7}
   moveChance: 0.6
+--- !u!1 &1536485479
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1536485481}
+  - component: {fileID: 1536485480}
+  m_Layer: 0
+  m_Name: Dev Readout
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1536485480
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1536485479}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06eefac3e2411704eb5bc20d64c26a79, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.DevReadout
+  lineMaterial: {fileID: 2100000, guid: 6620a41a1b093284a841d00dc2217702, type: 2}
+  input: {fileID: 374318556}
+  showOnStart: 1
+  panelOffset: {x: -0.1, y: -0.11, z: 0.45}
+  fontSize: 0.09
+--- !u!4 &1536485481
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1536485479}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1541842441
 GameObject:
   m_ObjectHideFlags: 0
@@ -3034,7 +3153,6 @@ GameObject:
   - component: {fileID: 1736066352}
   - component: {fileID: 1736066351}
   - component: {fileID: 1736066356}
-  - component: {fileID: 1736066361}
   - component: {fileID: 1736066360}
   - component: {fileID: 1736066359}
   - component: {fileID: 1736066358}
@@ -3110,7 +3228,7 @@ MonoBehaviour:
   _scoringModifier:
     _positionRotationWeight: 0.8
   _slippiness: 0
-  _supportedGrabTypes: 3
+  _supportedGrabTypes: 2
   _pinchGrabRules:
     _thumbRequirement: 1
     _indexRequirement: 1
@@ -3147,8 +3265,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.10499999, y: 0.1, z: 0.075}
-  m_Center: {x: -0.33499998, y: -0.05, z: 0.3475}
+  m_Size: {x: 0.775, y: 0.085999995, z: 0.075}
+  m_Center: {x: 0, y: -0.087, z: 0.3475}
 --- !u!65 &1736066358
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3168,8 +3286,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.26999998, y: 0.1, z: 0.075}
-  m_Center: {x: 0.2525, y: -0.05, z: 0.3475}
+  m_Size: {x: 0.075, y: 0.13, z: 0.775}
+  m_Center: {x: -0.3475, y: -0.065, z: 0}
 --- !u!65 &1736066359
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3189,8 +3307,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.075, y: 0.1, z: 0.775}
-  m_Center: {x: -0.3475, y: -0.05, z: 0}
+  m_Size: {x: 0.075, y: 0.13, z: 0.775}
+  m_Center: {x: 0.3475, y: -0.065, z: 0}
 --- !u!65 &1736066360
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3210,29 +3328,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.075, y: 0.1, z: 0.775}
-  m_Center: {x: 0.3475, y: -0.05, z: 0}
---- !u!65 &1736066361
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1736066349}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 0.775, y: 0.1, z: 0.075}
-  m_Center: {x: 0, y: -0.05, z: -0.3475}
+  m_Size: {x: 0.775, y: 0.13, z: 0.075}
+  m_Center: {x: 0, y: -0.065, z: -0.3475}
 --- !u!1 &1847074511
 GameObject:
   m_ObjectHideFlags: 0
@@ -3391,7 +3488,7 @@ MonoBehaviour:
   shardSize: 0.12
   driftFrom: {x: 0.8, y: 0.3, z: -1.2}
   driftSeconds: 3.5
-  contactSlack: 0.01
+  contactSlack: 0.015
   autoTouchSeconds: 10
   nudgeSpeed: 0.45
   nudgeSpring: 220
@@ -3400,8 +3497,11 @@ MonoBehaviour:
   riseSeconds: 1.6
   moveWaitSeconds: 12
   returnRiseSeconds: 2
-  podScale: 3.2
-  podRow: {x: 0.11, y: 0.1, z: 0.26}
+  podScale: 2.4
+  podFocusGrow: 1.3
+  podArc: {x: 1.2, y: 0.1, z: 0.26}
+  podArcBow: 0.06
+  podMinGap: 0.4
   dropReach: 0.12
   statueNear: 3
 --- !u!4 &1891040200
@@ -3880,3 +3980,5 @@ SceneRoots:
   - {fileID: 1891040200}
   - {fileID: 1380201672}
   - {fileID: 1421177269}
+  - {fileID: 1522577914}
+  - {fileID: 1536485481}

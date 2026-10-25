@@ -67,7 +67,7 @@ namespace Diorama.EditorTools
             var g = Object.FindFirstObjectByType<GhostHands>();
             if (g == null) return;
             g.previewing = true;
-            g.Show("grab_rim_slide", GhostPlace.AtTarget, "islandRim", 1f, false, true, 0.3f);
+            g.Show("grab_rim_slide", GhostPlace.IslandSides, "islandRim", 1f, false, true);
         }
 
         public static void ChooseStarter()

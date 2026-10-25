@@ -1,0 +1,263 @@
+using System.Collections.Generic;
+using Oculus.Interaction.Input;
+using UnityEngine;
+
+namespace Diorama
+{
+    /// <summary>
+    /// The island's grab frame (step 8d), like the grab frame on Meta's panels: a thin, soft white rounded rectangle
+    /// tracing the rocky base just under the cap's edge, a little outside it. It fades in when an open hand comes within
+    /// <see cref="showDistance"/> of the base skirt (the palm-grab zone), brightest on the side nearest the hand. Hover
+    /// (the hand in the zone, ready to grab) = brighter and a little thicker; grabbed = solid with a touch of gold; two
+    /// hands light both their sides. It fades out over <see cref="fadeSeconds"/> once the hand leaves, stays hidden
+    /// during battles and scene swaps, and pulses while a lesson hints at the rim (<see cref="IslandHandle.HintGlow"/>).
+    /// It replaced the old rock brighten.
+    /// </summary>
+    [DefaultExecutionOrder(200)] // after the island has moved this frame
+    public class IslandGrabFrame : MonoBehaviour
+    {
+        public IslandBuilder island;
+        public IslandHandle handle;
+        [Tooltip("Optional: hidden while the battle zoom is on.")]
+        public WorldWindow window;
+        [Tooltip("Optional: hidden during battles.")]
+        public PodRack pods;
+        [Tooltip("Diorama/Grab Frame material.")]
+        public Material material;
+
+        [Header("Shape (island-local m)")]
+        [Tooltip("Height of the frame (0 = the cap's base; the cap top is about +0.006).")]
+        public float height = 0f;
+        [Tooltip("How far outside the base's edge.")]
+        public float outset = 0.008f;
+        public float cornerRadius = 0.03f;
+        [Range(2, 16)] public int cornerSegments = 8;
+        [Tooltip("Extra points along each straight side (the glow follows the hand along it).")]
+        [Range(1, 24)] public int sideSegments = 10;
+
+        [Header("Look")]
+        [Tooltip("Ribbon width (world m): near, hover, held.")]
+        public Vector3 width = new Vector3(0.003f, 0.0045f, 0.005f);
+        [Tooltip("An open hand this close to the grab zone (world m) fades the frame in.")]
+        public float showDistance = 0.1f;
+        [Tooltip("Along the frame, the glow falls off this far from the point nearest the hand (world m).")]
+        public float nearSpread = 0.12f;
+        [Tooltip("The rest of the frame while a hand is near (x the nearest side's brightness).")]
+        [Range(0f, 1f)] public float farLevel = 0.25f;
+        [Range(0f, 1f)] public float nearLevel = 0.55f;
+        [Range(0f, 2f)] public float hoverLevel = 1f;
+        [Range(0f, 2f)] public float grabbedLevel = 1.1f;
+        public Color color = new Color(0.95f, 0.97f, 1f);
+        [Tooltip("Held: the frame tints toward this.")]
+        public Color grabbedColor = new Color(1f, 0.82f, 0.45f);
+        [Range(0f, 1f)] public float grabbedTint = 0.45f;
+        public float fadeInSeconds = 0.12f;
+        public float fadeSeconds = 0.3f;
+
+        struct HandState
+        {
+            public Hand hand;
+            public float near, hover, held;
+            public Vector3 closest;
+        }
+
+        /// <summary>Bridge checks without hands: a fake open right palm here (world), null = off.</summary>
+        public static System.Func<Vector3?> DebugPalm;
+
+        readonly HandState[] _hands = new HandState[2];
+        readonly List<Vector3> _local = new List<Vector3>();
+        readonly List<Vector3> _world = new List<Vector3>();
+        readonly List<Vector3> _verts = new List<Vector3>();
+        readonly List<Color> _colors = new List<Color>();
+        readonly List<Vector2> _uvs = new List<Vector2>();
+        readonly List<int> _tris = new List<int>();
+        Mesh _mesh;
+        Vector2 _builtFor;
+        float _hint;
+
+        void Start()
+        {
+            if (island == null || handle == null || material == null)
+            {
+                Debug.LogError("[IslandGrabFrame] Needs the island, its handle and the Grab Frame material (Set Up MR_Main (8d)): no grab frame.", this);
+                enabled = false;
+                return;
+            }
+            _mesh = new Mesh { name = "Island Grab Frame" };
+            _mesh.MarkDynamic();
+        }
+
+        void OnDestroy()
+        {
+            if (_mesh != null) Destroy(_mesh);
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStatics() => DebugPalm = null;
+
+        bool Hidden => pods != null && pods.InBattle || window != null && window.IsZoomed || SceneSwap.IsBusy ||
+                       handle.ScaleFactor < 0.3f; // the opening: the island hasn't grown yet
+
+        void LateUpdate()
+        {
+            float dt = Time.deltaTime;
+            bool hidden = Hidden;
+            float any = 0f;
+            for (int h = 0; h < 2; h++) any = Mathf.Max(any, Track(ref _hands[h], h == 0, hidden, dt));
+            _hint = Mathf.MoveTowards(_hint, hidden ? 0f : handle.HintGlow, dt * 4f);
+            if (any <= 0.002f && _hint <= 0.002f) return;
+            Draw();
+        }
+
+        /// <summary>Eases one hand's near / hover / held levels; returns how much it lights the frame.</summary>
+        float Track(ref HandState s, bool left, bool hidden, float dt)
+        {
+            var hand = HandLookup.Refresh(ref s.hand, left ? Handedness.Left : Handedness.Right);
+            float near = 0f, hover = 0f, held = 0f;
+            Vector3? fake = !left && DebugPalm != null ? DebugPalm() : null;
+            if (!hidden && fake.HasValue)
+            {
+                float d = handle.DistanceToZone(fake.Value);
+                near = d < showDistance ? 1f - Mathf.SmoothStep(0f, 1f, d / showDistance) : 0f;
+                hover = d <= 0.005f ? 1f : 0f;
+                s.closest = fake.Value;
+            }
+            else if (!hidden && HandLookup.TryGetJoint(hand, HandJointId.HandPalm, out var palm))
+            {
+                held = handle.IsHandGrabbing(left) ? 1f : 0f;
+                // An open hand (a pinching one is going for a pod, a rune or a look + pinch).
+                bool open = held > 0f || !hand.GetIndexFingerIsPinching();
+                float d = handle.DistanceToZone(palm);
+                if (open && d < showDistance)
+                {
+                    near = 1f - Mathf.SmoothStep(0f, 1f, d / showDistance);
+                    hover = handle.IsHandHovering(left) || d <= 0.005f ? 1f : 0f;
+                }
+                if (near > 0f || held > 0f) s.closest = palm;
+            }
+            s.near = Ease(s.near, Mathf.Max(near, held), dt);
+            s.hover = Ease(s.hover, Mathf.Max(hover, held), dt);
+            s.held = Ease(s.held, held, dt);
+            return s.near;
+        }
+
+        float Ease(float from, float to, float dt) =>
+            Mathf.MoveTowards(from, to, dt / Mathf.Max(0.01f, to > from ? fadeInSeconds : fadeSeconds));
+
+        void Draw()
+        {
+            var cam = Camera.main;
+            if (cam == null) return;
+            BuildPath();
+            var t = island.transform;
+            _world.Clear();
+            foreach (var p in _local) _world.Add(t.TransformPoint(p));
+
+            // Each hand's nearest point on the frame: its glow centres there.
+            var nearest = new Vector3[2];
+            for (int h = 0; h < 2; h++) nearest[h] = NearestOnFrame(_hands[h].closest);
+            float pulse = _hint * (0.55f + 0.45f * Mathf.Sin(Time.time * 4f));
+            float heldAll = Mathf.Max(_hands[0].held, _hands[1].held);
+            float hoverAll = Mathf.Max(_hands[0].hover, _hands[1].hover);
+            float w = Mathf.Lerp(Mathf.Lerp(width.x, width.y, hoverAll), width.z, heldAll);
+            Color tint = Color.Lerp(color, grabbedColor, grabbedTint * heldAll);
+
+            _verts.Clear();
+            _colors.Clear();
+            _uvs.Clear();
+            _tris.Clear();
+            int n = _world.Count;
+            Vector3 eye = cam.transform.position;
+            for (int i = 0; i < n; i++)
+            {
+                Vector3 p = _world[i];
+                Vector3 tangent = _world[(i + 1) % n] - _world[(i - 1 + n) % n];
+                Vector3 side = Vector3.Cross(tangent, eye - p);
+                side = side.sqrMagnitude > 1e-10f ? side.normalized * (w * 0.5f) : Vector3.up * (w * 0.5f);
+                float level = pulse * 0.6f;
+                for (int h = 0; h < 2; h++)
+                {
+                    var s = _hands[h];
+                    if (s.near <= 0.001f) continue;
+                    float along = (p - nearest[h]).magnitude / Mathf.Max(0.001f, nearSpread);
+                    float local = farLevel + (1f - farLevel) * Mathf.Exp(-along * along);
+                    float peak = Mathf.Lerp(nearLevel, hoverLevel, s.hover);
+                    // Held: the whole frame solid.
+                    float handLevel = Mathf.Lerp(local * peak, grabbedLevel, s.held) * s.near;
+                    level = Mathf.Max(level, handLevel);
+                }
+                var c = new Color(tint.r, tint.g, tint.b, level);
+                _verts.Add(p - side);
+                _verts.Add(p + side);
+                _colors.Add(c);
+                _colors.Add(c);
+                _uvs.Add(new Vector2(0f, 0f));
+                _uvs.Add(new Vector2(0f, 1f));
+                int a = i * 2, b = ((i + 1) % n) * 2;
+                _tris.Add(a);
+                _tris.Add(b);
+                _tris.Add(a + 1);
+                _tris.Add(a + 1);
+                _tris.Add(b);
+                _tris.Add(b + 1);
+            }
+            _mesh.Clear();
+            _mesh.SetVertices(_verts);
+            _mesh.SetColors(_colors);
+            _mesh.SetUVs(0, _uvs);
+            _mesh.SetTriangles(_tris, 0);
+            _mesh.RecalculateBounds();
+            Graphics.RenderMesh(new RenderParams(material) { layer = island.gameObject.layer, shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off },
+                _mesh, 0, Matrix4x4.identity);
+        }
+
+        Vector3 NearestOnFrame(Vector3 p)
+        {
+            Vector3 best = p;
+            float bestSq = float.MaxValue;
+            int n = _world.Count;
+            for (int i = 0; i < n; i++)
+            {
+                Vector3 a = _world[i], b = _world[(i + 1) % n], ab = b - a;
+                float k = ab.sqrMagnitude > 1e-10f ? Mathf.Clamp01(Vector3.Dot(p - a, ab) / ab.sqrMagnitude) : 0f;
+                Vector3 q = a + ab * k;
+                float d = (q - p).sqrMagnitude;
+                if (d < bestSq)
+                {
+                    bestSq = d;
+                    best = q;
+                }
+            }
+            return best;
+        }
+
+        /// <summary>The rounded rectangle around the island's footprint (island-local), rebuilt when the footprint changes.</summary>
+        void BuildPath()
+        {
+            var half = island.FootprintHalfSize;
+            if (_local.Count > 0 && half == _builtFor) return;
+            _builtFor = half;
+            _local.Clear();
+            var b = new Bounds(Vector3.zero, new Vector3(half.x * 2f, 0f, half.y * 2f));
+            float hx = half.x + outset, hz = half.y + outset;
+            float r = Mathf.Min(cornerRadius, Mathf.Min(hx, hz) * 0.9f);
+            // Corner centres, counter-clockwise seen from above (+X, +Z first), and the angle each corner's arc starts at.
+            var centers = new[] { new Vector2(hx - r, hz - r), new Vector2(-hx + r, hz - r), new Vector2(-hx + r, -hz + r), new Vector2(hx - r, -hz + r) };
+            for (int k = 0; k < 4; k++)
+            {
+                float start = k * 90f;
+                for (int i = 0; i <= cornerSegments; i++)
+                {
+                    float a = (start + 90f * i / cornerSegments) * Mathf.Deg2Rad;
+                    _local.Add(new Vector3(b.center.x + centers[k].x + Mathf.Cos(a) * r, height, b.center.z + centers[k].y + Mathf.Sin(a) * r));
+                }
+                // The straight side to the next corner's arc.
+                var next = centers[(k + 1) % 4];
+                float na = ((k + 1) * 90f) * Mathf.Deg2Rad;
+                Vector3 from = _local[_local.Count - 1];
+                var to = new Vector3(b.center.x + next.x + Mathf.Cos(na) * r, height, b.center.z + next.y + Mathf.Sin(na) * r);
+                for (int i = 1; i < sideSegments; i++) _local.Add(Vector3.Lerp(from, to, i / (float)sideSegments));
+            }
+        }
+    }
+}

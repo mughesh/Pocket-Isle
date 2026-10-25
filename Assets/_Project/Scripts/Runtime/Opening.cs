@@ -922,11 +922,11 @@ namespace Diorama
             return island.transform.TransformPoint(island.TileToLocal(tile, island.Content.capHeight + tilesUp * island.map.tileSize));
         }
 
+        /// <summary>The move lesson's spot: the base skirt on the player's right (the ghost palm-grabs the side, step 8d).</summary>
         Vector3? RimPoint()
         {
             if (_stage != Stage.Move || island == null) return null;
-            var b = island.LocalBounds;
-            return island.transform.TransformPoint(new Vector3(b.center.x, island.CapTopLocal - 0.02f, b.max.z));
+            return island.transform.TransformPoint(new Vector3(-island.FootprintHalfSize.x, island.CapTopLocal - 0.05f, 0f));
         }
 
         void Burst(Vector3 at, int count, Color color, float speed)

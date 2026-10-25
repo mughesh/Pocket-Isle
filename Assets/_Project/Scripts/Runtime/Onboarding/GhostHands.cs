@@ -39,6 +39,11 @@ namespace Diorama
         public Vector3 wristDorsal = new Vector3(1f, 0.35f, 0.25f);
         [Tooltip("Both hands (show me your hands) sit this far apart (m).")]
         public float bothSpread = 0.18f;
+        [Tooltip("Island sides: the palm sits this far below the cap top (island-local m) and this far out from the base (world m).")]
+        public float sideDrop = 0.05f;
+        public float sideOut = 0.02f;
+        [Tooltip("Island sides: at the key moment the fingers point this way (right hand; x right, y up, z away from the player), the palm flat against the base.")]
+        public Vector3 sideFingers = new Vector3(0f, -0.35f, 1f);
 
         [Header("Feel")]
         public float fadeSeconds = 0.3f;
@@ -266,15 +271,25 @@ namespace Diorama
                 loopFade = 1f;
             }
             float alpha = _visible * loopFade;
-            float placeScale = _request.place == GhostPlace.AtTarget && library != null ? library.targetScale : 1f;
+            float placeScale = (_request.place == GhostPlace.AtTarget || _request.place == GhostPlace.IslandSides) && library != null ? library.targetScale : 1f;
             float scale = _request.scale * placeScale * Mathf.Max(0.05f, _clip.size) * Mathf.Lerp(1f, struggleScale, _struggle);
 
             var a = _request.both ? _left ?? _right : _request.left ? _left ?? _right : _right ?? _left;
             var b = _request.both ? (a == _left ? _right : _left) : null;
-            Vector3 side = frame * Vector3.right * ((_request.spread > 0f ? _request.spread : bothSpread) * 0.5f);
-            Pose(a, point + (b != null ? (a.left ? -side : side) : Vector3.zero), frame, t, scale, alpha);
-            if (b != null) Pose(b, point + (b.left ? -side : side), frame, t, scale, alpha);
-            else Hidden(a == _left ? _right : _left);
+            if (_request.place == GhostPlace.IslandSides)
+            {
+                // Each hand on its own side of the base, the clip turned so the palm faces the island.
+                Pose(a, SidePoint(a.left), frame, t, scale, alpha, true);
+                if (b != null) Pose(b, SidePoint(b.left), frame, t, scale, alpha, true);
+                else Hidden(a == _left ? _right : _left);
+            }
+            else
+            {
+                Vector3 side = frame * Vector3.right * ((_request.spread > 0f ? _request.spread : bothSpread) * 0.5f);
+                Pose(a, point + (b != null ? (a.left ? -side : side) : Vector3.zero), frame, t, scale, alpha);
+                if (b != null) Pose(b, point + (b.left ? -side : side), frame, t, scale, alpha);
+                else Hidden(a == _left ? _right : _left);
+            }
 
             _keyWorld = point;
             _keyValid = true;
@@ -301,6 +316,13 @@ namespace Diorama
                     point = island.transform.TransformPoint(local) + Vector3.up * aboveIslandHeight;
                     break;
                 }
+                case GhostPlace.IslandSides:
+                {
+                    if (island == null) return false;
+                    var b = island.LocalBounds;
+                    point = island.transform.TransformPoint(new Vector3(b.center.x, island.CapTopLocal - sideDrop, b.center.z));
+                    break;
+                }
                 case GhostPlace.AtTarget:
                 case GhostPlace.AboveTarget:
                 {
@@ -319,8 +341,21 @@ namespace Diorama
             return true;
         }
 
-        /// <summary>Poses one ghost so the clip's key joint at its key time sits on <paramref name="point"/>.</summary>
-        void Pose(Ghost g, Vector3 point, Quaternion frame, float t, float scale, float alpha)
+        /// <summary>The palm's spot on the base skirt, on the left or right side as the player sees it (island +X is the player's left).</summary>
+        Vector3 SidePoint(bool leftSide)
+        {
+            var half = island.FootprintHalfSize;
+            var t = island.transform;
+            var local = new Vector3(leftSide ? half.x : -half.x, island.CapTopLocal - sideDrop, 0f);
+            return t.TransformPoint(local) + t.right * (leftSide ? sideOut : -sideOut);
+        }
+
+        /// <summary>
+        /// Poses one ghost so the clip's key joint at its key time sits on <paramref name="point"/>. Side grab: the whole
+        /// clip turns so that at the key time the palm lies flat against the island's side (back of the hand outward,
+        /// fingers along <see cref="sideFingers"/>), whatever way the recording held it.
+        /// </summary>
+        void Pose(Ghost g, Vector3 point, Quaternion frame, float t, float scale, float alpha, bool sideGrab = false)
         {
             bool mirror = _clip.leftHand != g.left;
             var view = _clip.anchor == GhostAnchor.Wrist ? WristView(g.left) : Quaternion.identity;
@@ -330,6 +365,15 @@ namespace Diorama
             // Where the key joint is at the key time, relative to the clip frame's origin.
             _clip.Sample(_clip.keyTime * _clip.Duration, mirror, out var kp, out var kr, _rot, _pos);
             Vector3 keyInRoot = KeyInRoot(g, _clip.keyJoint);
+            if (sideGrab)
+            {
+                // The palm joint's axes at the key time (OpenXR: +Z toward the fingers, +Y the back of the hand).
+                var palm = view * kr * KeyRotInRoot(g, HandJointId.HandPalm);
+                var fingers = g.left ? GhostHandClip.Mirror(sideFingers) : sideFingers;
+                var dorsal = g.left ? Vector3.left : Vector3.right;
+                var turn = Quaternion.LookRotation(fingers, dorsal) * Quaternion.Inverse(Quaternion.LookRotation(palm * Vector3.forward, palm * Vector3.up));
+                frame *= turn;
+            }
             Vector3 key = view * kp + view * kr * keyInRoot;
             Vector3 origin = point + frame * (offset * scale) - frame * (key * scale);
 
@@ -343,6 +387,22 @@ namespace Diorama
             g.block.SetFloat(AlphaId, alpha);
             g.renderer.SetPropertyBlock(g.block);
             g.renderer.enabled = alpha > 0.002f;
+        }
+
+        /// <summary>A joint's rotation in the hand root's frame with the joints as just sampled.</summary>
+        Quaternion KeyRotInRoot(Ghost g, HandJointId joint)
+        {
+            int k = (int)joint;
+            if (k < 0 || k >= JointCount || g.joints[k] == null) return Quaternion.identity;
+            Quaternion r = Quaternion.identity;
+            var t = g.joints[k];
+            while (t != null && t != g.root)
+            {
+                int i = System.Array.IndexOf(g.joints, t);
+                r = (i >= 0 ? _rot[i] : t.localRotation) * r;
+                t = t.parent;
+            }
+            return r;
         }
 
         /// <summary>The key joint's position in the hand root's frame (unscaled) with the joints as just sampled.</summary>

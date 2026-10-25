@@ -49,7 +49,7 @@ MonoBehaviour:
     rewindTo: 
     praise: 1
     ghost: grab_rim_slide
-    place: 1
+    place: 4
     target: rim
     ghostScale: 1
     bothHands: 0
@@ -269,11 +269,11 @@ MonoBehaviour:
     rewindTo: 
     praise: 1
     ghost: grab_rim_slide
-    place: 1
+    place: 4
     target: islandRim
     ghostScale: 1
     bothHands: 1
-    ghostSpread: 0.3
+    ghostSpread: 0
     goldPath: 
     goldTileSteps: 0
     tutorialGrass: 0

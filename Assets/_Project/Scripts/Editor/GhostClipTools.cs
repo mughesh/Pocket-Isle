@@ -100,7 +100,7 @@ namespace Diorama.EditorTools
         Vector2 _scroll;
         static readonly string[] Hands = { "Auto (right first)", "Right", "Left" };
         static readonly string[] PreviewHands = { "Left", "Right", "Both" };
-        static readonly string[] Places = { "Above the island", "At a target (front rim)" };
+        static readonly string[] Places = { "Above the island", "At a target (front rim)", "On the base sides (palm grab)" };
 
         void OnGUI()
         {
@@ -190,7 +190,7 @@ namespace Diorama.EditorTools
             if (ghosts == null) return;
             ghosts.previewing = true;
             _previewing = clip;
-            var place = _previewPlace == 0 ? GhostPlace.AboveIsland : GhostPlace.AtTarget;
+            var place = _previewPlace == 0 ? GhostPlace.AboveIsland : _previewPlace == 1 ? GhostPlace.AtTarget : GhostPlace.IslandSides;
             if (place == GhostPlace.AtTarget)
             {
                 // At the island's front edge (the rim's middle), at the lesson size for targets.

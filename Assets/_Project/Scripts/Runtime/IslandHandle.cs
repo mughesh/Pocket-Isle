@@ -8,7 +8,9 @@ namespace Diorama
     /// <summary>
     /// Holding the floating island. The ISDK Grabbable on the island uses this as both its one- and two-grab
     /// transformer; grabs can only start on the rim colliders (HandGrabInteractable on the "Rim Grab" child),
-    /// never on the play surface. The island always stays level (parallel to the floor).
+    /// never on the play surface. Step 8d: palm grabs only (a pinch never moves the island; pinch is for pods, runes
+    /// and look + pinch) on the rocky base skirt all around; <see cref="IslandGrabFrame"/> shows where (it replaced the
+    /// rock brighten). The island always stays level (parallel to the floor).
     /// Its front (+Z: the Spirit, runes and pods side) always turns to face the head (yaw only, head position projected
     /// on the floor plane): while held, after release, and when idle if the player has shifted more than
     /// <see cref="idleAngle"/> for <see cref="idleSeconds"/> (not during the battle zoom).
@@ -43,11 +45,9 @@ namespace Diorama
         [Tooltip("No idle turning while the battle zoom is on.")]
         public WorldWindow window;
 
-        [Header("Gesture guard and hover")]
+        [Header("Gesture guard")]
         [Tooltip("A hand whose thumb tip or palm is this close to the rim counts as busy.")]
         public float nearRimDistance = 0.05f;
-        [Range(0f, 1f)] public float highlight = 0.15f;
-        public float highlightFadeSeconds = 0.12f;
 
         IGrabbable _grabbable;
         Grabbable _grabbableComponent;
@@ -65,13 +65,12 @@ namespace Diorama
 
         readonly Hand[] _hands = new Hand[2];
         readonly bool[] _near = new bool[2];
-        float _glow;
 
         Transform Target => _grabbable != null ? _grabbable.Transform : transform;
         /// <summary>A hand is holding the island (the opening waits for this).</summary>
         public bool IsGrabbed => _grabbableComponent != null && _grabbableComponent.SelectingPointsCount > 0;
 
-        /// <summary>Extra rim glow from a hint (the opening's "hold its rocky edge"), 0..1 of the highlight.</summary>
+        /// <summary>Hint glow (the move and two-hands lessons): the grab frame pulses, 0..1.</summary>
         public float HintGlow { get; set; }
 
         /// <summary>A hand took hold of the island (the first grab point; pod cards close).</summary>
@@ -83,12 +82,11 @@ namespace Diorama
         {
             _baseScale = placer != null ? placer.islandScale : transform.localScale.x;
             if (rimInteractable == null) Debug.LogError("[IslandHandle] No rim HandGrabInteractable assigned; the island can't be grabbed.");
-            // The front rim's middle (the two-hands tip); the rim glows itself, no gold sphere.
+            // The base skirt's front middle (the two-hands tip); the grab frame glows, no gold sphere.
             Dialogue.RegisterTarget("islandRim", () =>
             {
                 if (island == null) return null;
-                var b = island.LocalBounds;
-                return island.transform.TransformPoint(new Vector3(b.center.x, island.CapTopLocal - 0.02f, b.max.z));
+                return island.transform.TransformPoint(new Vector3(0f, island.CapTopLocal - 0.05f, island.FootprintHalfSize.y));
             }, k => HintGlow = k, () => 0f);
         }
 
@@ -219,12 +217,6 @@ namespace Diorama
         {
             _near[0] = IsNearRim(HandLookup.Refresh(ref _hands[0], Handedness.Left));
             _near[1] = IsNearRim(HandLookup.Refresh(ref _hands[1], Handedness.Right));
-
-            bool hover = rimInteractable != null && rimInteractable.State != InteractableState.Normal &&
-                         rimInteractable.State != InteractableState.Disabled;
-            float target = hover || _near[0] || _near[1] || IsGrabbed ? highlight : 0f;
-            _glow = Mathf.MoveTowards(_glow, target, Time.deltaTime * highlight / Mathf.Max(0.01f, highlightFadeSeconds));
-            if (island != null) island.rimHighlight = Mathf.Max(_glow, HintGlow * highlight * 2f);
             UpdateFacing();
         }
 
