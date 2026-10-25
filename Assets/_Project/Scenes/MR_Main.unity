@@ -321,6 +321,111 @@ Transform:
   - {fileID: 1196775047}
   m_Father: {fileID: 301495222}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &204973768
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 204973769}
+  - component: {fileID: 204973771}
+  - component: {fileID: 204973770}
+  m_Layer: 0
+  m_Name: Fallen Log
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &204973769
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 204973768}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1553131432}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &204973770
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 204973768}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20147f5730c3d1e4bad9c983ea9698a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.FallenLog
+  piece: {fileID: 204973771}
+  anchor: {x: 20, y: 14}
+  island: {fileID: 270959109}
+  explorer: {fileID: 374318554}
+  fx: {fileID: 1078587927}
+  doneLine: cinder.log.done
+  bounce: 0.004
+  bounceSeconds: 0.45
+  volume: 0.8
+--- !u!114 &204973771
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 204973768}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 551e9456ff58fee459be84499e470a78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.CarryPiece
+  id: cinder.log
+  map: {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
+  island: {fileID: 270959109}
+  window: {fileID: 270959113}
+  explorer: {fileID: 374318554}
+  grabGuard: {fileID: 270959111}
+  ghosts: {fileID: 1421177268}
+  fx: {fileID: 1078587927}
+  reach: 3
+  lessonLine: cinder.log.hands
+  ghostClip: grab_drop
+  ghostScale: 1
+  recipe: {fileID: 11400000, guid: 782c07a7a06cda744b18f4eed5f22284, type: 2}
+  home: {x: 20.5, y: 14}
+  homeHeight: 0
+  homeYaw: 0
+  spots:
+  - tile: {x: 18.5, y: 14}
+    height: 0.18
+    yaw: 0
+  - tile: {x: 22.5, y: 14}
+    height: 0.18
+    yaw: 0
+  grabRadius: 0.5
+  grabSlack: 0.015
+  halfLength: 0.9
+  lag: 0.22
+  maxSpeed: 7
+  liftToMove: 0.6
+  wobble: 9
+  wobbleGain: 12
+  snapRadius: 1.3
+  dropSeconds: 0.35
+  fallBackSeconds: 0.55
+  floatHeight: 1.1
+  floatSeconds: 0.9
+  pickTimeout: 15
+  spotMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  spotRing: 1.1
 --- !u!1 &221433161
 GameObject:
   m_ObjectHideFlags: 0
@@ -3043,6 +3148,38 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1553131431
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1553131432}
+  m_Layer: 0
+  m_Name: Hand Puzzles
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1553131432
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1553131431}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 204973769}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1583412946
 GameObject:
   m_ObjectHideFlags: 0
@@ -4097,3 +4234,4 @@ SceneRoots:
   - {fileID: 1522577914}
   - {fileID: 1536485481}
   - {fileID: 1811331407}
+  - {fileID: 1553131432}

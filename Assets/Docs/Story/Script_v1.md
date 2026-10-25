@@ -142,10 +142,10 @@ every ~10 s while it waits. Shard, move and starter use the Opening lines above;
   - Spirit: A forge in the cliff. The fire came from here.
 - `cinder.ruins.first` · once · → landmark:ruins (first time in the kiln ruins)
   - Spirit: Old kilns. Something glazed is moving in the grass...
-- `cw.log` · once (blocked by the fallen log)
-  - Spirit: A fallen log. Too heavy for the little one.
-  - Spirit: But not for you. Reach in and lift it!
-- `cw.log.done` · Spirit: Strong hands!
+- `cinder.log.hands` · once · → puzzle:cinder.log (step 9b: right after cinder.log.first; the ghost shows the lift)
+  - Spirit: Maybe your big hands could move it?
+- `cinder.log.done` · once (step 9b: the log set down on a ledge, the trail open)
+  - Spirit: You're strong! Let's go on.
 - `cw.temple` · once (first time at the temple door)
   - Spirit: The forge temple. Something big is breathing in there.
 - `cw.bellows` · once

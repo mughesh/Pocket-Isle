@@ -86,7 +86,8 @@ namespace Diorama.EditorTools
         static int PriorityOf(string section) =>
             section.StartsWith("Opening") || section.StartsWith("Tutorials") ? 1 : 2;
 
-        static readonly Regex TargetFlag = new Regex(@"·?\s*→\s*([A-Za-z][\w:,]*)");
+        // Dots only between word characters (puzzle:cinder.log), so a target can still end a sentence.
+        static readonly Regex TargetFlag = new Regex(@"·?\s*→\s*([A-Za-z][\w:,]*(?:\.\w+)*)");
         static readonly Regex WhileFlag = new Regex(@"·\s*while\s+([!\w.&| ]+)");
 
         /// <summary>

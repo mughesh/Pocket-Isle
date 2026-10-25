@@ -661,29 +661,26 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: Old kilns. Something glazed is moving in the grass...
-  - id: cw.log
+  - id: cinder.log.hands
     once: 1
     priority: 2
-    note: blocked by the fallen log
-    target: 
+    note: 'step 9b: right after cinder.log.first; the ghost shows the lift'
+    target: puzzle:cinder.log
     validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: A fallen log. Too heavy for the little one.
-    - speaker: 0
-      speakerName: Spirit
-      text: But not for you. Reach in and lift it!
-  - id: cw.log.done
-    once: 0
+      text: Maybe your big hands could move it?
+  - id: cinder.log.done
+    once: 1
     priority: 2
-    note: 
+    note: 'step 9b: the log set down on a ledge, the trail open'
     target: 
     validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Strong hands!
+      text: You're strong! Let's go on.
   - id: cw.temple
     once: 1
     priority: 2

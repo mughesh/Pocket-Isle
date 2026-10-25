@@ -398,13 +398,13 @@ namespace Diorama
                 if (!visible) continue;
                 bool carrying = State == Phase.Held && _lifted || State == Phase.Picked;
                 float pulse = 0.75f + 0.25f * Mathf.Sin(Time.time * 3f + i);
-                float intensity = (Hovered == i ? 2.2f : carrying ? 1.3f : 0.7f) * pulse;
+                float intensity = (Hovered == i ? 2.4f : carrying ? 1.6f : 1f) * pulse;
                 _rings[i].localPosition = local;
                 _rings[i].localRotation = Quaternion.Euler(90f, 0f, 0f);
                 _rings[i].localScale = Vector3.one * (island.map.tileSize * island.Zoom * spotRing * (Hovered == i ? 1.15f : 1f));
                 _ringBlock.Clear();
                 _ringBlock.SetFloat(ModeId, 1f);
-                _ringBlock.SetFloat(FillId, Hovered == i ? 1f : 0f);
+                _ringBlock.SetFloat(FillId, 1f);
                 _ringBlock.SetFloat(IntensityId, intensity);
                 _ringRenderers[i].SetPropertyBlock(_ringBlock);
             }
