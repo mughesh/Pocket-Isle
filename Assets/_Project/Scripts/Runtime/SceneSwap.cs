@@ -64,6 +64,7 @@ namespace Diorama
 
         WorldMap _outdoor;
         float _outdoorRestored;
+        Vector2Int? _returnTile, _returnFacing;
         Color _lightColor;
         float _lightIntensity;
         bool _lightSaved;
@@ -90,10 +91,16 @@ namespace Diorama
 
         public WorldMap FindWorld(string name) => worlds.Find(m => m != null && m.name == name);
 
-        /// <summary>Swaps into <paramref name="interior"/> with the explorer on <paramref name="entryTile"/>. False while busy or already inside.</summary>
-        public bool Enter(WorldMap interior, Vector2Int entryTile, Vector2Int? facing = null)
+        /// <summary>
+        /// Swaps into <paramref name="interior"/> with the explorer on <paramref name="entryTile"/>. False while busy or
+        /// already inside. Coming back out lands on the tile the explorer stood on, or on <paramref name="returnTile"/>
+        /// facing <paramref name="returnFacing"/> (step 9b: the forge doorway lets you out in front of it, facing away).
+        /// </summary>
+        public bool Enter(WorldMap interior, Vector2Int entryTile, Vector2Int? facing = null, Vector2Int? returnTile = null, Vector2Int? returnFacing = null)
         {
             if (!enabled || Busy || Inside || interior == null) return false;
+            _returnTile = returnTile;
+            _returnFacing = returnFacing;
             StartCoroutine(Swap(interior, entryTile, facing ?? new Vector2Int(0, -1), Kind.Enter));
             return true;
         }
@@ -194,9 +201,10 @@ namespace Diorama
                 _outdoorRestored = RealmState.Restored;
                 if (!Inside)
                 {
-                    ReturnTile = explorer.Tile;
-                    ReturnFacing = explorer.Facing;
+                    ReturnTile = _returnTile ?? explorer.Tile;
+                    ReturnFacing = _returnFacing ?? explorer.Facing;
                 }
+                _returnTile = _returnFacing = null;
             }
             else if (kind == Kind.Travel && realm != null) realm.Remember(from, RealmState.Restored);
             island.world = to;

@@ -82,6 +82,9 @@ namespace Diorama
         /// <summary>Scene swap: the rocky base blends from the content's theme toward this one by <see cref="rimTint"/>.</summary>
         [NonSerialized] public RealmTheme rimTheme;
         [NonSerialized] public float rimTint;
+        /// <summary>Lifts all map content (tiles, props, the explorer) by this much, island-local metres: a quick bounce
+        /// when something heavy lands (step 9b's log). The rocky base stays put.</summary>
+        [NonSerialized] public float contentLift;
 
         // Fixed sizes from the prototype, in metres. The cap mesh reaches down to the column top (-CapSkirt) so
         // water, which sits CapSkirt lower, still shows above the column.
@@ -357,7 +360,7 @@ namespace Diorama
             {
                 Vector3 pivot = MapPoint(ZoomPivot);
                 Vector3 center = MapPoint(ViewCenter);
-                return Matrix4x4.TRS(pivot * (1f - _zoom) - center, Quaternion.identity, Vector3.one * _zoom);
+                return Matrix4x4.TRS(pivot * (1f - _zoom) - center + Vector3.up * contentLift, Quaternion.identity, Vector3.one * _zoom);
             }
         }
 
@@ -695,7 +698,7 @@ namespace Diorama
                         float s = tile * (0.8f + rnd.Next() * 0.4f);
                         steam.local.Add(Matrix4x4.TRS(new Vector3(at.x, cap, at.z), Quaternion.Euler(0f, rnd.Next() * 360f, 0f), Vector3.one * s));
                     }
-                if (wm == null || !wm.TryGetProp(wm.PropAt(r, c), out var e)) return;
+                if (wm == null || !wm.TryGetProp(wm.PropAt(r, c), out var e) || wm.IsPropHidden(new Vector2Int(c, r))) return;
                 var b = BatchFor(e.recipe);
                 if (b == null) return;
                 var f = WorldMap.FootprintOf(e);

@@ -35,6 +35,7 @@ Shader "Diorama/Prop"
         [ToggleUI] _ClearSink ("Sink In Battle Clearing", Float) = 1
 
         [HideInInspector] _WindowClip ("Island Window Clip", Float) = 0
+        [HideInInspector] _RestoredSelf ("Own Restoration (-1 = the realm's)", Float) = -1
     }
 
     HLSLINCLUDE
@@ -52,6 +53,7 @@ Shader "Diorama/Prop"
         float  _OutlineWidth;
         float  _ClearSink;
         float  _WindowClip;
+        float  _RestoredSelf;
     CBUFFER_END
 
     float _RealmRestored; // RealmState: 0 = ash grey and cold, 1 = restored
@@ -65,7 +67,8 @@ Shader "Diorama/Prop"
         UNITY_VERTEX_INPUT_INSTANCE_ID
     };
 
-    float PropRestored() { return saturate(_RealmRestored); }
+    // A puzzle prop drawn on its own (step 9b: a brazier warming up, the forge door heating) sets its own restoration.
+    float PropRestored() { return _RestoredSelf < 0.0 ? saturate(_RealmRestored) : saturate(_RestoredSelf); }
 
     float3 PropOrigin() { return UNITY_MATRIX_M._m03_m13_m23; }
 

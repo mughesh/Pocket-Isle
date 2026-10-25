@@ -127,6 +127,7 @@ namespace Diorama
             ("grab_flick", GhostAnchor.Island, 2.5f, "Grab a pod at the near-right corner, flick it toward the island's far middle, open the hand."),
             ("palm_hover", GhostAnchor.Island, 2.5f, "Palm down, hover it over a spot ~10 cm above the island, hold still."),
             ("hands_up", GhostAnchor.Island, 2.5f, "Raise one hand in front of you, palm away, fingers up, wiggle the fingers."),
+            ("pump_handle", GhostAnchor.Island, 4f, "Pinch an imaginary handle ~5 cm above the island, push it down ~4 cm, let go, lift back up. Twice, then pull back."),
         };
 
         public GhostHandClip Find(string name)

@@ -410,10 +410,22 @@ namespace Diorama
         public bool IsHandBusy(bool leftHand)
         {
             if (IsHandGrabbing(leftHand)) return true;
+            if (_heldElsewhere[leftHand ? 0 : 1] >= Time.frameCount - 1) return true;
             int h = leftHand ? 0 : 1;
             Resolve(h);
             return _pinch[h].grab;
         }
+
+        static readonly int[] _heldElsewhere = { -10, -10 };
+
+        /// <summary>
+        /// A hand is holding something else on the island this frame (step 9b: a puzzle's log or pump handle): the gaze
+        /// walk, tile touch, shrines and microgestures ignore it, like a hand holding the island. Call every frame.
+        /// </summary>
+        public static void MarkHandHeld(bool leftHand) => _heldElsewhere[leftHand ? 0 : 1] = Time.frameCount;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetHeld() => _heldElsewhere[0] = _heldElsewhere[1] = -10;
 
         static Vector3 Flat(Vector3 v) => new Vector3(v.x, 0f, v.z);
     }

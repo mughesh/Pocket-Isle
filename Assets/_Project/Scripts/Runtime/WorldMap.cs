@@ -140,6 +140,8 @@ namespace Diorama
         string[] _propRows, _zoneRows;
         Dictionary<char, PropLegend> _legend;
         HashSet<Vector2Int> _blocked;
+        // Runtime changes (step 9b puzzles): never serialized, so a Play session can't write them into the asset.
+        [NonSerialized] HashSet<Vector2Int> _hiddenProps, _openProps;
 
         /// <summary>The zone legend entry at a tile (column, row). False outside every zone.</summary>
         public bool TryGetZone(Vector2Int tile, out MapZone zone)
@@ -225,6 +227,7 @@ namespace Diorama
                     for (int c = 0; c < rows[r].Length; c++)
                     {
                         if (!TryGetProp(rows[r][c], out var e) || !e.recipe.blocksWalking) continue;
+                        if (_openProps != null && _openProps.Contains(new Vector2Int(c, r))) continue;
                         var f = FootprintOf(e);
                         for (int dy = 0; dy < f.y; dy++)
                             for (int dx = 0; dx < f.x; dx++)
@@ -235,6 +238,43 @@ namespace Diorama
         }
 
         public override bool CanWalk(Vector2Int tile) => base.CanWalk(tile) && !PropBlocks(tile);
+
+        /// <summary>True when the island doesn't draw the prop anchored here (a puzzle draws its own). It still blocks.</summary>
+        public bool IsPropHidden(Vector2Int anchor) => _hiddenProps != null && _hiddenProps.Contains(anchor);
+
+        /// <summary>Runtime only: the island stops (or starts again) drawing the prop anchored here. Rebuilds the island.</summary>
+        public void SetPropHidden(Vector2Int anchor, bool hidden)
+        {
+            if (hidden == IsPropHidden(anchor)) return;
+            if (_hiddenProps == null) _hiddenProps = new HashSet<Vector2Int>();
+            if (hidden) _hiddenProps.Add(anchor);
+            else _hiddenProps.Remove(anchor);
+            version++;
+        }
+
+        /// <summary>True when the prop anchored here no longer blocks walking (a lifted log, an open door).</summary>
+        public bool IsPropOpen(Vector2Int anchor) => _openProps != null && _openProps.Contains(anchor);
+
+        /// <summary>Runtime only: the prop anchored here stops (or starts again) blocking its footprint.</summary>
+        public void SetPropOpen(Vector2Int anchor, bool open)
+        {
+            if (open == IsPropOpen(anchor)) return;
+            if (_openProps == null) _openProps = new HashSet<Vector2Int>();
+            if (open) _openProps.Add(anchor);
+            else _openProps.Remove(anchor);
+            _blocked = null;
+            version++;
+        }
+
+        /// <summary>Drops every runtime change (puzzles call it when they go away; tests).</summary>
+        public void ClearRuntimeChanges()
+        {
+            bool any = _hiddenProps != null && _hiddenProps.Count > 0 || _openProps != null && _openProps.Count > 0;
+            _hiddenProps = null;
+            _openProps = null;
+            _blocked = null;
+            if (any) version++;
+        }
 
         /// <summary>Replaces the props grid from code (dressing tools) and drops the caches.</summary>
         public void SetProps(string text)

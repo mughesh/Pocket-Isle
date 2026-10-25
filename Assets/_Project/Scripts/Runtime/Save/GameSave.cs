@@ -68,6 +68,7 @@ namespace Diorama
             if (encounters != null) encounters.IsCaught = s => s != null && _caught.Contains(SpeciesRegistry.IdOf(s));
             Load();
             _ready = true;
+            PuzzleState.Changed += OnPuzzleChanged;
             if (shrines != null) shrines.Rested += OnRested;
             if (encounters != null)
             {
@@ -85,8 +86,11 @@ namespace Diorama
 
         void OnTravelFinished(WorldMap to) => Save("travelled to " + to.name);
 
+        void OnPuzzleChanged(string id) => Save($"puzzle {id} {(PuzzleState.IsSolved(id) ? "solved" : $"stage {PuzzleState.Stage(id)}")}");
+
         void OnDestroy()
         {
+            PuzzleState.Changed -= OnPuzzleChanged;
             if (shrines != null) shrines.Rested -= OnRested;
             if (encounters != null)
             {
@@ -141,10 +145,12 @@ namespace Diorama
             {
                 case SaveGame.ReadResult.NoSave:
                     Debug.Log($"[GameSave] No save at {SavePath}: new game ({Describe(party.members)}).");
+                    PuzzleState.Restore(null);
                     NoteParty();
                     break;
                 case SaveGame.ReadResult.Bad:
                     Debug.LogWarning($"[GameSave] The save was unreadable ({problem}): renamed to {SaveGame.BadFileName}, new game.");
+                    PuzzleState.Restore(null);
                     NoteParty();
                     break;
                 default:
@@ -165,6 +171,9 @@ namespace Diorama
                 pods = party.members;
             }
             party.Restore(pods.Take(Party.Size).ToList(), stored);
+
+            // Puzzles first: a lifted log or an open door changes where the explorer can stand.
+            PuzzleState.Restore(data.puzzles);
 
             // Every realm's restoration first, so the map we land on reads its own.
             if (realm != null)
@@ -219,7 +228,8 @@ namespace Diorama
             foreach (var p in problems) Debug.LogWarning($"[GameSave] {p}");
             Debug.Log($"[GameSave] Loaded {SavePath} (saved {data.savedAt}): {Describe(party.members)}; storage {party.storage.Count}; " +
                       $"{data.map} c{data.explorerX} r{data.explorerY}{(data.inside ? $" (inside {data.interior} at c{data.insideX} r{data.insideY})" : "")}; last shrine {(data.hasShrine ? $"c{data.shrineX} r{data.shrineY}" : "none")}; " +
-                      $"realm {RealmState.Restored:0.##}; {data.said.Count} lines said; {_caught.Count} species caught; {explorer.moveMode}.");
+                      $"realm {RealmState.Restored:0.##}; {data.said.Count} lines said; {_caught.Count} species caught; {explorer.moveMode}; " +
+                      $"puzzles {PuzzleState.Describe()}.");
         }
 
         /// <summary>Everything in the pods and storage counts as caught (the starter too).</summary>
@@ -268,6 +278,7 @@ namespace Diorama
                     seen = encounters != null ? encounters.Seen.ToList() : new List<string>(),
                     walkMode = explorer.moveMode.ToString(),
                     dominantHand = DominantHand.Saved,
+                    puzzles = PuzzleState.ToSaved(),
                 };
                 if (data.hasShrine)
                 {

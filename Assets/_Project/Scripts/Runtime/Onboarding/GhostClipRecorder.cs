@@ -94,7 +94,7 @@ namespace Diorama
             clip.leftHand = hand.Handedness == Handedness.Left;
             clip.anchor = anchor;
             clip.fps = rate;
-            clip.keyJoint = clipName == "poke" ? HandJointId.HandIndexTip : HandJointId.HandPalm;
+            clip.keyJoint = clipName == "poke" || clipName == "pump_handle" ? HandJointId.HandIndexTip : HandJointId.HandPalm;
             clip.keyTime = 0.4f;
             clip.gazeDotUntil = clipName == "pinch" || clipName == "grab_drop" ? 0.2f : 0f;
             if (clipName == "pinch") clip.placeOffset = new Vector3(0.07f, -0.05f, -0.05f);

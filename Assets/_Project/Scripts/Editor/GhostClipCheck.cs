@@ -117,6 +117,20 @@ namespace Diorama.EditorTools
                     }
                     why = $"thumb meets index, {best * 100f:0.0} cm apart";
                     break;
+                case "pump_handle":
+                {
+                    // The first pinch (two strokes: the closest pinch could be the second one).
+                    best = float.MaxValue;
+                    for (int i = a; i <= b; i++) best = Mathf.Min(best, (pts[i][thumb] - pts[i][idx]).magnitude);
+                    for (int i = a; i <= b; i++)
+                        if ((pts[i][thumb] - pts[i][idx]).magnitude <= best + 0.006f)
+                        {
+                            key = i;
+                            break;
+                        }
+                    why = $"first pinch, thumb and index {best * 100f:0.0} cm apart";
+                    break;
+                }
                 case "thumb_swipe_forward":
                     best = float.MinValue;
                     for (int i = a; i <= b; i++)

@@ -24,6 +24,15 @@ namespace Diorama
         public float restored;
     }
 
+    /// <summary>A hand puzzle's state (step 9b): solved, and how far it got (lit braziers, the spot a log lies on).</summary>
+    [Serializable]
+    public class SavedPuzzle
+    {
+        public string id;
+        public bool solved;
+        public int stage;
+    }
+
     /// <summary>The whole save file (JSON). Bump <see cref="CurrentVersion"/> when the layout changes.</summary>
     [Serializable]
     public class SaveData
@@ -56,6 +65,8 @@ namespace Diorama
         public string walkMode;
         /// <summary>"left" / "right": the hand that first touched the opening shard (step 8e); empty = not yet.</summary>
         public string dominantHand;
+        /// <summary>Hand puzzles (step 9b). Older saves have none: nothing solved.</summary>
+        public List<SavedPuzzle> puzzles = new List<SavedPuzzle>();
 
         [Header("Inside an interior (the explorer fields above are then the outdoor return tile)")]
         public bool inside;
