@@ -5,10 +5,10 @@ using static Diorama.EditorTools.StarterKit;
 namespace Diorama.EditorTools
 {
     /// <summary>
-    /// Step 9b forge props. The map gets Bellows (body + handle at rest) and ForgePipe (one 1 x 1 prop whose iron pipe
+    /// Step 9b forge props. The map gets Bellows (with its press pad) and ForgePipe (one 1 x 1 prop whose iron pipe
     /// runs <see cref="PipeSpan"/> tiles each way along the cliff foot: from the bellows' nozzle 3 tiles east of its
-    /// tile to the braziers 1 east, 1 west and 3 west of it). The forge puzzle draws its own pieces: BellowsBody (squashes),
-    /// BellowsHandle (hinge at the origin, grip along +Z), BrazierWarm (coals glowing, no flame yet), ForgeDoorFrame
+    /// tile to the braziers 1 east, 1 west and 3 west of it). The forge puzzle draws its own pieces: BellowsBody (squashes under
+    /// the finger), BrazierWarm (coals glowing, no flame yet), ForgeDoorFrame
     /// (the forge mouth without its inside, a glow panel behind) and ForgeDoorLeaf (the iron-strapped door that sinks
     /// into the ground). Shape units are tiles; shape +X is map west (lower columns), +Z faces the player.
     /// </summary>
@@ -19,11 +19,10 @@ namespace Diorama.EditorTools
         /// <summary>Pipe run height and its offset back toward the cliff (tiles), shared with the forge puzzle's glow pulses.</summary>
         public const float PipeHeight = 0.72f, PipeBack = 0.38f;
         /// <summary>
-        /// The bellows' hinge (east edge of its top board), the handle's arm length (tiles) and turn: the arm reaches west
-        /// across the top (sideways to the player, so the push down reads from the seat).
+        /// Top of the bellows' press pad (tiles): poke it down to pump (Mugesh, Oct 26: a poke instead of the first
+        /// version's lever). The forge puzzle squashes the whole body with the finger.
         /// </summary>
-        public static readonly Vector3 BellowsHinge = new Vector3(-0.3f, 0.5f, 0f);
-        public const float HandleArm = 1f, HandleRestAngle = 28f, HandleYaw = 90f;
+        public const float BellowsTop = 0.57f;
 
         static readonly PropColor Leather = C("#8A5A3A");
         static readonly PropColor ForgeIron = C("#3D3633");
@@ -31,36 +30,20 @@ namespace Diorama.EditorTools
         static IEnumerable<PropRecipe> ForgeProps()
         {
             var bodyShapes = BellowsBodyPieces();
-            var handleShapes = BellowsHandlePieces();
 
-            var body = Recipe("BellowsBody", new Vector2Int(1, 1), true, false, 1400);
-            body.palette = Palette(ForgeIron, Wood, Stone, Leather, Ember, Smoke);
+            var body = Recipe("BellowsBody", new Vector2Int(1, 1), true, false, 1800);
+            body.palette = Palette(ForgeIron, Wood, Stone, Leather, Ember, C("#C0824A", 0.15f));
             body.yawJitter = 0f;
             body.scaleJitter = 0f;
             body.pieces = new List<PropPiece>(bodyShapes);
             yield return body;
 
-            var handle = Recipe("BellowsHandle", new Vector2Int(1, 1), false, false, 600);
-            handle.palette = Palette(ForgeIron, LightWood, Stone, Leather, Ember, Smoke);
-            handle.yawJitter = 0f;
-            handle.scaleJitter = 0f;
-            handle.outline = 0.016f;
-            handle.pieces = new List<PropPiece>(handleShapes);
-            yield return handle;
-
-            // The map's look: the body with the handle up at rest.
-            var bellows = Recipe("Bellows", new Vector2Int(1, 1), true, false, 2000);
-            bellows.palette = Palette(ForgeIron, LightWood, Stone, Leather, Ember, Smoke);
+            // The map's look: the same bellows (the puzzle draws its own copy that squashes).
+            var bellows = Recipe("Bellows", new Vector2Int(1, 1), true, false, 1800);
+            bellows.palette = body.palette;
             bellows.yawJitter = 0f;
             bellows.scaleJitter = 0f;
             bellows.pieces = new List<PropPiece>(bodyShapes);
-            foreach (var p in handleShapes)
-            {
-                var q = p;
-                q.position = BellowsHinge;
-                q.rotation = new Vector3(-HandleRestAngle, HandleYaw, 0f);
-                bellows.pieces.Add(q);
-            }
             yield return bellows;
 
             yield return ForgePipe();
@@ -84,17 +67,11 @@ namespace Diorama.EditorTools
                 Torus(new Vector3(0f, 0.31f, 0f), 0.29f, 0.022f, Vector3.zero, 0.03f)), PropSlot.Leaf),
             Piece(PShape("BellowsBody_Nozzle",
                 Cone(new Vector3(0.25f, 0.25f, -0.15f), new Vector3(0.38f, 0.3f, -0.3f), 0.06f, 0.04f, 0f),
-                Sphere(new Vector3(0.38f, 0.3f, -0.3f), 0.05f, 0.02f)), PropSlot.Clay),
-        };
-
-        /// <summary>Hinge knuckle at the origin, an iron arm along +Z, a wooden crossbar grip at its end.</summary>
-        static PropPiece[] BellowsHandlePieces() => new[]
-        {
-            Piece(PShape("BellowsHandle_Arm",
-                Sphere(Vector3.zero, 0.06f, 0f),
-                Cone(Vector3.zero, new Vector3(0f, 0f, HandleArm), 0.035f, 0.03f, 0.02f)), PropSlot.Clay),
-            Piece(PShape("BellowsHandle_Grip",
-                Cone(new Vector3(-0.14f, 0f, HandleArm), new Vector3(0.14f, 0f, HandleArm), 0.05f, 0.05f, 0f)), PropSlot.Wood),
+                Sphere(new Vector3(0.38f, 0.3f, -0.3f), 0.05f, 0.02f),
+                Torus(new Vector3(0f, 0.5f, 0.02f), 0.2f, 0.022f, Vector3.zero, 0f)), PropSlot.Clay),
+            // The press pad: a round stuffed leather cushion on the top board, in an iron ring. Poke it.
+            Piece(PShape("BellowsBody_Pad",
+                Ell(new Vector3(0f, 0.51f, 0.02f), new Vector3(0.19f, 0.06f, 0.19f), 0f).Bumps(0.006f, 20f)), PropSlot.Accent),
         };
 
         /// <summary>

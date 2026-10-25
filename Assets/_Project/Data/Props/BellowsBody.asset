@@ -40,6 +40,15 @@ MonoBehaviour:
     slot: 0
     motion: 0
     motionAmount: 0
+  - shape: {fileID: 11400000, guid: c278fe5a9c1d97343a23ea92b54c3d15, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 5
+    motion: 0
+    motionAmount: 0
   palette:
   - restored: {r: 0.2559608, g: 0.2274946, b: 0.21148236, a: 1}
     unrestored: {r: 0.23921569, g: 0.21176471, b: 0.2, a: 1}
@@ -56,9 +65,9 @@ MonoBehaviour:
   - restored: {r: 1, g: 0.63818675, b: 0.23513734, a: 1}
     unrestored: {r: 1, g: 0.7019608, b: 0.2784314, a: 1}
     glow: 1
-  - restored: {r: 0.99447066, g: 0.9532836, b: 0.90106595, a: 1}
-    unrestored: {r: 0.92941177, g: 0.8980392, b: 0.84705883, a: 1}
-    glow: 0.2
+  - restored: {r: 0.80564713, g: 0.534477, b: 0.28080165, a: 1}
+    unrestored: {r: 0.7529412, g: 0.50980395, b: 0.2901961, a: 1}
+    glow: 0.15
   tips:
     on: 0
     onSlot: 0
@@ -73,5 +82,5 @@ MonoBehaviour:
   yawJitter: 0
   scaleJitter: 0
   resolution: 40
-  triangleBudget: 1400
+  triangleBudget: 1800
   bakedMesh: {fileID: 4300000, guid: c680cb9e2151c8d448efd6ad2496be39, type: 2}

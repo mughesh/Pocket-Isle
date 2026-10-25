@@ -5,7 +5,7 @@ namespace Diorama
 {
     /// <summary>
     /// Cinderwood's forge (step 9b), the scene side of a <see cref="PumpPiece"/>: bellows → pipes → braziers → door.
-    /// Each pump squashes the bellows (they follow the handle) with a puff, and a glow pulse runs along the pipe to the
+    /// Each pump squashes the bellows (they follow the finger poking the pad) with a puff, and a glow pulse runs along the pipe to the
     /// next unlit brazier, whose coals brighten a step (4 pumps per brazier). The 4th lights it with a flame burst and a
     /// cheer (<see cref="brazierLines"/>). Cooling takes coals back a step, never a lit brazier. All three lit: the
     /// forge door glows from inside, its iron bands heat up, it sinks into the ground with steam and sparks, the Spirit
@@ -139,8 +139,9 @@ namespace Diorama
             if (_body == null) return;
             bool here = pump.Here;
             float t = pump.Travel;
-            // The bellows follow the handle: squashed flat when it's down.
-            _body.Place(bellows, 0f, Quaternion.identity, here, new Vector3(1f + 0.06f * t, 1f - 0.3f * t, 1f + 0.06f * t));
+            // The bellows follow the finger: the pad's top goes down by the press travel, the bag bulges a little.
+            float squash = pump.padHeight > 1e-3f ? pump.pressTravel * t / pump.padHeight : 0f;
+            _body.Place(bellows, 0f, Quaternion.identity, here, new Vector3(1f + 0.08f * t, 1f - squash, 1f + 0.08f * t));
             for (int i = 0; i < braziers.Length; i++) DrawBrazier(i, here);
             Vector2 doorCenter = door + new Vector2(1f, 0f);
             _frame.restoredSelf = _doorHeat;

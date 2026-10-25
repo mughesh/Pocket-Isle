@@ -39,9 +39,9 @@ namespace Diorama
 
         [Header("Grab")]
         [Tooltip("Capsule radius round its long axis, tiles.")]
-        public float grabRadius = 0.5f;
+        public float grabRadius = 0.85f;
         [Tooltip("Extra world metres on top of the radius (hand tracking wobble).")]
-        public float grabSlack = 0.015f;
+        public float grabSlack = 0.03f;
         [Tooltip("Half length of the long axis, tiles (a 2 x 1 log: ~0.85).")]
         public float halfLength = 0.85f;
 

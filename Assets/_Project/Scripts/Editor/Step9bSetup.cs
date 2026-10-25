@@ -122,7 +122,10 @@ namespace Diorama.EditorTools
             piece.home = anchor + new Vector2((f.x - 1) * 0.5f, (f.y - 1) * 0.5f);
             piece.homeHeight = 0f;
             piece.homeYaw = (entry.turned ? 90f : 0f) + entry.yaw;
-            piece.halfLength = Mathf.Max(f.x, f.y) * 0.5f - 0.1f;
+            // Generous (Mugesh, Oct 26: the first grab zone was too small): past both ends, 0.85 tiles round the log.
+            piece.halfLength = Mathf.Max(f.x, f.y) * 0.5f;
+            piece.grabRadius = 0.85f;
+            piece.grabSlack = 0.03f;
             piece.spots = new List<CarrySpot>();
             foreach (var xy in LedgeXY)
             {
@@ -194,18 +197,17 @@ namespace Diorama.EditorTools
             pump.id = "cinder.bellows";
             pump.reach = 4;
             pump.lessonLine = "cinder.bellows.first";
-            pump.ghostClip = "pump_handle";
+            // Poke the pad (Mugesh, Oct 26): the recorded poke ghost shows it.
+            pump.ghostClip = "poke";
             pump.ghostScale = 1f;
-            pump.handleRecipe = PropKit.Load("BellowsHandle");
-            // Shape +X is map west (lower columns), +Z the player's side (higher rows).
-            pump.hinge = bellows + new Vector2(-PropKit.BellowsHinge.x, PropKit.BellowsHinge.z);
-            pump.hingeHeight = PropKit.BellowsHinge.y;
-            pump.armLength = PropKit.HandleArm;
-            pump.armYaw = PropKit.HandleYaw;
-            pump.upAngle = PropKit.HandleRestAngle;
-            pump.downAngle = -12f;
-            pump.spring = 4f;
-            pump.grabRadius = 0.55f;
+            pump.pad = bellows;
+            pump.padHeight = PropKit.BellowsTop;
+            pump.pressTravel = 0.3f;
+            pump.pressRadius = 0.5f;
+            pump.pressSlack = 0.02f;
+            pump.spring = 5f;
+            pump.downAt = 0.7f;
+            pump.upAt = 0.3f;
             pump.strokesNeeded = 12;
             pump.checkpoint = 4;
             pump.coolDelay = 4f;
@@ -231,12 +233,12 @@ namespace Diorama.EditorTools
             EditorUtility.SetDirty(forge);
 
             var missing = new List<string>();
-            foreach (var (n, r) in new[] { ("BellowsHandle", pump.handleRecipe), ("BellowsBody", forge.bodyRecipe), ("Brazier", forge.brazierCold),
+            foreach (var (n, r) in new[] { ("BellowsBody", forge.bodyRecipe), ("Brazier", forge.brazierCold),
                          ("BrazierWarm", forge.brazierWarm), ("BrazierLit", forge.brazierLit), ("ForgeDoorFrame", forge.doorFrame), ("ForgeDoorLeaf", forge.doorLeaf) })
                 if (r == null || r.bakedMesh == null) missing.Add(n);
-            log.Append($"\n  'Forge Bellows' {Missing(pump)}: hinge c{pump.hinge.x:0.##} r{pump.hinge.y:0.##}, braziers " +
+            log.Append($"\n  'Forge Bellows' {Missing(pump)}: press pad c{pump.pad.x} r{pump.pad.y}, braziers " +
                        string.Join(", ", System.Array.ConvertAll(forge.braziers, b => $"c{b.x} r{b.y}")) + $", door c{forge.door.x} r{forge.door.y}, " +
-                       $"{pump.strokesNeeded} pumps ({pump.checkpoint} per brazier), lesson cinder.bellows.first + ghost pump_handle" +
+                       $"{pump.strokesNeeded} pokes ({pump.checkpoint} per brazier), lesson cinder.bellows.first + ghost poke" +
                        (missing.Count > 0 ? $"; NOT BAKED: {string.Join(", ", missing)}" : ""));
         }
     }

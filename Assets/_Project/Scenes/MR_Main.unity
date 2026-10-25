@@ -410,9 +410,9 @@ MonoBehaviour:
   - tile: {x: 22.5, y: 14}
     height: 0.18
     yaw: 0
-  grabRadius: 0.5
-  grabSlack: 0.015
-  halfLength: 0.9
+  grabRadius: 0.85
+  grabSlack: 0.03
+  halfLength: 1
   lag: 0.22
   maxSpeed: 7
   liftToMove: 0.6
@@ -2470,24 +2470,20 @@ MonoBehaviour:
   fx: {fileID: 1078587927}
   reach: 4
   lessonLine: cinder.bellows.first
-  ghostClip: pump_handle
+  ghostClip: poke
   ghostScale: 1
-  handleRecipe: {fileID: 11400000, guid: fdf3e2060d9df3d48b3a14d3854c5cf3, type: 2}
-  hinge: {x: 18.3, y: 4}
-  hingeHeight: 0.5
-  armLength: 1
-  armYaw: 90
-  upAngle: 28
-  downAngle: -12
-  spring: 4
-  grabRadius: 0.55
-  grabSlack: 0.015
+  pad: {x: 18, y: 4}
+  padHeight: 0.57
+  pressTravel: 0.3
+  pressRadius: 0.5
+  pressSlack: 0.02
+  spring: 5
   autoStrokeSeconds: 0.7
   strokesNeeded: 12
   checkpoint: 4
   coolDelay: 4
   coolStep: 2
-  downAt: 0.8
+  downAt: 0.7
   upAt: 0.3
 --- !u!1001 &1132406365
 PrefabInstance:

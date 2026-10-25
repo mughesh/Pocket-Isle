@@ -114,7 +114,7 @@ Beat the Keeper → the element flows again, the realm visibly revives, its shar
   → cliff forge temple. Side pockets hide rare grass patches, berry bushes and an orb.
 - **Habitat:** ember tall grass (red-gold). Water visitors live in the tall grass around the hot springs.
 - **Residents (later, if cheap):** a few friendly creature villagers in the kiln village with one-line hints.
-- **Temple:** pump the forge bellows (~~open/close hand~~ decided Oct 26: **pinch the handle and push it down**) → heat
+- **Temple:** pump the forge bellows (~~open/close hand~~ decided Oct 26: **pinch the handle and push it down**; after the first Link test, Oct 26: **poke the pad**, one poke = one pump) → heat
   flows through pipes → lights 3 braziers → Keeper door opens. The log is **grabbed, lifted and set aside** (Oct 26).
 
 ### Cinderwood as built (step 9a, Oct 26)
@@ -161,8 +161,8 @@ is within `reach` tiles, saves its state (`PuzzleState` in the save: solved + a 
 time it's usable in a session (line + gold focus + ghost hand at `puzzle:<id>`, until first touched).
 | Piece | How | Settings |
 |---|---|---|
-| **Carry** | Pinch or close a fist anywhere near it (capsule round its long side, +1.5 cm). Heavy: only rises until lifted 0.6 tiles, then follows with 0.22 s lag and a damped wobble. Released within 1.3 tiles of a target spot: drops onto it (solved). Anywhere else: falls back home. Look + pinch it (floats up), look + pinch a spot (floats there). | weight (lag, max speed, wobble), lift before it moves, snap radius, spots |
-| **Pump** | A lever on a hinge with a spring return. Pinch / fist the grip, push down. Stroke = past 80% of the travel and back above 30%. Look + pinch the grip = one stroke. | travel (angles), spring, strokes needed, checkpoint, cooling (after 4 s, a step every 2 s, never below a checkpoint) |
+| **Carry** | Pinch or close a fist anywhere near it (capsule 0.85 tiles round its whole length, +3 cm). Heavy: only rises until lifted 0.6 tiles, then follows with 0.22 s lag and a damped wobble. Released within 1.3 tiles of a target spot: drops onto it (solved). Anywhere else: falls back home. Look + pinch it (floats up), look + pinch a spot (floats there). | weight (lag, max speed, wobble), lift before it moves, snap radius, spots |
+| **Pump** | A press pad with a spring return: a fingertip coming down onto it from above pushes it (the first version's lever read badly). Stroke = past 70% of the travel and back above 30%: one poke, one pump. Look + pinch the pad = one stroke. | pad height, travel, radius, spring, strokes needed, checkpoint, cooling (after 4 s, a step every 2 s, never below a checkpoint) |
 | Wheel | `IWheelPiece` stub only (sluice wheel, windmill) | |
 
 **The fallen log** (Carry `cinder.log`): reach 3. Lesson: `cinder.log.first` (landmark) then `cinder.log.hands` "Maybe
@@ -171,9 +171,8 @@ side of the gap (18 / 22, 45). Lifting: leaves and dust fall, the explorer hops.
 tiles bounce (the base stays put), the log's tiles open, the explorer hops, "You're strong! Let's go on." Elsewhere: a
 small thud, it lies across the gap again.
 
-**The forge** (Pump `cinder.bellows`): reach 4. Bellows beside the door with a sideways iron handle (hinge on its east
-edge, the grip reaches west: the push down reads from the seat). Lesson: "Bellows! Pump them to send heat to the
-braziers." + the `pump_handle` ghost (placeholder until Mugesh records it). 12 pumps, 4 per brazier: each pump squashes
+**The forge** (Pump `cinder.bellows`): reach 4. Bellows beside the door with a round leather press pad on top. Lesson:
+"Bellows! Poke them to send heat to the braziers." + the recorded `poke` ghost on the pad. 12 pokes, 4 per brazier: each pump squashes
 the bellows with a puff and sends a glow along the pipe to the next unlit brazier (nearest first), whose coals warm a
 step; the 4th lights it (flame burst, "One!" / "Two!" / "Three!", saved). All three: the door glows from inside, its
 iron bands heat, it sinks into the ground with steam and sparks, "The forge is waking up!", the doorway opens (saved).

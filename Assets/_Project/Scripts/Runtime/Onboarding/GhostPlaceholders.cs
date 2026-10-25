@@ -39,7 +39,6 @@ namespace Diorama
         public static readonly string[] Names =
         {
             "poke", "grab_rim_slide", "grab_drop", "thumb_swipe_forward", "thumb_tap", "pinch", "grab_toss", "grab_flick", "palm_hover", "hands_up",
-            "pump_handle",
         };
 
         /// <summary>Builds a placeholder clip from the right hand's rest pose (joint-local), or null for an unknown name.</summary>
@@ -257,28 +256,6 @@ namespace Diorama
                     {
                         Open(0f, new Vector3(0f, 0.012f, 0f), f, d, 0.15f), Open(0.5f, new Vector3(0f, -0.008f, 0f), f, d, 0.15f),
                         Open(1f, new Vector3(0f, 0.012f, 0f), f, d, 0.15f),
-                    };
-                }
-                case "pump_handle":
-                {
-                    // Step 9b bellows: pinch the handle, push it down, let go (it springs up), twice. Key = the first pinch.
-                    seconds = 3.4f;
-                    keyJoint = HandJointId.HandIndexTip;
-                    keyTime = 0.2f;
-                    gaze = 0.15f;
-                    Vector3 f = new Vector3(0f, -0.45f, 1f), d = new Vector3(0f, 1f, 0.45f);
-                    Vector3 pushed = new Vector3(0f, -0.04f, 0.006f), above = new Vector3(0f, 0.008f, -0.004f);
-                    Key P(float t, Vector3 p, float k) => new Key
-                    {
-                        t = t, pos = p, fingers = f, dorsal = d,
-                        thumb = Mathf.Lerp(0.1f, 0.6f, k), index = Mathf.Lerp(0.22f, 0.55f, k), middle = 0.45f, ring = 0.55f, pinky = 0.6f,
-                        swing = Mathf.Lerp(0.6f, -0.2f, k),
-                    };
-                    return new List<Key>
-                    {
-                        P(0f, new Vector3(0f, 0.03f, -0.07f), 0f), P(0.13f, above, 0f), P(0.2f, Vector3.zero, 1f), P(0.36f, pushed, 1f),
-                        P(0.42f, pushed, 0f), P(0.5f, above, 0f), P(0.56f, Vector3.zero, 1f), P(0.72f, pushed, 1f), P(0.78f, pushed, 0f),
-                        P(1f, new Vector3(0f, 0.03f, -0.07f), 0f),
                     };
                 }
                 case "hands_up":

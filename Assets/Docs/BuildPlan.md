@@ -24,7 +24,7 @@ Prompts for Claude Code: `Assets/Docs/Prompts/step-NN-*.md`. Design: `Assets/Doc
   Device capture owed (village and springs).
 - **Step 9b built Oct 26 (headset test pending): guardian-hand puzzles.** Reusable kit (Carry, Pump, Wheel stub; saved
   state; self-teaching ghost lessons), the fallen log (lift it onto a ledge), the forge (bellows → pipe → 3 braziers →
-  the door opens), the Forge Hall placeholder interior. New recording owed: `pump_handle`.
+  the door opens), the Forge Hall placeholder interior. After the first Link test: bigger log grab, the bellows are poked.
 - Next: step 9c (Hearthstag, the battle, the restored realm, the shard).
 
 ## Principle

@@ -4,46 +4,41 @@ using UnityEngine;
 namespace Diorama
 {
     /// <summary>
-    /// Pump (step 9b hand puzzle kit): a lever handle on a hinge with a spring return. Pinch (or close a fist on) the
-    /// grip and push it down; let go and it springs back up. A stroke = pushed past ~80% of its travel and back above
-    /// 30% (<see cref="PumpStrokes"/>). <see cref="strokesNeeded"/> strokes solve it; every <see cref="checkpoint"/>
-    /// strokes is a saved stage that never cools away; between them, stopping for <see cref="coolDelay"/> s loses a
-    /// stroke every <see cref="coolStep"/> s. Look + pinch the grip = one whole stroke by itself.
-    /// The handle (<see cref="handleRecipe"/>, modelled with its hinge at the origin and the grip along +Z) is drawn here;
-    /// what it pumps (bellows, pipes, braziers) is the listener's (<see cref="ForgeBellows"/>), from <see cref="Travel"/>,
-    /// <see cref="Stroked"/> and <see cref="Cooled"/>.
+    /// Pump (step 9b hand puzzle kit): a pad you poke down with a fingertip; it springs back up. A stroke = pushed past
+    /// <see cref="downAt"/> of its travel and back above <see cref="upAt"/> (<see cref="PumpStrokes"/>): one poke, one
+    /// pump. Either index fingertip counts when it comes down onto the pad from above within <see cref="pressRadius"/>.
+    /// <see cref="strokesNeeded"/> strokes solve it; every <see cref="checkpoint"/> strokes is a saved stage that never
+    /// cools away; between them, stopping for <see cref="coolDelay"/> s loses a stroke every <see cref="coolStep"/> s.
+    /// Look + pinch the pad = one stroke by itself.
+    /// Mugesh, Oct 26: a poke reads better than the first version's lever. The piece draws nothing itself: what it
+    /// pumps (the bellows squashing under the finger, pipes, braziers) is the listener's (<see cref="ForgeBellows"/>),
+    /// from <see cref="Travel"/>, <see cref="Stroked"/> and <see cref="Cooled"/>.
     /// </summary>
     [DefaultExecutionOrder(-20)] // before the gaze walk and tile touch read IsHandBusy
     public class PumpPiece : HandPuzzle
     {
-        [Header("Handle")]
-        public PropRecipe handleRecipe;
-        [Tooltip("Hinge: map tile (column, row) and height above the cap (tiles).")]
-        public Vector2 hinge;
-        public float hingeHeight = 0.8f;
-        [Tooltip("Hinge to grip, tiles.")]
-        public float armLength = 1f;
-        [Tooltip("Which way the arm points, degrees (map space; 0 = toward the player).")]
-        public float armYaw;
-        [Tooltip("Arm angle above horizontal at rest (up) and fully pushed (down), degrees.")]
-        public float upAngle = 28f, downAngle = -12f;
+        [Header("Press pad")]
+        [Tooltip("Map tile (column, row) of the pad's centre.")]
+        public Vector2 pad;
+        [Tooltip("The pad's top at rest, tiles above the cap.")]
+        public float padHeight = 0.55f;
+        [Tooltip("How far it goes down, tiles (all the way = travel 1).")]
+        public float pressTravel = 0.3f;
+        [Tooltip("A fingertip within this many tiles of the pad's centre (horizontally) presses it.")]
+        public float pressRadius = 0.5f;
+        [Tooltip("Extra world metres on the radius (hand tracking wobble).")]
+        public float pressSlack = 0.015f;
         [Tooltip("Spring return, travel per second (1 = the whole way in a second).")]
-        public float spring = 4f;
-
-        [Header("Grab")]
-        [Tooltip("Grab ball round the grip, tiles.")]
-        public float grabRadius = 0.55f;
-        [Tooltip("Extra world metres (hand tracking wobble).")]
-        public float grabSlack = 0.015f;
+        public float spring = 5f;
         [Tooltip("Look + pinch: one stroke takes this long.")]
-        public float autoStrokeSeconds = 0.7f;
+        public float autoStrokeSeconds = 0.6f;
 
         [Header("Strokes")]
         public int strokesNeeded = 12;
         [Tooltip("Every this many strokes is a saved stage (a lit brazier).")]
         public int checkpoint = 4;
         public float coolDelay = 4f, coolStep = 2f;
-        [Range(0.5f, 1f)] public float downAt = 0.8f;
+        [Range(0.5f, 1f)] public float downAt = 0.7f;
         [Range(0f, 0.5f)] public float upAt = 0.3f;
 
         /// <summary>A stroke counted (strokes so far).</summary>
@@ -51,7 +46,7 @@ namespace Diorama
         /// <summary>Heat cooled away one stroke (strokes left).</summary>
         public event Action<PumpPiece, int> Cooled;
 
-        /// <summary>0 = handle up at rest, 1 = pushed all the way down.</summary>
+        /// <summary>0 = pad up at rest, 1 = pushed all the way down.</summary>
         public float Travel { get; private set; }
         public int Strokes => _strokes.Strokes;
         public int Checkpoints => _strokes.Checkpoints;
@@ -59,32 +54,19 @@ namespace Diorama
 
         readonly PumpStrokes _strokes = new PumpStrokes();
         readonly HandState[] _hands = new HandState[2];
-        PropView _view;
+        readonly bool[] _above = new bool[2];
         int _hand = -1;
-        float _grabAngleOffset;
         float _auto = -1f;
         bool _gazed;
 
-        protected override Vector2 HomeTile => hinge;
+        protected override Vector2 HomeTile => pad;
 
-        public override Vector3? FocusPoint => _view != null && _view.Visible ? GripWorld : (Vector3?)null;
+        public override Vector3? FocusPoint => Here ? PadWorld : (Vector3?)null;
 
         public override float FocusRadius => 0.6f * TileWorld;
 
-        /// <summary>The grip's world point now.</summary>
-        public Vector3 GripWorld => MapToWorld(Grip(Angle));
-
-        float Angle => Mathf.Lerp(upAngle, downAngle, Travel);
-
-        Quaternion ArmTurn => Quaternion.Euler(0f, armYaw, 0f);
-
-        /// <summary>The grip in (column, height, row) for an arm angle.</summary>
-        Vector3 Grip(float angle)
-        {
-            // Map space: +Z toward the player, columns run toward -X.
-            Vector3 dir = ArmTurn * (Quaternion.Euler(-angle, 0f, 0f) * Vector3.forward) * armLength;
-            return new Vector3(hinge.x - dir.x, hingeHeight + dir.y, hinge.y + dir.z);
-        }
+        /// <summary>The pad's top now (world).</summary>
+        public Vector3 PadWorld => MapToWorld(new Vector3(pad.x, padHeight - pressTravel * Travel, pad.y));
 
         protected override void Start()
         {
@@ -94,15 +76,7 @@ namespace Diorama
             _strokes.coolStep = coolStep;
             _strokes.downAt = downAt;
             _strokes.upAt = upAt;
-            if (handleRecipe != null) _view = new PropView($"Pump Handle {handleRecipe.name}", island, handleRecipe);
-            else Debug.LogError($"[PumpPiece] {name}: no handle recipe: nothing to grab.", this);
             base.Start();
-        }
-
-        protected override void OnDestroy()
-        {
-            base.OnDestroy();
-            _view?.Destroy();
         }
 
         protected override void ApplyState()
@@ -118,13 +92,14 @@ namespace Diorama
         {
             ReadHands(_hands);
             bool usable = Usable && !IsSolved;
+            float pressed = usable ? Press() : 0f;
             if (!Here) _hand = -1;
-            if (_hand >= 0) Hold();
-            else if (_auto >= 0f) AutoStroke();
+            if (_auto >= 0f) AutoStroke();
             else
             {
-                Travel = Mathf.MoveTowards(Travel, 0f, spring * Time.deltaTime);
-                if (usable) TryGrab();
+                // The pad follows a finger down at once and springs back up when it lifts.
+                Travel = Mathf.Max(pressed, Mathf.MoveTowards(Travel, 0f, spring * Time.deltaTime));
+                if (usable && _hand < 0) LookPinch();
                 else _gazed = false;
             }
             if (_hand >= 0) IslandHandle.MarkHandHeld(_hand == 0);
@@ -135,28 +110,59 @@ namespace Diorama
                 Debug.Log($"[PumpPiece] {id}: cooled to {_strokes.Strokes} stroke(s).");
                 Cooled?.Invoke(this, _strokes.Strokes);
             }
-            if (_view != null) _view.Place(hinge, hingeHeight, ArmTurn * Quaternion.Euler(-Angle, 0f, 0f), Here);
             base.Update();
         }
 
-        void TryGrab()
+        /// <summary>How far a fingertip pushes the pad down (0..1); sets <see cref="_hand"/> to the pressing hand or -1.</summary>
+        float Press()
         {
+            float best = 0f;
+            int was = _hand;
+            _hand = -1;
+            float slack = pressSlack / Mathf.Max(1e-5f, TileWorld);
             for (int h = 0; h < 2; h++)
             {
-                var s = _hands[h];
-                if (s.busy || !(s.pinchStarted || s.fistStarted)) continue;
-                var grip = s.pinchStarted ? s.pinchPoint : s.palm;
-                float slack = grabSlack / Mathf.Max(1e-5f, TileWorld);
-                if ((WorldToMap(grip) - Grip(Angle)).magnitude > grabRadius + slack) continue;
-                _hand = h;
-                _grabAngleOffset = Angle - HandAngle(grip);
-                MarkInteracted();
-                Debug.Log($"[PumpPiece] {id}: handle grabbed by the {(s.left ? "left" : "right")} hand ({(s.pinchStarted ? "pinch" : "palm")}).");
-                return;
+                var hand = HandRegistry.Get(h == 0 ? Oculus.Interaction.Input.Handedness.Left : Oculus.Interaction.Input.Handedness.Right);
+                if (_hands[h].busy && was != h || !HandLookup.TryGetJoint(hand, Oculus.Interaction.Input.HandJointId.HandIndexTip, out var tip))
+                {
+                    _above[h] = false;
+                    continue;
+                }
+                Vector3 m = WorldToMap(tip);
+                bool over = new Vector2(m.x - pad.x, m.z - pad.y).magnitude <= pressRadius + slack;
+                // Only a finger that came down onto the pad from above presses it (not one coming in from the side or
+                // below), and one pushed far through it lets go.
+                if (!over || m.y < padHeight - pressTravel - 0.8f)
+                {
+                    _above[h] = false;
+                    continue;
+                }
+                if (m.y >= padHeight)
+                {
+                    _above[h] = true;
+                    continue;
+                }
+                if (!_above[h]) continue;
+                float depth = Mathf.Clamp01((padHeight - m.y) / Mathf.Max(1e-3f, pressTravel));
+                if (depth > best || _hand < 0)
+                {
+                    best = Mathf.Max(best, depth);
+                    _hand = h;
+                }
             }
+            if (_hand >= 0 && was < 0)
+            {
+                MarkInteracted();
+                Debug.Log($"[PumpPiece] {id}: pressed by the {(_hand == 0 ? "left" : "right")} fingertip.");
+            }
+            return best;
+        }
+
+        void LookPinch()
+        {
             _gazed = Gazed();
             if (!_gazed) return;
-            FocusHighlight.Hover(GripWorld, FocusRadius);
+            FocusHighlight.Hover(PadWorld, FocusRadius);
             if (GazePinch(_hands))
             {
                 MarkInteracted();
@@ -165,35 +171,12 @@ namespace Diorama
             }
         }
 
-        /// <summary>The hand's angle round the hinge, in the arm's vertical plane (degrees above horizontal).</summary>
-        float HandAngle(Vector3 world)
-        {
-            Vector3 m = WorldToMap(world);
-            Vector3 v = new Vector3(-(m.x - hinge.x), m.y - hingeHeight, m.z - hinge.y); // back to map-space axes
-            Vector3 along = ArmTurn * Vector3.forward;
-            return Mathf.Atan2(v.y, Vector3.Dot(new Vector3(v.x, 0f, v.z), along)) * Mathf.Rad2Deg;
-        }
-
-        void Hold()
-        {
-            var s = _hands[_hand];
-            if (!s.tracked || !s.Holding)
-            {
-                Debug.Log($"[PumpPiece] {id}: handle released at {Travel:0.00}.");
-                _hand = -1;
-                return;
-            }
-            float angle = HandAngle(s.GripPoint) + _grabAngleOffset;
-            float span = upAngle - downAngle;
-            Travel = Mathf.Clamp01(Mathf.Abs(span) > 1e-3f ? (upAngle - angle) / span : 0f);
-        }
-
         void AutoStroke()
         {
             _auto += Time.deltaTime;
             float u = Mathf.Clamp01(_auto / Mathf.Max(0.1f, autoStrokeSeconds));
             // Down quickly, up with the spring.
-            Travel = u < 0.45f ? Mathf.SmoothStep(0f, 1f, u / 0.45f) : 1f - Mathf.SmoothStep(0f, 1f, (u - 0.45f) / 0.55f);
+            Travel = u < 0.4f ? Mathf.SmoothStep(0f, 1f, u / 0.4f) : 1f - Mathf.SmoothStep(0f, 1f, (u - 0.4f) / 0.6f);
             if (u >= 1f)
             {
                 _auto = -1f;
@@ -205,7 +188,7 @@ namespace Diorama
         {
             if (!HeadGaze.TryGetRay(out var ray)) return false;
             var pick = new HeadGaze.ConePick(ray, _gazed ? 0 : -1);
-            pick.Consider(0, GripWorld, Mathf.Max(HeadGaze.MinRadius * island.transform.lossyScale.x, 0.7f * TileWorld));
+            pick.Consider(0, PadWorld, Mathf.Max(HeadGaze.MinRadius * island.transform.lossyScale.x, 0.7f * TileWorld));
             return pick.Best == 0;
         }
 

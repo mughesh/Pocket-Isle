@@ -33,3 +33,13 @@ MonoBehaviour:
     rotation: {x: 0, y: 0, z: 0}
     bumps: 0
     bumpFrequency: 0
+  - kind: 3
+    blend: 0
+    k: 0
+    mirrorX: 0
+    a: {x: 0, y: 0.5, z: 0.02}
+    b: {x: 0, y: 0, z: 0}
+    size: {x: 0.2, y: 0.022, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    bumps: 0
+    bumpFrequency: 0

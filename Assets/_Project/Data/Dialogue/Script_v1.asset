@@ -694,13 +694,13 @@ MonoBehaviour:
   - id: cinder.bellows.first
     once: 1
     priority: 2
-    note: 'step 9b: first time the bellows are in reach; the ghost pumps'
+    note: 'step 9b: first time the bellows are in reach; the ghost pokes the pad'
     target: puzzle:cinder.bellows
     validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Bellows! Pump them to send heat to the braziers.
+      text: Bellows! Poke them to send heat to the braziers.
   - id: cinder.brazier.one
     once: 0
     priority: 2
