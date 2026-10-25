@@ -68,7 +68,11 @@ namespace Diorama
         /// <paramref name="rotation"/> (map space: +Z toward the player), <paramref name="scale"/> x a tile. Hidden when
         /// <paramref name="show"/> is false or it lies outside the island window.
         /// </summary>
-        public void Place(Vector2 tile, float height, Quaternion rotation, bool show, float scale = 1f)
+        public void Place(Vector2 tile, float height, Quaternion rotation, bool show, float scale = 1f) =>
+            Place(tile, height, rotation, show, Vector3.one * scale);
+
+        /// <summary>As above with a non-uniform scale (a bellows squashing), in the prop's own axes.</summary>
+        public void Place(Vector2 tile, float height, Quaternion rotation, bool show, Vector3 scale)
         {
             if (_renderer == null) return;
             var content = _island.Content;
@@ -79,7 +83,7 @@ namespace Diorama
             if (!inWindow) return;
             transform.localPosition = local;
             transform.localRotation = rotation;
-            transform.localScale = Vector3.one * (t * _island.Zoom * scale);
+            transform.localScale = scale * (t * _island.Zoom);
             Apply();
         }
 

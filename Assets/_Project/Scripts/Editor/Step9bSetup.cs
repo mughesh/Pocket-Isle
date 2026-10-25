@@ -7,8 +7,9 @@ using UnityEngine;
 namespace Diorama.EditorTools
 {
     /// <summary>
-    /// Step 9b: guardian-hand puzzles. Runs the 9a setup first (it rewrites the Cinderwood map and reimports the script),
-    /// then wires the fallen log (Carry). Safe to re-run.
+    /// Step 9b: guardian-hand puzzles. Runs the 9a setup first (it writes and bakes the Cinderwood props including the
+    /// 9b forge ones, rewrites the map and reimports the script), then wires the fallen log (Carry) and the forge
+    /// bellows (Pump). Safe to re-run.
     /// </summary>
     public static class Step9bSetup
     {
@@ -44,6 +45,7 @@ namespace Diorama.EditorTools
             }
             var root = Root();
             FallenLog(root, map, log);
+            Forge(root, map, log);
 
             EditorSceneManager.MarkSceneDirty(active);
             EditorSceneManager.SaveScene(active);
@@ -136,6 +138,66 @@ namespace Diorama.EditorTools
             EditorUtility.SetDirty(listener);
             log.Append($"\n  'Fallen Log' {Missing(piece)}: home c{piece.home.x} r{piece.home.y}, ledges " +
                        string.Join(", ", piece.spots.ConvertAll(s => $"c{s.tile.x} r{s.tile.y}")) + ", lesson cinder.log.hands + ghost grab_drop");
+        }
+
+        // ---- C: the forge (bellows, pipes, braziers, door) ----
+
+        static void Forge(Transform root, WorldMap map, StringBuilder log)
+        {
+            var pump = Child<PumpPiece>(root, "Forge Bellows");
+            var forge = pump.GetComponent<ForgeBellows>();
+            if (forge == null) forge = Undo.AddComponent<ForgeBellows>(pump.gameObject);
+            Undo.RecordObject(pump, "Step 9b");
+            Undo.RecordObject(forge, "Step 9b");
+            Common(pump, map);
+            var bellows = CinderwoodTools.Tile(CinderwoodTools.BellowsXY);
+            pump.id = "cinder.bellows";
+            pump.reach = 4;
+            pump.lessonLine = "cinder.bellows.first";
+            pump.ghostClip = "pump_handle";
+            pump.ghostScale = 1f;
+            pump.handleRecipe = PropKit.Load("BellowsHandle");
+            // Shape +X is map west (lower columns), +Z the player's side (higher rows).
+            pump.hinge = bellows + new Vector2(-PropKit.BellowsHinge.x, PropKit.BellowsHinge.z);
+            pump.hingeHeight = PropKit.BellowsHinge.y;
+            pump.armLength = PropKit.HandleArm;
+            pump.armYaw = PropKit.HandleYaw;
+            pump.upAngle = PropKit.HandleRestAngle;
+            pump.downAngle = -12f;
+            pump.spring = 4f;
+            pump.grabRadius = 0.55f;
+            pump.strokesNeeded = 12;
+            pump.checkpoint = 4;
+            pump.coolDelay = 4f;
+            pump.coolStep = 2f;
+
+            forge.pump = pump;
+            forge.island = pump.island;
+            forge.explorer = pump.explorer;
+            forge.swap = Object.FindFirstObjectByType<SceneSwap>(FindObjectsInactive.Include);
+            forge.fx = pump.fx;
+            forge.bellows = bellows;
+            forge.braziers = System.Array.ConvertAll(CinderwoodTools.BrazierXY, CinderwoodTools.Tile);
+            forge.door = CinderwoodTools.Tile(CinderwoodTools.DoorXY);
+            forge.bodyRecipe = PropKit.Load("BellowsBody");
+            forge.brazierCold = PropKit.Load("Brazier");
+            forge.brazierWarm = PropKit.Load("BrazierWarm");
+            forge.brazierLit = PropKit.Load("BrazierLit");
+            forge.doorFrame = PropKit.Load("ForgeDoorFrame");
+            forge.doorLeaf = PropKit.Load("ForgeDoorLeaf");
+            forge.pipeHeight = PropKit.PipeHeight;
+            forge.pipeBack = PropKit.PipeBack;
+            EditorUtility.SetDirty(pump);
+            EditorUtility.SetDirty(forge);
+
+            var missing = new List<string>();
+            foreach (var (n, r) in new[] { ("BellowsHandle", pump.handleRecipe), ("BellowsBody", forge.bodyRecipe), ("Brazier", forge.brazierCold),
+                         ("BrazierWarm", forge.brazierWarm), ("BrazierLit", forge.brazierLit), ("ForgeDoorFrame", forge.doorFrame), ("ForgeDoorLeaf", forge.doorLeaf) })
+                if (r == null || r.bakedMesh == null) missing.Add(n);
+            log.Append($"\n  'Forge Bellows' {Missing(pump)}: hinge c{pump.hinge.x:0.##} r{pump.hinge.y:0.##}, braziers " +
+                       string.Join(", ", System.Array.ConvertAll(forge.braziers, b => $"c{b.x} r{b.y}")) + $", door c{forge.door.x} r{forge.door.y}, " +
+                       $"{pump.strokesNeeded} pumps ({pump.checkpoint} per brazier), lesson cinder.bellows.first + ghost pump_handle" +
+                       (missing.Count > 0 ? $"; NOT BAKED: {string.Join(", ", missing)}" : ""));
         }
     }
 }

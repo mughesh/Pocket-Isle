@@ -691,17 +691,17 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: The forge temple. Something big is breathing in there.
-  - id: cw.bellows
+  - id: cinder.bellows.first
     once: 1
     priority: 2
-    note: 
-    target: 
+    note: 'step 9b: first time the bellows are in reach; the ghost pumps'
+    target: puzzle:cinder.bellows
     validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: These bellows feed the forge. Squeeze your hand, open, squeeze.
-  - id: cw.brazier
+      text: Bellows! Pump them to send heat to the braziers.
+  - id: cinder.brazier.one
     once: 0
     priority: 2
     note: 
@@ -710,8 +710,8 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: 'One lit! (then: Two! / All three!)'
-  - id: cw.door
+      text: One!
+  - id: cinder.brazier.two
     once: 0
     priority: 2
     note: 
@@ -720,7 +720,27 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: The door's opening...
+      text: Two!
+  - id: cinder.brazier.three
+    once: 0
+    priority: 2
+    note: 
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Three!
+  - id: cinder.forge.open
+    once: 1
+    priority: 2
+    note: 'step 9b: all three braziers lit, the door glows and opens'
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The forge is waking up!
   - id: cw.keeper.meet
     once: 0
     priority: 2

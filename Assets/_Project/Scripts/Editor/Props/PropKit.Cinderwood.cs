@@ -44,6 +44,7 @@ namespace Diorama.EditorTools
             Add(RuinedKiln());
             Add(PotShards());
             Add(EmberVent());
+            foreach (var r in ForgeProps()) Add(r); // step 9b: bellows, pipe, warm brazier, forge door frame + leaf
 
             var theme = Theme("Cinderwood");
             if (theme == null) Debug.LogError("[PropKit] No Cinderwood theme (write the prop kit first): the trees aren't mixed.");

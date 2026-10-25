@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 374f6b77629fa034d93d2a7945ac7885, type: 3}
+  m_Name: ForgeDoorLeaf
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.PropRecipe
+  pieces:
+  - shape: {fileID: 11400000, guid: fcd9a617daca4f841802a6dfdce52e06, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 1
+    motion: 0
+    motionAmount: 0
+  - shape: {fileID: 11400000, guid: d6b7ba6dfa0070c4da0a578e6b69f565, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 0
+    motion: 0
+    motionAmount: 0
+  palette:
+  - restored: {r: 0.84705883, g: 0.4, b: 0.16470589, a: 1}
+    unrestored: {r: 0.23921569, g: 0.21176471, b: 0.2, a: 1}
+    glow: 0.45
+  - restored: {r: 0.19301963, g: 0.1522774, b: 0.13074982, a: 1}
+    unrestored: {r: 0.18039216, g: 0.14117648, b: 0.1254902, a: 1}
+    glow: 0
+  - restored: {r: 0.68396086, g: 0.638326, b: 0.59055614, a: 1}
+    unrestored: {r: 0.6392157, g: 0.6039216, b: 0.5568628, a: 1}
+    glow: 0
+  - restored: {r: 0.82243145, g: 0.31199694, b: 0.13746355, a: 1}
+    unrestored: {r: 0.76862746, g: 0.28235295, b: 0.16470589, a: 1}
+    glow: 0
+  - restored: {r: 1, g: 0.63818675, b: 0.23513734, a: 1}
+    unrestored: {r: 1, g: 0.7019608, b: 0.2784314, a: 1}
+    glow: 1
+  - restored: {r: 0.37764707, g: 0.32907662, b: 0.2975859, a: 1}
+    unrestored: {r: 0.3529412, g: 0.30588236, b: 0.28235295, a: 1}
+    glow: 0
+  tips:
+    on: 0
+    onSlot: 0
+    tipSlot: 0
+    at: 0
+    byHeight: 0
+  spec: 0.15
+  outline: 0.022
+  footprint: {x: 3, y: 1}
+  blocksWalking: 1
+  randomYaw: 0
+  yawJitter: 0
+  scaleJitter: 0
+  resolution: 56
+  triangleBudget: 1600
+  bakedMesh: {fileID: 4300000, guid: 80a5c3155a22b124598764dace137b68, type: 2}

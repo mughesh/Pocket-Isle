@@ -29,6 +29,11 @@ namespace Diorama.EditorTools
         public static readonly Vector2Int ShrineXY = new Vector2Int(24, 33);  // 2 x 2, front y 31
         public static readonly Vector2Int LogXY = new Vector2Int(20, 45);     // 2 x 1 across the trail
         public static readonly Vector2Int DoorXY = new Vector2Int(19, 56);    // forge door, 3 x 1
+        // Step 9b: the bellows beside the door, its pipe along the cliff foot, the braziers in a row under the pipe
+        // (lit nearest first). The pipe prop sits PropKit.PipeSpan tiles west of the bellows.
+        public static readonly Vector2Int BellowsXY = new Vector2Int(18, 55);
+        public static readonly Vector2Int PipeXY = new Vector2Int(18 - PropKit.PipeSpan, 55);
+        public static readonly Vector2Int[] BrazierXY = { new Vector2Int(16, 55), new Vector2Int(14, 55), new Vector2Int(12, 55) };
         static readonly Vector2Int FirstGrassXY = new Vector2Int(15, 7);
         static readonly Vector2Int PlazaXY = new Vector2Int(15, 33);
 
@@ -89,7 +94,7 @@ namespace Diorama.EditorTools
         // ---- prop keys ----
         const char KGate = 'Z', KShrine = 'Y', KHut = 'h', KKiln = 'k', KPots = 'p', KWood = 'w', KLanternPost = 'l',
             KStoneLantern = 'n', KBush = 'b', KLog = 'o', KSign = 's', KLeaves = 'v', KCliff = 'c', KCliffB = 'C',
-            KDoor = 'd', KBrazier = 'u', KRuin = 'r', KShards = 'x', KVent = 'e',
+            KDoor = 'd', KBrazier = 'u', KRuin = 'r', KShards = 'x', KVent = 'e', KBellows = 'B', KPipe = 'i',
             KFence = '-', KFenceTurned = '|', KCornerWS = '1', KCornerNW = '2', KCornerEN = '3', KCornerSE = '4';
 
         // ---- generation state ----
@@ -123,7 +128,7 @@ namespace Diorama.EditorTools
                      {
                          "ReturnGate", HearthShrines.RecipeName, "ClayHut", "Kiln", "PotCluster", "Woodpile", "LanternPost",
                          "StoneLantern", "BerryBush", "FallenLog", "Signpost", "LeafPile", "CliffWall", "ForgeDoor", "Brazier",
-                         "RuinedKiln", "PotShards", "EmberVent", "Fence", "FenceCorner",
+                         "RuinedKiln", "PotShards", "EmberVent", "Fence", "FenceCorner", "Bellows", "ForgePipe",
                      })
             {
                 var r = PropKit.Load(name);
@@ -205,6 +210,8 @@ namespace Diorama.EditorTools
             Key(KCliffB, "CliffWall", 180f);
             Key(KDoor, "ForgeDoor");
             Key(KBrazier, "Brazier");
+            Key(KBellows, "Bellows");
+            Key(KPipe, "ForgePipe");
             Key(KRuin, "RuinedKiln");
             Key(KShards, "PotShards");
             Key(KVent, "EmberVent");
@@ -475,7 +482,9 @@ namespace Diorama.EditorTools
             }
             Ground(DoorXY.x, DoorXY.y, IslandMap.Grass);
             Prop(DoorXY, KDoor);
-            foreach (var (x, y) in new[] { (16, 54), (24, 54), (23, 51) }) Prop(x, y, KBrazier);
+            foreach (var b in BrazierXY) Prop(b, KBrazier);
+            Prop(BellowsXY, KBellows);
+            Prop(PipeXY, KPipe);
             foreach (var (x, y) in new[] { (14, 52), (26, 50), (12, 49) }) Prop(x, y, KVent);
         }
 
@@ -641,6 +650,7 @@ namespace Diorama.EditorTools
                 KWood => "Woodpile", KLanternPost => "LanternPost", KStoneLantern => "StoneLantern", KBush => "BerryBush",
                 KLog => "FallenLog", KSign => "Signpost", KLeaves => "LeafPile", KCliff or KCliffB => "CliffWall",
                 KDoor => "ForgeDoor", KBrazier => "Brazier", KRuin => "RuinedKiln", KShards => "PotShards", KVent => "EmberVent",
+                KBellows => "Bellows", KPipe => "ForgePipe",
                 KFence or KFenceTurned => "Fence", KCornerWS or KCornerNW or KCornerEN or KCornerSE => "FenceCorner",
                 _ => null,
             };

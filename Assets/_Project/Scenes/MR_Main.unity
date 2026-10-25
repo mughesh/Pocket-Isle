@@ -2314,6 +2314,125 @@ MonoBehaviour:
   padSeconds: 0.4
   progression: {fileID: 11400000, guid: c5e0845f05a2ec34a817839899fdc421, type: 2}
   pauseBetweenMoves: 0.45
+--- !u!1 &1127440539
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1127440540}
+  - component: {fileID: 1127440542}
+  - component: {fileID: 1127440541}
+  m_Layer: 0
+  m_Name: Forge Bellows
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1127440540
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1127440539}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1553131432}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1127440541
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1127440539}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4e3fd5cefe098c43b0d16eff23fe64f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.ForgeBellows
+  pump: {fileID: 1127440542}
+  island: {fileID: 270959109}
+  explorer: {fileID: 374318554}
+  swap: {fileID: 221433162}
+  fx: {fileID: 1078587927}
+  bellows: {x: 18, y: 4}
+  braziers:
+  - {x: 16, y: 4}
+  - {x: 14, y: 4}
+  - {x: 12, y: 4}
+  door: {x: 19, y: 3}
+  bodyRecipe: {fileID: 11400000, guid: b6f4ed7ffb944fd4c9f6bbfa3eab50af, type: 2}
+  brazierCold: {fileID: 11400000, guid: 771dd8e345ee42345b16f0cd0367744c, type: 2}
+  brazierWarm: {fileID: 11400000, guid: 2c38bf65a2a72ee469b9f95c240b4bfa, type: 2}
+  brazierLit: {fileID: 11400000, guid: 4bb563fb979735e47ab034d75c7f07ac, type: 2}
+  doorFrame: {fileID: 11400000, guid: 7aac663ea63bebb4aaedb4ba1581487d, type: 2}
+  doorLeaf: {fileID: 11400000, guid: 1709efd599696134bba1e671dd2a0de2, type: 2}
+  pipeHeight: 0.72
+  pipeBack: 0.38
+  nozzle: {x: 0.38, y: 0.3, z: -0.3}
+  pulseSpeed: 8
+  glowSeconds: 1.6
+  openSeconds: 2.6
+  sinkDepth: 2.9
+  preheat: 0.35
+  hall: {fileID: 0}
+  hallEntry: {x: 4, y: 8}
+  brazierLines:
+  - cinder.brazier.one
+  - cinder.brazier.two
+  - cinder.brazier.three
+  openLine: cinder.forge.open
+  volume: 0.7
+--- !u!114 &1127440542
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1127440539}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 051164a04b398064391db8ef96fc4872, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.PumpPiece
+  id: cinder.bellows
+  map: {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
+  island: {fileID: 270959109}
+  window: {fileID: 270959113}
+  explorer: {fileID: 374318554}
+  grabGuard: {fileID: 270959111}
+  ghosts: {fileID: 1421177268}
+  fx: {fileID: 1078587927}
+  reach: 4
+  lessonLine: cinder.bellows.first
+  ghostClip: pump_handle
+  ghostScale: 1
+  handleRecipe: {fileID: 11400000, guid: fdf3e2060d9df3d48b3a14d3854c5cf3, type: 2}
+  hinge: {x: 18.3, y: 4}
+  hingeHeight: 0.5
+  armLength: 1
+  armYaw: 90
+  upAngle: 28
+  downAngle: -12
+  spring: 4
+  grabRadius: 0.55
+  grabSlack: 0.015
+  autoStrokeSeconds: 0.7
+  strokesNeeded: 12
+  checkpoint: 4
+  coolDelay: 4
+  coolStep: 2
+  downAt: 0.8
+  upAt: 0.3
 --- !u!1001 &1132406365
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3178,6 +3297,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 204973769}
+  - {fileID: 1127440540}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1583412946

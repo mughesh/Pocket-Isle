@@ -148,10 +148,13 @@ every ~10 s while it waits. Shard, move and starter use the Opening lines above;
   - Spirit: You're strong! Let's go on.
 - `cw.temple` · once (first time at the temple door)
   - Spirit: The forge temple. Something big is breathing in there.
-- `cw.bellows` · once
-  - Spirit: These bellows feed the forge. Squeeze your hand, open, squeeze.
-- `cw.brazier` · Spirit: One lit! (then: Two! / All three!)
-- `cw.door` · Spirit: The door's opening...
+- `cinder.bellows.first` · once · → puzzle:cinder.bellows (step 9b: first time the bellows are in reach; the ghost pumps)
+  - Spirit: Bellows! Pump them to send heat to the braziers.
+- `cinder.brazier.one` · Spirit: One!
+- `cinder.brazier.two` · Spirit: Two!
+- `cinder.brazier.three` · Spirit: Three!
+- `cinder.forge.open` · once (step 9b: all three braziers lit, the door glows and opens)
+  - Spirit: The forge is waking up!
 - `cw.keeper.meet`
   - Hearthstag: Stay back! If I share the fire, it will go out forever.
   - Spirit: He's not mean. He's scared.
