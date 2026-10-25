@@ -18,6 +18,7 @@ MonoBehaviour:
     priority: 1
     note: only if the shard isn't touched within 3 s
     target: shard
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -27,6 +28,7 @@ MonoBehaviour:
     priority: 1
     note: 
     target: 
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -39,6 +41,7 @@ MonoBehaviour:
     priority: 1
     note: 
     target: rim
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -51,6 +54,7 @@ MonoBehaviour:
     priority: 1
     note: 
     target: starterPods
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -60,6 +64,7 @@ MonoBehaviour:
     priority: 1
     note: 
     target: 
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -69,6 +74,7 @@ MonoBehaviour:
     priority: 1
     note: 
     target: 
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -78,27 +84,17 @@ MonoBehaviour:
     priority: 1
     note: 
     target: 
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
       text: Pufflet! Light as a cloud, twice as fluffy.
-  - id: intro.explorer
-    once: 1
-    priority: 1
-    note: 
-    target: tile:21,22
-    lines:
-    - speaker: 0
-      speakerName: Spirit
-      text: See the little explorer? Swipe your thumb along your finger to walk.
-    - speaker: 0
-      speakerName: Spirit
-      text: Tap your thumb to stop. Or just look at a spot and pinch.
   - id: intro.statue
     once: 1
     priority: 1
     note: first time within ~3 tiles of the statue
     target: landmark:statue
+    validWhile: '!tutorial'
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -106,11 +102,192 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: I feel like I know it. Strange.
+  - id: lesson.move.again
+    once: 0
+    priority: 1
+    note: 
+    target: rim
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Grab the rocky edge and slide it.
+  - id: lesson.starter.again
+    once: 0
+    priority: 1
+    note: 
+    target: starterPods
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Look at one, then grab it or pinch.
+  - id: lesson.walk
+    once: 0
+    priority: 1
+    note: 
+    target: ghost
+    validWhile: canWalk
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Slide your thumb along your finger to walk.
+  - id: lesson.walk.again
+    once: 0
+    priority: 1
+    note: 
+    target: ghost
+    validWhile: canWalk
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Thumb along your finger. Like this!
+  - id: lesson.walk.help
+    once: 0
+    priority: 1
+    note: 
+    target: ghost
+    validWhile: canWalk
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Or look at a spot and pinch.
+  - id: lesson.stop
+    once: 0
+    priority: 1
+    note: 
+    target: ghost
+    validWhile: canWalk
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Swipe to walk, then tap your thumb to stop.
+  - id: lesson.stop.again
+    once: 0
+    priority: 1
+    note: 
+    target: ghost
+    validWhile: canWalk
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Swipe, then tap to stop.
+  - id: lesson.look
+    once: 0
+    priority: 1
+    note: 
+    target: goldTile
+    validWhile: canWalk
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Look at the glowing spot and pinch.
+  - id: lesson.look.again
+    once: 0
+    priority: 1
+    note: 
+    target: goldTile
+    validWhile: canWalk
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The glowing spot. Look, then pinch!
+  - id: lesson.grass
+    once: 0
+    priority: 1
+    note: 
+    target: landmark:firstGrass
+    validWhile: canWalk
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Islings hide in tall grass. Let's peek!
+  - id: lesson.grass.again
+    once: 0
+    priority: 1
+    note: 
+    target: landmark:firstGrass
+    validWhile: canWalk
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Follow the gold tiles into the tall grass.
+  - id: lesson.send.again
+    once: 0
+    priority: 1
+    note: 
+    target: leadPod
+    validWhile: battle
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Toss your friend's pod onto the island!
+  - id: lesson.rune.again
+    once: 0
+    priority: 1
+    note: 
+    target: runes
+    validWhile: battle
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Look at a rune and pinch.
+  - id: lesson.catch.again
+    once: 0
+    priority: 1
+    note: 
+    target: cradle
+    validWhile: battle
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Grab the big pod and flick it!
+  - id: lesson.hands
+    once: 0
+    priority: 1
+    note: 
+    target: 
+    validWhile: tutorial
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Show me your hands!
+  - id: praise.nice
+    once: 0
+    priority: 1
+    note: 
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Nice!
+  - id: praise.like
+    once: 0
+    priority: 1
+    note: 
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Just like that!
+  - id: praise.perfect
+    once: 0
+    priority: 1
+    note: 
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Perfect!
   - id: gate.sealed
     once: 0
     priority: 2
     note: walking into or pinching a sealed gate
     target: gate:last
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -120,6 +297,7 @@ MonoBehaviour:
     priority: 2
     note: first time the fire gate comes into the window
     target: gate:fire
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -129,6 +307,7 @@ MonoBehaviour:
     priority: 2
     note: first arrival in Cinderwood
     target: tile:30,29
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -141,6 +320,7 @@ MonoBehaviour:
     priority: 2
     note: first time back in the hub from a realm
     target: landmark:statue
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -150,6 +330,7 @@ MonoBehaviour:
     priority: 1
     note: 
     target: 
+    validWhile: encounters
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -159,6 +340,7 @@ MonoBehaviour:
     priority: 1
     note: first time next to water
     target: 
+    validWhile: encounters & !battle
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -168,6 +350,7 @@ MonoBehaviour:
     priority: 1
     note: encounter start
     target: leadPod
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -177,6 +360,7 @@ MonoBehaviour:
     priority: 1
     note: 
     target: runes
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -186,6 +370,7 @@ MonoBehaviour:
     priority: 1
     note: first super or not-very effective hit
     target: 
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -195,6 +380,7 @@ MonoBehaviour:
     priority: 1
     note: 
     target: 
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -204,6 +390,7 @@ MonoBehaviour:
     priority: 1
     note: 
     target: 
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -213,6 +400,7 @@ MonoBehaviour:
     priority: 1
     note: first time the wild HP bar is red
     target: cradle
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -222,6 +410,7 @@ MonoBehaviour:
     priority: 1
     note: a pod thrown above red shatters
     target: cradle
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -231,6 +420,7 @@ MonoBehaviour:
     priority: 1
     note: first dazed wild Isling
     target: cradle
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -240,6 +430,7 @@ MonoBehaviour:
     priority: 1
     note: 
     target: 
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -249,6 +440,7 @@ MonoBehaviour:
     priority: 1
     note: 
     target: 
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -258,6 +450,7 @@ MonoBehaviour:
     priority: 1
     note: first evolution
     target: nearPad
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -267,6 +460,7 @@ MonoBehaviour:
     priority: 1
     note: first time a shrine comes into the window
     target: shrine
+    validWhile: '!tutorial'
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -276,6 +470,7 @@ MonoBehaviour:
     priority: 1
     note: first time inside the Hearth Lodge; the lodge hint chain starts, step 7c
     target: lodgeCenter
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -285,6 +480,7 @@ MonoBehaviour:
     priority: 1
     note: 'chain 2: waits for an inspect, comes back after 15 s'
     target: lodgeIsling
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -294,6 +490,7 @@ MonoBehaviour:
     priority: 1
     note: chain 3, after the first inspect; then the gold moves to a rim socket
     target: pedestal
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -303,6 +500,7 @@ MonoBehaviour:
     priority: 1
     note: chain 4, after the first swap
     target: rimPod
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -312,6 +510,7 @@ MonoBehaviour:
     priority: 1
     note: chain 5, after chain 4 or 30 s
     target: lodgeDoor
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -321,6 +520,7 @@ MonoBehaviour:
     priority: 1
     note: the last rim pod refuses to leave
     target: leadPod
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -330,6 +530,7 @@ MonoBehaviour:
     priority: 1
     note: 
     target: 
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -342,6 +543,7 @@ MonoBehaviour:
     priority: 1
     note: first gold sparkle
     target: 
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -351,6 +553,7 @@ MonoBehaviour:
     priority: 2
     note: 
     target: 
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -363,6 +566,7 @@ MonoBehaviour:
     priority: 2
     note: 
     target: 
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -372,6 +576,7 @@ MonoBehaviour:
     priority: 2
     note: 
     target: 
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -381,6 +586,7 @@ MonoBehaviour:
     priority: 2
     note: blocked by the fallen log
     target: 
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -393,6 +599,7 @@ MonoBehaviour:
     priority: 2
     note: 
     target: 
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -402,6 +609,7 @@ MonoBehaviour:
     priority: 2
     note: first time at the temple door
     target: 
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -411,6 +619,7 @@ MonoBehaviour:
     priority: 2
     note: 
     target: 
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -420,6 +629,7 @@ MonoBehaviour:
     priority: 2
     note: 
     target: 
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -429,6 +639,7 @@ MonoBehaviour:
     priority: 2
     note: 
     target: 
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -438,6 +649,7 @@ MonoBehaviour:
     priority: 2
     note: 
     target: 
+    validWhile: 
     lines:
     - speaker: 1
       speakerName: Hearthstag
@@ -453,6 +665,7 @@ MonoBehaviour:
     priority: 2
     note: 
     target: 
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -462,6 +675,7 @@ MonoBehaviour:
     priority: 2
     note: 
     target: 
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -471,6 +685,7 @@ MonoBehaviour:
     priority: 2
     note: 
     target: 
+    validWhile: 
     lines:
     - speaker: 1
       speakerName: Hearthstag
@@ -486,6 +701,7 @@ MonoBehaviour:
     priority: 2
     note: 
     target: 
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -495,6 +711,7 @@ MonoBehaviour:
     priority: 2
     note: 
     target: 
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -504,6 +721,7 @@ MonoBehaviour:
     priority: 2
     note: 
     target: 
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -513,6 +731,7 @@ MonoBehaviour:
     priority: 2
     note: 
     target: 
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -522,6 +741,7 @@ MonoBehaviour:
     priority: 2
     note: 
     target: 
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
@@ -531,6 +751,7 @@ MonoBehaviour:
     priority: 2
     note: 
     target: 
+    validWhile: 
     lines:
     - speaker: 2
       speakerName: Heart
@@ -546,6 +767,7 @@ MonoBehaviour:
     priority: 2
     note: 
     target: 
+    validWhile: 
     lines:
     - speaker: 2
       speakerName: Heart
@@ -561,6 +783,7 @@ MonoBehaviour:
     priority: 2
     note: 
     target: 
+    validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit

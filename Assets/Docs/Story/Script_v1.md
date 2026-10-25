@@ -5,7 +5,10 @@ Format: `trigger_id` · speaker · lines (shown in order). **once** = only the f
 Optional `· → target` (before the lines): the Spirit flies to that anchor while saying them and it pulses
 (`leadPod`, `cradle`, `runes`, `nearPad`, `wildPad`, `shrine`, `lodgeCenter`, `pedestal`, `lodgeIsling`, `rimSocket`, `rimPod`,
 `lodgeDoor`, `tile:x,y`, step 8: `shard`, `rim`, `starterPods`, `landmark:name` (WorldMap landmarks: `statue`, `firstGrass`, `pond`), `gate:fire` / `gate:water` / `gate:wind` /
-`gate:home`, `gate:last`). No target = it stays home. The target glows gold and the Spirit shines its lantern on it (step 7c).
+`gate:home`, `gate:last`, step 8b: `ghost` (beside the ghost hand above the island), `goldTile`). No target = it stays home. The target glows gold and the Spirit shines its lantern on it (step 7c).
+Optional `· while <condition>` (step 8b): the line only shows while it holds and closes the moment it stops
+(`battle`, `swap`, `canWalk`, `encounters`, `tutorial`, `wildRed`, `battle.out`; `!` not, `&` and, `|` or). A battle or a
+scene swap starting closes every hint line that has no `while` saying it still applies.
 Names are placeholders. The step 5c dialogue system loads this (convert to data asset).
 
 ## Opening (Still Isle)
@@ -22,12 +25,47 @@ Names are placeholders. The step 5c dialogue system loads this (convert to data 
 - `starter.kilnpot` · Spirit: Kilnpot! Warm as a fresh-baked pot.
 - `starter.pebbloop` · Spirit: Pebbloop! Bubbly, and very round.
 - `starter.pufflet` · Spirit: Pufflet! Light as a cloud, twice as fluffy.
-- `intro.explorer` · once · → tile:21,22
-  - Spirit: See the little explorer? Swipe your thumb along your finger to walk.
-  - Spirit: Tap your thumb to stop. Or just look at a spot and pinch.
-- `intro.statue` · once · → landmark:statue (first time within ~3 tiles of the statue)
+- `intro.statue` · once · while !tutorial · → landmark:statue (first time within ~3 tiles of the statue)
   - Spirit: That statue... it has three empty holes.
   - Spirit: I feel like I know it. Strange.
+
+## Tutorials: lessons (step 8b)
+One lesson at a time (Data/Onboarding/Onboarding_Main). The first line comes when the lesson starts; the `.again` line
+every ~10 s while it waits. Shard, move and starter use the Opening lines above; send out, pick a move and catch use
+`pod.first`, `battle.first` and `capture.first` below.
+- `lesson.move.again` · → rim
+  - Spirit: Grab the rocky edge and slide it.
+- `lesson.starter.again` · → starterPods
+  - Spirit: Look at one, then grab it or pinch.
+- `lesson.walk` · while canWalk · → ghost
+  - Spirit: Slide your thumb along your finger to walk.
+- `lesson.walk.again` · while canWalk · → ghost
+  - Spirit: Thumb along your finger. Like this!
+- `lesson.walk.help` · while canWalk · → ghost
+  - Spirit: Or look at a spot and pinch.
+- `lesson.stop` · while canWalk · → ghost
+  - Spirit: Swipe to walk, then tap your thumb to stop.
+- `lesson.stop.again` · while canWalk · → ghost
+  - Spirit: Swipe, then tap to stop.
+- `lesson.look` · while canWalk · → goldTile
+  - Spirit: Look at the glowing spot and pinch.
+- `lesson.look.again` · while canWalk · → goldTile
+  - Spirit: The glowing spot. Look, then pinch!
+- `lesson.grass` · while canWalk · → landmark:firstGrass
+  - Spirit: Islings hide in tall grass. Let's peek!
+- `lesson.grass.again` · while canWalk · → landmark:firstGrass
+  - Spirit: Follow the gold tiles into the tall grass.
+- `lesson.send.again` · while battle · → leadPod
+  - Spirit: Toss your friend's pod onto the island!
+- `lesson.rune.again` · while battle · → runes
+  - Spirit: Look at a rune and pinch.
+- `lesson.catch.again` · while battle · → cradle
+  - Spirit: Grab the big pod and flick it!
+- `lesson.hands` · while tutorial
+  - Spirit: Show me your hands!
+- `praise.nice` · Spirit: Nice!
+- `praise.like` · Spirit: Just like that!
+- `praise.perfect` · Spirit: Perfect!
 
 ## Shard Gates and realms (step 8)
 - `gate.sealed` · → gate:last (walking into or pinching a sealed gate)
@@ -41,8 +79,8 @@ Names are placeholders. The step 5c dialogue system loads this (convert to data 
   - Spirit: Home again. The statue looks... different?
 
 ## Tutorials
-- `tut.grass` · once: Spirit: Tall grass rustles when an Isling is hiding in it.
-- `tut.pond` · once (first time next to water): Spirit: Face the water and tap. Something might bite!
+- `tut.grass` · once · while encounters: Spirit: Tall grass rustles when an Isling is hiding in it.
+- `tut.pond` · once · while encounters & !battle (first time next to water): Spirit: Face the water and tap. Something might bite!
 - `pod.first` · once · → leadPod (encounter start)
   - Spirit: Grab your friend's pod from the rim and toss it in!
 - `battle.first` · once · → runes
@@ -61,7 +99,7 @@ Names are placeholders. The step 5c dialogue system loads this (convert to data 
 - `party.full` · once: Spirit: Your pods are full. New friends will wait for you at the Hearth Lodge.
 - `evolve.first` · once · → nearPad (first evolution)
   - Spirit: Look at that! They've grown into something new.
-- `shrine.first` · once · → shrine (first time a shrine comes into the window)
+- `shrine.first` · once · while !tutorial · → shrine (first time a shrine comes into the window)
   - Spirit: A Hearth Shrine! Warm your hand over the flame.
 - `lodge.first` · once · → lodgeCenter (first time inside the Hearth Lodge; the lodge hint chain starts, step 7c)
   - Spirit: This is the Hearth Lodge. Islings you've caught rest here.
