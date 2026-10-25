@@ -114,7 +114,8 @@ Beat the Keeper → the element flows again, the realm visibly revives, its shar
   → cliff forge temple. Side pockets hide rare grass patches, berry bushes and an orb.
 - **Habitat:** ember tall grass (red-gold). Water visitors live in the tall grass around the hot springs.
 - **Residents (later, if cheap):** a few friendly creature villagers in the kiln village with one-line hints.
-- **Temple:** pump the forge bellows (open/close hand) → heat flows through pipes → lights 3 braziers → Keeper door opens.
+- **Temple:** pump the forge bellows (~~open/close hand~~ decided Oct 26: **pinch the handle and push it down**) → heat
+  flows through pipes → lights 3 braziers → Keeper door opens. The log is **grabbed, lifted and set aside** (Oct 26).
 
 ### Cinderwood as built (step 9a, Oct 26)
 Written by `CinderwoodTools` (Tools > Pocket Isle > Set Up MR_Main (9a Cinderwood)), seed 909. Coordinates (x west→east,
@@ -131,7 +132,7 @@ y south→north; south = the arrival, nearest the player); the map's (column, ro
 | Berry grove (pocket) | 46–56, 24–36 | Path from the springs; fenced square, 3 rows of berry bushes, tall grass between rows |
 | Hot springs | 30–46, 34–46 | 4 round pools (H) with stone rims, boulders, tall grass rings |
 | Fallen log | 18–22, 44–46 | Trail back west from the springs narrows between rocks; the log at (20, 45) blocks it completely |
-| Forge temple | 10–30, 48–58 | Behind the log (closed in 9a): cliff wall along y 56, the 3-wide forge door at (19, 56), 3 cold braziers, ember vents |
+| Forge temple | 10–30, 48–58 | Behind the log: cliff wall along y 56, the 3-wide forge door at (19, 56); 9b: bellows at (18, 55), pipe along the cliff foot, 3 braziers in a row at (16 / 14 / 12, 55); ember vents |
 | Kiln ruins (pocket) | 44–56, 46–58 | Narrow path from the springs through the trees; 4 ruined kilns, pot shards, vents, rare grass |
 
 - The forest between places is a wall (trees, rocks between them): only the trail, side paths and pockets are
@@ -149,6 +150,37 @@ y south→north; south = the arrival, nearest the player); the map's (column, ro
   the fence needs its corner piece). Trees: AutumnTree rebuilt (stacked blobs, red-orange to gold), TallTree mixed in
   (35%).
 - **Hearthstag fight:** ember-crown shield blocks damage until hit by a Water move (or 3 hits of anything), then open for 2 turns; repeats.
+
+### Hand puzzles as built (step 9b, Oct 26)
+Tools > Pocket Isle > Set Up MR_Main (9b puzzles). Scene objects under **Hand Puzzles**.
+
+**The kit** (`Runtime/Puzzles`, reusable for Lilymere and Galewick). Every piece is island-local and positioned in map
+tiles (works at any island scale, while the map scrolls), draws its own prop (the island stops drawing the map's copy:
+runtime-only, never written into the map asset), works only while its map shows, it's in the window and the explorer
+is within `reach` tiles, saves its state (`PuzzleState` in the save: solved + a stage), and teaches itself the first
+time it's usable in a session (line + gold focus + ghost hand at `puzzle:<id>`, until first touched).
+| Piece | How | Settings |
+|---|---|---|
+| **Carry** | Pinch or close a fist anywhere near it (capsule round its long side, +1.5 cm). Heavy: only rises until lifted 0.6 tiles, then follows with 0.22 s lag and a damped wobble. Released within 1.3 tiles of a target spot: drops onto it (solved). Anywhere else: falls back home. Look + pinch it (floats up), look + pinch a spot (floats there). | weight (lag, max speed, wobble), lift before it moves, snap radius, spots |
+| **Pump** | A lever on a hinge with a spring return. Pinch / fist the grip, push down. Stroke = past 80% of the travel and back above 30%. Look + pinch the grip = one stroke. | travel (angles), spring, strokes needed, checkpoint, cooling (after 4 s, a step every 2 s, never below a checkpoint) |
+| Wheel | `IWheelPiece` stub only (sluice wheel, windmill) | |
+
+**The fallen log** (Carry `cinder.log`): reach 3. Lesson: `cinder.log.first` (landmark) then `cinder.log.hands` "Maybe
+your big hands could move it?" + the recorded `grab_drop` ghost on the log. Two glowing rings on the rock ledges either
+side of the gap (18 / 22, 45). Lifting: leaves and dust fall, the explorer hops. On a ledge: thud, dust, the island's
+tiles bounce (the base stays put), the log's tiles open, the explorer hops, "You're strong! Let's go on." Elsewhere: a
+small thud, it lies across the gap again.
+
+**The forge** (Pump `cinder.bellows`): reach 4. Bellows beside the door with a sideways iron handle (hinge on its east
+edge, the grip reaches west: the push down reads from the seat). Lesson: "Bellows! Pump them to send heat to the
+braziers." + the `pump_handle` ghost (placeholder until Mugesh records it). 12 pumps, 4 per brazier: each pump squashes
+the bellows with a puff and sends a glow along the pipe to the next unlit brazier (nearest first), whose coals warm a
+step; the 4th lights it (flame burst, "One!" / "Two!" / "Three!", saved). All three: the door glows from inside, its
+iron bands heat, it sinks into the ground with steam and sparks, "The forge is waking up!", the doorway opens (saved).
+
+**Forge Hall** (placeholder until 9c): 10 x 10 interior like the Lodge (stone floor, pillars, the big cold forge, anvil,
+chains, dim ember crystals). Walk onto the open doorway to go in; the Keeper's spot is an empty glowing ring ("Something
+huge sleeps here... not yet."); the door tiles lead back out in front of the forge, facing away.
 
 ### Look of the two states (decided Oct 24)
 The element "not flowing" shows as things being **still and unlit**, not as colour loss. The bright palette is the
