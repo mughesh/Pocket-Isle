@@ -54,8 +54,8 @@ namespace Diorama
         [Tooltip("Where it drifts in from, relative to its resting spot (island space: x to the player's left, z toward the player).")]
         public Vector3 driftFrom = new Vector3(0.8f, 0.3f, -1.2f);
         public float driftSeconds = 3.5f;
-        [Tooltip("A fingertip this far (m) outside the shard's surface touches it (the palm gets 2 cm more). Contact, not proximity.")]
-        public float contactSlack = 0.01f;
+        [Tooltip("A fingertip this close (m) to the shard's visible surface touches it (the palm joint, inside the hand, gets 1 cm more).")]
+        public float contactSlack = 0.015f;
         [Tooltip("It unfolds by itself after this long (s).")]
         public float autoTouchSeconds = 10f;
         [Tooltip("A touch pushes the shard away from the finger at this speed (m/s); a damped spring brings it back.")]
@@ -374,11 +374,20 @@ namespace Diorama
             _shard = go.transform;
             var e = _shardMesh.bounds.extents;
             _shardRadius = (e.x + e.y + e.z) / 3f * shardSize;
+            // Step 8d: contact against the visible surface (a convex trigger, never simulated), not an average sphere.
+            go.layer = 2; // Ignore Raycast
+            _shardCollider = go.AddComponent<MeshCollider>();
+            _shardCollider.convex = true;
+            _shardCollider.isTrigger = true;
+            _shardCollider.sharedMesh = _shardMesh;
             _spinAngle = 0f;
             _nudge = _nudgeVel = Vector3.zero;
         }
 
         float _shardRadius;
+        MeshCollider _shardCollider;
+        // Dev readout: the closest each hand got to the surface during the current approach (m).
+        readonly float[] _approachMin = { float.MaxValue, float.MaxValue };
 
         Vector3? ShardFront()
         {
@@ -419,8 +428,9 @@ namespace Diorama
         static readonly HandJointId[] TouchJoints = { HandJointId.HandIndexTip, HandJointId.HandMiddleTip, HandJointId.HandThumbTip, HandJointId.HandPalm };
 
         /// <summary>
-        /// A fingertip or the palm in contact with the shard (not merely near it), or a pinch while looking at it. A
-        /// contact nudges the shard away from the hand (it springs back) and flashes where it was touched.
+        /// A fingertip or the palm in contact with the shard's visible surface (closest point on its convex collider,
+        /// within <see cref="contactSlack"/>), or a pinch while looking at it. A contact nudges the shard away from the
+        /// hand (it springs back) and flashes where it was touched.
         /// </summary>
         bool ShardTouched()
         {
@@ -428,30 +438,51 @@ namespace Diorama
             Vector3 c = _shard.position;
             bool looking = HeadGaze.TryGetRay(out var ray) && Vector3.Cross(ray.direction, c - ray.origin).magnitude < shardSize * 0.9f &&
                            Vector3.Dot(ray.direction, c - ray.origin) > 0f;
+            bool readout = DevReadout.Active;
+            if (readout) DevReadout.Sphere(c, _shardRadius + contactSlack, new Color(1f, 0.5f, 0.2f, 0.5f));
             for (int h = 0; h < 2; h++)
             {
                 var hand = HandLookup.Refresh(ref _hands[h], h == 0 ? Handedness.Left : Handedness.Right);
                 if (hand == null || !hand.IsTrackedDataValid)
                 {
                     _wasTouching[h] = false;
+                    if (readout) DevReadout.Text($"shard{h}", $"shard {(h == 0 ? "L" : "R")}: no hand ({(hand != null ? hand.name : "none")})");
                     continue;
                 }
                 bool touching = false;
+                float best = float.MaxValue, bestSphere = float.MaxValue;
+                string bestJoint = "";
                 foreach (var joint in TouchJoints)
                 {
                     if (!HandLookup.TryGetJoint(hand, joint, out var p)) continue;
-                    float reach = _shardRadius + contactSlack + (joint == HandJointId.HandPalm ? 0.02f : 0f);
-                    if ((p - c).sqrMagnitude >= reach * reach) continue;
+                    Vector3 surface = SurfacePoint(p);
+                    float d = (surface - p).magnitude;
+                    float reach = contactSlack + (joint == HandJointId.HandPalm ? 0.01f : 0f);
+                    if (d < best)
+                    {
+                        best = d;
+                        bestJoint = joint.ToString();
+                        // The old test (step 8c): distance outside the average sphere.
+                        bestSphere = (p - c).magnitude - _shardRadius;
+                    }
+                    if (readout && joint == HandJointId.HandIndexTip)
+                        DevReadout.Line(p, surface, d <= reach ? Color.green : Color.yellow);
+                    if (d > reach) continue;
                     touching = true;
                     if (_wasTouching[h]) break;
-                    Vector3 dir = c - p;
+                    // Pushed from the finger into the shard (inside it: from the head's side).
+                    Vector3 dir = d > 1e-4f ? surface - p : c - p;
                     if (dir.sqrMagnitude < 1e-6f && Camera.main != null) dir = Camera.main.transform.forward;
                     dir.Normalize();
-                    Contact(c - dir * _shardRadius, dir, joint.ToString());
+                    Contact(surface, dir, $"{joint}, {d * 100f:0.0} cm from the surface");
                     _wasTouching[h] = true;
                     return true;
                 }
                 _wasTouching[h] = touching;
+                LogApproach(h, best, bestSphere, bestJoint);
+                if (readout)
+                    DevReadout.Text($"shard{h}", $"shard {(h == 0 ? "L" : "R")}: {bestJoint} {best * 100f:0.0} cm to surface (need {contactSlack * 100f:0.0}), " +
+                                                 $"old 8c sphere test {bestSphere * 100f:0.0} cm (touched below 1.0) [{hand.name}]");
                 bool pinching = hand.GetIndexFingerIsPinching();
                 if (pinching && !_wasPinching[h] && looking)
                 {
@@ -462,6 +493,29 @@ namespace Diorama
                 _wasPinching[h] = pinching;
             }
             return false;
+        }
+
+        /// <summary>Closest point on the shard's visible surface (the point itself when inside).</summary>
+        Vector3 SurfacePoint(Vector3 p)
+        {
+            if (_shardCollider == null) return _shard.position + (p - _shard.position).normalized * _shardRadius;
+            // The pose is passed in: the shard moves every frame and transforms aren't synced to physics until the next step.
+            return Physics.ClosestPoint(p, _shardCollider, _shard.position, _shard.rotation);
+        }
+
+        /// <summary>Dev builds: one log line per approach (a hand comes within 6 cm, then leaves): how close it got.</summary>
+        void LogApproach(int h, float distance, float sphere, string joint)
+        {
+            if (!Application.isEditor && !Debug.isDebugBuild) return;
+            if (distance < 0.06f)
+            {
+                _approachMin[h] = Mathf.Min(_approachMin[h], distance);
+                return;
+            }
+            if (_approachMin[h] == float.MaxValue) return;
+            Debug.Log($"[Opening] Shard approach ({(h == 0 ? "left" : "right")}): closest {_approachMin[h] * 100f:0.0} cm to the surface " +
+                      $"(contact at {contactSlack * 100f:0.0}), no touch. Last joint {joint}, old sphere test {sphere * 100f:0.0} cm.");
+            _approachMin[h] = float.MaxValue;
         }
 
         /// <summary>Sells the touch: a push away from the hand (damped spring back), a small flash and sparks at the spot.</summary>
