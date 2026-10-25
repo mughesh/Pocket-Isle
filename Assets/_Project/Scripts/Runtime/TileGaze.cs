@@ -54,6 +54,7 @@ namespace Diorama
                 if (pinching && !_wasPinching[h] && !busy && usable)
                 {
                     bool ok = explorer.GoTo(tile);
+                    if (ok) Onboarding.Mark("gazeWalk");
                     Debug.Log($"[TileGaze] Gaze + pinch ({(h == 0 ? "left" : "right")}) on c{tile.x} r{tile.y}: {(ok ? "walking there" : "can't reach")}.");
                     _reachTile = new Vector2Int(int.MinValue, 0);
                 }

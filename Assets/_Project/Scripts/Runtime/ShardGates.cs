@@ -164,7 +164,7 @@ namespace Diorama
             float tile = island.map.tileSize;
             Vector3 ground = island.TileToLocal(Center(p.link), island.Content.capHeight);
             bool visible = outside && !window.IsZoomed && island.FootprintContains(ground);
-            if (visible && !p.seen && !explorer.Locked)
+            if (visible && !p.seen && !explorer.Locked && !Onboarding.Running)
             {
                 p.seen = true;
                 if (!string.IsNullOrEmpty(p.link.firstSeenLine)) Dialogue.Say(p.link.firstSeenLine);

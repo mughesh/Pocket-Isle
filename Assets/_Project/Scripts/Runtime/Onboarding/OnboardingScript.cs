@@ -1,0 +1,94 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace Diorama
+{
+    /// <summary>Where a lesson's ghost hand shows.</summary>
+    public enum GhostPlace
+    {
+        None,
+        /// <summary>At the lesson's dialogue target (shard, rim, pods, runes, cradle, a tile), reaching in from the player's side.</summary>
+        AtTarget,
+        /// <summary>Floating above the island's front centre (thumb demos), the Spirit beside it.</summary>
+        AboveIsland,
+        /// <summary>Floating above the lesson's target (a gold tile).</summary>
+        AboveTarget,
+    }
+
+    /// <summary>
+    /// One lesson: the Spirit's line (repeated while it waits), what the gold focus and the ghost hand show, and when it
+    /// starts, counts as done, gets skipped or goes back to an earlier lesson. Conditions are <see cref="GameConditions"/>
+    /// expressions over states (battle, canWalk, ...) and the lesson events marked with <see cref="Onboarding.Mark"/>
+    /// (walked3, stopped, ...); an event that happened earlier counts (doing it ahead of time = done on arrival).
+    /// </summary>
+    [Serializable]
+    public class LessonData
+    {
+        public string id;
+        [Tooltip("Dialogue trigger said when the lesson starts.")]
+        public string line;
+        [Tooltip("Shorter trigger for the reminders (every repeatSeconds while waiting). Empty = the line again.")]
+        public string again;
+        [Tooltip("Optional trigger said once after helpAfter seconds (walk lessons: the look + pinch alternative).")]
+        public string help;
+        public float helpAfter = 30f;
+
+        [Header("When")]
+        [Tooltip("Waits until this holds (empty = at once).")]
+        public string startWhen;
+        [Tooltip("Then waits this long before teaching (it can still be done meanwhile).")]
+        public float delay;
+        [Tooltip("Done (with praise) when this holds; events that happened earlier count.")]
+        public string doneWhen;
+        [Tooltip("Skipped quietly once this stops holding (empty = always valid).")]
+        public string validWhile;
+        [Tooltip("Skipped quietly after teaching this long (s). 0 = waits forever.")]
+        public float skipAfter;
+        [Tooltip("Goes back to rewindTo when this holds (a battle lost or fled mid-tutorial).")]
+        public string failWhen;
+        public string rewindTo;
+        public bool praise = true;
+
+        [Header("Show")]
+        [Tooltip("Ghost hand clip name (GhostHandClip.clipName). Empty = no ghost.")]
+        public string ghost;
+        public GhostPlace place;
+        [Tooltip("Dialogue target id the ghost and the Spirit use (shard, rim, starterPods, ghost, goldTile, leadPod, runes, cradle, landmark:x).")]
+        public string target;
+        [Tooltip("Ghost size: 1 = real hand, 0.6 for the demos above the island.")]
+        public float ghostScale = 1f;
+        [Tooltip("Show both hands (mirrored).")]
+        public bool bothHands;
+
+        [Header("Extras")]
+        [Tooltip("While this lesson waits, gold tiles run from the explorer to this landmark.")]
+        public string goldPath;
+        [Tooltip("Picks a gold tile this many steps from the explorer when it starts (target goldTile). 0 = none.")]
+        public int goldTileSteps;
+        [Tooltip("While this lesson is the current one, the tutorial grass patch starts the scripted first encounter.")]
+        public bool tutorialGrass;
+    }
+
+    /// <summary>The opening's lessons in order (Data/Onboarding/Onboarding_Main), run one at a time by <see cref="Onboarding"/>.</summary>
+    [CreateAssetMenu(menuName = "Pocket Isle/Onboarding Script", fileName = "Onboarding")]
+    public class OnboardingScript : ScriptableObject
+    {
+        public List<LessonData> lessons = new List<LessonData>();
+        [Tooltip("Rotating praise triggers said when a lesson is done.")]
+        public List<string> praise = new List<string> { "praise.nice", "praise.like", "praise.perfect" };
+        [Tooltip("Said when no hand is tracked for a while during a lesson.")]
+        public string handsLine = "lesson.hands";
+        [Tooltip("Ghost clip for the hands check (both hands).")]
+        public string handsGhost = "hands_up";
+        [Tooltip("A waiting lesson's line comes back after this long without it (s).")]
+        public float repeatSeconds = 10f;
+
+        public int IndexOf(string id)
+        {
+            for (int i = 0; i < lessons.Count; i++)
+                if (lessons[i].id == id) return i;
+            return -1;
+        }
+    }
+}

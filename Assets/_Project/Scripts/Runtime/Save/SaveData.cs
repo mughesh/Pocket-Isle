@@ -28,7 +28,7 @@ namespace Diorama
     [Serializable]
     public class SaveData
     {
-        public const int CurrentVersion = 2;
+        public const int CurrentVersion = 3;
 
         public int version = CurrentVersion;
         public string savedAt;
@@ -44,6 +44,10 @@ namespace Diorama
         public string shrineMap;
         /// <summary>The scripted first encounter (step 8) has happened.</summary>
         public bool firstEncounterDone;
+        /// <summary>The tutorial lesson the player is on (step 8b; <see cref="LessonData.id"/>), empty once finished.</summary>
+        public string lesson;
+        /// <summary>The tutorial is done (it never shows again).</summary>
+        public bool tutorialDone;
         public List<SavedRealm> realms = new List<SavedRealm>();
         public List<string> said = new List<string>();
         public List<string> caught = new List<string>();
@@ -137,6 +141,7 @@ namespace Diorama
         /// <summary>
         /// Brings an older save up to <see cref="SaveData.CurrentVersion"/>. v1 -> v2: the map, the shrine's map and the
         /// realm ids become Cinderwood (renamed test map), and the scripted first encounter counts as done.
+        /// v2 -> v3: the tutorial (step 8b) counts as done; those players already know the controls.
         /// </summary>
         public static void Migrate(SaveData data)
         {
@@ -149,6 +154,7 @@ namespace Diorama
                     if (r.realm == LegacyRealm) r.realm = LegacyMap;
                 data.firstEncounterDone = true;
             }
+            if (data.version < 3) data.tutorialDone = true;
             data.version = SaveData.CurrentVersion;
         }
 

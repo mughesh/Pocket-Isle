@@ -87,13 +87,21 @@ namespace Diorama.EditorTools
             section.StartsWith("Opening") || section.StartsWith("Tutorials") ? 1 : 2;
 
         static readonly Regex TargetFlag = new Regex(@"·?\s*→\s*([A-Za-z][\w:,]*)");
+        static readonly Regex WhileFlag = new Regex(@"·\s*while\s+([!\w.&| ]+)");
 
         /// <summary>
         /// After the id: "· once", "· once (note)", "· once: Spirit: text", "· Spirit: text", or nothing, plus an optional
-        /// target anchor anywhere before the text: "· → cradle" (the Spirit flies there for these lines).
+        /// target anchor anywhere before the text: "· → cradle" (the Spirit flies there for these lines), and an optional
+        /// condition "· while canWalk &amp; !battle" (<see cref="DialogueTrigger.validWhile"/>).
         /// </summary>
         static void ParseFlags(DialogueTrigger t, string rest, int n, StringBuilder warnings)
         {
+            var when = WhileFlag.Match(rest);
+            if (when.Success)
+            {
+                t.validWhile = when.Groups[1].Value.Trim();
+                rest = rest.Remove(when.Index, when.Length);
+            }
             var target = TargetFlag.Match(rest);
             if (target.Success)
             {

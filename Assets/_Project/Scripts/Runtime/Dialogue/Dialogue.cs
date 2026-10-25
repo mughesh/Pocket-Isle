@@ -14,6 +14,10 @@ namespace Diorama
     /// A trigger can name a target anchor (systems register them by id, like speakers): while its lines show, the target
     /// pulses and <see cref="TryGetTarget"/> gives its point, so the Spirit flies over to it. A target that disappears
     /// mid-line counts as lost (the Spirit goes home, the line finishes there).
+    /// Lines expire (step 8b): a trigger's <see cref="DialogueTrigger.validWhile"/> (a <see cref="GameConditions"/>
+    /// expression) must hold while it shows, or the bubble closes at once and its queued lines are dropped. When a battle
+    /// or a scene swap starts, every hint line (priority 1 or lower) that doesn't say it still holds is dropped. A "once"
+    /// trigger dropped before any of its lines showed may fire again later. No idle hints while the tutorial runs.
     /// Editor: D cycles through every trigger id (ignoring once); the Inspector lists them with Fire buttons.
     /// </summary>
     public class Dialogue : MonoBehaviour
@@ -49,6 +53,7 @@ namespace Diorama
             public int priority;
             public string trigger;
             public string target;
+            public string validWhile;
         }
 
         static readonly Dictionary<string, Target> _targets = new Dictionary<string, Target>();
@@ -59,6 +64,9 @@ namespace Diorama
 
         readonly List<Queued> _queue = new List<Queued>();
         readonly HashSet<string> _said = new HashSet<string>();
+        readonly HashSet<string> _shown = new HashSet<string>();
+        readonly HashSet<string> _notNow = new HashSet<string>();
+        bool _wasSwapping;
         readonly Dictionary<DialogueSpeaker, Transform> _anchors = new Dictionary<DialogueSpeaker, Transform>();
         Queued? _current;
         float _lastInput, _lastIdle = -999f;
@@ -82,6 +90,15 @@ namespace Diorama
         {
             if (_instance != null) _instance.Fire(triggerId, false);
         }
+
+        /// <summary>Queues a trigger's lines even if it is "once" and was said (lesson reminders). Not while it is still queued or showing.</summary>
+        public static void Repeat(string triggerId)
+        {
+            if (_instance != null) _instance.Fire(triggerId, false, true);
+        }
+
+        /// <summary>A trigger's lines are showing or waiting in the queue.</summary>
+        public static bool IsPending(string triggerId) => _instance != null && _instance.IsQueuedOrShowing(triggerId);
 
         /// <summary>Where a speaker's bubble goes (above this point). Unregistered speakers use the Spirit's.</summary>
         public static void RegisterSpeaker(DialogueSpeaker speaker, Transform anchor)
@@ -149,11 +166,18 @@ namespace Diorama
         void OnDestroy()
         {
             if (_instance == this) _instance = null;
+            if (encounters != null) encounters.BattleStarted -= OnBattleStarted;
         }
 
         void Start()
         {
             _lastInput = Time.time;
+            if (encounters != null)
+            {
+                GameConditions.Register("battle", () => encounters != null && encounters.InBattle);
+                encounters.BattleStarted += OnBattleStarted;
+            }
+            GameConditions.Register("swap", () => SceneSwap.IsBusy);
             if (bubble != null)
             {
                 bubble.Finished += Next;
@@ -220,7 +244,9 @@ namespace Diorama
         }
 
         /// <summary>Queues a trigger's lines; force = ignore "once" (debug).</summary>
-        public void Fire(string id, bool force)
+        public void Fire(string id, bool force) => Fire(id, force, force);
+
+        void Fire(string id, bool force, bool ignoreOnce)
         {
             if (script == null) return;
             var t = script.Find(id);
@@ -229,7 +255,13 @@ namespace Diorama
                 Debug.LogWarning($"[Dialogue] No trigger '{id}' in {script.name}.", this);
                 return;
             }
-            if (t.once && _said.Contains(id) && !force) return;
+            if (t.once && _said.Contains(id) && !ignoreOnce) return;
+            if (!GameConditions.Check(t.validWhile))
+            {
+                if (_notNow.Add(id)) Debug.Log($"[Dialogue] {id}: not now ({t.validWhile}).");
+                return;
+            }
+            _notNow.Remove(id);
             if (IsQueuedOrShowing(id) && !force) return;
             _said.Add(id);
             if (_current.HasValue && t.priority > _current.Value.priority)
@@ -240,7 +272,7 @@ namespace Diorama
             }
             int at = _queue.FindIndex(q => q.priority < t.priority);
             if (at < 0) at = _queue.Count;
-            foreach (var line in t.lines) _queue.Insert(at++, new Queued { line = line, priority = t.priority, trigger = id, target = t.target });
+            foreach (var line in t.lines) _queue.Insert(at++, new Queued { line = line, priority = t.priority, trigger = id, target = t.target, validWhile = t.validWhile });
             Debug.Log($"[Dialogue] {id}: {t.lines.Count} line(s){(t.once ? ", once" : "")}.");
             if (!_current.HasValue) Next();
         }
@@ -251,6 +283,8 @@ namespace Diorama
         {
             _current = null;
             SetTarget(null);
+            // Lines that stopped applying while they waited are dropped.
+            while (_queue.Count > 0 && !GameConditions.Check(_queue[0].validWhile)) Drop(0, "no longer applies");
             if (_queue.Count == 0)
             {
                 if (bubble != null) bubble.Hide();
@@ -260,6 +294,7 @@ namespace Diorama
             var q = _queue[0];
             _queue.RemoveAt(0);
             _current = q;
+            _shown.Add(q.trigger);
             _lastInput = Time.time;
             SetTarget(q.target);
             var anchor = AnchorFor(q.line.speaker);
@@ -299,10 +334,59 @@ namespace Diorama
             return transform;
         }
 
+        /// <summary>Removes a queued line; a "once" trigger that never showed a line may fire again later.</summary>
+        void Drop(int index, string why)
+        {
+            var q = _queue[index];
+            _queue.RemoveAt(index);
+            if (_queue.Exists(o => o.trigger == q.trigger)) return;
+            if (!_shown.Contains(q.trigger) && _said.Remove(q.trigger)) Debug.Log($"[Dialogue] {q.trigger} dropped before it showed ({why}): it can come again.");
+            else Debug.Log($"[Dialogue] {q.trigger} dropped ({why}).");
+        }
+
+        void OnBattleStarted() => Expire("battle started");
+
+        /// <summary>The trigger whose line shows now, or null.</summary>
+        public string CurrentTrigger => _current.HasValue ? _current.Value.trigger : null;
+
+        /// <summary>
+        /// A battle or scene swap started (called by those events; public for tests): hint lines (priority 1 or lower)
+        /// close and drop unless they still hold.
+        /// </summary>
+        public void Expire(string why)
+        {
+            for (int i = _queue.Count - 1; i >= 0; i--)
+                if (_queue[i].priority <= 1 && !Holds(_queue[i])) Drop(i, why);
+            if (_current.HasValue && _current.Value.priority <= 1 && !Holds(_current.Value))
+            {
+                Debug.Log($"[Dialogue] {_current.Value.trigger} closed ({why}).");
+                DropTrigger(_current.Value.trigger, why);
+                Next();
+            }
+        }
+
+        // An explicit validWhile that holds keeps a line through a battle or swap; lines without one are plain hints.
+        static bool Holds(Queued q) => !string.IsNullOrEmpty(q.validWhile) && GameConditions.Check(q.validWhile);
+
+        void DropTrigger(string trigger, string why)
+        {
+            for (int i = _queue.Count - 1; i >= 0; i--)
+                if (_queue[i].trigger == trigger) Drop(i, why);
+        }
+
         void Update()
         {
             var kb = Keyboard.current;
             if (Application.isEditor && kb != null && kb.dKey.wasPressedThisFrame) DebugCycle();
+            bool swapping = SceneSwap.IsBusy;
+            if (swapping && !_wasSwapping) Expire("scene swap");
+            _wasSwapping = swapping;
+            if (_current.HasValue && !GameConditions.Check(_current.Value.validWhile))
+            {
+                Debug.Log($"[Dialogue] {_current.Value.trigger} closed: {_current.Value.validWhile} stopped holding.");
+                DropTrigger(_current.Value.trigger, "condition ended");
+                Next();
+            }
             if (kb != null && kb.anyKey.wasPressedThisFrame) _lastInput = Time.time;
             UpdateTarget();
             TryIdleHint();
@@ -312,7 +396,7 @@ namespace Diorama
         {
             if (script == null || script.idleHints.Count == 0 || _current.HasValue || _queue.Count > 0) return;
             if (Time.time - _lastInput < idleSeconds || Time.time - _lastIdle < idleGap) return;
-            if (encounters != null && encounters.InBattle || explorer != null && explorer.Locked) return;
+            if (encounters != null && encounters.InBattle || explorer != null && explorer.Locked || Onboarding.Running) return;
             _lastIdle = Time.time;
             int i = UnityEngine.Random.Range(0, script.idleHints.Count);
             if (i == _lastHint && script.idleHints.Count > 1) i = (i + 1) % script.idleHints.Count;

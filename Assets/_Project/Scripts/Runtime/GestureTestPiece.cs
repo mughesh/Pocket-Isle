@@ -83,6 +83,9 @@ namespace Diorama
         /// <summary>The GoTo target changed: a tile, or null when the explorer arrived or the path was cancelled.</summary>
         public event Action<Vector2Int?> DestinationChanged;
 
+        /// <summary>A thumb tap stopped a walk (or a GoTo path).</summary>
+        public event Action Stopped;
+
         Transform _cube;
         TextMeshPro _label;
         Vector2Int _tile, _fromTile;
@@ -275,6 +278,7 @@ namespace Diorama
                 // Any swipe or tap cancels a GoTo; a swipe then walks its own way.
                 CancelPath();
                 _last += " - path cancelled";
+                if (gesture == ThumbGesture.Tap) Stopped?.Invoke();
                 if (gesture != ThumbGesture.Tap && !Zoomed)
                 {
                     _heading = _facing = d;
@@ -285,7 +289,11 @@ namespace Diorama
             }
             else if (gesture == ThumbGesture.Tap)
             {
-                if (_heading != Vector2Int.zero) Stop();
+                if (_heading != Vector2Int.zero)
+                {
+                    Stop();
+                    Stopped?.Invoke();
+                }
                 else if (_stepT >= 1f && !Zoomed) TapWhileStanding();
             }
             else if (Zoomed)

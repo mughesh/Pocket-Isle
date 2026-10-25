@@ -29,6 +29,8 @@ namespace Diorama
         public string note;
         [Tooltip("Where the Spirit flies while saying these lines: leadPod, cradle, runes, nearPad, wildPad, tile:x,y. Empty = stays home.")]
         public string target;
+        [Tooltip("Only shown while this holds (GameConditions: battle, swap, canWalk, encounters, ...; ! & |). The bubble closes as soon as it stops holding, and a battle or scene swap starting drops it unless it still holds. Empty = always.")]
+        public string validWhile;
         public List<DialogueLine> lines = new List<DialogueLine>();
     }
 

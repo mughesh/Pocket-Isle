@@ -29,6 +29,8 @@ namespace Diorama
         public BattleHud hud;
         [Tooltip("The puff appears above it (the Lantern Spirit).")]
         public Transform spirit;
+        [Tooltip("Optional. Saves which tutorial lesson the player is on.")]
+        public Onboarding onboarding;
 
         readonly HashSet<string> _caught = new HashSet<string>();
         bool _ready;
@@ -184,6 +186,7 @@ namespace Diorama
                 shrines.LastShrineMap = data.hasShrine ? data.shrineMap : null;
             }
             if (encounters != null) encounters.FirstEncounterDone = data.firstEncounterDone;
+            if (onboarding != null) onboarding.Restore(data.lesson, data.tutorialDone);
             if (realm != null) realm.SetNow(data.RestoredFor(RealmId, realm.Recall(swap != null ? swap.Outdoor : explorer.island.world)));
             Dialogue.RestoreSaid(data.said);
             _caught.Clear();
@@ -251,6 +254,8 @@ namespace Diorama
                     hasShrine = shrines != null && shrines.LastShrine.HasValue,
                     shrineMap = shrines != null ? shrines.LastShrineMap : null,
                     firstEncounterDone = encounters != null && encounters.FirstEncounterDone,
+                    lesson = onboarding != null ? onboarding.CurrentId : null,
+                    tutorialDone = onboarding == null || onboarding.CurrentId == null,
                     said = Dialogue.Said.ToList(),
                     caught = _caught.ToList(),
                     seen = encounters != null ? encounters.Seen.ToList() : new List<string>(),

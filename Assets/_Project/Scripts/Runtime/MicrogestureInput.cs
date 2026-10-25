@@ -81,6 +81,9 @@ namespace Diorama
             Gesture?.Invoke(gesture, source);
         }
 
+        /// <summary>Test hook (the Claude bridge): a gesture as if the hand made it.</summary>
+        public void DebugRaise(ThumbGesture gesture, GestureSource source) => Raise(gesture, source);
+
         void TrackPinches()
         {
             for (int h = 0; h < 2; h++)

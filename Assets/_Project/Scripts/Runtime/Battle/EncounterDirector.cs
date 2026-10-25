@@ -20,6 +20,8 @@ namespace Diorama
     /// is won. After a win (fainted or caught) every creature that fought gets XP (<see cref="Progression"/>): the one
     /// on the pad shows it (XP bar, level-ups) and evolves there if due. Losing the whole party sends the explorer back
     /// to the last Hearth Shrine used (spawn without one), healed. Then walking resumes.
+    /// During the tutorial (<see cref="Onboarding.EncountersEnabled"/> off) tall grass only rustles and fishing is off,
+    /// except the tutorial patch while the grass lesson runs: it always meets the scripted first species.
     /// Editor: B starts a grass encounter on the spot; in battle C throws the cradle pod, X switches to the next pod.
     /// </summary>
     public class EncounterDirector : MonoBehaviour
@@ -69,6 +71,8 @@ namespace Diorama
         [Header("Pods")]
         [Tooltip("The lead pod is sent out by itself after this long (s).")]
         public float autoSendSeconds = 6f;
+        [Tooltip("The same during the tutorial (the send-out lesson's ghost hand shows how first).")]
+        public float tutorialAutoSendSeconds = 20f;
         [Tooltip("A catch throw homes in when it heads within this angle of the wild creature (degrees, flat).")]
         public float catchAimAngle = 25f;
         [Tooltip("A send-out throw lands on the pad when it heads within this angle of it (degrees, flat); a drop above the island always does.")]
@@ -79,6 +83,15 @@ namespace Diorama
         public float dazedSeconds = 8f;
 
         public bool InBattle { get; private set; }
+
+        /// <summary>In battle with the player's Isling out on its pad (its moves can be picked).</summary>
+        public bool PlayerOut => InBattle && _activeSlot >= 0;
+
+        /// <summary>Waiting for the player to send an Isling out (toss a pod onto the island).</summary>
+        public bool AwaitingSendOut { get; private set; }
+
+        /// <summary>An encounter starts (before the zoom; hint lines close).</summary>
+        public event System.Action BattleStarted;
 
         /// <summary>A battle finished and walking resumed (also after running before a send-out).</summary>
         public event System.Action<BattleResult> BattleEnded;
@@ -189,6 +202,14 @@ namespace Diorama
                 Debug.LogError($"[EncounterDirector] {island.world.name} has no grass table: tall grass won't trigger battles.", island.world);
                 return;
             }
+            if (!Onboarding.EncountersEnabled)
+            {
+                if (!Onboarding.IsTutorialGrass(tile) || firstSpecies == null) return; // only rustles (the step flash)
+                Debug.Log($"[EncounterDirector] Tutorial grass: {firstSpecies.name} Lv {firstLevel} (scripted).");
+                Onboarding.Mark("grassBattle");
+                StartCoroutine(Encounter(table, tile, new IslingInstance(firstSpecies, firstLevel)));
+                return;
+            }
             if (!FirstEncounterDone && firstSpecies != null)
             {
                 Debug.Log($"[EncounterDirector] First encounter of the game (scripted): {firstSpecies.name} Lv {firstLevel}.");
@@ -204,6 +225,11 @@ namespace Diorama
         {
             var table = WaterTable;
             if (InBattle || party.members.Count == 0) return;
+            if (!Onboarding.EncountersEnabled)
+            {
+                Debug.Log("[EncounterDirector] Fishing is off until the tutorial's grass lesson is done.");
+                return;
+            }
             if (table == null)
             {
                 Debug.LogError($"[EncounterDirector] {island.world.name} has no water table: fishing won't work.", island.world);
@@ -240,6 +266,7 @@ namespace Diorama
             InBattle = true;
             explorer.Locked = true;
             MapCreature.HideAll = true;
+            BattleStarted?.Invoke();
             FirstEncounterDone = true;
             var wild = scripted;
             bool rare = false;
@@ -363,6 +390,8 @@ namespace Diorama
                 runes.SetInteractable(false);
                 pods.PartyGrab = pods.CradleGrab = false;
 
+                if (act.kind == ActKind.Move) Onboarding.Mark("moveUsed");
+                else if (act.index == PodRack.CradleSlot && act.kind != ActKind.Run) Onboarding.Mark("podThrown");
                 IReadOnlyList<BattleEvent> events;
                 if (act.kind == ActKind.Move) events = battle.PlayTurn(act.index);
                 else if (act.kind == ActKind.Run) events = battle.TryFlee();
@@ -525,6 +554,7 @@ namespace Diorama
                 var act = _act;
                 _waiting = false;
                 pods.CradleGrab = false;
+                if (act.index == PodRack.CradleSlot && (act.kind == ActKind.PodThrow || act.kind == ActKind.PodPick)) Onboarding.Mark("podThrown");
                 if (act.index != PodRack.CradleSlot || act.kind != ActKind.PodThrow && act.kind != ActKind.PodPick)
                 {
                     if (act.kind == ActKind.PodThrow) yield return pods.FlyHome(act.index);
@@ -551,6 +581,8 @@ namespace Diorama
                 if (i != _activeSlot && party.CanFight(i)) return true;
             return false;
         }
+
+        float AutoSendSeconds => Onboarding.EncountersEnabled ? autoSendSeconds : tutorialAutoSendSeconds;
 
         /// <summary>Island-local point a pod lands on: the top of the party creature's pad.</summary>
         Vector3 PodOnPad() => stage.PadTopLocal(BattleSide.Player) + Vector3.up * pods.podPrefab.radius;
@@ -596,6 +628,7 @@ namespace Diorama
             string how = "";
             Vector3 vel = Vector3.zero;
             if (ran != null) runes.SetInteractable(true); // only Run shows
+            AwaitingSendOut = true;
             while (chosen < 0)
             {
                 var act = _act;
@@ -605,6 +638,7 @@ namespace Diorama
                     runes.SetInteractable(false);
                     pods.PartyGrab = false;
                     pods.GlowSlot = -1;
+                    AwaitingSendOut = false;
                     ran();
                     yield break;
                 }
@@ -623,10 +657,13 @@ namespace Diorama
                 }
                 else if (act.kind != ActKind.None) _act = default; // no moves before a creature is out
                 else if (pods.AnyHeld) idle = 0f;
-                else if ((idle += Time.deltaTime) >= autoSendSeconds) { chosen = lead; how = $"auto after {autoSendSeconds:0} s"; }
+                else if ((idle += Time.deltaTime) >= AutoSendSeconds) { chosen = lead; how = $"auto after {AutoSendSeconds:0} s"; }
                 if (chosen < 0) yield return null;
             }
+            // The player sent it (the lesson's praise); an auto send-out isn't theirs.
+            if (!how.StartsWith("auto")) Onboarding.Mark("sentOut");
             _waiting = false;
+            AwaitingSendOut = false;
             runes.SetInteractable(false);
             pods.PartyGrab = false;
             pods.GlowSlot = -1;
@@ -730,6 +767,7 @@ namespace Diorama
             pods.InBattle = pods.PartyGrab = pods.CradleGrab = pods.CradleVisible = pods.CradleGlow = pods.CradlePulse = false;
             pods.ActiveSlot = pods.GlowSlot = -1;
             _waiting = false;
+            AwaitingSendOut = false;
             _activeSlot = -1;
             explorer.StandOffset = Vector2.zero;
             window.SetFocus(null);
