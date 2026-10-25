@@ -1,0 +1,253 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a24ca16dd648604f807b16711d6f11b, type: 3}
+  m_Name: Onboarding_Main
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.OnboardingScript
+  lessons:
+  - id: shard
+    line: intro.shard
+    again: 
+    help: 
+    helpAfter: 30
+    startWhen: opening.shard
+    delay: 3
+    doneWhen: shardTouched
+    validWhile: opening.shard
+    skipAfter: 0
+    failWhen: 
+    rewindTo: 
+    praise: 1
+    ghost: poke
+    place: 1
+    target: shard
+    ghostScale: 1
+    bothHands: 0
+    goldPath: 
+    goldTileSteps: 0
+    tutorialGrass: 0
+  - id: move
+    line: intro.world
+    again: lesson.move.again
+    help: 
+    helpAfter: 30
+    startWhen: opening.move
+    delay: 0
+    doneWhen: islandGrabbed
+    validWhile: opening.move
+    skipAfter: 12
+    failWhen: 
+    rewindTo: 
+    praise: 1
+    ghost: grab_rim_slide
+    place: 1
+    target: rim
+    ghostScale: 1
+    bothHands: 0
+    goldPath: 
+    goldTileSteps: 0
+    tutorialGrass: 0
+  - id: starter
+    line: intro.starter
+    again: lesson.starter.again
+    help: 
+    helpAfter: 30
+    startWhen: opening.starters
+    delay: 0
+    doneWhen: starterPicked
+    validWhile: 
+    skipAfter: 0
+    failWhen: 
+    rewindTo: 
+    praise: 1
+    ghost: grab_drop
+    place: 1
+    target: starterPods
+    ghostScale: 1
+    bothHands: 0
+    goldPath: 
+    goldTileSteps: 0
+    tutorialGrass: 0
+  - id: walk
+    line: lesson.walk
+    again: lesson.walk.again
+    help: lesson.walk.help
+    helpAfter: 30
+    startWhen: canWalk
+    delay: 1.5
+    doneWhen: walked3
+    validWhile: 
+    skipAfter: 0
+    failWhen: 
+    rewindTo: 
+    praise: 1
+    ghost: thumb_swipe_forward
+    place: 2
+    target: ghost
+    ghostScale: 0.6
+    bothHands: 0
+    goldPath: 
+    goldTileSteps: 0
+    tutorialGrass: 0
+  - id: stop
+    line: lesson.stop
+    again: lesson.stop.again
+    help: 
+    helpAfter: 30
+    startWhen: canWalk
+    delay: 0.8
+    doneWhen: stopped
+    validWhile: 
+    skipAfter: 0
+    failWhen: 
+    rewindTo: 
+    praise: 1
+    ghost: thumb_tap
+    place: 2
+    target: ghost
+    ghostScale: 0.6
+    bothHands: 0
+    goldPath: 
+    goldTileSteps: 0
+    tutorialGrass: 0
+  - id: look
+    line: lesson.look
+    again: lesson.look.again
+    help: 
+    helpAfter: 30
+    startWhen: canWalk
+    delay: 0.8
+    doneWhen: atGoldTile | gazeWalk
+    validWhile: 
+    skipAfter: 0
+    failWhen: 
+    rewindTo: 
+    praise: 1
+    ghost: pinch
+    place: 3
+    target: goldTile
+    ghostScale: 0.6
+    bothHands: 0
+    goldPath: 
+    goldTileSteps: 3
+    tutorialGrass: 0
+  - id: grass
+    line: lesson.grass
+    again: lesson.grass.again
+    help: 
+    helpAfter: 30
+    startWhen: canWalk
+    delay: 0.8
+    doneWhen: grassBattle
+    validWhile: 
+    skipAfter: 0
+    failWhen: 
+    rewindTo: 
+    praise: 0
+    ghost: 
+    place: 0
+    target: landmark:firstGrass
+    ghostScale: 1
+    bothHands: 0
+    goldPath: firstGrass
+    goldTileSteps: 0
+    tutorialGrass: 1
+  - id: send
+    line: pod.first
+    again: lesson.send.again
+    help: 
+    helpAfter: 30
+    startWhen: battle.send
+    delay: 0
+    doneWhen: sentOut
+    validWhile: battle.send
+    skipAfter: 0
+    failWhen: battleFailed
+    rewindTo: grass
+    praise: 1
+    ghost: grab_toss
+    place: 1
+    target: leadPod
+    ghostScale: 1
+    bothHands: 0
+    goldPath: 
+    goldTileSteps: 0
+    tutorialGrass: 0
+  - id: rune
+    line: battle.first
+    again: lesson.rune.again
+    help: 
+    helpAfter: 30
+    startWhen: battle.out
+    delay: 0
+    doneWhen: moveUsed
+    validWhile: battle
+    skipAfter: 0
+    failWhen: battleFailed
+    rewindTo: grass
+    praise: 1
+    ghost: pinch
+    place: 1
+    target: runes
+    ghostScale: 1
+    bothHands: 0
+    goldPath: 
+    goldTileSteps: 0
+    tutorialGrass: 0
+  - id: catch
+    line: capture.first
+    again: lesson.catch.again
+    help: 
+    helpAfter: 30
+    startWhen: wildRed
+    delay: 0
+    doneWhen: podThrown
+    validWhile: battle
+    skipAfter: 0
+    failWhen: battleFailed
+    rewindTo: grass
+    praise: 1
+    ghost: grab_flick
+    place: 1
+    target: cradle
+    ghostScale: 1
+    bothHands: 0
+    goldPath: 
+    goldTileSteps: 0
+    tutorialGrass: 0
+  - id: free
+    line: 
+    again: 
+    help: 
+    helpAfter: 30
+    startWhen: 
+    delay: 0
+    doneWhen: wonOrCaught
+    validWhile: 
+    skipAfter: 0
+    failWhen: battleFailed
+    rewindTo: grass
+    praise: 0
+    ghost: 
+    place: 0
+    target: 
+    ghostScale: 1
+    bothHands: 0
+    goldPath: 
+    goldTileSteps: 0
+    tutorialGrass: 0
+  praise:
+  - praise.nice
+  - praise.like
+  - praise.perfect
+  handsLine: lesson.hands
+  handsGhost: hands_up
+  repeatSeconds: 10

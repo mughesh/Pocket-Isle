@@ -2412,6 +2412,62 @@ MonoBehaviour:
   wanderRadius: 2
   hopInterval: {x: 3, y: 7}
   moveChance: 0.6
+--- !u!1 &1380201670
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1380201672}
+  - component: {fileID: 1380201671}
+  m_Layer: 0
+  m_Name: Onboarding
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1380201671
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1380201670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e77652f770daa724d8e0f5894fcf116e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.Onboarding
+  script: {fileID: 11400000, guid: 1e1c5b30f31a50b4889080bcfc8fcfe2, type: 2}
+  explorer: {fileID: 374318554}
+  encounters: {fileID: 1499891275}
+  island: {fileID: 270959109}
+  handle: {fileID: 270959111}
+  input: {fileID: 374318556}
+  save: {fileID: 1541842443}
+  patchLandmark: firstGrass
+  patchRadius: 1
+  walkSteps: 3
+  handsMissingSeconds: 3
+  chimeVolume: 0.35
+--- !u!4 &1380201672
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1380201670}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1406653588
 GameObject:
   m_ObjectHideFlags: 0
@@ -2527,6 +2583,7 @@ MonoBehaviour:
   rippleSeconds: 1
   seed: 0
   autoSendSeconds: 6
+  tutorialAutoSendSeconds: 20
   catchAimAngle: 25
   sendAimAngle: 45
   minThrowSpeed: 0.35
@@ -2724,6 +2781,7 @@ MonoBehaviour:
   swap: {fileID: 221433162}
   hud: {fileID: 1078587926}
   spirit: {fileID: 1847074512}
+  onboarding: {fileID: 1380201671}
 --- !u!4 &1541842444
 Transform:
   m_ObjectHideFlags: 0
@@ -3195,6 +3253,8 @@ MonoBehaviour:
   spirit: {fileID: 1847074513}
   fx: {fileID: 1078587927}
   save: {fileID: 1541842443}
+  onboarding: {fileID: 1380201671}
+  firstWalkLesson: walk
   shardMaterial: {fileID: 2100000, guid: 5cf32f9131fcae742b5bdedc45e8d5d7, type: 2}
   starters:
   - {fileID: 11400000, guid: 4e0827bf455d6eb4c853967a75296d1d, type: 2}
@@ -3205,7 +3265,6 @@ MonoBehaviour:
   driftFrom: {x: 0.8, y: 0.3, z: -1.2}
   driftSeconds: 3.5
   touchRadius: 0.08
-  hintSeconds: 3
   autoTouchSeconds: 6
   growSeconds: 1.2
   riseSeconds: 1.6
@@ -3689,3 +3748,4 @@ SceneRoots:
   - {fileID: 1059021441}
   - {fileID: 1858573328}
   - {fileID: 1891040200}
+  - {fileID: 1380201672}

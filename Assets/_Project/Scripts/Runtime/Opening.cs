@@ -17,11 +17,13 @@ namespace Diorama
     /// glass pods rise from the statue and float in a row above the island, a starter turning in each
     /// (<c>intro.starter</c>): looking at one makes it grow and wiggle and the Spirit names it; grab it and drop it on
     /// the rim, or look + pinch it, and it is yours (the other two sink back into the statue). Then the explorer can walk
-    /// (<c>intro.explorer</c>, a gold run of tiles toward the first tall grass) and the first grass holds the scripted
-    /// first encounter. Nothing is saved until the starter is picked, so quitting earlier replays the opening.
+    /// and the walk lessons start. Nothing is saved until the starter is picked, so quitting earlier replays the opening.
     /// A returning player (a save loaded) skips all this: the island rises from the middle where it was placed in about
     /// <see cref="returnRiseSeconds"/>. <c>intro.statue</c> plays the first time the explorer gets near the statue.
-    /// Editor and development builds: N skips the opening (Kilnpot).
+    /// Step 8b: the hints (touch the shard, move the island, pick a starter, then walking) are <see cref="Onboarding"/>
+    /// lessons. The opening starts the chain, publishes its stages (<c>opening.shard</c>, <c>opening.move</c>,
+    /// <c>opening.starters</c>) and marks what the player did (<c>shardTouched</c>, <c>islandGrabbed</c>, <c>starterPicked</c>).
+    /// Editor and development builds: N skips the opening (Kilnpot) and the lessons up to <see cref="firstWalkLesson"/>.
     /// </summary>
     [DefaultExecutionOrder(110)] // after GameSave (100) has loaded the save
     public class Opening : MonoBehaviour
@@ -35,6 +37,10 @@ namespace Diorama
         public LanternSpirit spirit;
         public BattleFx fx;
         public GameSave save;
+        [Tooltip("Optional. Runs the lessons (step 8b).")]
+        public Onboarding onboarding;
+        [Tooltip("N (skip) jumps the lessons to this one.")]
+        public string firstWalkLesson = "walk";
         [Tooltip("Diorama/Toon material for the shard (mossy stone, gold cracks).")]
         public Material shardMaterial;
 
@@ -50,8 +56,6 @@ namespace Diorama
         public float driftSeconds = 3.5f;
         [Tooltip("A fingertip or palm this close (m) touches it.")]
         public float touchRadius = 0.08f;
-        [Tooltip("The Spirit's 'Touch it?' after this long without a touch (s).")]
-        public float hintSeconds = 3f;
         [Tooltip("It unfolds by itself after this long (s).")]
         public float autoTouchSeconds = 6f;
 
@@ -93,7 +97,7 @@ namespace Diorama
         MaterialPropertyBlock _block;
         Mesh _shardMesh;
         float _scale;
-        bool _touched;
+        bool _touched, _shardWaiting;
         readonly List<PodView> _starterPods = new List<PodView>();
         int _gazedPod = -1, _saidPod = -1, _chosen = -1;
         float _gazeSince;
@@ -116,6 +120,9 @@ namespace Diorama
             Dialogue.RegisterTarget("rim", RimPoint, k => { if (handle != null) handle.HintGlow = k; }, () => 0f);
             Dialogue.RegisterTarget("starterPods", () => _starterPods.Count > 1 && _starterPods[1] != null ? _starterPods[1].transform.position : (Vector3?)null,
                 k => { }, () => podRow.x * 0.5f * island.transform.lossyScale.x);
+            GameConditions.Register("opening.shard", () => _shardWaiting);
+            GameConditions.Register("opening.move", () => _stage == Stage.Move);
+            GameConditions.Register("opening.starters", () => _stage == Stage.Starters && _starterPods.Count > 0);
             _run = StartCoroutine(save.Loaded ? Returning() : NewGame());
         }
 
@@ -180,6 +187,7 @@ namespace Diorama
             InProgress = true;
             save.Suspended = true;
             party.Restore(new List<IslingInstance>(), new List<IslingInstance>());
+            if (onboarding != null) onboarding.Begin();
             explorer.Locked = true;
             explorer.Shrink = 0f;
             spirit.Appear = 0f;
@@ -203,9 +211,9 @@ namespace Diorama
                 yield return null;
             }
 
-            // Waits for a hand (or gives in after a while).
+            // Waits for a hand (or gives in after a while). The touch lesson hints after a few seconds.
             float waited = 0f;
-            bool hinted = false;
+            _shardWaiting = true;
             while (!_touched && waited < autoTouchSeconds)
             {
                 waited += Time.deltaTime;
@@ -213,15 +221,11 @@ namespace Diorama
                 SpinShard(0.35f);
                 SetShardGlow(0.35f + 0.25f * Mathf.Sin(Time.time * 2.2f), 0.2f);
                 _touched = ShardTouched();
-                if (!hinted && waited >= hintSeconds && !_touched)
-                {
-                    hinted = true;
-                    Dialogue.Say("intro.shard");
-                }
                 yield return null;
             }
+            _shardWaiting = false;
+            if (_touched) Onboarding.Mark("shardTouched");
             Debug.Log($"[Opening] Shard {(_touched ? "touched" : "unfolds by itself")} after {waited:0.0} s.");
-            Dialogue.Cancel("intro.shard");
 
             // Cracks open with light; the base grows out of it; the tiles rise from the middle.
             _stage = Stage.Unfold;
@@ -280,9 +284,8 @@ namespace Diorama
             Dialogue.Say("intro.arrive");
             yield return WaitLines(14f);
 
-            // Moving the island is prompted, not forced.
+            // Moving the island is prompted (the move lesson), not forced.
             _stage = Stage.Move;
-            Dialogue.Say("intro.world");
             float since = 0f;
             bool grabbed = false;
             while (since < moveWaitSeconds && !grabbed)
@@ -291,6 +294,7 @@ namespace Diorama
                 grabbed = handle != null && handle.IsGrabbed;
                 yield return null;
             }
+            if (grabbed) Onboarding.Mark("islandGrabbed");
             while (handle != null && handle.IsGrabbed) yield return null;
             if (handle != null) handle.HintGlow = 0f;
             Debug.Log($"[Opening] Move prompt: {(grabbed ? "the island was moved" : "no grab, moving on")}.");
@@ -299,16 +303,14 @@ namespace Diorama
             // Starter choice.
             _stage = Stage.Starters;
             yield return RisePods();
-            Dialogue.Say("intro.starter");
             while (_chosen < 0) yield return null;
             yield return Choose(_chosen);
+            Onboarding.Mark("starterPicked");
 
-            // Walking.
+            // Walking: the walk lessons take over.
             _stage = Stage.Walk;
             explorer.Locked = false;
-            Dialogue.Say("intro.explorer");
             Finish();
-            yield return GoldPath();
         }
 
         void Finish()
@@ -333,6 +335,8 @@ namespace Diorama
             if (handle != null) handle.HintGlow = 0f;
             if (party.members.Count == 0 && starters.Length > 0 && starters[0] != null) party.Add(new IslingInstance(starters[0], starterLevel));
             _stage = Stage.Done;
+            _shardWaiting = false;
+            if (onboarding != null) onboarding.SkipTo(firstWalkLesson);
             Debug.Log("[Opening] Skipped (N).");
             Finish();
         }
@@ -635,28 +639,7 @@ namespace Diorama
             Debug.Log($"[Opening] Starter: {starters[index].name} Lv {starterLevel} in pod 1.");
         }
 
-        // ---- walking ----
-
-        /// <summary>Tiles toward the first tall grass flash one after another until the explorer sets off.</summary>
-        IEnumerator GoldPath()
-        {
-            if (island.world == null || !island.world.TryGetLandmark("firstGrass", out var grass)) yield break;
-            var path = new List<Vector2Int>();
-            var start = explorer.Tile;
-            if (!ExplorerPath.Find(island.world, start, grass, path, 60)) yield break;
-            for (float t = 0f; t < 25f && explorer.Tile == start; )
-            {
-                foreach (var tile in path)
-                {
-                    if (explorer.Tile != start) yield break;
-                    island.FlashTile(tile, 0.4f);
-                    yield return new WaitForSeconds(0.12f);
-                    t += 0.12f;
-                }
-                yield return new WaitForSeconds(0.8f);
-                t += 0.8f;
-            }
-        }
+        // ---- statue ----
 
         void CheckStatue()
         {
