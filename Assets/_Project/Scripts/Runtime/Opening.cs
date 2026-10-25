@@ -71,12 +71,12 @@ namespace Diorama
         public float returnRiseSeconds = 2f;
 
         [Header("Starter pods")]
-        [Tooltip("Floating pod size against a rim pod (step 8d: 25% smaller than 8c's 3.2).")]
+        [Tooltip("Largest floating pod size against a rim pod; smaller if the arc can't fit three (and a grown one) with the gaps.")]
         public float podScale = 2.4f;
         [Tooltip("The looked-at pod grows this much; its neighbours slide apart (dock-style) so they never touch.")]
-        public float podFocusGrow = 1.3f;
-        [Tooltip("Floating pods: arc width (x the island's width), height above the cap (m at the placed island size), toward the player from the island's middle (island-local m).")]
-        public Vector3 podArc = new Vector3(1.2f, 0.1f, 0.26f);
+        public float podFocusGrow = 1.25f;
+        [Tooltip("Floating pods (step 8e: always over the island): arc width (x the island's width), height above the cap (m at the placed island size), toward the player from the island's middle (x half the island's depth).")]
+        public Vector3 podArc = new Vector3(0.7f, 0.1f, 0.25f);
         [Tooltip("The outer pods float this much nearer the player than the middle one (island-local m): a shallow arc.")]
         public float podArcBow = 0.06f;
         [Tooltip("Smallest gap between floating pods (x a pod's diameter).")]
@@ -134,7 +134,7 @@ namespace Diorama
             // The rim glows itself (HintGlow); no gold sphere, it would outline the trees along the front.
             Dialogue.RegisterTarget("rim", RimPoint, k => { if (handle != null) handle.HintGlow = k; }, () => 0f);
             Dialogue.RegisterTarget("starterPods", () => _starterPods.Count > 1 && _starterPods[1] != null ? _starterPods[1].transform.position : (Vector3?)null,
-                k => { }, () => pods.podPrefab != null ? pods.podPrefab.radius * podScale * podFocusGrow * island.transform.lossyScale.x : 0.03f);
+                k => { }, () => pods.podPrefab != null ? pods.podPrefab.radius * FloatScale * podFocusGrow * island.transform.lossyScale.x : 0.03f);
             DialogueBubble.KeepClear += StarterPodsInView;
             GameConditions.Register("opening.shard", () => _shardWaiting);
             GameConditions.Register("opening.move", () => _stage == Stage.Move);
@@ -686,17 +686,36 @@ namespace Diorama
         readonly List<float> _podX = new List<float>();
 
         /// <summary>
+        /// The floating pods' size (x a rim pod): <see cref="podScale"/>, or smaller so that all of them, one grown by
+        /// <see cref="podFocusGrow"/>, plus the gaps fit across the arc (step 8e). Island-local, so it holds at any island size.
+        /// </summary>
+        float FloatScale
+        {
+            get
+            {
+                float radius = pods.podPrefab != null ? pods.podPrefab.radius : 0.015f;
+                int n = Mathf.Max(1, _starterPods.Count > 0 ? _starterPods.Count : starters.Length);
+                float halfSpan = island.FootprintHalfSize.x * podArc.x;
+                float fit = halfSpan / ((n - 1) * (1f + podMinGap) + podFocusGrow) / radius;
+                return Mathf.Min(podScale, fit);
+            }
+        }
+
+        /// <summary>
         /// Where floating pod <paramref name="i"/> rests (island-local): on a shallow arc across <see cref="podArc"/>.x of
-        /// the island's width (outer pods nearer the player), <see cref="podArc"/>.y above the cap. Index 0 is the player's left.
+        /// the island's width (outer pods nearer the player), <see cref="podArc"/>.y above the cap, always inside the
+        /// island's footprint. Index 0 is the player's left.
         /// </summary>
         Vector3 PodLocal(int i)
         {
-            var b = island.LocalBounds;
-            float half = Mathf.Max(1e-4f, island.FootprintHalfSize.x * podArc.x);
-            float x = i < _podX.Count ? _podX[i] : b.center.x;
-            float bow = podArcBow * Mathf.Clamp01(Mathf.Abs(x - b.center.x) / half) * Mathf.Clamp01(Mathf.Abs(x - b.center.x) / half);
+            var half2 = island.FootprintHalfSize;
+            float half = Mathf.Max(1e-4f, half2.x * podArc.x);
+            float x = i < _podX.Count ? _podX[i] : 0f;
+            float k = Mathf.Clamp01(Mathf.Abs(x) / half);
+            float r = (pods.podPrefab != null ? pods.podPrefab.radius : 0.015f) * FloatScale * podFocusGrow;
+            float z = Mathf.Min(half2.y * podArc.z + podArcBow * k * k, half2.y - r);
             float above = podArc.y / Mathf.Max(0.05f, placer.islandScale);
-            return new Vector3(x, island.CapTopLocal + above, b.center.z + podArc.z + bow);
+            return new Vector3(x, island.CapTopLocal + above, z);
         }
 
         /// <summary>
@@ -706,17 +725,21 @@ namespace Diorama
         void LayoutPods(int focus)
         {
             int n = Mathf.Max(1, _starterPods.Count);
-            var b = island.LocalBounds;
-            float r0 = pods.podPrefab != null ? pods.podPrefab.radius * podScale : 0.03f;
-            float half = island.FootprintHalfSize.x * podArc.x - r0;
+            float r0 = (pods.podPrefab != null ? pods.podPrefab.radius : 0.015f) * FloatScale;
+            float span = island.FootprintHalfSize.x * podArc.x;
+            float half = span - r0;
             float gap = podMinGap * 2f * r0;
             _podX.Clear();
-            for (int i = 0; i < n; i++) _podX.Add(n == 1 ? b.center.x : b.center.x + Mathf.Lerp(half, -half, i / (float)(n - 1)));
+            for (int i = 0; i < n; i++) _podX.Add(n == 1 ? 0f : Mathf.Lerp(half, -half, i / (float)(n - 1)));
             float R(int i) => r0 * (i == focus ? podFocusGrow : 1f);
             int from = focus >= 0 ? focus : n / 2;
             // x falls with the index (index 0 is the player's left, +X): each neighbour keeps its distance or moves out.
             for (int j = from + 1; j < n; j++) _podX[j] = Mathf.Min(_podX[j], _podX[j - 1] - R(j - 1) - R(j) - gap);
             for (int j = from - 1; j >= 0; j--) _podX[j] = Mathf.Max(_podX[j], _podX[j + 1] + R(j + 1) + R(j) + gap);
+            // Still over the island: a row pushed past an end shifts back (FloatScale makes the whole row fit).
+            float over = _podX[0] + R(0) - span, under = -span - (_podX[n - 1] - R(n - 1));
+            float shift = over > 0f ? -over : under > 0f ? under : 0f;
+            for (int i = 0; i < n; i++) _podX[i] += shift;
         }
 
         /// <summary>The floating pods, for the speech bubble to keep clear of (step 8d).</summary>
@@ -770,7 +793,7 @@ namespace Diorama
                     float k = Mathf.SmoothStep(0f, 1f, u);
                     var p = _starterPods[i].transform;
                     p.localPosition = Vector3.Lerp(statue, PodLocal(i), k) + Vector3.up * (0.06f * Mathf.Sin(u * Mathf.PI));
-                    _starterPods[i].BaseScale = Vector3.one * podScale * EaseOutBack(u);
+                    _starterPods[i].BaseScale = Vector3.one * FloatScale * EaseOutBack(u);
                 }
                 yield return null;
             }
@@ -798,7 +821,7 @@ namespace Diorama
                 bool held = grab != null && grab.IsHeld;
                 bool focus = i == _gazedPod && !held;
                 // Floating and held pods stay big; they shrink to rim size only as they snap into the socket (Choose).
-                float size = podScale * (focus ? podFocusGrow : 1f);
+                float size = FloatScale * (focus ? podFocusGrow : 1f);
                 pod.BaseScale = Vector3.one * Mathf.Lerp(pod.BaseScale.x, size, 1f - Mathf.Exp(-Time.deltaTime * 10f));
                 if (held) continue;
                 var target = PodLocal(i) + Vector3.up * (0.006f * Mathf.Sin(t * 1.6f + i));
@@ -869,7 +892,7 @@ namespace Diorama
             var statue = island.transform.InverseTransformPoint(LandmarkWorld("statue", 1.2f) ?? island.transform.position);
             var chosen = index < _starterPods.Count ? _starterPods[index] : null;
             Vector3 fromChosen = chosen != null ? chosen.transform.position : Vector3.zero;
-            float chosenFrom = chosen != null ? chosen.BaseScale.x : podScale;
+            float chosenFrom = chosen != null ? chosen.BaseScale.x : FloatScale;
             var others = new List<(PodView pod, Vector3 from)>();
             for (int i = 0; i < _starterPods.Count; i++)
                 if (i != index && _starterPods[i] != null) others.Add((_starterPods[i], _starterPods[i].transform.localPosition));
@@ -888,7 +911,7 @@ namespace Diorama
                 foreach (var (pod, from) in others)
                 {
                     pod.transform.localPosition = Vector3.Lerp(from, statue, u);
-                    pod.BaseScale = Vector3.one * podScale * (1f - u);
+                    pod.BaseScale = Vector3.one * FloatScale * (1f - u);
                 }
                 yield return null;
             }

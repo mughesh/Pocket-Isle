@@ -48,6 +48,61 @@ namespace Diorama.EditorTools
             Debug.Log(sb.ToString());
         }
 
+        /// <summary>
+        /// Starter pod layout without a new game: runs the opening's own layout on three placeholder pods (none, gaze on
+        /// each) and logs whether every pod stays inside the island's footprint, and the gaps.
+        /// </summary>
+        public static void PodLayout()
+        {
+            var o = Object.FindFirstObjectByType<Opening>();
+            var island = Object.FindFirstObjectByType<IslandBuilder>();
+            if (o == null || island == null || o.pods == null || o.pods.podPrefab == null) return;
+            const BindingFlags f = BindingFlags.Instance | BindingFlags.NonPublic;
+            var list = (System.Collections.Generic.List<PodView>)typeof(Opening).GetField("_starterPods", f).GetValue(o);
+            if (list.Count > 0)
+            {
+                Debug.Log("[Step8eDebug] Starter pods are up: use GazeMiddlePod instead.");
+                return;
+            }
+            var layout = typeof(Opening).GetMethod("LayoutPods", f);
+            var local = typeof(Opening).GetMethod("PodLocal", f);
+            float scale = (float)typeof(Opening).GetProperty("FloatScale", f).GetValue(o);
+            var half = island.FootprintHalfSize;
+            float r0 = o.pods.podPrefab.radius * scale;
+            var sb = new StringBuilder($"[Step8eDebug] Starter pods: footprint half {half.x:0.000} x {half.y:0.000}, size x{scale:0.00} (max {o.podScale}), " +
+                                       $"radius {r0 * 100f:0.0} cm local, focus x{o.podFocusGrow}:");
+            for (int i = 0; i < 3; i++) list.Add(null);
+            try
+            {
+                foreach (int focus in new[] { -1, 0, 1, 2 })
+                {
+                    layout.Invoke(o, new object[] { focus });
+                    sb.Append($"\n  gaze {(focus < 0 ? "none" : "pod " + focus)}:");
+                    bool inside = true;
+                    float minGap = float.MaxValue;
+                    for (int i = 0; i < 3; i++)
+                    {
+                        var p = (Vector3)local.Invoke(o, new object[] { i });
+                        float r = r0 * (i == focus ? o.podFocusGrow : 1f);
+                        inside &= Mathf.Abs(p.x) + r <= half.x && Mathf.Abs(p.z) + r <= half.y;
+                        sb.Append($" ({p.x:0.000}, {p.z:0.000})");
+                        if (i > 0)
+                        {
+                            var q = (Vector3)local.Invoke(o, new object[] { i - 1 });
+                            float rq = r0 * (i - 1 == focus ? o.podFocusGrow : 1f);
+                            minGap = Mathf.Min(minGap, (new Vector2(p.x - q.x, p.z - q.z)).magnitude - r - rq);
+                        }
+                    }
+                    sb.Append($" inside {inside}, smallest gap {minGap * 100f:0.0} cm = {minGap / (2f * r0):0.00} diameters");
+                }
+            }
+            finally
+            {
+                list.Clear();
+            }
+            Debug.Log(sb.ToString());
+        }
+
         static string Path(Component c)
         {
             if (c == null) return "null";
