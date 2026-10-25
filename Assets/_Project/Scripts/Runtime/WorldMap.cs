@@ -26,6 +26,25 @@ namespace Diorama
     {
         public string name;
         public Vector2Int tile;
+        [Tooltip("Optional dialogue trigger said the first time the explorer comes within Radius tiles (LandmarkLines).")]
+        public string line;
+        [Min(0)] public int radius;
+    }
+
+    /// <summary>
+    /// One entry of a world map's zones legend: the character used in the zones grid, the zone id (forest, field,
+    /// springs...) and its own tall grass table (empty = the map's grass table). Later realms reuse the same system.
+    /// </summary>
+    [Serializable]
+    public struct MapZone
+    {
+        [Tooltip("The character used in the zones grid (first character counts).")]
+        public string key;
+        public string id;
+        [Tooltip("Tall grass encounters in this zone. Empty = the map's grass table.")]
+        public EncounterTable grassTable;
+
+        public char Key => string.IsNullOrEmpty(key) ? '.' : key[0];
     }
 
     /// <summary>
@@ -90,8 +109,13 @@ namespace Diorama
         public RealmTheme theme;
 
         [Header("Encounters (outdoor maps)")]
+        [Tooltip("Tall grass outside any zone with its own table.")]
         public EncounterTable grassTable;
         public EncounterTable waterTable;
+        [Tooltip("Same size as the layout, one character per tile. '.' = no zone. Characters come from the zone legend.")]
+        [TextArea(4, 60)]
+        public string zones = string.Empty;
+        public List<MapZone> zoneLegend = new List<MapZone>();
 
         [Header("Story")]
         [Tooltip("Realm id for story lines (stillisle, cinderwood).")]
@@ -113,9 +137,42 @@ namespace Diorama
             return false;
         }
 
-        string[] _propRows;
+        string[] _propRows, _zoneRows;
         Dictionary<char, PropLegend> _legend;
         HashSet<Vector2Int> _blocked;
+
+        /// <summary>The zone legend entry at a tile (column, row). False outside every zone.</summary>
+        public bool TryGetZone(Vector2Int tile, out MapZone zone)
+        {
+            zone = default;
+            if (_zoneRows == null)
+                _zoneRows = (zones ?? string.Empty).Replace("\r", string.Empty)
+                    .Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            if (tile.y < 0 || tile.y >= _zoneRows.Length || tile.x < 0 || tile.x >= _zoneRows[tile.y].Length) return false;
+            char k = _zoneRows[tile.y][tile.x];
+            if (k == Empty || zoneLegend == null) return false;
+            foreach (var z in zoneLegend)
+                if (z.Key == k)
+                {
+                    zone = z;
+                    return true;
+                }
+            return false;
+        }
+
+        /// <summary>The zone id at a tile, or null.</summary>
+        public string ZoneAt(Vector2Int tile) => TryGetZone(tile, out var z) ? z.id : null;
+
+        /// <summary>The tall grass table for a tile: its zone's own, else the map's.</summary>
+        public EncounterTable GrassTableAt(Vector2Int tile) =>
+            TryGetZone(tile, out var z) && z.grassTable != null ? z.grassTable : grassTable;
+
+        /// <summary>Replaces the zones grid from code (generators).</summary>
+        public void SetZones(string text)
+        {
+            zones = text;
+            _zoneRows = null;
+        }
 
         public char At(Vector2Int tile) => At(tile.y, tile.x);
 
@@ -190,6 +247,7 @@ namespace Diorama
         void ClearPropCaches()
         {
             _propRows = null;
+            _zoneRows = null;
             _legend = null;
             _blocked = null;
         }

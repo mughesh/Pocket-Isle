@@ -46,9 +46,12 @@ namespace Diorama
         /// <summary>The scripted first encounter has happened (saved).</summary>
         public bool FirstEncounterDone { get; set; }
 
-        /// <summary>The current outdoor map's tall grass table (each map has its own: <see cref="WorldMap.grassTable"/>).</summary>
+        /// <summary>The current outdoor map's tall grass table (each map has its own: <see cref="WorldMap.grassTable"/>; zones can override it, <see cref="GrassTableAt"/>).</summary>
         public EncounterTable GrassTable => island != null && island.world != null ? island.world.grassTable : null;
         /// <summary>The current outdoor map's water table.</summary>
+        /// <summary>The tall grass table for a tile of the current map: its zone's own table, else the map's.</summary>
+        public EncounterTable GrassTableAt(Vector2Int tile) => island != null && island.world != null ? island.world.GrassTableAt(tile) : null;
+
         public EncounterTable WaterTable => island != null && island.world != null ? island.world.waterTable : null;
 
         [Header("Tuning")]
@@ -182,7 +185,7 @@ namespace Diorama
         /// <summary>Starts an encounter on the spot (testing: Editor key B, the Claude bridge, the context menu).</summary>
         public void StartEncounter(Habitat habitat)
         {
-            var table = habitat == Habitat.Water ? WaterTable : GrassTable;
+            var table = habitat == Habitat.Water ? WaterTable : GrassTableAt(explorer.Tile);
             if (InBattle || table == null || party.members.Count == 0 || window.IsZoomed || SceneSwap.IsInside || SceneSwap.IsBusy) return;
             StartCoroutine(Encounter(table, habitat == Habitat.Water ? explorer.Tile + explorer.Facing : explorer.Tile));
         }
@@ -195,7 +198,7 @@ namespace Diorama
 
         void OnTallGrassStep(Vector2Int tile)
         {
-            var table = GrassTable;
+            var table = GrassTableAt(tile);
             if (InBattle || SceneSwap.IsInside || party.members.Count == 0) return;
             if (table == null)
             {
@@ -293,7 +296,8 @@ namespace Diorama
 
             bool water = table.habitat == Habitat.Water;
             var layout = _layout = Layout(water);
-            Debug.Log($"[EncounterDirector] {(water ? "Water" : "Grass")} encounter: wild {wild.Name} lv {wild.level}{(rare ? " (rare)" : "")} " +
+            string zone = island.world != null ? island.world.ZoneAt(where) : null;
+            Debug.Log($"[EncounterDirector] {(water ? "Water" : "Grass")} encounter ({table.name}{(zone != null ? $", zone {zone}" : "")}): wild {wild.Name} lv {wild.level}{(rare ? " (rare)" : "")} " +
                       $"on pad c{layout.wildPad.x} r{layout.wildPad.y}, lead {lead.Name} lv {lead.level} for pad c{layout.myPad.x} r{layout.myPad.y}, " +
                       $"zoom x{layout.zoom:F2}{(layout.fallback ? " (fallback pads: no free pair)" : "")}.");
 
