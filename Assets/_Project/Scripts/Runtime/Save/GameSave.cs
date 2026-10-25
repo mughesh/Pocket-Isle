@@ -35,6 +35,12 @@ namespace Diorama
 
         public static string SavePath => SaveGame.DefaultPath;
 
+        /// <summary>A save was found and applied at start (returning player: no opening).</summary>
+        public bool Loaded { get; private set; }
+
+        /// <summary>No saving while set (the opening, before a starter is chosen: quitting then replays the opening).</summary>
+        public bool Suspended { get; set; }
+
         /// <summary>Species ids caught so far (for the future "Caught 10 / 30" counter).</summary>
         public IReadOnlyCollection<string> Caught => _caught;
 
@@ -147,6 +153,7 @@ namespace Diorama
 
         void Apply(SaveData data)
         {
+            Loaded = true;
             var problems = new List<string>();
             var pods = SaveGame.FromSaved(data.party, registry, problems);
             var stored = SaveGame.FromSaved(data.storage, registry, problems);
@@ -220,7 +227,7 @@ namespace Diorama
         /// <summary>Writes the save now. <paramref name="puff"/> shows "Saved" by the Spirit.</summary>
         public void Save(string reason, bool puff = false)
         {
-            if (!_ready || !enabled) return;
+            if (!_ready || !enabled || Suspended) return;
             try
             {
                 bool inside = swap != null && swap.Inside;

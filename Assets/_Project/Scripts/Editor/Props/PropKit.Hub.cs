@@ -126,6 +126,7 @@ namespace Diorama.EditorTools
             theme.restored = theme.unrestored = look;
             theme.startRestored = 1f;
             theme.embers = 0f;
+            theme.frontBorderTrees = false;
             theme.leaves = 0f;
             theme.overrideLight = false;
         }
@@ -146,11 +147,11 @@ namespace Diorama.EditorTools
         /// </summary>
         static PropRecipe Statue()
         {
-            var statue = Recipe("Statue", new Vector2Int(3, 3), true, false, 5000);
+            var statue = Recipe("Statue", new Vector2Int(3, 3), true, false, 6000);
             statue.palette = Palette(H("#C8533E", 0.25f), H("#4F86C6", 0.25f), H("#BDB5A5"), HubMoss, H("#FFCB6B", 0.65f), H("#F2EEE6", 0.3f));
             statue.yawJitter = 0f;
             statue.scaleJitter = 0f;
-            statue.resolution = 72;
+            statue.resolution = 48;
             statue.outline = 0.03f;
 
             var stone = new List<SdfPrimitive>

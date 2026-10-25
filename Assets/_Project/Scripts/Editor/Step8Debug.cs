@@ -27,6 +27,29 @@ namespace Diorama.EditorTools
             Debug.LogWarning($"[Step8Debug] No '{id}' gate on {explorer.island.world.name}.");
         }
 
+        /// <summary>Opening: pick a starter as if looked at and pinched (0 Kilnpot, 1 Pebbloop, 2 Pufflet).</summary>
+        static void Choose(int i)
+        {
+            var o = Object.FindFirstObjectByType<Opening>();
+            if (o != null) o.DebugChoose(i);
+        }
+
+        public static void ChoosePebbloop() => Choose(1);
+
+        /// <summary>A seated shot from the island's front (the opening's floating pods, the unfold), hands hidden.</summary>
+        public static void SeatedShot()
+        {
+            var island = Object.FindFirstObjectByType<IslandBuilder>();
+            if (island == null) return;
+            var hidden = HideNoise();
+            var t = island.transform;
+            var eye = t.position + t.rotation * new Vector3(0f, 0.32f, 0.5f);
+            var look = t.position + t.rotation * new Vector3(0f, 0.06f, 0f);
+            BattleDebug.Render($"Logs/BattleShots/opening_{Time.frameCount}.png", eye, Quaternion.LookRotation(look - eye, Vector3.up));
+            Restore(hidden);
+            Debug.Log($"[Step8Debug] Shot Logs/BattleShots/opening_{Time.frameCount}.png");
+        }
+
         public static void FireGate() => UseGate("fire");
         public static void HomeGate() => UseGate("home");
         public static void WaterGate() => UseGate("water");
@@ -100,22 +123,29 @@ namespace Diorama.EditorTools
 
         // forceRenderingOff is not serialized, so hiding never dirties the scene (a dirty scene makes the Test Runner
         // open a modal save dialog that blocks the bridge).
+        // In Play the island (and the opening's shard) live under the rig's TrackingSpace: only the hands are hidden then,
+        // and the Spirit and map creatures only in edit mode.
         static List<Renderer> HideNoise()
         {
             var hidden = new List<Renderer>();
+            var island = Object.FindFirstObjectByType<IslandBuilder>();
             var roots = new List<Component>();
             var rig = Object.FindFirstObjectByType<OVRCameraRig>();
             if (rig != null) roots.Add(rig);
-            var spirit = Object.FindFirstObjectByType<LanternSpirit>();
-            if (spirit != null) roots.Add(spirit);
-            foreach (var mc in Object.FindObjectsByType<MapCreature>(FindObjectsSortMode.None)) roots.Add(mc);
+            if (!Application.isPlaying)
+            {
+                var spirit = Object.FindFirstObjectByType<LanternSpirit>();
+                if (spirit != null) roots.Add(spirit);
+                foreach (var mc in Object.FindObjectsByType<MapCreature>(FindObjectsSortMode.None)) roots.Add(mc);
+            }
             foreach (var root in roots)
                 foreach (var r in root.GetComponentsInChildren<Renderer>())
-                    if (r.enabled && !r.forceRenderingOff)
-                    {
-                        r.forceRenderingOff = true;
-                        hidden.Add(r);
-                    }
+                {
+                    bool keep = Application.isPlaying && (island != null && r.transform.IsChildOf(island.transform) || r.name == "Opening Shard");
+                    if (keep || !r.enabled || r.forceRenderingOff) continue;
+                    r.forceRenderingOff = true;
+                    hidden.Add(r);
+                }
             return hidden;
         }
 

@@ -72,7 +72,7 @@ namespace Diorama.EditorTools
                     bool border = r == 0 || c == 0 || r == Size - 1 || c == Size - 1;
                     bool ring1 = r == 1 || c == 1 || r == Size - 2 || c == Size - 2;
                     bool ring2 = r == 2 || c == 2 || r == Size - 3 || c == Size - 3;
-                    g[r, c] = border ? IslandMap.Blocked : ring1 && rnd.Next() < 0.75f || ring2 && r < Size / 2 && rnd.Next() < 0.25f ? IslandMap.Tree : IslandMap.Grass;
+                    g[r, c] = border ? IslandMap.Blocked : ring1 && rnd.Next() < (r == Size - 2 ? 0.2f : 0.75f) || ring2 && r < Size / 2 && rnd.Next() < 0.25f ? IslandMap.Tree : IslandMap.Grass;
                     p[r, c] = IslandMap.Empty;
                 }
             void Set(int c, int r, char ch)

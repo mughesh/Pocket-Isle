@@ -3155,6 +3155,79 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1891040198
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1891040200}
+  - component: {fileID: 1891040199}
+  m_Layer: 0
+  m_Name: Opening
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1891040199
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1891040198}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b3d35b31d9d6994c940cc91cc81e69b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.Opening
+  island: {fileID: 270959109}
+  placer: {fileID: 374318555}
+  handle: {fileID: 270959111}
+  explorer: {fileID: 374318554}
+  party: {fileID: 1499891276}
+  pods: {fileID: 78739058}
+  spirit: {fileID: 1847074513}
+  fx: {fileID: 1078587927}
+  save: {fileID: 1541842443}
+  shardMaterial: {fileID: 2100000, guid: 5cf32f9131fcae742b5bdedc45e8d5d7, type: 2}
+  starters:
+  - {fileID: 11400000, guid: 4e0827bf455d6eb4c853967a75296d1d, type: 2}
+  - {fileID: 11400000, guid: 3e6a8bbe90a2d0447b3543119e52c28a, type: 2}
+  - {fileID: 11400000, guid: 11737ef7d2b67d84b8a98e2c3f8eeb9d, type: 2}
+  starterLevel: 5
+  shardSize: 0.12
+  driftFrom: {x: 0.8, y: 0.3, z: -1.2}
+  driftSeconds: 3.5
+  touchRadius: 0.08
+  hintSeconds: 3
+  autoTouchSeconds: 6
+  growSeconds: 1.2
+  riseSeconds: 1.6
+  moveWaitSeconds: 12
+  returnRiseSeconds: 2
+  podScale: 3.2
+  podRow: {x: 0.11, y: 0.1, z: 0.26}
+  dropReach: 0.12
+  statueNear: 3
+--- !u!4 &1891040200
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1891040198}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1954810186
 GameObject:
   m_ObjectHideFlags: 0
@@ -3613,3 +3686,4 @@ SceneRoots:
   - {fileID: 155307359}
   - {fileID: 1059021441}
   - {fileID: 1858573328}
+  - {fileID: 1891040200}

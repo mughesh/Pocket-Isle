@@ -38,6 +38,12 @@ namespace Diorama
         [Tooltip("Half angle of the head cone the Spirit stays inside (degrees).")]
         public float fovHalfAngle = 35f;
 
+        /// <summary>0 = hidden (before the opening's spark arrives), 1 = shown. Scales the model.</summary>
+        public float Appear { get; set; } = 1f;
+
+        /// <summary>Where the Spirit rests (world), above the near-left corner of the rim.</summary>
+        public Vector3 HomeWorld => island != null && island.map != null ? island.transform.TransformPoint(HomeLocal()) : transform.position;
+
         CreatureView _view;
         Transform _model, _anchor;
         float _speak, _speakTarget;
@@ -78,6 +84,9 @@ namespace Diorama
         void Update()
         {
             if (_model == null || island == null || island.map == null) return;
+            float appear = Mathf.Clamp01(Appear);
+            _model.localScale = Vector3.one * appear;
+            if (_model.gameObject.activeSelf != appear > 0.001f) _model.gameObject.SetActive(appear > 0.001f);
             _speak = Mathf.MoveTowards(_speak, _speakTarget, Time.deltaTime * 3f);
             UpdateTarget();
             Place(Time.time);

@@ -48,6 +48,9 @@ namespace Diorama
 
         public event Action Placed;
 
+        /// <summary>The island has been placed at least once (the opening waits for this).</summary>
+        public bool HasPlaced { get; private set; }
+
         OVRCameraRig _rig;
         Transform _head;
 
@@ -245,6 +248,7 @@ namespace Diorama
                 Debug.LogWarning($"[IslandPlacer] Placed ({reason}) at the seated default: no head pose from the rig or XR input. Island {pos:F2}.");
             }
             island.transform.SetPositionAndRotation(pos, Quaternion.LookRotation(-fwd, Vector3.up));
+            HasPlaced = true;
             Placed?.Invoke();
         }
 

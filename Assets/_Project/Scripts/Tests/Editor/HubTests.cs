@@ -118,6 +118,26 @@ namespace Diorama.Tests
         }
 
         [Test]
+        public void NewGameOrReturning_DecidedByTheSaveFile()
+        {
+            string dir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "PocketIsleHub_" + System.Guid.NewGuid().ToString("N"));
+            System.IO.Directory.CreateDirectory(dir);
+            string path = System.IO.Path.Combine(dir, SaveGame.FileName);
+            try
+            {
+                Assert.AreEqual(SaveGame.ReadResult.NoSave, SaveGame.Read(path, out _, out _), "no save: the opening plays");
+                SaveGame.Write(path, new SaveData { map = "WorldMap_StillIsle", explorerX = 15, explorerY = 22 });
+                Assert.AreEqual(SaveGame.ReadResult.Loaded, SaveGame.Read(path, out var data, out _), "a save: returning player, no opening");
+                Assert.AreEqual("WorldMap_StillIsle", data.map);
+                Assert.IsFalse(data.firstEncounterDone, "a new save keeps the scripted first encounter ahead");
+            }
+            finally
+            {
+                System.IO.Directory.Delete(dir, true);
+            }
+        }
+
+        [Test]
         public void Migrate_V1SaveMovesToCinderwood()
         {
             var v1 = new SaveData { version = 1, explorerX = 28, explorerY = 27, hasShrine = true, shrineX = 34, shrineY = 27 };

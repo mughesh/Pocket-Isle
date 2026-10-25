@@ -20,7 +20,8 @@ float4   _DioramaClearingView;  // xy = end of the view corridor toward the play
 float4   _DioramaClearingWorld; // xyz = ellipse centre in world space (grass bends away from it)
 
 // Scene swap (SceneSwap: shrine -> lodge, gates, temples): x = progress 0..1 (1 = all content sunk), y = island-local z
-// of the front edge, z = front-to-back depth. Front tiles go first, a ripple toward the back.
+// of the front edge, z = front-to-back depth, w = 1 radial. Front tiles go first, a ripple toward the back; radial (the
+// opening's unfold): the middle rises first, the edges last.
 float4   _DioramaSwap;
 
 // Focus language (step 7c, FocusHighlight): gold = "do this now" (the Spirit's hint target), white = what the gaze is
@@ -57,7 +58,10 @@ float3 DioramaOutlineFocus(float3 col, float3 originWS, out float widthScale)
 float DioramaSwapSink(float3 islandOrigin)
 {
     if (_DioramaSwap.x <= 0.0) return 0.0;
-    float delay = saturate((_DioramaSwap.y - islandOrigin.z) / max(_DioramaSwap.z, 1e-4)) * 0.6;
+    float along = _DioramaSwap.w > 0.5
+        ? 1.0 - length(islandOrigin.xz) / max(_DioramaSwap.z * 0.5, 1e-4)
+        : (_DioramaSwap.y - islandOrigin.z) / max(_DioramaSwap.z, 1e-4);
+    float delay = saturate(along) * 0.6;
     return smoothstep(delay, delay + 0.4, _DioramaSwap.x);
 }
 

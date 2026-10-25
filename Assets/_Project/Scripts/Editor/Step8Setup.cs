@@ -104,6 +104,8 @@ namespace Diorama.EditorTools
             EditorUtility.SetDirty(gates);
             log.Append("\n  'Shard Gates' (portals, walk in or look + pinch, sealed bump, arrival lines)");
 
+            WireOpening(island, swap, director, log);
+
             DialogueTools.Import();
             log.Append("\n  Script_v1 reimported (gate and opening lines)");
 
@@ -195,6 +197,78 @@ namespace Diorama.EditorTools
             EditorUtility.SetDirty(cinderwood);
             AssetDatabase.SaveAssets();
             log.Append($"\n  gates: hub fire c{StillIsleTools.FireGate.x} r{StillIsleTools.FireGate.y} <-> Cinderwood home c{CinderwoodGate.x} r{CinderwoodGate.y}; water and wind sealed");
+        }
+
+        // ---- C: the opening ----
+
+        const string ShardMaterialPath = "Assets/_Project/Materials/Props/OpeningShard.mat";
+
+        static void WireOpening(IslandBuilder island, SceneSwap swap, EncounterDirector director, StringBuilder log)
+        {
+            var opening = Object.FindFirstObjectByType<Opening>(FindObjectsInactive.Include);
+            if (opening == null)
+            {
+                var go = new GameObject("Opening");
+                Undo.RegisterCreatedObjectUndo(go, "Opening");
+                opening = go.AddComponent<Opening>();
+            }
+            opening.island = island;
+            opening.placer = Object.FindFirstObjectByType<IslandPlacer>(FindObjectsInactive.Include);
+            opening.handle = Object.FindFirstObjectByType<IslandHandle>(FindObjectsInactive.Include);
+            opening.explorer = swap.explorer;
+            opening.party = director.party;
+            opening.pods = director.pods;
+            opening.spirit = Object.FindFirstObjectByType<LanternSpirit>(FindObjectsInactive.Include);
+            opening.fx = Object.FindFirstObjectByType<BattleFx>(FindObjectsInactive.Include);
+            opening.save = Object.FindFirstObjectByType<GameSave>(FindObjectsInactive.Include);
+            opening.shardMaterial = ShardMaterial();
+            IslingSpecies S(string id) => AssetDatabase.LoadAssetAtPath<IslingSpecies>($"Assets/_Project/Data/Creatures/Species/{id}.asset");
+            opening.starters = new[] { S("Kilnpot"), S("Pebbloop"), S("Pufflet") };
+            opening.podScale = 3.2f;
+            opening.podRow = new Vector3(0.11f, 0.1f, 0.26f);
+            EditorUtility.SetDirty(opening);
+            bool ok = opening.placer != null && opening.handle != null && opening.spirit != null && opening.save != null && opening.pods != null;
+            log.Append($"\n  'Opening' (new game: shard, unfold, Spirit, move prompt, starter pods Kilnpot / Pebbloop / Pufflet; returning: 2 s rise){(ok ? "" : " - SOME REFERENCES MISSING")}");
+        }
+
+        /// <summary>Mossy grey stone with gold cracks (Diorama/Toon), outline on.</summary>
+        static Material ShardMaterial()
+        {
+            var shader = Shader.Find("Diorama/Toon");
+            var m = AssetDatabase.LoadAssetAtPath<Material>(ShardMaterialPath);
+            if (m == null)
+            {
+                m = new Material(shader) { name = "OpeningShard" };
+                AssetDatabase.CreateAsset(m, ShardMaterialPath);
+            }
+            m.SetColor("_BaseColor", new Color(0.62f, 0.6f, 0.55f));
+            m.SetColor("_TopColor", new Color(0.5f, 0.64f, 0.37f));
+            m.SetColor("_CrackColor", new Color(1f, 0.78f, 0.35f));
+            m.SetFloat("_CrackOn", 1f);
+            m.SetFloat("_Grad", 1f);
+            m.SetFloat("_CrackScale", 3.2f);
+            m.SetFloat("_CrackWidth", 0.05f);
+            m.SetFloat("_Emissive", 0.2f);
+            m.SetFloat("_OutlineWidth", 0.03f);
+            m.SetColor("_OutlineColor", new Color(0.16f, 0.15f, 0.13f));
+            m.enableInstancing = true;
+            CreatureBaker.SetOutlinePass(m, true);
+            EditorUtility.SetDirty(m);
+            return m;
+        }
+
+        /// <summary>Deletes the save and enters Play: the opening plays (a new game).</summary>
+        [MenuItem("Tools/Pocket Isle/New Game", priority = 30)]
+        static void NewGame()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode)
+            {
+                Debug.LogError("[Step8] Stop Play mode first (stopping autosaves, so delete after stopping).");
+                return;
+            }
+            SaveGame.Delete(GameSave.SavePath);
+            Debug.Log($"[Step8] New game: deleted {GameSave.SavePath}; entering Play (N skips the opening).");
+            EditorApplication.isPlaying = true;
         }
 
         static Material PortalMaterial()

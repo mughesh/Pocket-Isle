@@ -304,6 +304,12 @@ namespace Diorama
             RefreshLabel();
         }
 
+        /// <summary>A little hop on the spot (waking up in the opening).</summary>
+        public void Hop()
+        {
+            if (_hopStart < 0f) _hopStart = Time.time;
+        }
+
         void TapWhileStanding()
         {
             var front = _tile + _facing;

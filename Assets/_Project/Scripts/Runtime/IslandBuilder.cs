@@ -77,6 +77,8 @@ namespace Diorama
 
         /// <summary>Scene swap: 0 = content shown, 1 = all content sunk into the base (front first). Driven by SceneSwap.</summary>
         [NonSerialized] public float swapSink;
+        /// <summary>The swap ripples out from the centre instead of front to back (the opening's unfold, a returning player's rise).</summary>
+        [NonSerialized] public bool swapRadial;
         /// <summary>Scene swap: the rocky base blends from the content's theme toward this one by <see cref="rimTint"/>.</summary>
         [NonSerialized] public RealmTheme rimTheme;
         [NonSerialized] public float rimTint;
@@ -495,6 +497,8 @@ namespace Diorama
             ForEachCell(content, cells, treeBatches, (r, c, ch) =>
             {
                 if (ch != IslandMap.Tree && ch != IslandMap.Blocked) return;
+                // An open front edge (the side facing the player) where the theme asks for it.
+                if (ch == IslandMap.Blocked && r == content.Rows - 1 && Theme != null && !Theme.frontBorderTrees) return;
                 Vector3 p = MapPoint(new Vector2(c, r));
                 float s = 0.9f + rnd.Next() * 0.35f;
                 float ry = rnd.Next() * 6.28f;
@@ -855,7 +859,7 @@ namespace Diorama
             Shader.SetGlobalVector(ClearingSizeId, new Vector4(_clearRadii.x * tile, _clearRadii.y * tile, clearingStrength, clearingDim));
             Shader.SetGlobalVector(ClearingViewId, new Vector4(v.x, v.z, _clearViewWidth * tile, 0f));
             Shader.SetGlobalVector(ClearingWorldId, (l2w * ContentToLocal).MultiplyPoint3x4(c));
-            Shader.SetGlobalVector(SwapId, new Vector4(swapSink, _localBounds.max.z, Mathf.Max(0.01f, _localBounds.size.z), 0f));
+            Shader.SetGlobalVector(SwapId, new Vector4(swapSink, _localBounds.max.z, Mathf.Max(0.01f, _localBounds.size.z), swapRadial ? 1f : 0f));
         }
 
         /// <summary>Queues the island's instanced draws for one camera.</summary>

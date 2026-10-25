@@ -70,6 +70,9 @@ namespace Diorama
         [Tooltip("Optional. Drawn on tree (F) and border (X) tiles instead of the cone trees.")]
         public PropRecipe treeProp;
 
+        [Tooltip("Trees on the border tiles of the front edge (the side facing the player). Off = an open front.")]
+        public bool frontBorderTrees = true;
+
         [Tooltip("Restoration when a scene starts (1 = restored).")]
         [Range(0f, 1f)] public float startRestored = 1f;
 

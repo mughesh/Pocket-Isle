@@ -68,7 +68,11 @@ namespace Diorama
         float _glow;
 
         Transform Target => _grabbable != null ? _grabbable.Transform : transform;
-        bool IsGrabbed => _grabbableComponent != null && _grabbableComponent.SelectingPointsCount > 0;
+        /// <summary>A hand is holding the island (the opening waits for this).</summary>
+        public bool IsGrabbed => _grabbableComponent != null && _grabbableComponent.SelectingPointsCount > 0;
+
+        /// <summary>Extra rim glow from a hint (the opening's "hold its rocky edge"), 0..1 of the highlight.</summary>
+        public float HintGlow { get; set; }
 
         void Awake() => _grabbableComponent = GetComponent<Grabbable>();
 
@@ -208,7 +212,7 @@ namespace Diorama
                          rimInteractable.State != InteractableState.Disabled;
             float target = hover || _near[0] || _near[1] || IsGrabbed ? highlight : 0f;
             _glow = Mathf.MoveTowards(_glow, target, Time.deltaTime * highlight / Mathf.Max(0.01f, highlightFadeSeconds));
-            if (island != null) island.rimHighlight = _glow;
+            if (island != null) island.rimHighlight = Mathf.Max(_glow, HintGlow * highlight * 2f);
             UpdateFacing();
         }
 
