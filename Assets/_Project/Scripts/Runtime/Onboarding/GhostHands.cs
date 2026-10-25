@@ -91,6 +91,9 @@ namespace Diorama
         /// <summary>Where the demonstrated spot is now (the "ghost" dialogue target).</summary>
         public Vector3? KeyPoint => IsShowing && _keyValid ? _keyWorld : (Vector3?)null;
         public string ClipName => _showing ? _request.clip : null;
+        /// <summary>Seconds into the clip (trimmed) and its playable length, for the preview's progress bar.</summary>
+        public float ClipTime => _clip != null ? Mathf.Min(_time * Mathf.Max(0.05f, _clip.speed), _clip.Duration) : 0f;
+        public float ClipDuration => _clip != null ? _clip.Duration : 0f;
 
         void Start()
         {
@@ -130,8 +133,12 @@ namespace Diorama
 
         // ---- lessons ----
 
+        /// <summary>Editor preview (Ghost Clips window): lessons leave the ghost alone while it is set.</summary>
+        [System.NonSerialized] public bool previewing;
+
         void OnLessonShown(LessonData l)
         {
+            if (previewing) return;
             _hasSaved = false;
             if (string.IsNullOrEmpty(l.ghost) || l.place == GhostPlace.None)
             {
@@ -143,12 +150,14 @@ namespace Diorama
 
         void OnLessonEnded(LessonData l, bool done)
         {
+            if (previewing) return;
             _hasSaved = false;
             Hide();
         }
 
         void OnHandsMissing(bool missing)
         {
+            if (previewing) return;
             if (missing)
             {
                 _saved = _request;
@@ -236,7 +245,7 @@ namespace Diorama
                 return;
             }
 
-            float speed = Mathf.Lerp(1f, struggleSpeed, _struggle);
+            float speed = Mathf.Lerp(1f, struggleSpeed, _struggle) * Mathf.Max(0.05f, _clip.speed);
             float loopLength = _clip.Duration / speed + _clip.holdEnd;
             _time += dt;
             if (_time >= loopLength)
@@ -254,7 +263,7 @@ namespace Diorama
                 loopFade = 1f;
             }
             float alpha = _visible * loopFade;
-            float scale = _request.scale * Mathf.Lerp(1f, struggleScale, _struggle);
+            float scale = _request.scale * Mathf.Max(0.05f, _clip.size) * Mathf.Lerp(1f, struggleScale, _struggle);
 
             var a = _request.both ? _left ?? _right : _request.left ? _left ?? _right : _right ?? _left;
             var b = _request.both ? (a == _left ? _right : _left) : null;
@@ -321,6 +330,7 @@ namespace Diorama
             Vector3 origin = point + frame * (offset * scale) - frame * (key * scale);
 
             _clip.Sample(t, mirror, out var rp, out var rr, _rot, _pos);
+            rp = kp + (rp - kp) * Mathf.Clamp(_clip.travel, 0.05f, 1f);
             for (int i = 0; i < JointCount; i++)
                 if (g.joints[i] != null) g.joints[i].SetLocalPositionAndRotation(_pos[i], _rot[i]);
             float parentScale = g.root.parent != null ? g.root.parent.lossyScale.x : 1f;

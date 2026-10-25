@@ -12,4 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 0}
   m_Name: GhostClips
   m_EditorClassIdentifier: Diorama.Runtime:Diorama:GhostClipLibrary
-  clips: []
+  clips:
+  - {fileID: 11400000, guid: c87ac8a6cfb943643900a82c285062f7, type: 2}
+  - {fileID: 11400000, guid: 2e4e8f2caa963fb4bba4becfba8a31f0, type: 2}
+  - {fileID: 11400000, guid: b626d1f0bac74034fb5e73539820e7f2, type: 2}
+  - {fileID: 11400000, guid: efc095c3d5960b84cb7802bb90f8aac0, type: 2}
+  - {fileID: 11400000, guid: 6897ed81420a72a4e8ec041e32b36699, type: 2}
+  - {fileID: 11400000, guid: 9682def0b62db9b409eea67b8c9660e3, type: 2}
+  - {fileID: 11400000, guid: d150375b3b006e74e90ea86326febf3f, type: 2}
+  - {fileID: 11400000, guid: 67a336e220f41ce42ac9a18099ee5d03, type: 2}
+  - {fileID: 11400000, guid: b58ac3d5cfaec074faaec744a96da9dd, type: 2}
+  - {fileID: 11400000, guid: 9a7e3358aa9291f45a78a2a8697908b7, type: 2}

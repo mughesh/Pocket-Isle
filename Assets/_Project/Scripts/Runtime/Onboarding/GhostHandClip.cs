@@ -49,6 +49,12 @@ namespace Diorama
         public Vector3 placeOffset;
         [Tooltip("A gaze dot shows on the spot until this point of the loop (0..1, 0 = none): look first, then the gesture.")]
         [Range(0f, 1f)] public float gazeDotUntil;
+        [Tooltip("Size of this clip's ghost on top of the lesson's size (1 = as recorded).")]
+        [Range(0.3f, 1.5f)] public float size = 1f;
+        [Tooltip("How far the hand travels, around the key moment (1 = as recorded, 0.3 = a short reach). Fingers are untouched.")]
+        [Range(0.1f, 1f)] public float travel = 1f;
+        [Tooltip("Playback speed (1 = as recorded).")]
+        [Range(0.3f, 2f)] public float speed = 1f;
         [Tooltip("Hold the last pose this long before looping (s).")]
         [Min(0f)] public float holdEnd = 0.3f;
         public List<GhostFrame> frames = new List<GhostFrame>();
