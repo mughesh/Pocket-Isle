@@ -49,4 +49,12 @@ MonoBehaviour:
     leafGlow: 0
     outlineTint: {r: 1, g: 1, b: 1, a: 1}
   treeProp: {fileID: 11400000, guid: d5cc65e162e3da6408be3695c302e16a, type: 2}
+  treePropAlt: {fileID: 11400000, guid: 7f9d84d106d71924594db6f23164a39d, type: 2}
+  treeAltShare: 0.35
+  frontBorderTrees: 1
   startRestored: 0
+  embers: 1
+  leaves: 1
+  overrideLight: 0
+  lightColor: {r: 1, g: 1, b: 1, a: 1}
+  lightIntensity: 1

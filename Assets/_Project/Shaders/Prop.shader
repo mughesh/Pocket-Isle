@@ -28,6 +28,7 @@ Shader "Diorama/Prop"
         _GlowA ("Glow per slot (Clay Wood Stone Leaf)", Vector) = (0, 0, 0, 0)
         _GlowB ("Glow per slot (Glow Accent)", Vector) = (1, 0, 0, 0)
         _Tips ("Tips (on slot, tip slot, threshold, enabled)", Vector) = (0, 0, 0, 0)
+        _TipsHeight ("Tips By Height (0 = by facing, 1 = bottom to top)", Range(0, 1)) = 0
 
         _Spec ("Specular Glint", Range(0, 2)) = 0.15
         _OutlineWidth ("Outline Width (shape units)", Float) = 0.022
@@ -46,6 +47,7 @@ Shader "Diorama/Prop"
         float4 _GlowA;
         float4 _GlowB;
         float4 _Tips;
+        float  _TipsHeight;
         float  _Spec;
         float  _OutlineWidth;
         float  _ClearSink;
@@ -131,8 +133,9 @@ Shader "Diorama/Prop"
         return lerp(ash, rest, PropRestored());
     }
 
-    // Colour and glow of a fragment: the slot, or the tip slot on up-facing faces of the tips slot (tip = that mask).
-    void PropPaint(float slot, float3 normalOS, out float3 c, out float glow, out float tip)
+    // Colour and glow of a fragment: the slot, or the tip slot on up-facing faces of the tips slot (tip = that mask),
+    // blended toward a bottom-to-top gradient over the piece's height by _TipsHeight (canopies: red-orange to gold).
+    void PropPaint(float slot, float3 normalOS, float height, out float3 c, out float glow, out float tip)
     {
         slot = round(slot);
         c = PropSlotColor(slot);
@@ -141,6 +144,7 @@ Shader "Diorama/Prop"
         if (_Tips.w > 0.5 && abs(slot - _Tips.x) < 0.5)
         {
             tip = smoothstep(_Tips.z, _Tips.z + 0.12, normalize(normalOS).y);
+            tip = lerp(tip, smoothstep(0.3, 1.0, height), _TipsHeight);
             c = lerp(c, PropSlotColor(_Tips.y), tip);
             glow = lerp(glow, PropGlow(_Tips.y), tip);
         }
@@ -193,6 +197,7 @@ Shader "Diorama/Prop"
                 float3 normalWS   : TEXCOORD2;
                 float3 islandPos  : TEXCOORD3;
                 float4 paint      : TEXCOORD4; // slot, flicker, instance shade, -
+                float  height     : TEXCOORD5; // height within the piece 0..1
                 UNITY_VERTEX_INPUT_INSTANCE_ID
                 UNITY_VERTEX_OUTPUT_STEREO
             };
@@ -211,6 +216,7 @@ Shader "Diorama/Prop"
                 o.normalOS = v.normalOS;
                 o.normalWS = TransformObjectToWorldNormal(v.normalOS);
                 o.paint = float4(v.uv0.x, flicker, 1.0 + (hash - 0.5) * 0.08, hash);
+                o.height = v.uv0.z;
                 return o;
             }
 
@@ -222,7 +228,7 @@ Shader "Diorama/Prop"
 
                 float3 c;
                 float glow, tip;
-                PropPaint(i.paint.x, i.normalOS, c, glow, tip);
+                PropPaint(i.paint.x, i.normalOS, i.height, c, glow, tip);
                 c *= i.paint.z;
 
                 float3 L = _MainLightPosition.xyz;
@@ -266,6 +272,7 @@ Shader "Diorama/Prop"
                 float3 normalOS   : TEXCOORD2;
                 float3 positionWS : TEXCOORD3;
                 float3 focus      : TEXCOORD4; // x gold, y white hover
+                float  height     : TEXCOORD5;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
                 UNITY_VERTEX_OUTPUT_STEREO
             };
@@ -284,6 +291,7 @@ Shader "Diorama/Prop"
                 o.positionWS = PropWindowVertex(p, o.islandPos);
                 o.positionCS = TransformWorldToHClip(o.positionWS);
                 o.slot = v.uv0.x;
+                o.height = v.uv0.z;
                 o.normalOS = v.normalOS;
                 return o;
             }
@@ -295,7 +303,7 @@ Shader "Diorama/Prop"
                 float3 c;
                 float glow;
                 float tip;
-                PropPaint(i.slot, i.normalOS, c, glow, tip);
+                PropPaint(i.slot, i.normalOS, i.height, c, glow, tip);
                 float3 col = c * 0.28; // like the creature outlines: base colour x 0.28 in linear
                 if (_WindowClip > 0.5) col = DioramaFocus(col, DioramaMapPoint(i.positionWS, _WindowClip).xz);
                 col = lerp(col, _DioramaHoverColor.rgb, i.focus.y);

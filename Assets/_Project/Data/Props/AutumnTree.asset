@@ -41,11 +41,11 @@ MonoBehaviour:
   - restored: {r: 0.68396086, g: 0.638326, b: 0.59055614, a: 1}
     unrestored: {r: 0.6392157, g: 0.6039216, b: 0.5568628, a: 1}
     glow: 0
-  - restored: {r: 0.82243145, g: 0.31199694, b: 0.13746355, a: 1}
-    unrestored: {r: 0.76862746, g: 0.28235295, b: 0.16470589, a: 1}
+  - restored: {r: 0.7720785, g: 0.27916855, b: 0.091558486, a: 1}
+    unrestored: {r: 0.72156864, g: 0.2509804, b: 0.12156863, a: 1}
     glow: 0
-  - restored: {r: 1, g: 0.6026091, b: 0.19300413, a: 1}
-    unrestored: {r: 0.9529412, g: 0.6392157, b: 0.22745098, a: 1}
+  - restored: {r: 1, g: 0.6625521, b: 0.1940496, a: 1}
+    unrestored: {r: 0.9490196, g: 0.6901961, b: 0.22745098, a: 1}
     glow: 0.5
   - restored: {r: 0.99447066, g: 0.9532836, b: 0.90106595, a: 1}
     unrestored: {r: 0.92941177, g: 0.8980392, b: 0.84705883, a: 1}
@@ -55,6 +55,7 @@ MonoBehaviour:
     onSlot: 3
     tipSlot: 4
     at: 0.55
+    byHeight: 0.85
   spec: 0.15
   outline: 0.022
   footprint: {x: 1, y: 1}

@@ -150,7 +150,7 @@ namespace Diorama
         {
             public IslandMap content;
             public int version = -1;
-            public PropRecipe tree;
+            public PropRecipe tree, treeAlt;
             public readonly List<Batch> batches = new List<Batch>();
             public readonly List<Mesh> meshes = new List<Mesh>();
             public readonly Dictionary<char, Batch> caps = new Dictionary<char, Batch>();
@@ -203,6 +203,15 @@ namespace Diorama
             {
                 var t = Theme;
                 return t != null && t.treeProp != null && t.treeProp.bakedMesh != null ? t.treeProp : null;
+            }
+        }
+
+        PropRecipe ThemeTreeAlt
+        {
+            get
+            {
+                var t = Theme;
+                return ThemeTree != null && t.treePropAlt != null && t.treePropAlt.bakedMesh != null && t.treeAltShare > 0f ? t.treePropAlt : null;
             }
         }
 
@@ -395,9 +404,9 @@ namespace Diorama
             }
             var content = Content;
             if (content == null) return;
-            if (_built.content == content && _built.version == content.version && _built.tree == ThemeTree) return;
+            if (_built.content == content && _built.version == content.version && _built.tree == ThemeTree && _built.treeAlt == ThemeTreeAlt) return;
             var kept = _cache.Find(b => b.content == content);
-            if (kept != null && kept.version == content.version && kept.tree == ThemeTree)
+            if (kept != null && kept.version == content.version && kept.tree == ThemeTree && kept.treeAlt == ThemeTreeAlt)
             {
                 _built = kept;
                 TileCount = kept.tiles;
@@ -429,6 +438,7 @@ namespace Diorama
             _built.content = content;
             _built.version = content.version;
             var treeProp = _built.tree = ThemeTree;
+            var treeAlt = _built.treeAlt = ThemeTreeAlt;
 
             var rnd = new SeededRandom(seed);
             float tile = map.tileSize, cap = map.capHeight;
@@ -487,7 +497,12 @@ namespace Diorama
 
             // ---- trees (also the blocked border): cone trees, or the theme's tree prop ----
             var treeBatches = new List<Batch>();
-            if (treeProp != null) treeBatches.Add(AddProp(treeProp));
+            Batch altBatch = null;
+            if (treeProp != null)
+            {
+                treeBatches.Add(AddProp(treeProp));
+                if (treeAlt != null) treeBatches.Add(altBatch = AddProp(treeAlt));
+            }
             else
             {
                 var trunkMesh = Keep(ProceduralMeshes.Cylinder(0.004f, 0.005f, 0.026f, 6, 0.013f, "TreeTrunk"));
@@ -507,7 +522,14 @@ namespace Diorama
                 float ry = rnd.Next() * 6.28f;
                 // Prop meshes are in tile units; cone trees are in metres.
                 var m = Matrix4x4.TRS(new Vector3(p.x, cap, p.z), Quaternion.Euler(0f, -ry * Mathf.Rad2Deg, 0f), Vector3.one * (treeProp != null ? s * tile : s));
-                foreach (var b in treeBatches) b.local.Add(m);
+                if (treeProp != null)
+                {
+                    // Which shape: a stable hash of the tile (the random sequence above stays as it was).
+                    bool alt = altBatch != null && TileHash(c, r) < Theme.treeAltShare;
+                    (alt ? altBatch : treeBatches[0]).local.Add(m);
+                }
+                else
+                    foreach (var b in treeBatches) b.local.Add(m);
             });
 
             // ---- rocks: two per rock tile, and a stone rim where a hot spring meets land ----
@@ -580,6 +602,16 @@ namespace Diorama
                           $"{(Time.realtimeSinceStartupAsDouble - t0) * 1000.0:0} ms ({_cache.Count} map(s) kept).");
         }
 
+        /// <summary>0..1 per map tile, the same every build.</summary>
+        static float TileHash(int c, int r)
+        {
+            uint h = (uint)(c * 73856093) ^ (uint)(r * 19349663);
+            h ^= h >> 13;
+            h *= 0x5bd1e995;
+            h ^= h >> 15;
+            return (h & 0xFFFFFF) / (float)0x1000000;
+        }
+
         static readonly Vector2Int[] Sides = { new Vector2Int(1, 0), new Vector2Int(-1, 0), new Vector2Int(0, 1), new Vector2Int(0, -1) };
 
         /// <summary>
@@ -640,7 +672,7 @@ namespace Diorama
                 Vector3 p = MapPoint(new Vector2(c + (f.x - 1) * 0.5f, r + (f.y - 1) * 0.5f));
                 float yaw = recipe.randomYaw && f == Vector2Int.one
                     ? rnd.Next() * 360f
-                    : (e.turned ? 90f : 0f) + (rnd.Next() * 2f - 1f) * recipe.yawJitter;
+                    : (e.turned ? 90f : 0f) + e.yaw + (rnd.Next() * 2f - 1f) * recipe.yawJitter;
                 float scale = tile * (1f + (rnd.Next() * 2f - 1f) * recipe.scaleJitter);
                 b.local.Add(Matrix4x4.TRS(new Vector3(p.x, cap, p.z), Quaternion.Euler(0f, yaw, 0f), Vector3.one * scale));
             });

@@ -69,6 +69,10 @@ namespace Diorama
 
         [Tooltip("Optional. Drawn on tree (F) and border (X) tiles instead of the cone trees.")]
         public PropRecipe treeProp;
+        [Tooltip("Optional second tree shape (Cinderwood: tall narrow), mixed in on some tree tiles.")]
+        public PropRecipe treePropAlt;
+        [Tooltip("Share of tree tiles that take the second shape (picked per tile, stable).")]
+        [Range(0f, 1f)] public float treeAltShare = 0.35f;
 
         [Tooltip("Trees on the border tiles of the front edge (the side facing the player). Off = an open front.")]
         public bool frontBorderTrees = true;

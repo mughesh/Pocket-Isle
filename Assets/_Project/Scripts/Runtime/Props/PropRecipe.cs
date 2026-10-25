@@ -66,6 +66,8 @@ namespace Diorama
         public PropSlot tipSlot;
         [Tooltip("-1..1: how directly a face must point up to get the tip colour.")]
         public float at;
+        [Tooltip("0 = by facing only; 1 = a gradient over the piece's height instead (bottom = the slot, top = the tip colour).")]
+        [Range(0f, 1f)] public float byHeight;
     }
 
     /// <summary>
@@ -116,6 +118,7 @@ namespace Diorama
         static readonly int GlowAId = Shader.PropertyToID("_GlowA");
         static readonly int GlowBId = Shader.PropertyToID("_GlowB");
         static readonly int TipsId = Shader.PropertyToID("_Tips");
+        static readonly int TipsHeightId = Shader.PropertyToID("_TipsHeight");
         static readonly int SpecId = Shader.PropertyToID("_Spec");
         static readonly int OutlineWidthId = Shader.PropertyToID("_OutlineWidth");
 
@@ -140,6 +143,7 @@ namespace Diorama
             block.SetVector(GlowAId, new Vector4(glow[0], glow[1], glow[2], glow[3]));
             block.SetVector(GlowBId, new Vector4(glow[4], glow[5], 0f, 0f));
             block.SetVector(TipsId, tips.on ? new Vector4((int)tips.onSlot, (int)tips.tipSlot, tips.at, 1f) : Vector4.zero);
+            block.SetFloat(TipsHeightId, tips.on ? tips.byHeight : 0f);
             block.SetFloat(SpecId, spec);
             block.SetFloat(OutlineWidthId, outline);
         }

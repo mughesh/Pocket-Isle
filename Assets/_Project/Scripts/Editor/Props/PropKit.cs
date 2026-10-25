@@ -188,28 +188,8 @@ namespace Diorama.EditorTools
                 Piece(PShape("BerryBush_Berries", Berries(leafPrims, 9)), PropSlot.Accent),
             };
 
-            // ---- autumn tree: round russet canopy with glowing leaf tips ----
-            var tree = Recipe("AutumnTree", new Vector2Int(1, 1), true, true, 900);
-            tree.palette = Palette(Clay, C("#4A3328"), Stone, Leaf,
-                C("#F3A33A", 0.5f), Smoke);
-            tree.tips = new PropTips { on = true, onSlot = PropSlot.Leaf, tipSlot = PropSlot.Glow, at = 0.55f };
-            tree.scaleJitter = 0.12f;
-            tree.pieces = new List<PropPiece>
-            {
-                Piece(PShape("AutumnTree_Trunk",
-                    Cone(new Vector3(0f, 0f, 0f), new Vector3(0f, 0.95f, 0f), 0.085f, 0.055f, 0f),
-                    Ell(new Vector3(0f, 0.03f, 0f), new Vector3(0.14f, 0.06f, 0.14f), 0.08f),
-                    Cone(new Vector3(0f, 0.62f, 0f), new Vector3(0.2f, 0.92f, 0.06f), 0.04f, 0.03f, 0.06f),
-                    Cone(new Vector3(0f, 0.7f, 0f), new Vector3(-0.18f, 0.98f, -0.05f), 0.035f, 0.025f, 0.06f),
-                    Floor(0f)), PropSlot.Wood),
-                Piece(PShape("AutumnTree_Canopy",
-                    Sphere(new Vector3(0f, 1.32f, 0f), 0.4f).Bumps(0.025f, 10f),
-                    Sphere(new Vector3(0.3f, 1.18f, 0.08f), 0.28f, 0.14f).Bumps(0.025f, 10f),
-                    Sphere(new Vector3(-0.3f, 1.22f, -0.06f), 0.3f, 0.14f).Bumps(0.025f, 10f),
-                    Sphere(new Vector3(0.04f, 1.2f, 0.3f), 0.26f, 0.14f).Bumps(0.025f, 10f),
-                    Sphere(new Vector3(-0.06f, 1.18f, -0.3f), 0.26f, 0.14f).Bumps(0.025f, 10f),
-                    Sphere(new Vector3(0.02f, 1.6f, -0.02f), 0.27f, 0.14f).Bumps(0.025f, 10f)), PropSlot.Leaf, PropMotion.Sway, 0.035f),
-            };
+            // ---- autumn tree (step 9a: stacked blobs, red-orange to gold; PropKit.Cinderwood) ----
+            var tree = AutumnTree();
 
             // ---- fallen mossy log, 2x1, blocks the path (the hand puzzle will lift it later) ----
             var log = Recipe("FallenLog", new Vector2Int(2, 1), true, false, 1200);

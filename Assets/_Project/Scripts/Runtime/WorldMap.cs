@@ -13,6 +13,9 @@ namespace Diorama
         public PropRecipe recipe;
         [Tooltip("Turned a quarter: the footprint swaps columns and rows (a 2x1 log lying along a column).")]
         public bool turned;
+        [Tooltip("Extra turn in degrees on top of Turned (fence corners, the cliff's second look). The footprint doesn't turn " +
+                 "with it: use multiples of 90 on 1x1 props, 180 on bigger ones.")]
+        public float yaw;
 
         public char Key => string.IsNullOrEmpty(key) ? '.' : key[0];
     }
