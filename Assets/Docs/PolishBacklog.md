@@ -5,6 +5,8 @@ here** and gets done in the polish days (Nov 13–14), most valuable first. Add 
 
 | Added | Item | Notes |
 |---|---|---|
+| Oct 26 | **Grab-lock jigsaw corners** (Mugesh's idea): the island's corners are puzzle-piece slots; a snapped-in piece = island locked, a visible gap = unlocked; the pieces double as handles for one/two-hand grab and zoom | Future grab-lock iteration; the 8e pinch/palm modes were reverted to the older grab |
+| Oct 26 | **Glazegolem should look clearly rare** (Mugesh): richer glaze, gold kintsugi cracks, a sparkle or shimmer | Do with the character pass. Step 9b prompt |
 | Oct 25 | **Lock island** toggle (no accidental grabs) | In the Spirit menu. Mugesh's note, step 8c |
 | Oct 25 | Ghost start / end points per target: the grab ghosts (pods, cradle, rim) still land the palm on the target's centre | 8c did the shard (front surface) and the attack lesson (nearest rune). Needs a per-target contact offset |
 | Oct 25 | **The Spirit as the menu**: poke or look + pinch the Spirit, a small ring of options round it (Replay tutorial, Recenter, Volumes, New game, Quit) | Design with Mugesh first |
