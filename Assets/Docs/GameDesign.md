@@ -223,6 +223,23 @@ sink back into the statue. Then `intro.explorer` and a gold run of tiles toward 
 pick (quitting replays the opening). Returning players: the island rises from the middle in 2 s where it was placed.
 Flat Editor: launch to walking about 45 s (10 s of it waits for a head pose that never comes), on the device about 35 s.
 
+**Lessons (step 8b, `Onboarding`, data `Data/Onboarding/Onboarding_Main`):** one at a time; each waits for its moment,
+says its line (a shorter reminder every 10 s), shows a ghost hand doing the gesture, and on done plays a soft chime and
+the Spirit's praise (Nice! / Just like that! / Perfect!). Order: touch the shard (hint after 3 s, opens by itself at 6 s),
+move the island (rim, skips after 12 s), pick a starter (look, grab, drop on the rim), walk 3 tiles (thumb swipe demo
+above the island, the Spirit beside it; after 30 s "Or look at a spot and pinch."), stop (thumb tap), look + pinch the gold
+tile, follow the gold tiles to the tutorial grass (always the scripted Toastling Lv 3), toss the pod in (auto send-out
+waits 20 s in the tutorial and doesn't earn praise), pick a move, flick the cradle pod once the wild one is in the red,
+then free roam: the first win or catch turns wild battles and fishing on. Until then other tall grass only rustles and
+the statue, shrine, gate, grass and pond hints wait. A lost or fled tutorial battle goes back to the grass lesson.
+Doing something early (tapping to stop during the walk lesson) completes that lesson when it comes up. The current
+lesson is saved; older saves count the tutorial as done. Hint lines expire: a battle or scene swap closes them, and a
+line with a `while` condition closes as soon as it stops holding (control hints never show in battle).
+**Ghost hands:** a copy of the player's own ISDK hand mesh, translucent pale blue with a bright rim (not gold), drawn
+over the island, never grabbable. Real size at the shard, rim, pods, runes and cradle; 60% above the island for the
+thumb demos. It shows the hand used last (mirrored), slows to 0.6x and grows 20% after 3 loops, and with no hands
+tracked for 3 s the Spirit says "Show me your hands!" while both ghost hands rise in front of the island.
+
 ## Finale
 - All 3 shards in the statue. It wakes: the **Heart of the World**, a huge ancient creature.
 - Final battle with your team. On victory the shards rejoin and the world is whole.

@@ -5,6 +5,8 @@ here** and gets done in the polish days (Nov 13–14), most valuable first. Add 
 
 | Added | Item | Notes |
 |---|---|---|
+| Oct 25 | **The Spirit as the menu**: poke or look + pinch the Spirit, a small ring of options round it (Replay tutorial, Recenter, Volumes, New game, Quit) | Design with Mugesh first |
+| Oct 25 | Ghost hand placeholders: thumb swipe / tap / pinch poses are rough | Replaced by Mugesh's recordings (Record Ghost Clip) |
 | Oct 25 | Shader warmup at launch (shard, fx orb, portal, pod variants) | 3 hitch frames in the opening on device, worst 97 ms |
 | Oct 25 | Starter pods a bit small at the default island size | podScale 3.2, grows 1.45x on gaze |
 | Oct 25 | Windmill blades on the Wind gate could spin | Static now (Sway only) |

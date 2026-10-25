@@ -13,6 +13,9 @@ Prompts for Claude Code: `Assets/Docs/Prompts/step-NN-*.md`. Design: `Assets/Doc
 - **Step 8 built Oct 25 (11 days ahead of plan), headset test pending:** Still Isle hub with the statue, Shard Gates
   (fire open to Cinderwood, water and wind sealed), map-to-map travel, the opening (shard, unfold, Spirit, starter
   pods), scripted first encounter. Flat Editor smoke test passed (new game to catch to Cinderwood and back).
+- **Step 8b built Oct 25 (headset test pending):** one lesson at a time (Onboarding_Main), ghost hands show each
+  gesture (placeholders until Mugesh records the ten clips), no wild battles until the tutorial grass, hint lines
+  expire on battle / scene swap. The ghost-hand player is ready for step 9's hand puzzles.
 - Next: step 9 (Cinderwood complete).
 
 ## Principle
