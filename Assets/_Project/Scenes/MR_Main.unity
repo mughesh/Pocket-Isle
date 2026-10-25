@@ -1088,6 +1088,17 @@ MonoBehaviour:
   restLookback: 0.5
   heldThresholdMm: 8
   barRangeMm: 20
+--- !u!114 &374903275 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8702425413754196321, guid: 0a7d2469f24041c4284c66706f84c45e, type: 3}
+  m_PrefabInstance: {fileID: 2032557509}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9af9ea683544b184083cef283557012d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &382714126
 GameObject:
   m_ObjectHideFlags: 0
@@ -2412,6 +2423,17 @@ MonoBehaviour:
   wanderRadius: 2
   hopInterval: {x: 3, y: 7}
   moveChance: 0.6
+--- !u!114 &1365154989 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6147449420076126337, guid: 0a7d2469f24041c4284c66706f84c45e, type: 3}
+  m_PrefabInstance: {fileID: 2032557509}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9af9ea683544b184083cef283557012d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1380201670
 GameObject:
   m_ObjectHideFlags: 0
@@ -2498,6 +2520,84 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1994521898}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1421177266
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1421177269}
+  - component: {fileID: 1421177268}
+  - component: {fileID: 1421177267}
+  m_Layer: 0
+  m_Name: Ghost Hands
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1421177267
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1421177266}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a701e260522dc5f41a3b2ff627ccbc80, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.GhostClipRecorder
+  island: {fileID: 270959109}
+  input: {fileID: 374318556}
+  library: {fileID: 11400000, guid: 7e26b85907efc8041b13452a19693a8b, type: 2}
+  rate: 30
+--- !u!114 &1421177268
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1421177266}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c6be3f44013eff4cb4339fe32e7732b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.GhostHands
+  onboarding: {fileID: 1380201671}
+  island: {fileID: 270959109}
+  leftSource: {fileID: 1365154989}
+  rightSource: {fileID: 374903275}
+  material: {fileID: 2100000, guid: ee25ba6990f6da74d877dde8bcab8ed4, type: 2}
+  library: {fileID: 11400000, guid: 7e26b85907efc8041b13452a19693a8b, type: 2}
+  aboveIslandHeight: 0.12
+  aboveIslandFront: 0.55
+  aboveTargetHeight: 0.07
+  wristFingers: {x: -0.35, y: 0.25, z: 1}
+  wristDorsal: {x: 1, y: 0.35, z: 0.25}
+  bothSpread: 0.18
+  fadeSeconds: 0.3
+  struggleLoops: 3
+  struggleSpeed: 0.6
+  struggleScale: 1.2
+  dotSize: 0.012
+--- !u!4 &1421177269
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1421177266}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1497595888
 GameObject:
@@ -3749,3 +3849,4 @@ SceneRoots:
   - {fileID: 1858573328}
   - {fileID: 1891040200}
   - {fileID: 1380201672}
+  - {fileID: 1421177269}

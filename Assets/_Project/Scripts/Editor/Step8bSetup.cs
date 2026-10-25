@@ -15,6 +15,7 @@ namespace Diorama.EditorTools
     {
         const string ScenePath = "Assets/_Project/Scenes/MR_Main.unity";
         public const string LessonsPath = "Assets/_Project/Data/Onboarding/Onboarding_Main.asset";
+        const string GhostMaterialPath = "Assets/_Project/Materials/Onboarding/GhostHand.mat";
 
         [MenuItem("Tools/Pocket Isle/Set Up MR_Main (8b onboarding)", priority = 48)]
         public static void SetUp()
@@ -63,6 +64,8 @@ namespace Diorama.EditorTools
             EditorUtility.SetDirty(onboarding);
             log.Append($"\n  'Onboarding' (lessons, tutorial grass = {onboarding.patchLandmark} +-{onboarding.patchRadius}, walk lesson {onboarding.walkSteps} steps; input {(onboarding.input != null ? "linked" : "MISSING")})");
 
+            WireGhosts(onboarding, opening, log);
+
             Undo.RecordObject(opening, "Step 8b");
             opening.onboarding = onboarding;
             EditorUtility.SetDirty(opening);
@@ -75,6 +78,61 @@ namespace Diorama.EditorTools
             EditorSceneManager.SaveScene(active);
             AssetDatabase.SaveAssets();
             Debug.Log(log.ToString());
+        }
+
+        /// <summary>The ghost hands (copies of the rig's own hand visuals) and the clip recorder on one object.</summary>
+        static void WireGhosts(Onboarding onboarding, Opening opening, StringBuilder log)
+        {
+            var ghosts = Object.FindFirstObjectByType<GhostHands>(FindObjectsInactive.Include);
+            if (ghosts == null)
+            {
+                var go = new GameObject("Ghost Hands");
+                Undo.RegisterCreatedObjectUndo(go, "Ghost Hands");
+                ghosts = go.AddComponent<GhostHands>();
+            }
+            var recorder = ghosts.GetComponent<GhostClipRecorder>();
+            if (recorder == null) recorder = Undo.AddComponent<GhostClipRecorder>(ghosts.gameObject);
+            var library = GhostClipTools.Library();
+            Undo.RecordObject(ghosts, "Step 8b");
+            ghosts.onboarding = onboarding;
+            ghosts.island = opening.island;
+            ghosts.material = GhostMaterial();
+            ghosts.library = library;
+            ghosts.leftSource = ghosts.rightSource = null;
+            foreach (var hv in Object.FindObjectsByType<Oculus.Interaction.HandVisual>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                // The rig's tracked-hand visuals, not the synthetic ones that lock onto interactables.
+                bool synthetic = false;
+                for (var t = hv.transform; t != null; t = t.parent)
+                    if (t.name.Contains("Synthetic")) synthetic = true;
+                if (synthetic || hv.Root == null) continue;
+                if (hv.Root.name.Contains("Left") && ghosts.leftSource == null) ghosts.leftSource = hv;
+                else if (hv.Root.name.Contains("Right") && ghosts.rightSource == null) ghosts.rightSource = hv;
+            }
+            EditorUtility.SetDirty(ghosts);
+            Undo.RecordObject(recorder, "Step 8b");
+            recorder.island = opening.island;
+            recorder.input = onboarding.input;
+            recorder.library = library;
+            EditorUtility.SetDirty(recorder);
+            log.Append($"\n  'Ghost Hands' (copies {(ghosts.leftSource != null ? ghosts.leftSource.name : "NO LEFT")} / {(ghosts.rightSource != null ? ghosts.rightSource.name : "NO RIGHT")}, " +
+                       $"{GhostMaterialPath}, {library.clips.Count} recorded clip(s) in {GhostClipTools.LibraryPath}) + recorder (4 left taps on the device)");
+        }
+
+        static Material GhostMaterial()
+        {
+            DioramaSceneSetup.EnsureFolder("Assets/_Project/Materials/Onboarding");
+            var shader = Shader.Find("Diorama/Ghost Hand");
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(GhostMaterialPath);
+            if (mat == null)
+            {
+                mat = new Material(shader) { name = "GhostHand" };
+                AssetDatabase.CreateAsset(mat, GhostMaterialPath);
+            }
+            else if (mat.shader != shader) mat.shader = shader;
+            mat.enableInstancing = true;
+            EditorUtility.SetDirty(mat);
+            return mat;
         }
 
         /// <summary>The opening's lessons in order (step-08b prompt, section B).</summary>
