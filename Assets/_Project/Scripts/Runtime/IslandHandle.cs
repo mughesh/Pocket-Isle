@@ -248,15 +248,43 @@ namespace Diorama
             return false;
         }
 
-        /// <summary>True while this hand is grabbing the island or is within nearRimDistance of the rim.</summary>
-        public bool IsHandBusy(bool leftHand)
+        /// <summary>The island's size against where it was placed (two-hand resize): 1 = as placed.</summary>
+        public float ScaleFactor => _baseScale > 1e-4f ? Target.localScale.x / _baseScale : 1f;
+
+        /// <summary>This hand is hovering the base skirt, ready to palm-grab (ISDK hover), or holding it.</summary>
+        public bool IsHandHovering(bool leftHand)
         {
-            if (_near[leftHand ? 0 : 1]) return true;
+            if (rimInteractable == null) return false;
+            var handedness = leftHand ? Handedness.Left : Handedness.Right;
+            foreach (var interactor in rimInteractable.Interactors)
+                if (interactor != null && interactor.Hand != null && interactor.Hand.Handedness == handedness) return true;
+            return false;
+        }
+
+        /// <summary>Distance (m) from a world point to the grab zone (0 inside it); the grab frame fades in by it.</summary>
+        public float DistanceToZone(Vector3 p)
+        {
+            float best = float.MaxValue;
+            if (rimColliders == null) return best;
+            foreach (var c in rimColliders)
+                if (c != null && c.enabled) best = Mathf.Min(best, (c.ClosestPoint(p) - p).magnitude);
+            return best;
+        }
+
+        /// <summary>True while this hand holds the island (not merely near the rim).</summary>
+        public bool IsHandGrabbing(bool leftHand)
+        {
             if (rimInteractable == null) return false;
             var handedness = leftHand ? Handedness.Left : Handedness.Right;
             foreach (var interactor in rimInteractable.SelectingInteractors)
                 if (interactor != null && interactor.Hand != null && interactor.Hand.Handedness == handedness) return true;
             return false;
+        }
+
+        /// <summary>True while this hand is grabbing the island or is within nearRimDistance of the rim.</summary>
+        public bool IsHandBusy(bool leftHand)
+        {
+            return _near[leftHand ? 0 : 1] || IsHandGrabbing(leftHand);
         }
 
         static Vector3 Flat(Vector3 v) => new Vector3(v.x, 0f, v.z);

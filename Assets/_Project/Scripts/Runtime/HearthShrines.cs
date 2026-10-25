@@ -33,7 +33,7 @@ namespace Diorama
         public WorldMap lodge;
         [Tooltip("Diorama/Beacon material (flame column and glow ring).")]
         public Material beaconMaterial;
-        [Tooltip("Pinches and palms from a hand that is grabbing or touching the rim are ignored.")]
+        [Tooltip("Pinches from a hand that is grabbing or touching the rim are ignored; palms only while it holds the island.")]
         public IslandHandle grabGuard;
 
         [Header("Shape (prop tile units, 1 = one tile)")]
@@ -44,10 +44,8 @@ namespace Diorama
         public float beaconWidth = 0.04f;
 
         [Header("Warm your hand")]
-        [Tooltip("Palm within this distance above the bowl (world metres).")]
-        public float palmReach = 0.08f;
-        [Tooltip("Palm normal · down must be above this (facing down).")]
-        [Range(0f, 1f)] public float palmFacing = 0.6f;
+        [Tooltip("Palm facing down over the bowl: facing, height above the bowl rim, horizontal radius (scaled with the island).")]
+        public PalmHover palm = new PalmHover();
         public float holdSeconds = 0.8f;
 
         /// <summary>The explorer rested at this shrine (anchor tile): healed, time to save.</summary>
@@ -110,7 +108,6 @@ namespace Diorama
         readonly List<Vector2Int> _shrines = new List<Vector2Int>();
         readonly List<Beacon> _beacons = new List<Beacon>();
         readonly Hand[] _hands = new Hand[2];
-        readonly PalmHover _palm = new PalmHover();
         readonly bool[] _wasPinching = { true, true };
         WorldMap _scanned;
         int _scannedVersion = -1;
@@ -238,7 +235,7 @@ namespace Diorama
             if (near) Dialogue.Say("shrine.near");
 
             // Warm your hand: the ring fills while a palm faces down over the bowl, wherever the explorer is.
-            bool warming = usable && _pending != i && _palm.IsOver(island.transform.TransformPoint(local), island.transform.up, palmReach, palmFacing, grabGuard);
+            bool warming = usable && _pending != i && palm.IsOver(island.transform.TransformPoint(local), island.transform.up, grabGuard, "flame");
             b.hold = warming ? b.hold + Time.deltaTime : Mathf.MoveTowards(b.hold, 0f, Time.deltaTime * 2f);
             if (b.hold >= holdSeconds)
             {

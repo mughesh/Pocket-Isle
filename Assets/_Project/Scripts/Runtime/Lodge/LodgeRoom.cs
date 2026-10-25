@@ -47,8 +47,7 @@ namespace Diorama
         [Header("Leave by palm over the arch (like entering)")]
         [Tooltip("Diorama/Beacon material (the filling ring).")]
         public Material beaconMaterial;
-        public float palmReach = 0.08f;
-        [Range(0f, 1f)] public float palmFacing = 0.6f;
+        public PalmHover palm = new PalmHover();
         public float palmHoldSeconds = 0.8f;
 
         [Header("Limits and sizes")]
@@ -87,7 +86,6 @@ namespace Diorama
         Transform _pageArrow;
         TMPro.TextMeshPro _pageText;
         readonly Dictionary<LodgeIsling, float> _since = new Dictionary<LodgeIsling, float>();
-        readonly PalmHover _palm = new PalmHover();
         float _doorHold;
         Transform _doorRing;
         MeshRenderer _doorRingRenderer;
@@ -587,7 +585,7 @@ namespace Diorama
         void UpdateDoorPalm(bool free)
         {
             Vector3 top = DoorLocal(archHeight + 0.15f);
-            bool warming = free && _palm.IsOver(island.transform.TransformPoint(top), island.transform.up, palmReach, palmFacing, grabGuard);
+            bool warming = free && palm.IsOver(island.transform.TransformPoint(top), island.transform.up, grabGuard, "door");
             _doorHold = warming ? _doorHold + Time.deltaTime : Mathf.MoveTowards(_doorHold, 0f, Time.deltaTime * 2f);
             if (_doorRing != null)
             {
