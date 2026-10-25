@@ -3,13 +3,14 @@
 Revised Oct 22 (v3) for the full game in `GameDesign.md`. Systems first, then one complete realm, then more content.
 Prompts for Claude Code: `Assets/Docs/Prompts/step-NN-*.md`. Design: `Assets/Docs/GameDesign.md`.
 
-## Status (Oct 24, Claude Code)
-- Steps 1–6 and step 6 fixes: passed on the headset (`pre-goa` at aa3cd20).
-- Step 6 fixes 2 (no Catch rune, pod always in the cradle and shatters above red, rim pods grow on gaze, gaze 5° lower):
-  committed f69d96f, **headset test pending**.
-- Step 7 (ahead of plan): XP / levels / evolution (53b10df), Hearth Shrine + storage shelf (e14f949), save / load +
-  pause (68190d0). Step 7b (shrine interior): scene swap + 2 x 2 shrine (a39f01e), Hearth Lodge (6b03d79), Islings
-  rename (next commit). All **headset test pending**; flat Editor Play smoke tests passed. Spatial anchors not done (cut #5).
+## Status (Oct 25, Claude Code)
+- Steps 1–7c: passed on the headset. Step 7c was the first release device build: 95 MB, **stable 73 fps**
+  (`pre-goa` moved to the Oct 25 build-settings commit).
+- Ahead of plan: step 7 (XP / levels / evolution, Hearth Shrine, save / load + pause), step 7b (scene swap, 2 x 2
+  shrine, **Hearth Lodge instead of the Sanctuary island**), the **Islings rename** (done), step 7c (lodge door,
+  gold focus outline + Spirit lantern beam, first-visit hint chain, 8 Islings walk the lodge, the rest sleep in pods).
+- The island always stays level: **tilt toward the head on release was dropped**. Spatial anchors not done (cut #5).
+- Next: step 8 (opening, starter choice, Still Isle hub, Shard Gates).
 
 ## Principle
 - **Every system data-driven** (ScriptableObjects): species, moves, type chart, maps, temples, dialogue.
@@ -24,7 +25,7 @@ Prompts for Claude Code: `Assets/Docs/Prompts/step-NN-*.md`. Design: `Assets/Doc
 | 1. Toon look | done Oct 21 | Island, grass, trees, toon shaders |
 | 2. On the headset | done Oct 22 | Passthrough, microgestures move a test cube |
 | 2b-1. Walk / run / hold | done Oct 22 | Swipe walks, same swipe runs, tap stops; HoldToWalk mode via thumb offset |
-| 2b-2. Island handling | Oct 22–23 | Grab rim to move; two hands to turn and resize; tilts toward head on release; soft shadow on real surface (MRUK) |
+| 2b-2. Island handling | Oct 22–23 | Grab rim to move; two hands to turn and resize; stays level (no tilt); soft shadow on real surface (MRUK) |
 | 3. World window | Oct 23–25 | Test map ~4× the island; island shows a scrolling window; tiles rise/sink at edges, clipped at rim; explorer walks the map; **window can zoom in/out around a tile** (battle stage) |
 | 4. Creature kit + baker | Oct 24–26 | Editor tool bakes SDF part recipes (ScriptableObject) into meshes; Kilnpot, Pebbloop, Pufflet on the island with idle breathing, eyes, rigid ears/tails |
 | 5. Encounter + battle core | Oct 26–27 | Tall grass → zoom in → your creature out → 3 moves via gaze + pinch runes → HP, types, damage → win / flee → zoom out. Species/move/type data assets. **Tagged build `pre-goa`** |
@@ -38,13 +39,13 @@ Keeper fight phases, opening script. Concept images via Antigravity in batches.
 
 | Step | Dates | Done when |
 |---|---|---|
-| 6. Capture + party | Nov 3–4 | Flick pod to capture (HP-based chance); 6 rim pods (pinch for stats, pull to send out); 7th catch flies to Sanctuary; Hearth Shrine heals, saves, swaps |
+| 6. Capture + party | Nov 3–4 | Flick pod to capture (HP-based chance); 6 rim pods (look + pinch for stats, throw a pod to send out); 7th catch goes to the Hearth Lodge; Hearth Shrine heals, saves, swaps |
 | 7. Progression + save | Nov 4–5 | XP, levels, evolution at level; save/load; spatial anchor restores island position |
 | 8. Opening + hub | Nov 5–6 | Shard drifts in and unfolds; Lantern Spirit; starter choice; Still Isle with statue + 3 Shard Gates; gate transition (base material swap) |
 | 9. Cinderwood complete | Nov 6–9 | Full map, fire creatures (min 4), 2 hand moments (log, bellows), temple, Hearthstag fight, restoration, shard into statue |
 | **Gate: Nov 9 evening** | | Slice playable start to shard #1? If not, Nov 10–12 go to finishing the slice, not new realms |
 | 10. Lilymere + Galewick | Nov 9–12 | Same template: map, min 4 creatures each, hand moments, Keeper, restoration |
-| 11. Finale + Sanctuary | Nov 12–13 | Statue wakes into the Heart; final battle; Spirit rejoins; Sanctuary island with counter |
+| 11. Finale | Nov 12–13 | Statue wakes into the Heart; final battle; Spirit rejoins; caught counter in the Hearth Lodge |
 | 12. Polish | Nov 13–14 | Audio (credits list), onboarding hints, softened island art, 72 fps, bug pass |
 | 13. Ship | Nov 15–16 | Demo video < 3 min, Devpost write-up, APK to the Competition channel |
 

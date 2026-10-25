@@ -47,6 +47,21 @@ namespace Diorama.EditorTools
                 director.uncaughtWeight = 2f;
                 EditorUtility.SetDirty(director);
                 log.Append("\n  encounters: species not caught yet count 2x, first meeting sparkles 'New!'");
+
+                var tour = Object.FindFirstObjectByType<PerfTour>(FindObjectsInactive.Include);
+                if (tour == null)
+                {
+                    var go = new GameObject("Perf Tour");
+                    Undo.RegisterCreatedObjectUndo(go, "Perf Tour");
+                    tour = go.AddComponent<PerfTour>();
+                }
+                tour.explorer = room.explorer;
+                tour.encounters = director;
+                tour.runes = Object.FindFirstObjectByType<BattleRunes>(FindObjectsInactive.Include);
+                tour.swap = room.swap;
+                tour.party = room.party;
+                EditorUtility.SetDirty(tour);
+                log.Append("\n  'Perf Tour' (device perf capture; runs only when perftour.txt is in the persistent data folder)");
             }
             Focus(log);
             DialogueTools.Import();

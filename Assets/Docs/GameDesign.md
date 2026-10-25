@@ -30,7 +30,7 @@ and restore the world. Each restored region docks onto your island.
 
 ## Player and world
 - **Player:** a giant guardian spirit. Explains why real hands can reach in, throw pods and move the island.
-- **Explorer:** tiny character on the tiles, moved with thumb microgestures.
+- **Explorer:** tiny character on the tiles: thumb swipe auto-walks, or touch a tile, or look at a tile + pinch.
 - **Guide:** the **Lantern Spirit**, a small floating creature near your hand. Short text bubbles, hints, story. No voice.
 - **Story hook:** the world shattered into floating pieces, one per element. Each Shard Keeper (region boss)
   was frightened or corrupted by the shattering. They aren't evil. Beat one and it calms, giving up its shard.
@@ -162,7 +162,8 @@ explore → tall grass encounter → battle → capture → party / Hearth Lodge
   First feature to cut if late.
 
 ## Party and collection
-- **Party:** 6 glass pods in sockets on the island's rocky rim. Pinch one for stats; pull one to send it out.
+- **Party:** 6 glass pods in sockets on the island's rocky rim. Look at one (it grows) for its card; **throw the
+  pod** onto the battle pad to send the Isling out (or look + pinch it).
 - **7th catch and beyond:** goes to the Hearth Lodge automatically (light streak off the island).
 - **Hearth Shrine (decided Oct 24, step 7b):** a 2 x 2 stone hut with a flame beacon, visible from across the window.
   Stand on any tile touching it (its flame leans toward you), then **warm your hand over the flame** (palm down over

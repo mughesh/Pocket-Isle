@@ -11,3 +11,13 @@ here** and gets done in the polish days (Nov 13–14), most valuable first. Add 
 | Oct 23 | Friendly creature villagers in the kiln village | One-line hints |
 | Oct 22 | Movement feel and speed tuning on the real Cinderwood map | |
 | Oct 22 | Golden Berry crafting | First to cut |
+
+## Lodge life (do with scene filler props)
+
+| Added | Item | Notes |
+|---|---|---|
+| Oct 25 | Poke the hearth to stoke it | Embers burst, Islings gather round |
+| Oct 25 | Pet an Isling with an open hand | It leans in, little hearts |
+| Oct 25 | A berry bowl to fill | |
+| Oct 25 | A toy ball you toss that Islings chase | |
+| Oct 25 | Wind chimes / hanging lanterns you can flick | |

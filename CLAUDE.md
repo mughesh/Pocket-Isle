@@ -35,9 +35,10 @@ Core loop: **explore → tall-grass encounter → battle → capture flick → c
 ## Technical decisions (do not change without asking)
 - Unity **6.3 LTS**, URP, Meta Quest build profile, OpenXR with the Meta XR feature group.
 - Meta XR SDK **v207 or later**: Core SDK, Interaction SDK, MR Utility Kit (MRUK), Meta XR Simulator.
-- Input: Interaction SDK hands. Movement uses **thumb microgestures**: a swipe (left, right, forward,
-  back) starts walking; walking continues while the thumb stays off-centre (read from hand joint poses,
-  because microgesture events fire once per swipe); thumb back to rest or a thumb tap stops. Steps are
+- Input: Interaction SDK hands. Walking, three ways on one path system: (1) a **thumb microgesture swipe**
+  (left, right, forward, back) auto-walks until a thumb tap, an obstacle or a new swipe (same swipe again = run);
+  (2) **touch a tile** with a fingertip = walk there; (3) **look at a tile + pinch** = walk there. Thumb-hold
+  walking was dropped on Oct 24 (accidental stops, tiring). Walk 0.4 s per tile, run 0.2. Steps are
   tile-by-tile. Capture is a flick/throw gesture. Gaze + pinch for UI.
 - Island placement: grab the rocky rim/base to move (never the play surface); two-hand grab for yaw and
   uniform scale; the island always stays level (no tilt toward the head). Re-placing in front of the user is
