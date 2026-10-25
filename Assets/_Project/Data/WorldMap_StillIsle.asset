@@ -138,39 +138,49 @@ MonoBehaviour:
   - key: S
     recipe: {fileID: 11400000, guid: 4e524cd358b9b874f9c8ac964bd660a2, type: 2}
     turned: 0
+    yaw: 0
   - key: f
     recipe: {fileID: 11400000, guid: 166d589c7b84f7440a8533ff62677e6c, type: 2}
     turned: 0
+    yaw: 0
   - key: w
     recipe: {fileID: 11400000, guid: 060247c819eb9194baa615ac5e0a699d, type: 2}
     turned: 0
+    yaw: 0
   - key: g
     recipe: {fileID: 11400000, guid: 5ed00ec5cf5c1fb4dac984c6ddfec929, type: 2}
     turned: 0
+    yaw: 0
   - key: Y
     recipe: {fileID: 11400000, guid: b4ff74f9eeb49724995b03596b7d6943, type: 2}
     turned: 0
+    yaw: 0
   - key: l
     recipe: {fileID: 11400000, guid: e5433c33ffbd7ef4e8a155c7e9b5a866, type: 2}
     turned: 0
+    yaw: 0
   - key: b
     recipe: {fileID: 11400000, guid: 69f099619857df94f80e6b02d355f761, type: 2}
     turned: 0
+    yaw: 0
   - key: s
     recipe: {fileID: 11400000, guid: cc9a99a98bf9cd94999ebf9174b7800f, type: 2}
     turned: 0
+    yaw: 0
   viewZoom: 1
   theme: {fileID: 11400000, guid: 573607c9578eb9a4bb3fec0f01fdf495, type: 2}
   grassTable: {fileID: 11400000, guid: 019ec2e8b4e80634d82706540465e2a9, type: 2}
   waterTable: {fileID: 11400000, guid: 58716727d743c2d4f8da387d8ad39c50, type: 2}
+  zones: 
+  zoneLegend: []
   realm: stillisle
   arrivalLine: hub.return.first
   gates:
   - id: fire
     tile: {x: 2, y: 15}
     to: {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
-    arrive: {x: 30, y: 27}
-    arriveFacing: {x: 0, y: 1}
+    arrive: {x: 10, y: 54}
+    arriveFacing: {x: 0, y: -1}
     isSealed: 0
     portal: {r: 1, g: 0.55, b: 0.22, a: 1}
     firstSeenLine: gate.fire.first
@@ -193,9 +203,17 @@ MonoBehaviour:
   landmarks:
   - name: start
     tile: {x: 15, y: 22}
+    line: 
+    radius: 0
   - name: statue
     tile: {x: 15, y: 17}
+    line: 
+    radius: 0
   - name: firstGrass
     tile: {x: 21, y: 22}
+    line: 
+    radius: 0
   - name: pond
     tile: {x: 6, y: 22}
+    line: 
+    radius: 0

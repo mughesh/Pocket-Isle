@@ -76,7 +76,10 @@ namespace Diorama.Tests
             Assert.AreEqual(hub, home.to);
             Assert.IsTrue(hub.CanWalk(home.arrive), "arrival in the hub is walkable");
             Assert.IsTrue(home.arrive == fire.Front(0) || home.arrive == fire.Front(1), "you come back in front of the fire gate");
-            Assert.IsTrue(fire.arrive == home.Front(0) || fire.arrive == home.Front(1), "you arrive in front of Cinderwood's return gate");
+            // Step 9a: you arrive beside the return gate's front, facing north up the trail (not facing the gate).
+            int near = Mathf.Min(Mathf.Abs(fire.arrive.x - home.Front(0).x), Mathf.Abs(fire.arrive.x - home.Front(1).x)) + Mathf.Abs(fire.arrive.y - home.Front(0).y);
+            Assert.IsTrue(near >= 1 && near <= 2, $"you arrive beside Cinderwood's return gate (off its front by {near})");
+            Assert.AreEqual(new Vector2Int(0, -1), fire.arriveFacing, "arrival faces north (up the trail)");
             Assert.IsFalse(Gate(hub, "water").Open);
             Assert.IsFalse(Gate(hub, "wind").Open);
             Assert.IsTrue(ExplorerPath.CanReach(cw, cw.startTile, fire.arrive, FarSteps), "return gate reachable from Cinderwood's start");

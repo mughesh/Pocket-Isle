@@ -178,6 +178,12 @@ namespace Diorama
             if (world == null) problems.Add($"saved on map '{data.map}', which isn't in the scene swap's worlds: staying on {RealmId}");
             if (world != null && world.CanWalk(tile)) swap.TravelNow(world, tile, facing);
             else if (world == null && explorer.island != null && explorer.island.Content != null && explorer.island.Content.CanWalk(tile)) explorer.Teleport(tile, facing);
+            else if (world != null && world.CanWalk(world.startTile))
+            {
+                // The map changed under the save (step 9a rewrote Cinderwood): start that map at its arrival.
+                problems.Add($"explorer tile c{tile.x} r{tile.y} isn't walkable on {world.name} (map changed?): moved to its start c{world.startTile.x} r{world.startTile.y}");
+                swap.TravelNow(world, world.startTile, new Vector2Int(0, -1));
+            }
             else problems.Add($"explorer tile c{tile.x} r{tile.y} isn't walkable on {(world != null ? world.name : RealmId)} (map changed?): left at spawn");
 
             if (shrines != null)

@@ -137,6 +137,7 @@ namespace Diorama
             public ThemeRole role;
             public bool outline;  // Toon Outline material: the theme sets its outline colour
             public int passes = 1; // draw calls per chunk (props draw their outline pass from the same material)
+            public bool steam;    // hot spring steam: not drawn while the realm is unrestored (it has shrunk to nothing then)
             public Color color;   // current theme colour (caps: the tile flash uses it)
             public MaterialPropertyBlock props;
             public readonly List<Matrix4x4> local = new List<Matrix4x4>();
@@ -247,7 +248,36 @@ namespace Diorama
             }
         }
 
-        static int InstanceCount(Batch b) => b.content ? b.count : b.local.Count;
+        /// <summary>Triangles drawn per camera last frame, all batches and passes (outline passes count again).</summary>
+        public long TriangleTotal
+        {
+            get
+            {
+                long n = 0;
+                foreach (var b in _batches)
+                    if (b.material != null && b.mesh != null) n += (long)InstanceCount(b) * b.passes * (b.mesh.GetIndexCount(0) / 3);
+                return n;
+            }
+        }
+
+        /// <summary>The biggest batches by triangles last frame ("mesh: instances x tris x passes"), for perf checks.</summary>
+        public string TriangleBreakdown(int top = 5)
+        {
+            var list = new List<(long tris, string text)>();
+            foreach (var b in _batches)
+            {
+                if (b.material == null || b.mesh == null) continue;
+                int n = InstanceCount(b);
+                long t = (long)n * b.passes * (b.mesh.GetIndexCount(0) / 3);
+                list.Add((t, $"{b.mesh.name} {n}x{b.mesh.GetIndexCount(0) / 3}x{b.passes} = {t / 1000f:0}k"));
+            }
+            list.Sort((a, c) => c.tris.CompareTo(a.tris));
+            var parts = new List<string>();
+            for (int i = 0; i < list.Count && i < top; i++) parts.Add(list[i].text);
+            return string.Join(", ", parts);
+        }
+
+        static int InstanceCount(Batch b) => b.steam && RealmState.Restored < 0.01f ? 0 : b.content ? b.count : b.local.Count;
 
         /// <summary>Island footprint extent in local space (before this transform's scale).</summary>
         public Bounds LocalBounds
@@ -641,6 +671,7 @@ namespace Diorama
                         else if (BatchFor(e.recipe) == null) missing.Add($"{e.recipe.name} (not baked)");
                     }
             var steam = hasHotSpring ? BatchFor(hotSpringSteam) : null;
+            if (steam != null) steam.steam = true;
             if (hasHotSpring && steam == null)
                 Debug.LogWarning("[Diorama] Hot springs without steam: assign a baked Hot Spring Steam prop on the IslandBuilder.", this);
             if (missing.Count > 0) Debug.LogWarning($"[Diorama] Props skipped: {string.Join(", ", missing)}. Tools > Pocket Isle > Props > Bake All.", this);

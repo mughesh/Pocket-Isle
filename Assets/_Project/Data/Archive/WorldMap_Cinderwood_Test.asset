@@ -1,0 +1,293 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8376f4ae30d857a45a9d450ac2b7be0f, type: 3}
+  m_Name: WorldMap_Cinderwood_Test
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.WorldMap
+  layout: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    XGGGFGFFGFGFFFFGFGFGFFFFFFFGFFFGGGFGFFFFFGFFFFGFGFGFFFGX
+
+    XGGGGGGGGGGGGGGGGGGGGGGGGGGRGGGGGGGGGGGGGGGGGGGGGGGGGGFX
+
+    XGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGX
+
+    XGGGGGGGGGGGGGGGGGGGGRGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGFX
+
+    XGGGGGGGGGGGGGGGGGRGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGX
+
+    XFGGGRGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGFFFGGGGGGGGGGGGGGGGX
+
+    XGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGFFFGGGGGGGGGGGGGGGFX
+
+    XGGGGGGGGGGGGGGGGGGGTTPPPPPPGGGGGGGGFFGGGGPPGGGGGGGGGGGX
+
+    XGGGGGGPPGPPPPPTPPPPPPPTGGGPPPPGGGGGGGGGGGPPGGGGGGGGGGFX
+
+    XFGGGGPPPPPPPPPPPTTTTTTTTGGGGGPPGGGGGGGPPPPGGGGGGGGGGGFX
+
+    XGGGGGPGGGTTTTTTTTTTTTTTTGGGGGGPPPPPPPPPGGPGGGGGGGGGGGFX
+
+    XFGGFPPGGGTTTTTTTTTTTTTTTGGGGGGGGGGGGGGGPPPGGGGGGGGGGGFX
+
+    XFGFFPFFGGTTTTTTTTTTTTTTGGGGGGGGGGGGGGGGGPGGGGGGRGGGGGFX
+
+    XFFFFPFGFGGTTTTTTTGGTTTTGGGGGGGGGGGGGGGGGPPGGGGGGGGGGGGX
+
+    XGGFGPGFFGGRTTTTTGGGGGGGGGGGGGGGGGGGGGGGGGPPGGGGGGGGGGFX
+
+    XFFFFPFFGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGPGGGGGGGGGGGX
+
+    XFGFFPPFFGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGPGGGGGGGGGGFX
+
+    XGGFFGPGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGPPPGGGGGGGGGGX
+
+    XFGGGGPGGGGGGGGGGGGGGGGGGGGGGGGGGGRGGGGGGGGGPGGGGGGGGGFX
+
+    XFGGGGPGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGPGGGGGGGGGGX
+
+    XFGGGGPPGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGPPGGGGGGGGGFX
+
+    XFGGGGGPGGGGGGGGGGGGFFFFFGGGGGGGGGGGGGGGGGGPGGGGGGGGGGGX
+
+    XGGGGGGPGGGGGGRGGGGGFFGFFGGGGGGGGGGGGGGGGGGPGGGGGGGGGGFX
+
+    XFGRGGGPGGGGGGGGGGGGFFFFFFGGGGGPPPGGGGGGGGGPPGGGGGGGGGGX
+
+    XFGGGGGPGPPPPPPPPPPPPGFPPPGGPPPPGPPPPPPPGGGPPGGGGGGGGGGX
+
+    XFGGGGGPPPGGGGGGGGGFPPPPPPPGPGGGGGGGGGGPGGGGPGGGGGGGGGGX
+
+    XFGGGGGPGGGGGGGGGGGFGGPFGGPPPGGGGGGGGGGPPGGGPGGGGGGGGGFX
+
+    XGGGGGGPGGGGRGGGGGGGGGGFGGGGGGGHHHGGGGGGPPPGPPFGGGGGGGGX
+
+    XFGGGGPPGGGGGGGGGGRGGGGGGGGGGGGHHHGGGGGGGGPPPPFGGGGGGGFX
+
+    XGGGGGGPPGGGGGGGGGRGGGGGGGGGGGRGGGGGGGGGGGGGGPGGGGGGGGFX
+
+    XGGGGGGGPPGGGGGGGGGGFFFGGGGGGGGGGGGGGGGGGGGGPPPGGGGGGGFX
+
+    XFGGGGGGPGGGGGGGGGGFFGFFGGGGGGGGGGGGWWWWGGGGGGPGGGGGGGFX
+
+    XGGGGGGGPPGGGGGGGGGFFGFFGGGGGGGGGGWWWWWWWGGGGGPGGGGGGGFX
+
+    XGGGGGGGGPGGGGGGGGGFFFFFGGGGGGGGGWWWWWWWWWGGGGPGGGGGGGFX
+
+    XFGGGGGGGPPPGGGGGGGGFFFGGGFFGGGGGWWWWWWWWWGGGGPGGGGGGGGX
+
+    XFGGGGGGGGGPPGGGGGGGGGGGGGFGFGGGGWWWWWWWWWGGGGPGGRGGGGGX
+
+    XGGGGGGGGGGGPGGGRGGGGGGGGGGFGGGGGWWWWWWWWWGGGGPGGRGGGGFX
+
+    XFGGGGGGGGGGPGGGGGGGGGGGGGGGGGGGGGWWWWWWWWGGGPPGGGGGGGFX
+
+    XFGGGGGGGGGRPGGGGGGGGGGGGGGGGGRGGGWWWWWWWGGGPPGGGGGGGGFX
+
+    XGGGGGGGGGGGPRGGGGGGGGGGGGGGGGGGGGGGWWWWGGGGPGGGGGGGGGFX
+
+    XFGGGGGGGGGGPGGGGGGGGGGGGGGGGGGGGGGTTTGGGGGGPGGGGGGGGGFX
+
+    XFGGGGGGGGGGPGGGGGGGGRGGGGGGGGGGGTTTTTTTGGGGPGGGGGGGGGFX
+
+    XFGGGGGGGGGGPGGGTTGGGGGGGGGGGGGGGTTTTTTTGGGGPGGGGGGGGRFX
+
+    XFGGGGGGGGGGPGGTTTTGGGGGGGGGGGGGGTTTTTTPPPPPPGGGGGGGGGGX
+
+    XFGGGGGGGGGPPGGTTTTTGGGGGGGGGFGGGGGTTTTPGGGGGGGGGGGGGGFX
+
+    XFGGGGGGGGGGPPPTTTTPPPPPGGFFFFFGGGGPPPPPGGGGGGGGGGGGGGFX
+
+    XFGGGGGGGGGGGGPPPPPPGGGPPPPPPPPPPPPPGGGGGGGGGGGGGGGGGGFX
+
+    XGGGGGGGGGGGGGGTTTTTGGGGGGFFFFFGFGFGGFGGGGGGGGGGGGGGGGGX
+
+    XFGGGGGGGGGGGGGGGTTGGGGGGGGGGFGFGGFFFFGGGGGGGGGGGGGGGGFX
+
+    XFGGGGGGGGGGGFGGGGGGGGGGGGGGGGGFFFFGGGGGGGGGGGGGRRGGGGFX
+
+    XFGGGGGGGGGGFFGGGGGGGGGGGGGGGGGFFFFFFFGGGGRGGGGGGGGGGGFX
+
+    XFGGGGGGGRGGGFFGGGGGGGGGRGGGGGGGFFFFFGGGGGGGGGGGGGGGGGFX
+
+    XGGGGGGGRGGGGGGGGGGGGGGGGGGGGGGGGFFFGGGGGGGGGGGGGGGGGGFX
+
+    XGFGGFFFFFFGGFGGGFFGGFGFGFFGFFFFGGFGGFGGGGFFFFFGGGFGGFFX
+
+    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+  tileSize: 0.05
+  capHeight: 0.006
+  seed: 1234
+  startTile: {x: 28, y: 27}
+  props: '........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    .................Y......................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ......................U.................................
+
+    .........................S..b.A..U......................
+
+    ......................J.................................
+
+    ................................o.L.....................
+
+    ........................................................
+
+    ..............................Z.........................
+
+    ........................L.........Y.....................
+
+    ......................L...S.............................
+
+    ........................J...............................
+
+    ............................B...........................
+
+    ...............................U..A.....................
+
+    ..........................K.............................
+
+    ............................A.K.S.......................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................
+
+    ........................................................'
+  propLegend:
+  - key: K
+    recipe: {fileID: 11400000, guid: 3fece9f9f9f86704bb929bb793c714ad, type: 2}
+    turned: 0
+  - key: L
+    recipe: {fileID: 11400000, guid: d23ec13ae9af1254e8ddece07b2a1f38, type: 2}
+    turned: 0
+  - key: B
+    recipe: {fileID: 11400000, guid: 771dd8e345ee42345b16f0cd0367744c, type: 2}
+    turned: 0
+  - key: b
+    recipe: {fileID: 11400000, guid: 4bb563fb979735e47ab034d75c7f07ac, type: 2}
+    turned: 0
+  - key: U
+    recipe: {fileID: 11400000, guid: 3fb99cd684ae5c84a84a770de91c9c13, type: 2}
+    turned: 0
+  - key: A
+    recipe: {fileID: 11400000, guid: d5cc65e162e3da6408be3695c302e16a, type: 2}
+    turned: 0
+  - key: O
+    recipe: {fileID: 11400000, guid: 782c07a7a06cda744b18f4eed5f22284, type: 2}
+    turned: 0
+  - key: o
+    recipe: {fileID: 11400000, guid: 782c07a7a06cda744b18f4eed5f22284, type: 2}
+    turned: 1
+  - key: S
+    recipe: {fileID: 11400000, guid: 0ac73cb048bf97d47a3575d6fea394b7, type: 2}
+    turned: 0
+  - key: J
+    recipe: {fileID: 11400000, guid: c6f92765d108a4c4a8aed7c4f9e97007, type: 2}
+    turned: 0
+  - key: Y
+    recipe: {fileID: 11400000, guid: b4ff74f9eeb49724995b03596b7d6943, type: 2}
+    turned: 0
+  - key: Z
+    recipe: {fileID: 11400000, guid: 22df831919cb43d41a95a73e294ddda4, type: 2}
+    turned: 0
+  viewZoom: 1
+  theme: {fileID: 11400000, guid: 19d20160e4c769e41a975af21b11f3b8, type: 2}
+  grassTable: {fileID: 11400000, guid: 674dcb07c5696924dbbad850006068b4, type: 2}
+  waterTable: {fileID: 11400000, guid: 5b47e44c4def61b419051ed86ed2fcb3, type: 2}
+  realm: cinderwood
+  arrivalLine: realm.cinderwood.first
+  gates:
+  - id: home
+    tile: {x: 30, y: 26}
+    to: {fileID: 11400000, guid: ab0469af29722704f949fec768f94b68, type: 2}
+    arrive: {x: 3, y: 16}
+    arriveFacing: {x: 0, y: 1}
+    isSealed: 0
+    portal: {r: 1, g: 0.85, b: 0.48, a: 1}
+    firstSeenLine: 
+  landmarks: []

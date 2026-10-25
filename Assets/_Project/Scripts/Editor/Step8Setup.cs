@@ -18,8 +18,8 @@ namespace Diorama.EditorTools
         const string CinderwoodPath = "Assets/_Project/Data/WorldMap_Cinderwood.asset";
         const string PortalMaterialPath = "Assets/_Project/Materials/Props/Portal.mat";
         const char ReturnGateKey = 'Z';
-        /// <summary>Cinderwood's return gate (anchor, 2 x 1), two tiles right of its start; you arrive in front of it.</summary>
-        static readonly Vector2Int CinderwoodGate = new Vector2Int(30, 26);
+        /// <summary>Cinderwood's return gate (anchor, 2 x 1). Step 9a: the 60 x 60 map's gate by the arrival.</summary>
+        static Vector2Int CinderwoodGate => CinderwoodTools.ReturnGate;
 
         static readonly Color FireColor = new Color(1f, 0.55f, 0.22f);
         static readonly Color WaterColor = new Color(0.36f, 0.72f, 1f);
@@ -144,8 +144,9 @@ namespace Diorama.EditorTools
             }
             map.realm = "cinderwood";
             map.arrivalLine = "realm.cinderwood.first";
-            map.grassTable = AssetDatabase.LoadAssetAtPath<EncounterTable>("Assets/_Project/Data/Battle/Encounters_TestGrass.asset");
-            map.waterTable = AssetDatabase.LoadAssetAtPath<EncounterTable>("Assets/_Project/Data/Battle/Encounters_TestWater.asset");
+            // Step 9a writes Cinderwood's own tables; the test ones only fill a map that has none.
+            if (map.grassTable == null) map.grassTable = AssetDatabase.LoadAssetAtPath<EncounterTable>("Assets/_Project/Data/Battle/Encounters_TestGrass.asset");
+            if (map.waterTable == null) map.waterTable = AssetDatabase.LoadAssetAtPath<EncounterTable>("Assets/_Project/Data/Battle/Encounters_TestWater.asset");
 
             var gate = PropKit.Load("ReturnGate");
             map.propLegend.RemoveAll(e => e.Key == ReturnGateKey);
@@ -180,20 +181,20 @@ namespace Diorama.EditorTools
             }
             map.SetProps(sb.ToString());
             EditorUtility.SetDirty(map);
-            log.Append($"\n  {map.name}: realm cinderwood, test tables, return gate c{g.x} r{g.y} (arrive c{g.x} r{g.y + 1})");
+            log.Append($"\n  {map.name}: realm cinderwood, return gate c{g.x} r{g.y} (arrive c{CinderwoodTools.Arrive.x} r{CinderwoodTools.Arrive.y})");
             return map;
         }
 
         /// <summary>Hub fire gate <-> Cinderwood return gate; hub water and wind sealed.</summary>
-        static void Link(WorldMap hub, WorldMap cinderwood, StringBuilder log)
+        internal static void Link(WorldMap hub, WorldMap cinderwood, StringBuilder log)
         {
             hub.realm = "stillisle";
             hub.arrivalLine = "hub.return.first";
             var toHub = StillIsleTools.FireGate + new Vector2Int(1, 1);
-            var toCinder = CinderwoodGate + new Vector2Int(0, 1);
+            var toCinder = CinderwoodTools.Arrive;
             hub.gates = new List<GateLink>
             {
-                new GateLink { id = "fire", tile = StillIsleTools.FireGate, to = cinderwood, arrive = toCinder, arriveFacing = new Vector2Int(0, 1), portal = FireColor, firstSeenLine = "gate.fire.first" },
+                new GateLink { id = "fire", tile = StillIsleTools.FireGate, to = cinderwood, arrive = toCinder, arriveFacing = CinderwoodTools.ArriveFacing, portal = FireColor, firstSeenLine = "gate.fire.first" },
                 new GateLink { id = "water", tile = StillIsleTools.WaterGate, isSealed = true, portal = WaterColor },
                 new GateLink { id = "wind", tile = StillIsleTools.WindGate, isSealed = true, portal = WindColor },
             };

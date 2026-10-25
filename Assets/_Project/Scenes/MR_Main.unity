@@ -2279,7 +2279,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.MapCreature
   island: {fileID: 270959109}
   explorer: {fileID: 374318554}
-  homeTile: {x: 26, y: 25}
+  homeTile: {x: 14, y: 25}
   map: {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
   wander: 1
   wanderRadius: 2
@@ -2433,7 +2433,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.MapCreature
   island: {fileID: 270959109}
   explorer: {fileID: 374318554}
-  homeTile: {x: 30, y: 25}
+  homeTile: {x: 17, y: 26}
   map: {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
   wander: 1
   wanderRadius: 2
@@ -2907,7 +2907,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.MapCreature
   island: {fileID: 270959109}
   explorer: {fileID: 374318554}
-  homeTile: {x: 28, y: 24}
+  homeTile: {x: 13, y: 27}
   map: {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
   wander: 1
   wanderRadius: 2

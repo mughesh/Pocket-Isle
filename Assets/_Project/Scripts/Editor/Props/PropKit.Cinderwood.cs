@@ -65,7 +65,7 @@ namespace Diorama.EditorTools
         /// <summary>Round autumn tree: 2-3 stacked, offset blobs, widest in the middle, trunk showing below.</summary>
         static PropRecipe AutumnTree()
         {
-            var tree = Recipe("AutumnTree", new Vector2Int(1, 1), true, true, 900);
+            var tree = Recipe("AutumnTree", new Vector2Int(1, 1), true, true, 700);
             tree.palette = Palette(Clay, C("#4A3328"), Stone, CanopyRed, CanopyGold, Smoke);
             tree.tips = CanopyTips;
             tree.scaleJitter = 0.12f;
@@ -88,7 +88,7 @@ namespace Diorama.EditorTools
         /// <summary>Tall narrow tree (poplar-like): four stacked slim blobs.</summary>
         static PropRecipe TallTree()
         {
-            var tree = Recipe("TallTree", new Vector2Int(1, 1), true, true, 900);
+            var tree = Recipe("TallTree", new Vector2Int(1, 1), true, true, 700);
             tree.palette = Palette(Clay, C("#4A3328"), Stone, CanopyRed, CanopyGold, Smoke);
             tree.tips = CanopyTips;
             tree.scaleJitter = 0.1f;
