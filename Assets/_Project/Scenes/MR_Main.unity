@@ -1952,6 +1952,8 @@ MonoBehaviour:
   runes: {fileID: 382714127}
   swap: {fileID: 221433162}
   party: {fileID: 1499891276}
+  opening: {fileID: 1891040199}
+  gates: {fileID: 1858573327}
   seconds: 30
 --- !u!4 &1059021441
 Transform:

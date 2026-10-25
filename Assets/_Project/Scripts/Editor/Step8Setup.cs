@@ -105,6 +105,14 @@ namespace Diorama.EditorTools
             log.Append("\n  'Shard Gates' (portals, walk in or look + pinch, sealed bump, arrival lines)");
 
             WireOpening(island, swap, director, log);
+            var tour = Object.FindFirstObjectByType<PerfTour>(FindObjectsInactive.Include);
+            if (tour != null)
+            {
+                tour.opening = Object.FindFirstObjectByType<Opening>(FindObjectsInactive.Include);
+                tour.gates = gates;
+                EditorUtility.SetDirty(tour);
+                log.Append("\n  Perf Tour: step 8 tour (perftour8.txt: opening, hub with the statue, gate travel)");
+            }
 
             DialogueTools.Import();
             log.Append("\n  Script_v1 reimported (gate and opening lines)");

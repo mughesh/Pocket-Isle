@@ -19,12 +19,17 @@ namespace Diorama
     public class PerfTour : MonoBehaviour
     {
         public const string TriggerFile = "perftour.txt";
+        /// <summary>Step 8 tour: the opening (start it on a new game: no save), the hub with the statue, gate travel.</summary>
+        public const string HubTriggerFile = "perftour8.txt";
 
         public GestureTestPiece explorer;
         public EncounterDirector encounters;
         public BattleRunes runes;
         public SceneSwap swap;
         public Party party;
+        [Tooltip("Step 8 tour.")]
+        public Opening opening;
+        public ShardGates gates;
         public float seconds = 30f;
 
         ProfilerRecorder _draws, _tris, _memory;
@@ -36,16 +41,23 @@ namespace Diorama
         void Start()
         {
             Debug.Log($"[Startup] first frame at {Time.realtimeSinceStartup:0.00} s after the player started.");
-            string path = Path.Combine(Application.persistentDataPath, TriggerFile);
-            if (!File.Exists(path)) return;
-            try { File.Delete(path); }
-            catch (IOException e) { Debug.LogWarning($"[PerfTour] Couldn't delete the trigger file: {e.Message}"); }
-            if (explorer == null || encounters == null || runes == null || swap == null || party == null)
+            bool hub = Consume(HubTriggerFile);
+            if (!hub && !Consume(TriggerFile)) return;
+            if (explorer == null || encounters == null || runes == null || swap == null || party == null || hub && (opening == null || gates == null))
             {
-                Debug.LogError("[PerfTour] Needs the explorer, encounters, runes, scene swap and party (Set Up MR_Main (7c)).", this);
+                Debug.LogError("[PerfTour] Needs the explorer, encounters, runes, scene swap, party (and for step 8 the opening and gates): Set Up MR_Main (8 hub).", this);
                 return;
             }
-            StartCoroutine(Tour());
+            StartCoroutine(hub ? HubTour() : Tour());
+        }
+
+        static bool Consume(string file)
+        {
+            string path = Path.Combine(Application.persistentDataPath, file);
+            if (!File.Exists(path)) return false;
+            try { File.Delete(path); }
+            catch (IOException e) { Debug.LogWarning($"[PerfTour] Couldn't delete the trigger file: {e.Message}"); }
+            return true;
         }
 
         void OnDisable() => StopRecorders();
@@ -171,6 +183,63 @@ namespace Diorama
                 yield return WaitSwap();
             }
 
+            encounters.grassChance = chance;
+            Debug.Log("[PerfTour] Done.");
+        }
+
+        /// <summary>
+        /// Step 8: the opening as it plays (shard, unfold, Spirit; auto-touch), then the first starter is picked, the hub
+        /// with the statue in view, then fire gate to Cinderwood and back, again and again.
+        /// </summary>
+        IEnumerator HubTour()
+        {
+            Debug.Log($"[PerfTour] Starting the step 8 tour ({(Opening.InProgress ? "new game" : "returning player: no opening to measure")}).");
+            float chance = encounters.grassChance;
+            encounters.grassChance = 0f;
+            encounters.FirstEncounterDone = true;
+            if (Opening.InProgress)
+            {
+                Begin("opening (shard, unfold, spirit)");
+                yield return new WaitForSeconds(20f);
+                End("opening (shard, unfold, spirit)");
+                for (float t = 0f; Opening.InProgress && t < 60f; t += 0.5f)
+                {
+                    opening.DebugChoose(0);
+                    yield return new WaitForSeconds(0.5f);
+                }
+            }
+            if (SceneSwap.IsInside)
+            {
+                swap.Return();
+                yield return WaitSwap();
+            }
+            var hub = swap.FindWorld("WorldMap_StillIsle");
+            if (hub != null && explorer.island.world != hub)
+            {
+                swap.TravelNow(hub, hub.startTile, new Vector2Int(0, -1));
+                yield return null;
+            }
+            if (hub != null) explorer.Teleport(hub.startTile + Vector2Int.down, new Vector2Int(0, -1));
+            yield return new WaitForSeconds(2f);
+            Begin("hub (statue in view)");
+            yield return new WaitForSeconds(seconds * 0.5f);
+            End("hub (statue in view)");
+
+            Begin("gate travel");
+            float until = Time.time + seconds;
+            while (Time.time < until)
+            {
+                string id = explorer.island.world == hub ? "fire" : "home";
+                int i = gates.IndexOf(id);
+                if (i < 0) break;
+                foreach (var g in explorer.island.world.gates)
+                    if (g.id == id) explorer.Teleport(g.Front(0), new Vector2Int(0, -1));
+                gates.Pick(i, "PerfTour");
+                yield return new WaitForSeconds(0.6f);
+                yield return WaitSwap();
+                yield return new WaitForSeconds(1.5f);
+            }
+            End("gate travel");
             encounters.grassChance = chance;
             Debug.Log("[PerfTour] Done.");
         }

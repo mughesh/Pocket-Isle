@@ -36,6 +36,14 @@ namespace Diorama.EditorTools
 
         public static void ChoosePebbloop() => Choose(1);
 
+        /// <summary>Walks the explorer to the hub's first tall grass (the scripted first encounter).</summary>
+        public static void GoFirstGrass()
+        {
+            var explorer = Object.FindFirstObjectByType<GestureTestPiece>();
+            if (explorer == null || explorer.island.world == null || !explorer.island.world.TryGetLandmark("firstGrass", out var grass)) return;
+            Debug.Log($"[Step8Debug] GoTo first grass c{grass.x} r{grass.y}: {explorer.GoTo(grass)}");
+        }
+
         /// <summary>A seated shot from the island's front (the opening's floating pods, the unfold), hands hidden.</summary>
         public static void SeatedShot()
         {
