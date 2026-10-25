@@ -5,9 +5,11 @@ here** and gets done in the polish days (Nov 13–14), most valuable first. Add 
 
 | Added | Item | Notes |
 |---|---|---|
+| Oct 25 | **Lock island** toggle (no accidental grabs) | In the Spirit menu. Mugesh's note, step 8c |
+| Oct 25 | Ghost start / end points per target: the grab ghosts (pods, cradle, rim) still land the palm on the target's centre | 8c did the shard (front surface) and the attack lesson (nearest rune). Needs a per-target contact offset |
 | Oct 25 | **The Spirit as the menu**: poke or look + pinch the Spirit, a small ring of options round it (Replay tutorial, Recenter, Volumes, New game, Quit) | Design with Mugesh first |
-| Oct 25 | Ghost hand placeholders: thumb swipe / tap / pinch poses are rough | Replaced by Mugesh's recordings (Record Ghost Clip) |
-| Oct 25 | Shader warmup at launch (shard, fx orb, portal, pod variants) | 3 hitch frames in the opening on device, worst 97 ms |
+| Oct 25 | ~~Ghost hand placeholders: thumb swipe / tap / pinch poses are rough~~ | Done: Mugesh's recordings |
+| Oct 25 | ~~Shader warmup at launch (shard, fx orb, portal, pod variants)~~ | Done in 8c (drawn once before the shard). Confirm on device |
 | Oct 25 | Starter pods a bit small at the default island size | podScale 3.2, grows 1.45x on gaze |
 | Oct 25 | Windmill blades on the Wind gate could spin | Static now (Sway only) |
 | Oct 24 | Lantern Spirit size and position tuning | Fine for now |

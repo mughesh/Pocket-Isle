@@ -53,6 +53,23 @@ namespace Diorama.EditorTools
             HeadGaze.DebugAim = null;
         }
 
+        /// <summary>Battle: the lead pod is sent out as if thrown.</summary>
+        public static void SendLead()
+        {
+            var d = Object.FindFirstObjectByType<EncounterDirector>();
+            var party = Object.FindFirstObjectByType<Party>();
+            if (d != null && party != null) d.DebugPick(party.LeadSlot);
+        }
+
+        /// <summary>The two-hands tip's ghost, held as a preview (lessons and the hands check leave it alone).</summary>
+        public static void GhostTwoHands()
+        {
+            var g = Object.FindFirstObjectByType<GhostHands>();
+            if (g == null) return;
+            g.previewing = true;
+            g.Show("grab_rim_slide", GhostPlace.AtTarget, "islandRim", 1f, false, true, 0.3f);
+        }
+
         public static void ChooseStarter()
         {
             var o = Object.FindFirstObjectByType<Opening>();
