@@ -93,7 +93,6 @@ namespace Diorama
         float _sideSign = 1f;
         int _chars;
         bool _showing;
-        readonly Hand[] _hands = new Hand[2];
         readonly bool[] _wasPinching = new bool[2];
 
         void Awake()
@@ -358,7 +357,7 @@ namespace Diorama
             IsGazed = looking;
             for (int h = 0; h < 2; h++)
             {
-                var hand = HandLookup.Refresh(ref _hands[h], h == 0 ? Handedness.Left : Handedness.Right);
+                var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
                 if (hand == null || !hand.IsTrackedDataValid)
                 {
                     _wasPinching[h] = false;

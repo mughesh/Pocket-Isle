@@ -90,7 +90,6 @@ namespace Diorama
         MaterialPropertyBlock _block;
         bool _interactable;
         int _hovered = -1;
-        readonly Hand[] _hands = new Hand[2];
         readonly bool[] _wasPinching = new bool[2];
         StageActor _avoidA, _avoidB;
         float _avoid;
@@ -389,7 +388,7 @@ namespace Diorama
             }
             for (int h = 0; h < 2; h++)
             {
-                var hand = HandLookup.Refresh(ref _hands[h], h == 0 ? Handedness.Left : Handedness.Right);
+                var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
                 if (hand == null || !hand.IsTrackedDataValid)
                 {
                     _wasPinching[h] = false;

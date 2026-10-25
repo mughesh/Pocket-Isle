@@ -76,8 +76,6 @@ namespace Diorama
         /// <summary>The saved id of the lesson the player is on (null when finished or not started).</summary>
         public string CurrentId => _runner != null && _runner.IsRunning && _runner.Current != null ? _runner.Current.id : null;
         public bool HandsMissing { get; private set; }
-        /// <summary>The hand the player used last (swipes, pinches); the ghost shows that one. Default right.</summary>
-        public bool LastHandLeft { get; private set; }
         public Vector2Int? GoldTile => _goldTile;
 
         LessonRunner _runner;
@@ -87,8 +85,6 @@ namespace Diorama
         Vector2Int? _goldTile;
         Coroutine _goldPath;
         AudioSource _audio;
-        readonly Hand[] _hands = new Hand[2];
-        readonly bool[] _wasPinching = { true, true };
 
         void Awake()
         {
@@ -115,7 +111,6 @@ namespace Diorama
                 explorer.Stopped -= OnStopped;
             }
             if (encounters != null) encounters.BattleEnded -= OnBattleEnded;
-            if (input != null) input.Gesture -= OnGesture;
         }
 
         void Start()
@@ -129,7 +124,6 @@ namespace Diorama
             explorer.OnStep += OnStep;
             explorer.Stopped += OnStopped;
             encounters.BattleEnded += OnBattleEnded;
-            if (input != null) input.Gesture += OnGesture;
 
             GameConditions.Register("battle.send", () => encounters != null && encounters.AwaitingSendOut);
             GameConditions.Register("battle.out", () => encounters != null && encounters.PlayerOut);
@@ -238,11 +232,6 @@ namespace Diorama
         {
             if (_runner == null || !_runner.IsRunning) return;
             _runner.Mark(result == BattleResult.Won || result == BattleResult.Caught ? "wonOrCaught" : "battleFailed");
-        }
-
-        void OnGesture(ThumbGesture g, GestureSource source)
-        {
-            if (source != GestureSource.Keyboard) LastHandLeft = source == GestureSource.LeftHand;
         }
 
         // ---- the chain ----
@@ -372,12 +361,9 @@ namespace Diorama
             for (int h = 0; h < 2; h++)
             {
                 bool left = h == 0;
-                var hand = HandLookup.Refresh(ref _hands[h], left ? Handedness.Left : Handedness.Right);
+                var hand = HandRegistry.Get(left ? Handedness.Left : Handedness.Right);
                 bool tracked = hand != null && hand.IsTrackedDataValid;
                 any |= tracked;
-                bool pinching = tracked && hand.GetIndexFingerIsPinching();
-                if (pinching && !_wasPinching[h]) LastHandLeft = left;
-                _wasPinching[h] = pinching;
             }
             // Flat Editor Play has no hands at all: no "Show me your hands!" there.
             if (!UnityEngine.XR.XRSettings.isDeviceActive || _runner.State != LessonRunner.Phase.Teaching) any = true;

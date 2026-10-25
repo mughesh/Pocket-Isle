@@ -98,7 +98,7 @@ namespace Diorama
 
         void UpdateHand(HandProbe probe, Handedness handedness)
         {
-            HandLookup.Refresh(ref probe.hand, handedness);
+            probe.hand = HandRegistry.Get(handedness);
             probe.valid = probe.hand != null && probe.hand.IsTrackedDataValid && TryReadOffset(probe.hand, out probe.current);
             if (!probe.valid) return;
 

@@ -32,7 +32,6 @@ namespace Diorama
         public bool IsRecording { get; private set; }
 
         TextMeshPro _label;
-        readonly Hand[] _hands = new Hand[2];
 
         void Start()
         {
@@ -172,8 +171,8 @@ namespace Diorama
 
         Hand PickHand(Handedness? which)
         {
-            var right = HandLookup.Refresh(ref _hands[1], Handedness.Right);
-            var left = HandLookup.Refresh(ref _hands[0], Handedness.Left);
+            var right = HandRegistry.Get(Handedness.Right);
+            var left = HandRegistry.Get(Handedness.Left);
             if (which == Handedness.Left) return left;
             if (which == Handedness.Right) return right;
             return right != null && right.IsTrackedDataValid ? right : left != null && left.IsTrackedDataValid ? left : null;

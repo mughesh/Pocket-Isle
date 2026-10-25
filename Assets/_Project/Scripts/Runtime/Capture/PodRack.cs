@@ -138,7 +138,6 @@ namespace Diorama
         float _cradleShown, _cradlePop = -1f;
         PodCard _card;
         Mesh _quad;
-        readonly Hand[] _hands = new Hand[2];
         readonly bool[] _wasPinching = { true, true };
         readonly int[] _poked = { -1, -1 };
         int _gazed = -1;
@@ -607,7 +606,7 @@ namespace Diorama
             for (int h = 0; h < 2; h++)
             {
                 bool left = h == 0;
-                var hand = HandLookup.Refresh(ref _hands[h], left ? Handedness.Left : Handedness.Right);
+                var hand = HandRegistry.Get(left ? Handedness.Left : Handedness.Right);
                 bool tracked = HandLookup.TryGetJoint(hand, HandJointId.HandIndexTip, out var tip);
 
                 // Poke: a fingertip entering a pod.
@@ -693,7 +692,7 @@ namespace Diorama
             float bestSq = handFocusDistance * handFocusDistance;
             for (int h = 0; h < 2; h++)
             {
-                var hand = HandLookup.Refresh(ref _hands[h], h == 0 ? Handedness.Left : Handedness.Right);
+                var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
                 foreach (var joint in HandJoints)
                 {
                     if (!HandLookup.TryGetJoint(hand, joint, out var j)) continue;
@@ -756,7 +755,7 @@ namespace Diorama
             if ((InBattle && (PartyGrab || CradleGrab) || !InBattle) && rim.SelectingInteractors.Count == 0)
                 for (int h = 0; h < 2 && !reaching; h++)
                 {
-                    var hand = HandLookup.Refresh(ref _hands[h], h == 0 ? Handedness.Left : Handedness.Right);
+                    var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
                     foreach (var joint in new[] { HandJointId.HandIndexTip, HandJointId.HandPalm })
                     {
                         if (!HandLookup.TryGetJoint(hand, joint, out var p)) continue;

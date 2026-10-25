@@ -178,7 +178,7 @@ namespace Diorama
             Pending(_chain.targets[_step]);
             string ghost = _chain.ghosts[_step];
             if (ghosts != null && !string.IsNullOrEmpty(ghost))
-                ghosts.Show(ghost, GhostPlace.AtTarget, _chain.targets[_step], 1f, onboarding != null && onboarding.LastHandLeft, false);
+                ghosts.Show(ghost, GhostPlace.AtTarget, _chain.targets[_step], 1f, DominantHand.Left, false);
         }
 
         void HideGhost()

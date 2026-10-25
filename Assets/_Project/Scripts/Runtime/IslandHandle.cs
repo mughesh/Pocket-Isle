@@ -63,7 +63,6 @@ namespace Diorama
         bool _turning;
         float _turnSeconds, _offFor;
 
-        readonly Hand[] _hands = new Hand[2];
         readonly bool[] _near = new bool[2];
 
         Transform Target => _grabbable != null ? _grabbable.Transform : transform;
@@ -215,8 +214,8 @@ namespace Diorama
 
         void Update()
         {
-            _near[0] = IsNearRim(HandLookup.Refresh(ref _hands[0], Handedness.Left));
-            _near[1] = IsNearRim(HandLookup.Refresh(ref _hands[1], Handedness.Right));
+            _near[0] = IsNearRim(HandRegistry.Get(Handedness.Left));
+            _near[1] = IsNearRim(HandRegistry.Get(Handedness.Right));
             UpdateFacing();
         }
 

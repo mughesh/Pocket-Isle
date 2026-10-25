@@ -74,7 +74,6 @@ namespace Diorama
         readonly List<LodgeIsling> _islings = new List<LodgeIsling>();
         readonly Dictionary<LodgeIsling, Grabber> _grabbers = new Dictionary<LodgeIsling, Grabber>();
         readonly PodView[] _comb = new PodView[6];
-        readonly Hand[] _hands = new Hand[2];
         readonly bool[] _wasPinching = { true, true };
         readonly int[] _poked = { -1, -1 };
         IslingCard _card;
@@ -728,7 +727,7 @@ namespace Diorama
             for (int h = 0; h < 2; h++)
             {
                 bool left = h == 0;
-                var hand = HandLookup.Refresh(ref _hands[h], left ? Handedness.Left : Handedness.Right);
+                var hand = HandRegistry.Get(left ? Handedness.Left : Handedness.Right);
                 bool tracked = HandLookup.TryGetJoint(hand, HandJointId.HandIndexTip, out var tip);
 
                 // Poke an Isling.

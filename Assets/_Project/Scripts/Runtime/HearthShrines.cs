@@ -107,7 +107,6 @@ namespace Diorama
 
         readonly List<Vector2Int> _shrines = new List<Vector2Int>();
         readonly List<Beacon> _beacons = new List<Beacon>();
-        readonly Hand[] _hands = new Hand[2];
         readonly bool[] _wasPinching = { true, true };
         WorldMap _scanned;
         int _scannedVersion = -1;
@@ -309,7 +308,7 @@ namespace Diorama
             for (int h = 0; h < 2; h++)
             {
                 bool left = h == 0;
-                var hand = HandLookup.Refresh(ref _hands[h], left ? Handedness.Left : Handedness.Right);
+                var hand = HandRegistry.Get(left ? Handedness.Left : Handedness.Right);
                 bool pinching = hand != null && hand.IsTrackedDataValid && hand.GetIndexFingerIsPinching();
                 bool busy = grabGuard != null && grabGuard.IsHandBusy(left);
                 if (pinching && !_wasPinching[h] && !busy && _gazed >= 0) Pick(_gazed, $"look + pinch ({(left ? "left" : "right")})");

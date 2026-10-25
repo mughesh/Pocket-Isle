@@ -56,7 +56,6 @@ namespace Diorama
 
         struct HandState
         {
-            public Hand hand;
             public float near, hover, held;
             public Vector3 closest;
         }
@@ -112,7 +111,7 @@ namespace Diorama
         /// <summary>Eases one hand's near / hover / held levels; returns how much it lights the frame.</summary>
         float Track(ref HandState s, bool left, bool hidden, float dt)
         {
-            var hand = HandLookup.Refresh(ref s.hand, left ? Handedness.Left : Handedness.Right);
+            var hand = HandRegistry.Get(left ? Handedness.Left : Handedness.Right);
             float near = 0f, hover = 0f, held = 0f;
             Vector3? fake = !left && DebugPalm != null ? DebugPalm() : null;
             if (!hidden && fake.HasValue)

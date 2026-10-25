@@ -38,7 +38,6 @@ namespace Diorama
         OVRPlugin.HandTrackingState _state;
         readonly float[] _lastTime = { -1f, -1f };
         readonly OVRPlugin.MicrogestureType[] _lastType = new OVRPlugin.MicrogestureType[2];
-        readonly Hand[] _hands = new Hand[2];
         readonly float[] _pinchStart = { -9f, -9f };
         readonly bool[] _pinching = new bool[2];
         readonly int[] _burstCount = new int[3];
@@ -88,7 +87,7 @@ namespace Diorama
         {
             for (int h = 0; h < 2; h++)
             {
-                var hand = HandLookup.Refresh(ref _hands[h], h == 0 ? Handedness.Left : Handedness.Right);
+                var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
                 bool pinching = hand != null && hand.IsTrackedDataValid && hand.GetIndexFingerIsPinching();
                 if (pinching && !_pinching[h]) _pinchStart[h] = Time.unscaledTime;
                 _pinching[h] = pinching;

@@ -21,8 +21,6 @@ namespace Diorama
         [Tooltip("Palm within this horizontal distance of the point (m at the placed island size).")]
         public float radius = 0.06f;
 
-        [NonSerialized] readonly Hand[] _hands = new Hand[2];
-
         /// <summary>
         /// A free hand's palm faces down over <paramref name="point"/> (world; <paramref name="up"/> = the island's up).
         /// <paramref name="label"/> names the dev readout line (null = none).
@@ -41,7 +39,7 @@ namespace Diorama
             for (int h = 0; h < 2; h++)
             {
                 bool left = h == 0;
-                var hand = HandLookup.Refresh(ref _hands[h], left ? Handedness.Left : Handedness.Right);
+                var hand = HandRegistry.Get(left ? Handedness.Left : Handedness.Right);
                 string side = left ? "L" : "R";
                 if (!HandLookup.TryGetJointPose(hand, HandJointId.HandPalm, out var palm))
                 {

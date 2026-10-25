@@ -54,6 +54,8 @@ namespace Diorama
         /// <summary>Species met in battle (step 7c: "New!" only the first time).</summary>
         public List<string> seen = new List<string>();
         public string walkMode;
+        /// <summary>"left" / "right": the hand that first touched the opening shard (step 8e); empty = not yet.</summary>
+        public string dominantHand;
 
         [Header("Inside an interior (the explorer fields above are then the outdoor return tile)")]
         public bool inside;

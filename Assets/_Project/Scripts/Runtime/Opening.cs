@@ -115,7 +115,6 @@ namespace Diorama
         readonly List<PodView> _starterPods = new List<PodView>();
         int _gazedPod = -1, _saidPod = -1, _chosen = -1;
         float _gazeSince;
-        readonly Hand[] _hands = new Hand[2];
         readonly bool[] _wasPinching = { true, true };
         Coroutine _run;
 
@@ -450,7 +449,7 @@ namespace Diorama
             if (readout) DevReadout.Sphere(c, _shardRadius + contactSlack, new Color(1f, 0.5f, 0.2f, 0.5f));
             for (int h = 0; h < 2; h++)
             {
-                var hand = HandLookup.Refresh(ref _hands[h], h == 0 ? Handedness.Left : Handedness.Right);
+                var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
                 if (hand == null || !hand.IsTrackedDataValid)
                 {
                     _wasTouching[h] = false;
@@ -482,7 +481,8 @@ namespace Diorama
                     Vector3 dir = d > 1e-4f ? surface - p : c - p;
                     if (dir.sqrMagnitude < 1e-6f && Camera.main != null) dir = Camera.main.transform.forward;
                     dir.Normalize();
-                    Contact(surface, dir, $"{joint}, {d * 100f:0.0} cm from the surface");
+                    DominantHand.FirstTouch(h == 0);
+                    Contact(surface, dir, $"{(h == 0 ? "left" : "right")} {joint}, {d * 100f:0.0} cm from the surface");
                     _wasTouching[h] = true;
                     return true;
                 }
@@ -495,7 +495,8 @@ namespace Diorama
                 if (pinching && !_wasPinching[h] && looking)
                 {
                     var toHead = Camera.main != null ? (Camera.main.transform.position - c).normalized : Vector3.back;
-                    Contact(c + toHead * _shardRadius, -toHead * 0.4f, "look + pinch");
+                    DominantHand.FirstTouch(h == 0);
+                    Contact(c + toHead * _shardRadius, -toHead * 0.4f, $"{(h == 0 ? "left" : "right")} look + pinch");
                     return true;
                 }
                 _wasPinching[h] = pinching;
@@ -826,7 +827,7 @@ namespace Diorama
             for (int h = 0; h < 2; h++)
             {
                 bool left = h == 0;
-                var hand = HandLookup.Refresh(ref _hands[h], left ? Handedness.Left : Handedness.Right);
+                var hand = HandRegistry.Get(left ? Handedness.Left : Handedness.Right);
                 bool pinching = hand != null && hand.IsTrackedDataValid && hand.GetIndexFingerIsPinching();
                 bool busy = handle != null && handle.IsHandBusy(left);
                 bool holding = false;

@@ -22,7 +22,6 @@ namespace Diorama
         [Tooltip("Optional. A rim pod under the gaze takes the pinch.")]
         public PodRack pods;
 
-        readonly Hand[] _hands = new Hand[2];
         readonly bool[] _wasPinching = { true, true };
         Vector2Int _reachTile = new Vector2Int(int.MinValue, 0);
         bool _reachable;
@@ -48,7 +47,7 @@ namespace Diorama
 
             for (int h = 0; h < 2; h++)
             {
-                var hand = HandLookup.Refresh(ref _hands[h], h == 0 ? Handedness.Left : Handedness.Right);
+                var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
                 bool pinching = hand != null && hand.IsTrackedDataValid && hand.GetIndexFingerIsPinching();
                 bool busy = grabGuard != null && grabGuard.IsHandBusy(h == 0);
                 if (pinching && !_wasPinching[h] && !busy && usable)

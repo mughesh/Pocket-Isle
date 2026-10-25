@@ -198,6 +198,7 @@ namespace Diorama
             }
             NoteParty();
             if (Enum.TryParse(data.walkMode, out MoveMode mode)) explorer.moveMode = mode;
+            DominantHand.Restore(data.dominantHand);
             if (data.inside)
             {
                 var interior = swap != null ? swap.FindInterior(data.interior) : null;
@@ -260,6 +261,7 @@ namespace Diorama
                     caught = _caught.ToList(),
                     seen = encounters != null ? encounters.Seen.ToList() : new List<string>(),
                     walkMode = explorer.moveMode.ToString(),
+                    dominantHand = DominantHand.Saved,
                 };
                 if (data.hasShrine)
                 {

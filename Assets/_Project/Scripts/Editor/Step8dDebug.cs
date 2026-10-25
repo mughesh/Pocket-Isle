@@ -19,8 +19,8 @@ namespace Diorama.EditorTools
             }
             foreach (var side in new[] { Handedness.Left, Handedness.Right })
             {
-                var h = HandLookup.Find(side);
-                Debug.Log($"[Step8dDebug] HandLookup {side}: {(h != null ? h.name : "none")}");
+                var h = HandRegistry.Get(side);
+                Debug.Log($"[Step8dDebug] HandRegistry {side}: {(h != null ? h.name : "none")}");
             }
         }
 

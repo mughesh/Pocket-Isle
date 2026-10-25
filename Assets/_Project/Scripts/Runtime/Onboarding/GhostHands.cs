@@ -12,7 +12,7 @@ namespace Diorama
     /// (pale blue, bright rim, pulled toward the eye so the island never hides it). One draw per hand.
     /// Placement: at the lesson's target (real size, reaching in from the player's side), above the island's front
     /// (thumb demos, <see cref="Onboarding"/> lesson scale, the Spirit beside it: dialogue target <c>ghost</c>) or above a
-    /// target tile. It shows the hand the player used last (mirroring the clip when needed). After
+    /// target tile. It shows the player's dominant hand (<see cref="DominantHand"/>, mirroring the clip when needed). After
     /// <see cref="struggleLoops"/> loops without the lesson done it slows down and grows a little. With no hands tracked it
     /// shows both hands raised. Recorded clips (<see cref="library"/>) replace the code placeholders by name.
     /// </summary>
@@ -150,7 +150,7 @@ namespace Diorama
                 Hide();
                 return;
             }
-            Show(l.ghost, l.place, l.target, l.ghostScale, onboarding.LastHandLeft, l.bothHands, l.ghostSpread);
+            Show(l.ghost, l.place, l.target, l.ghostScale, DominantHand.Left, l.bothHands, l.ghostSpread);
         }
 
         void OnLessonEnded(LessonData l, bool done)
@@ -504,12 +504,7 @@ namespace Diorama
                 if (g.renderer == null && System.Array.IndexOf(smr.bones, g.joints[(int)HandJointId.HandWristRoot]) >= 0) g.renderer = smr;
                 else smr.enabled = false; // the OVR-skeleton mesh
             }
-            // Strip every behaviour (the copy must never track, grab or be pointed at). Later components can depend on
-            // earlier ones (RequireComponent), so each object's go last-added first.
-            var behaviours = clone.GetComponentsInChildren<MonoBehaviour>(true);
-            foreach (var mb in behaviours) mb.enabled = false;
-            for (int i = behaviours.Length - 1; i >= 0; i--) DestroyImmediate(behaviours[i]);
-            foreach (var col in clone.GetComponentsInChildren<Collider>(true)) DestroyImmediate(col);
+            if (!StripToMesh(clone)) Debug.LogError($"[GhostHands] {clone.name} still has hand components after stripping.", this);
             if (g.root == null || g.renderer == null)
             {
                 Debug.LogError($"[GhostHands] {source.name}: no OpenXR skinned hand / root found; no {(left ? "left" : "right")} ghost.", this);
@@ -525,6 +520,23 @@ namespace Diorama
             g.renderer.enabled = false;
             holder.SetActive(true);
             return g;
+        }
+
+        /// <summary>
+        /// Leaves a copied hand visual as bare meshes and transforms: every behaviour (Hand, data sources, interactors,
+        /// visuals), collider and rigidbody goes, so the copy can never track, grab, be pointed at or be taken for the
+        /// player's hand. Later components can depend on earlier ones (RequireComponent), so last-added first.
+        /// Returns false if anything hand-like is left.
+        /// </summary>
+        public static bool StripToMesh(GameObject clone)
+        {
+            var behaviours = clone.GetComponentsInChildren<MonoBehaviour>(true);
+            foreach (var mb in behaviours) mb.enabled = false;
+            for (int i = behaviours.Length - 1; i >= 0; i--) DestroyImmediate(behaviours[i]);
+            foreach (var col in clone.GetComponentsInChildren<Collider>(true)) DestroyImmediate(col);
+            foreach (var rb in clone.GetComponentsInChildren<Rigidbody>(true)) DestroyImmediate(rb);
+            return clone.GetComponentsInChildren<Oculus.Interaction.Input.IHand>(true).Length == 0 &&
+                   clone.GetComponentsInChildren<MonoBehaviour>(true).Length == 0;
         }
 
         static Transform Map(Transform srcTop, Transform cloneTop, Transform src)

@@ -34,7 +34,6 @@ namespace Diorama
 
         class Finger
         {
-            public Hand hand;
             public Vector3 last;
             public bool hasLast;
             public float speed;
@@ -54,7 +53,7 @@ namespace Diorama
 
         void UpdateFinger(Finger f, bool left)
         {
-            var hand = HandLookup.Refresh(ref f.hand, left ? Handedness.Left : Handedness.Right);
+            var hand = HandRegistry.Get(left ? Handedness.Left : Handedness.Right);
             if (!HandLookup.TryGetJoint(hand, HandJointId.HandIndexTip, out var tip))
             {
                 f.hasLast = f.dipped = false;

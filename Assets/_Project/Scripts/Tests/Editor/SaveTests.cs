@@ -114,6 +114,23 @@ namespace Diorama.Tests
         }
 
         [Test]
+        public void DominantHand_FirstTouchDecidesAndRoundTrips()
+        {
+            DominantHand.Restore(null);
+            Assert.IsFalse(DominantHand.Known);
+            Assert.IsFalse(DominantHand.Left, "right until the shard is touched");
+            DominantHand.FirstTouch(true);
+            DominantHand.FirstTouch(false);
+            Assert.IsTrue(DominantHand.Left, "only the first touch counts");
+            SaveGame.Write(_path, new SaveData { dominantHand = DominantHand.Saved });
+            DominantHand.Restore(null);
+            Assert.AreEqual(SaveGame.ReadResult.Loaded, SaveGame.Read(_path, out var back, out _));
+            DominantHand.Restore(back.dominantHand);
+            Assert.IsTrue(DominantHand.Known && DominantHand.Left);
+            DominantHand.Restore(null);
+        }
+
+        [Test]
         public void UnknownSpecies_IsSkippedAndReported()
         {
             Species("Kilnpot");
