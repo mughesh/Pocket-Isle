@@ -232,8 +232,10 @@ namespace Diorama.EditorTools
             opening.shardMaterial = ShardMaterial();
             IslingSpecies S(string id) => AssetDatabase.LoadAssetAtPath<IslingSpecies>($"Assets/_Project/Data/Creatures/Species/{id}.asset");
             opening.starters = new[] { S("Kilnpot"), S("Pebbloop"), S("Pufflet") };
-            opening.podScale = 3.2f;
-            opening.podRow = new Vector3(0.11f, 0.1f, 0.26f);
+            // Step 8d: 25% smaller than 8c's 3.2, on a wide shallow arc.
+            opening.podScale = 2.4f;
+            opening.podFocusGrow = 1.3f;
+            opening.podArc = new Vector3(1.2f, 0.1f, 0.26f);
             EditorUtility.SetDirty(opening);
             bool ok = opening.placer != null && opening.handle != null && opening.spirit != null && opening.save != null && opening.pods != null;
             log.Append($"\n  'Opening' (new game: shard, unfold, Spirit, move prompt, starter pods Kilnpot / Pebbloop / Pufflet; returning: 2 s rise){(ok ? "" : " - SOME REFERENCES MISSING")}");

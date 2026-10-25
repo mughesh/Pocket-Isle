@@ -250,6 +250,9 @@ namespace Diorama
             }
         }
 
+        /// <summary>Half the tile footprint (island-local x, z), centred on the origin: the base's real edge (LocalBounds is padded).</summary>
+        public Vector2 FootprintHalfSize => map != null ? new Vector2(map.Columns * map.tileSize * 0.5f, map.Rows * map.tileSize * 0.5f) : Vector2.zero;
+
         public int BladeCount { get; private set; }
         public int TileCount { get; private set; }
 

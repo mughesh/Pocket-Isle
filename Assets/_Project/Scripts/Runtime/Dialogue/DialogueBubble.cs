@@ -18,6 +18,17 @@ namespace Diorama
     /// </summary>
     public class DialogueBubble : MonoBehaviour
     {
+        /// <summary>
+        /// Things the bubble must not cover in the player's view: each listener adds spheres (xyz world centre, w radius),
+        /// the bubble moves up until it clears them (step 8d: the floating starter pods).
+        /// </summary>
+        public static event Action<System.Collections.Generic.List<Vector4>> KeepClear;
+
+        readonly System.Collections.Generic.List<Vector4> _keep = new System.Collections.Generic.List<Vector4>();
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStatics() => KeepClear = null;
+
         public Material hudMaterial;
         [Tooltip("Pinches from a hand that is grabbing or touching the rim are ignored.")]
         public IslandHandle grabGuard;
@@ -288,6 +299,7 @@ namespace Diorama
                 target = SidePosition(cam, _anchor.parent != null ? _anchor.parent.position + Vector3.up * 0.01f : _anchor.position, focus, Mathf.Max(radius, 0.02f));
                 if (before != _sideSign) PlaceTail();
             }
+            if (cam != null) target = ClearOfKeeps(cam, target);
             if (cam != null)
             {
                 Vector3 head = cam.transform.position, fwd = cam.transform.forward, dir = target - head;
@@ -300,6 +312,36 @@ namespace Diorama
             if (cam == null) return;
             Vector3 away = _root.position - cam.transform.position;
             if (away.sqrMagnitude > 1e-6f) _root.rotation = Quaternion.LookRotation(away, Vector3.up);
+        }
+
+        /// <summary>Moves the bubble up (in the view) until it covers none of the <see cref="KeepClear"/> spheres.</summary>
+        Vector3 ClearOfKeeps(Camera cam, Vector3 pos)
+        {
+            if (KeepClear == null) return pos;
+            _keep.Clear();
+            KeepClear(_keep);
+            var head = cam.transform;
+            for (int pass = 0; pass < 4; pass++)
+            {
+                bool moved = false;
+                foreach (var k in _keep)
+                {
+                    Vector3 b = head.InverseTransformPoint(pos), t = head.InverseTransformPoint(k);
+                    if (b.z < 0.05f || t.z < 0.05f) continue;
+                    // The sphere at the bubble's depth.
+                    float s = b.z / t.z;
+                    Vector2 tp = new Vector2(t.x, t.y) * s;
+                    float tr = k.w * s + 0.006f;
+                    float dx = Mathf.Abs(tp.x - b.x) - _size.x * 0.5f, dy = Mathf.Abs(tp.y - b.y) - _size.y * 0.5f;
+                    float ox = Mathf.Max(dx, 0f), oy = Mathf.Max(dy, 0f);
+                    if (ox * ox + oy * oy >= tr * tr) continue;
+                    // Up until the bubble's lower edge clears the top of the sphere.
+                    pos += head.up * (tp.y + tr - (b.y - _size.y * 0.5f) + 0.004f);
+                    moved = true;
+                }
+                if (!moved) break;
+            }
+            return pos;
         }
 
         void GazePinch()

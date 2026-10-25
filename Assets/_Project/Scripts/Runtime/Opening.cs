@@ -71,10 +71,16 @@ namespace Diorama
         public float returnRiseSeconds = 2f;
 
         [Header("Starter pods")]
-        [Tooltip("Pod size against a rim pod.")]
-        public float podScale = 3.2f;
-        [Tooltip("Row of floating pods, island-local metres: spacing, height above the cap, toward the player.")]
-        public Vector3 podRow = new Vector3(0.11f, 0.1f, 0.26f);
+        [Tooltip("Floating pod size against a rim pod (step 8d: 25% smaller than 8c's 3.2).")]
+        public float podScale = 2.4f;
+        [Tooltip("The looked-at pod grows this much; its neighbours slide apart (dock-style) so they never touch.")]
+        public float podFocusGrow = 1.3f;
+        [Tooltip("Floating pods: arc width (x the island's width), height above the cap (m at the placed island size), toward the player from the island's middle (island-local m).")]
+        public Vector3 podArc = new Vector3(1.2f, 0.1f, 0.26f);
+        [Tooltip("The outer pods float this much nearer the player than the middle one (island-local m): a shallow arc.")]
+        public float podArcBow = 0.06f;
+        [Tooltip("Smallest gap between floating pods (x a pod's diameter).")]
+        public float podMinGap = 0.4f;
         [Tooltip("A dropped pod picks a rim socket within this distance (world m).")]
         public float dropReach = 0.12f;
 
@@ -129,7 +135,8 @@ namespace Diorama
             // The rim glows itself (HintGlow); no gold sphere, it would outline the trees along the front.
             Dialogue.RegisterTarget("rim", RimPoint, k => { if (handle != null) handle.HintGlow = k; }, () => 0f);
             Dialogue.RegisterTarget("starterPods", () => _starterPods.Count > 1 && _starterPods[1] != null ? _starterPods[1].transform.position : (Vector3?)null,
-                k => { }, () => podRow.x * 0.5f * island.transform.lossyScale.x);
+                k => { }, () => pods.podPrefab != null ? pods.podPrefab.radius * podScale * podFocusGrow * island.transform.lossyScale.x : 0.03f);
+            DialogueBubble.KeepClear += StarterPodsInView;
             GameConditions.Register("opening.shard", () => _shardWaiting);
             GameConditions.Register("opening.move", () => _stage == Stage.Move);
             GameConditions.Register("opening.starters", () => _stage == Stage.Starters && _starterPods.Count > 0);
@@ -138,6 +145,7 @@ namespace Diorama
 
         void OnDestroy()
         {
+            DialogueBubble.KeepClear -= StarterPodsInView;
             InProgress = false;
             if (_shardMesh != null) Destroy(_shardMesh);
         }
@@ -674,8 +682,53 @@ namespace Diorama
 
         // ---- starter pods ----
 
-        Vector3 PodLocal(int i) =>
-            new Vector3(podRow.x * (1 - i), island.CapTopLocal + podRow.y, island.LocalBounds.center.z + podRow.z);
+        readonly List<float> _podX = new List<float>();
+
+        /// <summary>
+        /// Where floating pod <paramref name="i"/> rests (island-local): on a shallow arc across <see cref="podArc"/>.x of
+        /// the island's width (outer pods nearer the player), <see cref="podArc"/>.y above the cap. Index 0 is the player's left.
+        /// </summary>
+        Vector3 PodLocal(int i)
+        {
+            var b = island.LocalBounds;
+            float half = Mathf.Max(1e-4f, island.FootprintHalfSize.x * podArc.x);
+            float x = i < _podX.Count ? _podX[i] : b.center.x;
+            float bow = podArcBow * Mathf.Clamp01(Mathf.Abs(x - b.center.x) / half) * Mathf.Clamp01(Mathf.Abs(x - b.center.x) / half);
+            float above = podArc.y / Mathf.Max(0.05f, placer.islandScale);
+            return new Vector3(x, island.CapTopLocal + above, b.center.z + podArc.z + bow);
+        }
+
+        /// <summary>
+        /// Spreads the pods evenly (their outer edges at the arc's ends), then dock-style: the looked-at pod grows and its
+        /// neighbours slide outward until every gap is at least <see cref="podMinGap"/> of a pod's diameter.
+        /// </summary>
+        void LayoutPods(int focus)
+        {
+            int n = Mathf.Max(1, _starterPods.Count);
+            var b = island.LocalBounds;
+            float r0 = pods.podPrefab != null ? pods.podPrefab.radius * podScale : 0.03f;
+            float half = island.FootprintHalfSize.x * podArc.x - r0;
+            float gap = podMinGap * 2f * r0;
+            _podX.Clear();
+            for (int i = 0; i < n; i++) _podX.Add(n == 1 ? b.center.x : b.center.x + Mathf.Lerp(half, -half, i / (float)(n - 1)));
+            float R(int i) => r0 * (i == focus ? podFocusGrow : 1f);
+            int from = focus >= 0 ? focus : n / 2;
+            // x falls with the index (index 0 is the player's left, +X): each neighbour keeps its distance or moves out.
+            for (int j = from + 1; j < n; j++) _podX[j] = Mathf.Min(_podX[j], _podX[j - 1] - R(j - 1) - R(j) - gap);
+            for (int j = from - 1; j >= 0; j--) _podX[j] = Mathf.Max(_podX[j], _podX[j + 1] + R(j + 1) + R(j) + gap);
+        }
+
+        /// <summary>The floating pods, for the speech bubble to keep clear of (step 8d).</summary>
+        void StarterPodsInView(List<Vector4> keep)
+        {
+            if (_stage != Stage.Starters) return;
+            foreach (var p in _starterPods)
+                if (p != null)
+                {
+                    var c = p.transform.position;
+                    keep.Add(new Vector4(c.x, c.y, c.z, p.WorldRadius * 1.15f));
+                }
+        }
 
         IEnumerator RisePods()
         {
@@ -707,6 +760,7 @@ namespace Diorama
                 }
                 _starterPods.Add(pod);
             }
+            LayoutPods(-1);
             for (float t = 0f; t < 1.4f; t += Time.deltaTime)
             {
                 for (int i = 0; i < _starterPods.Count; i++)
@@ -732,6 +786,9 @@ namespace Diorama
                 _saidPod = _gazedPod;
                 Dialogue.Say("starter." + starters[_gazedPod].name.ToLowerInvariant());
             }
+            bool gazedHeld = _gazedPod >= 0 && _gazedPod < _starterPods.Count && _starterPods[_gazedPod] != null &&
+                             _starterPods[_gazedPod].GetComponent<PodGrab>() is PodGrab gg && gg.IsHeld;
+            LayoutPods(gazedHeld ? -1 : _gazedPod);
             for (int i = 0; i < _starterPods.Count; i++)
             {
                 var pod = _starterPods[i];
@@ -740,7 +797,7 @@ namespace Diorama
                 bool held = grab != null && grab.IsHeld;
                 bool focus = i == _gazedPod && !held;
                 // Floating and held pods stay big; they shrink to rim size only as they snap into the socket (Choose).
-                float size = podScale * (focus ? 1.45f : 1f);
+                float size = podScale * (focus ? podFocusGrow : 1f);
                 pod.BaseScale = Vector3.one * Mathf.Lerp(pod.BaseScale.x, size, 1f - Mathf.Exp(-Time.deltaTime * 10f));
                 if (held) continue;
                 var target = PodLocal(i) + Vector3.up * (0.006f * Mathf.Sin(t * 1.6f + i));
