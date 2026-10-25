@@ -1,0 +1,124 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e27712b2a6f9fc45ae0b54784bf7327, type: 3}
+  m_Name: Hearthstag
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.CreatureRecipe
+  baseRecipe: {fileID: 0}
+  body: {fileID: 11400000, guid: 0e12cb15ed023f0449dfaabcdd664ac5, type: 2}
+  height: 0.11
+  zones:
+    belly: 0
+    bellyDirection: {x: 0, y: 0, z: 0}
+    bellyAt: 0
+    bellyMaxY: 0
+    bellyDrips: 0
+    bellyDripLength: 0
+    socks: 1
+    socksY: -0.5
+    tips: 0
+    tipAxis: {x: 0, y: 0, z: 0}
+    tipAt: 0
+    spots: 0
+    spotScale: 0
+    cracks: 0
+    crackScale: 0
+    crackWidth: 0
+    crackPulse: 0
+    patches:
+    - center: {x: 0, y: 0.08, z: 0.66}
+      radius: 0.3
+      color: 1
+      mirrorX: 0
+    - center: {x: 0, y: -0.36, z: 0.02}
+      radius: 0.24
+      color: 1
+      mirrorX: 0
+    - center: {x: 0, y: 0.76, z: 0.97}
+      radius: 0.12
+      color: 1
+      mirrorX: 0
+  parts:
+  - part: {fileID: 11400000, guid: b44c8fc62fb9c7947b6365ea8ef602d0, type: 2}
+    position: {x: 0, y: 1.08, z: 0.56}
+    rotation: {x: -8, y: 0, z: 0}
+    scale: {x: 1.35, y: 1.35, z: 1.35}
+    mirror: 0
+    parent: -1
+  - part: {fileID: 11400000, guid: b44c8fc62fb9c7947b6365ea8ef602d0, type: 2}
+    position: {x: 0.12, y: 1.06, z: 0.6}
+    rotation: {x: -4, y: 0, z: -16}
+    scale: {x: 1.05, y: 1.05, z: 1.05}
+    mirror: 1
+    parent: -1
+  - part: {fileID: 11400000, guid: b44c8fc62fb9c7947b6365ea8ef602d0, type: 2}
+    position: {x: 0.23, y: 1.01, z: 0.52}
+    rotation: {x: 0, y: 0, z: -34}
+    scale: {x: 1.15, y: 1.15, z: 1.15}
+    mirror: 1
+    parent: -1
+  - part: {fileID: 11400000, guid: b256910a768836c48ac94de738e9b8db, type: 2}
+    position: {x: 0.27, y: 0.95, z: 0.55}
+    rotation: {x: 0, y: 0, z: 15}
+    scale: {x: 1, y: 1, z: 1}
+    mirror: 1
+    parent: -1
+  - part: {fileID: 11400000, guid: e76ee4add9cb999419c01a2bd2c1f78a, type: 2}
+    position: {x: 0, y: 0.32, z: -0.66}
+    rotation: {x: -35, y: 0, z: 0}
+    scale: {x: 1.2, y: 1.2, z: 1.2}
+    mirror: 0
+    parent: -1
+  face:
+    eyeSize: 0.062
+    eyeSpacing: 0.14
+    eyeHeight: 0.93
+    eyeStretch: 1.15
+    decals:
+    - kind: 0
+      at: {x: 0, y: 0.81}
+      size: {x: 0.06, y: 0.04}
+      color: 6
+      mirrorX: 0
+    - kind: 1
+      at: {x: 0, y: 0.72}
+      size: {x: 0.04, y: 0}
+      color: 6
+      mirrorX: 0
+  palette:
+    baseColor: {r: 0.54509807, g: 0.22745098, b: 0.11764706, a: 1}
+    belly: {r: 0.9607843, g: 0.92941177, b: 0.85490197, a: 1}
+    accent: {r: 0.41568628, g: 0.16470589, b: 0.078431375, a: 1}
+    socks: {r: 0.22745098, g: 0.22745098, b: 0.22745098, a: 1}
+    glow: {r: 0.9098039, g: 0.5254902, b: 0.16470589, a: 1}
+    extra: {r: 1, g: 0.69803923, b: 0.2901961, a: 1}
+    face: {r: 0.2901961, g: 0.15686275, b: 0.09411765, a: 1}
+    iris: {r: 0.7529412, g: 0.47058824, b: 0.15686275, a: 1}
+  spec: 0.18
+  glow: 0
+  outline: 0.03
+  idle:
+    breathe: 0.012
+    breatheSpeed: 1.5
+    jiggle: 0
+    hover: 0
+    bob: 0
+    sway: 1.5
+    swaySpeed: 0.6
+  heightScale: 1.25
+  extraParts: []
+  overridePalette: 0
+  hueShift: 0
+  saturationScale: 1
+  valueScale: 1
+  resolution: 104
+  triangleBudget: 10000
+  bakedPrefab: {fileID: 1962732298427982143, guid: 82456e2e45cda3c4ba5157a071ad2792, type: 3}

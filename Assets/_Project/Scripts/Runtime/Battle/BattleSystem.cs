@@ -12,6 +12,8 @@ namespace Diorama
     {
         MoveUsed, Missed, Damage, Shielded, AttackRaised, Healed, Fainted, FleeFailed, Fled, Ended,
         Switched, CatchAttempt, BrokeFree,
+        // Keeper battles (step 9c, KeeperRules): its crown shield broke / rose again, it entered phase 2.
+        ShieldBroken, ShieldRaised, KeeperPhase2,
     }
 
     /// <summary>
@@ -28,12 +30,15 @@ namespace Diorama
         public int hpAfter;
         public Effectiveness effectiveness;
         public bool shieldAbsorbed;
+        /// <summary>Damage: a Keeper's crown shield took most of it ("Blocked!"); <see cref="cracks"/> = cracked crystals now.</summary>
+        public bool blocked;
+        public int cracks;
         public BattleResult result;
 
         public override string ToString() => kind switch
         {
             BattleEventKind.MoveUsed => $"{side} used {move.Name}",
-            BattleEventKind.Damage => $"{side} took {amount} ({effectiveness}{(shieldAbsorbed ? ", shield" : "")}), HP {hpAfter}",
+            BattleEventKind.Damage => $"{side} took {amount} ({effectiveness}{(shieldAbsorbed ? ", shield" : "")}{(blocked ? $", blocked, {cracks} crack(s)" : "")}), HP {hpAfter}",
             BattleEventKind.Healed => $"{side} healed {amount}, HP {hpAfter}",
             BattleEventKind.AttackRaised => $"{side} attack stage {amount}",
             BattleEventKind.CatchAttempt => $"Catch: {amount} wobble(s), {(result == BattleResult.Caught ? "caught" : "broke free")}",
@@ -78,6 +83,8 @@ namespace Diorama
         public Battler player { get; private set; }
         public readonly Battler wild;
         public readonly bool wildIsRare;
+        /// <summary>Keeper battle rules, or null for a wild battle.</summary>
+        public readonly KeeperRules keeper;
         readonly TypeChart _chart;
         readonly SeededRandom _rnd;
         readonly Func<bool> _hasReserve;
@@ -101,15 +108,17 @@ namespace Diorama
         public bool WildDazed { get; private set; }
 
         /// <summary>A pod can catch: the wild HP bar is red, or it is dazed (before that a pod always breaks).</summary>
-        public bool CatchUnlocked => !IsOver && (WildDazed || BattleMath.CatchUnlocked(wild.Hp, wild.MaxHp));
+        public bool CatchUnlocked => keeper == null && !IsOver && (WildDazed || BattleMath.CatchUnlocked(wild.Hp, wild.MaxHp));
 
         /// <param name="hasReserve">True while another party creature (not the one fighting) can still fight.</param>
+        /// <param name="keeper">Keeper rules (crown shield, phases, no catching), or null.</param>
         public BattleSystem(IslingInstance player, IslingInstance wild, TypeChart chart, int seed, bool wildIsRare = false,
-            Func<bool> hasReserve = null)
+            Func<bool> hasReserve = null, KeeperRules keeper = null)
         {
             this.player = new Battler(BattleSide.Player, player);
             this.wild = new Battler(BattleSide.Wild, wild);
             this.wildIsRare = wildIsRare;
+            this.keeper = keeper;
             _chart = chart;
             _rnd = new SeededRandom(seed);
             _hasReserve = hasReserve;
@@ -136,7 +145,13 @@ namespace Diorama
             var first = playerFirst ? player : wild;
             Act(first, playerFirst ? playerMove : wildMove);
             if (!IsOver) Act(Other(first), playerFirst ? wildMove : playerMove);
+            EndKeeperTurn();
             return _turn;
+        }
+
+        void EndKeeperTurn()
+        {
+            if (keeper != null && !IsOver) keeper.EndTurn();
         }
 
         /// <summary>Tries to run. On a miss the wild creature gets a free move.</summary>
@@ -144,7 +159,8 @@ namespace Diorama
         {
             _turn.Clear();
             if (IsOver || PlayerMustSwitch || WildDazed) return _turn;
-            float chance = BattleMath.FleeChance(player.isling.Speed, wild.isling.Speed, _failedFlees);
+            // A Keeper lets you go: you can always come back and try again.
+            float chance = keeper != null ? 1f : BattleMath.FleeChance(player.isling.Speed, wild.isling.Speed, _failedFlees);
             if (_rnd.Next() < chance)
             {
                 Raise(new BattleEvent { kind = BattleEventKind.Fled, side = BattleSide.Player });
@@ -174,7 +190,7 @@ namespace Diorama
         {
             _turn.Clear();
             LastCatch = _turn;
-            if (IsOver || PlayerMustSwitch) return _turn;
+            if (IsOver || PlayerMustSwitch || keeper != null) return _turn;
             bool locked = !CatchUnlocked;
             float chance = locked ? 0f : CatchChance, roll = _rnd.Next();
             bool caught = roll < chance;
@@ -221,7 +237,11 @@ namespace Diorama
             player = new Battler(BattleSide.Player, next);
             if (!_participants.Contains(next)) _participants.Add(next);
             Raise(new BattleEvent { kind = BattleEventKind.Switched, side = BattleSide.Player });
-            if (!free) Act(wild, PickWildMove());
+            if (!free)
+            {
+                Act(wild, PickWildMove());
+                EndKeeperTurn();
+            }
             return _turn;
         }
 
@@ -236,6 +256,7 @@ namespace Diorama
         public MoveData PickWildMove()
         {
             var moves = wild.Moves;
+            if (keeper != null) return keeper.Pick(moves);
             float total = 0f;
             foreach (var m in moves) total += WildWeight(m);
             if (total <= 0f) return null;
@@ -271,6 +292,10 @@ namespace Diorama
             {
                 switch (move.effect)
                 {
+                    case SupportEffect.Shield when keeper != null && user == wild:
+                        keeper.Raise();
+                        Raise(new BattleEvent { kind = BattleEventKind.ShieldRaised, side = user.side, move = move });
+                        break;
                     case SupportEffect.Shield:
                         user.shielded = true;
                         Raise(new BattleEvent { kind = BattleEventKind.Shielded, side = user.side, move = move });
@@ -296,23 +321,46 @@ namespace Diorama
             var effectiveness = _chart != null ? _chart.Matchup(move.element, target.isling.Element) : Effectiveness.Normal;
             float typeMul = _chart != null ? _chart.Multiplier(effectiveness) : 1f;
             float roll = Mathf.Lerp(BattleMath.RollMin, BattleMath.RollMax, _rnd.Next());
-            int damage = BattleMath.Damage(user.isling.level, move.power, user.Attack, target.isling.Defense, typeMul, roll);
+            // Phase 2: the Keeper's shot (move 1) hits harder.
+            int power = keeper != null && user == wild && keeper.Phase2 && user.Moves.Length > 0 && move == user.Moves[0]
+                ? Mathf.RoundToInt(move.power * keeper.phase2Power) : move.power;
+            int damage = BattleMath.Damage(user.isling.level, power, user.Attack, target.isling.Defense, typeMul, roll);
             bool absorbed = target.shielded;
             if (absorbed)
             {
                 damage = Mathf.Max(1, damage / 2);
                 target.shielded = false;
             }
+            bool blocked = false, broke = false;
+            if (keeper != null && target == wild && keeper.Shielded)
+            {
+                if (move.element == keeper.breaksWith) broke = true;
+                else
+                {
+                    blocked = true;
+                    damage = Mathf.Max(1, Mathf.RoundToInt(damage * keeper.blockedShare));
+                    keeper.Cracks++;
+                    broke = keeper.Cracks >= keeper.hitsToBreak;
+                }
+                if (broke) keeper.Break();
+            }
             target.isling.currentHp = Mathf.Max(0, target.Hp - damage);
             Raise(new BattleEvent
             {
                 kind = BattleEventKind.Damage, side = target.side, move = move, amount = damage, hpAfter = target.Hp,
-                effectiveness = effectiveness, shieldAbsorbed = absorbed,
+                effectiveness = effectiveness, shieldAbsorbed = absorbed, blocked = blocked, cracks = keeper != null ? keeper.Cracks : 0,
             });
+            if (broke) Raise(new BattleEvent { kind = BattleEventKind.ShieldBroken, side = target.side, move = move });
+            if (keeper != null && target == wild && !keeper.Phase2 && target.Hp > 0 && target.Hp <= target.MaxHp * keeper.phase2At)
+            {
+                keeper.Phase2 = true;
+                Raise(new BattleEvent { kind = BattleEventKind.KeeperPhase2, side = target.side });
+            }
             if (target.Hp > 0) return;
 
             Raise(new BattleEvent { kind = BattleEventKind.Fainted, side = target.side });
-            if (target == wild) WildDazed = true;
+            if (target == wild && keeper != null) End(BattleResult.Won);
+            else if (target == wild) WildDazed = true;
             else if (_hasReserve != null && _hasReserve()) PlayerMustSwitch = true;
             else End(BattleResult.Lost);
         }

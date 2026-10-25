@@ -109,7 +109,7 @@ namespace Diorama.EditorTools
         }
 
         /// <summary>Data/Creatures/SpeciesRegistry with every species asset (ids = asset names).</summary>
-        static SpeciesRegistry Registry()
+        internal static SpeciesRegistry Registry()
         {
             const string path = "Assets/_Project/Data/Creatures/SpeciesRegistry.asset";
             var r = AssetDatabase.LoadAssetAtPath<SpeciesRegistry>(path);

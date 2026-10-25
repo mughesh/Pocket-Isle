@@ -35,6 +35,10 @@ namespace Diorama
         [Tooltip("Element attack, Neutral attack, support.")]
         public MoveData[] moves = new MoveData[3];
 
+        [Header("Story")]
+        [Tooltip("A realm Keeper (step 9c): fought once with its own rules (KeeperRules), never caught.")]
+        public bool keeper;
+
         public GameObject Prefab => recipe != null ? recipe.bakedPrefab : null;
     }
 }

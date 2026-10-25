@@ -15,6 +15,7 @@ MonoBehaviour:
   species:
   - {fileID: 11400000, guid: 44d82e91744f67e4a993758eede3bbb1, type: 2}
   - {fileID: 11400000, guid: c1473e635e7776940a34b25e7b53b532, type: 2}
+  - {fileID: 11400000, guid: 372e47726df79e944b8e3ae698a9b00b, type: 2}
   - {fileID: 11400000, guid: bf28c73db405a224da137bbcb4724879, type: 2}
   - {fileID: 11400000, guid: e163c6002098afa4ea9295b9d4055e5a, type: 2}
   - {fileID: 11400000, guid: dee1246386885fe4692153f955a5bf48, type: 2}
