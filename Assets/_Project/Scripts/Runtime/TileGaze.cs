@@ -34,7 +34,7 @@ namespace Diorama
             bool onTile = TryGetGazeTile(out var tile, out var hit);
             bool bubbleFirst = bubble != null && bubble.IsGazed || pods != null && pods.IsGazed;
             bool usable = onTile && !bubbleFirst && explorer.CanMove;
-            if (usable) GazeTarget.Mark();
+            if (usable) GazeTarget.Mark(island.transform.TransformPoint(hit));
             if (usable)
             {
                 if (tile != _reachTile)

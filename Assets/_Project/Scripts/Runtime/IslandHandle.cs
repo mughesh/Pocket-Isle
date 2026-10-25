@@ -58,8 +58,12 @@ namespace Diorama
         public EncounterDirector encounters;
         [Tooltip("Grab shell over the front pod strip: grab zone while exploring, off while the pods are active.")]
         public Collider[] podStripColliders;
-        [Tooltip("Gaze on something selectable: a pinch in the shell is a grab only after the hand was in the shell this long (s).")]
+        [Tooltip("Gaze on something selectable away from the hand: a pinch in the shell is a grab only after the hand was in the shell this long (s).")]
         public float grabHoverSeconds = 0.15f;
+        [Tooltip("The gaze target counts as 'away from the hand' beyond this distance from the pinch point (world m); nearer, the player is looking at what they grab.")]
+        public float gazeAwayDistance = 0.15f;
+        [Tooltip("A pinch point or palm this close to the shell counts as in it (world m), except over the play area.")]
+        public float zoneMargin = 0.01f;
 
         IGrabbable _grabbable;
         Grabbable _grabbableComponent;
@@ -275,12 +279,19 @@ namespace Diorama
 
         // ---- pinch: grab or select ----
 
-        /// <summary>A point is inside the grab shell (an enabled zone collider).</summary>
+        /// <summary>A point is in the grab shell (within <see cref="zoneMargin"/> of an enabled zone collider), never over the play area.</summary>
         public bool InZone(Vector3 p)
         {
             if (rimColliders == null) return false;
+            if (island != null)
+            {
+                var local = island.transform.InverseTransformPoint(p);
+                var half = island.FootprintHalfSize;
+                if (Mathf.Abs(local.x) < half.x && Mathf.Abs(local.z) < half.y && local.y > island.CapTopLocal - 0.003f) return false;
+            }
+            float margin = zoneMargin * zoneMargin;
             foreach (var c in rimColliders)
-                if (c != null && c.enabled && (c.ClosestPoint(p) - p).sqrMagnitude < 1e-8f) return true;
+                if (c != null && c.enabled && (c.ClosestPoint(p) - p).sqrMagnitude <= margin) return true;
             return false;
         }
 
@@ -301,22 +312,25 @@ namespace Diorama
             s.frame = Time.frameCount;
             var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
             bool tracked = hand != null && hand.IsTrackedDataValid;
-            bool inZone = tracked && (TryGetPinchPoint(hand, out var pinchPoint) && InZone(pinchPoint) ||
+            Vector3 pinchPoint = default;
+            bool hasPinch = tracked && TryGetPinchPoint(hand, out pinchPoint);
+            bool inZone = tracked && (hasPinch && InZone(pinchPoint) ||
                                       HandLookup.TryGetJoint(hand, HandJointId.HandPalm, out var palm) && InZone(palm));
             if (inZone && !s.inZone) s.zoneSince = Time.time;
             s.inZone = inZone;
             bool pinching = tracked && hand.GetIndexFingerIsPinching();
             if (!s.pinching || !pinching)
             {
-                // Free, or a pinch starting now: decide (the decision holds while the pinch lasts).
-                bool gaze = GazeTarget.Any;
+                // Free, or a pinch starting now: decide (the decision holds while the pinch lasts). Only a gaze target
+                // away from the hand competes (looking at the edge you grab is not a look + pinch elsewhere).
+                bool gaze = hasPinch && GazeTarget.TryGet(out var gazePoint) && (gazePoint - pinchPoint).magnitude > gazeAwayDistance;
                 float inFor = inZone ? Time.time - s.zoneSince : 0f;
                 s.grab = inZone && (!gaze || inFor >= grabHoverSeconds);
                 if (pinching && (Application.isEditor || Debug.isDebugBuild))
                 {
                     string side = h == 0 ? "L" : "R";
-                    s.last = s.grab ? $"pinch {side}: GRAB (in the shell {inFor:0.00} s{(gaze ? ", gaze on a target" : "")})"
-                           : inZone ? $"pinch {side}: select (gaze on a target, in the shell only {inFor:0.00} s < {grabHoverSeconds:0.00})"
+                    s.last = s.grab ? $"pinch {side}: GRAB (in the shell {inFor:0.00} s{(gaze ? ", gaze on a target away from the hand" : "")})"
+                           : inZone ? $"pinch {side}: select (gaze on a target away from the hand, in the shell only {inFor:0.00} s < {grabHoverSeconds:0.00})"
                            : $"pinch {side}: select (pinch point outside the shell)";
                     Debug.Log($"[IslandHandle] {s.last}, {(_podsActive ? "pods active" : "explore")}.");
                 }

@@ -70,7 +70,7 @@ namespace Diorama
             _hoverPoint = world;
             _hoverRadius = radius;
             _hoverFrame = Time.frameCount;
-            GazeTarget.Mark();
+            GazeTarget.Mark(world);
         }
 
         /// <summary>A hint step waits for its action at this target: after the line's gold, a soft pulse now and then.</summary>

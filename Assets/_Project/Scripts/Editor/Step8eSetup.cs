@@ -15,8 +15,8 @@ namespace Diorama.EditorTools
     static class Step8eSetup
     {
         const string ScenePath = "Assets/_Project/Scenes/MR_Main.unity";
-        // The grab shell, island-local metres: from 1 cm inside the rock face to 2.5 cm out, cap edge down to the bottom.
-        const float ShellIn = 0.01f, ShellOut = 0.025f, ShellTop = 0f, ShellBottom = -0.13f;
+        // The grab shell, island-local metres: 1 cm inside the rock face to 4 cm out, from just above the cap edge (pinching the top edge) to the bottom.
+        const float ShellIn = 0.01f, ShellOut = 0.04f, ShellTop = 0.012f, ShellBottom = -0.13f;
         const float MinCorner = 0.03f;
 
         [MenuItem("Tools/Pocket Isle/Set Up MR_Main (8e hands and modes)", priority = 49)]
