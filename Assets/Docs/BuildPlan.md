@@ -16,7 +16,13 @@ Prompts for Claude Code: `Assets/Docs/Prompts/step-NN-*.md`. Design: `Assets/Doc
 - **Step 8b built Oct 25 (headset test pending):** one lesson at a time (Onboarding_Main), ghost hands show each
   gesture (placeholders until Mugesh records the ten clips), no wild battles until the tutorial grass, hint lines
   expire on battle / scene swap. The ghost-hand player is ready for step 9's hand puzzles.
-- Next: step 9 (Cinderwood complete).
+- Steps 8c-8e (first-minutes polish, grab / touch fixes, hands and modes) built Oct 25-26; 8e tested over Link.
+- **Step 9a built Oct 26 (headset test pending): Cinderwood, the land.** 60 x 60 (the size for every realm), one
+  winding trail through five beats (arrival gate, forest, kiln village + shrine, hot springs, fallen log, cliff forge
+  temple) with four side pockets (ember field, lantern glade, berry grove, hidden kiln ruins), per-zone encounter
+  tables, 11 new props + the tree fix, first-visit zone lines, automated layout checks, a Cinderwood perf tour.
+  Device capture owed (village and springs).
+- Next: step 9b (lift the log, temple interior, bellows / braziers, Hearthstag, restored realm, the shard).
 
 ## Principle
 - **Every system data-driven** (ScriptableObjects): species, moves, type chart, maps, temples, dialogue.

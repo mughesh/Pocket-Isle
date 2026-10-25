@@ -76,7 +76,7 @@ embers or falling leaves, an open front edge (no border trees facing the player)
 - Use: walk into it from its front tiles, or look + pinch it (the explorer walks there first). Open gates travel with
   the scene swap (content sinks, the base tints to the next realm, the new map rises); you arrive in front of the
   other map's return gate. Sealed gates (Water, Wind until step 10): a soft bump, the seal flashes, `gate.sealed`.
-- Cinderwood (the old test map, renamed) has a mossy return gate two tiles right of its start.
+- Cinderwood (60 x 60 since step 9a; the old test map is in Data/Archive) has a mossy return gate by its arrival.
 - Each realm keeps its own restoration; the save keeps the map you're on; the Lodge returns you to the map you came
   from; losing everything returns you to the last shrine on its own map.
 
@@ -108,12 +108,46 @@ Beat the Keeper → the element flows again, the realm visibly revives, its shar
   No Keeper is a hard wall: Keeper shields also break after 3 hits of any type; the counter type is just faster.
 
 ## Cinderwood (fire realm, the vertical slice) — decided Oct 22
-- **Size 100×100 tiles** (~1 min walk edge to edge at 0.6 s/tile; island window is 14×14). Something every ~15 tiles.
+- ~~Size 100×100~~ **Every realm is 60×60** (decided Oct 26: the 100×100 test map felt empty; dense beats sparse).
+  Something to look at every ~8 tiles along the trail.
 - **Layout: main trail + side pockets.** Gate → forest trail → kiln village → hot springs → fallen log (hand moment)
   → cliff forge temple. Side pockets hide rare grass patches, berry bushes and an orb.
 - **Habitat:** ember tall grass (red-gold). Water visitors live in the tall grass around the hot springs.
 - **Residents (later, if cheap):** a few friendly creature villagers in the kiln village with one-line hints.
 - **Temple:** pump the forge bellows (open/close hand) → heat flows through pipes → lights 3 braziers → Keeper door opens.
+
+### Cinderwood as built (step 9a, Oct 26)
+Written by `CinderwoodTools` (Tools > Pocket Isle > Set Up MR_Main (9a Cinderwood)), seed 909. Coordinates (x west→east,
+y south→north; south = the arrival, nearest the player); the map's (column, row) = (x, 59 − y). Top-down shot:
+`Logs/BattleShots/9a_map.png` (Step9aDebug.MapShot).
+
+| Beat / pocket | Tiles (x, y) | As built |
+|---|---|---|
+| Arrival | 6–14, 2–8 | Return gate at (7, 6); you arrive at (10, 5) beside its front, facing north; first ember grass at (15, 7); a signpost |
+| Forest trail | 4–22, 8–24 | 2-wide trail winding north, ember grass patches on both sides, leaf piles, lantern posts, signpost at the field fork |
+| Ember field (pocket) | 26–50, 2–14 | 1-wide side path from (13, 9); five tall grass patches, rock islands, ember vents, a few lone trees |
+| Lantern glade (pocket) | 30–44, 16–26 | Path north from the field; ring of 8 unlit stone lanterns round a clearing, two grass patches |
+| Kiln village | 6–26, 26–40 | Round plaza, 5 clay huts, 3 kilns, pots, woodpiles, lantern posts, fences, signposts; **Hearth Shrine at (24, 33)**; the three map creatures live on the plaza |
+| Berry grove (pocket) | 46–56, 24–36 | Path from the springs; fenced square, 3 rows of berry bushes, tall grass between rows |
+| Hot springs | 30–46, 34–46 | 4 round pools (H) with stone rims, boulders, tall grass rings |
+| Fallen log | 18–22, 44–46 | Trail back west from the springs narrows between rocks; the log at (20, 45) blocks it completely |
+| Forge temple | 10–30, 48–58 | Behind the log (closed in 9a): cliff wall along y 56, the 3-wide forge door at (19, 56), 3 cold braziers, ember vents |
+| Kiln ruins (pocket) | 44–56, 46–58 | Narrow path from the springs through the trees; 4 ruined kilns, pot shards, vents, rare grass |
+
+- The forest between places is a wall (trees, rocks between them): only the trail, side paths and pockets are
+  walkable. Behind the first row of trees, ~45% of trees are rocks (perf; they sit behind the tree walls).
+- Zones (a grid like the props grid) carry their own tall grass tables: forest Toastling 60 / Waxle 30 / Kettlewing 10
+  Lv 3–5; field 50/30/20 Lv 4–6; glade Waxle 70 / Toastling 30 Lv 5–7; grove Kettlewing 60 / Toastling 40 Lv 5–7;
+  springs Kettlewing 70 / Waxle 30 Lv 6–8 (water visitors later); ruins **Glazegolem 25% (rare)** / Toastling 40 /
+  Waxle 35 Lv 7–9. Elsewhere (arrival, village) the map table with the ~5% rare Glazegolem.
+- First-visit lines (`LandmarkLines`): plaza 4 tiles, springs pool 5, log 3, forge door 4 (from 9b), ruins 5.
+- Checks (setup + EditMode test): trail connects arrival → shrine → springs → log; every pocket reachable; nothing
+  walkable cut off (the temple is reachable only with the log lifted); tall grass 17% of walkable land in 21
+  patches of 5–20; longest straight trail 9 tiles; never more than ~2 trail tiles without something to look at.
+- New props: ClayHut, Fence + FenceCorner (turned by the legend's yaw), Signpost, Woodpile, LeafPile, CliffWall
+  (its second look = turned 180), ForgeDoor (cold), RuinedKiln, PotShards, EmberVent: 11 recipes (the cap was 10;
+  the fence needs its corner piece). Trees: AutumnTree rebuilt (stacked blobs, red-orange to gold), TallTree mixed in
+  (35%).
 - **Hearthstag fight:** ember-crown shield blocks damage until hit by a Water move (or 3 hits of anything), then open for 2 turns; repeats.
 
 ### Look of the two states (decided Oct 24)
