@@ -55,6 +55,39 @@ namespace Diorama.EditorTools
             }
             log.Append($"\n  {i} map creature(s) moved to the kiln village plaza");
 
+            // D: first-visit lines near the village, springs, log, forge door and ruins.
+            var island = Object.FindFirstObjectByType<IslandBuilder>(FindObjectsInactive.Include);
+            var explorer = Object.FindFirstObjectByType<GestureTestPiece>(FindObjectsInactive.Include);
+            var director = Object.FindFirstObjectByType<EncounterDirector>(FindObjectsInactive.Include);
+            var lines = Object.FindFirstObjectByType<LandmarkLines>(FindObjectsInactive.Include);
+            if (lines == null)
+            {
+                var go = new GameObject("Landmark Lines");
+                Undo.RegisterCreatedObjectUndo(go, "Landmark Lines");
+                lines = go.AddComponent<LandmarkLines>();
+            }
+            lines.island = island;
+            lines.explorer = explorer;
+            lines.encounters = director;
+            EditorUtility.SetDirty(lines);
+            DialogueTools.Import();
+            log.Append($"\n  'Landmark Lines' {(island != null && explorer != null ? "wired" : "MISSING island or explorer")}; Script_v1 reimported (cinder.*.first lines)");
+
+            // E: the Cinderwood perf tour (perftour9.txt).
+            var tour = Object.FindFirstObjectByType<PerfTour>(FindObjectsInactive.Include);
+            if (tour != null)
+            {
+                Undo.RecordObject(tour, "Step 9a");
+                tour.cinderwood = map;
+                tour.cinderwoodTrail = CinderwoodTools.TourStops(map);
+                tour.villageSpot = CinderwoodTools.VillageSpot;
+                tour.springsSpot = CinderwoodTools.SpringsSpot;
+                if (tour.opening == null) tour.opening = Object.FindFirstObjectByType<Opening>(FindObjectsInactive.Include);
+                EditorUtility.SetDirty(tour);
+                log.Append($"\n  Perf Tour: Cinderwood tour (perftour9.txt), {tour.cinderwoodTrail.Count} trail stops");
+            }
+            else log.Append("\n  no Perf Tour in the scene (Set Up MR_Main (7c)): the Cinderwood tour isn't wired");
+
             var problems = CinderwoodTools.Check(map, log);
             foreach (var p in problems) Debug.LogError($"[Step9a] Layout check: {p}");
             log.Append(problems.Count == 0 ? "\n  layout checks: all passed" : $"\n  layout checks: {problems.Count} problem(s), see the errors");

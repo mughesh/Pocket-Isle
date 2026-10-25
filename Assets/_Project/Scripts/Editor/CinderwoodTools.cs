@@ -759,6 +759,36 @@ namespace Diorama.EditorTools
             return list;
         }
 
+        /// <summary>
+        /// Perf tour stops (column, row): the arrival, then a walkable tile every ~8 tiles along the trail up to the tile
+        /// in front of the log (the temple is behind it in 9a). Each stop is well inside a path search from the last.
+        /// </summary>
+        public static List<Vector2Int> TourStops(WorldMap map)
+        {
+            var stops = new List<Vector2Int> { Arrive };
+            var samples = TrailSamples();
+            var logFront = Tile(LogXY + Vector2Int.down);
+            for (int i = 8; i < samples.Count; i += 8)
+            {
+                var s = samples[i];
+                if (s.y >= LogXY.y - 0.5f) break;
+                var t = Tile(Mathf.RoundToInt(s.x), Mathf.RoundToInt(s.y));
+                if (!map.CanWalk(t))
+                    foreach (var d in new[] { Vector2Int.right, Vector2Int.left, Vector2Int.up, Vector2Int.down })
+                        if (map.CanWalk(t + d))
+                        {
+                            t += d;
+                            break;
+                        }
+                if (map.CanWalk(t) && t != stops[stops.Count - 1]) stops.Add(t);
+            }
+            stops.Add(logFront);
+            return stops;
+        }
+
+        public static Vector2Int VillageSpot => Tile(15, 31);
+        public static Vector2Int SpringsSpot => Tile(37, 41);
+
         // ================= checks =================
 
         /// <summary>

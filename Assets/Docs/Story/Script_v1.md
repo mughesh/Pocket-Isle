@@ -74,7 +74,7 @@ every ~10 s while it waits. Shard, move and starter use the Opening lines above;
   - Spirit: This one's still asleep. Maybe later.
 - `gate.fire.first` · once · → gate:fire (first time the fire gate comes into the window)
   - Spirit: That arch is warm. It leads somewhere.
-- `realm.cinderwood.first` · once · → tile:30,29 (first arrival in Cinderwood)
+- `realm.cinderwood.first` · once · → landmark:firstGrass (first arrival in Cinderwood; step 9a: the first ember grass by the gate)
   - Spirit: Cinderwood. The fire here has gone quiet.
   - Spirit: Let's find out why.
 - `hub.return.first` · once · → landmark:statue (first time back in the hub from a realm)
@@ -132,8 +132,16 @@ every ~10 s while it waits. Shard, move and starter use the Opening lines above;
 - `cw.arrive` · once
   - Spirit: Cinderwood... it used to glow all year round.
   - Spirit: The leaves have gone grey. It's so cold.
-- `cw.village` · once: Spirit: The kilns are cold. Nobody's baking. That's never happened.
-- `cw.springs` · once: Spirit: Even the hot springs are only lukewarm.
+- `cinder.village.first` · once · → landmark:plaza (step 9a: first time the explorer comes near the village plaza)
+  - Spirit: A kiln village. The kilns are cold... everyone's gone quiet.
+- `cinder.springs.first` · once · → landmark:springs (first time near a pool)
+  - Spirit: Hot springs! Well, warm-ish. Not much steam.
+- `cinder.log.first` · once · → landmark:log (first time near the fallen log)
+  - Spirit: A huge log blocks the path. Too heavy for the explorer...
+- `cinder.temple.first` · once · → landmark:temple (first time near the forge door; past the log, so from 9b)
+  - Spirit: A forge in the cliff. The fire came from here.
+- `cinder.ruins.first` · once · → landmark:ruins (first time in the kiln ruins)
+  - Spirit: Old kilns. Something glazed is moving in the grass...
 - `cw.log` · once (blocked by the fallen log)
   - Spirit: A fallen log. Too heavy for the little one.
   - Spirit: But not for you. Reach in and lift it!

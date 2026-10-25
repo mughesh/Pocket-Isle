@@ -21,6 +21,8 @@ namespace Diorama
         public const string TriggerFile = "perftour.txt";
         /// <summary>Step 8 tour: the opening (start it on a new game: no save), the hub with the statue, gate travel.</summary>
         public const string HubTriggerFile = "perftour8.txt";
+        /// <summary>Step 9a tour: Cinderwood's whole trail, then the village (most props) and the springs (steam).</summary>
+        public const string CinderwoodTriggerFile = "perftour9.txt";
 
         public GestureTestPiece explorer;
         public EncounterDirector encounters;
@@ -31,6 +33,11 @@ namespace Diorama
         public Opening opening;
         public ShardGates gates;
         public float seconds = 30f;
+        [Tooltip("Step 9a tour: Cinderwood and its trail stops in order (column, row), written by Set Up MR_Main (9a Cinderwood).")]
+        public WorldMap cinderwood;
+        public List<Vector2Int> cinderwoodTrail = new List<Vector2Int>();
+        [Tooltip("Where the village and springs captures stand (column, row).")]
+        public Vector2Int villageSpot, springsSpot;
 
         ProfilerRecorder _draws, _tris, _memory;
         readonly List<float> _frames = new List<float>(4096);
@@ -41,6 +48,16 @@ namespace Diorama
         void Start()
         {
             Debug.Log($"[Startup] first frame at {Time.realtimeSinceStartup:0.00} s after the player started.");
+            if (Consume(CinderwoodTriggerFile))
+            {
+                if (explorer == null || encounters == null || swap == null || cinderwood == null || cinderwoodTrail.Count < 2)
+                {
+                    Debug.LogError("[PerfTour] The Cinderwood tour needs the explorer, encounters, scene swap and the trail: Set Up MR_Main (9a Cinderwood).", this);
+                    return;
+                }
+                StartCoroutine(CinderwoodTour());
+                return;
+            }
             bool hub = Consume(HubTriggerFile);
             if (!hub && !Consume(TriggerFile)) return;
             if (explorer == null || encounters == null || runes == null || swap == null || party == null || hub && (opening == null || gates == null))
@@ -241,6 +258,70 @@ namespace Diorama
                 yield return new WaitForSeconds(1.5f);
             }
             End("gate travel");
+            encounters.grassChance = chance;
+            Debug.Log("[PerfTour] Done.");
+        }
+
+        /// <summary>Editor: starts the Cinderwood tour on the next Play (writes the trigger file).</summary>
+        public static void ArmCinderwoodTour() =>
+            File.WriteAllText(Path.Combine(Application.persistentDataPath, CinderwoodTriggerFile), "9a");
+
+        /// <summary>
+        /// Step 9a: past the opening (picks the first starter on a new game), travel to Cinderwood's arrival, walk the
+        /// whole trail stop by stop (one capture), then stand in the village unrestored and restored, then at the springs
+        /// restored (steam). Encounters are off; landmark lines play as they would.
+        /// </summary>
+        IEnumerator CinderwoodTour()
+        {
+            yield return null;
+            Debug.Log($"[PerfTour] Starting the Cinderwood tour ({cinderwoodTrail.Count} trail stops).");
+            float chance = encounters.grassChance;
+            encounters.grassChance = 0f;
+            encounters.FirstEncounterDone = true;
+            for (float t = 0f; Opening.InProgress && t < 60f; t += 0.5f)
+            {
+                if (opening != null) opening.DebugChoose(0);
+                yield return new WaitForSeconds(0.5f);
+            }
+            if (SceneSwap.IsInside)
+            {
+                swap.Return();
+                yield return WaitSwap();
+            }
+            swap.TravelNow(cinderwood, cinderwoodTrail[0], new Vector2Int(0, -1));
+            yield return new WaitForSeconds(2f);
+
+            RealmState.Restored = 0f;
+            Begin("cinderwood trail walk");
+            for (int i = 1; i < cinderwoodTrail.Count; i++)
+            {
+                var stop = cinderwoodTrail[i];
+                if (!explorer.GoTo(stop))
+                {
+                    Debug.LogWarning($"[PerfTour] Can't path to trail stop {i} c{stop.x} r{stop.y} from c{explorer.Tile.x} r{explorer.Tile.y}: skipped.");
+                    continue;
+                }
+                for (float t = 0f; explorer.Destination.HasValue && t < 30f; t += Time.deltaTime) yield return null;
+            }
+            End("cinderwood trail walk");
+
+            explorer.Teleport(villageSpot, new Vector2Int(0, -1));
+            yield return new WaitForSeconds(2f);
+            Begin("village (unrestored)");
+            yield return new WaitForSeconds(seconds * 0.5f);
+            End("village (unrestored)");
+            RealmState.Restored = 1f;
+            yield return new WaitForSeconds(1f);
+            Begin("village (restored)");
+            yield return new WaitForSeconds(seconds * 0.5f);
+            End("village (restored)");
+
+            explorer.Teleport(springsSpot, new Vector2Int(0, -1));
+            yield return new WaitForSeconds(2f);
+            Begin("springs (restored, steam)");
+            yield return new WaitForSeconds(seconds * 0.5f);
+            End("springs (restored, steam)");
+            RealmState.Restored = 0f;
             encounters.grassChance = chance;
             Debug.Log("[PerfTour] Done.");
         }

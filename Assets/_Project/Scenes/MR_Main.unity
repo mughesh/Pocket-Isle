@@ -1982,6 +1982,20 @@ MonoBehaviour:
   opening: {fileID: 1891040199}
   gates: {fileID: 1858573327}
   seconds: 30
+  cinderwood: {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
+  cinderwoodTrail:
+  - {x: 10, y: 54}
+  - {x: 10, y: 48}
+  - {x: 9, y: 41}
+  - {x: 14, y: 37}
+  - {x: 14, y: 30}
+  - {x: 19, y: 29}
+  - {x: 26, y: 29}
+  - {x: 30, y: 23}
+  - {x: 36, y: 19}
+  - {x: 20, y: 15}
+  villageSpot: {x: 15, y: 28}
+  springsSpot: {x: 37, y: 18}
 --- !u!4 &1059021441
 Transform:
   m_ObjectHideFlags: 0
@@ -3383,6 +3397,53 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.78, y: 0.14199999, z: 0.08}
   m_Center: {x: 0, y: -0.058999997, z: -0.35}
+--- !u!1 &1811331405
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1811331407}
+  - component: {fileID: 1811331406}
+  m_Layer: 0
+  m_Name: Landmark Lines
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1811331406
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1811331405}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17daa1ec06fe4b04e98b562092c06f33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.LandmarkLines
+  island: {fileID: 270959109}
+  explorer: {fileID: 374318554}
+  encounters: {fileID: 1499891275}
+--- !u!4 &1811331407
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1811331405}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1847074511
 GameObject:
   m_ObjectHideFlags: 0
@@ -4035,3 +4096,4 @@ SceneRoots:
   - {fileID: 1421177269}
   - {fileID: 1522577914}
   - {fileID: 1536485481}
+  - {fileID: 1811331407}

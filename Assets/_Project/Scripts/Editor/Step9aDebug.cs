@@ -187,6 +187,13 @@ namespace Diorama.EditorTools
             Debug.Log("[Step9aDebug] Logs/BattleShots/9a_map.png");
         }
 
+        /// <summary>Arms the Cinderwood perf tour for the next Play (trigger file in the Editor's persistent data folder).</summary>
+        public static void ArmTour()
+        {
+            PerfTour.ArmCinderwoodTour();
+            Debug.Log($"[Step9aDebug] Cinderwood perf tour armed ({Application.persistentDataPath}/{PerfTour.CinderwoodTriggerFile}): enter Play.");
+        }
+
         /// <summary>Cinderwood as text (north up, y labels left): a prop's key on its anchor, else the terrain.</summary>
         public static void DumpMap()
         {

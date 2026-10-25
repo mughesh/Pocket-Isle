@@ -315,8 +315,8 @@ MonoBehaviour:
   - id: realm.cinderwood.first
     once: 1
     priority: 2
-    note: first arrival in Cinderwood
-    target: tile:30,29
+    note: 'first arrival in Cinderwood; step 9a: the first ember grass by the gate'
+    target: landmark:firstGrass
     validWhile: 
     lines:
     - speaker: 0
@@ -611,26 +611,56 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: The leaves have gone grey. It's so cold.
-  - id: cw.village
+  - id: cinder.village.first
     once: 1
     priority: 2
-    note: 
-    target: 
+    note: 'step 9a: first time the explorer comes near the village plaza'
+    target: landmark:plaza
     validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: The kilns are cold. Nobody's baking. That's never happened.
-  - id: cw.springs
+      text: A kiln village. The kilns are cold... everyone's gone quiet.
+  - id: cinder.springs.first
     once: 1
     priority: 2
-    note: 
-    target: 
+    note: first time near a pool
+    target: landmark:springs
     validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Even the hot springs are only lukewarm.
+      text: Hot springs! Well, warm-ish. Not much steam.
+  - id: cinder.log.first
+    once: 1
+    priority: 2
+    note: first time near the fallen log
+    target: landmark:log
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: A huge log blocks the path. Too heavy for the explorer...
+  - id: cinder.temple.first
+    once: 1
+    priority: 2
+    note: first time near the forge door; past the log, so from 9b
+    target: landmark:temple
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: A forge in the cliff. The fire came from here.
+  - id: cinder.ruins.first
+    once: 1
+    priority: 2
+    note: first time in the kiln ruins
+    target: landmark:ruins
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Old kilns. Something glazed is moving in the grass...
   - id: cw.log
     once: 1
     priority: 2
