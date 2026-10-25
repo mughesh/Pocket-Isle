@@ -103,6 +103,8 @@ every ~10 s while it waits. Shard, move and starter use the Opening lines above;
   - Spirit: Look at that! They've grown into something new.
 - `shrine.first` · once · while !tutorial · → shrine (first time a shrine comes into the window)
   - Spirit: A Hearth Shrine! Warm your hand over the flame.
+- `shrine.near` · once · while !tutorial · → shrine (step 8c: first time the explorer stands next to one)
+  - Spirit: Warm your hand over the flame.
 - `lodge.first` · once · → lodgeCenter (first time inside the Hearth Lodge; the lodge hint chain starts, step 7c)
   - Spirit: This is the Hearth Lodge. Islings you've caught rest here.
 - `lodge.inspect` · once · → lodgeIsling (chain 2: waits for an inspect, comes back after 15 s)
@@ -113,6 +115,12 @@ every ~10 s while it waits. Shard, move and starter use the Opening lines above;
   - Spirit: To leave one here, toss its pod onto the floor.
 - `lodge.exit` · once · → lodgeDoor (chain 5, after chain 4 or 30 s)
   - Spirit: The door takes you back outside.
+- `lodge.first.empty` · once · → lodgeCenter (step 8c: first visit with nobody in the lodge; the empty-lodge chain starts)
+  - Spirit: This is the Hearth Lodge. Islings you leave here rest by the fire.
+- `lodge.toss` · once · → rimPod (empty chain 2: waits for a pod let go on the floor; ghost toss)
+  - Spirit: Toss a pod onto the floor to let one rest here.
+- `lodge.inspect.one` · once · → lodgeIsling (empty chain 3, after it pops out; then lodge.take, lodge.exit)
+  - Spirit: Look at it and pinch to see how it's doing.
 - `lodge.last` · → leadPod (the last rim pod refuses to leave)
   - Spirit: Keep at least one Isling with you!
 - `gate.first` · once

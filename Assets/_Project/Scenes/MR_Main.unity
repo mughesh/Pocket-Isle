@@ -275,6 +275,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.LodgeGuide
   room: {fileID: 155307358}
   swap: {fileID: 221433162}
+  ghosts: {fileID: 1421177268}
+  onboarding: {fileID: 1380201671}
   repromptSeconds: 15
   exitAfterSeconds: 30
 --- !u!1 &200327674

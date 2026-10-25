@@ -81,8 +81,12 @@ namespace Diorama
             }
             var head = cam.transform;
             ray = new Ray(head.position, Quaternion.AngleAxis(pitch, head.right) * head.forward);
+            if (DebugAim != null && DebugAim() is Vector3 aim) ray = new Ray(head.position, (aim - head.position).normalized);
             return true;
         }
+
+        /// <summary>Editor checks (the Claude bridge): the gaze points at this world point instead. Null = normal.</summary>
+        public static System.Func<Vector3?> DebugAim;
 
         // ---- cone picking ----
 
@@ -148,6 +152,7 @@ namespace Diorama
         {
             _instance = null;
             _warned = false;
+            DebugAim = null;
         }
     }
 }

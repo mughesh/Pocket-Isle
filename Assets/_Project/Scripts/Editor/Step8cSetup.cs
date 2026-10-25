@@ -54,6 +54,17 @@ namespace Diorama.EditorTools
 
             RimZones(log);
 
+            var guide = Object.FindFirstObjectByType<LodgeGuide>(FindObjectsInactive.Include);
+            if (guide != null)
+            {
+                Undo.RecordObject(guide, "Step 8c");
+                guide.ghosts = Object.FindFirstObjectByType<GhostHands>(FindObjectsInactive.Include);
+                guide.onboarding = Object.FindFirstObjectByType<Onboarding>(FindObjectsInactive.Include);
+                EditorUtility.SetDirty(guide);
+                log.Append($"\n  lodge guide: two chains (empty lodge: toss, inspect, take, exit), ghost {(guide.ghosts != null ? "linked" : "MISSING")}");
+            }
+            else log.Append("\n  NO LodgeGuide");
+
             EditorSceneManager.MarkSceneDirty(active);
             EditorSceneManager.SaveScene(active);
             AssetDatabase.SaveAssets();

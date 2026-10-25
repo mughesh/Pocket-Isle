@@ -475,6 +475,16 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: A Hearth Shrine! Warm your hand over the flame.
+  - id: shrine.near
+    once: 1
+    priority: 1
+    note: 'step 8c: first time the explorer stands next to one'
+    target: shrine
+    validWhile: '!tutorial'
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Warm your hand over the flame.
   - id: lodge.first
     once: 1
     priority: 1
@@ -525,6 +535,36 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: The door takes you back outside.
+  - id: lodge.first.empty
+    once: 1
+    priority: 1
+    note: 'step 8c: first visit with nobody in the lodge; the empty-lodge chain starts'
+    target: lodgeCenter
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: This is the Hearth Lodge. Islings you leave here rest by the fire.
+  - id: lodge.toss
+    once: 1
+    priority: 1
+    note: 'empty chain 2: waits for a pod let go on the floor; ghost toss'
+    target: rimPod
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Toss a pod onto the floor to let one rest here.
+  - id: lodge.inspect.one
+    once: 1
+    priority: 1
+    note: empty chain 3, after it pops out; then lodge.take, lodge.exit
+    target: lodgeIsling
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Look at it and pinch to see how it's doing.
   - id: lodge.last
     once: 0
     priority: 1

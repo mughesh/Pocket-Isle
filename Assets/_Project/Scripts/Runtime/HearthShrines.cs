@@ -9,9 +9,11 @@ namespace Diorama
     /// <summary>
     /// Hearth Shrines on the world map: 2 x 2 props whose recipe is <see cref="RecipeName"/>, each with a soft flame
     /// beacon above it (seen from across the window). Standing on any tile touching a shrine, its flame leans toward
-    /// the player and brightens and a glow ring appears over the bowl. To go in: hold a palm over the bowl, facing down,
-    /// for <see cref="holdSeconds"/> (the ring fills), look + pinch the shrine (from farther away the explorer walks
-    /// there first), or walk into its doorway from the front. Then the flame flares, a warm wave heals the rim pods, <see cref="Rested"/> fires (the save
+    /// the player and brightens and a glow ring appears over the bowl (the first time the Spirit says <c>shrine.near</c>).
+    /// To go in: hold a palm over the bowl, facing down, for <see cref="holdSeconds"/> (the ring fills), or look + pinch
+    /// the shrine. Both work whenever the shrine is on the island: from farther away the explorer walks there by itself,
+    /// then goes in. Walking up to it no longer goes in (step 8c: that left the palm magic unused). Then the flame
+    /// flares, a warm wave heals the rim pods, <see cref="Rested"/> fires (the save
     /// listens) and the island swaps into the Hearth Lodge (<see cref="SceneSwap"/>). The last shrine used is where
     /// the explorer returns after losing (<see cref="RespawnTile"/>, outside).
     /// The Spirit's <c>shrine.first</c> line plays the first time a shrine comes into the window.
@@ -145,7 +147,6 @@ namespace Diorama
             _quad = BattleHud.VerticalQuad();
             _block = new MaterialPropertyBlock();
             explorer.OnStep += OnStep;
-            explorer.OnBump += OnBump;
             Dialogue.RegisterTarget("shrine", ShrinePoint, k => { }, () => 1.6f * island.map.tileSize * island.Zoom * island.transform.lossyScale.x);
             Scan();
         }
@@ -155,7 +156,6 @@ namespace Diorama
             if (explorer != null)
             {
                 explorer.OnStep -= OnStep;
-                explorer.OnBump -= OnBump;
             }
             if (_quad != null) Destroy(_quad);
         }
@@ -212,6 +212,8 @@ namespace Diorama
         {
             if (_quad == null) return;
             Scan();
+            // A walk to a shrine that got cancelled (a swipe, a new destination) no longer goes in.
+            if (_pending >= 0 && !explorer.Destination.HasValue) _pending = -1;
             bool outside = Outside;
             if (!outside) pods.SetExternalGaze(this, false);
             _gazed = outside && !window.IsZoomed && !explorer.Locked ? GazedShrine() : -1;
@@ -230,22 +232,26 @@ namespace Diorama
             Vector3 local = island.TileToLocal(Center(s), island.Content.capHeight + bowlHeight * island.map.tileSize);
             bool visible = outside && !window.IsZoomed && island.FootprintContains(local);
             if (visible && !explorer.Locked) Dialogue.Say("shrine.first");
-            bool near = visible && !_entering && !explorer.Locked && IsTouching(s, explorer.Tile);
+            bool usable = visible && !_entering && !explorer.Locked;
+            bool near = usable && IsTouching(s, explorer.Tile);
             b.near = Mathf.MoveTowards(b.near, near ? 1f : 0f, Time.deltaTime * 3f);
+            if (near) Dialogue.Say("shrine.near");
 
-            // Warm your hand: the ring fills while a palm faces down over the bowl.
-            bool warming = near && _palm.IsOver(island.transform.TransformPoint(local), island.transform.up, palmReach, palmFacing, grabGuard);
+            // Warm your hand: the ring fills while a palm faces down over the bowl, wherever the explorer is.
+            bool warming = usable && _pending != i && _palm.IsOver(island.transform.TransformPoint(local), island.transform.up, palmReach, palmFacing, grabGuard);
             b.hold = warming ? b.hold + Time.deltaTime : Mathf.MoveTowards(b.hold, 0f, Time.deltaTime * 2f);
             if (b.hold >= holdSeconds)
             {
                 b.hold = 0f;
-                Debug.Log($"[HearthShrines] Palm held over the shrine c{s.x} r{s.y}.");
-                StartCoroutine(Enter(s));
+                // Next to it: in at once. Farther away: the explorer walks there, then goes in (as with look + pinch).
+                Pick(i, "palm over the flame");
             }
 
             if (b.column == null) return;
             b.column.gameObject.SetActive(visible);
-            b.ring.gameObject.SetActive(visible && b.near > 0.01f);
+            // The ring shows next to it, while a palm fills it from afar, and while the explorer walks there.
+            float ringOn = Mathf.Max(b.near, Mathf.Clamp01(b.hold / Mathf.Max(0.01f, holdSeconds) * 4f), _pending == i ? 1f : 0f);
+            b.ring.gameObject.SetActive(visible && ringOn > 0.01f);
             if (!visible) return;
             var cam = Camera.main;
             Vector3 up = Vector3.up;
@@ -273,11 +279,11 @@ namespace Diorama
             float ring = island.map.tileSize * 1.1f;
             b.ring.localPosition = local + Vector3.up * (island.map.tileSize * 0.25f);
             b.ring.localRotation = Quaternion.Euler(90f, 0f, 0f);
-            b.ring.localScale = Vector3.one * ring * (0.6f + 0.4f * b.near);
+            b.ring.localScale = Vector3.one * ring * (0.6f + 0.4f * ringOn);
             _block.Clear();
             _block.SetFloat(ModeId, 1f);
-            _block.SetFloat(FillId, Mathf.Clamp01(b.hold / holdSeconds));
-            _block.SetFloat(IntensityId, b.near * 1.4f);
+            _block.SetFloat(FillId, _pending == i ? 1f : Mathf.Clamp01(b.hold / holdSeconds));
+            _block.SetFloat(IntensityId, ringOn * 1.4f);
             b.ringRenderer.SetPropertyBlock(_block);
         }
 
@@ -344,20 +350,6 @@ namespace Diorama
             var s = _shrines[_pending];
             _pending = -1;
             if (IsTouching(s, tile)) StartCoroutine(Enter(s));
-        }
-
-        /// <summary>Walking into the hut's front (the doorway faces the trail, +rows) goes in, like any building.</summary>
-        void OnBump(Vector2Int blocked)
-        {
-            if (_entering || !Outside) return;
-            foreach (var s in _shrines)
-            {
-                bool doorway = blocked.y == s.y + 1 && (blocked.x == s.x || blocked.x == s.x + 1);
-                if (!doorway || explorer.Tile != blocked + Vector2Int.up) continue;
-                Debug.Log($"[HearthShrines] Walked into the shrine's doorway c{s.x} r{s.y}.");
-                StartCoroutine(Enter(s));
-                return;
-            }
         }
 
         /// <summary>Flame flare, heal wave, save (Rested), then the swap into the lodge.</summary>

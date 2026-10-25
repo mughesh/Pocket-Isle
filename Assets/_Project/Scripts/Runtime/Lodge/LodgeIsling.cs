@@ -21,6 +21,8 @@ namespace Diorama
         public float Grow { get; set; }
         /// <summary>Hidden while it is curled into a pod in a hand.</summary>
         public bool Hidden { get; set; }
+        /// <summary>Looked at: it stays put (no new hops), so the gaze doesn't lose it.</summary>
+        public bool Noticed { get; set; }
 
         static readonly Vector2Int[] Steps = { Vector2Int.right, Vector2Int.left, Vector2Int.up, Vector2Int.down };
 
@@ -111,6 +113,7 @@ namespace Diorama
             }
             if (_sleepUntil >= 0f && Time.time >= _sleepUntil) Wake();
             if (OnPedestal || Hidden || Asleep || View.IsHopping || _room == null) return;
+            if (Noticed) _nextHop = Mathf.Max(_nextHop, Time.time + 1f);
             if (Time.time < _nextHop) return;
             _nextHop = Time.time + Random.Range(2.5f, 6f);
             float roll = Random.value;

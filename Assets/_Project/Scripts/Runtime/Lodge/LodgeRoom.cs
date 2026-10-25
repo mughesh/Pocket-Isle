@@ -172,7 +172,7 @@ namespace Diorama
             pods.LodgeMode = true;
             pods.PickHandler = OnRimPicked;
             Sync();
-            Dialogue.Say("lodge.first");
+            // The welcome is LodgeGuide's first step (lodge.first, or lodge.first.empty for an empty lodge).
             Debug.Log($"[LodgeRoom] Inside: {Mathf.Min(maxInRoom, party.storage.Count)} Isling(s) in the room, " +
                       $"{Mathf.Max(0, party.storage.Count - maxInRoom)} asleep in the honeycomb ({Cells.Length} a page), {party.members.Count} in the pods.");
         }
@@ -696,7 +696,8 @@ namespace Diorama
                 {
                     var li = _islings[i];
                     if (li == null || li.Leaving || li.Hidden) continue;
-                    pick.Consider(i, island.transform.TransformPoint(li.LocalCenter), Mathf.Max(min, 0.45f * tile));
+                    // Step 8c: a bigger ball than its body (0.45 tile was too small to hold with the head on a wandering Isling).
+                    pick.Consider(i, island.transform.TransformPoint(li.LocalCenter), Mathf.Max(min, 0.75f * tile));
                 }
                 for (int k = 0; k < _comb.Length; k++)
                     if (_comb[k] != null) pick.Consider(CombId + k, _comb[k].transform.position, Mathf.Max(min, 0.3f * tile));
@@ -710,6 +711,13 @@ namespace Diorama
                 else if (pick.Best >= 0) _gazed = _islings[pick.Best];
             }
             else _gazeId = -1;
+            if (_gazed != null)
+            {
+                _lastGazed = _gazed;
+                _lastGazedAt = Time.time;
+            }
+            foreach (var li in _islings)
+                if (li != null) li.Noticed = li == _gazed;
             // White = what you're looking at (FocusHighlight; gold is only for hints).
             if (_gazed != null) FocusHighlight.Hover(island.transform.TransformPoint(_gazed.LocalCenter), 0.5f * TileWorld);
             else if (_gazedComb >= 0) FocusHighlight.Hover(_comb[_gazedComb].transform.position, 0.3f * TileWorld);
@@ -749,9 +757,17 @@ namespace Diorama
             }
         }
 
+        LodgeIsling _lastGazed;
+        float _lastGazedAt = -1f;
+        /// <summary>A pinch just after the gaze slipped off an Isling still counts for it (the head moves as the hand pinches).</summary>
+        const float GazeGrace = 0.35f;
+
         void Pinch()
         {
-            if (_gazed != null) Inspect(_gazed);
+            bool other = _gazedComb >= 0 || _gazedPage || _gazedDoor;
+            var isling = _gazed != null ? _gazed
+                       : !other && _lastGazed != null && !_lastGazed.Hidden && !_lastGazed.Leaving && Time.time - _lastGazedAt < GazeGrace ? _lastGazed : null;
+            if (isling != null) Inspect(isling);
             else if (_gazedComb >= 0) Wake(_gazedComb);
             else if (_gazedPage) NextPage("look + pinch");
             else if (_gazedDoor)
