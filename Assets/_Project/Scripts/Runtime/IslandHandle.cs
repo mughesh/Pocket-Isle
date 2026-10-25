@@ -64,6 +64,9 @@ namespace Diorama
         public float gazeAwayDistance = 0.15f;
         [Tooltip("A pinch point or palm this close to the shell counts as in it (world m), except over the play area.")]
         public float zoneMargin = 0.01f;
+        [Tooltip("Corners (island-local m from each corner, along both edges): plain grabs, no grab-or-select rule; a hand within cornerReach of the shell there can always grab.")]
+        public float cornerSize = 0.1f;
+        public float cornerReach = 0.03f;
 
         IGrabbable _grabbable;
         Grabbable _grabbableComponent;
@@ -295,6 +298,19 @@ namespace Diorama
             return false;
         }
 
+        /// <summary>Near one of the base's corners and the grab shell: grabs there are plain ISDK grabs (Mugesh, Oct 26).</summary>
+        bool InCorner(Vector3 p)
+        {
+            if (island == null || rimColliders == null) return false;
+            var local = island.transform.InverseTransformPoint(p);
+            var half = island.FootprintHalfSize;
+            if (Mathf.Abs(local.x) < half.x - cornerSize || Mathf.Abs(local.z) < half.y - cornerSize) return false;
+            float reach = cornerReach * cornerReach;
+            foreach (var c in rimColliders)
+                if (c != null && c.enabled && (c.ClosestPoint(p) - p).sqrMagnitude <= reach) return true;
+            return false;
+        }
+
         /// <summary>Between the thumb and index tips (where a pinch closes).</summary>
         public static bool TryGetPinchPoint(IHand hand, out Vector3 point)
         {
@@ -312,10 +328,11 @@ namespace Diorama
             s.frame = Time.frameCount;
             var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
             bool tracked = hand != null && hand.IsTrackedDataValid;
-            Vector3 pinchPoint = default;
+            Vector3 pinchPoint = default, palmPoint = default;
             bool hasPinch = tracked && TryGetPinchPoint(hand, out pinchPoint);
-            bool inZone = tracked && (hasPinch && InZone(pinchPoint) ||
-                                      HandLookup.TryGetJoint(hand, HandJointId.HandPalm, out var palm) && InZone(palm));
+            bool hasPalm = tracked && HandLookup.TryGetJoint(hand, HandJointId.HandPalm, out palmPoint);
+            bool corner = hasPinch && InCorner(pinchPoint) || hasPalm && InCorner(palmPoint);
+            bool inZone = corner || hasPinch && InZone(pinchPoint) || hasPalm && InZone(palmPoint);
             if (inZone && !s.inZone) s.zoneSince = Time.time;
             s.inZone = inZone;
             bool pinching = tracked && hand.GetIndexFingerIsPinching();
@@ -325,11 +342,11 @@ namespace Diorama
                 // away from the hand competes (looking at the edge you grab is not a look + pinch elsewhere).
                 bool gaze = hasPinch && GazeTarget.TryGet(out var gazePoint) && (gazePoint - pinchPoint).magnitude > gazeAwayDistance;
                 float inFor = inZone ? Time.time - s.zoneSince : 0f;
-                s.grab = inZone && (!gaze || inFor >= grabHoverSeconds);
+                s.grab = corner || inZone && (!gaze || inFor >= grabHoverSeconds);
                 if (pinching && (Application.isEditor || Debug.isDebugBuild))
                 {
                     string side = h == 0 ? "L" : "R";
-                    s.last = s.grab ? $"pinch {side}: GRAB (in the shell {inFor:0.00} s{(gaze ? ", gaze on a target away from the hand" : "")})"
+                    s.last = s.grab ? $"pinch {side}: GRAB ({(corner ? "corner" : $"in the shell {inFor:0.00} s")}{(gaze ? ", gaze on a target away from the hand" : "")})"
                            : inZone ? $"pinch {side}: select (gaze on a target away from the hand, in the shell only {inFor:0.00} s < {grabHoverSeconds:0.00})"
                            : $"pinch {side}: select (pinch point outside the shell)";
                     Debug.Log($"[IslandHandle] {s.last}, {(_podsActive ? "pods active" : "explore")}.");
