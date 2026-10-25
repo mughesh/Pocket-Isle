@@ -10,6 +10,8 @@ here** and gets done in the polish days (Nov 13–14), most valuable first. Add 
 | Oct 25 | **The Spirit as the menu**: poke or look + pinch the Spirit, a small ring of options round it (Replay tutorial, Recenter, Volumes, New game, Quit) | Design with Mugesh first |
 | Oct 25 | ~~Ghost hand placeholders: thumb swipe / tap / pinch poses are rough~~ | Done: Mugesh's recordings |
 | Oct 25 | ~~Shader warmup at launch (shard, fx orb, portal, pod variants)~~ | Done in 8c (drawn once before the shard). Confirm on device |
+| Oct 25 | A dedicated palm-grab recording for the island ghosts (move, two hands) | 8d turns the rim-slide recording so its palm lies on the base side; a real side grab would read better |
+| Oct 25 | Remove the 8c rim corner code (`Step8cSetup.RimZones`, `PodRack.SocketBandLocal`) once the 8d skirt zone is confirmed | 8d's setup replaces those boxes right after the 8c setup builds them |
 | Oct 25 | Starter pods a bit small at the default island size | podScale 3.2, grows 1.45x on gaze |
 | Oct 25 | Windmill blades on the Wind gate could spin | Static now (Sway only) |
 | Oct 24 | Lantern Spirit size and position tuning | Fine for now |
