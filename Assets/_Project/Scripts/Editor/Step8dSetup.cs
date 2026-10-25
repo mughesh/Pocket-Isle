@@ -149,8 +149,6 @@ namespace Diorama.EditorTools
             Undo.RecordObject(frame, "Step 8d");
             frame.island = handle.island;
             frame.handle = handle;
-            frame.window = Object.FindFirstObjectByType<WorldWindow>(FindObjectsInactive.Include);
-            frame.pods = Object.FindFirstObjectByType<PodRack>(FindObjectsInactive.Include);
             frame.material = Material(FrameMaterialPath, "Diorama/Grab Frame");
             frame.height = 0f;
             frame.outset = 0.008f;

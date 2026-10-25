@@ -72,6 +72,8 @@ namespace Diorama
         public float grabPinchDistance = 0.08f;
         [Tooltip("The rim grab pauses while a palm or fingertip is this close to a grabbable pod (m).")]
         public float rimGuardDistance = 0.07f;
+        [Tooltip("Pods active (battle, lodge): a grabbable pod comes this far out of its socket (world m).")]
+        public float activePopOut = 0.003f;
         public float cardSeconds = 4f;
 
         /// <summary>A pod was let go while it could be used: slot, island-local position and velocity.</summary>
@@ -114,6 +116,12 @@ namespace Diorama
         /// </summary>
         public bool LodgeMode { get; set; }
 
+        /// <summary>
+        /// Step 8e: exploring (no battle, not in the lodge). The rim pods are inert then: no grab, no poke, no growing
+        /// toward a reaching hand (the island's grab zone covers the strip in front of them); look + pinch shows the card.
+        /// </summary>
+        public bool Explore => !InBattle && !LodgeMode;
+
         public event Action<int, Vector3, Vector3> LodgeDropped;
 
         /// <summary>A slot to highlight (a lodge selection), or -1.</summary>
@@ -145,6 +153,7 @@ namespace Diorama
         float _partyGrab, _socketStep;
         readonly float[] _grow = new float[Party.Size];
         readonly float[] _slide = new float[Party.Size];
+        readonly float[] _pop = new float[Party.Size];
         int _bigSlot = -1, _evolvingSlot = -1;
         float _bigUntil;
         float _cradleRefillAt = -1f, _cradleIn = 1f;
@@ -317,7 +326,9 @@ namespace Diorama
             int i = Mathf.Clamp(slot, 0, Party.Size - 1);
             // Slid aside for a big neighbour; a big pod comes out of the rock face by its extra radius.
             float grow = Mathf.SmoothStep(0f, 1f, _grow[i]);
-            return _socketPos[i] + new Vector3(_slide[i], 0f, podPrefab.radius * (focusScale - 1f) * grow);
+            // Pods active: a grabbable pod sits a little out of its socket.
+            float pop = activePopOut / Mathf.Max(1e-4f, island.transform.lossyScale.x) * Mathf.SmoothStep(0f, 1f, _pop[i]);
+            return _socketPos[i] + new Vector3(_slide[i], 0f, podPrefab.radius * (focusScale - 1f) * grow + pop);
         }
 
         /// <summary>Rest scale of a party pod right now (1, up to <see cref="focusScale"/> while it is the big one).</summary>
@@ -343,6 +354,11 @@ namespace Diorama
                 var g = Grab(p);
                 bool held = g != null && g.IsHeld;
                 if (g != null) g.CanGrab = !p.Detached && (held || CanUse(i));
+                if (i < Party.Size)
+                {
+                    _pop[i] = Mathf.MoveTowards(_pop[i], !Explore && CanUse(i) ? 1f : 0f, Time.deltaTime * 6f);
+                    p.Grabbable = _pop[i];
+                }
                 if (!p.Detached && !held)
                 {
                     p.transform.localPosition = HomeLocal(i);
@@ -609,16 +625,16 @@ namespace Diorama
                 var hand = HandRegistry.Get(left ? Handedness.Left : Handedness.Right);
                 bool tracked = HandLookup.TryGetJoint(hand, HandJointId.HandIndexTip, out var tip);
 
-                // Poke: a fingertip entering a pod.
+                // Poke: a fingertip entering a pod (not while exploring: the pods are inert then).
                 int poked = -1;
-                if (tracked)
+                if (tracked && !Explore)
                     for (int i = 0; i < _pods.Length; i++)
                     {
                         var p = _pods[i];
                         if (p == null || p.Detached || !Pointable(i)) continue;
                         if ((tip - p.transform.position).sqrMagnitude < Sq(p.WorldRadius * pokeRadius)) poked = i;
                     }
-                if (poked >= 0 && poked != _poked[h] && !InBattle) ShowCard(poked, "poke");
+                if (poked >= 0 && poked != _poked[h] && LodgeMode && !InBattle) ShowCard(poked, "poke");
                 _poked[h] = poked;
 
                 // Gaze + pinch (not a pinch that grabs a pod).
@@ -660,7 +676,7 @@ namespace Diorama
                 for (int i = 0; i < Party.Size && focus < 0; i++)
                     if (_pods[i] != null && _pods[i].Isling == _card.Showing && !_pods[i].Detached) focus = i;
             if (focus < 0 && _gazed >= 0 && _gazed < Party.Size) focus = _gazed;
-            if (focus < 0) focus = NearestToHands();
+            if (focus < 0 && !Explore) focus = NearestToHands();
             if (focus >= 0)
             {
                 if (focus != _bigSlot) Debug.Log($"[PodRack] Pod {focus + 1} grows (gaze, hand or card).");
@@ -750,9 +766,8 @@ namespace Diorama
             var rim = handle != null ? handle.rimInteractable : null;
             if (rim == null) return;
             bool reaching = false;
-            // Step 8c: outside battle too (poking a pod for its card started island grabs); the rim has no grab
-            // boxes over the pod strip either.
-            if ((InBattle && (PartyGrab || CradleGrab) || !InBattle) && rim.SelectingInteractors.Count == 0)
+            // Step 8e: only while pods can be grabbed (battle, lodge); exploring, the strip in front of them is grab zone.
+            if ((InBattle && (PartyGrab || CradleGrab) || LodgeMode && !InBattle) && rim.SelectingInteractors.Count == 0)
                 for (int h = 0; h < 2 && !reaching; h++)
                 {
                     var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
@@ -763,7 +778,7 @@ namespace Diorama
                         {
                             // At least the grab volume plus a little: the hand must not reach it before the guard pauses the rim.
                             float guard = Mathf.Max(rimGuardDistance, World((i == CradleSlot ? cradleGrabSize : _partyGrab) * 0.5f + 0.03f));
-                            if (_pods[i] != null && (CanUse(i) || !InBattle && i < Party.Size) && (_pods[i].transform.position - p).sqrMagnitude < Sq(guard)) reaching = true;
+                            if (_pods[i] != null && CanUse(i) && (_pods[i].transform.position - p).sqrMagnitude < Sq(guard)) reaching = true;
                         }
                     }
                 }

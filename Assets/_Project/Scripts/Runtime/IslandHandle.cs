@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Oculus.Interaction;
 using Oculus.Interaction.HandGrab;
 using Oculus.Interaction.Input;
@@ -8,9 +9,14 @@ namespace Diorama
     /// <summary>
     /// Holding the floating island. The ISDK Grabbable on the island uses this as both its one- and two-grab
     /// transformer; grabs can only start on the rim colliders (HandGrabInteractable on the "Rim Grab" child),
-    /// never on the play surface. Step 8d: palm grabs only (a pinch never moves the island; pinch is for pods, runes
-    /// and look + pinch) on the rocky base skirt all around; <see cref="IslandGrabFrame"/> shows where (it replaced the
-    /// rock brighten). The island always stays level (parallel to the floor).
+    /// never on the play surface: a thin shell around the rocky base skirt; <see cref="IslandGrabFrame"/> shows where.
+    /// Step 8e: pinch or palm. Two modes: Explore (the whole skirt, the front pod strip too; the rim pods are inert) and
+    /// Pods active (battles and the lodge: the pods can be grabbed, so the strip in front of them is not grab zone).
+    /// Every pinch is resolved once, as it starts: an island grab only when the pinch point (or palm) is in the shell,
+    /// and, if the gaze is on something selectable at that moment, only when the hand had been in the shell for
+    /// <see cref="grabHoverSeconds"/> first; otherwise it is a look + pinch (gaze select). The ISDK grab asks
+    /// <see cref="Filter"/>, the gaze systems ask <see cref="IsHandBusy"/>, so both always agree.
+    /// The island always stays level (parallel to the floor).
     /// Its front (+Z: the Spirit, runes and pods side) always turns to face the head (yaw only, head position projected
     /// on the floor plane): while held, after release, and when idle if the player has shifted more than
     /// <see cref="idleAngle"/> for <see cref="idleSeconds"/> (not during the battle zoom).
@@ -19,7 +25,7 @@ namespace Diorama
     /// Also reports which hands are busy with the island so microgestures can ignore them.
     /// </summary>
     [RequireComponent(typeof(Grabbable))]
-    public class IslandHandle : MonoBehaviour, ITransformer
+    public class IslandHandle : MonoBehaviour, ITransformer, IGameObjectFilter
     {
         public IslandBuilder island;
         public IslandPlacer placer;
@@ -45,9 +51,15 @@ namespace Diorama
         [Tooltip("No idle turning while the battle zoom is on.")]
         public WorldWindow window;
 
-        [Header("Gesture guard")]
-        [Tooltip("A hand whose thumb tip or palm is this close to the rim counts as busy.")]
-        public float nearRimDistance = 0.05f;
+        [Header("Modes and pinch (step 8e)")]
+        [Tooltip("Pods active while it is in the lodge or a battle.")]
+        public PodRack pods;
+        [Tooltip("Pods active from the encounter's start to the zoom-out.")]
+        public EncounterDirector encounters;
+        [Tooltip("Grab shell over the front pod strip: grab zone while exploring, off while the pods are active.")]
+        public Collider[] podStripColliders;
+        [Tooltip("Gaze on something selectable: a pinch in the shell is a grab only after the hand was in the shell this long (s).")]
+        public float grabHoverSeconds = 0.15f;
 
         IGrabbable _grabbable;
         Grabbable _grabbableComponent;
@@ -63,7 +75,18 @@ namespace Diorama
         bool _turning;
         float _turnSeconds, _offFor;
 
-        readonly bool[] _near = new bool[2];
+        /// <summary>One hand's pinch resolution. Grab = the current intent while not pinching, frozen once a pinch starts.</summary>
+        struct PinchState
+        {
+            public int frame;
+            public bool pinching, grab, inZone;
+            public float zoneSince;
+            public string last;
+        }
+
+        readonly PinchState[] _pinch = new PinchState[2];
+        readonly Dictionary<GameObject, int> _interactorSide = new Dictionary<GameObject, int>();
+        bool _podsActive, _modeLogged;
 
         Transform Target => _grabbable != null ? _grabbable.Transform : transform;
         /// <summary>A hand is holding the island (the opening waits for this).</summary>
@@ -81,6 +104,9 @@ namespace Diorama
         {
             _baseScale = placer != null ? placer.islandScale : transform.localScale.x;
             if (rimInteractable == null) Debug.LogError("[IslandHandle] No rim HandGrabInteractable assigned; the island can't be grabbed.");
+            else rimInteractable.InjectOptionalInteractorFilters(new List<IGameObjectFilter> { this });
+            if (pods == null || encounters == null) Debug.LogError("[IslandHandle] No pod rack / encounters (Set Up MR_Main (8e)): always in Explore mode.", this);
+            ApplyMode(true);
             // The base skirt's front middle (the two-hands tip); the grab frame glows, no gold sphere.
             Dialogue.RegisterTarget("islandRim", () =>
             {
@@ -214,8 +240,12 @@ namespace Diorama
 
         void Update()
         {
-            _near[0] = IsNearRim(HandRegistry.Get(Handedness.Left));
-            _near[1] = IsNearRim(HandRegistry.Get(Handedness.Right));
+            ApplyMode(false);
+            Resolve(0);
+            Resolve(1);
+            if (DevReadout.Active)
+                for (int h = 0; h < 2; h++)
+                    if (_pinch[h].last != null) DevReadout.Text($"pinch{h}", _pinch[h].last);
             UpdateFacing();
         }
 
@@ -225,18 +255,88 @@ namespace Diorama
             if (IsGrabbed && autoFace) UpdateTransform();
         }
 
-        bool IsNearRim(Hand hand)
+        // ---- modes ----
+
+        /// <summary>Battles (encounter start to zoom-out) and the lodge: the rim pods can be grabbed.</summary>
+        public bool PodsActive => encounters != null && encounters.InBattle || pods != null && (pods.InBattle || pods.LodgeMode);
+
+        /// <summary>Switches the pod strip's grab shell with the mode. Never mid-grab: a held island keeps its zone until let go.</summary>
+        void ApplyMode(bool force)
         {
-            if (hand == null || rimColliders == null) return false;
-            return NearRim(hand, HandJointId.HandThumbTip) || NearRim(hand, HandJointId.HandPalm);
+            bool active = PodsActive;
+            if (!force && (active == _podsActive || IsGrabbed)) return;
+            if (!force || !_modeLogged) Debug.Log($"[IslandHandle] Mode: {(active ? "pods active (grab the back, sides and front corners)" : "explore (grab anywhere on the base)")}.");
+            _modeLogged = true;
+            _podsActive = active;
+            if (podStripColliders != null)
+                foreach (var c in podStripColliders)
+                    if (c != null) c.enabled = !active;
         }
 
-        bool NearRim(Hand hand, HandJointId joint)
+        // ---- pinch: grab or select ----
+
+        /// <summary>A point is inside the grab shell (an enabled zone collider).</summary>
+        public bool InZone(Vector3 p)
         {
-            if (!HandLookup.TryGetJoint(hand, joint, out var p)) return false;
+            if (rimColliders == null) return false;
             foreach (var c in rimColliders)
-                if (c != null && c.enabled && (c.ClosestPoint(p) - p).sqrMagnitude <= nearRimDistance * nearRimDistance) return true;
+                if (c != null && c.enabled && (c.ClosestPoint(p) - p).sqrMagnitude < 1e-8f) return true;
             return false;
+        }
+
+        /// <summary>Between the thumb and index tips (where a pinch closes).</summary>
+        public static bool TryGetPinchPoint(IHand hand, out Vector3 point)
+        {
+            point = default;
+            if (!HandLookup.TryGetJoint(hand, HandJointId.HandThumbTip, out var thumb) || !HandLookup.TryGetJoint(hand, HandJointId.HandIndexTip, out var index)) return false;
+            point = (thumb + index) * 0.5f;
+            return true;
+        }
+
+        /// <summary>Updates one hand's pinch state once per frame (whoever asks first: the ISDK filter, a gaze system or Update).</summary>
+        void Resolve(int h)
+        {
+            ref var s = ref _pinch[h];
+            if (s.frame == Time.frameCount) return;
+            s.frame = Time.frameCount;
+            var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
+            bool tracked = hand != null && hand.IsTrackedDataValid;
+            bool inZone = tracked && (TryGetPinchPoint(hand, out var pinchPoint) && InZone(pinchPoint) ||
+                                      HandLookup.TryGetJoint(hand, HandJointId.HandPalm, out var palm) && InZone(palm));
+            if (inZone && !s.inZone) s.zoneSince = Time.time;
+            s.inZone = inZone;
+            bool pinching = tracked && hand.GetIndexFingerIsPinching();
+            if (!s.pinching || !pinching)
+            {
+                // Free, or a pinch starting now: decide (the decision holds while the pinch lasts).
+                bool gaze = GazeTarget.Any;
+                float inFor = inZone ? Time.time - s.zoneSince : 0f;
+                s.grab = inZone && (!gaze || inFor >= grabHoverSeconds);
+                if (pinching && (Application.isEditor || Debug.isDebugBuild))
+                {
+                    string side = h == 0 ? "L" : "R";
+                    s.last = s.grab ? $"pinch {side}: GRAB (in the shell {inFor:0.00} s{(gaze ? ", gaze on a target" : "")})"
+                           : inZone ? $"pinch {side}: select (gaze on a target, in the shell only {inFor:0.00} s < {grabHoverSeconds:0.00})"
+                           : $"pinch {side}: select (pinch point outside the shell)";
+                    Debug.Log($"[IslandHandle] {s.last}, {(_podsActive ? "pods active" : "explore")}.");
+                }
+            }
+            s.pinching = pinching;
+        }
+
+        /// <summary>ISDK interactor filter on the rim grab: may this interactor's hand grab the island now?</summary>
+        public bool Filter(GameObject interactor)
+        {
+            if (!_interactorSide.TryGetValue(interactor, out int h))
+            {
+                var grab = interactor.GetComponent<IHandGrabInteractor>();
+                h = grab != null && grab.Hand != null ? grab.Hand.Handedness == Handedness.Left ? 0 : 1 : -1;
+                _interactorSide[interactor] = h;
+            }
+            if (h < 0) return true;
+            if (IsHandGrabbing(h == 0)) return true;
+            Resolve(h);
+            return _pinch[h].grab;
         }
 
         /// <summary>The island's size against where it was placed (two-hand resize): 1 = as placed.</summary>
@@ -272,10 +372,16 @@ namespace Diorama
             return false;
         }
 
-        /// <summary>True while this hand is grabbing the island or is within nearRimDistance of the rim.</summary>
+        /// <summary>
+        /// True while this hand holds the island, or its pinch (or the pinch it would make now) is an island grab:
+        /// gaze selects and microgestures ignore it.
+        /// </summary>
         public bool IsHandBusy(bool leftHand)
         {
-            return _near[leftHand ? 0 : 1] || IsHandGrabbing(leftHand);
+            if (IsHandGrabbing(leftHand)) return true;
+            int h = leftHand ? 0 : 1;
+            Resolve(h);
+            return _pinch[h].grab;
         }
 
         static Vector3 Flat(Vector3 v) => new Vector3(v.x, 0f, v.z);

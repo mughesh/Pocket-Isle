@@ -151,7 +151,7 @@ namespace Diorama.EditorTools
                 new LessonData
                 {
                     id = "move", line = "intro.world", again = "lesson.move.again", startWhen = "opening.move", validWhile = "opening.move",
-                    // Step 8d: a palm grab on the side of the base (the island is palm grab only).
+                    // Step 8e: a pinch on the side of the base (pinch or palm both grab the island).
                     doneWhen = "islandGrabbed", skipAfter = 12f, ghost = "grab_rim_slide", place = GhostPlace.IslandSides, target = "rim",
                 },
                 new LessonData
@@ -206,7 +206,7 @@ namespace Diorama.EditorTools
                 },
                 new LessonData
                 {
-                    // Step 8c: once, after the first battle: both hands turn and resize the island (8d: both palms on the
+                    // Step 8c: once, after the first battle: both hands turn and resize the island (8e: both hands pinch the
                     // left and right sides of the base).
                     id = "twoHands", line = "lesson.twohands", startWhen = "!battle & !swap", delay = 2f, doneWhen = "twoHandGrab", skipAfter = 15f,
                     ghost = "grab_rim_slide", place = GhostPlace.IslandSides, target = "islandRim", bothHands = true,

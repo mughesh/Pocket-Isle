@@ -6,22 +6,18 @@ namespace Diorama
 {
     /// <summary>
     /// The island's grab frame (step 8d), like the grab frame on Meta's panels: a thin, soft white rounded rectangle
-    /// tracing the rocky base just under the cap's edge, a little outside it. It fades in when an open hand comes within
-    /// <see cref="showDistance"/> of the base skirt (the palm-grab zone), brightest on the side nearest the hand. Hover
-    /// (the hand in the zone, ready to grab) = brighter and a little thicker; grabbed = solid with a touch of gold; two
-    /// hands light both their sides. It fades out over <see cref="fadeSeconds"/> once the hand leaves, stays hidden
-    /// during battles and scene swaps, and pulses while a lesson hints at the rim (<see cref="IslandHandle.HintGlow"/>).
-    /// It replaced the old rock brighten.
+    /// tracing the rocky base just under the cap's edge, a little outside it. It fades in when a hand's pinch point or
+    /// palm comes within <see cref="showDistance"/> of the grab shell, brightest on the side nearest the hand. Hover
+    /// (in the shell, ready to grab) = brighter and a little thicker; grabbed = solid with a touch of gold; two hands
+    /// light both their sides. Step 8e: only the parts of the frame over the grab zone light up (with the pods active,
+    /// never the strip in front of them). It fades out over <see cref="fadeSeconds"/> once the hand leaves, stays
+    /// hidden during scene swaps, and pulses while a lesson hints at the rim (<see cref="IslandHandle.HintGlow"/>).
     /// </summary>
     [DefaultExecutionOrder(200)] // after the island has moved this frame
     public class IslandGrabFrame : MonoBehaviour
     {
         public IslandBuilder island;
         public IslandHandle handle;
-        [Tooltip("Optional: hidden while the battle zoom is on.")]
-        public WorldWindow window;
-        [Tooltip("Optional: hidden during battles.")]
-        public PodRack pods;
         [Tooltip("Diorama/Grab Frame material.")]
         public Material material;
 
@@ -38,8 +34,10 @@ namespace Diorama
         [Header("Look")]
         [Tooltip("Ribbon width (world m): near, hover, held.")]
         public Vector3 width = new Vector3(0.003f, 0.0045f, 0.005f);
-        [Tooltip("An open hand this close to the grab zone (world m) fades the frame in.")]
+        [Tooltip("A pinch point or palm this close to the grab zone (world m) fades the frame in.")]
         public float showDistance = 0.1f;
+        [Tooltip("Frame points this far from the grab zone (world m) stay dark (the strip in front of active pods).")]
+        public float zoneFeather = 0.012f;
         [Tooltip("Along the frame, the glow falls off this far from the point nearest the hand (world m).")]
         public float nearSpread = 0.12f;
         [Tooltip("The rest of the frame while a hand is near (x the nearest side's brightness).")]
@@ -94,8 +92,7 @@ namespace Diorama
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void ResetStatics() => DebugPalm = null;
 
-        bool Hidden => pods != null && pods.InBattle || window != null && window.IsZoomed || SceneSwap.IsBusy ||
-                       handle.ScaleFactor < 0.3f; // the opening: the island hasn't grown yet
+        bool Hidden => SceneSwap.IsBusy || handle.ScaleFactor < 0.3f; // the opening: the island hasn't grown yet
 
         void LateUpdate()
         {
@@ -124,15 +121,24 @@ namespace Diorama
             else if (!hidden && HandLookup.TryGetJoint(hand, HandJointId.HandPalm, out var palm))
             {
                 held = handle.IsHandGrabbing(left) ? 1f : 0f;
-                // An open hand (a pinching one is going for a pod, a rune or a look + pinch).
-                bool open = held > 0f || !hand.GetIndexFingerIsPinching();
+                // The nearer of the pinch point and the palm (pinch and palm grabs both work).
+                Vector3 probe = palm;
                 float d = handle.DistanceToZone(palm);
-                if (open && d < showDistance)
+                if (IslandHandle.TryGetPinchPoint(hand, out var pinch))
+                {
+                    float dp = handle.DistanceToZone(pinch);
+                    if (dp < d)
+                    {
+                        d = dp;
+                        probe = pinch;
+                    }
+                }
+                if (d < showDistance)
                 {
                     near = 1f - Mathf.SmoothStep(0f, 1f, d / showDistance);
                     hover = handle.IsHandHovering(left) || d <= 0.005f ? 1f : 0f;
                 }
-                if (near > 0f || held > 0f) s.closest = palm;
+                if (near > 0f || held > 0f) s.closest = probe;
             }
             s.near = Ease(s.near, Mathf.Max(near, held), dt);
             s.hover = Ease(s.hover, Mathf.Max(hover, held), dt);
@@ -185,6 +191,8 @@ namespace Diorama
                     float handLevel = Mathf.Lerp(local * peak, grabbedLevel, s.held) * s.near;
                     level = Mathf.Max(level, handLevel);
                 }
+                // Only over the grab zone (with the pods active, the strip in front of them stays dark).
+                level *= 1f - Mathf.SmoothStep(0f, 1f, handle.DistanceToZone(p) / Mathf.Max(0.001f, zoneFeather * t.lossyScale.x));
                 var c = new Color(tint.r, tint.g, tint.b, level);
                 _verts.Add(p - side);
                 _verts.Add(p + side);

@@ -172,6 +172,7 @@ MonoBehaviour:
   gazeRadius: 2.2
   grabPinchDistance: 0.08
   rimGuardDistance: 0.07
+  activePopOut: 0.003
   cardSeconds: 4
 --- !u!4 &78739059
 Transform:
@@ -598,6 +599,8 @@ MonoBehaviour:
   placer: {fileID: 374318555}
   rimInteractable: {fileID: 1736066356}
   rimColliders:
+  - {fileID: 1736066362}
+  - {fileID: 1736066361}
   - {fileID: 1736066360}
   - {fileID: 1736066359}
   - {fileID: 1736066358}
@@ -610,7 +613,11 @@ MonoBehaviour:
   idleSeconds: 1.5
   idleTurnSeconds: 1
   window: {fileID: 270959113}
-  nearRimDistance: 0.05
+  pods: {fileID: 78739058}
+  encounters: {fileID: 1499891275}
+  podStripColliders:
+  - {fileID: 1736066357}
+  grabHoverSeconds: 0.15
 --- !u!114 &270959112
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2584,9 +2591,8 @@ MonoBehaviour:
   wristFingers: {x: -0.35, y: 0.25, z: 1}
   wristDorsal: {x: 1, y: 0.35, z: 0.25}
   bothSpread: 0.18
-  sideDrop: 0.05
-  sideOut: 0.02
-  sideFingers: {x: 0, y: -0.35, z: 1}
+  sideDrop: 0.04
+  sideOut: 0.08
   fadeSeconds: 0.3
   struggleLoops: 3
   struggleSpeed: 0.6
@@ -2779,8 +2785,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.IslandGrabFrame
   island: {fileID: 270959109}
   handle: {fileID: 270959111}
-  window: {fileID: 270959113}
-  pods: {fileID: 78739058}
   material: {fileID: 2100000, guid: 796a9a767f0010447b33719eb17e264b, type: 2}
   height: 0
   outset: 0.008
@@ -2789,6 +2793,7 @@ MonoBehaviour:
   sideSegments: 10
   width: {x: 0.003, y: 0.0045, z: 0.005}
   showDistance: 0.1
+  zoneFeather: 0.012
   nearSpread: 0.12
   farLevel: 0.25
   nearLevel: 0.55
@@ -3153,6 +3158,8 @@ GameObject:
   - component: {fileID: 1736066352}
   - component: {fileID: 1736066351}
   - component: {fileID: 1736066356}
+  - component: {fileID: 1736066362}
+  - component: {fileID: 1736066361}
   - component: {fileID: 1736066360}
   - component: {fileID: 1736066359}
   - component: {fileID: 1736066358}
@@ -3228,7 +3235,7 @@ MonoBehaviour:
   _scoringModifier:
     _positionRotationWeight: 0.8
   _slippiness: 0
-  _supportedGrabTypes: 2
+  _supportedGrabTypes: 3
   _pinchGrabRules:
     _thumbRequirement: 1
     _indexRequirement: 1
@@ -3261,12 +3268,12 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.775, y: 0.085999995, z: 0.075}
-  m_Center: {x: 0, y: -0.087, z: 0.3475}
+  m_Size: {x: 0.4, y: 0.13, z: 0.035}
+  m_Center: {x: -0.082499996, y: -0.065, z: 0.3575}
 --- !u!65 &1736066358
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3282,12 +3289,12 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.075, y: 0.13, z: 0.775}
-  m_Center: {x: -0.3475, y: -0.065, z: 0}
+  m_Size: {x: 0.0925, y: 0.13, z: 0.035}
+  m_Center: {x: -0.32875, y: -0.065, z: 0.3575}
 --- !u!65 &1736066359
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3303,12 +3310,12 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.075, y: 0.13, z: 0.775}
-  m_Center: {x: 0.3475, y: -0.065, z: 0}
+  m_Size: {x: 0.2575, y: 0.13, z: 0.035}
+  m_Center: {x: 0.24625, y: -0.065, z: 0.3575}
 --- !u!65 &1736066360
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3324,12 +3331,54 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.775, y: 0.13, z: 0.075}
-  m_Center: {x: 0, y: -0.065, z: -0.3475}
+  m_Size: {x: 0.035, y: 0.13, z: 0.75}
+  m_Center: {x: -0.3575, y: -0.065, z: 0}
+--- !u!65 &1736066361
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1736066349}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.035, y: 0.13, z: 0.75}
+  m_Center: {x: 0.3575, y: -0.065, z: 0}
+--- !u!65 &1736066362
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1736066349}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.75, y: 0.13, z: 0.035}
+  m_Center: {x: 0, y: -0.065, z: -0.3575}
 --- !u!1 &1847074511
 GameObject:
   m_ObjectHideFlags: 0
@@ -3498,8 +3547,8 @@ MonoBehaviour:
   moveWaitSeconds: 12
   returnRiseSeconds: 2
   podScale: 2.4
-  podFocusGrow: 1.3
-  podArc: {x: 1.2, y: 0.1, z: 0.26}
+  podFocusGrow: 1.25
+  podArc: {x: 0.7, y: 0.1, z: 0.25}
   podArcBow: 0.06
   podMinGap: 0.4
   dropReach: 0.12

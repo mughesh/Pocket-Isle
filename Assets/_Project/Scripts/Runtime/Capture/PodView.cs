@@ -28,6 +28,8 @@ namespace Diorama
         public Color emptyTint = new Color(0.78f, 0.9f, 1f);
         public Color brass = new Color(0.79f, 0.6f, 0.26f);
         public Color dimBrass = new Color(0.45f, 0.38f, 0.28f);
+        [Tooltip("Pods active (battle, lodge): the band of a pod that can be grabbed now.")]
+        public Color brightBrass = new Color(1f, 0.8f, 0.38f);
 
         static readonly int TintId = Shader.PropertyToID("_Tint");
         static readonly int GlowId = Shader.PropertyToID("_Glow");
@@ -46,6 +48,8 @@ namespace Diorama
         public float Shatter { get; set; }
         /// <summary>Hides the tiny creature (it is out on the battle field).</summary>
         public bool IslingOut { get; set; }
+        /// <summary>0..1: this pod can be grabbed now (pods active); the band brightens.</summary>
+        public float Grabbable { get; set; }
         /// <summary>Someone else moves this pod (a flight); its rack leaves it alone.</summary>
         public bool Detached { get; set; }
 
@@ -178,7 +182,7 @@ namespace Diorama
             if (band != null)
             {
                 band.GetPropertyBlock(_bandBlock);
-                _bandBlock.SetColor(BaseColorId, fainted ? dimBrass : brass);
+                _bandBlock.SetColor(BaseColorId, fainted ? dimBrass : Color.Lerp(brass, brightBrass, Grabbable));
                 band.SetPropertyBlock(_bandBlock);
             }
         }
