@@ -170,6 +170,7 @@ namespace Diorama
             _quad = BattleHud.VerticalQuad();
             if (hudMaterial != null) _card = new PodCard(hudMaterial, _quad);
             Layout();
+            if (handle != null) handle.GrabStarted += CloseCard;
             Dialogue.RegisterTarget("leadPod", () => PointOf(party.LeadSlot), k => PulseOf(party.LeadSlot, k), () => FocusRadius(party.LeadSlot));
             // The cradle stays a target while a shattered pod is being replaced.
             // Lodge hints: where an Isling can join (the next empty socket, else the last pod to swap with) and a pod
@@ -206,6 +207,7 @@ namespace Diorama
 
         void OnDestroy()
         {
+            if (handle != null) handle.GrabStarted -= CloseCard;
             if (_card != null) _card.Destroy();
             if (_quad != null) Destroy(_quad);
         }
@@ -218,21 +220,7 @@ namespace Diorama
             var map = island.map;
             int rows = map.Rows, cols = map.Columns;
             float tile = map.tileSize, cr = (rows - 1) * 0.5f, cc = (cols - 1) * 0.5f;
-            int front = -1, c0 = 0, c1 = 0;
-            for (int r = rows - 1; r >= 0 && front < 0; r--)
-                for (int c = 0; c < cols; c++)
-                {
-                    if (map.At(r, c) == IslandMap.Empty) continue;
-                    if (front < 0) { front = r; c0 = c; }
-                    c1 = c;
-                }
-            if (front < 0) return;
-            // Columns run toward -X: c0 is the player's left (+X), c1 the right end.
-            float z = (front - cr) * tile + tile * 0.5f;
-            float left = (cc - c0) * tile + tile * 0.5f, right = (cc - c1) * tile - tile * 0.5f;
-            float spanLeft = right + (left - right) * faceShare;
-            float margin = tile * 0.55f;
-            float step = (spanLeft - right - 2f * margin) / (Party.Size - 1);
+            if (!SocketRow(out int front, out float z, out float right, out float spanLeft, out float margin, out float step)) return;
             float y = map.capHeight - socketDepth;
             for (int i = 0; i < Party.Size; i++)
             {
@@ -273,6 +261,50 @@ namespace Diorama
             _cradle.gameObject.SetActive(false);
             _laidOut = true;
             Debug.Log($"[PodRack] {Party.Size} sockets on the front face (row {front}, x {_socketPos[0].x:0.000} to {_socketPos[Party.Size - 1].x:0.000}), cradle at {_cradlePos}.");
+        }
+
+        /// <summary>
+        /// The socket row on the front face (island-local): front row, its z, the right end, the left end of the socket
+        /// span, the end margin and the socket step (x runs from spanLeft - margin down by step).
+        /// </summary>
+        bool SocketRow(out int front, out float z, out float right, out float spanLeft, out float margin, out float step)
+        {
+            var map = island.map;
+            int rows = map.Rows, cols = map.Columns;
+            float tile = map.tileSize, cr = (rows - 1) * 0.5f, cc = (cols - 1) * 0.5f;
+            front = -1;
+            int c0 = 0, c1 = 0;
+            for (int r = rows - 1; r >= 0 && front < 0; r--)
+                for (int c = 0; c < cols; c++)
+                {
+                    if (map.At(r, c) == IslandMap.Empty) continue;
+                    if (front < 0) { front = r; c0 = c; }
+                    c1 = c;
+                }
+            z = right = spanLeft = margin = step = 0f;
+            if (front < 0) return false;
+            // Columns run toward -X: c0 is the player's left (+X), c1 the right end.
+            z = (front - cr) * tile + tile * 0.5f;
+            float left = (cc - c0) * tile + tile * 0.5f;
+            right = (cc - c1) * tile - tile * 0.5f;
+            spanLeft = right + (left - right) * faceShare;
+            margin = tile * 0.55f;
+            step = (spanLeft - right - 2f * margin) / (Party.Size - 1);
+            return true;
+        }
+
+        /// <summary>
+        /// The front strip the six sockets and their grab volumes use (island-local x, plus a hand's width of clearance).
+        /// The island's rim grab stays off it (step 8c: reaching for a pod grabbed the island). Works in edit mode.
+        /// </summary>
+        public bool SocketBandLocal(out float minX, out float maxX, out float frontZ)
+        {
+            minX = maxX = frontZ = 0f;
+            if (island == null || island.map == null || !SocketRow(out _, out frontZ, out float right, out float spanLeft, out float margin, out float step)) return false;
+            float pad = Mathf.Min(partyGrabSize, Mathf.Abs(step) * 0.96f) * 0.5f * focusScale + 0.01f;
+            maxX = spanLeft - margin + pad;
+            minX = spanLeft - margin - (Party.Size - 1) * step - pad;
+            return true;
         }
 
         /// <summary>Where a pod rests (island-local).</summary>
@@ -332,7 +364,24 @@ namespace Diorama
             }
             UpdateInput();
             UpdateRimGuard();
-            if (_card != null) _card.Tick();
+            if (_card != null)
+            {
+                // The card belongs to the island where it was opened: it closes once the island moves or turns.
+                if (_card.Visible && ((island.transform.position - _cardIslandPos).sqrMagnitude > 0.02f * 0.02f ||
+                                      Quaternion.Angle(island.transform.rotation, _cardIslandRot) > 4f))
+                    CloseCard();
+                _card.Tick();
+            }
+        }
+
+        Vector3 _cardIslandPos;
+        Quaternion _cardIslandRot;
+
+        void CloseCard()
+        {
+            if (_card == null || !_card.Visible) return;
+            _card.Hide();
+            Debug.Log("[PodRack] Card closed (the island moved).");
         }
 
         /// <summary>One pod per party creature; a changed creature is re-shown.</summary>
@@ -687,9 +736,11 @@ namespace Diorama
                 _card.Hide();
                 return;
             }
-            Vector3 up = island.transform.up;
-            Vector3 anchor = p.transform.position + up * World(0.055f) + island.transform.forward * World(0.03f);
-            _card.Show(p.Isling, anchor, cardSeconds);
+            // Follows its pod, its lower edge above the pod (the old fixed spot hid the pod and stayed put when the island moved).
+            _card.Show(p.Isling, () => p != null ? p.transform.position + island.transform.up * (p.WorldRadius + PodCard.HalfHeight + 0.012f) +
+                                              island.transform.forward * World(0.02f) : (Vector3?)null, cardSeconds);
+            _cardIslandPos = island.transform.position;
+            _cardIslandRot = island.transform.rotation;
             Debug.Log($"[PodRack] Card for {p.Isling.Name} ({how}).");
         }
 
@@ -700,7 +751,9 @@ namespace Diorama
             var rim = handle != null ? handle.rimInteractable : null;
             if (rim == null) return;
             bool reaching = false;
-            if ((InBattle && (PartyGrab || CradleGrab) || LodgeMode && !InBattle) && rim.SelectingInteractors.Count == 0)
+            // Step 8c: outside battle too (poking a pod for its card started island grabs); the rim has no grab
+            // boxes over the pod strip either.
+            if ((InBattle && (PartyGrab || CradleGrab) || !InBattle) && rim.SelectingInteractors.Count == 0)
                 for (int h = 0; h < 2 && !reaching; h++)
                 {
                     var hand = HandLookup.Refresh(ref _hands[h], h == 0 ? Handedness.Left : Handedness.Right);
@@ -711,7 +764,7 @@ namespace Diorama
                         {
                             // At least the grab volume plus a little: the hand must not reach it before the guard pauses the rim.
                             float guard = Mathf.Max(rimGuardDistance, World((i == CradleSlot ? cradleGrabSize : _partyGrab) * 0.5f + 0.03f));
-                            if (_pods[i] != null && CanUse(i) && (_pods[i].transform.position - p).sqrMagnitude < Sq(guard)) reaching = true;
+                            if (_pods[i] != null && (CanUse(i) || !InBattle && i < Party.Size) && (_pods[i].transform.position - p).sqrMagnitude < Sq(guard)) reaching = true;
                         }
                     }
                 }

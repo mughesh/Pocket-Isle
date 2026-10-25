@@ -252,7 +252,7 @@ namespace Diorama.EditorTools
             foreach (var guid in AssetDatabase.FindAssets("t:IslingSpecies"))
             {
                 var species = AssetDatabase.LoadAssetAtPath<IslingSpecies>(AssetDatabase.GUIDToAssetPath(guid));
-                card.Show(new IslingInstance(species, 12), Vector3.zero, 1f);
+                card.Show(new IslingInstance(species, 12), () => Vector3.zero, 1f);
                 Debug.Log($"[CardFit] {species.displayName}: {card.Describe()}");
             }
             var root = GameObject.Find("Pod Card");

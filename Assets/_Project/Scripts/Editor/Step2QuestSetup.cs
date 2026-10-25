@@ -250,7 +250,7 @@ namespace Diorama.EditorTools
         }
 
         // Rim grab box sizes, island-local metres (the island is 14 tiles x 5 cm, cap top at +0.006).
-        const float RimInset = 0.04f, RimOutset = 0.035f, RimTop = 0f, RimBottom = -0.10f;
+        internal const float RimInset = 0.04f, RimOutset = 0.035f, RimTop = 0f, RimBottom = -0.10f;
 
         /// <summary>Grabbable + rim HandGrabInteractable + IslandHandle on the island, shadow, palm summon, gesture guard.</summary>
         static void AddIslandHandling(IslandBuilder builder, IslandPlacer placer, MicrogestureInput input)

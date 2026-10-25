@@ -5,7 +5,7 @@ namespace Diorama
 {
     /// <summary>
     /// Small stats card in the dialogue bubble style (name, level, element, HP bar) shown above a pod for a few seconds.
-    /// Fixed real-world size, faces the head. Built at runtime by <see cref="PodRack"/>; not parented to the island.
+    /// Fixed real-world size, faces the head, follows its pod (an anchor function). Built at runtime by <see cref="PodRack"/>.
     /// Rows, top to bottom: name (auto-sized to fit), "Lv 5 · Fire", HP bar, "HP 38/38". A name too long even at the
     /// smallest size widens the panel (up to <see cref="MaxWiden"/>) instead of clipping.
     /// </summary>
@@ -31,7 +31,10 @@ namespace Diorama
         readonly TextMeshPro _name, _info, _hp;
         readonly MaterialPropertyBlock _block = new MaterialPropertyBlock();
         float _until, _appear;
-        Vector3 _anchor;
+        System.Func<Vector3?> _anchor;
+
+        /// <summary>Half the panel height (m): the anchor is the panel's middle.</summary>
+        public const float HalfHeight = Height * 0.5f;
 
         public IslingInstance Showing { get; private set; }
         public bool Visible => _root.gameObject.activeSelf;
@@ -118,12 +121,12 @@ namespace Diorama
             return t;
         }
 
-        /// <summary>Shows the card for this creature above <paramref name="anchorWorld"/> for <paramref name="seconds"/>.</summary>
-        public void Show(IslingInstance c, Vector3 anchorWorld, float seconds)
+        /// <summary>Shows the card for this creature at <paramref name="anchor"/> (followed; null = hide) for <paramref name="seconds"/>.</summary>
+        public void Show(IslingInstance c, System.Func<Vector3?> anchor, float seconds)
         {
-            if (c == null) return;
+            if (c == null || anchor == null) return;
             Showing = c;
-            _anchor = anchorWorld;
+            _anchor = anchor;
             _until = Time.time + seconds;
             if (!Visible) _appear = 0f;
             _root.gameObject.SetActive(true);
@@ -162,7 +165,13 @@ namespace Diorama
 
         void Place()
         {
-            _root.position = _anchor;
+            var at = _anchor != null ? _anchor() : null;
+            if (!at.HasValue)
+            {
+                Hide();
+                return;
+            }
+            _root.position = at.Value;
             _root.localScale = Vector3.one * Mathf.SmoothStep(0.6f, 1f, _appear);
             var cam = Camera.main;
             if (cam == null) return;
