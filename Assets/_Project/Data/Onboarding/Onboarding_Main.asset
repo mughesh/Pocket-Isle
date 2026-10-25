@@ -28,9 +28,10 @@ MonoBehaviour:
     praise: 1
     ghost: poke
     place: 1
-    target: shard
+    target: shardFront
     ghostScale: 1
     bothHands: 0
+    ghostSpread: 0
     goldPath: 
     goldTileSteps: 0
     tutorialGrass: 0
@@ -52,6 +53,7 @@ MonoBehaviour:
     target: rim
     ghostScale: 1
     bothHands: 0
+    ghostSpread: 0
     goldPath: 
     goldTileSteps: 0
     tutorialGrass: 0
@@ -73,6 +75,7 @@ MonoBehaviour:
     target: starterPods
     ghostScale: 1
     bothHands: 0
+    ghostSpread: 0
     goldPath: 
     goldTileSteps: 0
     tutorialGrass: 0
@@ -94,6 +97,7 @@ MonoBehaviour:
     target: ghost
     ghostScale: 0.6
     bothHands: 0
+    ghostSpread: 0
     goldPath: 
     goldTileSteps: 0
     tutorialGrass: 0
@@ -115,6 +119,7 @@ MonoBehaviour:
     target: ghost
     ghostScale: 0.6
     bothHands: 0
+    ghostSpread: 0
     goldPath: 
     goldTileSteps: 0
     tutorialGrass: 0
@@ -136,6 +141,7 @@ MonoBehaviour:
     target: goldTile
     ghostScale: 0.6
     bothHands: 0
+    ghostSpread: 0
     goldPath: 
     goldTileSteps: 3
     tutorialGrass: 0
@@ -157,6 +163,7 @@ MonoBehaviour:
     target: landmark:firstGrass
     ghostScale: 1
     bothHands: 0
+    ghostSpread: 0
     goldPath: firstGrass
     goldTileSteps: 0
     tutorialGrass: 1
@@ -178,6 +185,7 @@ MonoBehaviour:
     target: leadPod
     ghostScale: 1
     bothHands: 0
+    ghostSpread: 0
     goldPath: 
     goldTileSteps: 0
     tutorialGrass: 0
@@ -194,11 +202,12 @@ MonoBehaviour:
     failWhen: battleFailed
     rewindTo: grass
     praise: 1
-    ghost: pinch
+    ghost: poke
     place: 1
-    target: runes
+    target: nearestRune
     ghostScale: 1
     bothHands: 0
+    ghostSpread: 0
     goldPath: 
     goldTileSteps: 0
     tutorialGrass: 0
@@ -220,6 +229,7 @@ MonoBehaviour:
     target: cradle
     ghostScale: 1
     bothHands: 0
+    ghostSpread: 0
     goldPath: 
     goldTileSteps: 0
     tutorialGrass: 0
@@ -241,6 +251,29 @@ MonoBehaviour:
     target: 
     ghostScale: 1
     bothHands: 0
+    ghostSpread: 0
+    goldPath: 
+    goldTileSteps: 0
+    tutorialGrass: 0
+  - id: twoHands
+    line: lesson.twohands
+    again: 
+    help: 
+    helpAfter: 30
+    startWhen: '!battle & !swap'
+    delay: 2
+    doneWhen: twoHandGrab
+    validWhile: 
+    skipAfter: 15
+    failWhen: 
+    rewindTo: 
+    praise: 1
+    ghost: grab_rim_slide
+    place: 1
+    target: islandRim
+    ghostScale: 1
+    bothHands: 1
+    ghostSpread: 0.3
     goldPath: 
     goldTileSteps: 0
     tutorialGrass: 0

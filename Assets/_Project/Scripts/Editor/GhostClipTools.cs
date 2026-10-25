@@ -100,7 +100,7 @@ namespace Diorama.EditorTools
         Vector2 _scroll;
         static readonly string[] Hands = { "Auto (right first)", "Right", "Left" };
         static readonly string[] PreviewHands = { "Left", "Right", "Both" };
-        static readonly string[] Places = { "Above the island", "Real size, in front" };
+        static readonly string[] Places = { "Above the island", "At a target (front rim)" };
 
         void OnGUI()
         {
@@ -115,6 +115,18 @@ namespace Diorama.EditorTools
                 _previewPlace = EditorGUILayout.Popup(_previewPlace, Places);
             }
             _previewScale = EditorGUILayout.Slider("Preview lesson size", _previewScale, 0.3f, 1.5f);
+            var lib = AssetDatabase.LoadAssetAtPath<GhostClipLibrary>(GhostClipTools.LibraryPath);
+            if (lib != null)
+            {
+                EditorGUI.BeginChangeCheck();
+                float ts = EditorGUILayout.Slider(new GUIContent("Size at targets (all clips)", "Ghosts at a lesson target show at this share of real hand size. The thumb demos above the island are not affected."), lib.targetScale, 0.3f, 1.5f);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    Undo.RecordObject(lib, "Ghost target size");
+                    lib.targetScale = ts;
+                    EditorUtility.SetDirty(lib);
+                }
+            }
             var recorder = Application.isPlaying ? Object.FindFirstObjectByType<GhostClipRecorder>() : null;
             var ghosts = Application.isPlaying ? Object.FindFirstObjectByType<GhostHands>() : null;
             var library = AssetDatabase.LoadAssetAtPath<GhostClipLibrary>(GhostClipTools.LibraryPath);
@@ -181,7 +193,7 @@ namespace Diorama.EditorTools
             var place = _previewPlace == 0 ? GhostPlace.AboveIsland : GhostPlace.AtTarget;
             if (place == GhostPlace.AtTarget)
             {
-                // Real size in front of the island's front edge (the rim's middle).
+                // At the island's front edge (the rim's middle), at the lesson size for targets.
                 var island = Object.FindFirstObjectByType<IslandBuilder>();
                 Dialogue.RegisterTarget("preview", () =>
                 {

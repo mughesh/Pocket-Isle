@@ -7,7 +7,8 @@ namespace Diorama
     /// One focus language for every hint (step 7c): "the Spirit shines its lantern on it".
     /// Gold = do this now: while a dialogue line has a target (<see cref="Dialogue.GetTarget"/>), anything whose origin is
     /// inside the target's sphere gets a gold pulsing outline (Toon, Toon Outline and Prop outlines; pods glow gold at the
-    /// rim) and a soft beam of warm light runs from the Spirit's lantern to it. After the line the gold stays for
+    /// rim), a soft gold halo sits on it, and the Spirit's lantern brightens with a short faint cone below it (step 8c: the
+    /// old beam line to the target crossed the scene and looked bad). After the line the gold stays for
     /// <see cref="lingerSeconds"/> (or until the target disappears or <see cref="Clear"/> is called); a hint step still
     /// waiting (<see cref="SetPending"/>) then gets a softer pulse every <see cref="softPulseGap"/> seconds.
     /// White = what the gaze is on: selectables call <see cref="Hover"/> each frame; a thin white outline, never gold.
@@ -15,7 +16,7 @@ namespace Diorama
     /// </summary>
     public class FocusHighlight : MonoBehaviour
     {
-        [Tooltip("Diorama/Lantern Beam material.")]
+        [Tooltip("Diorama/Lantern Beam material (halo on the target, short cone below the lantern).")]
         public Material beamMaterial;
         public Color gold = new Color(1f, 0.74f, 0.16f);
         public Color hoverColor = new Color(1f, 1f, 1f);
@@ -23,10 +24,12 @@ namespace Diorama
         public float lingerSeconds = 6f;
         [Tooltip("A hint step still waiting pulses softly this often (s).")]
         public float softPulseGap = 4f;
-        [Tooltip("Beam width at the lantern and at the target (metres at island scale 1).")]
-        public float beamStartWidth = 0.003f;
-        public float beamEndWidth = 0.02f;
-        [Tooltip("The beam stays this long after the line ends (s).")]
+        [Tooltip("Halo diameter as a share of the target's focus sphere diameter.")]
+        public float haloSize = 1.5f;
+        [Tooltip("Short cone below the lantern: length and width at its open end (metres at island scale 1). Length 0 = no cone.")]
+        public float coneLength = 0.035f;
+        public float coneWidth = 0.02f;
+        [Tooltip("The halo stays this long after the line ends (s).")]
         public float beamLinger = 1.5f;
         public IslandBuilder island;
 
@@ -45,16 +48,21 @@ namespace Diorama
         static float _pendingRadius, _pendingSince;
         static bool _cleared;
 
+        static readonly int RadialId = Shader.PropertyToID("_Radial");
+
         Dialogue.Target _last;
-        float _lastEnded = -999f, _beam;
+        float _lastEnded = -999f, _beam, _haloRadius;
         Vector3 _beamTo;
-        Mesh _beamMesh;
-        MeshRenderer _beamRenderer;
+        Mesh _coneMesh, _haloMesh;
+        MeshRenderer _coneRenderer, _haloRenderer;
         MaterialPropertyBlock _block;
         readonly Vector3[] _verts = new Vector3[4];
 
-        /// <summary>Where the beam starts (the Spirit's lantern). LanternSpirit sets it.</summary>
+        /// <summary>Where the cone starts (the Spirit's lantern). LanternSpirit sets it.</summary>
         public static void SetLantern(Transform lantern) => _lantern = lantern;
+
+        /// <summary>0..1: the lantern is shining on a hint target now (the Spirit brightens).</summary>
+        public static float Shine => _instance != null ? _instance._beam : 0f;
 
         /// <summary>The gaze is on something at <paramref name="world"/> (radius in world metres): white for this frame.</summary>
         public static void Hover(Vector3 world, float radius)
@@ -91,26 +99,35 @@ namespace Diorama
 
         void Start()
         {
-            if (beamMaterial == null) Debug.LogError("[FocusHighlight] No beam material: hints show the gold outline but no lantern beam (Set Up MR_Main (7c)).", this);
+            if (beamMaterial == null) Debug.LogError("[FocusHighlight] No beam material: hints show the gold outline but no halo (Set Up MR_Main (7c)).", this);
             _block = new MaterialPropertyBlock();
-            _beamMesh = new Mesh { name = "Lantern Beam" };
-            _beamMesh.MarkDynamic();
-            _beamMesh.vertices = _verts;
-            _beamMesh.uv = new[] { new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0f, 1f), new Vector2(1f, 1f) };
-            _beamMesh.triangles = new[] { 0, 2, 1, 1, 2, 3 };
-            var go = new GameObject("Lantern Beam");
+            _coneRenderer = MakeQuad("Lantern Cone", out _coneMesh, true);
+            _haloRenderer = MakeQuad("Lantern Halo", out _haloMesh, false);
+        }
+
+        MeshRenderer MakeQuad(string name, out Mesh mesh, bool dynamic)
+        {
+            mesh = new Mesh { name = name };
+            if (dynamic) mesh.MarkDynamic();
+            mesh.vertices = dynamic ? _verts : new[] { new Vector3(-0.5f, -0.5f, 0f), new Vector3(0.5f, -0.5f, 0f), new Vector3(-0.5f, 0.5f, 0f), new Vector3(0.5f, 0.5f, 0f) };
+            mesh.uv = new[] { new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0f, 1f), new Vector2(1f, 1f) };
+            mesh.triangles = new[] { 0, 2, 1, 1, 2, 3 };
+            mesh.RecalculateBounds();
+            var go = new GameObject(name);
             go.transform.SetParent(transform, false);
-            go.AddComponent<MeshFilter>().sharedMesh = _beamMesh;
-            _beamRenderer = go.AddComponent<MeshRenderer>();
-            _beamRenderer.sharedMaterial = beamMaterial;
-            _beamRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            _beamRenderer.receiveShadows = false;
+            go.AddComponent<MeshFilter>().sharedMesh = mesh;
+            var r = go.AddComponent<MeshRenderer>();
+            r.sharedMaterial = beamMaterial;
+            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            r.receiveShadows = false;
             go.SetActive(false);
+            return r;
         }
 
         void OnDestroy()
         {
-            if (_beamMesh != null) Destroy(_beamMesh);
+            if (_coneMesh != null) Destroy(_coneMesh);
+            if (_haloMesh != null) Destroy(_haloMesh);
         }
 
         float Scale => island != null ? island.transform.lossyScale.x : 1f;
@@ -131,6 +148,7 @@ namespace Diorama
                 amount = 0.55f + 0.45f * Mathf.Sin(Time.time * 5f);
                 beam = true;
                 _beamTo = world;
+                _haloRadius = HaloRadius(target);
             }
             else if (!_cleared && _last != null && Time.time - _lastEnded < lingerSeconds && state != Dialogue.TargetState.Lost)
             {
@@ -140,6 +158,7 @@ namespace Diorama
                     sphere = new Vector4(p.Value.x, p.Value.y, p.Value.z, RadiusOf(_last));
                     amount = 0.45f + 0.35f * Mathf.Sin(Time.time * 4f);
                     _beamTo = p.Value;
+                    _haloRadius = HaloRadius(_last);
                 }
             }
             else if (_pending != null && !_cleared)
@@ -170,37 +189,63 @@ namespace Diorama
             return r > 0f ? r : 0.035f * Scale;
         }
 
-        /// <summary>A camera-facing strip from the lantern to the target, wider at the target (a cone seen from the side).</summary>
+        /// <summary>Halo radius; none for targets that glow themselves or have no size (rim, ghost, room centre).</summary>
+        float HaloRadius(Dialogue.Target t)
+        {
+            float r = t != null && t.radius != null ? t.radius() : 0.035f * Scale;
+            return r > 0.005f * Scale ? r * haloSize : 0f;
+        }
+
+        /// <summary>
+        /// The lantern's light: a soft gold halo facing the camera on the target, and a short cone from the lantern
+        /// toward it that fades out within a few centimetres (it never crosses the scene).
+        /// </summary>
         void UpdateBeam(bool on)
         {
-            if (_beamRenderer == null) return;
-            _beam = Mathf.MoveTowards(_beam, on && _lantern != null ? 1f : 0f, Time.deltaTime * 3f);
+            if (_coneRenderer == null) return;
+            _beam = Mathf.MoveTowards(_beam, on ? 1f : 0f, Time.deltaTime * 3f);
             var cam = Camera.main;
-            bool show = _beam > 0.01f && _lantern != null && cam != null;
-            _beamRenderer.gameObject.SetActive(show);
-            if (!show) return;
-            Vector3 a = _lantern.position, b = _beamTo;
-            Vector3 along = b - a;
+            bool show = _beam > 0.01f && cam != null;
+
+            bool halo = show && _haloRadius > 0f;
+            _haloRenderer.gameObject.SetActive(halo);
+            if (halo)
+            {
+                var ht = _haloRenderer.transform;
+                ht.SetPositionAndRotation(_beamTo, Quaternion.LookRotation(_beamTo - cam.transform.position, Vector3.up));
+                float parent = ht.parent != null ? ht.parent.lossyScale.x : 1f;
+                ht.localScale = Vector3.one * (_haloRadius * 2f / Mathf.Max(1e-5f, parent));
+                _block.Clear();
+                _block.SetFloat(IntensityId, _beam);
+                _block.SetFloat(RadialId, 1f);
+                _haloRenderer.SetPropertyBlock(_block);
+            }
+
+            bool cone = show && _lantern != null && coneLength > 0f;
+            _coneRenderer.gameObject.SetActive(cone);
+            if (!cone) return;
+            Vector3 a = _lantern.position;
+            Vector3 along = _beamTo - a;
             if (along.sqrMagnitude < 1e-8f)
             {
-                _beamRenderer.gameObject.SetActive(false);
+                _coneRenderer.gameObject.SetActive(false);
                 return;
             }
-            // Stop just short of the target so the gold outline stays readable.
-            b -= along.normalized * Mathf.Min(along.magnitude * 0.15f, 0.012f * Scale);
+            Vector3 b = a + along.normalized * Mathf.Min(along.magnitude * 0.5f, coneLength * Scale);
             Vector3 mid = (a + b) * 0.5f;
             Vector3 side = Vector3.Cross(along, mid - cam.transform.position).normalized;
-            float w0 = beamStartWidth * Scale * 0.5f, w1 = beamEndWidth * Scale * 0.5f;
-            var inv = _beamRenderer.transform.worldToLocalMatrix;
+            float w0 = 0.002f * Scale, w1 = coneWidth * Scale * 0.5f;
+            var inv = _coneRenderer.transform.worldToLocalMatrix;
             _verts[0] = inv.MultiplyPoint3x4(a - side * w0);
             _verts[1] = inv.MultiplyPoint3x4(a + side * w0);
             _verts[2] = inv.MultiplyPoint3x4(b - side * w1);
             _verts[3] = inv.MultiplyPoint3x4(b + side * w1);
-            _beamMesh.vertices = _verts;
-            _beamMesh.RecalculateBounds();
+            _coneMesh.vertices = _verts;
+            _coneMesh.RecalculateBounds();
             _block.Clear();
             _block.SetFloat(IntensityId, _beam);
-            _beamRenderer.SetPropertyBlock(_block);
+            _block.SetFloat(RadialId, 0f);
+            _coneRenderer.SetPropertyBlock(_block);
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]

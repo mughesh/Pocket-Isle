@@ -52,7 +52,7 @@ namespace Diorama
         public static readonly string[] Events =
         {
             "shardTouched", "islandGrabbed", "starterPicked", "walked3", "stopped", "gazeWalk",
-            "grassBattle", "sentOut", "moveUsed", "podThrown", "wonOrCaught", "battleFailed",
+            "grassBattle", "sentOut", "moveUsed", "podThrown", "wonOrCaught", "battleFailed", "twoHandGrab",
         };
 
         static Onboarding _instance;

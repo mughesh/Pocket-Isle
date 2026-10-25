@@ -66,7 +66,7 @@ namespace Diorama
             public string clip;
             public GhostPlace place;
             public string target;
-            public float scale;
+            public float scale, spread;
             public bool left, both;
         }
 
@@ -145,7 +145,7 @@ namespace Diorama
                 Hide();
                 return;
             }
-            Show(l.ghost, l.place, l.target, l.ghostScale, onboarding.LastHandLeft, l.bothHands);
+            Show(l.ghost, l.place, l.target, l.ghostScale, onboarding.LastHandLeft, l.bothHands, l.ghostSpread);
         }
 
         void OnLessonEnded(LessonData l, bool done)
@@ -165,13 +165,16 @@ namespace Diorama
                 Show(onboarding != null && onboarding.script != null ? onboarding.script.handsGhost : "hands_up", GhostPlace.AboveIsland, null, 0.8f, false, true);
                 return;
             }
-            if (_hasSaved) Show(_saved.clip, _saved.place, _saved.target, _saved.scale, _saved.left, _saved.both);
+            if (_hasSaved) Show(_saved.clip, _saved.place, _saved.target, _saved.scale, _saved.left, _saved.both, _saved.spread);
             else Hide();
             _hasSaved = false;
         }
 
-        /// <summary>Shows a clip (restarts it). Left = show the left hand (the clip is mirrored if it was recorded with the other).</summary>
-        public void Show(string clip, GhostPlace place, string target, float scale, bool left, bool both)
+        /// <summary>
+        /// Shows a clip (restarts it). Left = show the left hand (the clip is mirrored if it was recorded with the other).
+        /// At a target the size is also x the library's <see cref="GhostClipLibrary.targetScale"/>. Spread = both hands' gap (0 = default).
+        /// </summary>
+        public void Show(string clip, GhostPlace place, string target, float scale, bool left, bool both, float spread = 0f)
         {
             var c = Find(clip);
             if (c == null)
@@ -180,7 +183,7 @@ namespace Diorama
                 Hide();
                 return;
             }
-            _request = new Request { clip = clip, place = place, target = target, scale = Mathf.Max(0.1f, scale), left = left, both = both };
+            _request = new Request { clip = clip, place = place, target = target, scale = Mathf.Max(0.1f, scale), left = left, both = both, spread = spread };
             _clip = c;
             _showing = true;
             _time = 0f;
@@ -263,11 +266,12 @@ namespace Diorama
                 loopFade = 1f;
             }
             float alpha = _visible * loopFade;
-            float scale = _request.scale * Mathf.Max(0.05f, _clip.size) * Mathf.Lerp(1f, struggleScale, _struggle);
+            float placeScale = _request.place == GhostPlace.AtTarget && library != null ? library.targetScale : 1f;
+            float scale = _request.scale * placeScale * Mathf.Max(0.05f, _clip.size) * Mathf.Lerp(1f, struggleScale, _struggle);
 
             var a = _request.both ? _left ?? _right : _request.left ? _left ?? _right : _right ?? _left;
             var b = _request.both ? (a == _left ? _right : _left) : null;
-            Vector3 side = frame * Vector3.right * (bothSpread * 0.5f);
+            Vector3 side = frame * Vector3.right * ((_request.spread > 0f ? _request.spread : bothSpread) * 0.5f);
             Pose(a, point + (b != null ? (a.left ? -side : side) : Vector3.zero), frame, t, scale, alpha);
             if (b != null) Pose(b, point + (b.left ? -side : side), frame, t, scale, alpha);
             else Hidden(a == _left ? _right : _left);

@@ -74,12 +74,22 @@ namespace Diorama
         /// <summary>Extra rim glow from a hint (the opening's "hold its rocky edge"), 0..1 of the highlight.</summary>
         public float HintGlow { get; set; }
 
+        /// <summary>A hand took hold of the island (the first grab point; pod cards close).</summary>
+        public event System.Action GrabStarted;
+
         void Awake() => _grabbableComponent = GetComponent<Grabbable>();
 
         void Start()
         {
             _baseScale = placer != null ? placer.islandScale : transform.localScale.x;
             if (rimInteractable == null) Debug.LogError("[IslandHandle] No rim HandGrabInteractable assigned; the island can't be grabbed.");
+            // The front rim's middle (the two-hands tip); the rim glows itself, no gold sphere.
+            Dialogue.RegisterTarget("islandRim", () =>
+            {
+                if (island == null) return null;
+                var b = island.LocalBounds;
+                return island.transform.TransformPoint(new Vector3(b.center.x, island.CapTopLocal - 0.02f, b.max.z));
+            }, k => HintGlow = k, () => 0f);
         }
 
         // ---- ITransformer ----
@@ -96,9 +106,11 @@ namespace Diorama
             if (points.Count == 1)
             {
                 _offset = _startPos - points[0].position;
+                GrabStarted?.Invoke();
             }
             else if (points.Count >= 2)
             {
+                Onboarding.Mark("twoHandGrab");
                 Vector3 a = points[0].position, b = points[1].position;
                 _startMid = (a + b) * 0.5f;
                 _startDist = Mathf.Max(0.01f, Vector3.Distance(a, b));

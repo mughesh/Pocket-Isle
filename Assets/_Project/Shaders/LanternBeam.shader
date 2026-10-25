@@ -1,6 +1,7 @@
-// The Lantern Spirit's beam (step 7c, FocusHighlight): a thin additive cone of warm light from the Spirit's lantern to
-// the hint target. uv.x runs across the beam (0..1), uv.y along it (0 = lantern, 1 = target). Soft edges, fades in
-// from the lantern, a gentle shimmer drifting toward the target.
+// The Lantern Spirit's light (FocusHighlight). Step 8c replaced the long beam to the target (it crossed the scene) with
+// two additive pieces sharing this shader:
+//   _Radial 0: a short, faint cone just below the lantern. uv.x across (0..1), uv.y along (0 = lantern), fading out.
+//   _Radial 1: a soft gold halo / light pool on the hint target: a camera-facing disc, bright ring, soft falloff.
 Shader "Diorama/Lantern Beam"
 {
     Properties
@@ -8,6 +9,7 @@ Shader "Diorama/Lantern Beam"
         _Color ("Edge Colour", Color) = (1, 0.72, 0.28, 1)
         _Core ("Core Colour", Color) = (1, 0.93, 0.7, 1)
         _Intensity ("Intensity", Range(0, 3)) = 1
+        _Radial ("Halo (1) or cone (0)", Range(0, 1)) = 0
     }
 
     SubShader
@@ -31,6 +33,7 @@ Shader "Diorama/Lantern Beam"
                 float4 _Color;
                 float4 _Core;
                 float _Intensity;
+                float _Radial;
             CBUFFER_END
 
             struct Attributes
@@ -61,13 +64,26 @@ Shader "Diorama/Lantern Beam"
             {
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
                 float t = _Time.y;
+                if (_Radial > 0.5)
+                {
+                    // Halo: soft disc, a brighter ring around the target's edge, a slow breathing pulse.
+                    float d = length(i.uv * 2.0 - 1.0);
+                    float fall = saturate(1.0 - d);
+                    fall = fall * fall;
+                    float ring = exp(-pow((d - 0.62) / 0.16, 2.0));
+                    float pulse = 0.85 + 0.15 * sin(t * 3.0);
+                    float h = (fall * 0.55 + ring * 0.45) * pulse * _Intensity * 0.6;
+                    float3 hc = lerp(_Color.rgb, _Core.rgb, fall);
+                    return half4(hc * h, h);
+                }
                 float x = abs(i.uv.x * 2.0 - 1.0);
                 float y = i.uv.y;
                 float across = saturate(1.0 - x);
                 across = across * across * (3.0 - 2.0 * across);
-                float along = smoothstep(0.0, 0.18, y) * (1.0 - 0.35 * smoothstep(0.8, 1.0, y));
-                float shimmer = 0.78 + 0.22 * sin(y * 26.0 - t * 4.0) * sin(y * 7.0 + t * 1.7);
-                float a = across * along * shimmer * _Intensity * 0.55;
+                // Bright at the lantern, gone by the far end: never reaches anything.
+                float along = smoothstep(0.0, 0.1, y) * (1.0 - smoothstep(0.15, 1.0, y));
+                float shimmer = 0.8 + 0.2 * sin(y * 20.0 - t * 4.0);
+                float a = across * along * shimmer * _Intensity * 0.4;
                 float3 col = lerp(_Color.rgb, _Core.rgb, across * across);
                 return half4(col * a, a);
             }

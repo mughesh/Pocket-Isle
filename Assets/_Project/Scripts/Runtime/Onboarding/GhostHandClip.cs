@@ -111,6 +111,8 @@ namespace Diorama
     public class GhostClipLibrary : ScriptableObject
     {
         public List<GhostHandClip> clips = new List<GhostHandClip>();
+        [Tooltip("Ghosts at a lesson target (shard, rim, pods, runes, cradle) show at this share of real hand size; the thumb demos above the island keep their lesson size.")]
+        [Range(0.3f, 1.5f)] public float targetScale = 0.75f;
 
         /// <summary>The clips the lessons use, in recording order, with how to hold the hand for each.</summary>
         public static readonly (string name, GhostAnchor anchor, float seconds, string how)[] Wanted =

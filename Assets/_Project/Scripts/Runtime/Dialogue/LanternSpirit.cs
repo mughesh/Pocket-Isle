@@ -26,6 +26,8 @@ namespace Diorama
         public float speakLift = 0.012f;
         [Tooltip("Body brightening while speaking (0..1 towards white).")]
         public float speakBrighten = 0.18f;
+        [Tooltip("Extra brightness while the lantern shines on a hint target (step 8c: replaces the beam line).")]
+        public float shineBrighten = 0.35f;
 
         [Header("Flying to a target")]
         public float flySeconds = 0.5f;
@@ -90,7 +92,7 @@ namespace Diorama
             _speak = Mathf.MoveTowards(_speak, _speakTarget, Time.deltaTime * 3f);
             UpdateTarget();
             Place(Time.time);
-            if (_view != null) _view.SetFlash(speakBrighten * Mathf.SmoothStep(0f, 1f, _speak));
+            if (_view != null) _view.SetFlash(Mathf.Max(speakBrighten * Mathf.SmoothStep(0f, 1f, _speak), shineBrighten * FocusHighlight.Shine));
         }
 
         /// <summary>Active target: go (and keep the linger timer fresh). Lost: home now. None: home after the linger.</summary>

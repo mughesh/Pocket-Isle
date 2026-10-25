@@ -105,6 +105,28 @@ namespace Diorama
             Build();
             Hide();
             Dialogue.RegisterTarget("runes", () => RunePoint(1), k => PulseRunes(0, 2, k));
+            // The attack lesson: one move rune to poke, the one nearest the player's head (step 8c).
+            Dialogue.RegisterTarget("nearestRune", () => RunePoint(NearestMove()), k => PulseRunes(NearestMove(), NearestMove(), k));
+        }
+
+        int NearestMove()
+        {
+            var cam = Camera.main;
+            if (cam == null || this == null) return 1;
+            int best = 1;
+            float bestD = float.MaxValue;
+            for (int i = 0; i < 3; i++)
+            {
+                if (_runes[i] == null || !_runes[i].shown) continue;
+                // Near-ties go to the middle one.
+                float d = (_runes[i].root.position - cam.transform.position).sqrMagnitude - (i == 1 ? 1e-4f : 0f);
+                if (d < bestD)
+                {
+                    bestD = d;
+                    best = i;
+                }
+            }
+            return best;
         }
 
         Vector3? RunePoint(int index) =>

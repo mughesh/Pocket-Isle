@@ -60,6 +60,8 @@ namespace Diorama
         public float ghostScale = 1f;
         [Tooltip("Show both hands (mirrored).")]
         public bool bothHands;
+        [Tooltip("Both hands: how far apart (m). 0 = the ghost's default.")]
+        public float ghostSpread;
 
         [Header("Extras")]
         [Tooltip("While this lesson waits, gold tiles run from the explorer to this landmark.")]

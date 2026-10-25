@@ -1574,8 +1574,9 @@ MonoBehaviour:
   hoverColor: {r: 1, g: 1, b: 1, a: 1}
   lingerSeconds: 6
   softPulseGap: 4
-  beamStartWidth: 0.003
-  beamEndWidth: 0.02
+  haloSize: 1.5
+  coneLength: 0.035
+  coneWidth: 0.02
   beamLinger: 1.5
   island: {fileID: 270959109}
 --- !u!1 &886928184
@@ -3258,6 +3259,7 @@ MonoBehaviour:
   bobSpeed: 1.1
   speakLift: 0.012
   speakBrighten: 0.18
+  shineBrighten: 0.35
   flySeconds: 0.5
   flyArc: 0.02
   targetOffset: {x: 0.065, y: 0.012, z: 0}

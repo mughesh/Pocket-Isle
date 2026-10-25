@@ -124,6 +124,8 @@ namespace Diorama
             _block = new MaterialPropertyBlock();
             _scale = placer.islandScale;
             Dialogue.RegisterTarget("shard", () => _shard != null ? _shard.position : (Vector3?)null, k => { }, () => shardSize * 0.8f);
+            // The shard's surface facing the player: where the ghost's fingertip lands (the centre put it inside).
+            Dialogue.RegisterTarget("shardFront", ShardFront, k => { }, () => shardSize * 0.8f);
             // The rim glows itself (HintGlow); no gold sphere, it would outline the trees along the front.
             Dialogue.RegisterTarget("rim", RimPoint, k => { if (handle != null) handle.HintGlow = k; }, () => 0f);
             Dialogue.RegisterTarget("starterPods", () => _starterPods.Count > 1 && _starterPods[1] != null ? _starterPods[1].transform.position : (Vector3?)null,
@@ -377,6 +379,16 @@ namespace Diorama
         }
 
         float _shardRadius;
+
+        Vector3? ShardFront()
+        {
+            if (_shard == null) return null;
+            var cam = Camera.main;
+            Vector3 c = _shard.position;
+            Vector3 toHead = cam != null ? cam.transform.position - c : island.transform.forward;
+            toHead.y = 0f;
+            return c + (toHead.sqrMagnitude > 1e-6f ? toHead.normalized : Vector3.forward) * _shardRadius;
+        }
 
         /// <summary>
         /// Places the shard at <paramref name="basePos"/> plus the nudge spring, and turns it. The spin speed eases toward

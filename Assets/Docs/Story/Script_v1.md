@@ -5,7 +5,7 @@ Format: `trigger_id` · speaker · lines (shown in order). **once** = only the f
 Optional `· → target` (before the lines): the Spirit flies to that anchor while saying them and it pulses
 (`leadPod`, `cradle`, `runes`, `nearPad`, `wildPad`, `shrine`, `lodgeCenter`, `pedestal`, `lodgeIsling`, `rimSocket`, `rimPod`,
 `lodgeDoor`, `tile:x,y`, step 8: `shard`, `rim`, `starterPods`, `landmark:name` (WorldMap landmarks: `statue`, `firstGrass`, `pond`), `gate:fire` / `gate:water` / `gate:wind` /
-`gate:home`, `gate:last`, step 8b: `ghost` (beside the ghost hand above the island), `goldTile`). No target = it stays home. The target glows gold and the Spirit shines its lantern on it (step 7c).
+`gate:home`, `gate:last`, step 8b: `ghost` (beside the ghost hand above the island), `goldTile`, step 8c: `shardFront`, `nearestRune`, `islandRim`). No target = it stays home. The target glows gold and the Spirit shines its lantern on it (step 7c).
 Optional `· while <condition>` (step 8b): the line only shows while it holds and closes the moment it stops
 (`battle`, `swap`, `canWalk`, `encounters`, `tutorial`, `wildRed`, `battle.out`; `!` not, `&` and, `|` or). A battle or a
 scene swap starting closes every hint line that has no `while` saying it still applies.
@@ -57,10 +57,12 @@ every ~10 s while it waits. Shard, move and starter use the Opening lines above;
   - Spirit: Follow the gold tiles into the tall grass.
 - `lesson.send.again` · while battle · → leadPod
   - Spirit: Toss your friend's pod onto the island!
-- `lesson.rune.again` · while battle · → runes
-  - Spirit: Look at a rune and pinch.
+- `lesson.rune.again` · while battle · → nearestRune
+  - Spirit: Poke a rune!
 - `lesson.catch.again` · while battle · → cradle
   - Spirit: Grab the big pod and flick it!
+- `lesson.twohands` · while !battle · → islandRim (step 8c, once after the first battle)
+  - Spirit: Use both hands to turn or resize the island.
 - `lesson.hands` · while tutorial
   - Spirit: Show me your hands!
 - `praise.nice` · Spirit: Nice!
@@ -83,8 +85,8 @@ every ~10 s while it waits. Shard, move and starter use the Opening lines above;
 - `tut.pond` · once · while encounters & !battle (first time next to water): Spirit: Face the water and tap. Something might bite!
 - `pod.first` · once · → leadPod (encounter start)
   - Spirit: Grab your friend's pod from the rim and toss it in!
-- `battle.first` · once · → runes
-  - Spirit: Look at a rune and pinch. Or just poke it.
+- `battle.first` · once · → nearestRune
+  - Spirit: Poke a rune to attack!
 - `battle.types` · once (first super or not-very effective hit)
   - Spirit: Water beats Fire. Fire beats Wind. Wind beats Water.
 - `battle.win.first` · once: Spirit: You did it! Your friend is getting stronger.

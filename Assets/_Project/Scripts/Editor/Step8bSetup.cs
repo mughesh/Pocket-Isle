@@ -146,7 +146,7 @@ namespace Diorama.EditorTools
                 new LessonData
                 {
                     id = "shard", line = "intro.shard", startWhen = "opening.shard", delay = 1.5f, validWhile = "opening.shard",
-                    doneWhen = "shardTouched", ghost = "poke", place = GhostPlace.AtTarget, target = "shard",
+                    doneWhen = "shardTouched", ghost = "poke", place = GhostPlace.AtTarget, target = "shardFront",
                 },
                 new LessonData
                 {
@@ -188,9 +188,10 @@ namespace Diorama.EditorTools
                 },
                 new LessonData
                 {
+                    // Step 8c: poke is taught (look + pinch still works).
                     id = "rune", line = "battle.first", again = "lesson.rune.again", startWhen = "battle.out", validWhile = "battle",
                     doneWhen = "moveUsed", failWhen = battleFail, rewindTo = "grass",
-                    ghost = "pinch", place = GhostPlace.AtTarget, target = "runes",
+                    ghost = "poke", place = GhostPlace.AtTarget, target = "nearestRune",
                 },
                 new LessonData
                 {
@@ -201,6 +202,12 @@ namespace Diorama.EditorTools
                 new LessonData
                 {
                     id = "free", doneWhen = "wonOrCaught", failWhen = battleFail, rewindTo = "grass", praise = false,
+                },
+                new LessonData
+                {
+                    // Step 8c: once, after the first battle: both hands at the rim turn and resize the island.
+                    id = "twoHands", line = "lesson.twohands", startWhen = "!battle & !swap", delay = 2f, doneWhen = "twoHandGrab", skipAfter = 15f,
+                    ghost = "grab_rim_slide", place = GhostPlace.AtTarget, target = "islandRim", bothHands = true, ghostSpread = 0.3f,
                 },
             };
             s.praise = new List<string> { "praise.nice", "praise.like", "praise.perfect" };

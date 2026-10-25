@@ -226,12 +226,12 @@ MonoBehaviour:
     once: 0
     priority: 1
     note: 
-    target: runes
+    target: nearestRune
     validWhile: battle
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Look at a rune and pinch.
+      text: Poke a rune!
   - id: lesson.catch.again
     once: 0
     priority: 1
@@ -242,6 +242,16 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: Grab the big pod and flick it!
+  - id: lesson.twohands
+    once: 0
+    priority: 1
+    note: step 8c, once after the first battle
+    target: islandRim
+    validWhile: '!battle'
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Use both hands to turn or resize the island.
   - id: lesson.hands
     once: 0
     priority: 1
@@ -359,12 +369,12 @@ MonoBehaviour:
     once: 1
     priority: 1
     note: 
-    target: runes
+    target: nearestRune
     validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Look at a rune and pinch. Or just poke it.
+      text: Poke a rune to attack!
   - id: battle.types
     once: 1
     priority: 1
