@@ -9,7 +9,7 @@ using CommonUsages = UnityEngine.XR.CommonUsages;
 namespace Diorama
 {
     /// <summary>
-    /// Places the island level, in front of the seated user at about waist height, its +Z facing them.
+    /// Places the island level, in front of the seated user at about chest height, its +Z facing them.
     /// Keeps the user's current island scale. Re-place: the Quest recenter (hold the Meta button, or the system
     /// menu's recenter), or R in the Editor. Moving, turning and resizing by hand is IslandHandle.
     /// The island is parented to the camera rig's TrackingSpace: MRUK world locking moves that transform after the
@@ -29,8 +29,8 @@ namespace Diorama
         [Header("Placement")]
         [Tooltip("Horizontal distance from the head to the island centre, in metres.")]
         public float distance = 0.45f;
-        [Tooltip("How far below eye height the island sits, in metres. About 0.55 is waist level when seated.")]
-        public float belowEye = 0.55f;
+        [Tooltip("How far below eye height the island sits, in metres. About 0.35 is chest height when seated (0.55 was waist).")]
+        public float belowEye = 0.35f;
 
         [Tooltip("Eye height above the floor assumed when there is no head pose at all (seated), in metres.")]
         public float seatedEyeHeight = 1.15f;
@@ -219,7 +219,7 @@ namespace Diorama
             if (kb != null && kb.rKey.wasPressedThisFrame) Place("R key");
         }
 
-        /// <summary>Places the island in front of the user at waist height, level.</summary>
+        /// <summary>Places the island in front of the user at chest height, level.</summary>
         public void Place() => Place("request");
 
         void Place(string reason)
@@ -234,7 +234,7 @@ namespace Diorama
             {
                 fwd = Flat(headFwd);
                 pos = headPos + fwd * distance + Vector3.down * belowEye;
-                Status = $"waist ({source})";
+                Status = $"chest ({source})";
                 Debug.Log($"[IslandPlacer] Placed ({reason}) from {source}. Head {headPos:F2}, island {pos:F2}.");
             }
             else

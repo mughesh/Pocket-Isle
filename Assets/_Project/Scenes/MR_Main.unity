@@ -1036,7 +1036,7 @@ MonoBehaviour:
   island: {fileID: 270959109}
   islandScale: 0.6
   distance: 0.45
-  belowEye: 0.55
+  belowEye: 0.35
   seatedEyeHeight: 1.15
   trackingTimeout: 3
   settleFrames: 4
@@ -3364,8 +3364,11 @@ MonoBehaviour:
   shardSize: 0.12
   driftFrom: {x: 0.8, y: 0.3, z: -1.2}
   driftSeconds: 3.5
-  touchRadius: 0.08
-  autoTouchSeconds: 6
+  contactSlack: 0.01
+  autoTouchSeconds: 10
+  nudgeSpeed: 0.45
+  nudgeSpring: 220
+  nudgeDamping: 0.3
   growSeconds: 1.2
   riseSeconds: 1.6
   moveWaitSeconds: 12

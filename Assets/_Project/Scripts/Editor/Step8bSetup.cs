@@ -145,7 +145,7 @@ namespace Diorama.EditorTools
             {
                 new LessonData
                 {
-                    id = "shard", line = "intro.shard", startWhen = "opening.shard", delay = 3f, validWhile = "opening.shard",
+                    id = "shard", line = "intro.shard", startWhen = "opening.shard", delay = 1.5f, validWhile = "opening.shard",
                     doneWhen = "shardTouched", ghost = "poke", place = GhostPlace.AtTarget, target = "shard",
                 },
                 new LessonData

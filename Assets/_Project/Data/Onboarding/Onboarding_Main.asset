@@ -19,7 +19,7 @@ MonoBehaviour:
     help: 
     helpAfter: 30
     startWhen: opening.shard
-    delay: 3
+    delay: 1.5
     doneWhen: shardTouched
     validWhile: opening.shard
     skipAfter: 0

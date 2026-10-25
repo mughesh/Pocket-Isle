@@ -54,10 +54,14 @@ namespace Diorama
         [Tooltip("Where it drifts in from, relative to its resting spot (island space: x to the player's left, z toward the player).")]
         public Vector3 driftFrom = new Vector3(0.8f, 0.3f, -1.2f);
         public float driftSeconds = 3.5f;
-        [Tooltip("A fingertip or palm this close (m) touches it.")]
-        public float touchRadius = 0.08f;
+        [Tooltip("A fingertip this far (m) outside the shard's surface touches it (the palm gets 2 cm more). Contact, not proximity.")]
+        public float contactSlack = 0.01f;
         [Tooltip("It unfolds by itself after this long (s).")]
-        public float autoTouchSeconds = 6f;
+        public float autoTouchSeconds = 10f;
+        [Tooltip("A touch pushes the shard away from the finger at this speed (m/s); a damped spring brings it back.")]
+        public float nudgeSpeed = 0.45f;
+        public float nudgeSpring = 220f;
+        [Range(0.05f, 1f)] public float nudgeDamping = 0.3f;
 
         [Header("Unfold")]
         public float growSeconds = 1.2f;
@@ -98,6 +102,10 @@ namespace Diorama
         Mesh _shardMesh;
         float _scale;
         bool _touched, _shardWaiting;
+        // One continuous spin across drift, hover and crack; the nudge spring on top of the base position.
+        float _spinAngle, _spinSpeed;
+        Vector3 _nudge, _nudgeVel;
+        readonly bool[] _wasTouching = new bool[2];
         readonly List<PodView> _starterPods = new List<PodView>();
         int _gazedPod = -1, _saidPod = -1, _chosen = -1;
         float _gazeSince;
@@ -198,27 +206,32 @@ namespace Diorama
             Debug.Log("[Opening] New game: the shard arrives.");
             yield return WaitPlaced();
 
+            // First use of the opening's shaders, drawn once and tiny before anything shows (the device hitched up to
+            // 97 ms when the shard, flash, Spirit spark and pods first drew).
+            yield return WarmUp();
+
             // The shard drifts in and settles where the island will be.
             _stage = Stage.Shard;
             Vector3 rest = island.transform.position + Vector3.up * 0.06f;
             MakeShard(rest + island.transform.rotation * driftFrom);
             Vector3 from = _shard.position;
+            _spinSpeed = 0.6f;
             for (float t = 0f; t < driftSeconds; t += Time.deltaTime)
             {
                 float u = Mathf.SmoothStep(0f, 1f, t / driftSeconds);
-                _shard.position = Vector3.Lerp(from, rest, u) + Vector3.up * (0.12f * Mathf.Sin(u * Mathf.PI));
-                SpinShard(0.6f);
+                MoveShard(Vector3.Lerp(from, rest, u) + Vector3.up * (0.12f * Mathf.Sin(u * Mathf.PI)), 0.6f);
                 yield return null;
             }
 
-            // Waits for a hand (or gives in after a while). The touch lesson hints after a few seconds.
+            // Waits for a hand (or gives in after a while). The touch lesson hints after a moment.
             float waited = 0f;
             _shardWaiting = true;
             while (!_touched && waited < autoTouchSeconds)
             {
                 waited += Time.deltaTime;
-                _shard.position = rest + Vector3.up * (0.008f * Mathf.Sin(Time.time * 1.7f));
-                SpinShard(0.35f);
+                // The bob fades in so the hover carries on from the drift without a jump.
+                float bob = 0.008f * Mathf.Clamp01(waited / 1.2f);
+                MoveShard(rest + Vector3.up * (bob * Mathf.Sin(Time.time * 1.7f)), 0.35f);
                 SetShardGlow(0.35f + 0.25f * Mathf.Sin(Time.time * 2.2f), 0.2f);
                 _touched = ShardTouched();
                 yield return null;
@@ -227,13 +240,13 @@ namespace Diorama
             if (_touched) Onboarding.Mark("shardTouched");
             Debug.Log($"[Opening] Shard {(_touched ? "touched" : "unfolds by itself")} after {waited:0.0} s.");
 
-            // Cracks open with light; the base grows out of it; the tiles rise from the middle.
+            // Cracks open with light (the nudge still springs back); the base grows out of it; the tiles rise from the middle.
             _stage = Stage.Unfold;
-            Vector3 shardHome = _shard.position;
+            Vector3 shardHome = _shard.position - _nudge;
             for (float t = 0f; t < 0.5f; t += Time.deltaTime)
             {
                 float u = t / 0.5f;
-                _shard.position = shardHome + UnityEngine.Random.insideUnitSphere * (0.004f * u);
+                MoveShard(shardHome + UnityEngine.Random.insideUnitSphere * (0.004f * u), 0.35f + u);
                 SetShardGlow(u, 0.2f + 0.8f * u);
                 yield return null;
             }
@@ -245,6 +258,7 @@ namespace Diorama
                 island.transform.localScale = Vector3.one * Mathf.Max(HiddenScale, _scale * EaseOutBack(g));
                 if (_shard != null)
                 {
+                    MoveShard(shardHome, 1.35f);
                     float s = 1f - Mathf.Clamp01(t / 0.3f);
                     _shard.localScale = Vector3.one * shardSize * s;
                     if (s <= 0f)
@@ -356,9 +370,30 @@ namespace Diorama
             _shardRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             if (shardMaterial == null) Debug.LogError("[Opening] No shard material: the shard is pink.", this);
             _shard = go.transform;
+            var e = _shardMesh.bounds.extents;
+            _shardRadius = (e.x + e.y + e.z) / 3f * shardSize;
+            _spinAngle = 0f;
+            _nudge = _nudgeVel = Vector3.zero;
         }
 
-        void SpinShard(float speed) => _shard.rotation = Quaternion.Euler(8f * Mathf.Sin(Time.time * 0.9f), Time.time * speed * 40f, 6f * Mathf.Cos(Time.time * 0.7f));
+        float _shardRadius;
+
+        /// <summary>
+        /// Places the shard at <paramref name="basePos"/> plus the nudge spring, and turns it. The spin speed eases toward
+        /// <paramref name="spinSpeed"/> and the angle accumulates, so changing state never restarts the turn.
+        /// </summary>
+        void MoveShard(Vector3 basePos, float spinSpeed)
+        {
+            float dt = Time.deltaTime;
+            _spinSpeed = Mathf.MoveTowards(_spinSpeed, spinSpeed, dt * 0.6f);
+            _spinAngle = Mathf.Repeat(_spinAngle + _spinSpeed * 40f * dt, 360f);
+            // Damped spring back to the base position (semi-implicit Euler, stable at these rates).
+            float c = 2f * nudgeDamping * Mathf.Sqrt(nudgeSpring);
+            _nudgeVel += (-nudgeSpring * _nudge - c * _nudgeVel) * dt;
+            _nudge += _nudgeVel * dt;
+            _shard.SetPositionAndRotation(basePos + _nudge,
+                Quaternion.Euler(8f * Mathf.Sin(Time.time * 0.9f), _spinAngle, 6f * Mathf.Cos(Time.time * 0.7f)));
+        }
 
         void SetShardGlow(float crack, float emissive)
         {
@@ -369,24 +404,120 @@ namespace Diorama
             _shardRenderer.SetPropertyBlock(_block);
         }
 
-        /// <summary>A fingertip or palm near the shard, or a pinch while looking at it.</summary>
+        static readonly HandJointId[] TouchJoints = { HandJointId.HandIndexTip, HandJointId.HandMiddleTip, HandJointId.HandThumbTip, HandJointId.HandPalm };
+
+        /// <summary>
+        /// A fingertip or the palm in contact with the shard (not merely near it), or a pinch while looking at it. A
+        /// contact nudges the shard away from the hand (it springs back) and flashes where it was touched.
+        /// </summary>
         bool ShardTouched()
         {
             if (_shard == null) return false;
-            float reach = touchRadius + shardSize * 0.4f;
-            bool looking = HeadGaze.TryGetRay(out var ray) && Vector3.Cross(ray.direction, _shard.position - ray.origin).magnitude < shardSize * 0.9f &&
-                           Vector3.Dot(ray.direction, _shard.position - ray.origin) > 0f;
+            Vector3 c = _shard.position;
+            bool looking = HeadGaze.TryGetRay(out var ray) && Vector3.Cross(ray.direction, c - ray.origin).magnitude < shardSize * 0.9f &&
+                           Vector3.Dot(ray.direction, c - ray.origin) > 0f;
             for (int h = 0; h < 2; h++)
             {
                 var hand = HandLookup.Refresh(ref _hands[h], h == 0 ? Handedness.Left : Handedness.Right);
-                if (hand == null || !hand.IsTrackedDataValid) continue;
-                foreach (var joint in new[] { HandJointId.HandIndexTip, HandJointId.HandPalm, HandJointId.HandThumbTip })
-                    if (HandLookup.TryGetJoint(hand, joint, out var p) && (p - _shard.position).sqrMagnitude < reach * reach) return true;
+                if (hand == null || !hand.IsTrackedDataValid)
+                {
+                    _wasTouching[h] = false;
+                    continue;
+                }
+                bool touching = false;
+                foreach (var joint in TouchJoints)
+                {
+                    if (!HandLookup.TryGetJoint(hand, joint, out var p)) continue;
+                    float reach = _shardRadius + contactSlack + (joint == HandJointId.HandPalm ? 0.02f : 0f);
+                    if ((p - c).sqrMagnitude >= reach * reach) continue;
+                    touching = true;
+                    if (_wasTouching[h]) break;
+                    Vector3 dir = c - p;
+                    if (dir.sqrMagnitude < 1e-6f && Camera.main != null) dir = Camera.main.transform.forward;
+                    dir.Normalize();
+                    Contact(c - dir * _shardRadius, dir, joint.ToString());
+                    _wasTouching[h] = true;
+                    return true;
+                }
+                _wasTouching[h] = touching;
                 bool pinching = hand.GetIndexFingerIsPinching();
-                if (pinching && !_wasPinching[h] && looking) return true;
+                if (pinching && !_wasPinching[h] && looking)
+                {
+                    var toHead = Camera.main != null ? (Camera.main.transform.position - c).normalized : Vector3.back;
+                    Contact(c + toHead * _shardRadius, -toHead * 0.4f, "look + pinch");
+                    return true;
+                }
                 _wasPinching[h] = pinching;
             }
             return false;
+        }
+
+        /// <summary>Sells the touch: a push away from the hand (damped spring back), a small flash and sparks at the spot.</summary>
+        void Contact(Vector3 at, Vector3 push, string how)
+        {
+            _nudgeVel += push * nudgeSpeed;
+            StartCoroutine(Flash(at, shardSize * 0.45f, 0.3f));
+            Burst(at, 10, new Color(1f, 0.9f, 0.6f), 0.08f);
+            Debug.Log($"[Opening] Shard touched ({how}).");
+        }
+
+        /// <summary>Test hook (the Claude bridge): a fingertip contact from the player's side.</summary>
+        public void DebugPoke()
+        {
+            if (!_shardWaiting || _shard == null || Camera.main == null) return;
+            var dir = (_shard.position - Camera.main.transform.position).normalized;
+            Contact(_shard.position - dir * _shardRadius, dir, "debug poke");
+            _touched = true;
+        }
+
+        /// <summary>
+        /// Draws everything the opening shows for the first time (shard, fx orb, ring and dots, a starter pod with its
+        /// Isling, a gate portal) once, tiny, in front of the camera, so their shader pipelines exist before the shard
+        /// appears. Vulkan builds pipelines at first draw; a ShaderVariantCollection warmup doesn't on Vulkan.
+        /// </summary>
+        IEnumerator WarmUp()
+        {
+            var cam = Camera.main;
+            if (cam == null) yield break;
+            float started = Time.realtimeSinceStartup;
+            Vector3 at = cam.transform.position + cam.transform.forward * 0.8f;
+            var tiny = Matrix4x4.TRS(at, Quaternion.identity, Vector3.one * 0.002f);
+            var mesh = ShardMesh();
+            var orb = fx != null ? fx.Get(BattleFx.Shape.Orb) : null;
+            var ring = fx != null ? fx.Get(BattleFx.Shape.Ring) : null;
+            foreach (var item in new[] { orb, ring })
+            {
+                if (item == null) continue;
+                item.Set(Color.white, new Color(1f, 0.85f, 0.45f), 1f, 1.4f, 1f, 0.3f);
+                item.transform.position = at;
+                item.transform.localScale = Vector3.one * (0.002f / Mathf.Max(1e-4f, fx.transform.lossyScale.x));
+            }
+            if (fx != null) fx.Burst(at, 2, Color.white, 0f, 0.1f, 0.0005f);
+            PodView pod = null;
+            if (pods != null && pods.podPrefab != null && starters.Length > 0 && starters[0] != null)
+            {
+                pod = Instantiate(pods.podPrefab, island.transform.parent, false);
+                pod.name = "Warmup Pod";
+                pod.Show(new IslingInstance(starters[0], starterLevel));
+                pod.transform.position = at;
+                pod.BaseScale = Vector3.one * 0.02f;
+            }
+            var gates = FindFirstObjectByType<ShardGates>();
+            var portal = gates != null ? gates.portalMaterial : null;
+            for (int f = 0; f < 3; f++)
+            {
+                if (shardMaterial != null) Graphics.RenderMesh(new RenderParams(shardMaterial), mesh, 0, tiny);
+                if (portal != null) Graphics.RenderMesh(new RenderParams(portal), mesh, 0, tiny);
+                yield return null;
+            }
+            if (fx != null)
+            {
+                fx.Release(orb);
+                fx.Release(ring);
+            }
+            if (pod != null) Destroy(pod.gameObject);
+            Destroy(mesh);
+            Debug.Log($"[Opening] Shader warmup: shard, fx, pod{(portal != null ? ", portal" : "")} drawn once ({(Time.realtimeSinceStartup - started) * 1000f:0} ms).");
         }
 
         /// <summary>A lumpy, slightly tall rock (a jittered, subdivided icosahedron), about 1 unit tall, origin in the middle.</summary>
@@ -500,7 +631,8 @@ namespace Diorama
                 pod.name = $"Starter Pod {starters[i].name}";
                 pod.Show(new IslingInstance(starters[i], starterLevel));
                 pod.transform.localPosition = statue;
-                pod.transform.localScale = Vector3.zero;
+                // BaseScale, not localScale: PodView rewrites localScale from it every frame (held pods shrank to rim size).
+                pod.BaseScale = Vector3.zero;
                 var grab = pod.GetComponent<PodGrab>();
                 if (grab != null)
                 {
@@ -517,7 +649,7 @@ namespace Diorama
                     float k = Mathf.SmoothStep(0f, 1f, u);
                     var p = _starterPods[i].transform;
                     p.localPosition = Vector3.Lerp(statue, PodLocal(i), k) + Vector3.up * (0.06f * Mathf.Sin(u * Mathf.PI));
-                    p.localScale = Vector3.one * podScale * EaseOutBack(u);
+                    _starterPods[i].BaseScale = Vector3.one * podScale * EaseOutBack(u);
                 }
                 yield return null;
             }
@@ -539,12 +671,14 @@ namespace Diorama
                 var pod = _starterPods[i];
                 if (pod == null) continue;
                 var grab = pod.GetComponent<PodGrab>();
-                if (grab != null && grab.IsHeld) continue;
-                bool focus = i == _gazedPod;
+                bool held = grab != null && grab.IsHeld;
+                bool focus = i == _gazedPod && !held;
+                // Floating and held pods stay big; they shrink to rim size only as they snap into the socket (Choose).
+                float size = podScale * (focus ? 1.45f : 1f);
+                pod.BaseScale = Vector3.one * Mathf.Lerp(pod.BaseScale.x, size, 1f - Mathf.Exp(-Time.deltaTime * 10f));
+                if (held) continue;
                 var target = PodLocal(i) + Vector3.up * (0.006f * Mathf.Sin(t * 1.6f + i));
                 pod.transform.localPosition = Vector3.Lerp(pod.transform.localPosition, target, 1f - Mathf.Exp(-Time.deltaTime * 8f));
-                float size = podScale * (focus ? 1.45f : 1f);
-                pod.transform.localScale = Vector3.one * Mathf.Lerp(pod.transform.localScale.x, size, 1f - Mathf.Exp(-Time.deltaTime * 10f));
                 // The starter inside waves: the pod wiggles while looked at.
                 pod.transform.localRotation = Quaternion.Euler(0f, 0f, focus ? 12f * Mathf.Sin(t * 9f) : 0f);
                 pod.Hover = focus ? 1f : 0f;
@@ -611,9 +745,10 @@ namespace Diorama
             var statue = island.transform.InverseTransformPoint(LandmarkWorld("statue", 1.2f) ?? island.transform.position);
             var chosen = index < _starterPods.Count ? _starterPods[index] : null;
             Vector3 fromChosen = chosen != null ? chosen.transform.position : Vector3.zero;
-            var others = new List<(Transform t, Vector3 from)>();
+            float chosenFrom = chosen != null ? chosen.BaseScale.x : podScale;
+            var others = new List<(PodView pod, Vector3 from)>();
             for (int i = 0; i < _starterPods.Count; i++)
-                if (i != index && _starterPods[i] != null) others.Add((_starterPods[i].transform, _starterPods[i].transform.localPosition));
+                if (i != index && _starterPods[i] != null) others.Add((_starterPods[i], _starterPods[i].transform.localPosition));
             for (float t = 0f; t < 0.8f; t += Time.deltaTime)
             {
                 float u = Mathf.SmoothStep(0f, 1f, t / 0.8f);
@@ -622,12 +757,14 @@ namespace Diorama
                     float f = Mathf.Clamp01(t / 0.5f);
                     chosen.transform.position = Vector3.Lerp(fromChosen, pods.HomeWorld(0), Mathf.SmoothStep(0f, 1f, f)) +
                                                 Vector3.up * (0.03f * island.transform.lossyScale.x * Mathf.Sin(f * Mathf.PI));
-                    chosen.transform.localScale = Vector3.one * Mathf.Lerp(podScale, 1f, f);
+                    // Big until the last 0.3 s of the flight, then eases to rim size as it snaps in.
+                    float shrink = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((t - 0.2f) / 0.3f));
+                    chosen.BaseScale = Vector3.one * Mathf.Lerp(chosenFrom, 1f, shrink);
                 }
-                foreach (var (tr, from) in others)
+                foreach (var (pod, from) in others)
                 {
-                    tr.localPosition = Vector3.Lerp(from, statue, u);
-                    tr.localScale = Vector3.one * podScale * (1f - u);
+                    pod.transform.localPosition = Vector3.Lerp(from, statue, u);
+                    pod.BaseScale = Vector3.one * podScale * (1f - u);
                 }
                 yield return null;
             }
