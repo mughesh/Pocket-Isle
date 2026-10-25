@@ -52,6 +52,34 @@ and restore the world. Each restored region docks onto your island.
 - **Region order is free.** All 3 gates open from the hub. Wild levels and Keepers scale with shards held.
 - Each realm has: tall-grass areas, berry bushes, a Hearth Shrine or two, a **Temple** with its Keeper, hidden orbs.
 
+### Still Isle as built (step 8, Oct 25)
+30 x 30 map (`WorldMap_StillIsle`), row 0 = back, column 0 = the player's left. The window (14 tiles) shows the statue
+from the start.
+
+| Where | What |
+|---|---|
+| c15 r22 | Start tile (front centre, small cream clearing) |
+| c14-16 r16-18 | Statue (3 x 3) on a round stone plaza: a seated mossy stone hound with long drooping ears, closed smiling eyes, faint gold cracks, three empty chest sockets (red / blue / white rims, dim). Faces the start. |
+| c10 r20 | Hearth Shrine (2 x 2, door to the front), with its Lodge |
+| c19-25 r19-22 | First tall grass, right of the start (~7 tiles of walking). First encounter of a new game: Toastling Lv 3 |
+| c3-7 r19-21 | Pond (fishing spot c6 r22), stepping stones beside it |
+| c2 r15 / c14 r2 / c26 r15 | Fire / Water / Wind gates (2 x 1) at the end of path stubs on the left, back and right edges; walk in from the tile in front (+row) |
+
+Calm theme: moss green grass, cream paths, pale stone, quiet blue water, teal round trees, grey mossy base rock, no
+embers or falling leaves, an open front edge (no border trees facing the player). Encounters: "visitors" table
+(Toastling, Waxle, Kettlewing Lv 2-4; the pond has Kettlewing) until Neutral species exist.
+
+### Shard Gates as built (step 8)
+- Fire = ember-stone arch, Water = round-cornered stone well with lilies under a wooden crossbar, Wind = short stone
+  tunnel with a little windmill. Each has a portal surface (shader `Diorama/Portal`): open = a slow swirl in the gate
+  colour, sealed = a dark stone seal with a faint seam.
+- Use: walk into it from its front tiles, or look + pinch it (the explorer walks there first). Open gates travel with
+  the scene swap (content sinks, the base tints to the next realm, the new map rises); you arrive in front of the
+  other map's return gate. Sealed gates (Water, Wind until step 10): a soft bump, the seal flashes, `gate.sealed`.
+- Cinderwood (the old test map, renamed) has a mossy return gate two tiles right of its start.
+- Each realm keeps its own restoration; the save keeps the map you're on; the Lodge returns you to the map you came
+  from; losing everything returns you to the last shrine on its own map.
+
 ## Realms and story (decided Oct 22)
 Pattern: in each realm the element has stopped flowing because its frightened Keeper hoards it in the temple.
 Beat the Keeper → the element flows again, the realm visibly revives, its shard docks onto your island.
@@ -183,6 +211,17 @@ explore → tall grass encounter → battle → capture → party / Hearth Lodge
 3. Pick 1 of 3 starters (one per element). Doesn't lock region order.
 4. Walk with thumb gestures to the first tall grass; first battle and first catch within ~3 minutes.
 5. The statue is visible, unexplained.
+
+**As built (step 8, `Opening`):** new game only (no save). Passthrough room, a 12 cm mossy shard with gold cracks
+drifts in from ~1.5 m and settles where the island will be. Touch it (fingertip, palm, or look + pinch); after 3 s the
+Spirit's `intro.shard`, after 6 s it unfolds by itself. It cracks open with light, the base grows out of it, the tiles
+rise from the middle, the explorer pops up and hops twice. A spark leaves the statue and becomes the Spirit
+(`intro.arrive`). `intro.world` makes the rim glow and waits for a grab or 12 s. Three glass pods rise from the statue
+and float over the front half (Kilnpot left, Pebbloop middle, Pufflet right, as the player sees them): looking at one
+makes it grow and wiggle and the Spirit names it; drop it on the rim or look + pinch to pick (no confirm), the others
+sink back into the statue. Then `intro.explorer` and a gold run of tiles toward the first grass. Nothing saves before the
+pick (quitting replays the opening). Returning players: the island rises from the middle in 2 s where it was placed.
+Flat Editor: launch to walking about 45 s (10 s of it waits for a head pose that never comes), on the device about 35 s.
 
 ## Finale
 - All 3 shards in the statue. It wakes: the **Heart of the World**, a huge ancient creature.

@@ -193,6 +193,7 @@ namespace Diorama
         /// </summary>
         IEnumerator HubTour()
         {
+            yield return null; // the Opening starts after this script (execution order 110)
             Debug.Log($"[PerfTour] Starting the step 8 tour ({(Opening.InProgress ? "new game" : "returning player: no opening to measure")}).");
             float chance = encounters.grassChance;
             encounters.grassChance = 0f;

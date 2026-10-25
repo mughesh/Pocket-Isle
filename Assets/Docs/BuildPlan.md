@@ -10,7 +10,10 @@ Prompts for Claude Code: `Assets/Docs/Prompts/step-NN-*.md`. Design: `Assets/Doc
   shrine, **Hearth Lodge instead of the Sanctuary island**), the **Islings rename** (done), step 7c (lodge door,
   gold focus outline + Spirit lantern beam, first-visit hint chain, 8 Islings walk the lodge, the rest sleep in pods).
 - The island always stays level: **tilt toward the head on release was dropped**. Spatial anchors not done (cut #5).
-- Next: step 8 (opening, starter choice, Still Isle hub, Shard Gates).
+- **Step 8 built Oct 25 (11 days ahead of plan), headset test pending:** Still Isle hub with the statue, Shard Gates
+  (fire open to Cinderwood, water and wind sealed), map-to-map travel, the opening (shard, unfold, Spirit, starter
+  pods), scripted first encounter. Flat Editor smoke test passed (new game to catch to Cinderwood and back).
+- Next: step 9 (Cinderwood complete).
 
 ## Principle
 - **Every system data-driven** (ScriptableObjects): species, moves, type chart, maps, temples, dialogue.

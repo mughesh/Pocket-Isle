@@ -5,6 +5,9 @@ here** and gets done in the polish days (Nov 13–14), most valuable first. Add 
 
 | Added | Item | Notes |
 |---|---|---|
+| Oct 25 | Shader warmup at launch (shard, fx orb, portal, pod variants) | 3 hitch frames in the opening on device, worst 97 ms |
+| Oct 25 | Starter pods a bit small at the default island size | podScale 3.2, grows 1.45x on gaze |
+| Oct 25 | Windmill blades on the Wind gate could spin | Static now (Sway only) |
 | Oct 24 | Lantern Spirit size and position tuning | Fine for now |
 | Oct 24 | Real explorer character | Replace the orange cube |
 | Oct 23 | Ambient life: fireflies, birds, butterflies | Fireflies cheap (particles) |
