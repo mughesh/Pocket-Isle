@@ -462,6 +462,7 @@ MonoBehaviour:
   sun: {fileID: 367221215}
   interiors:
   - {fileID: 11400000, guid: d856d518a6f0ad34dbd5d32a3ad3fa1e, type: 2}
+  - {fileID: 11400000, guid: 826b78d0c19f2014a9858fa40dff5037, type: 2}
   worlds:
   - {fileID: 11400000, guid: ab0469af29722704f949fec768f94b68, type: 2}
   - {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
@@ -1278,6 +1279,61 @@ Transform:
   m_Children: []
   m_Father: {fileID: 270959110}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &423146276
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 423146277}
+  - component: {fileID: 423146278}
+  m_Layer: 0
+  m_Name: Forge Hall
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &423146277
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 423146276}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1553131432}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &423146278
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 423146276}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed0c46d1e7631a24db4a1b75749f7f3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.ForgeHall
+  swap: {fileID: 221433162}
+  hall: {fileID: 11400000, guid: 826b78d0c19f2014a9858fa40dff5037, type: 2}
+  island: {fileID: 270959109}
+  explorer: {fileID: 374318554}
+  ringMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  doorTiles:
+  - {x: 4, y: 9}
+  - {x: 5, y: 9}
+  keeperSpot: {x: 4.5, y: 4}
+  ringSize: 2.4
+  firstLine: cinder.hall.first
 --- !u!1 &509277689
 GameObject:
   m_ObjectHideFlags: 0
@@ -2384,7 +2440,7 @@ MonoBehaviour:
   openSeconds: 2.6
   sinkDepth: 2.9
   preheat: 0.35
-  hall: {fileID: 0}
+  hall: {fileID: 11400000, guid: 826b78d0c19f2014a9858fa40dff5037, type: 2}
   hallEntry: {x: 4, y: 8}
   brazierLines:
   - cinder.brazier.one
@@ -3298,6 +3354,7 @@ Transform:
   m_Children:
   - {fileID: 204973769}
   - {fileID: 1127440540}
+  - {fileID: 423146277}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1583412946

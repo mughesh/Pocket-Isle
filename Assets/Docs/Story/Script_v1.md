@@ -155,6 +155,8 @@ every ~10 s while it waits. Shard, move and starter use the Opening lines above;
 - `cinder.brazier.three` · Spirit: Three!
 - `cinder.forge.open` · once (step 9b: all three braziers lit, the door glows and opens)
   - Spirit: The forge is waking up!
+- `cinder.hall.first` · once · → hallKeeper (step 9b: first time inside the Forge Hall; Hearthstag comes in 9c)
+  - Spirit: Something huge sleeps here... not yet.
 - `cw.keeper.meet`
   - Hearthstag: Stay back! If I share the fire, it will go out forever.
   - Spirit: He's not mean. He's scared.

@@ -36,11 +36,26 @@ namespace Diorama.EditorTools
 
         public static void Pump() { var p = Bellows; if (p != null) p.DebugStroke(); }
 
+        /// <summary>Walks onto the forge doorway (open door: into the Forge Hall).</summary>
+        public static void WalkIn() => Walk(CinderwoodTools.Tile(CinderwoodTools.DoorXY + Vector2Int.right));
+
+        /// <summary>Inside the Forge Hall: walks onto the door tile (back out).</summary>
+        public static void WalkOut() => Walk(ForgeHallTools.DoorTiles[0]);
+
+        static void Walk(Vector2Int tile)
+        {
+            var e = Find<GestureTestPiece>();
+            if (e == null) return;
+            bool ok = e.GoTo(tile);
+            Debug.Log($"[Step9bDebug] Walk to c{tile.x} r{tile.y}: {(ok ? "walking" : "can't reach")}.");
+        }
+
         /// <summary>Forgets every puzzle (this Play session; the next save writes it).</summary>
         public static void ResetPuzzles() => PuzzleState.Restore(null);
 
         public static void Describe() => Debug.Log($"[Step9bDebug] Puzzles: {PuzzleState.Describe()}; explorer " +
-                                                   $"{(Find<GestureTestPiece>() is GestureTestPiece e ? $"c{e.Tile.x} r{e.Tile.y}" : "-")}.");
+                                                   $"{(Find<GestureTestPiece>() is GestureTestPiece e ? $"c{e.Tile.x} r{e.Tile.y} facing {e.Facing}" : "-")}; " +
+                                                   $"inside {(SceneSwap.IsInside ? Find<SceneSwap>().Interior.name : "no")}.");
 
         /// <summary>Close view of a map tile (x, y) from the player's side: Logs/BattleShots/9b_{name}.png.</summary>
         static void Close(string name, float x, float y, float height = 0.5f)

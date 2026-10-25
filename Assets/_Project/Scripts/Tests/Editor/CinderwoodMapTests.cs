@@ -45,5 +45,55 @@ namespace Diorama.Tests
             Assert.AreEqual("forest", map.ZoneAt(CinderwoodTools.Tile(10, 16)));
             Assert.AreEqual(map.grassTable, map.GrassTableAt(CinderwoodTools.Tile(2, 2)), "outside the zones: the map's table");
         }
+
+        static string PropName(WorldMap map, UnityEngine.Vector2Int xy)
+        {
+            var t = CinderwoodTools.Tile(xy);
+            return map.TryGetProp(map.PropAt(t.y, t.x), out var e) && e.recipe != null ? e.recipe.name : null;
+        }
+
+        [Test]
+        public void Forge_BellowsPipeAndBraziersInARow_DoorFrontReachableOnceTheLogIsOpen()
+        {
+            var map = Load();
+            Assert.AreEqual("Bellows", PropName(map, CinderwoodTools.BellowsXY));
+            Assert.AreEqual("ForgePipe", PropName(map, CinderwoodTools.PipeXY));
+            foreach (var b in CinderwoodTools.BrazierXY) Assert.AreEqual("Brazier", PropName(map, b), $"brazier at {b}");
+            Assert.AreEqual("ForgeDoor", PropName(map, CinderwoodTools.DoorXY));
+            var log = CinderwoodTools.LogTile;
+            var front = CinderwoodTools.Tile(CinderwoodTools.DoorXY + new UnityEngine.Vector2Int(1, -1));
+            var logFront = CinderwoodTools.Tile(CinderwoodTools.LogXY + UnityEngine.Vector2Int.down);
+            try
+            {
+                Assert.IsFalse(ExplorerPath.CanReach(map, logFront, front, 400), "the log blocks the way to the forge");
+                map.SetPropOpen(log, true);
+                Assert.IsTrue(ExplorerPath.CanReach(map, logFront, front, 400), "log moved: the forge door is reachable");
+                var door = CinderwoodTools.Tile(CinderwoodTools.DoorXY);
+                Assert.IsFalse(map.CanWalk(door + UnityEngine.Vector2Int.right), "the shut door blocks");
+                map.SetPropOpen(door, true);
+                Assert.IsTrue(map.CanWalk(door + UnityEngine.Vector2Int.right), "the open door can be walked into");
+            }
+            finally
+            {
+                map.ClearRuntimeChanges();
+            }
+        }
+
+        [Test]
+        public void ForgeHall_EntryReachesTheDoor_KeeperSpotIsClear()
+        {
+            var hall = AssetDatabase.LoadAssetAtPath<WorldMap>(ForgeHallTools.HallPath);
+            if (hall == null) Assert.Inconclusive($"{ForgeHallTools.HallPath} missing (run Tools > Pocket Isle > Set Up MR_Main (9b puzzles)).");
+            Assert.IsTrue(hall.CanWalk(ForgeHallTools.EntryTile));
+            foreach (var d in ForgeHallTools.DoorTiles)
+            {
+                Assert.IsTrue(hall.CanWalk(d), $"door tile {d} walkable (stepping on it leads out)");
+                Assert.IsTrue(ExplorerPath.CanReach(hall, ForgeHallTools.EntryTile, d, 40));
+            }
+            var k = ForgeHallTools.KeeperSpot;
+            for (int dx = -1; dx <= 1; dx++)
+                for (int dy = -1; dy <= 1; dy++)
+                    Assert.IsTrue(hall.CanWalk(new UnityEngine.Vector2Int(UnityEngine.Mathf.RoundToInt(k.x) + dx, UnityEngine.Mathf.RoundToInt(k.y) + dy)), "the Keeper's spot is open floor");
+        }
     }
 }

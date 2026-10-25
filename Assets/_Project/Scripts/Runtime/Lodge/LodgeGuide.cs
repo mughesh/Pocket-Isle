@@ -218,7 +218,8 @@ namespace Diorama
         void OnReturned(WorldMap map)
         {
             HideGhost();
-            if (_step == Exit)
+            // Step 9b: the Forge Hall is an interior too; without a lodge visit this session there is no chain.
+            if (_chain != null && _step == Exit)
             {
                 // Leaving was the last step's action: mark it done.
                 _step = Steps.Length;

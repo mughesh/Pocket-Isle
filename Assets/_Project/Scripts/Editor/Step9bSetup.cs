@@ -8,8 +8,8 @@ namespace Diorama.EditorTools
 {
     /// <summary>
     /// Step 9b: guardian-hand puzzles. Runs the 9a setup first (it writes and bakes the Cinderwood props including the
-    /// 9b forge ones, rewrites the map and reimports the script), then wires the fallen log (Carry) and the forge
-    /// bellows (Pump). Safe to re-run.
+    /// 9b forge ones, rewrites the map and reimports the script), then wires the fallen log (Carry), the forge
+    /// bellows (Pump) and writes the Forge Hall interior behind the forge door. Safe to re-run.
     /// </summary>
     public static class Step9bSetup
     {
@@ -46,6 +46,7 @@ namespace Diorama.EditorTools
             var root = Root();
             FallenLog(root, map, log);
             Forge(root, map, log);
+            Hall(root, log);
 
             EditorSceneManager.MarkSceneDirty(active);
             EditorSceneManager.SaveScene(active);
@@ -138,6 +139,45 @@ namespace Diorama.EditorTools
             EditorUtility.SetDirty(listener);
             log.Append($"\n  'Fallen Log' {Missing(piece)}: home c{piece.home.x} r{piece.home.y}, ledges " +
                        string.Join(", ", piece.spots.ConvertAll(s => $"c{s.tile.x} r{s.tile.y}")) + ", lesson cinder.log.hands + ghost grab_drop");
+        }
+
+        // ---- D: the Forge Hall (placeholder until 9c) ----
+
+        static void Hall(Transform root, StringBuilder log)
+        {
+            var hallMap = ForgeHallTools.WriteHall(log);
+            var swap = Object.FindFirstObjectByType<SceneSwap>(FindObjectsInactive.Include);
+            if (swap == null)
+            {
+                log.Append("\n  Forge Hall: NO scene swap in the scene");
+                return;
+            }
+            Undo.RecordObject(swap, "Step 9b");
+            swap.interiors.RemoveAll(m => m == null);
+            if (!swap.interiors.Contains(hallMap)) swap.interiors.Add(hallMap);
+            EditorUtility.SetDirty(swap);
+
+            var hall = Child<ForgeHall>(root, "Forge Hall");
+            Undo.RecordObject(hall, "Step 9b");
+            hall.swap = swap;
+            hall.hall = hallMap;
+            hall.island = Object.FindFirstObjectByType<IslandBuilder>(FindObjectsInactive.Include);
+            hall.explorer = Object.FindFirstObjectByType<GestureTestPiece>(FindObjectsInactive.Include);
+            hall.ringMaterial = Step7bSetup.BeaconMaterial();
+            hall.doorTiles = System.Array.ConvertAll(ForgeHallTools.DoorTiles, t => (Vector2)t);
+            hall.keeperSpot = ForgeHallTools.KeeperSpot;
+            EditorUtility.SetDirty(hall);
+
+            var forge = root.GetComponentInChildren<ForgeBellows>(true);
+            if (forge != null)
+            {
+                Undo.RecordObject(forge, "Step 9b");
+                forge.hall = hallMap;
+                forge.hallEntry = ForgeHallTools.EntryTile;
+                EditorUtility.SetDirty(forge);
+            }
+            log.Append($"\n  'Forge Hall' wired: in through the open forge door (entry c{ForgeHallTools.EntryTile.x} r{ForgeHallTools.EntryTile.y}), " +
+                       $"out on the door tiles; Keeper ring at c{hall.keeperSpot.x} r{hall.keeperSpot.y}; {(forge != null ? "the forge door leads in" : "NO forge to lead in")}");
         }
 
         // ---- C: the forge (bellows, pipes, braziers, door) ----

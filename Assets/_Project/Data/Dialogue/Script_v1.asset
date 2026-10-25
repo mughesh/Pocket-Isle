@@ -741,6 +741,16 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: The forge is waking up!
+  - id: cinder.hall.first
+    once: 1
+    priority: 2
+    note: 'step 9b: first time inside the Forge Hall; Hearthstag comes in 9c'
+    target: hallKeeper
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Something huge sleeps here... not yet.
   - id: cw.keeper.meet
     once: 0
     priority: 2
