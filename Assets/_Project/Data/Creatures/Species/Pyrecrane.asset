@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8421308f89f57d498f601bfba37a8cf, type: 3}
+  m_Name: Pyrecrane
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.IslingSpecies
+  displayName: Pyrecrane
+  element: 1
+  recipe: {fileID: 11400000, guid: 4c08b5792b08a8540836f47d669b93fd, type: 2}
+  evolvesTo: {fileID: 0}
+  evolveLevel: 0
+  baseStats:
+    hp: 68
+    attack: 18
+    defense: 13
+    speed: 17
+  moves:
+  - {fileID: 11400000, guid: b0ecd79adb807924cb00264c4eb22e78, type: 2}
+  - {fileID: 11400000, guid: 5a5dcbcb7a50b984f9f06a89afdf21b5, type: 2}
+  - {fileID: 11400000, guid: dc4cdfd9106c04b4ea02d64706c2dc09, type: 2}
+  keeper: 0

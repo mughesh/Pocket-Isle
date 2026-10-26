@@ -1,0 +1,126 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e27712b2a6f9fc45ae0b54784bf7327, type: 3}
+  m_Name: Embercrane
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.CreatureRecipe
+  baseRecipe: {fileID: 0}
+  body: {fileID: 11400000, guid: 9d8b61a4a03474241bc4c9d78739f0aa, type: 2}
+  height: 0.05
+  zones:
+    belly: 0
+    bellyDirection: {x: 0, y: 0, z: 0}
+    bellyAt: 0
+    bellyMaxY: 0
+    bellyDrips: 0
+    bellyDripLength: 0
+    socks: 1
+    socksY: -0.5
+    tips: 0
+    tipAxis: {x: 0, y: 0, z: 0}
+    tipAt: 0
+    spots: 0
+    spotScale: 0
+    cracks: 0
+    crackScale: 0
+    crackWidth: 0
+    crackPulse: 0
+    patches:
+    - center: {x: 0, y: -0.12, z: 0.4}
+      radius: 0.36
+      color: 1
+      mirrorX: 0
+    - center: {x: 0, y: 0.68, z: 0.46}
+      radius: 0.2
+      color: 1
+      mirrorX: 0
+    - center: {x: 0, y: 0.9, z: 0.34}
+      radius: 0.15
+      color: 5
+      mirrorX: 0
+  parts:
+  - part: {fileID: 11400000, guid: 8d96362e58c98c946b4a3c7e3c4b6233, type: 2}
+    position: {x: 0, y: 0.68, z: 0.44}
+    rotation: {x: 8, y: 0, z: 0}
+    scale: {x: 1.1, y: 1.1, z: 1.1}
+    mirror: 0
+    parent: -1
+  - part: {fileID: 11400000, guid: 6ff9a9bb72d27e34b9a0b177eb761c70, type: 2}
+    position: {x: 0, y: 0.86, z: 0.16}
+    rotation: {x: -35, y: 0, z: 0}
+    scale: {x: 1.1, y: 1.1, z: 1.1}
+    mirror: 0
+    parent: -1
+  - part: {fileID: 11400000, guid: 6ff9a9bb72d27e34b9a0b177eb761c70, type: 2}
+    position: {x: 0.05, y: 0.84, z: 0.14}
+    rotation: {x: -45, y: 0, z: -22}
+    scale: {x: 0.95, y: 0.95, z: 0.95}
+    mirror: 1
+    parent: -1
+  - part: {fileID: 11400000, guid: 6ff9a9bb72d27e34b9a0b177eb761c70, type: 2}
+    position: {x: 0, y: -0.02, z: -0.46}
+    rotation: {x: -55, y: 0, z: 0}
+    scale: {x: 1.7, y: 1.7, z: 1.7}
+    mirror: 0
+    parent: -1
+  - part: {fileID: 11400000, guid: 6ff9a9bb72d27e34b9a0b177eb761c70, type: 2}
+    position: {x: 0.08, y: -0.04, z: -0.44}
+    rotation: {x: -50, y: 0, z: -30}
+    scale: {x: 1.6, y: 1.6, z: 1.6}
+    mirror: 1
+    parent: -1
+  - part: {fileID: 11400000, guid: 6ff9a9bb72d27e34b9a0b177eb761c70, type: 2}
+    position: {x: 0.14, y: -0.08, z: -0.4}
+    rotation: {x: -40, y: 0, z: -60}
+    scale: {x: 1.4, y: 1.4, z: 1.4}
+    mirror: 1
+    parent: -1
+  - part: {fileID: 11400000, guid: 91ea87cdebeec91458c58c6d04ca4c49, type: 2}
+    position: {x: 0.36, y: -0.02, z: -0.1}
+    rotation: {x: 0, y: 25, z: 5}
+    scale: {x: 1.15, y: 1.15, z: 1.15}
+    mirror: 1
+    parent: -1
+  face:
+    eyeSize: 0.042
+    eyeSpacing: 0.12
+    eyeHeight: 0.74
+    eyeStretch: 0.7
+    decals: []
+  palette:
+    baseColor: {r: 0.22745098, g: 0.21176471, b: 0.19607843, a: 1}
+    belly: {r: 0.9490196, g: 0.9019608, b: 0.8156863, a: 1}
+    accent: {r: 0.2901961, g: 0.26666668, b: 0.2509804, a: 1}
+    socks: {r: 0.16470589, g: 0.15686275, b: 0.14901961, a: 1}
+    glow: {r: 1, g: 0.47843137, b: 0.11764706, a: 1}
+    extra: {r: 0.78431374, g: 0.1882353, b: 0.16470589, a: 1}
+    face: {r: 0.16470589, g: 0.1254902, b: 0.09411765, a: 1}
+    iris: {r: 0.16470589, g: 0.1254902, b: 0.09411765, a: 1}
+  spec: 0.2
+  glow: 0
+  outline: 0.035
+  idle:
+    breathe: 0.012
+    breatheSpeed: 1.8
+    jiggle: 0
+    hover: 0
+    bob: 0
+    sway: 2
+    swaySpeed: 0.8
+  heightScale: 1.25
+  extraParts: []
+  overridePalette: 0
+  hueShift: 0
+  saturationScale: 1
+  valueScale: 1
+  resolution: 88
+  triangleBudget: 6000
+  bakedPrefab: {fileID: 8913390638775277096, guid: e583c1a60193b554f994e50a76592814, type: 3}

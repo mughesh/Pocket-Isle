@@ -425,7 +425,7 @@ namespace Diorama.EditorTools
             var wing = Kit("WingNub");
             var flame = Kit("FlamePuff");
             var feather = Part("FlameFeather", PartMotion.Flicker, Vector3.up, 0.08f, 1.2f,
-                new PartStyle { color = PaletteSlot.Glow, gradient = true, gradientTo = PaletteSlot.Extra, glow = 0.6f, spec = 0.2f, outline = 0.016f },
+                new PartStyle { color = PaletteSlot.Glow, glow = 0.5f, spec = 0.2f, outline = 0.016f, tip = true, tipColor = PaletteSlot.Belly, tipAxis = Vector3.up, tipAt = 0.3f },
                 Ell(new Vector3(0f, 0.15f, 0f), new Vector3(0.055f, 0.17f, 0.03f), 0f),
                 Cone(new Vector3(0f, 0.28f, 0f), new Vector3(0f, 0.38f, 0f), 0.04f, 0.008f, 0.03f));
             Budget(feather, 24, 300);
@@ -445,7 +445,7 @@ namespace Diorama.EditorTools
                 new CreaturePalette
                 {
                     baseColor = Hex("#3A3632"), belly = Hex("#F2E6D0"), accent = Hex("#4A4440"), socks = Hex("#2A2826"),
-                    glow = Hex("#FF8C28"), extra = Hex("#FFD060"), face = Hex("#2A2018"), iris = Hex("#2A2018"),
+                    glow = Hex("#FF7A1E"), extra = Hex("#C8302A"), face = Hex("#2A2018"), iris = Hex("#2A2018"),
                 },
                 new BodyZones
                 {
@@ -454,7 +454,7 @@ namespace Diorama.EditorTools
                     {
                         new PatternPatch { center = new Vector3(0f, -0.12f, 0.4f), radius = 0.36f, color = PaletteSlot.Belly },
                         new PatternPatch { center = new Vector3(0f, 0.68f, 0.46f), radius = 0.2f, color = PaletteSlot.Belly },
-                        new PatternPatch { center = new Vector3(0f, 0.9f, 0.3f), radius = 0.12f, color = PaletteSlot.Glow },
+                        new PatternPatch { center = new Vector3(0f, 0.9f, 0.34f), radius = 0.15f, color = PaletteSlot.Extra },
                     },
                 },
                 new FaceSettings { eyeSize = 0.042f, eyeSpacing = 0.12f, eyeHeight = 0.74f, eyeStretch = 0.7f, decals = new List<FaceDecal>() },
@@ -464,10 +464,10 @@ namespace Diorama.EditorTools
                     Place(beak, new Vector3(0f, 0.68f, 0.44f), new Vector3(8f, 0f, 0f), 1.1f),
                     Place(feather, new Vector3(0f, 0.86f, 0.16f), new Vector3(-35f, 0f, 0f), 1.1f),
                     Place(feather, new Vector3(0.05f, 0.84f, 0.14f), new Vector3(-45f, 0f, -22f), 0.95f, true),
-                    Place(feather, new Vector3(0f, -0.02f, -0.46f), new Vector3(-55f, 0f, 0f), 1.4f),
-                    Place(feather, new Vector3(0.08f, -0.04f, -0.44f), new Vector3(-50f, 0f, -30f), 1.3f, true),
-                    Place(feather, new Vector3(0.14f, -0.08f, -0.4f), new Vector3(-40f, 0f, -60f), 1.15f, true),
-                    Place(wing, new Vector3(0.4f, -0.04f, -0.06f), new Vector3(0f, 15f, 15f), 1.3f, true),
+                    Place(feather, new Vector3(0f, -0.02f, -0.46f), new Vector3(-55f, 0f, 0f), 1.7f),
+                    Place(feather, new Vector3(0.08f, -0.04f, -0.44f), new Vector3(-50f, 0f, -30f), 1.6f, true),
+                    Place(feather, new Vector3(0.14f, -0.08f, -0.4f), new Vector3(-40f, 0f, -60f), 1.4f, true),
+                    Place(wing, new Vector3(0.36f, -0.02f, -0.1f), new Vector3(0f, 25f, 5f), 1.15f, true),
                 });
             EditorUtility.SetDirty(crane);
 
@@ -475,7 +475,7 @@ namespace Diorama.EditorTools
                 new CreaturePalette
                 {
                     baseColor = Hex("#2E2A28"), belly = Hex("#FFF0D8"), accent = Hex("#3A3430"), socks = Hex("#2A2826"),
-                    glow = Hex("#FF6A20"), extra = Hex("#FFE080"), face = Hex("#2A2018"), iris = Hex("#C04020"),
+                    glow = Hex("#FF6A20"), extra = Hex("#D8281E"), face = Hex("#2A2018"), iris = Hex("#C04020"),
                 },
                 Place(feather, new Vector3(0f, 0.9f, 0.1f), new Vector3(-20f, 0f, 0f), 1.4f),
                 Place(feather, new Vector3(0f, 0.04f, -0.5f), new Vector3(-70f, 0f, 0f), 1.6f),
