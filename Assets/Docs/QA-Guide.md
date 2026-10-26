@@ -41,7 +41,24 @@ clear storage): they turn red, press again within 3 seconds.
 Cheats (one-hit KO, invincible, wild battles off, rare x10, time and walk speed) last until the app closes. They are
 never saved.
 
-## 4. What's new in this build (step 9g)
+## 4. What's new in this build (step 9h)
+
+- **No room-scan prompt** on a new headset (the island just floats when the headset has no room scan).
+- **Instructions stay** until you do them: after a few seconds the Spirit's bubble shrinks to a small chip with a hand
+  ("Grab the edge", "Pinch!"); look at the chip or the Spirit to read the full line again. Lines stay up longer.
+- **Shorter opening**, and a new **pinch lesson** right after the Spirit arrives (a ghost hand pinches beside your own
+  hand; each pinch sparkles; two pinches and you move on).
+- **Pods you can use now have a gold rim**; the one you look at or touch turns white and grows a little.
+- **Ghost hands act on the real things**: the island-move ghost grabs the near rim's corner on your main-hand side, the
+  starter ghost grabs the pod you look at (or each pod in turn) and sets it on the rim, the send-out ghost grabs your
+  lead pod and lets go over the pad.
+- **Lodge:** standing next to the door, or a hand resting near it, no longer takes you out; walk into the door (swipe
+  toward it, or look at it and pinch).
+- **Battles:** your explorer faces the wild Isling; the Spirit waits at the side of the island; its bubble never sinks
+  into the island.
+- **New logo** on the title (a little piece of the island with amber and mossy green letters).
+
+## Earlier (step 9g)
 
 - **Title screen:** a "Pocket Isle" logo over the island. New players pick **Full adventure** or **Quick journey**
   (about 10 min) after the island unfolds; returning players get **Continue / New journey / Settings**. Starting a

@@ -243,6 +243,12 @@ huge sleeps here... not yet."); the door tiles lead back out in front of the for
   hints), Recenter island (the placer's re-place in front of the head), Credits (a stone card; scrolls once it is longer
   than 7 lines; `AudioCredits.md` is appended by the setup when it exists), Back.
 
+**Logo v2 (step 9h):** built from the island's own art: a 6 x 3 mini Still Isle chunk (grass caps, a path strip, grey
+tile columns, a rocky underside of uneven depth, tall-grass tufts, the hub's tree, statue and lantern shapes), "Pocket"
+amber with a light top band and a dark lower band, "Isle" grass green with a cream band and dripping moss caps, the I's
+dot a small glowing lantern. Hand-made: uneven heights, a small tilt per letter. The lantern pulses, two specks drift,
+the base bobs. 9.8k triangles, 4 draws.
+
 ### Quick Journey as built (step 9g, Oct 26)
 - Same game, its own slot, dials in `Data/QuickJourney.asset` (`QuickJourneyConfig`), applied only in the quick slot.
 - **Lessons:** all hand-verb lessons stay (shard, move, starter, walk, look, grass, send, rune, catch). Cut: `stop`
@@ -409,6 +415,33 @@ line with a `while` condition closes as soon as it stops holding (control hints 
 over the island, never grabbable. Real size at the shard, rim, pods, runes and cradle; 60% above the island for the
 thumb demos. It shows the hand used last (mirrored), slows to 0.6x and grows 20% after 3 loops, and with no hands
 tracked for 3 s the Spirit says "Show me your hands!" while both ghost hands rise in front of the island.
+
+**First minutes clarity (step 9h, Oct 26; from the QA tester's first run: too much text, too fast, instructions gone
+before the action is done, pinch never taught):**
+- **One instruction at a time, and it stays.** While a lesson teaches, the Spirit parks beside its target and the
+  lesson line stays up (`Dialogue.Pin`). After ~6 s the bubble shrinks to a **hint chip** (a short verb + a small hand:
+  "Grab the edge", "Pinch!", "Look + pinch", "Toss the pod"...) that stays until the lesson is done; looking at the chip
+  or the Spirit opens the full line again. On done: the chime and the praise, the chip goes, the next lesson. No other
+  line replaces a lesson line: story lines wait until it is done; idle hints are off during the tutorial.
+- **Reading pace:** every line stays at least 1.5 s + 0.06 s a character after it is typed in; a more important line
+  waits for that minimum instead of cutting it off. The first poke or pinch on a line still typing shows it whole.
+- **Less text before the starter:** one line each: "Something's here. Touch it?", "Hello, big one! I'm a Lantern
+  Spirit.", "This little island is yours. Grab its rocky edge to move it.", "Pick an Isling friend!" then "Look at one
+  and pinch, or grab it.". "The world broke into floating pieces" moved to the statue beat.
+- **Pinch is taught** right after the Spirit arrives (both slots): "Tap your thumb and finger together. Like this!", the
+  ghost pinches right beside the player's own dominant hand (~8 cm outside it, following it), each pinch sparkles gold
+  at the fingertips, done after 2 (the opening moves on after 45 s without them).
+- **Focus language on pods:** every pod the player can act on now has a gold rim (starter pods while picking, the lead
+  pod while sending out, the armed cradle pod); a looked-at or touched pod turns white and grows ~8%.
+- **Ghosts on the real objects (retarget, no re-recording):** a grab clip's grab and release frames come from its
+  thumb-index gap; the grab lands on the lesson's real source and the release on its real target, blended over the carry.
+  Island move: the near rim's corner on the dominant side. Starter: the looked-at pod, else the next one each loop (left,
+  middle, right), set down on the rim socket. Send out: the real lead pod, let go over the near pad. Catch: the cradle pod.
+- **Small fixes:** no room scan or scene-permission prompt ever (room data is used only if the headset already has it and
+  the permission was already given: shadow + table snap; otherwise the island floats). Lodge: no palm-over-the-arch exit;
+  a door tile exits only when the step was aimed out (a swipe toward the door, or a tap / look + pinch on it). Battles:
+  the explorer turns to face the wild Isling; the Spirit waits beside the near rim on the non-dominant side; its bubble
+  never sinks into the island.
 
 ## Finale
 - All 3 shards in the statue. It wakes: the **Heart of the World**, a huge ancient creature.

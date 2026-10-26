@@ -23,6 +23,14 @@ here** and gets done in the polish days (Nov 13–14), most valuable first. Add 
 | Oct 22 | Movement feel and speed tuning on the real Cinderwood map | |
 | Oct 22 | Golden Berry crafting | First to cut |
 
+## From step 9h (Oct 26)
+
+| Added | Item | Notes |
+|---|---|---|
+| Oct 26 | Rock-slab look for the title and menu runes | Runes stay like the battle runes for now |
+| Oct 26 | **Guided ghost recorder** (Mugesh's idea) | Dev panel "Ghost" tab walks through each lesson: "Record this next: <lesson>", Ready, 3-2-1, records while he does the real action, stops when the lesson's done event fires, preview, Keep / Redo; clips saved with their source / target anchors so the 9h retarget applies. Nov 3, only for clips that still look wrong after 9h |
+| Oct 26 | Quick Journey 10-minute design pass | Separate design session |
+
 ## Lodge life (do with scene filler props)
 
 | Added | Item | Notes |
