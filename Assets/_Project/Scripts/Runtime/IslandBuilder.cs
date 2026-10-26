@@ -295,6 +295,33 @@ namespace Diorama
         /// <summary>Half the tile footprint (island-local x, z), centred on the origin: the base's real edge (LocalBounds is padded).</summary>
         public Vector2 FootprintHalfSize => map != null ? new Vector2(map.Columns * map.tileSize * 0.5f, map.Rows * map.tileSize * 0.5f) : Vector2.zero;
 
+        /// <summary>Lowest point of the rocky base's underside (island-local y).</summary>
+        public const float BaseBottomLocal = -0.26f;
+
+        /// <summary>
+        /// Step 9e: moves an island-local point out of the island's solid (the footprint plus the rim, from the base's
+        /// underside up to the cap top), keeping <paramref name="margin"/> (x, z sideways, y above the cap). The shortest
+        /// way out wins, up preferred (sideways counts 1.5x), never down. Points outside are returned as they are.
+        /// </summary>
+        public Vector3 PushOutLocal(Vector3 p, Vector3 margin)
+        {
+            var half = FootprintHalfSize + new Vector2(0.02f, 0.02f);
+            float hx = half.x + margin.x, hz = half.y + margin.z, top = CapTopLocal + margin.y;
+            if (Mathf.Abs(p.x) >= hx || Mathf.Abs(p.z) >= hz || p.y >= top || p.y <= BaseBottomLocal - margin.y) return p;
+            float up = top - p.y, sx = (hx - Mathf.Abs(p.x)) * 1.5f, sz = (hz - Mathf.Abs(p.z)) * 1.5f;
+            if (up <= sx && up <= sz) p.y = top;
+            else if (sx <= sz) p.x = Mathf.Sign(p.x == 0f ? 1f : p.x) * hx;
+            else p.z = Mathf.Sign(p.z == 0f ? 1f : p.z) * hz;
+            return p;
+        }
+
+        /// <summary><see cref="PushOutLocal"/> for a world point (margins in world metres).</summary>
+        public Vector3 PushOutWorld(Vector3 world, Vector3 marginWorld)
+        {
+            float s = Mathf.Max(1e-4f, transform.lossyScale.x);
+            return transform.TransformPoint(PushOutLocal(transform.InverseTransformPoint(world), marginWorld / s));
+        }
+
         public int BladeCount { get; private set; }
         public int TileCount { get; private set; }
 

@@ -20,12 +20,13 @@ MonoBehaviour:
   trimStart: 0.9
   trimEnd: 0
   keyJoint: 0
+  keyPinch: 1
   keyTime: 0.34920636
   placeOffset: {x: 0, y: 0, z: 0}
   gazeDotUntil: 0.2
   size: 1
-  speed: 1
   travel: 0.7
+  speed: 1
   holdEnd: 0.3
   frames:
   - rootPos: {x: 0, y: 0, z: 0}

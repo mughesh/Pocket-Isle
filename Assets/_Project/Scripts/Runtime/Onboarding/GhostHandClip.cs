@@ -43,6 +43,8 @@ namespace Diorama
         [Min(0f)] public float trimStart, trimEnd;
         [Tooltip("The joint that lands on the demonstrated spot (index tip for a poke, palm for grabs).")]
         public HandJointId keyJoint = HandJointId.HandPalm;
+        [Tooltip("Pinch grabs (step 9e): the point between the thumb and index tips lands on the spot instead of the key joint.")]
+        public bool keyPinch;
         [Tooltip("When it lands there (0..1 of the trimmed clip).")]
         [Range(0f, 1f)] public float keyTime = 0.5f;
         [Tooltip("Shift from the spot (m, x right / y up / z away from the player): beside the runes rather than over them.")]

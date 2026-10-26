@@ -231,6 +231,31 @@ namespace Diorama
                    $"thumb3 local {(g.joints[(int)HandJointId.HandThumb3] != null ? g.joints[(int)HandJointId.HandThumb3].localEulerAngles.ToString("F0") : "-")}";
         }
 
+        /// <summary>
+        /// Debug (step 9e): for each clip, at its key time, the thumb-to-index tip gap and how far the palm sits from the
+        /// pinch point (cm, right ghost, unscaled): a pinch grab whose key is the palm misses its spot by that much.
+        /// </summary>
+        public string DescribeKeys()
+        {
+            var g = _right ?? _left;
+            if (g == null) return "no ghost";
+            var sb = new System.Text.StringBuilder();
+            var names = new List<string>(_placeholders.Keys);
+            if (library != null)
+                foreach (var c in library.clips)
+                    if (c != null && !names.Contains(c.clipName)) names.Add(c.clipName);
+            foreach (var n in names)
+            {
+                var c = Find(n);
+                if (c == null) continue;
+                c.Sample(c.keyTime * c.Duration, c.leftHand != g.left, out _, out _, _rot, _pos);
+                Vector3 thumb = KeyInRoot(g, HandJointId.HandThumbTip), index = KeyInRoot(g, HandJointId.HandIndexTip), palm = KeyInRoot(g, HandJointId.HandPalm);
+                Vector3 pinch = (thumb + index) * 0.5f;
+                sb.Append($"\n  {n}: key {(c.keyPinch ? "pinch point" : c.keyJoint.ToString())}, tips {Vector3.Distance(thumb, index) * 100f:0.0} cm apart, palm {Vector3.Distance(palm, pinch) * 100f:0.0} cm from the pinch point");
+            }
+            return sb.ToString();
+        }
+
         /// <summary>Poses the ghosts now (debug shots render right after).</summary>
         public void DebugPose() => Tick(0f);
 
@@ -367,7 +392,9 @@ namespace Diorama
 
             // Where the key joint is at the key time, relative to the clip frame's origin.
             _clip.Sample(_clip.keyTime * _clip.Duration, mirror, out var kp, out var kr, _rot, _pos);
-            Vector3 keyInRoot = KeyInRoot(g, _clip.keyJoint);
+            Vector3 keyInRoot = _clip.keyPinch
+                ? (KeyInRoot(g, HandJointId.HandThumbTip) + KeyInRoot(g, HandJointId.HandIndexTip)) * 0.5f
+                : KeyInRoot(g, _clip.keyJoint);
             if (yaw != 0f) frame *= Quaternion.Euler(0f, yaw, 0f);
             Vector3 key = view * kp + view * kr * keyInRoot;
             Vector3 origin = point + frame * (offset * scale) - frame * (key * scale);

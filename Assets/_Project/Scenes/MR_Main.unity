@@ -513,6 +513,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.DialogueBubble
   hudMaterial: {fileID: 2100000, guid: 0656b6c4f92798e49a14cf09a2c6800e, type: 2}
   grabGuard: {fileID: 270959111}
+  island: {fileID: 270959109}
   fontSize: 0.14
   maxWidth: 0.2
   padding: {x: 0.012, y: 0.009}
@@ -2094,6 +2095,9 @@ MonoBehaviour:
   island: {fileID: 270959109}
   explorer: {fileID: 374318554}
   hudMaterial: {fileID: 2100000, guid: 0656b6c4f92798e49a14cf09a2c6800e, type: 2}
+  pillarMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  coveredAlpha: 0.55
+  pillarSize: {x: 1.6, y: 0.14}
   reachableColor: {r: 0.62, g: 0.96, b: 0.58, a: 0.95}
   blockedColor: {r: 0.72, g: 0.72, b: 0.72, a: 0.6}
   markerColor: {r: 1, g: 0.82, b: 0.42, a: 0.95}
@@ -3005,8 +3009,8 @@ MonoBehaviour:
   wristFingers: {x: -0.35, y: 0.25, z: 1}
   wristDorsal: {x: 1, y: 0.35, z: 0.25}
   bothSpread: 0.18
-  sideDrop: 0.04
-  sideOut: 0.08
+  sideDrop: 0.015
+  sideOut: 0.012
   fadeSeconds: 0.3
   struggleLoops: 3
   struggleSpeed: 0.6
@@ -3934,6 +3938,7 @@ MonoBehaviour:
   targetOffset: {x: 0.065, y: 0.012, z: 0}
   lingerSeconds: 1.5
   fovHalfAngle: 35
+  keepOut: {x: 0.025, y: 0.012}
 --- !u!1 &1858573326
 GameObject:
   m_ObjectHideFlags: 0

@@ -32,6 +32,8 @@ namespace Diorama
         public Material hudMaterial;
         [Tooltip("Pinches from a hand that is grabbing or touching the rim are ignored.")]
         public IslandHandle grabGuard;
+        [Tooltip("The bubble is kept out of this island's solid (step 9e).")]
+        public IslandBuilder island;
 
         [Header("Look")]
         public float fontSize = 0.14f;
@@ -306,6 +308,9 @@ namespace Diorama
                 if (angle > maxViewAngle && dir.sqrMagnitude > 1e-6f)
                     target = head + Vector3.RotateTowards(dir, fwd * dir.magnitude, (angle - maxViewAngle) * Mathf.Deg2Rad, 0f);
             }
+            // Never inside the island (step 9e): the whole panel stays above the cap or beside the rim.
+            if (island != null && island.map != null)
+                target = island.PushOutWorld(target, new Vector3(_size.x * 0.5f + 0.005f, _size.y * 0.5f + 0.008f, _size.x * 0.5f + 0.005f));
             _root.position = snap ? target : Vector3.Lerp(_root.position, target, 1f - Mathf.Exp(-Time.deltaTime * 10f));
             _root.localScale = Vector3.one * Mathf.SmoothStep(0.6f, 1f, _appear);
             if (cam == null) return;

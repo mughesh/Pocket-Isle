@@ -14,6 +14,7 @@ Shader "Diorama/Hud"
         _Border ("Border Width (of height)", Range(0, 0.3)) = 0.06
         _Aspect ("Aspect", Float) = 5
         _Radius ("Corner Radius (of height)", Range(0, 0.5)) = 0.45
+        [Enum(UnityEngine.Rendering.CompareFunction)] _ZTest ("Depth Test", Float) = 4
     }
 
     SubShader
@@ -26,6 +27,7 @@ Shader "Diorama/Hud"
             Tags { "LightMode" = "UniversalForward" }
             Blend SrcAlpha OneMinusSrcAlpha, One OneMinusSrcAlpha
             ZWrite Off
+            ZTest [_ZTest]
             Cull Off
 
             HLSLPROGRAM

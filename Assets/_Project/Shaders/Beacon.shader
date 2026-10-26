@@ -1,6 +1,7 @@
-// Hearth Shrine flame beacon (step 7b), additive, two modes:
+// Hearth Shrine flame beacon (step 7b), additive, three modes:
 // 0 = a soft flame column on a camera-facing quad (fades upward, flickers, slow pulse), seen from across the window;
-// 1 = a flat glow ring above the bowl whose arc fills with _Fill (the palm-hold progress).
+// 1 = a flat glow ring above the bowl whose arc fills with _Fill (the palm-hold progress);
+// 2 = a calm thin light pillar (step 9e: the gaze tile).
 Shader "Diorama/Beacon"
 {
     Properties
@@ -8,8 +9,9 @@ Shader "Diorama/Beacon"
         _Color ("Edge Colour", Color) = (1, 0.55, 0.2, 1)
         _Core ("Core Colour", Color) = (1, 0.9, 0.6, 1)
         _Intensity ("Intensity", Range(0, 3)) = 1
-        _Mode ("Mode (0 column, 1 ring)", Float) = 0
+        _Mode ("Mode (0 column, 1 ring, 2 pillar)", Float) = 0
         _Fill ("Ring Fill", Range(0, 1)) = 0
+        [Enum(UnityEngine.Rendering.CompareFunction)] _ZTest ("Depth Test", Float) = 4
     }
 
     SubShader
@@ -22,6 +24,7 @@ Shader "Diorama/Beacon"
             Tags { "LightMode" = "UniversalForward" }
             Blend One One
             ZWrite Off
+            ZTest [_ZTest]
             Cull Off
 
             HLSLPROGRAM
@@ -80,6 +83,16 @@ Shader "Diorama/Beacon"
                     float pulse = 0.8 + 0.2 * sin(t * 1.6);
                     a = across * rise * licks * pulse;
                     col = lerp(_Color.rgb, _Core.rgb, saturate(across * (1.0 - y) * 1.5));
+                }
+                else if (_Mode > 1.5)
+                {
+                    // Pillar (step 9e, the gaze tile): a calm thin light, soft across, fading upward, no flame.
+                    float x = abs(i.uv.x * 2.0 - 1.0);
+                    float y = i.uv.y;
+                    float across = saturate(1.0 - x);
+                    across *= across;
+                    a = across * smoothstep(0.0, 0.05, y) * pow(saturate(1.0 - y), 1.8) * (0.85 + 0.15 * sin(t * 4.0));
+                    col = lerp(_Color.rgb, _Core.rgb, across * 0.5);
                 }
                 else
                 {

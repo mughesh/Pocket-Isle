@@ -39,6 +39,8 @@ namespace Diorama
         public float lingerSeconds = 1.5f;
         [Tooltip("Half angle of the head cone the Spirit stays inside (degrees).")]
         public float fovHalfAngle = 35f;
+        [Tooltip("Kept out of the island's solid by this much (island-scale metres): x = beside the rim, y = feet above the cap.")]
+        public Vector2 keepOut = new Vector2(0.025f, 0.012f);
 
         /// <summary>0 = hidden (before the opening's spark arrives), 1 = shown. Scales the model.</summary>
         public float Appear { get; set; } = 1f;
@@ -131,6 +133,9 @@ namespace Diorama
             float lift = Mathf.Sin(t * bobSpeed * Mathf.PI * 2f) * bobHeight + speakLift * Mathf.SmoothStep(0f, 1f, _speak);
             Vector3 pos = u < 1f ? Vector3.Lerp(_flyFrom, goal, k) + Vector3.up * (flyArc * Mathf.Sin(u * Mathf.PI)) : goal;
             transform.localPosition = pos + Vector3.up * lift * (u < 1f ? k : 1f);
+            // Never inside the island: beside its rim or above the cap (step 9e).
+            float s = island.transform.lossyScale.x;
+            transform.position = island.PushOutWorld(transform.position, new Vector3(keepOut.x, keepOut.y, keepOut.x) * s);
 
             var cam = Camera.main;
             if (cam == null) return;
