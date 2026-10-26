@@ -25,6 +25,7 @@ MonoBehaviour:
   - enabled: 1
     label: 
     instrument: 1
+    model: 0
     wave: 0
     note: 
     hz: 80
@@ -66,9 +67,83 @@ MonoBehaviour:
     crackleDensity: 0
     crackleLength: 2
     crackleGain: 0.5
+    modal:
+      material: 1
+      exciter: 1
+      exciterMs: 1.5
+      decayScale: 1
+      damping: 0
+      strike: 0.22
+      detune: 0
+      modes: []
+    particles:
+      density: 300
+      systemDecay: 0.1
+      grainMs: 3
+      res1: 2000
+      res2: 0
+      res3: 0
+      q: 4
+      freqJitter: 0.3
+      gainJitter: 0.7
+    bubbles:
+      atStart: 1
+      rate: 0
+      radiusMin: 2
+      radiusMax: 4
+      rise: 0.1
+      decayScale: 1.5
+      ampJitter: 0.5
+    fire:
+      intensity: 0.6
+      crackleRate: 25
+      crackleFreq: 2500
+      crackleGain: 1
+      hissGain: 0.3
+      hissFreq: 3000
+      lapGain: 0.5
+      lapFreq: 450
+      lapRate: 3
+    wind:
+      freq: 700
+      q: 1.5
+      gustRate: 0.4
+      gustDepth: 0.6
+      baseLevel: 0.35
+      whistleGain: 0.3
+      whistleFreq: 1400
+      whistleThreshold: 0.6
+      leavesGain: 0
+    friction:
+      rateStart: 12
+      rateEnd: 30
+      rateTime: 0.6
+      irregularity: 0.3
+      pressure: 0.6
+      body: 1
+      bodyDecay: 0.6
+      scrape: 0.2
+    breath:
+      formantStart: 600
+      formantEnd: 1400
+      sweepTime: 0.15
+      sweepCurve: 0.6
+      secondFormant: 2.4
+      q: 3
+      pinkMix: 0.5
+      flutterRate: 0
+      flutterDepth: 0
+    group: -1
+    scatter:
+      count: 0
+      window: 0.5
+      pitchJitter: 2
+      gainJitter: 0.5
+      bunching: 1
   - enabled: 1
     label: 
     instrument: 1
+    model: 0
     wave: 0
     note: A3
     hz: 440
@@ -110,6 +185,80 @@ MonoBehaviour:
     crackleDensity: 0
     crackleLength: 2
     crackleGain: 0.5
+    modal:
+      material: 1
+      exciter: 1
+      exciterMs: 1.5
+      decayScale: 1
+      damping: 0
+      strike: 0.22
+      detune: 0
+      modes: []
+    particles:
+      density: 300
+      systemDecay: 0.1
+      grainMs: 3
+      res1: 2000
+      res2: 0
+      res3: 0
+      q: 4
+      freqJitter: 0.3
+      gainJitter: 0.7
+    bubbles:
+      atStart: 1
+      rate: 0
+      radiusMin: 2
+      radiusMax: 4
+      rise: 0.1
+      decayScale: 1.5
+      ampJitter: 0.5
+    fire:
+      intensity: 0.6
+      crackleRate: 25
+      crackleFreq: 2500
+      crackleGain: 1
+      hissGain: 0.3
+      hissFreq: 3000
+      lapGain: 0.5
+      lapFreq: 450
+      lapRate: 3
+    wind:
+      freq: 700
+      q: 1.5
+      gustRate: 0.4
+      gustDepth: 0.6
+      baseLevel: 0.35
+      whistleGain: 0.3
+      whistleFreq: 1400
+      whistleThreshold: 0.6
+      leavesGain: 0
+    friction:
+      rateStart: 12
+      rateEnd: 30
+      rateTime: 0.6
+      irregularity: 0.3
+      pressure: 0.6
+      body: 1
+      bodyDecay: 0.6
+      scrape: 0.2
+    breath:
+      formantStart: 600
+      formantEnd: 1400
+      sweepTime: 0.15
+      sweepCurve: 0.6
+      secondFormant: 2.4
+      q: 3
+      pinkMix: 0.5
+      flutterRate: 0
+      flutterDepth: 0
+    group: -1
+    scatter:
+      count: 0
+      window: 0.5
+      pitchJitter: 2
+      gainJitter: 0.5
+      bunching: 1
+  groups: []
   loopCrossfade: 0.04
   notes:
   - note: D4
@@ -136,6 +285,7 @@ MonoBehaviour:
   tierTrimDb: 0
   peakDb: -3
   gap: 0
+  confidence: 0
   review:
     status: 0
     note: 
