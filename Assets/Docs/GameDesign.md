@@ -181,6 +181,18 @@ iron bands heat, it sinks into the ground with steam and sparks, "The forge is w
 chains, dim ember crystals). Walk onto the open doorway to go in; the Keeper's spot is an empty glowing ring ("Something
 huge sleeps here... not yet."); the door tiles lead back out in front of the forge, facing away.
 
+### Keeper and shard as built (step 9c, Oct 26)
+- **Hearthstag**: Fire Keeper, Lv 12, base HP 115 (~2.5x), atk 11, def 14, spd 8; Ember Shot (36), Crown Charge (48, every
+  3rd turn), Crown Shield. ~2.5x an Isling; frightened = ash fur + flickering dull red crystals, calmed = chestnut + gold.
+- **Crown shield**: starts up; hits do 10% ("Blocked!") and crack a crystal; a Water move or 3 hits break it; 2 open
+  turns, then it raises it again. Below 50% HP: phase 2 (shot x1.5, crown brighter). No capture; Run always works (back
+  at the hall door); losing = the last shrine, healed, nothing lost. The fight resets until won.
+- **After the win**: kneels, calms, nods; forge ignites; the fire shard floats to you, grab it (or look + pinch) into the
+  brass holder on the rim (back-left, three cups). Outside: the realm restores in a ~5 s wave from the temple; a return
+  gate appears in front of the temple (24, 52). Revisiting: Hearthstag rests by the burning forge; poke it for a snort.
+- **Hub**: holding a shard, the statue's matching socket glows and the Spirit points; carry the shard from the holder to
+  the socket (or look + pinch): it locks in, the statue's rims and cracks glow, moss falls, the Spirit feels warmer.
+
 ### Look of the two states (decided Oct 24)
 The element "not flowing" shows as things being **still and unlit**, not as colour loss. The bright palette is the
 default; restoring the realm makes things **move and glow**.
