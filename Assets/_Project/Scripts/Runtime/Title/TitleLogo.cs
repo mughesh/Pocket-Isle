@@ -6,7 +6,7 @@ namespace Diorama
     /// <summary>
     /// The "Pocket Isle" logo: chunky letters on a mini floating island. Step 9h (v2): two props baked at edit time
     /// (PropKit.Logo: the letters, and a mini Still Isle chunk built from the island's own tiles and props), drawn with
-    /// the prop shader (2 renderers, 4 draws), not clipped by the island window. The lantern on the I pulses, two specks
+    /// the prop shader (2 renderers, 4 draws), not clipped by the island window. The lantern beside "Isle" pulses, two specks
     /// drift up past the letters, the base bobs a little on its own. It sits above the
     /// island's far half, bobs and sways a little and turns to face the head. <see cref="Rise"/> brings it in from a
     /// point (the statue, or the middle of a rising island), <see cref="Leave"/> floats it up and away. Unscaled time.
@@ -37,7 +37,7 @@ namespace Diorama
         public float faceSpeed = 2.5f;
         [Tooltip("The base bobs on its own, this much (share of the logo's width).")]
         public float baseBob = 0.012f;
-        [Tooltip("The lantern on the I pulses between these glow amounts.")]
+        [Tooltip("The base's lantern pulses between these glow amounts.")]
         public Vector2 lanternGlow = new Vector2(0.7f, 1.6f);
         [Tooltip("A drifting speck (ember / sparkle) this often (s); two are in the air at a time.")]
         public float speckEvery = 1.4f;
@@ -49,7 +49,8 @@ namespace Diorama
 
         Transform _pivot, _base;
         MeshRenderer _renderer;
-        MaterialPropertyBlock _block;
+        MaterialPropertyBlock _block, _baseBlock;
+        MeshRenderer _baseRenderer;
         Vector3 _baseRest;
         float _nextSpeck;
         float _scale = 1f, _yaw;
@@ -81,7 +82,8 @@ namespace Diorama
             _renderer = Part("Logo Letters", mesh, recipe, b, _block);
             if (baseMesh != null)
             {
-                Part("Logo Base", baseMesh, baseRecipe, b, new MaterialPropertyBlock());
+                _baseBlock = new MaterialPropertyBlock();
+                _baseRenderer = Part("Logo Base", baseMesh, baseRecipe, b, _baseBlock);
                 _base = _pivot.Find("Logo Base");
                 _baseRest = _base.localPosition;
             }
@@ -205,14 +207,14 @@ namespace Diorama
             Alive(t);
         }
 
-        /// <summary>The lantern on the I pulses, the base bobs on its own, two specks drift up past the letters.</summary>
+        /// <summary>The lantern pulses, the base bobs on its own, two specks drift up past the letters.</summary>
         void Alive(float t)
         {
-            if (_block != null && recipe != null)
+            if (_baseBlock != null && baseRecipe != null)
             {
                 float k = 0.5f + 0.5f * Mathf.Sin(t * 2.4f);
-                _block.SetVector(GlowBId, new Vector4(Mathf.Lerp(lanternGlow.x, lanternGlow.y, k), recipe.Color(PropSlot.Accent).glow, 0f, 0f));
-                _renderer.SetPropertyBlock(_block);
+                _baseBlock.SetVector(GlowBId, new Vector4(Mathf.Lerp(lanternGlow.x, lanternGlow.y, k), baseRecipe.Color(PropSlot.Accent).glow, 0f, 0f));
+                _baseRenderer.SetPropertyBlock(_baseBlock);
             }
             if (_base != null) _base.localPosition = _baseRest + Vector3.up * (baseBob * width * Mathf.Sin(t * 1.05f + 1.3f));
             if (fx == null || _show < 0.95f || t < _nextSpeck) return;

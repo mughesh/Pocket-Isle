@@ -13,17 +13,7 @@ MonoBehaviour:
   m_Name: TitleLogoBase
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.PropRecipe
   pieces:
-  - shape: {fileID: 11400000, guid: af25c324a48842c45810c7f2b0fac064, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 2
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.5
-  - shape: {fileID: 11400000, guid: 1f721ad90205085468f982138d7fe29b, type: 2}
+  - shape: {fileID: 11400000, guid: 748922972524c9a4aabc0da7d858e970, type: 2}
     part: {fileID: 0}
     position: {x: 0, y: 0, z: 0}
     rotation: {x: 0, y: 0, z: 0}
@@ -32,347 +22,17 @@ MonoBehaviour:
     slot: 3
     motion: 0
     motionAmount: 0
-    budgetWeight: 0.6
-  - shape: {fileID: 11400000, guid: e914d9e5962f19e43a71afd5a006067a, type: 2}
+    budgetWeight: 1.6
+  - shape: {fileID: 11400000, guid: 62ee5bdf5f54ce54d833105ff44ec132, type: 2}
     part: {fileID: 0}
     position: {x: 0, y: 0, z: 0}
     rotation: {x: 0, y: 0, z: 0}
     scale: 1
     mirrorX: 0
-    slot: 2
+    slot: 1
     motion: 0
     motionAmount: 0
-    budgetWeight: 0.5
-  - shape: {fileID: 11400000, guid: 3d3a61602e5cf174e9ac7acbe9b6e018, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 3
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.6
-  - shape: {fileID: 11400000, guid: 2fbb8e6fd6356e04490b09de5c79e9d7, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 2
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.5
-  - shape: {fileID: 11400000, guid: 3dc2b290981aca849b42a80bb4f1cef9, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 3
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.6
-  - shape: {fileID: 11400000, guid: 3ace72f30ab467b46b5cf5131c1371c0, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 2
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.5
-  - shape: {fileID: 11400000, guid: 2e2a60f989c6ded41911cc344cc8acf1, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 3
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.6
-  - shape: {fileID: 11400000, guid: d091977f334a9194da192ecbd37fa31b, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 2
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.5
-  - shape: {fileID: 11400000, guid: 18f22559d345cd949b4cf33eb62911df, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 3
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.6
-  - shape: {fileID: 11400000, guid: 1b9d6b86345b79147932506d4983d504, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 2
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.5
-  - shape: {fileID: 11400000, guid: 271919a2e5cfd5645bd0934bd6dc7350, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 3
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.6
-  - shape: {fileID: 11400000, guid: 6e113385d6aedbc48b2b272b2805edaa, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 2
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.5
-  - shape: {fileID: 11400000, guid: 1b489d93b6bf5ba49aaf6570a8c84cc0, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 3
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.6
-  - shape: {fileID: 11400000, guid: c5b977bb0ee39bd4fa6b1ae5b47d721e, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 2
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.5
-  - shape: {fileID: 11400000, guid: a1f44050d097a8843993b7dd1130b59f, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 3
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.6
-  - shape: {fileID: 11400000, guid: 59531d022e487ae46a32888201f0c519, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 2
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.5
-  - shape: {fileID: 11400000, guid: 4da1890ad1b145e4ba53a2f207c184a0, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 0
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.6
-  - shape: {fileID: 11400000, guid: 66cf15fa9d9be664c90cfcdcd1c10ccf, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 2
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.5
-  - shape: {fileID: 11400000, guid: 90d0617d68619c34191ada7553d8a074, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 3
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.6
-  - shape: {fileID: 11400000, guid: 1964c1f813591c8409953a3c0c165339, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 2
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.5
-  - shape: {fileID: 11400000, guid: 25d4f9ada00404249abc12ab52ce0105, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 3
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.6
-  - shape: {fileID: 11400000, guid: 33c942cb7da211042b7131e2ef56edf3, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 2
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.5
-  - shape: {fileID: 11400000, guid: fca4314fd767c1d40ba13dc6256874c6, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 3
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.6
-  - shape: {fileID: 11400000, guid: cecfcc9f82e610940b20291922697ee1, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 2
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.5
-  - shape: {fileID: 11400000, guid: 6e7176d2c7c090e4f96ca837a771edd9, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 3
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.6
-  - shape: {fileID: 11400000, guid: 039afb0c67b02a8439274061cdcc5cb6, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 2
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.5
-  - shape: {fileID: 11400000, guid: 8a9b58eb7f5b11e4283b8677eeb6cc70, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 3
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.6
-  - shape: {fileID: 11400000, guid: 6e179fca9b57d7a4892c33b5d46473d6, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 2
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.5
-  - shape: {fileID: 11400000, guid: ce894377a20a5e6488feebde001f9724, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 0
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.6
-  - shape: {fileID: 11400000, guid: 0026f4192e98fc74eb2f92fc1a39e988, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 2
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.5
-  - shape: {fileID: 11400000, guid: 6f8fa59c974e8e249b0baa7429e4de5c, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 0
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.6
-  - shape: {fileID: 11400000, guid: 2d1a15c747c96174fbdbc3e9907daffd, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 2
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.5
-  - shape: {fileID: 11400000, guid: 0237be4b7998e444fb9db9dfa13ab67a, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 3
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.6
-  - shape: {fileID: 11400000, guid: 26781353d1440c1418e63b874209a154, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 2
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.5
-  - shape: {fileID: 11400000, guid: 29771675ed2d79a458a129e7bb757354, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 3
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.6
+    budgetWeight: 1.2
   - shape: {fileID: 11400000, guid: 01dc74c389af26a4db4fe91a4b822c7c, type: 2}
     part: {fileID: 0}
     position: {x: 0, y: 0, z: 0}
@@ -382,95 +42,75 @@ MonoBehaviour:
     slot: 2
     motion: 0
     motionAmount: 0
-    budgetWeight: 2.2
-  - shape: {fileID: 11400000, guid: 72cb134a69b292f4d9b15630e8fdccbf, type: 2}
+    budgetWeight: 1.8
+  - shape: {fileID: 11400000, guid: 1135051360df18b489fab8e672ec7853, type: 2}
     part: {fileID: 0}
     position: {x: 0, y: 0, z: 0}
     rotation: {x: 0, y: 0, z: 0}
     scale: 1
     mirrorX: 0
-    slot: 3
+    slot: 2
     motion: 0
     motionAmount: 0
-    budgetWeight: 0.6
-  - shape: {fileID: 11400000, guid: 82decaf9732a75643913a8068a1031ec, type: 2}
+    budgetWeight: 1.4
+  - shape: {fileID: 11400000, guid: 22c4fc30098df564d970e3451f84f41e, type: 2}
     part: {fileID: 0}
-    position: {x: -1.8465617, y: -0.000019396119, z: -0.45236573}
+    position: {x: 0, y: 0, z: 0}
     rotation: {x: 0, y: 0, z: 0}
-    scale: 0.84303856
-    mirrorX: 0
-    slot: 1
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.5
-  - shape: {fileID: 11400000, guid: 65e95aef39e3b0d4c8ad882d5b692c6b, type: 2}
-    part: {fileID: 0}
-    position: {x: -1.8465617, y: -0.000019396119, z: -0.45236573}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 0.84303856
+    scale: 1
     mirrorX: 0
     slot: 5
     motion: 0
-    motionAmount: 0.025
+    motionAmount: 0
     budgetWeight: 0.5
-  - shape: {fileID: 11400000, guid: e741d99569053b3468a8f0e44bb8ba10, type: 2}
+  - shape: {fileID: 11400000, guid: 498842e1d2490d34581486e035668eaa, type: 2}
     part: {fileID: 0}
-    position: {x: 1.7994448, y: 0, z: -0.45005998}
+    position: {x: 0, y: 0, z: 0}
     rotation: {x: 0, y: 0, z: 0}
-    scale: 0.42013374
+    scale: 1
     mirrorX: 0
     slot: 2
     motion: 0
     motionAmount: 0
-    budgetWeight: 0.5
-  - shape: {fileID: 11400000, guid: 68993b31c757cc4459bcef10bb0005a3, type: 2}
+    budgetWeight: 0.3
+  - shape: {fileID: 11400000, guid: 44d488aa19e8e8b46a283775531cbee1, type: 2}
     part: {fileID: 0}
-    position: {x: 1.7994448, y: 0, z: -0.45005998}
+    position: {x: 0, y: 0, z: 0}
     rotation: {x: 0, y: 0, z: 0}
-    scale: 0.42013374
+    scale: 1
     mirrorX: 0
-    slot: 2
+    slot: 0
     motion: 0
     motionAmount: 0
-    budgetWeight: 0.5
-  - shape: {fileID: 11400000, guid: 7732b30438fbfad45b36bc6078a8b671, type: 2}
+    budgetWeight: 0.4
+  - shape: {fileID: 11400000, guid: 3761a1d1390530542865359752b9a052, type: 2}
     part: {fileID: 0}
-    position: {x: -1.9499699, y: -0.00055737956, z: 0.49983224}
+    position: {x: 0, y: 0, z: 0}
     rotation: {x: 0, y: 0, z: 0}
-    scale: 0.8291609
-    mirrorX: 0
-    slot: 2
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.5
-  - shape: {fileID: 11400000, guid: 418317c1c8fa9974287a03399de10461, type: 2}
-    part: {fileID: 0}
-    position: {x: -1.9499699, y: -0.00055737956, z: 0.49983224}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 0.8291609
+    scale: 1
     mirrorX: 0
     slot: 4
     motion: 0
-    motionAmount: 0.0015
-    budgetWeight: 0.5
+    motionAmount: 0
+    budgetWeight: 0.2
   palette:
-  - restored: {r: 0.93333334, g: 0.8901961, b: 0.7764706, a: 1}
-    unrestored: {r: 0.93333334, g: 0.8901961, b: 0.7764706, a: 1}
+  - restored: {r: 0.2901961, g: 0.22745098, b: 0.18039216, a: 1}
+    unrestored: {r: 0.2901961, g: 0.22745098, b: 0.18039216, a: 1}
     glow: 0
-  - restored: {r: 0.41960785, g: 0.32941177, b: 0.25882354, a: 1}
-    unrestored: {r: 0.41960785, g: 0.32941177, b: 0.25882354, a: 1}
+  - restored: {r: 0.47843137, g: 0.32156864, b: 0.20392157, a: 1}
+    unrestored: {r: 0.47843137, g: 0.32156864, b: 0.20392157, a: 1}
     glow: 0
-  - restored: {r: 0.6117647, g: 0.5921569, b: 0.5411765, a: 1}
-    unrestored: {r: 0.6117647, g: 0.5921569, b: 0.5411765, a: 1}
+  - restored: {r: 0.6039216, g: 0.58431375, b: 0.54901963, a: 1}
+    unrestored: {r: 0.6039216, g: 0.58431375, b: 0.54901963, a: 1}
     glow: 0
-  - restored: {r: 0.5764706, g: 0.74509805, b: 0.41960785, a: 1}
-    unrestored: {r: 0.5764706, g: 0.74509805, b: 0.41960785, a: 1}
+  - restored: {r: 0.5254902, g: 0.7607843, b: 0.2901961, a: 1}
+    unrestored: {r: 0.5254902, g: 0.7607843, b: 0.2901961, a: 1}
     glow: 0
-  - restored: {r: 1, g: 0.8509804, b: 0.5411765, a: 1}
-    unrestored: {r: 1, g: 0.8509804, b: 0.5411765, a: 1}
-    glow: 0.9
-  - restored: {r: 0.30588236, g: 0.6039216, b: 0.5176471, a: 1}
-    unrestored: {r: 0.30588236, g: 0.6039216, b: 0.5176471, a: 1}
+  - restored: {r: 1, g: 0.8235294, b: 0.47843137, a: 1}
+    unrestored: {r: 1, g: 0.8235294, b: 0.47843137, a: 1}
+    glow: 1.2
+  - restored: {r: 0.41960785, g: 0.68235296, b: 0.24313726, a: 1}
+    unrestored: {r: 0.41960785, g: 0.68235296, b: 0.24313726, a: 1}
     glow: 0
   tips:
     on: 0
@@ -479,12 +119,12 @@ MonoBehaviour:
     at: 0
     byHeight: 0
   spec: 0.15
-  outline: 0.03
+  outline: 0.05
   footprint: {x: 1, y: 1}
   blocksWalking: 0
   randomYaw: 0
   yawJitter: 0
   scaleJitter: 0
-  resolution: 18
-  triangleBudget: 3000
+  resolution: 40
+  triangleBudget: 3600
   bakedMesh: {fileID: 4300000, guid: 09696be661c54cb408f55abb7d8ed171, type: 2}

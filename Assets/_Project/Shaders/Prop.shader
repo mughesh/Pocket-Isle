@@ -32,6 +32,7 @@ Shader "Diorama/Prop"
 
         _Spec ("Specular Glint", Range(0, 2)) = 0.15
         _OutlineWidth ("Outline Width (shape units)", Float) = 0.022
+        _OutlineTint ("Outline Colour Override (a = amount, the title logo)", Color) = (0, 0, 0, 0)
         [ToggleUI] _ClearSink ("Sink In Battle Clearing", Float) = 1
 
         [HideInInspector] _WindowClip ("Island Window Clip", Float) = 0
@@ -51,6 +52,7 @@ Shader "Diorama/Prop"
         float  _TipsHeight;
         float  _Spec;
         float  _OutlineWidth;
+        float4 _OutlineTint;
         float  _ClearSink;
         float  _WindowClip;
         float  _RestoredSelf;
@@ -321,6 +323,7 @@ Shader "Diorama/Prop"
                 float tip;
                 PropPaint(i.slot, i.normalOS, i.height, c, glow, tip);
                 float3 col = c * 0.28; // like the creature outlines: base colour x 0.28 in linear
+                col = lerp(col, _OutlineTint.rgb, _OutlineTint.a); // step 9h: one dark outline colour (the logo)
                 if (_WindowClip > 0.5) col = DioramaFocus(col, DioramaMapPoint(i.positionWS, _WindowClip).xz);
                 col = lerp(col, _DioramaHoverColor.rgb, i.focus.y);
                 col = lerp(col, _DioramaHighlightColor.rgb, i.focus.x);

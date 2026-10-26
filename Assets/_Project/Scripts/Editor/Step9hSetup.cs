@@ -40,6 +40,14 @@ namespace Diorama.EditorTools
             log.Append($"\n  Base: {PropBaker.Bake(chunk)}");
             int tris = (letters.bakedMesh != null ? letters.bakedMesh.triangles.Length / 3 : 0) + (chunk.bakedMesh != null ? chunk.bakedMesh.triangles.Length / 3 : 0);
             log.Append($"\n  Logo total {tris} triangles (budget 10000), 2 renderers x 2 passes = 4 draws (budget 8).");
+            // v3: one thick dark brown outline round letters and island (the reference's sticker look).
+            var mat = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Props/Logo.mat");
+            if (mat != null)
+            {
+                mat.SetColor("_OutlineTint", PropKit.LogoOutline);
+                EditorUtility.SetDirty(mat);
+            }
+            else log.Append("\n  MISSING Logo.mat (Step9gSetup.TitleOnly first).");
             var logo = Find<TitleLogo>();
             if (logo == null)
             {
@@ -84,6 +92,16 @@ namespace Diorama.EditorTools
                 EditorUtility.SetDirty(onboarding);
             }
             log.Append($"\n  Pinch lesson: sparkle fx {(onboarding != null && fx != null ? "linked" : "MISSING")}.");
+            // The ghost palm over a shrine's flame (until the first lodge visit).
+            var shrines = Find<HearthShrines>();
+            var ghosts = Find<GhostHands>();
+            if (shrines != null)
+            {
+                Undo.RecordObject(shrines, "Step 9h");
+                shrines.ghosts = ghosts;
+                EditorUtility.SetDirty(shrines);
+            }
+            log.Append($"\n  Shrine palm ghost: {(shrines != null && ghosts != null ? "linked" : "MISSING")}.");
             Undo.RecordObject(bubble, "Step 9h");
             bubble.holdBase = 1.5f;
             bubble.holdPerChar = 0.06f;
