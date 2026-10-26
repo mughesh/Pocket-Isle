@@ -286,6 +286,11 @@ the base bobs. 9.8k triangles, 4 draws.
   across all the grass, streaks, mills twitch; works anywhere in Galewick), **cloud bank** (3 puffs on the ridge path,
   about 3 gusts each, look + pinch-hold also works), **tower** (arrive with 3 kites: they tie onto the crown, vanes
   turn, the door opens). Each teaches itself once with a pinned chip (Flick! / Pull it up! / Wave!) and a ghost.
+- Wind roster (10c): Kitelet -> Kitewyrm, Whirlby -> Windwhirl, Samarling -> Samaroak, Vanehare -> Compasshare (Lv 16),
+  Zeppelope -> Skyshiplope (rare, Lv 18); Pufflet -> Nimbulpaca, Pebbloop -> Riverloom (Lv 14). Tables ~70% wind, ~30% fire
+  visitors, Zeppelope 5% in the rare pocket.
+- Galeowl (10d part one): Wind Keeper, Gust Wall breaks to Fire, Lv 9 (11 at one other shard). Hall, untangle, victory and
+  the wind shard still to build.
 
 ### Look of the two states (decided Oct 24)
 The element "not flowing" shows as things being **still and unlit**, not as colour loss. The bright palette is the

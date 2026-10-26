@@ -55,6 +55,9 @@ never saved.
   the path blow away.
 - **Wind tower**: arrive with all three kites; they tie onto the tower and the door opens. (Inside comes later.)
 - Wild Islings and Keepers are stronger once you hold a shard (+3 / +2 levels per shard).
+- **New wind Islings** in Galewick's grass (Kitelet, Whirlby, Samarling, Vanehare, rare Zeppelope) and their evolutions;
+  Pufflet and Pebbloop now evolve at Lv 14. Encounter tab can spawn them all (and Galeowl's species exists, but its hall
+  isn't built yet).
 
 ## Earlier (step 9h)
 
