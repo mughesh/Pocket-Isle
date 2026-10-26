@@ -14,7 +14,12 @@ namespace Diorama.Audio.EditorTools
         {
             public string id, group, set;
             public bool gap;
+            /// <summary>The synth patch; null for a cue without one (Kenney clips, music slots).</summary>
             public Action<SynthPatch> build;
+            /// <summary>Cue settings (bus, volume, 2D / 3D...), applied when the cue is created or reverted.</summary>
+            public Action<AudioCue> cue;
+            /// <summary>Asset path prefixes of extra clips the cue also plays (e.g. Clips/Kenney/step.grass).</summary>
+            public string[] extraClips;
         }
 
         static readonly List<Func<IEnumerable<Recipe>>> Providers = new List<Func<IEnumerable<Recipe>>>();

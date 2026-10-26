@@ -108,7 +108,7 @@ namespace Diorama.Audio.EditorTools
             int made = 0;
             foreach (var r in SynthRecipes.All())
             {
-                if (have.Contains(r.id)) continue;
+                if (r.build == null || have.Contains(r.id)) continue;
                 var dir = PatchRoot + r.group;
                 Directory.CreateDirectory(dir);
                 var patch = ScriptableObject.CreateInstance<SynthPatch>();

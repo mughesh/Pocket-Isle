@@ -110,6 +110,8 @@ namespace Diorama.Audio.EditorTools
                     Reload();
                 }
                 if (GUILayout.Button("Bake all", EditorStyles.toolbarButton)) SynthBaker.BakeAll(_patches);
+                if (GUILayout.Button(new GUIContent("Sync cues", "Create missing cues, refresh their clips, rebuild the table, validate, write AudioIds.cs."), EditorStyles.toolbarButton))
+                    AudioCueTools.SyncAll();
             }
 
             switch (_tab)
@@ -335,6 +337,14 @@ namespace Diorama.Audio.EditorTools
 
         void PlayPatchVariant(SynthPatch p)
         {
+            // The cue when there is one: it may mix in other clips (Kenney variants).
+            var cue = AudioCueTools.AllCues().Find(c => c.id == p.id);
+            var pick = cue != null ? cue.Pick() : null;
+            if (pick != null)
+            {
+                AudioPreview.Play(pick, cue.loop);
+                return;
+            }
             var clips = SynthBaker.Clips(p);
             if (clips.Count > 0) AudioPreview.Play(clips[Random.Range(0, clips.Count)], p.mode == SynthMode.Loop);
             else
