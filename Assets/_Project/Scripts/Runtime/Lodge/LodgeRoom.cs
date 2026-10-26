@@ -38,15 +38,16 @@ namespace Diorama
         public Vector2Int pedestalTile = new Vector2Int(4, 5);
         [Tooltip("Pedestal top above the floor (prop tile units).")]
         public float pedestalTop = 0.5f;
-        public Vector2Int[] doorTiles = { new Vector2Int(3, 7), new Vector2Int(4, 7) };
+        [Tooltip("Step 9i: on the back wall (row 0), right of the hearth; hands never reach there.")]
+        public Vector2Int[] doorTiles = { new Vector2Int(5, 0), new Vector2Int(6, 0) };
         [Tooltip("Door arch height (prop tile units; matches PropKit's LodgeDoor).")]
         public float archHeight = 0.76f;
-        public Vector2Int[] cozyTiles = { new Vector2Int(2, 1), new Vector2Int(5, 1), new Vector2Int(6, 2) };
+        public Vector2Int[] cozyTiles = { new Vector2Int(2, 1), new Vector2Int(1, 2), new Vector2Int(6, 3) };
         [Tooltip("Centre of the honeycomb pod wall (lodge tiles; its anchor plus half its footprint).")]
         public Vector2 honeycombCenter = new Vector2(1.5f, 0f);
 
-        [Tooltip("The step from inside onto a door tile (column, row): rows grow toward the door.")]
-        public Vector2Int doorOutward = new Vector2Int(0, 1);
+        [Tooltip("The step from inside onto a door tile (column, row): rows grow toward the player, the door is on row 0.")]
+        public Vector2Int doorOutward = new Vector2Int(0, -1);
 
         [Header("Door ring")]
         [Tooltip("Diorama/Beacon material (the ring over the arch while it is looked at).")]
@@ -91,6 +92,7 @@ namespace Diorama
         MeshRenderer _doorRingRenderer;
         MaterialPropertyBlock _block;
         Vector2Int? _spawnHint;
+        bool _walkIn;
         readonly HashSet<IslingSpecies> _warned = new HashSet<IslingSpecies>();
 
         public bool Active => swap != null && swap.Inside && swap.Interior == lodge;
@@ -119,6 +121,7 @@ namespace Diorama
             if (beaconMaterial == null) Debug.LogError("[LodgeRoom] No beacon material: the door arch shows no ring when looked at (Set Up MR_Main (7c)).", this);
             swap.Entered += OnEntered;
             swap.Returned += OnReturned;
+            swap.Finished += OnSwapFinished;
             pods.LodgeDropped += OnRimDropped;
             explorer.OnStep += OnStep;
             // The room as a whole has no outline to light (a tiny focus sphere): the beam alone points into it.
@@ -136,6 +139,7 @@ namespace Diorama
             {
                 swap.Entered -= OnEntered;
                 swap.Returned -= OnReturned;
+                swap.Finished -= OnSwapFinished;
             }
             if (pods != null) pods.LodgeDropped -= OnRimDropped;
             if (explorer != null) explorer.OnStep -= OnStep;
@@ -169,14 +173,30 @@ namespace Diorama
             if (map != lodge || !enabled) return;
             pods.LodgeMode = true;
             pods.PickHandler = OnRimPicked;
+            // Walked in through the back door (not a save loaded inside): face the player now, one step in once the
+            // room has risen (OnSwapFinished).
+            _walkIn = swap.Busy && IsDoor(explorer.Tile + doorOutward);
+            if (_walkIn) explorer.Face(-doorOutward);
             Sync();
             // The welcome is LodgeGuide's first step (lodge.first, or lodge.first.empty for an empty lodge).
             Debug.Log($"[LodgeRoom] Inside: {Mathf.Min(maxInRoom, party.storage.Count)} Isling(s) in the room, " +
                       $"{Mathf.Max(0, party.storage.Count - maxInRoom)} asleep in the honeycomb ({Cells.Length} a page), {party.members.Count} in the pods.");
         }
 
+        void OnSwapFinished(bool inside)
+        {
+            if (!inside || !_walkIn || !Active) return;
+            _walkIn = false;
+            var to = WalkInTile(explorer.Tile, doorOutward);
+            if (lodge.CanWalk(to) && explorer.GoTo(to)) Debug.Log($"[LodgeRoom] In through the back door: one step in to c{to.x} r{to.y}.");
+        }
+
+        /// <summary>Step 9i: the tile the explorer walks to after coming in: one step away from the door, toward the player.</summary>
+        public static Vector2Int WalkInTile(Vector2Int entry, Vector2Int outward) => entry - outward;
+
         void OnReturned(WorldMap map)
         {
+            _walkIn = false;
             Close();
             foreach (var i in _islings) if (i != null) Destroy(i.gameObject);
             _islings.Clear();
@@ -305,9 +325,10 @@ namespace Diorama
             return true;
         }
 
-        /// <summary>Next to the hearth (row 1) or on a cushion: a place to doze.</summary>
+        /// <summary>Next to the hearth (row 1, not in front of the door) or on a cushion: a place to doze.</summary>
         public bool IsCozy(Vector2Int tile)
         {
+            if (IsDoor(tile + doorOutward)) return false;
             if (tile.y <= 1) return true;
             foreach (var c in cozyTiles) if (c == tile) return true;
             return false;
@@ -580,7 +601,7 @@ namespace Diorama
             {
                 Vector2 sum = Vector2.zero;
                 foreach (var d in doorTiles) sum += d;
-                return doorTiles.Length > 0 ? sum / doorTiles.Length : new Vector2(3.5f, 7f);
+                return doorTiles.Length > 0 ? sum / doorTiles.Length : new Vector2(5.5f, 0f);
             }
         }
 

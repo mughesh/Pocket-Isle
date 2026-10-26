@@ -49,7 +49,12 @@ MonoBehaviour:
     leafGlow: 0
     outlineTint: {r: 1, g: 1, b: 1, a: 1}
   treeProp: {fileID: 0}
+  treePropAlt: {fileID: 0}
+  treeAltShare: 0.35
+  frontBorderTrees: 1
   startRestored: 1
+  embers: 1
+  leaves: 1
   overrideLight: 1
   lightColor: {r: 1, g: 0.83, b: 0.64, a: 1}
   lightIntensity: 1.05

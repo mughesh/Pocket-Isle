@@ -375,10 +375,13 @@ explore → tall grass encounter → battle → capture → party / Hearth Lodge
   the island **swaps into the Hearth Lodge** (content sinks, the base tints, the room rises). Losing everything
   returns you outside the last shrine used.
 - **Hearth Lodge (replaces the Sanctuary island, cut list #3):** a small dollhouse room inside the rim (back wall and
-  half side walls, hearth, honeycomb pod wall, rug, cushions, pedestal, door). Up to 12 stored Islings wander, doze by
+  half side walls, honeycomb pod wall (back left), hearth (back centre), door arch (back right, facing the player, step 9i:
+  on the near edge players walked out by accident while reaching for the rim), rug, cushions, pedestal; the near edge is
+  open). The explorer comes in at the back door and walks one tile toward the player. Up to 12 stored Islings wander, doze by
   the hearth and hop; the rest sleep in the honeycomb pods. Look + pinch (or poke) one: it hops onto the pedestal with
   its full card (Lv, element, HP, XP, moves, ATK / DEF / SPD). Grab one and drop it on a rim socket to bring it along
-  (swap if full); toss a rim pod onto the floor to leave it in the lodge (never the last one). Walk out the door.
+  (swap if full); toss a rim pod onto the floor to leave it in the lodge (never the last one). Walk out the back door (swipe
+  toward it, tap or look + pinch a door tile, or look + pinch the arch).
   The same scene swap opens realm gates (step 8) and temple arenas (step 9). Counter "Caught 10 / 30" later.
 
 ## Opening (first 5 minutes)

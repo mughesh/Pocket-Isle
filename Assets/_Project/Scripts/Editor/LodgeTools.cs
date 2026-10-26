@@ -8,17 +8,22 @@ namespace Diorama.EditorTools
     /// <summary>
     /// The Hearth Lodge interior (step 7b): an 8 x 8 WorldMap of wooden floor (P tiles) dressed with the lodge props
     /// (dollhouse cutaway: back wall and back half of the side walls only), and its warm Lodge theme (wood floor, warm
-    /// stone base, hearth light). Row 0 is the back wall, row 7 the open front with the door.
+    /// stone base, hearth light). Row 0 is the back wall with the door (step 9i: hands never reach the far wall; on the
+    /// near edge players walked out by accident), row 7 the open front.
     /// Re-running rewrites both (same files, references survive).
     /// </summary>
-    static class LodgeTools
+    public static class LodgeTools
     {
         public const string Dir = "Assets/_Project/Data/Interiors";
         public const string LodgePath = Dir + "/Lodge.asset";
         public const string ThemePath = Dir + "/LodgeTheme.asset";
         public const int Size = 8;
-        /// <summary>Where the explorer appears inside (just in from the door, facing the hearth).</summary>
-        public static readonly Vector2Int EntryTile = new Vector2Int(3, 6);
+        /// <summary>Where the explorer appears inside: just in from the back door (LodgeRoom walks it one tile toward the player).</summary>
+        public static readonly Vector2Int EntryTile = new Vector2Int(5, 1);
+        /// <summary>The door arch's two tiles on the back wall (keep LodgeRoom.doorTiles in sync).</summary>
+        public static readonly Vector2Int[] DoorTiles = { new Vector2Int(5, 0), new Vector2Int(6, 0) };
+        /// <summary>Cushions (keep LodgeRoom.cozyTiles in sync): none on the walk from the door.</summary>
+        public static readonly Vector2Int[] CushionTiles = { new Vector2Int(2, 1), new Vector2Int(1, 2), new Vector2Int(6, 3) };
 
         public static WorldMap WriteLodge(StringBuilder log)
         {
@@ -61,9 +66,10 @@ namespace Diorama.EditorTools
         }
 
         /// <summary>
-        /// The room: back wall of arches with the hearth (centre) and the honeycomb pod wall (left), side walls on the
-        /// back half (turned), a rug in the middle, cushions by the hearth, the pedestal front centre, the door on the
-        /// front edge. Writes and bakes the props. Keep LodgeRoom's tiles (pedestal, door, cushions) in sync.
+        /// The room: back wall of arches with the honeycomb pod wall (left), the hearth (centre) and the door arch (right,
+        /// turned to face the player), side walls on the back half (turned), a rug in the middle, cushions off the door
+        /// walk, the pedestal front centre, the front edge open. Writes and bakes the props. Keep LodgeRoom's tiles
+        /// (pedestal, door, cushions) in sync.
         /// </summary>
         static void WriteProps(WorldMap lodge, StringBuilder log)
         {
@@ -74,24 +80,24 @@ namespace Diorama.EditorTools
             {
                 Entry('w', recipes["LodgeWall"]), Entry('v', recipes["LodgeWall"], true), Entry('E', recipes["LodgeHearth"]),
                 Entry('C', recipes["LodgeHoneycomb"]), Entry('U', recipes["LodgeRug"]), Entry('c', recipes["LodgeCushion"]),
-                Entry('Q', recipes["LodgePedestal"]), Entry('D', recipes["LodgeDoor"]),
+                Entry('Q', recipes["LodgePedestal"]), Entry('D', recipes["LodgeDoor"], false, 180f),
             };
             // 8 x 8, row 0 = back. Multi-tile props: the key sits on their top-left tile.
             string grid =
-                "wC.E.www\n" +
-                "v.c..c.v\n" +
-                "v.....cv\n" +
-                "v..U...v\n" +
+                "wC.E.D.w\n" +
+                "v.c....v\n" +
+                "vc.....v\n" +
+                "v..U..cv\n" +
                 "........\n" +
                 "....Q...\n" +
                 "........\n" +
-                "...D....";
+                "........";
             lodge.SetProps(grid);
             log.Append($"\n  lodge props: {recipes.Count} written and baked (wall, hearth, honeycomb, rug, cushion, pedestal, door)");
         }
 
-        static PropLegend Entry(char key, PropRecipe recipe, bool turned = false) =>
-            new PropLegend { key = key.ToString(), recipe = recipe, turned = turned };
+        static PropLegend Entry(char key, PropRecipe recipe, bool turned = false, float yaw = 0f) =>
+            new PropLegend { key = key.ToString(), recipe = recipe, turned = turned, yaw = yaw };
 
         static Color Hex(string hex) => ColorUtility.TryParseHtmlString(hex, out var c) ? c : Color.magenta;
 

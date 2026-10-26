@@ -30,14 +30,14 @@ MonoBehaviour:
   tileSize: 0.05
   capHeight: 0.006
   seed: 1234
-  startTile: {x: 3, y: 6}
-  props: 'wC.E.www
+  startTile: {x: 5, y: 1}
+  props: 'wC.E.D.w
 
-    v.c..c.v
+    v.c....v
 
-    v.....cv
+    vc.....v
 
-    v..U...v
+    v..U..cv
 
     ........
 
@@ -45,31 +45,47 @@ MonoBehaviour:
 
     ........
 
-    ...D....'
+    ........'
   propLegend:
   - key: w
     recipe: {fileID: 11400000, guid: 491a0e197120ab84c9494380684a32a7, type: 2}
     turned: 0
+    yaw: 0
   - key: v
     recipe: {fileID: 11400000, guid: 491a0e197120ab84c9494380684a32a7, type: 2}
     turned: 1
+    yaw: 0
   - key: E
     recipe: {fileID: 11400000, guid: 4a0bfba8d30ebb144a6298d15a1baeb3, type: 2}
     turned: 0
+    yaw: 0
   - key: C
     recipe: {fileID: 11400000, guid: 0ada54f7c1df55f4d97ba2911f44a0e9, type: 2}
     turned: 0
+    yaw: 0
   - key: U
     recipe: {fileID: 11400000, guid: 3c7a1b58d476fd545b6025f7d43d2a9c, type: 2}
     turned: 0
+    yaw: 0
   - key: c
     recipe: {fileID: 11400000, guid: 94457f9c1fcd6284b87512db13f54ad8, type: 2}
     turned: 0
+    yaw: 0
   - key: Q
     recipe: {fileID: 11400000, guid: bdba4db0d16f3d04abaadb4ddb42ac60, type: 2}
     turned: 0
+    yaw: 0
   - key: D
     recipe: {fileID: 11400000, guid: 937339c3b2bbb0f418f283ed2b3e0850, type: 2}
     turned: 0
+    yaw: 180
   viewZoom: 1.6
   theme: {fileID: 11400000, guid: 366cdeb7b4073f44bb3c017f25e29cb1, type: 2}
+  grassTable: {fileID: 0}
+  waterTable: {fileID: 0}
+  zones: 
+  zoneLegend: []
+  realm: 
+  arrivalLine: 
+  gates: []
+  landmarks: []

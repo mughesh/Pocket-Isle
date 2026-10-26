@@ -222,7 +222,14 @@ namespace Diorama
                 else
                 {
                     swap.SetReturn(explorer.Tile, explorer.Facing);
-                    swap.EnterNow(interior, new Vector2Int(data.insideX, data.insideY), new Vector2Int(data.insideFacingX, data.insideFacingY));
+                    var inTile = new Vector2Int(data.insideX, data.insideY);
+                    // The room's layout changed (9i: the lodge door moved to the back wall): a tile that's no longer floor = its entry.
+                    if (!interior.CanWalk(inTile))
+                    {
+                        problems.Add($"inside tile c{inTile.x} r{inTile.y} isn't walkable on {interior.name} (layout changed?): moved to its entry c{interior.startTile.x} r{interior.startTile.y}");
+                        inTile = interior.startTile;
+                    }
+                    swap.EnterNow(interior, inTile, new Vector2Int(data.insideFacingX, data.insideFacingY));
                 }
             }
 

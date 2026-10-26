@@ -22,6 +22,7 @@ MonoBehaviour:
     slot: 5
     motion: 0
     motionAmount: 0
+    budgetWeight: 0
   palette:
   - restored: {r: 0.906353, g: 0.77309567, b: 0.61279535, a: 1}
     unrestored: {r: 0.84705883, g: 0.74509805, b: 0.5882353, a: 1}
@@ -46,6 +47,7 @@ MonoBehaviour:
     onSlot: 0
     tipSlot: 0
     at: 0
+    byHeight: 0
   spec: 0.15
   outline: 0.022
   footprint: {x: 1, y: 1}

@@ -22,6 +22,7 @@ MonoBehaviour:
     slot: 2
     motion: 0
     motionAmount: 0
+    budgetWeight: 0
   - shape: {fileID: 11400000, guid: a149e1da7c183c848879d01a24770ca6, type: 2}
     part: {fileID: 0}
     position: {x: 0, y: 0, z: 0}
@@ -31,6 +32,7 @@ MonoBehaviour:
     slot: 4
     motion: 2
     motionAmount: 0.002
+    budgetWeight: 0
   palette:
   - restored: {r: 0.906353, g: 0.77309567, b: 0.61279535, a: 1}
     unrestored: {r: 0.84705883, g: 0.74509805, b: 0.5882353, a: 1}
@@ -55,6 +57,7 @@ MonoBehaviour:
     onSlot: 0
     tipSlot: 0
     at: 0
+    byHeight: 0
   spec: 0.15
   outline: 0.022
   footprint: {x: 1, y: 1}
