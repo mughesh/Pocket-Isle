@@ -42,6 +42,37 @@ namespace Diorama.Audio.EditorTools
             File.WriteAllText(ReportPath, sb.ToString());
         }
 
+        /// <summary>Source vs imported (build) size of everything under Clips/, per folder: Logs/AudioLab/sizes.txt.</summary>
+        public static void SizeReport()
+        {
+            var orig = typeof(AudioImporter).GetProperty("origSize", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public);
+            var comp = typeof(AudioImporter).GetProperty("compSize", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public);
+            var totals = new System.Collections.Generic.SortedDictionary<string, long[]>();
+            foreach (var guid in AssetDatabase.FindAssets("t:AudioClip", new[] { AudioImportRules.Root.TrimEnd('/') }))
+            {
+                var path = AssetDatabase.GUIDToAssetPath(guid);
+                var imp = AssetImporter.GetAtPath(path) as AudioImporter;
+                if (imp == null) continue;
+                var key = Path.GetDirectoryName(path).Replace('\\', '/').Substring(AudioImportRules.Root.Length);
+                if (!totals.TryGetValue(key, out var t)) totals[key] = t = new long[3];
+                t[0] += new FileInfo(path).Length;
+                t[1] += comp != null ? System.Convert.ToInt64(comp.GetValue(imp)) : 0;
+                t[2]++;
+            }
+            var sb = new StringBuilder($"folder | files | on disk KB | imported KB (compSize via {(comp != null ? "reflection" : "missing")})\n");
+            long d = 0, c = 0, n = 0;
+            foreach (var kv in totals)
+            {
+                sb.AppendLine($"{kv.Key} | {kv.Value[2]} | {kv.Value[0] / 1024} | {kv.Value[1] / 1024}");
+                d += kv.Value[0];
+                c += kv.Value[1];
+                n += kv.Value[2];
+            }
+            sb.AppendLine($"TOTAL | {n} | {d / 1024} | {c / 1024}");
+            Directory.CreateDirectory(Path.GetDirectoryName(ReportPath));
+            File.WriteAllText("Logs/AudioLab/sizes.txt", sb.ToString());
+        }
+
         /// <summary>Resets every recipe patch to its code recipe (keeps reviews), bakes and syncs cues. Only for unreviewed batches.</summary>
         public static void ReapplyRecipesAndBake()
         {
