@@ -204,13 +204,64 @@ huge sleeps here... not yet."); the door tiles lead back out in front of the for
 
 ### Dev / QA panel (step 9e, Oct 26)
 - Editor and QA builds only (scripting define `POCKET_DEV`; **Tools > Pocket Isle > Build QA APK / Build Release APK**).
-  Left-hand menu pinch (palm up) or F2 opens a 2D panel beside the island's left side; poke or look + pinch.
+  The game menu's Dev rune (step 9g; before: the left-hand menu pinch) or F2 opens a 2D panel; poke or point + pinch.
 - Tabs: Go to (hub and Cinderwood landmarks, the Forge Hall), Party (heal, levels, team of 3 presets, add any species,
   one-hit KO, invincible), Encounter (fight any species now, wild on/off, rare x10), Story (tutorial, opening, realm
   restored, log, forge, Keeper, shard flags), Save (3 snapshots + auto, new game), Tools (fps, readouts, time x1/2/4,
   walk x2, report bug). QA guide: `Assets/Docs/QA-Guide.md`.
 - Built on `GameState`: live changes apply at once; story changes edit the save and reload the scene. **Quick Journey**
   (the judges' short flow, own design session) will reuse it: a preset = a SaveData + a reload.
+- Step 9g: the left-hand menu gesture opens the **game menu** now; its **Dev** rune (Editor / QA builds) or F2 opens
+  the panel. Save tab: **Quick: start / at gift / at gate / at temple** (presets into the quick slot).
+
+### Title, game menu, settings (step 9g, Oct 26)
+- **Every button is a rune** (`RuneBoard`: the battle runes' look and input; poke, or look + pinch either hand; the
+  looked-at rune grows with a gold border; a few runes need a 2 s hold, their plate fills gold). Boards sit over the
+  near rim and face the head.
+- **Logo** (sheet 17 option 1, `PropKit.Logo`, baked like a prop, 7.6k tris, one mesh): puffy orange "Pocket" over
+  green "Isle" on a mini floating island (grass, brown rock underside, grey rocks, a tiny tree, a lantern). No font:
+  letters are capsule strokes. About 30 cm wide at island scale 1, ~25 cm over the island's far half, bobs, sways a
+  little and turns to the head.
+- **Save slots:** `save.json` = Full adventure, `quick.json` = Quick Journey (same SaveData). PlayerPrefs keeps the last
+  played slot. Any slot = a returning player.
+- **New player:** the opening as before; after the explorer stretches and before the Spirit, the logo rises out of the
+  statue and the runes offer **Full adventure / Quick journey** ("about 10 min") / **Settings** (nothing gold until
+  looked at). The pick floats the logo away and the opening goes on in that slot.
+- **Returning player:** no shard; the island rises with the logo. **Continue** (gold, "Adventure" or "Quick journey"),
+  **New journey**, **Settings**, and "or: <other slot>" when both have a save. Gameplay waits until Continue. New
+  journey: Full / Quick / Back; a slot that has a save needs the 2 s hold ("Hold to start over"), then it is deleted
+  (copy kept as `<slot>.old.json`) and the opening plays from the shard without the slot question.
+- **Game menu** (`GameMenu`): left palm up + pinch (Meta's menu gesture; Esc in the Editor). Pauses the game
+  (`GamePause`, time stops; runes run on unscaled time), dims the island like the battle space. **Resume**,
+  **Settings**, **Title** (saves, reloads into the returning title), **Dev** (QA builds). Not during the opening before
+  the starter, on the title or during a scene swap; while the island is held it opens on release. The row sits a little
+  above the battle runes so they never overlap; battle runes ignore picks while paused. `menu.first` ("Palm up and
+  pinch with your left hand any time to pause.") a few calm seconds after the lessons end, never in battle.
+- **Settings** (`SettingsBoard`, one stone board): Music / Effects / Ambience (five pebbles: off, 1-4; PlayerPrefs under
+  the bus names `Music`, `SFX`, `Ambience`, read via `VolumeSettings`; nothing plays through them until the audio step),
+  Dominant hand Auto / Left / Right (overrides the first-shard-touch rule), Spirit hints On / Fewer (Fewer = no idle
+  hints), Recenter island (the placer's re-place in front of the head), Credits (a stone card; scrolls once it is longer
+  than 7 lines; `AudioCredits.md` is appended by the setup when it exists), Back.
+
+### Quick Journey as built (step 9g, Oct 26)
+- Same game, its own slot, dials in `Data/QuickJourney.asset` (`QuickJourneyConfig`), applied only in the quick slot.
+- **Lessons:** all hand-verb lessons stay (shard, move, starter, walk, look, grass, send, rune, catch). Cut: `stop`
+  (thumb tap to stop) and `twoHands` (turn / resize with both hands): both are off the route.
+- **The gift:** once the lessons are done, back in the hub and calm: `quick.gift` ("The road to Cinderwood is long. Take
+  two friends with you!"), two pods fly from the Spirit to the rim (Steambara + Toastling), the starter and any catch
+  are raised, then `quick.gate` ("Bring back the fire shard!") sends the Spirit to the fire gate (gold). Levels are per
+  starter from the Keeper sim: Kilnpot gifts Lv 8, raised to 8; Pebbloop 7 / 7; Pufflet 8 / raised to 10.
+- **Cinderwood dials:** encounters x0.5, win XP x2 on top of the curve, no rare entries (no rare-only detours). Gold
+  tiles show the way to the next goal (fire gate, log, forge door, home gate with the shard, statue) after 4 s standing
+  still.
+- **End:** the fire shard locks into the statue: `quick.end` ("You woke the first piece of the world!" / "Thank you for
+  playing the Quick Journey."), then **Keep exploring** / **Title** runes.
+- **Keeper sim (quick team, 1000 fights per starter):** Kilnpot 75%, Pebbloop 82%, Pufflet 81%. One shared level can't
+  do it: all Lv 8 = 74 / 95 / 52%, all Lv 9 = 99 / 100 / 97% (Steambara leads the fight, so the gifts' level matters most).
+- **Dry run** (Tools > Pocket Isle > Quick Journey Dry Run, 0.5 s per tile, 45 s per battle): 10:00. Opening + lessons
+  3:32, gift to gate 0:33, trail 1:06, log 0:35, forge 0:55, Keeper 2:30, statue 0:47. The per-beat seconds are
+  estimates in the config; the real route time comes from the timer in the dev readout (opening start to the shard
+  in the statue).
 
 ### Look of the two states (decided Oct 24)
 The element "not flowing" shows as things being **still and unlit**, not as colour loss. The bright palette is the
