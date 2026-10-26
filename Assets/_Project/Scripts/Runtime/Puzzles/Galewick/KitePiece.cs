@@ -441,7 +441,7 @@ namespace Diorama
         Vector3 TiedLocal(int i)
         {
             float a = Time.time * 0.6f + i * 2.1f;
-            var spot = tiedAt + new Vector3((i - 1) * 0.9f + Mathf.Sin(a) * 0.15f, 0.9f + i * 0.35f + Mathf.Sin(a * 1.7f) * 0.1f, 0f);
+            var spot = tiedAt + new Vector3((i - 1) * 2f + Mathf.Sin(a) * 0.2f, 1.4f + (i == 1 ? 1.1f : 0f) + Mathf.Sin(a * 1.7f) * 0.12f, 0f);
             return island.TileToLocal(new Vector2(spot.x, spot.z), island.Content.capHeight + spot.y * island.map.tileSize);
         }
 

@@ -138,6 +138,24 @@ namespace Diorama.EditorTools
             Debug.Log($"[GalewickPlay] Mill: here {(m != null && m.Here)}, usable {(m != null && m.Usable)}, angle {(m != null ? m.Angle : 0f):0}, kept {(m != null && m.Spin.Kept)}, solved {(m != null && m.IsSolved)}");
         }
 
+        /// <summary>Three flicks at once (the bridge is too slow to land three inside the 4 s window one call at a time).</summary>
+        public static void Flick3()
+        {
+            var m = Mill;
+            if (m == null) return;
+            for (int i = 0; i < 3; i++) m.DebugFlick(0.9f);
+            Debug.Log($"[GalewickPlay] Mill: 3 flicks, {m.Spin.RecentFlicks} in the window.");
+        }
+
+        public static void Describe()
+        {
+            var k = Object.FindFirstObjectByType<KitePiece>();
+            var b = Object.FindFirstObjectByType<CloudBankPiece>();
+            var d = Object.FindFirstObjectByType<TowerDoor>();
+            var m = Mill;
+            Debug.Log($"[GalewickPlay] mill solved {(m != null && m.IsSolved)}; {(k != null ? k.Describe() : "no kites")}; {(b != null ? b.Describe() : "no bank")}; tower open {(d != null && d.IsOpen)}; puzzles {PuzzleState.Describe()}");
+        }
+
         /// <summary>Kite number arg.txt rises and flies (look + pinch).</summary>
         public static void Kite()
         {
