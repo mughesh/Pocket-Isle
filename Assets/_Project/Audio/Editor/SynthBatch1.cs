@@ -32,9 +32,11 @@ namespace Diorama.Audio.EditorTools
             return _list;
         }
 
-        static void Add(string group, string id, Action<SynthPatch> build, Action<AudioCue> cue, bool gap = false, params string[] extraClips)
+        static SynthRecipes.Recipe Add(string group, string id, Action<SynthPatch> build, Action<AudioCue> cue, bool gap = false, params string[] extraClips)
         {
-            _list.Add(new SynthRecipes.Recipe { set = Set, group = group, id = id, build = build, cue = cue, gap = gap, extraClips = extraClips });
+            var r = new SynthRecipes.Recipe { set = Set, group = group, id = id, build = build, cue = cue, gap = gap, extraClips = extraClips };
+            _list.Add(r);
+            return r;
         }
 
         // ---- cue presets ----
@@ -414,7 +416,7 @@ namespace Diorama.Audio.EditorTools
                     L(WhiteNoise).BP(4000f, -1f, 0.1f, 0.2f).Env(0.002f, 0.15f).Crackle(200f, 1f, 0.4f).Gain(0.3f),
                     Glass("B6", 0.3f).Inst())
                 .Notes("B6@0.01:0.1/1*0.8", "A6@0.04:0.1/1*0.7", "F#6@0.07:0.1/1*0.6", "E6@0.1:0.15/1*0.5", "D6@0.13:0.3/1*0.5").Master(1f, 9000f),
-                Sfx(0.7f, 40, 1), false, "Clips/Kenney/catch.shatter");
+                Sfx(0.7f, 40, 1));
             Add("Catch", "catch.dazed", p => p.Loop(2f, 0.1f,
                     Glass("A6", 0.25f).Vib(6f, 0.4f).Inst())
                 .Notes("A6@0.15:0.1/0*0.6", "B6@0.4:0.1/0*0.5", "D7@0.65:0.1/0*0.6", "B6@0.9:0.1/0*0.5",
@@ -675,6 +677,19 @@ namespace Diorama.Audio.EditorTools
                     "A5@0:0.15/0", "D6@0.08:0.15/0", "E6@0.16:0.15/0", "A6@0.24:0.15/0", "B6@0.32:0.15/0", "D7@0.4:0.8/0",
                     "D6@0.4:1.4/1", "A6@0.4:1.4/1*0.5"),
                 Jingle(0.9f));
+
+            // Kenney CC0 (Part 4): catch.shatter mixes in a light glass impact; cues without a synth patch.
+            _list.Find(r => r.id == "catch.shatter").mixWith = "Clips/Kenney/catch.shatter";
+            Action<AudioCue> step = Sfx(0.25f, 150, 3, 0.05f).And(c =>
+            {
+                c.volumeJitter = 0.1f;
+                c.minInterval = 0.06f;
+                c.notes = "Pick by tile: grass / path / stone (halls) / wood (lodge).";
+            });
+            foreach (var id in new[] { "step.grass", "step.path", "step.stone", "step.wood" })
+                Add("Walk", id, null, step, false, "Clips/Kenney/" + id);
+            Add("Lodge", "lodge.door", null, Sfx(0.5f, 60, 1), false, "Clips/Kenney/lodge.door");
+            Add("Lodge", "lodge.page", null, Ui(0.4f, true), false, "Clips/Kenney/lodge.page");
 
             // Music slots (no clips yet)
             foreach (var id in new[] { "music.title", "music.hub", "music.cinderwood", "music.battle.wild", "music.battle.keeper", "music.lodge" })

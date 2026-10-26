@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28966354f9950c5429c46b779a504dcd, type: 3}
+  m_Name: step.path
+  m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
+  id: step.path
+  clips:
+  - {fileID: 8300000, guid: e6a7f73a2d4eb904b84f87158cfe568a, type: 3}
+  - {fileID: 8300000, guid: 3238c97fe2909b0449441f2d5681f55c, type: 3}
+  - {fileID: 8300000, guid: 0df34e5de2856ee43ac3657cff472850, type: 3}
+  - {fileID: 8300000, guid: ec9a482b56092944897dd8fe2ddb0da3, type: 3}
+  - {fileID: 8300000, guid: 3534772b0471c044d88736efc1c2b63f, type: 3}
+  volume: 0.25
+  volumeJitter: 0.1
+  pitchMin: 0.95
+  pitchMax: 1.05
+  pitchStepSemitones: 0
+  bus: 2
+  spatial: 1
+  minDistance: 0.1
+  maxDistance: 1.5
+  loop: 0
+  maxVoices: 3
+  minInterval: 0.06
+  priority: 150
+  awaitingClips: 0
+  notes: 'Pick by tile: grass / path / stone (halls) / wood (lodge).'
+  review:
+    status: 0
+    note: 

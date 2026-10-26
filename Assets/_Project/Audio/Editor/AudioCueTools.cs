@@ -90,7 +90,9 @@ namespace Diorama.Audio.EditorTools
                     made++;
                 }
                 var clips = new List<AudioClip>();
-                if (patches.TryGetValue(r.id, out var patch)) clips.AddRange(SynthBaker.Clips(patch));
+                patches.TryGetValue(r.id, out var patch);
+                if (!string.IsNullOrEmpty(r.mixWith) && patch != null) clips.AddRange(MixBaker.Clips(patch, r));
+                else if (patch != null) clips.AddRange(SynthBaker.Clips(patch));
                 clips.AddRange(ExtraClips(r.extraClips));
                 if (!cue.clips.SequenceEqual(clips))
                 {
@@ -168,6 +170,14 @@ namespace Diorama.Audio.EditorTools
                 sb.AppendLine($"DUPLICATE id '{g.Key}': {string.Join(", ", g.Select(AssetDatabase.GetAssetPath))}");
             }
             var used = new HashSet<AudioClip>();
+            // Mix sources (the synth sparkle and the Kenney glass behind catch.shatter's mixes) are used through the mixes.
+            foreach (var r in SynthRecipes.All())
+            {
+                if (string.IsNullOrEmpty(r.mixWith)) continue;
+                foreach (var x in ExtraClips(new[] { r.mixWith })) used.Add(x);
+                var patch = SynthBaker.AllPatches().Find(p => p.id == r.id);
+                if (patch != null) foreach (var x in SynthBaker.Clips(patch)) used.Add(x);
+            }
             foreach (var c in table.cues.Where(c => c != null))
             {
                 if (string.IsNullOrEmpty(c.id)) sb.AppendLine($"NO ID: {AssetDatabase.GetAssetPath(c)}");

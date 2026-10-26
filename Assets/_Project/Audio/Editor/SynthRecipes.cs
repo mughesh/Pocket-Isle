@@ -20,6 +20,10 @@ namespace Diorama.Audio.EditorTools
             public Action<AudioCue> cue;
             /// <summary>Asset path prefixes of extra clips the cue also plays (e.g. Clips/Kenney/step.grass).</summary>
             public string[] extraClips;
+            /// <summary>Clip prefix (e.g. Clips/Kenney/catch.shatter): the cue plays baked mixes of the synth sound with each
+            /// of these instead of either one alone.</summary>
+            public string mixWith;
+            public float mixGain = 0.6f;
         }
 
         static readonly List<Func<IEnumerable<Recipe>>> Providers = new List<Func<IEnumerable<Recipe>>>();

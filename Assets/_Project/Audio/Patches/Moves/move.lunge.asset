@@ -76,4 +76,5 @@ MonoBehaviour:
   gap: 0
   review:
     status: 0
-    note: 
+    note: 'Compare: synth and Kenney variants are both in the cue (Play picks at
+      random). Say which to keep.'

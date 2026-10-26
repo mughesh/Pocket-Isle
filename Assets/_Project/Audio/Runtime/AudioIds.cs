@@ -53,6 +53,8 @@ namespace Diorama.Audio
         public const string KeeperCrownShield = "keeper.crown.shield";
         public const string KeeperFury = "keeper.fury";
         public const string LanternSputter = "lantern.sputter";
+        public const string LodgeDoor = "lodge.door";
+        public const string LodgePage = "lodge.page";
         public const string LodgePodTick = "lodge.podTick";
         public const string LogLift = "log.lift";
         public const string MoveCharge = "move.charge";
@@ -98,6 +100,10 @@ namespace Diorama.Audio
         public const string SpiritBlip = "spirit.blip";
         public const string SpiritFocus = "spirit.focus";
         public const string SteamHiss = "steam.hiss";
+        public const string StepGrass = "step.grass";
+        public const string StepPath = "step.path";
+        public const string StepStone = "step.stone";
+        public const string StepWood = "step.wood";
         public const string UiSaved = "ui.saved";
         public const string WalkBump = "walk.bump";
         public const string WalkHop = "walk.hop";

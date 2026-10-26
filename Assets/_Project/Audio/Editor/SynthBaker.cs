@@ -78,6 +78,8 @@ namespace Diorama.Audio.EditorTools
                 }
             if (import)
                 foreach (var p in keep) AssetDatabase.ImportAsset(p, ImportAssetOptions.ForceUpdate);
+            var recipe = SynthRecipes.Find(patch.id);
+            if (recipe != null && !string.IsNullOrEmpty(recipe.mixWith)) MixBaker.Bake(patch, recipe, import);
         }
 
         public static void BakeAll(IList<SynthPatch> patches)
