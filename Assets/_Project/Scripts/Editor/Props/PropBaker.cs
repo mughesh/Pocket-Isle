@@ -103,6 +103,12 @@ namespace Diorama.EditorTools
                 var pn = mesh.normals;
                 var pt = mesh.triangles;
                 Object.DestroyImmediate(mesh);
+                if (pv.Length == 0)
+                {
+                    Debug.LogError($"[PropBaker] {recipe.name}: piece {index} ({(piece.shape != null ? piece.shape.name : "part")}) baked to nothing (too thin for resolution {recipe.resolution}?); left out.", recipe);
+                    index++;
+                    continue;
+                }
 
                 float s = piece.scale > 0f ? piece.scale : 1f;
                 var rot = Quaternion.Euler(piece.rotation);

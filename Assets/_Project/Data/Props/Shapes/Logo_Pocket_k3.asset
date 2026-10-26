@@ -13,33 +13,33 @@ MonoBehaviour:
   m_Name: Logo_Pocket_k3
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.SdfShape
   primitives:
-  - kind: 2
+  - kind: 5
     blend: 0
     k: 0
     mirrorX: 0
-    a: {x: -0.2699919, y: 1.2978344, z: 0.55}
-    b: {x: -0.231342, y: 2.1917758, z: 0.55}
-    size: {x: 0.15, y: 0.15, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: -0.25018552, y: 1.8136561, z: 0.55}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.6146982, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: 87.52434}
     bumps: 0
     bumpFrequency: 0
-  - kind: 2
+  - kind: 5
     blend: 0
-    k: 0.02
+    k: 0.03
     mirrorX: 0
-    a: {x: -0.5857267, y: 1.866765, z: 0.55}
-    b: {x: -0.2863747, y: 1.5403581, z: 0.55}
-    size: {x: 0.15, y: 0.15, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: -0.45616746, y: 1.7678299, z: 0.55}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.36365098, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: -47.475662}
     bumps: 0
     bumpFrequency: 0
-  - kind: 2
+  - kind: 5
     blend: 0
-    k: 0.02
+    k: 0.03
     mirrorX: 0
-    a: {x: -0.38939616, y: 1.6433296, z: 0.55}
-    b: {x: -0.6275685, y: 1.3132944, z: 0.55}
-    size: {x: 0.15, y: 0.15, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: -0.536647, y: 1.5175526, z: 0.55}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.3437113, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: -125.816376}
     bumps: 0
     bumpFrequency: 0

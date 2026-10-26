@@ -13,183 +13,183 @@ MonoBehaviour:
   m_Name: Logo_Pocket_o1
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.SdfShape
   primitives:
-  - kind: 2
+  - kind: 5
     blend: 0
     k: 0
     mirrorX: 0
-    a: {x: 0.8712164, y: 1.5706772, z: 0.55}
-    b: {x: 0.8824326, y: 1.664582, z: 0.55}
-    size: {x: 0.15, y: 0.15, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: 0.88924944, y: 1.6718959, z: 0.55}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.17014015, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: 83.188736}
     bumps: 0
     bumpFrequency: 0
-  - kind: 2
+  - kind: 5
     blend: 0
-    k: 0.02
+    k: 0.03
     mirrorX: 0
-    a: {x: 0.8824326, y: 1.664582, z: 0.55}
-    b: {x: 0.923049, y: 1.748533, z: 0.55}
-    size: {x: 0.15, y: 0.15, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: 0.91804534, y: 1.7707046, z: 0.55}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.16941121, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: 64.181816}
     bumps: 0
     bumpFrequency: 0
-  - kind: 2
+  - kind: 5
     blend: 0
-    k: 0.02
+    k: 0.03
     mirrorX: 0
-    a: {x: 0.923049, y: 1.748533, z: 0.55}
-    b: {x: 0.9881665, y: 1.8124044, z: 0.55}
-    size: {x: 0.15, y: 0.15, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: 0.9767864, y: 1.8528283, z: 0.55}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.16827403, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: 44.44651}
     bumps: 0
     bumpFrequency: 0
-  - kind: 2
+  - kind: 5
     blend: 0
-    k: 0.02
+    k: 0.03
     mirrorX: 0
-    a: {x: 0.9881665, y: 1.8124044, z: 0.55}
-    b: {x: 1.0699311, y: 1.8484924, z: 0.55}
-    size: {x: 0.15, y: 0.15, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: 1.0583876, y: 1.9083612, z: 0.55}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.1672525, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: 23.814913}
     bumps: 0
     bumpFrequency: 0
-  - kind: 2
+  - kind: 5
     blend: 0
-    k: 0.02
+    k: 0.03
     mirrorX: 0
-    a: {x: 1.0699311, y: 1.8484924, z: 0.55}
-    b: {x: 1.158481, y: 1.8524443, z: 0.55}
-    size: {x: 0.15, y: 0.15, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: 1.1530068, y: 1.9306056, z: 0.55}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.16684331, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: 2.5554078}
     bumps: 0
     bumpFrequency: 0
-  - kind: 2
+  - kind: 5
     blend: 0
-    k: 0.02
+    k: 0.03
     mirrorX: 0
-    a: {x: 1.158481, y: 1.8524443, z: 0.55}
-    b: {x: 1.2431353, y: 1.8237835, z: 0.55}
-    size: {x: 0.15, y: 0.15, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: 1.2492313, y: 1.9168785, z: 0.55}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.16725248, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: -18.70426}
     bumps: 0
     bumpFrequency: 0
-  - kind: 2
+  - kind: 5
     blend: 0
-    k: 0.02
+    k: 0.03
     mirrorX: 0
-    a: {x: 1.2431353, y: 1.8237835, z: 0.55}
-    b: {x: 1.3136837, y: 1.7659668, z: 0.55}
-    size: {x: 0.15, y: 0.15, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: 1.335455, y: 1.8688352, z: 0.55}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.16827402, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: -39.335735}
     bumps: 0
     bumpFrequency: 0
-  - kind: 2
+  - kind: 5
     blend: 0
-    k: 0.02
+    k: 0.03
     mirrorX: 0
-    a: {x: 1.3136837, y: 1.7659668, z: 0.55}
-    b: {x: 1.3616171, y: 1.6859677, z: 0.55}
-    size: {x: 0.15, y: 0.15, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: 1.4012783, y: 1.7922709, z: 0.55}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.16941117, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: -59.071064}
     bumps: 0
     bumpFrequency: 0
-  - kind: 2
+  - kind: 5
     blend: 0
-    k: 0.02
+    k: 0.03
     mirrorX: 0
-    a: {x: 1.3616171, y: 1.6859677, z: 0.55}
-    b: {x: 1.3811538, y: 1.5934354, z: 0.55}
-    size: {x: 0.15, y: 0.15, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: 1.4387616, y: 1.6964202, z: 0.55}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.17014018, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: -78.07798}
     bumps: 0
     bumpFrequency: 0
-  - kind: 2
+  - kind: 5
     blend: 0
-    k: 0.02
+    k: 0.03
     mirrorX: 0
-    a: {x: 1.3811538, y: 1.5934354, z: 0.55}
-    b: {x: 1.3699375, y: 1.4995306, z: 0.55}
-    size: {x: 0.15, y: 0.15, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: 1.4433842, y: 1.592844, z: 0.55}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.17014015, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: -96.8113}
     bumps: 0
     bumpFrequency: 0
-  - kind: 2
+  - kind: 5
     blend: 0
-    k: 0.02
+    k: 0.03
     mirrorX: 0
-    a: {x: 1.3699375, y: 1.4995306, z: 0.55}
-    b: {x: 1.3293213, y: 1.4155797, z: 0.55}
-    size: {x: 0.15, y: 0.15, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: 1.4145882, y: 1.4940352, z: 0.55}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.16941112, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: -115.81815}
     bumps: 0
     bumpFrequency: 0
-  - kind: 2
+  - kind: 5
     blend: 0
-    k: 0.02
+    k: 0.03
     mirrorX: 0
-    a: {x: 1.3293213, y: 1.4155797, z: 0.55}
-    b: {x: 1.2642037, y: 1.3517082, z: 0.55}
-    size: {x: 0.15, y: 0.15, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: 1.3558471, y: 1.4119117, z: 0.55}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.16827413, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: -135.55353}
     bumps: 0
     bumpFrequency: 0
-  - kind: 2
+  - kind: 5
     blend: 0
-    k: 0.02
+    k: 0.03
     mirrorX: 0
-    a: {x: 1.2642037, y: 1.3517082, z: 0.55}
-    b: {x: 1.182439, y: 1.3156201, z: 0.55}
-    size: {x: 0.15, y: 0.15, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: 1.274246, y: 1.3563787, z: 0.55}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.16725245, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: -156.18506}
     bumps: 0
     bumpFrequency: 0
-  - kind: 2
+  - kind: 5
     blend: 0
-    k: 0.02
+    k: 0.03
     mirrorX: 0
-    a: {x: 1.182439, y: 1.3156201, z: 0.55}
-    b: {x: 1.0938892, y: 1.3116683, z: 0.55}
-    size: {x: 0.15, y: 0.15, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: 1.179627, y: 1.3341343, z: 0.55}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.16684325, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: -177.44458}
     bumps: 0
     bumpFrequency: 0
-  - kind: 2
+  - kind: 5
     blend: 0
-    k: 0.02
+    k: 0.03
     mirrorX: 0
-    a: {x: 1.0938892, y: 1.3116683, z: 0.55}
-    b: {x: 1.0092349, y: 1.340329, z: 0.55}
-    size: {x: 0.15, y: 0.15, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: 1.0834024, y: 1.3478615, z: 0.55}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.16725253, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: 161.29576}
     bumps: 0
     bumpFrequency: 0
-  - kind: 2
+  - kind: 5
     blend: 0
-    k: 0.02
+    k: 0.03
     mirrorX: 0
-    a: {x: 1.0092349, y: 1.340329, z: 0.55}
-    b: {x: 0.93868655, y: 1.3981458, z: 0.55}
-    size: {x: 0.15, y: 0.15, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: 0.9971786, y: 1.3959045, z: 0.55}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.16827402, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: 140.66426}
     bumps: 0
     bumpFrequency: 0
-  - kind: 2
+  - kind: 5
     blend: 0
-    k: 0.02
+    k: 0.03
     mirrorX: 0
-    a: {x: 0.93868655, y: 1.3981458, z: 0.55}
-    b: {x: 0.89075315, y: 1.4781449, z: 0.55}
-    size: {x: 0.15, y: 0.15, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: 0.93135536, y: 1.4724689, z: 0.55}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.16941118, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: 120.92896}
     bumps: 0
     bumpFrequency: 0
-  - kind: 2
+  - kind: 5
     blend: 0
-    k: 0.02
+    k: 0.03
     mirrorX: 0
-    a: {x: 0.89075315, y: 1.4781449, z: 0.55}
-    b: {x: 0.8712164, y: 1.5706773, z: 0.55}
-    size: {x: 0.15, y: 0.15, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: 0.893872, y: 1.5683197, z: 0.55}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.17014016, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: 101.922}
     bumps: 0
     bumpFrequency: 0

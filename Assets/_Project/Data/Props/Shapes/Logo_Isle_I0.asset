@@ -13,33 +13,33 @@ MonoBehaviour:
   m_Name: Logo_Isle_I0
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.SdfShape
   primitives:
-  - kind: 2
+  - kind: 5
     blend: 0
     k: 0
     mirrorX: 0
-    a: {x: 1.3142064, y: -0.12684472, z: 0.82}
-    b: {x: 1.3074476, y: 0.99600536, z: 0.82}
-    size: {x: 0.17, y: 0.17, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: 1.3166002, y: 0.4746829, z: 0.82}
+    b: {x: 0.047250003, y: 0, z: 0}
+    size: {x: 0.7338378, y: 0.135, z: 0.12825}
+    rotation: {x: 0, y: 0, z: 90.34487}
     bumps: 0
     bumpFrequency: 0
-  - kind: 2
+  - kind: 5
     blend: 0
-    k: 0.02
+    k: 0.03
     mirrorX: 0
-    a: {x: 1.4534181, y: 0.996884, z: 0.82}
-    b: {x: 1.1614771, y: 0.9951267, z: 0.82}
-    size: {x: 0.17, y: 0.17, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: 1.3129795, y: 1.0762098, z: 0.82}
+    b: {x: 0.047250003, y: 0, z: 0}
+    size: {x: 0.28869984, y: 0.135, z: 0.12825}
+    rotation: {x: 0, y: 0, z: -179.65512}
     bumps: 0
     bumpFrequency: 0
-  - kind: 2
+  - kind: 5
     blend: 0
-    k: 0.02
+    k: 0.03
     mirrorX: 0
-    a: {x: 1.4601768, y: -0.12596609, z: 0.82}
-    b: {x: 1.1682358, y: -0.12772335, z: 0.82}
-    size: {x: 0.17, y: 0.17, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: 1.320221, y: -0.12684399, z: 0.82}
+    b: {x: 0.047250003, y: 0, z: 0}
+    size: {x: 0.28869984, y: 0.135, z: 0.12825}
+    rotation: {x: 0, y: 0, z: -179.65512}
     bumps: 0
     bumpFrequency: 0

@@ -13,73 +13,73 @@ MonoBehaviour:
   m_Name: Logo_Isle_l2
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.SdfShape
   primitives:
-  - kind: 2
+  - kind: 5
     blend: 0
     k: 0
     mirrorX: 0
-    a: {x: -0.18510637, y: 1.0991807, z: 0.82}
-    b: {x: -0.16340095, y: 0.13717923, z: 0.82}
-    size: {x: 0.17, y: 0.17, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: -0.15741482, y: 0.66681784, z: 0.82}
+    b: {x: 0.047250003, y: 0, z: 0}
+    size: {x: 0.6477891, y: 0.135, z: 0.12825}
+    rotation: {x: 0, y: 0, z: -88.707466}
     bumps: 0
     bumpFrequency: 0
-  - kind: 2
+  - kind: 5
     blend: 0
-    k: 0.02
+    k: 0.03
     mirrorX: 0
-    a: {x: -0.16340095, y: 0.13717923, z: 0.82}
-    b: {x: -0.17118356, y: 0.077723466, z: 0.82}
-    size: {x: 0.17, y: 0.17, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: -0.14995618, y: 0.11960862, z: 0.82}
+    b: {x: 0.047250003, y: 0, z: 0}
+    size: {x: 0.16442302, y: 0.135, z: 0.12825}
+    rotation: {x: 0, y: 0, z: -97.45747}
     bumps: 0
     bumpFrequency: 0
-  - kind: 2
+  - kind: 5
     blend: 0
-    k: 0.02
+    k: 0.03
     mirrorX: 0
-    a: {x: -0.17118356, y: 0.077723466, z: 0.82}
-    b: {x: -0.19648464, y: 0.02335977, z: 0.82}
-    size: {x: 0.17, y: 0.17, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: -0.1676796, y: 0.058633912, z: 0.82}
+    b: {x: 0.047250003, y: 0, z: 0}
+    size: {x: 0.16442302, y: 0.135, z: 0.12825}
+    rotation: {x: 0, y: 0, z: -114.957466}
     bumps: 0
     bumpFrequency: 0
-  - kind: 2
+  - kind: 5
     blend: 0
-    k: 0.02
+    k: 0.03
     mirrorX: 0
-    a: {x: -0.19648464, y: 0.02335977, z: 0.82}
-    b: {x: -0.2369622, y: -0.02087961, z: 0.82}
-    size: {x: 0.17, y: 0.17, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: -0.20291814, y: 0.005810838, z: 0.82}
+    b: {x: 0.047250003, y: 0, z: 0}
+    size: {x: 0.164423, y: 0.135, z: 0.12825}
+    rotation: {x: 0, y: 0, z: -132.45747}
     bumps: 0
     bumpFrequency: 0
-  - kind: 2
+  - kind: 5
     blend: 0
-    k: 0.02
+    k: 0.03
     mirrorX: 0
-    a: {x: -0.2369622, y: -0.02087961, z: 0.82}
-    b: {x: -0.28886938, y: -0.050899636, z: 0.82}
-    size: {x: 0.17, y: 0.17, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: -0.25241, y: -0.03397098, z: 0.82}
+    b: {x: 0.047250003, y: 0, z: 0}
+    size: {x: 0.16442303, y: 0.135, z: 0.12825}
+    rotation: {x: 0, y: 0, z: -149.95747}
     bumps: 0
     bumpFrequency: 0
-  - kind: 2
+  - kind: 5
     blend: 0
-    k: 0.02
+    k: 0.03
     mirrorX: 0
-    a: {x: -0.28886938, y: -0.050899636, z: 0.82}
-    b: {x: -0.34740126, y: -0.06392142, z: 0.82}
-    size: {x: 0.17, y: 0.17, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: -0.31157377, y: -0.0570291, z: 0.82}
+    b: {x: 0.047250003, y: 0, z: 0}
+    size: {x: 0.16442299, y: 0.135, z: 0.12825}
+    rotation: {x: 0, y: 0, z: -167.45749}
     bumps: 0
     bumpFrequency: 0
-  - kind: 2
+  - kind: 5
     blend: 0
-    k: 0.02
+    k: 0.03
     mirrorX: 0
-    a: {x: -0.34740126, y: -0.06392142, z: 0.82}
-    b: {x: -0.40713996, y: -0.058739662, z: 0.82}
-    size: {x: 0.17, y: 0.17, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
+    a: {x: -0.374933, y: -0.06122911, z: 0.82}
+    b: {x: 0.047250003, y: 0, z: 0}
+    size: {x: 0.16442303, y: 0.135, z: 0.12825}
+    rotation: {x: 0, y: 0, z: 175.04254}
     bumps: 0
     bumpFrequency: 0

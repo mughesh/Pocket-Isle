@@ -26,19 +26,21 @@ namespace Diorama.EditorTools
         {
             DioramaSceneSetup.EnsureFolder(Root);
             DioramaSceneSetup.EnsureFolder($"{Root}/Shapes");
-            var logo = Recipe(LogoName, Vector2Int.one, false, false, 6000);
-            logo.resolution = 48;
-            logo.outline = 0.075f;
-            logo.spec = 0.3f;
+            var logo = Recipe(LogoName, Vector2Int.one, false, false, 6650);
+            logo.resolution = 56;
+            logo.outline = 0.05f;
+            logo.spec = 0.45f;
             logo.scaleJitter = 0f;
             logo.yawJitter = 0f;
             // Clay amber ("Pocket"), Leaf deep green ("Isle"); the rest unused.
-            logo.palette = Palette(H("#F7A537"), H("#7A5236"), H("#9C988F"), H("#3F8C3B"), H("#FFD27A", 1.1f), H("#3E9440"));
+            logo.palette = Palette(H("#FFA01C"), H("#7A5236"), H("#9C988F"), H("#2E9A3C"), H("#FFD27A", 1.1f), H("#3E9440"));
 
             var pieces = new List<PropPiece>();
             // "Isle" on the island's front lip (over the earth band), "Pocket" stacked above, touching it.
-            Word(pieces, "Isle", 1.12f, 0.17f, -0.1f, 0.82f, 0.06f, PropSlot.Leaf, 11);
-            Word(pieces, "Pocket", 0.9f, 0.15f, 1.3f, 0.55f, 0.03f, PropSlot.Clay, 3);
+            // Strokes thin enough for the counters (the holes in P, o, e, c) to stay open: fat strokes closed them to slits
+            // that read as cracks.
+            Word(pieces, "Isle", 1.2f, 0.135f, -0.1f, 0.82f, 0.1f, PropSlot.Leaf, 11);
+            Word(pieces, "Pocket", 1.0f, 0.12f, 1.32f, 0.55f, 0.07f, PropSlot.Clay, 3);
             logo.pieces = pieces;
             UnityEditor.EditorUtility.SetDirty(logo);
             return logo;
@@ -49,14 +51,15 @@ namespace Diorama.EditorTools
         {
             DioramaSceneSetup.EnsureFolder(Root);
             DioramaSceneSetup.EnsureFolder($"{Root}/Shapes");
-            var b = Recipe(LogoBaseName, Vector2Int.one, false, false, 3600);
+            var b = Recipe(LogoBaseName, Vector2Int.one, false, false, 2900);
             b.resolution = 40;
             b.outline = 0.05f;
             b.spec = 0.15f;
             b.scaleJitter = 0f;
             b.yawJitter = 0f;
-            // Clay lantern frame, Wood earth, Stone rock, Leaf grass, Glow lantern light, Accent moss.
-            b.palette = Palette(H("#4A3A2E"), H("#7A5234"), H("#9A958C"), H("#86C24A"), H("#FFD27A", 1.2f), H("#6BAE3E"));
+            // Clay red (mushroom caps, flowers), Wood earth + lantern frame, Stone rock, Leaf grass, Glow lantern light and
+            // little glowing flowers, Accent moss.
+            b.palette = Palette(H("#F2554A"), H("#6E4A30"), H("#9A958C"), H("#86C24A"), H("#FFD27A", 1.2f), H("#5DA83A"));
 
             var pieces = new List<PropPiece>();
             pieces.Add(Weighted(PShape("LogoBase_Grass",
@@ -94,9 +97,44 @@ namespace Diorama.EditorTools
                 Cone(lantern + new Vector3(0f, 0.45f, 0f), lantern + new Vector3(0f, 0.55f, 0f), 0.17f, 0.05f, 0.02f),
                 Cone(lantern + new Vector3(0.12f, 0.08f, 0f), lantern + new Vector3(0.12f, 0.45f, 0f), 0.025f, 0.025f, 0.01f),
                 Cone(lantern + new Vector3(-0.12f, 0.08f, 0f), lantern + new Vector3(-0.12f, 0.45f, 0f), 0.025f, 0.025f, 0.01f),
-                Torus(lantern + new Vector3(0f, 0.6f, 0f), 0.05f, 0.018f, new Vector3(90f, 0f, 0f), 0.01f)), PropSlot.Clay, 0.4f));
+                Torus(lantern + new Vector3(0f, 0.6f, 0f), 0.05f, 0.018f, new Vector3(90f, 0f, 0f), 0.01f)), PropSlot.Wood, 0.4f));
             pieces.Add(Weighted(PShape("LogoBase_LanternLight",
                 Ell(lantern + new Vector3(0f, 0.27f, 0f), new Vector3(0.11f, 0.17f, 0.11f), 0f)), PropSlot.Glow, 0.2f));
+
+            // Life on the land (low poly, part of the same mesh): two red mushrooms, little flowers (red and glowing), grass
+            // tufts at the edges.
+            var caps = new List<SdfPrimitive>();
+            int stem = 0;
+            // Where the letters don't hide them: the land's left and right ends.
+            foreach (var (at, h) in new[] { (new Vector3(2.15f, 0f, 0.1f), 0.34f), (new Vector3(1.9f, 0f, 0.42f), 0.2f), (new Vector3(-2.3f, 0f, -0.15f), 0.28f) })
+            {
+                // Each stem its own piece (far apart in one piece they bake to nothing).
+                pieces.Add(Weighted(PShape($"LogoBase_MushroomStem{stem++}", Cone(at, at + Vector3.up * h, 0.055f, 0.045f, 0f)), PropSlot.Stone, 0.1f));
+                caps.Add(Ell(at + Vector3.up * (h + 0.02f), new Vector3(h * 0.55f, h * 0.32f, h * 0.55f), caps.Count == 0 ? 0f : 0.02f));
+            }
+            caps.Add(new SdfPrimitive { kind = SdfKind.Plane, blend = SdfBlend.Intersect, a = new Vector3(0f, 0.12f, 0f), b = Vector3.down, k = 0.01f });
+            pieces.Add(Weighted(PShape("LogoBase_MushroomCaps", caps.ToArray()), PropSlot.Clay, 0.4f));
+            // Little flowers along the front lip and the ends, red and glowing: one small piece each (a piece is meshed on
+            // its own grid, so tiny far-apart heads in one piece bake to nothing).
+            var rng = new System.Random(5);
+            float R(float a, float c) => a + (float)rng.NextDouble() * (c - a);
+            var flowers = new[] { new Vector2(2.3f, 0.5f), new Vector2(1.75f, 0.9f), new Vector2(-1.85f, 0.85f), new Vector2(-2.4f, 0.35f), new Vector2(0.05f, 1.0f), new Vector2(2.05f, -0.4f) };
+            for (int i = 0; i < flowers.Length; i++)
+            {
+                var foot = new Vector3(flowers[i].x, 0f, flowers[i].y);
+                float h = R(0.1f, 0.18f);
+                pieces.Add(Weighted(PShape($"LogoBase_Flower{i}",
+                    Cone(foot, foot + Vector3.up * h, 0.025f, 0.022f, 0f),
+                    Sphere(foot + Vector3.up * (h + 0.035f), 0.065f, 0.02f)), i % 2 == 0 ? PropSlot.Clay : PropSlot.Glow, 0.1f));
+            }
+            var tufts = new List<SdfPrimitive>();
+            foreach (var at in new[] { new Vector2(2.3f, 0.45f), new Vector2(-2.35f, 0.3f), new Vector2(0.2f, -0.95f), new Vector2(-1.75f, 0.85f) })
+                for (int i = 0; i < 3; i++)
+                {
+                    var foot = new Vector3(at.x + R(-0.08f, 0.08f), 0f, at.y + R(-0.06f, 0.06f));
+                    tufts.Add(Cone(foot, foot + new Vector3(R(-0.07f, 0.07f), R(0.2f, 0.32f), R(-0.04f, 0.04f)), 0.045f, 0.012f, tufts.Count == 0 ? 0f : 0.015f));
+                }
+            pieces.Add(Weighted(PShape("LogoBase_LogoTufts", tufts.ToArray()), PropSlot.Accent, 0.35f));
 
             b.pieces = pieces;
             UnityEditor.EditorUtility.SetDirty(b);
@@ -117,6 +155,8 @@ namespace Diorama.EditorTools
         /// </summary>
         static void Word(List<PropPiece> pieces, string word, float em, float r, float baseline, float z, float gap, PropSlot slot, int seed)
         {
+            // Half depth of the letters and the rounding of their edges (shape units).
+            float depth = r * 0.95f, edge = r * 0.35f;
             var rng = new System.Random(seed);
             float R(float a, float b) => a + (float)rng.NextDouble() * (b - a);
             var glyphs = new List<(char c, List<List<Vector2>> strokes, float span, float top)>();
@@ -146,11 +186,17 @@ namespace Diorama.EditorTools
                     var q = centre + new Vector2(d.x * Mathf.Cos(tilt) - d.y * Mathf.Sin(tilt), d.x * Mathf.Sin(tilt) + d.y * Mathf.Cos(tilt));
                     return new Vector3(-(x + q.x * size), baseline + lift + q.y * size, z);
                 }
+                // Each stroke segment is a flat-faced block with slightly rounded edges (chunky 3D type: crisp outline,
+                // flat front, no creases for the outline to poke through), the blocks melted together a little.
                 var prims = new List<SdfPrimitive>();
                 foreach (var stroke in strokes)
                     for (int i = 1; i < stroke.Count; i++)
-                        // The first capsule of the letter starts the union; the rest melt in with a small blend.
-                        prims.Add(Cone(At(stroke[i - 1]), At(stroke[i]), r, r, prims.Count == 0 ? 0f : 0.02f));
+                    {
+                        Vector3 a = At(stroke[i - 1]), b2 = At(stroke[i]);
+                        var d = b2 - a;
+                        float angle = Mathf.Atan2(d.y, d.x) * Mathf.Rad2Deg;
+                        prims.Add(Box((a + b2) * 0.5f, new Vector3(d.magnitude * 0.5f + r * 0.98f, r, depth), edge, prims.Count == 0 ? 0f : 0.03f, new Vector3(0f, 0f, angle)));
+                    }
                 pieces.Add(Weighted(PShape($"Logo_{word}_{c}{index}", prims.ToArray()), slot, 1f));
                 x += span + 2f * r + gap;
                 index++;

@@ -39,8 +39,8 @@ namespace Diorama
         public float baseBob = 0.012f;
         [Tooltip("The base's lantern pulses between these glow amounts.")]
         public Vector2 lanternGlow = new Vector2(0.7f, 1.6f);
-        [Tooltip("A drifting speck (ember / sparkle) this often (s); two are in the air at a time.")]
-        public float speckEvery = 1.4f;
+        [Tooltip("A firefly / sparkle drifts up from the logo land this often (s).")]
+        public float speckEvery = 0.45f;
 
         static readonly int WindowClipId = Shader.PropertyToID("_WindowClip");
         static readonly int RestoredSelfId = Shader.PropertyToID("_RestoredSelf");
@@ -220,9 +220,10 @@ namespace Diorama
             if (fx == null || _show < 0.95f || t < _nextSpeck) return;
             _nextSpeck = t + speckEvery;
             float s = island != null ? island.transform.lossyScale.x : 1f;
-            var side = _pivot.right * (Random.Range(-0.45f, 0.45f) * width * s);
-            var at = _pivot.position + side + _pivot.up * (Random.Range(-0.1f, 0.2f) * width * s);
-            fx.Burst(at, 1, Random.value < 0.5f ? RuneBoard.Gold : new Color(1f, 0.55f, 0.25f), 0.01f * s, speckEvery * 2f, 0.004f * s, Vector3.up * (0.02f * s));
+            // Fireflies round the land's rim (an ellipse round the logo, low), drifting up slowly.
+            float a = Random.value * Mathf.PI * 2f;
+            var at = _pivot.position + (_pivot.right * (Mathf.Cos(a) * 0.48f) + _pivot.forward * (Mathf.Sin(a) * 0.2f) + _pivot.up * Random.Range(-0.12f, 0.05f)) * (width * s);
+            fx.Burst(at, 1, Random.value < 0.6f ? new Color(1f, 0.9f, 0.45f) : new Color(1f, 0.6f, 0.3f), 0.012f * s, 2.6f, 0.0045f * s, Vector3.up * (0.015f * s));
         }
 
         /// <summary>The island-local yaw that turns the logo's front (+Z) toward the head.</summary>
