@@ -9,9 +9,8 @@ namespace Diorama
 {
     /// <summary>
     /// The in-headset dev / QA panel (step 9e). Only in the Editor and QA builds (scripting define POCKET_DEV); a release
-    /// build compiles it out and the object removes itself. Opened and closed with the left hand's menu gesture (palm up,
-    /// pinch: Meta's app menu button for hand tracking, <c>OVRInput.Button.Start</c> on <c>Controller.LHand</c>; also the
-    /// left controller's menu button), F2 in the Editor. A plain 2D panel opens a little past arm's reach in front of
+    /// build compiles it out and the object removes itself. Step 9g: opened from the game menu's Dev rune (the left hand's
+    /// menu gesture now opens the game menu) or F2; F2 closes it. A plain 2D panel opens a little past arm's reach in front of
     /// the player, toward the dominant hand and below the eyes, facing them; it stays put (world-locked) and comes back
     /// in front when the head turns well away. Its edge moves it like the island's rim (pinch the frame, or point at it and pinch, then drag);
     /// it keeps that spot (relative to the head's facing) until the app closes. Buttons work with a poke (a fingertip
@@ -128,7 +127,7 @@ namespace Diorama
             }
             Build();
             SetOpen(false);
-            Debug.Log("[DevPanel] Ready: left-hand menu pinch (palm up) or F2 opens it.");
+            Debug.Log("[DevPanel] Ready: the game menu's Dev rune or F2 opens it.");
         }
 
         void OnEnable() => DialogueBubble.KeepClear += KeepClear;
@@ -569,8 +568,7 @@ namespace Diorama
 
         static bool OpenPressed()
         {
-            if (OVRInput.GetDown(OVRInput.Button.Start, OVRInput.Controller.LHand) || OVRInput.GetDown(OVRInput.Button.Start, OVRInput.Controller.LTouch))
-                return true;
+            // Step 9g: the menu gesture belongs to the game menu (its Dev rune opens this panel).
             var kb = Keyboard.current;
             return kb != null && kb.f2Key.wasPressedThisFrame;
         }

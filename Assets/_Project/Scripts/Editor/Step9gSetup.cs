@@ -20,6 +20,14 @@ namespace Diorama.EditorTools
         {
             var log = new StringBuilder("[Step9g] Set up:");
             Title(log);
+            Menu(log);
+            Save(log);
+        }
+
+        public static void MenuOnly()
+        {
+            var log = new StringBuilder("[Step9g] Menu:");
+            Menu(log);
             Save(log);
         }
 
@@ -80,6 +88,54 @@ namespace Diorama.EditorTools
             opening.title = title;
             foreach (var o in new Object[] { title, logo, runes, opening }) EditorUtility.SetDirty(o);
             log.Append($"\n  Title: logo {(logo.fx != null ? "+ fx" : "(no fx)")}, runes, wired to the opening.");
+        }
+
+        /// <summary>
+        /// B: the game menu (left-hand menu gesture / Esc) and the settings board, both rune boards over the near rim;
+        /// the menu's row sits a little higher than the battle runes so the two never overlap. Reimports the dialogue
+        /// script (menu.first).
+        /// </summary>
+        public static void Menu(StringBuilder log)
+        {
+            var island = Find<IslandBuilder>();
+            var runesRef = Find<BattleRunes>();
+            if (island == null || runesRef == null)
+            {
+                log.Append("\n  MISSING island or battle runes: open MR_Main.");
+                return;
+            }
+            var menuGo = Child(island.transform, "Game Menu");
+            var menu = Component<GameMenu>(menuGo);
+            var menuRunes = Component<RuneBoard>(Child(menuGo.transform, "Menu Runes"));
+            var settingsGo = Child(island.transform, "Settings");
+            var settings = Component<SettingsBoard>(settingsGo);
+            var settingsRunes = Component<RuneBoard>(Child(settingsGo.transform, "Settings Runes"));
+            Wire(menuRunes, island, runesRef);
+            Wire(settingsRunes, island, runesRef);
+            menuRunes.offset = runesRef.offset + new Vector3(0f, 0.07f, 0f);
+            Undo.RecordObject(menu, "Step 9g");
+            Undo.RecordObject(settings, "Step 9g");
+            menu.runes = menuRunes;
+            menu.settings = settings;
+            menu.island = island;
+            menu.handle = Find<IslandHandle>();
+            menu.explorer = Find<GestureTestPiece>();
+            menu.save = Find<GameSave>();
+            menu.pause = Find<GamePause>();
+            menu.encounters = Find<EncounterDirector>();
+            menu.onboarding = Find<Onboarding>();
+            settings.runes = settingsRunes;
+            settings.placer = Find<IslandPlacer>();
+            const string audioCredits = "Assets/Docs/AudioCredits.md";
+            if (System.IO.File.Exists(audioCredits) && !settings.credits.Contains("Audio"))
+                settings.credits += "\n\nAudio\n" + System.IO.File.ReadAllText(audioCredits).Trim();
+            EditorUtility.SetDirty(menu);
+            EditorUtility.SetDirty(settings);
+            int missing = new Object[] { menu.handle, menu.explorer, menu.save, menu.pause, menu.encounters, menu.onboarding, settings.placer }.Count(o => o == null);
+            log.Append($"\n  Game menu + settings: {(missing == 0 ? "all references found" : $"{missing} reference(s) MISSING")}" +
+                       $"{(System.IO.File.Exists(audioCredits) ? ", audio credits added" : ", no AudioCredits.md yet")}.");
+            DialogueTools.Import();
+            log.Append("\n  Dialogue script reimported (menu.first).");
         }
 
         /// <summary>A rune board placed and painted like the battle runes.</summary>

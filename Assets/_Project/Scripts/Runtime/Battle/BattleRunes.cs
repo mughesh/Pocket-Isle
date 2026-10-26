@@ -235,7 +235,7 @@ namespace Diorama
                 _loggedPokeSelect = true;
                 Debug.Log($"[BattleRunes] Poke select on rune {index + 1} (first time).");
             }
-            if (_interactable && _runes[index].shown && _runes[index].appear > 0.6f) Pick(index, "poke");
+            if (_interactable && !GamePause.IsPaused && _runes[index].shown && _runes[index].appear > 0.6f) Pick(index, "poke");
         }
 
         /// <summary>
@@ -374,7 +374,8 @@ namespace Diorama
                 r.visual.localScale = Vector3.one * (Mathf.Max(0.001f, a) * (1f + 0.12f * r.hover + 0.08f * r.pulse));
             }
             Paint();
-            if (!_interactable) return;
+            // Step 9g: no picks while the game menu (or anything else) has the game paused.
+            if (!_interactable || GamePause.IsPaused) return;
 
             var kb = Keyboard.current;
             if (kb != null)

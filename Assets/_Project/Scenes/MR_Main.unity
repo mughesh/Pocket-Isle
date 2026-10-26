@@ -597,6 +597,60 @@ Transform:
   m_Children: []
   m_Father: {fileID: 733261510}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &259397458
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 259397459}
+  - component: {fileID: 259397460}
+  m_Layer: 0
+  m_Name: Settings Runes
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &259397459
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 259397458}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1916101687}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &259397460
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 259397458}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbec2679a89a2514db6ca02fdf0e34cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.RuneBoard
+  island: {fileID: 270959109}
+  grabGuard: {fileID: 270959111}
+  hudMaterial: {fileID: 2100000, guid: 0656b6c4f92798e49a14cf09a2c6800e, type: 2}
+  offset: {x: 0, y: 0.05, z: 0.02}
+  fontSize: 0.11
+  maxDrift: 15
+  driftSpeed: 1.5
+  maxTilt: 40
+  pressDepth: 0.008
+  holdSeconds: 2
 --- !u!1 &261742740
 GameObject:
   m_ObjectHideFlags: 0
@@ -742,6 +796,8 @@ Transform:
   - {fileID: 1954810187}
   - {fileID: 1067947788}
   - {fileID: 59714806}
+  - {fileID: 980002959}
+  - {fileID: 1916101687}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &270959111
@@ -2243,6 +2299,62 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &980002958
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 980002959}
+  - component: {fileID: 980002960}
+  m_Layer: 0
+  m_Name: Game Menu
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &980002959
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 980002958}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1083828882}
+  m_Father: {fileID: 270959110}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &980002960
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 980002958}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d22f2e6a696d68848ab5584a4bfb637b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.GameMenu
+  runes: {fileID: 1083828883}
+  settings: {fileID: 1916101688}
+  island: {fileID: 270959109}
+  handle: {fileID: 270959111}
+  explorer: {fileID: 374318554}
+  save: {fileID: 1541842443}
+  pause: {fileID: 1541842442}
+  encounters: {fileID: 1499891275}
+  onboarding: {fileID: 1380201671}
+  dim: 0.45
+  firstLine: menu.first
 --- !u!1 &1037280312
 GameObject:
   m_ObjectHideFlags: 0
@@ -2601,6 +2713,60 @@ MonoBehaviour:
   padSeconds: 0.4
   progression: {fileID: 11400000, guid: c5e0845f05a2ec34a817839899fdc421, type: 2}
   pauseBetweenMoves: 0.45
+--- !u!1 &1083828881
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1083828882}
+  - component: {fileID: 1083828883}
+  m_Layer: 0
+  m_Name: Menu Runes
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1083828882
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1083828881}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 980002959}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1083828883
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1083828881}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbec2679a89a2514db6ca02fdf0e34cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.RuneBoard
+  island: {fileID: 270959109}
+  grabGuard: {fileID: 270959111}
+  hudMaterial: {fileID: 2100000, guid: 0656b6c4f92798e49a14cf09a2c6800e, type: 2}
+  offset: {x: 0, y: 0.120000005, z: 0.02}
+  fontSize: 0.11
+  maxDrift: 15
+  driftSpeed: 1.5
+  maxTilt: 40
+  pressDepth: 0.008
+  holdSeconds: 2
 --- !u!1 &1127440539
 GameObject:
   m_ObjectHideFlags: 0
@@ -4270,6 +4436,67 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1916101686
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1916101687}
+  - component: {fileID: 1916101688}
+  m_Layer: 0
+  m_Name: Settings
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1916101687
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1916101686}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 259397459}
+  m_Father: {fileID: 270959110}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1916101688
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1916101686}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91c8e9256f8454b4685747b1a7ecb50e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.SettingsBoard
+  runes: {fileID: 259397460}
+  placer: {fileID: 374318555}
+  credits: 'Pocket Isle
+
+    by Mugesh
+
+
+    Built with the Meta XR SDK
+
+    and
+    Unity
+
+
+    Font: Liberation Sans (SIL Open Font License)'
+  creditLines: 7
+  creditSeconds: 2.2
 --- !u!1 &1954810186
 GameObject:
   m_ObjectHideFlags: 0

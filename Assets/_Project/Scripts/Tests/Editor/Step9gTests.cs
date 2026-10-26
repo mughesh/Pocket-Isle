@@ -50,6 +50,54 @@ namespace Diorama.Tests
         }
 
         [Test]
+        public void Settings_PersistInPlayerPrefs_UnderTheBusNames()
+        {
+            int music = PlayerPrefs.GetInt(VolumeSettings.Music, -1);
+            var hand = GameSettings.DominantHand;
+            bool fewer = GameSettings.FewerHints;
+            try
+            {
+                VolumeSettings.SetLevel(VolumeSettings.Music, 1);
+                Assert.AreEqual(1, PlayerPrefs.GetInt("Music"), "saved under the bus name");
+                Assert.AreEqual(0.25f, VolumeSettings.Volume(VolumeSettings.Music), 1e-4f);
+                VolumeSettings.SetLevel(VolumeSettings.Music, 9);
+                Assert.AreEqual(VolumeSettings.MaxLevel, VolumeSettings.Level(VolumeSettings.Music), "clamped");
+                GameSettings.FewerHints = true;
+                Assert.IsTrue(GameSettings.FewerHints);
+                GameSettings.DominantHand = GameSettings.Hand.Left;
+                Assert.IsTrue(DominantHand.Left && DominantHand.Known, "Left overrides the first touch");
+                GameSettings.DominantHand = GameSettings.Hand.Right;
+                Assert.IsFalse(DominantHand.Left);
+            }
+            finally
+            {
+                if (music < 0) PlayerPrefs.DeleteKey(VolumeSettings.Music);
+                else PlayerPrefs.SetInt(VolumeSettings.Music, music);
+                GameSettings.DominantHand = hand;
+                GameSettings.FewerHints = fewer;
+            }
+        }
+
+        [Test]
+        public void Settings_AutoHand_KeepsTheFirstTouchRule()
+        {
+            var hand = GameSettings.DominantHand;
+            try
+            {
+                GameSettings.DominantHand = GameSettings.Hand.Auto;
+                DominantHand.Restore("left");
+                Assert.IsTrue(DominantHand.Left);
+                DominantHand.Restore(null);
+                Assert.IsFalse(DominantHand.Known);
+            }
+            finally
+            {
+                GameSettings.DominantHand = hand;
+                DominantHand.Restore(null);
+            }
+        }
+
+        [Test]
         public void Logo_IsBaked_UnderTheBudget()
         {
             var logo = AssetDatabase.LoadAssetAtPath<PropRecipe>("Assets/_Project/Data/Props/TitleLogo.asset");

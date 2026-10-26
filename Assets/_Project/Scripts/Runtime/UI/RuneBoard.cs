@@ -189,7 +189,7 @@ namespace Diorama
             r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             r.sortingOrder = -1;
             _block.Clear();
-            _block.SetColor(BackColorId, new Color(0.16f, 0.17f, 0.16f, 0.9f));
+            _block.SetColor(BackColorId, new Color(0.19f, 0.2f, 0.19f, 0.97f));
             _block.SetColor(BorderColorId, new Color(0.62f, 0.6f, 0.52f, 0.85f));
             _block.SetFloat(FillId, 0f);
             _block.SetFloat(AspectId, size.x / Mathf.Max(1e-4f, size.y));

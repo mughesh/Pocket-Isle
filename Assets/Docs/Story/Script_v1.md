@@ -131,6 +131,8 @@ every ~10 s while it waits. Shard, move and starter use the Opening lines above;
   - Spirit: Your Islings learn from every battle. Watch them grow!
 - `steambara.first` · once · → wildPad (step 9f: the first wild Steambara)
   - Spirit: A water Isling, visiting the springs! Water beats fire...
+- `menu.first` · once (step 9g: a few calm seconds after the lessons end, never in a battle)
+  - Spirit: Palm up and pinch with your left hand any time to pause.
 
 ## Cinderwood (fire)
 - `cw.arrive` · once

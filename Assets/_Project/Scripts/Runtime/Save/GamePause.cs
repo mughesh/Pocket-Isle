@@ -8,12 +8,13 @@ namespace Diorama
     /// (focus lost) freezes the game with Time.timeScale 0: battle timers (dazed window, auto send-out), walking,
     /// animations and dialogue all stop, and continue where they were on resume. Hand tracking keeps running.
     /// Editor: focus changes are ignored (the Editor loses focus all the time); P toggles the pause for testing.
+    /// Step 9g: the game menu pauses too (<see cref="SetMenu"/>); runes and menus run on unscaled time.
     /// </summary>
     public class GamePause : MonoBehaviour
     {
         public static bool IsPaused { get; private set; }
 
-        bool _app, _focus, _key;
+        bool _app, _focus, _key, _menu;
 
         void OnApplicationPause(bool paused)
         {
@@ -37,6 +38,13 @@ namespace Diorama
             Apply("P key");
         }
 
+        /// <summary>The game menu is open (step 9g).</summary>
+        public void SetMenu(bool open)
+        {
+            _menu = open;
+            Apply("menu");
+        }
+
         /// <summary>Pauses or resumes from code (testing, the Claude bridge).</summary>
         public void SetPaused(bool paused)
         {
@@ -46,7 +54,7 @@ namespace Diorama
 
         void Apply(string why)
         {
-            bool paused = _app || _focus || _key;
+            bool paused = _app || _focus || _key || _menu;
             if (paused == IsPaused) return;
             IsPaused = paused;
             Time.timeScale = paused ? 0f : 1f;

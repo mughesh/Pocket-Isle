@@ -618,6 +618,16 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: A water Isling, visiting the springs! Water beats fire...
+  - id: menu.first
+    once: 1
+    priority: 1
+    note: 'step 9g: a few calm seconds after the lessons end, never in a battle'
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Palm up and pinch with your left hand any time to pause.
   - id: cw.arrive
     once: 1
     priority: 2

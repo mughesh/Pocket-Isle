@@ -398,6 +398,8 @@ namespace Diorama
         void TryIdleHint()
         {
             if (script == null || script.idleHints.Count == 0 || _current.HasValue || _queue.Count > 0) return;
+            // Step 9g: Settings > Spirit hints > Fewer.
+            if (GameSettings.FewerHints) return;
             if (Time.time - _lastInput < idleSeconds || Time.time - _lastIdle < idleGap) return;
             if (encounters != null && encounters.InBattle || explorer != null && explorer.Locked || Onboarding.Running) return;
             _lastIdle = Time.time;

@@ -15,6 +15,24 @@ namespace Diorama.EditorTools
 
         public static void Runes() => Debug.Log($"[Step9gDebug] Runes:\n{RuneBoard.DebugList()}");
 
+        /// <summary>Settings and the last played slot back to defaults (Editor PlayerPrefs after a test).</summary>
+        public static void ResetPrefs()
+        {
+            foreach (var k in new[] { "pocketisle.hand", "pocketisle.fewerHints", "pocketisle.lastSlot", VolumeSettings.Music, VolumeSettings.Sfx, VolumeSettings.Ambience })
+                PlayerPrefs.DeleteKey(k);
+            PlayerPrefs.Save();
+            Debug.Log("[Step9gDebug] Prefs reset (settings, last slot).");
+        }
+
+        /// <summary>Like the left-hand menu gesture.</summary>
+        public static void Menu()
+        {
+            var m = Object.FindFirstObjectByType<GameMenu>();
+            if (m == null) return;
+            if (GameMenu.IsOpen) m.Close("bridge");
+            else m.TryOpen();
+        }
+
         public static void State()
         {
             var e = Object.FindFirstObjectByType<GestureTestPiece>();
