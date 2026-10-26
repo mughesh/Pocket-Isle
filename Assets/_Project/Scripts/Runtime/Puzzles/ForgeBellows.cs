@@ -247,6 +247,7 @@ namespace Diorama
         {
             _opening = true;
             Debug.Log("[ForgeBellows] All braziers lit: the forge door opens.");
+            if (explorer != null) explorer.Cheer();
             if (!string.IsNullOrEmpty(openLine)) Dialogue.Say(openLine);
             float from = _doorHeat;
             for (float t = 0f; t < glowSeconds; t += Time.deltaTime)

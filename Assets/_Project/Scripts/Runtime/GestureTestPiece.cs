@@ -15,7 +15,8 @@ namespace Diorama
     }
 
     /// <summary>
-    /// Placeholder explorer: a cube that walks the world map tile by tile, shown through the island window, plus a
+    /// The explorer (step 9f: the teal-hooded kid, <see cref="explorerPrefab"/> with <see cref="ExplorerView"/>; the old
+    /// placeholder cube only when it is missing): walks the world map tile by tile, shown through the island window, plus a
     /// small world-space debug label beside the island (last gesture, tile, zoom, placement; see <see cref="DebugLabels"/>).
     /// <see cref="GoTo"/> walks an A* path to a tile (<see cref="ExplorerPath"/>; used by TileTouch and TileGaze); any
     /// swipe or tap cancels it.
@@ -36,6 +37,8 @@ namespace Diorama
         public IslandPlacer placer;
         public ThumbHoldProbe probe;
         public Material cubeMaterial;
+        [Tooltip("Step 9f: the baked explorer (Prefabs/Creatures/Explorer, with ExplorerView). Missing = the old cube and an error.")]
+        public CreatureView explorerPrefab;
 
         [Tooltip("Can be switched live in Play mode.")]
         public MoveMode moveMode = MoveMode.AutoWalk;
@@ -87,6 +90,8 @@ namespace Diorama
         public event Action Stopped;
 
         Transform _cube;
+        ExplorerView _view;
+        float _yaw = 180f;
         TextMeshPro _label;
         Vector2Int _tile, _fromTile;
         Vector2Int _heading;
@@ -152,12 +157,24 @@ namespace Diorama
             if (!Map.CanWalk(_tile))
                 Debug.LogWarning($"[GestureTestPiece] Start tile c{_tile.x} r{_tile.y} is '{Map.At(_tile.y, _tile.x)}', not walkable.");
 
-            var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            go.name = "Gesture Test Cube";
-            Destroy(go.GetComponent<Collider>());
-            if (cubeMaterial != null) go.GetComponent<MeshRenderer>().sharedMaterial = cubeMaterial;
-            _cube = go.transform;
-            _cube.SetParent(island.transform, false);
+            if (explorerPrefab != null)
+            {
+                var view = Instantiate(explorerPrefab, island.transform, false);
+                view.name = "Explorer";
+                _view = view.GetComponent<ExplorerView>();
+                if (_view == null) _view = view.gameObject.AddComponent<ExplorerView>();
+                _cube = view.transform;
+            }
+            else
+            {
+                Debug.LogError("[GestureTestPiece] No explorer prefab assigned (run Step9fSetup.Explorer); showing the placeholder cube.", this);
+                var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                go.name = "Gesture Test Cube";
+                Destroy(go.GetComponent<Collider>());
+                if (cubeMaterial != null) go.GetComponent<MeshRenderer>().sharedMaterial = cubeMaterial;
+                _cube = go.transform;
+                _cube.SetParent(island.transform, false);
+            }
 
             var labelGo = new GameObject("Gesture Label");
             labelGo.transform.SetParent(island.transform, false);
@@ -307,7 +324,15 @@ namespace Diorama
         /// <summary>A little hop on the spot (waking up in the opening).</summary>
         public void Hop()
         {
-            if (_hopStart < 0f) _hopStart = Time.time;
+            if (_view != null) _view.Hop();
+            else if (_hopStart < 0f) _hopStart = Time.time;
+        }
+
+        /// <summary>Arms up and a hop (step 9f: a puzzle solved).</summary>
+        public void Cheer()
+        {
+            if (_view != null) _view.Cheer();
+            else Hop();
         }
 
         void TapWhileStanding()
@@ -318,7 +343,7 @@ namespace Diorama
                 _last += " - fishing";
                 OnFishTap?.Invoke(front);
             }
-            else if (_hopStart < 0f) _hopStart = Time.time;
+            else Hop();
         }
 
         void ToggleZoom()
@@ -443,8 +468,22 @@ namespace Diorama
                 if (u >= 1f) _hopStart = -1f;
                 else hop = hopHeight * 4f * u * (1f - u);
             }
-            _cube.localPosition = island.TileToLocal(p, Map.capHeight + cubeSize * 0.5f + hop);
-            _cube.localScale = Vector3.one * (cubeSize * island.Zoom * Mathf.Max(0.001f, Shrink));
+            if (_view == null)
+            {
+                _cube.localPosition = island.TileToLocal(p, Map.capHeight + cubeSize * 0.5f + hop);
+                _cube.localScale = Vector3.one * (cubeSize * island.Zoom * Mathf.Max(0.001f, Shrink));
+                return;
+            }
+            // The kid: feet on the cap, bouncing per tile, facing where it walks (map columns run toward -X, rows +Z).
+            bool moving = _stepT < 1f;
+            _view.Moving = moving;
+            _view.Running = _running;
+            _view.StepPhase = moving ? _stepT : 0f;
+            float yaw = Mathf.Atan2(-_facing.x, _facing.y) * Mathf.Rad2Deg;
+            _yaw = Mathf.LerpAngle(_yaw, yaw, 1f - Mathf.Exp(-Time.deltaTime * 14f));
+            _cube.localPosition = island.TileToLocal(p, Map.capHeight + _view.Lift);
+            _cube.localRotation = Quaternion.Euler(0f, _yaw + _view.Glance, 0f) * Quaternion.Euler(_view.Lean, 0f, 0f);
+            _cube.localScale = Vector3.one * (island.Zoom * Mathf.Max(0.001f, Shrink));
         }
 
         void PositionLabel()

@@ -248,7 +248,7 @@ namespace Diorama.EditorTools
             bool wasClean = !scene.isDirty;
             var hud = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Battle/Hud.mat");
             var quad = BattleHud.VerticalQuad();
-            var card = new PodCard(hud, quad);
+            var card = new PodCard(hud, quad, AssetDatabase.LoadAssetAtPath<ProgressionConfig>("Assets/_Project/Data/Battle/Progression.asset"));
             foreach (var guid in AssetDatabase.FindAssets("t:IslingSpecies"))
             {
                 var species = AssetDatabase.LoadAssetAtPath<IslingSpecies>(AssetDatabase.GUIDToAssetPath(guid));

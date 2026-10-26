@@ -6,7 +6,8 @@ namespace Diorama
     /// <summary>
     /// Small stats card in the dialogue bubble style (name, level, element, HP bar) shown above a pod for a few seconds.
     /// Fixed real-world size, faces the head, follows its pod (an anchor function). Built at runtime by <see cref="PodRack"/>.
-    /// Rows, top to bottom: name (auto-sized to fit), "Lv 5 · Fire", HP bar, "HP 38/38". A name too long even at the
+    /// Rows, top to bottom: name (auto-sized to fit), "Lv 5 · Fire", HP bar, the gold XP bar with the next level at its
+    /// end ("→ 6", step 9f), "HP 38/38". A name too long even at the
     /// smallest size widens the panel (up to <see cref="MaxWiden"/>) instead of clipping.
     /// </summary>
     public class PodCard
@@ -22,13 +23,16 @@ namespace Diorama
         static readonly Color Back = new Color(1f, 0.965f, 0.89f, 0.97f);
         static readonly Color Ink = new Color(0.23f, 0.16f, 0.12f, 1f);
         static readonly Color Green = new Color(0.44f, 0.82f, 0.42f), Yellow = new Color(0.95f, 0.79f, 0.3f), Red = new Color(0.94f, 0.36f, 0.29f);
+        static readonly Color Gold = new Color(1f, 0.8f, 0.3f);
 
-        const float Width = 0.085f, Height = 0.05f, BarWidth = 0.068f, BarHeight = 0.0075f;
+        const float Width = 0.085f, Height = 0.058f, BarWidth = 0.068f, BarHeight = 0.0075f;
+        const float XpWidth = BarWidth - 0.013f, XpHeight = 0.004f, XpY = -0.0115f;
         const float Pad = 0.006f, NameSize = 0.12f, MinNameShare = 0.6f, MaxWiden = 1.4f, SmallSize = 0.075f;
 
         readonly Transform _root;
-        readonly MeshRenderer _panel, _bar;
-        readonly TextMeshPro _name, _info, _hp;
+        readonly MeshRenderer _panel, _bar, _xp;
+        readonly TextMeshPro _name, _info, _hp, _next;
+        readonly ProgressionConfig _progression;
         readonly MaterialPropertyBlock _block = new MaterialPropertyBlock();
         float _until, _appear;
         System.Func<Vector3?> _anchor;
@@ -39,15 +43,20 @@ namespace Diorama
         public IslingInstance Showing { get; private set; }
         public bool Visible => _root.gameObject.activeSelf;
 
-        public PodCard(Material hud, Mesh quad)
+        public PodCard(Material hud, Mesh quad, ProgressionConfig progression)
         {
+            _progression = progression;
             _root = new GameObject("Pod Card").transform;
             _panel = Quad("Panel", hud, quad, new Vector3(Width, Height, 1f), Vector3.zero, 0);
             SetPanelWidth(Width);
-            _bar = Quad("HP Bar", hud, quad, new Vector3(BarWidth, BarHeight, 1f), new Vector3(0f, -0.0065f, -0.0005f), 1);
-            _name = Text("Name", NameSize, new Vector3(0f, 0.0135f, -0.001f), 0.014f);
-            _info = Text("Info", SmallSize, new Vector3(0f, 0.0028f, -0.001f), 0.008f);
-            _hp = Text("HP", SmallSize, new Vector3(0f, -0.0168f, -0.001f), 0.008f);
+            _bar = Quad("HP Bar", hud, quad, new Vector3(BarWidth, BarHeight, 1f), new Vector3(0f, -0.0035f, -0.0005f), 1);
+            _xp = Quad("XP Bar", hud, quad, new Vector3(XpWidth, XpHeight, 1f), new Vector3(-(BarWidth - XpWidth) * 0.5f, XpY, -0.0005f), 1);
+            _name = Text("Name", NameSize, new Vector3(0f, 0.0165f, -0.001f), 0.014f);
+            _info = Text("Info", SmallSize, new Vector3(0f, 0.0058f, -0.001f), 0.008f);
+            _hp = Text("HP", SmallSize, new Vector3(0f, -0.0205f, -0.001f), 0.008f);
+            _next = Text("Next", SmallSize * 0.85f, new Vector3(XpWidth * 0.5f + 0.002f, XpY, -0.001f), 0.008f);
+            _next.alignment = TextAlignmentOptions.Center;
+            _next.rectTransform.sizeDelta = new Vector2(BarWidth - XpWidth + 0.002f, 0.008f);
             _root.gameObject.SetActive(false);
         }
 
@@ -142,6 +151,18 @@ namespace Diorama
             _block.SetFloat(AspectId, BarWidth / BarHeight);
             _bar.SetPropertyBlock(_block);
             _hp.text = $"HP {c.currentHp}/{c.MaxHp}";
+            bool xp = _progression != null;
+            _xp.gameObject.SetActive(xp);
+            _next.gameObject.SetActive(xp);
+            if (xp)
+            {
+                bool cap = c.level >= _progression.levelCap;
+                _block.SetFloat(FillId, _progression.XpShare(c));
+                _block.SetColor(FillColorId, Gold);
+                _block.SetFloat(AspectId, XpWidth / XpHeight);
+                _xp.SetPropertyBlock(_block);
+                _next.text = cap ? "max" : $"→ {c.level + 1}";
+            }
             Place();
         }
 

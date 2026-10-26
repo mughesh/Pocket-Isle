@@ -769,10 +769,13 @@ namespace Diorama
         {
             var a = _player;
             if (a == null || _playerBar == null || c == null) yield break;
-            hud.PopText(a.LocalTop + Vector3.up * 0.045f, $"+{amount} XP", Gold, 1f, 1.4f);
+            // Step 9f: a big "+34 XP", the XP bar at twice its size filling over about a second, a banner per level.
+            hud.PopText(a.LocalTop + Vector3.up * 0.05f, $"+{amount} XP", Gold, 1.9f, 1.8f);
             float share = startShare;
             int hp = c.currentHp - SumHp(ups);
-            float fill = ups.Count > 0 ? 0.4f : 0.6f;
+            hud.SetXp(_playerBar, share);
+            yield return Tween(0.2f, p => hud.SetXpScale(_playerBar, Mathf.Lerp(1f, XpBarLarge, EaseInOut(p))));
+            float fill = Mathf.Max(0.35f, 1f / (ups.Count + 1));
             for (int i = 0; i < ups.Count; i++)
             {
                 float from = share;
@@ -789,8 +792,16 @@ namespace Diorama
             float to = progression != null ? progression.XpShare(c) : 1f;
             float start = share;
             yield return Tween(fill, p => hud.SetXp(_playerBar, Mathf.Lerp(start, to, EaseInOut(p))));
-            yield return Wait(ups.Count > 0 ? 0.4f : 0.3f);
+            yield return Wait(ups.Count > 0 ? 0.6f : 0.5f);
+            yield return Tween(0.2f, p => hud.SetXpScale(_playerBar, Mathf.Lerp(XpBarLarge, 1f, EaseInOut(p))));
         }
+
+        /// <summary>Step 9f: how much bigger the pad's XP bar gets while the XP after a win fills.</summary>
+        const float XpBarLarge = 2f;
+
+        /// <summary>Step 9f: "+34" in gold rising from a world point (a benched Isling's pod on the rim).</summary>
+        public void PopXpAt(Vector3 world, int amount) =>
+            hud.PopText(hud.transform.InverseTransformPoint(world) + Vector3.up * 0.012f, $"+{amount}", Gold, 1.2f, 1.8f);
 
         static int SumHp(IReadOnlyList<LevelUp> ups)
         {
@@ -806,7 +817,7 @@ namespace Diorama
             var feet = island.TileToLocal(a.tile, Cap + a.baseLift + 0.002f);
             fx.Burst(island.transform.TransformPoint(feet), 22, Gold, World(0.045f), 0.6f, World(0.004f), Vector3.up * World(0.03f));
             StartCoroutine(GoldRing(a));
-            hud.PopText(a.LocalTop + Vector3.up * 0.03f, $"Lv {level}!", Gold, 1.3f, 1.2f);
+            hud.PopText(a.LocalTop + Vector3.up * 0.03f, $"Lv {level}!", Gold, 2.2f, 1.6f);
             a.View.Hop();
         }
 

@@ -292,8 +292,8 @@ namespace Diorama
                     Add("All Lv 5", () => state.AllLevels(5));
                     Add("All Lv 10", () => state.AllLevels(10));
                     Add("All Lv 15", () => state.AllLevels(15));
-                    Add("Team of 3, Lv 9", () => state.PresetTeam(9));
-                    Add("Team of 3, Lv 11", () => state.PresetTeam(11));
+                    Add("Team of 3, Lv 8", () => state.PresetTeam(8));
+                    Add("Team of 3, Lv 10", () => state.PresetTeam(10));
                     Add("Clear storage", () => state.ClearStorage(), null, true);
                     Add(() => $"One-hit KO: {OnOff(DevCheats.OneHitKo)}", () => DevCheats.OneHitKo = !DevCheats.OneHitKo, () => DevCheats.OneHitKo);
                     Add(() => $"Invincible: {OnOff(DevCheats.Invincible)}", () => DevCheats.Invincible = !DevCheats.Invincible, () => DevCheats.Invincible);

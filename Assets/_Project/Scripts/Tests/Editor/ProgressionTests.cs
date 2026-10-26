@@ -41,8 +41,9 @@ namespace Diorama.Tests
             Assert.AreEqual(40, _config.XpToNext(5));
             Assert.AreEqual(16, _config.XpToNext(1));
             Assert.AreEqual(184, _config.XpToNext(29));
-            Assert.AreEqual(25, _config.Reward(5, false));
-            Assert.AreEqual(50, _config.Reward(5, true));
+            // (5 + 4 x 5) x 3 (step 9f)
+            Assert.AreEqual(75, _config.Reward(5, false));
+            Assert.AreEqual(150, _config.Reward(5, true));
         }
 
         [Test]

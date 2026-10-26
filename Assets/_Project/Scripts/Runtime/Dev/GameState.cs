@@ -35,8 +35,8 @@ namespace Diorama
         public Vector2Int hallEntry = new Vector2Int(4, 8);
         [Tooltip("Lesson the tutorial restarts at (the first one after the opening).")]
         public string firstWalkLesson = "walk";
-        [Tooltip("The fire commons a preset team gets after the lead (species asset names).")]
-        public string[] presetCommons = { "Toastling", "Kettlewing" };
+        [Tooltip("Who a preset team gets after the lead (species asset names). Step 9f: Steambara (the Keeper is tuned for a Water Isling in the party) and a fire common.")]
+        public string[] presetCommons = { "Steambara", "Kettlewing" };
 
         public const string LogId = "cinder.log", BellowsId = "cinder.bellows", KeeperId = KeeperHall.KeeperId, ShardId = ShardHolder.FireId;
 
@@ -198,7 +198,7 @@ namespace Diorama
         }
 
         /// <summary>
-        /// A team of three at <paramref name="level"/>: the first pod's species (the starter) and two fire commons; the
+        /// A team of three at <paramref name="level"/>: the first pod's species (the starter), Steambara and a fire common; the
         /// other pod creatures move to storage.
         /// </summary>
         public void PresetTeam(int level)

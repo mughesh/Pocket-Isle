@@ -24,7 +24,7 @@ namespace Diorama
 
         readonly Transform _root;
         readonly MeshRenderer _panel, _hp, _xp;
-        readonly TextMeshPro _title, _hpText, _moves, _stats;
+        readonly TextMeshPro _title, _hpText, _moves, _stats, _next;
         readonly MaterialPropertyBlock _block = new MaterialPropertyBlock();
         float _appear;
         bool _shown;
@@ -38,7 +38,10 @@ namespace Diorama
             _root.SetParent(parent, false);
             _panel = Quad("Panel", hud, quad, new Vector2(Width, Height), Vector3.forward * 0.001f);
             _hp = Quad("HP", hud, quad, new Vector2(Width - 2f * Pad - 0.03f, 0.008f), new Vector3(-0.015f, 0.015f, 0f));
-            _xp = Quad("XP", hud, quad, new Vector2(Width - 2f * Pad, 0.004f), new Vector3(0f, 0.004f, 0f));
+            // Step 9f: the next level at the XP bar's end ("→ 7").
+            _xp = Quad("XP", hud, quad, new Vector2(Width - 2f * Pad - 0.018f, 0.004f), new Vector3(-0.009f, 0.004f, 0f));
+            _next = Text("Next", 0.06f, new Vector3(Width * 0.5f - Pad - 0.008f, 0.004f, 0f));
+            _next.rectTransform.sizeDelta = new Vector2(0.02f, 0.01f);
             _title = Text("Title", 0.1f, new Vector3(0f, Height * 0.5f - 0.016f, 0f));
             _hpText = Text("HP Text", 0.065f, new Vector3(Width * 0.5f - Pad - 0.014f, 0.015f, 0f));
             _hpText.alignment = TextAlignmentOptions.Right;
@@ -106,6 +109,7 @@ namespace Diorama
             Paint(_hp, new Color(0.15f, 0.15f, 0.14f, 1f), new Color(0f, 0f, 0f, 0.6f), _hp.transform.localScale.x / _hp.transform.localScale.y, hp,
                 hp > 0.5f ? Green : hp > 0.25f ? Yellow : Red, 0.5f, 0.12f);
             float xp = progression != null ? progression.XpShare(c) : 0f;
+            _next.text = progression != null && c.level >= progression.levelCap ? "max" : $"→ {c.level + 1}";
             Paint(_xp, new Color(0.15f, 0.15f, 0.14f, 1f), new Color(0f, 0f, 0f, 0.5f), _xp.transform.localScale.x / _xp.transform.localScale.y, xp, Gold, 0.5f, 0.12f);
         }
 

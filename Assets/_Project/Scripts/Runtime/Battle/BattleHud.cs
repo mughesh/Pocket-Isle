@@ -117,6 +117,19 @@ namespace Diorama
             bar.xpQuad.SetPropertyBlock(_block);
         }
 
+        /// <summary>
+        /// Step 9f: grows the XP bar under an HP bar to <paramref name="scale"/> times its size (2 while the XP after a win
+        /// fills, 1 = normal), keeping its top edge under the HP bar.
+        /// </summary>
+        public void SetXpScale(Bar bar, float scale)
+        {
+            if (bar == null) return;
+            if (bar.xpQuad == null) SetXp(bar, Mathf.Max(0f, bar.xp));
+            float h = barSize.y * xpBarHeight * scale;
+            bar.xpQuad.transform.localScale = new Vector3(barSize.x * scale, h, 1f);
+            bar.xpQuad.transform.localPosition = new Vector3(0f, -(barSize.y + h) * 0.5f - 0.0012f, 0f);
+        }
+
         /// <summary>New level and max HP (a level-up or an evolution): the label changes, the HP bar rescales.</summary>
         public void SetLevel(Bar bar, string name, int level, int hp, int max)
         {

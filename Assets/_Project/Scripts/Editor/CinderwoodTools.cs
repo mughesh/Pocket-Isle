@@ -161,8 +161,9 @@ namespace Diorama.EditorTools
                     "forest" => Table("Encounters_Forest", 3, 5, ("Toastling", 45f, false), ("Waxle", 22f, false), ("Kettlewing", 8f, false), ("Coalbeetle", 15f, false), ("Mapadillo", 10f, false)),
                     "field" => Table("Encounters_Field", 4, 6, ("Toastling", 30f, false), ("Kettlewing", 20f, false), ("Waxle", 12f, false), ("Coalbeetle", 17f, false), ("Mapadillo", 16f, false), ("Embercrane", 5f, true)),
                     "glade" => Table("Encounters_Glade", 5, 7, ("Waxle", 50f, false), ("Toastling", 20f, false), ("Cindercap", 30f, false)),
-                    "grove" => Table("Encounters_Grove", 5, 7, ("Kettlewing", 55f, false), ("Toastling", 35f, false), ("Mapadillo", 10f, false)),
-                    "springs" => Table("Encounters_Springs", 6, 8, ("Kettlewing", 65f, false), ("Waxle", 30f, false), ("Embercrane", 5f, true)),
+                    // Step 9f: Steambara, a Water visitor, soaks at the springs (~35%) and wanders into the grove (~10%).
+                    "grove" => Table("Encounters_Grove", 5, 7, ("Kettlewing", 50f, false), ("Toastling", 30f, false), ("Mapadillo", 10f, false), ("Steambara", 10f, false)),
+                    "springs" => Table("Encounters_Springs", 6, 8, ("Kettlewing", 40f, false), ("Steambara", 35f, false), ("Waxle", 20f, false), ("Embercrane", 5f, true)),
                     "ruins" => Table("Encounters_Ruins", 7, 9, ("Glazegolem", 25f, true), ("Toastling", 25f, false), ("Waxle", 25f, false), ("Ashmole", 25f, false)),
                     _ => null,
                 };
@@ -228,8 +229,13 @@ namespace Diorama.EditorTools
             return legend;
         }
 
+        /// <summary>Step 9f: Cinderwood's wild Islings are 2 levels up (the trail now levels you to ~8 by the temple).</summary>
+        public const int WildLevelBonus = 2;
+
         static EncounterTable Table(string name, int minLevel, int maxLevel, params (string species, float weight, bool rare)[] entries)
         {
+            minLevel += WildLevelBonus;
+            maxLevel += WildLevelBonus;
             DioramaSceneSetup.EnsureFolder(TableRoot);
             var table = Asset<EncounterTable>($"{TableRoot}/{name}.asset");
             table.habitat = Habitat.Grass;

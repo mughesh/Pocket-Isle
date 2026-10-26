@@ -20,9 +20,10 @@ namespace Diorama.EditorTools
         const string MoveRoot = "Assets/_Project/Data/Battle/Moves";
         public const string CrystalPartName = "CrownCrystal";
 
-        // Step 9e balance (KeeperSim): Lv 10, HP ~2.2x a normal Lv 10, a Lv 9 party of 3 wins ~65%.
+        // Step 9f balance (KeeperSim, Steambara in the party, Water leads): Lv 10; a Lv 8 party of 3 wins ~60-75% with
+        // Kilnpot or Pufflet (Pebbloop's party has two Water Islings and wins more). Was 88 / 8 / 9 (9e, no Water helper).
         public const int Level = 10;
-        public const int KeeperHp = 88, KeeperAttack = 8, KeeperDefense = 9;
+        public const int KeeperHp = 110, KeeperAttack = 10, KeeperDefense = 11;
 
         public static IslingSpecies Write()
         {

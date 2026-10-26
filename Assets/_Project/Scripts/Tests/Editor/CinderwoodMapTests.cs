@@ -38,8 +38,9 @@ namespace Diorama.Tests
                 {
                     glaze = true;
                     Assert.IsTrue(e.rare);
-                    Assert.AreEqual(7, e.minLevel);
-                    Assert.AreEqual(9, e.maxLevel);
+                    // Lv 7-9 + the step 9f wild level bonus.
+                    Assert.AreEqual(7 + CinderwoodTools.WildLevelBonus, e.minLevel);
+                    Assert.AreEqual(9 + CinderwoodTools.WildLevelBonus, e.maxLevel);
                 }
             Assert.IsTrue(glaze, "Glazegolem in the ruins table");
             Assert.AreEqual("forest", map.ZoneAt(CinderwoodTools.Tile(10, 16)));

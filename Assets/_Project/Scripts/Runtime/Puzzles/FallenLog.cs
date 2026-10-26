@@ -7,7 +7,7 @@ namespace Diorama
     /// Cinderwood's fallen log (step 9b), the scene side of a <see cref="CarryPiece"/>: the island stops drawing the
     /// map's log (the piece draws its own) and its tiles open once it's solved (saved). Lifting it shakes leaves and dust
     /// off and the explorer hops; set on a ledge: a thud, a dust puff and a quick bounce of the island's tiles, the trail
-    /// opens, the explorer cheers and the Spirit says <see cref="doneLine"/>. Dropped elsewhere: a small thud as it
+    /// opens, the explorer cheers (arms up) and the Spirit says <see cref="doneLine"/>. Dropped elsewhere: a small thud as it
     /// falls back across the gap.
     /// </summary>
     public class FallenLog : MonoBehaviour
@@ -108,7 +108,7 @@ namespace Diorama
             if (!onLedge) return;
             Map.SetPropOpen(anchor, true);
             Debug.Log($"[FallenLog] The log is on ledge {spot}: the trail is open (saved).");
-            if (explorer != null) explorer.Hop();
+            if (explorer != null) explorer.Cheer();
             if (!string.IsNullOrEmpty(doneLine)) Dialogue.Say(doneLine);
         }
 

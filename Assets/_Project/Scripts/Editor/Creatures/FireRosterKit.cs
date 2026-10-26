@@ -7,8 +7,8 @@ namespace Diorama.EditorTools
 {
     /// <summary>
     /// Step 9d: the rest of the fire roster (concepts Docs/ConceptArt/07_fire_rest and 10_fire_redraws). One method
-    /// per line writes the recipe(s), parts, species and moves; evolutions without a concept are modifiers on their base
-    /// (bigger, extra parts, own palette), like Kilngolem. Like the other kits this seeds the assets; re-running
+    /// per line writes the recipe(s), parts, species and moves; the five evolutions were modifiers on their base (bigger,
+    /// extra parts, own palette) and are now full recipes from sheet 11 (<see cref="Step9fKit"/>, step 9f). Like the other kits this seeds the assets; re-running
     /// overwrites them (same files, references survive). Needs the starter and fire kits written first.
     /// </summary>
     public static class FireRosterKit
@@ -245,6 +245,7 @@ namespace Diorama.EditorTools
 
             var hornRam = Attack("HornRam", "Horn Ram", Element.Fire, 45, 95, MoveAnimation.Lunge);
             var forgeS = FireSpecies("Forgehorn", forge, null, 0, 62, 16, 17, 8, hornRam, LoadMove("BodySlam"), LoadMove("PuffUp"));
+            Step9fKit.Forgehorn(); // step 9f: the full recipe from sheet 11 replaces the modifier
             var s = FireSpecies("Coalbeetle", beetle, forgeS, 16, 44, 12, 13, 7, hornRam, LoadMove("Tackle"), LoadMove("HunkerDown"));
             AssetDatabase.SaveAssets();
             return s;
@@ -315,6 +316,7 @@ namespace Diorama.EditorTools
 
             var roll = Attack("RollOut", "Roll Out", Element.Neutral, 40, 100, MoveAnimation.Lunge);
             var emberS = FireSpecies("Emberdillo", ember, null, 0, 64, 13, 18, 10, roll, LoadMove("KilnStomp"), LoadMove("HunkerDown"));
+            Step9fKit.Emberdillo(); // step 9f: the full recipe from sheet 11 replaces the modifier
             var s = FireSpecies("Mapadillo", dillo, emberS, 15, 46, 10, 14, 9, roll, LoadMove("EmberPuff"), LoadMove("HunkerDown"));
             AssetDatabase.SaveAssets();
             return s;
@@ -386,6 +388,7 @@ namespace Diorama.EditorTools
 
             var dig = Attack("DigStrike", "Dig Strike", Element.Neutral, 45, 90, MoveAnimation.Slam);
             var cinderS = FireSpecies("Cindermole", cinder, null, 0, 66, 16, 14, 9, dig, LoadMove("KilnStomp"), LoadMove("WarmNap"));
+            Step9fKit.Cindermole(); // step 9f: the full recipe from sheet 11 replaces the modifier
             var s = FireSpecies("Ashmole", mole, cinderS, 16, 48, 12, 11, 8, dig, LoadMove("EmberPuff"), LoadMove("WarmNap"));
             AssetDatabase.SaveAssets();
             return s;
@@ -448,6 +451,7 @@ namespace Diorama.EditorTools
 
             var spores = Attack("SporeDrift", "Spore Drift", Element.Fire, 40, 95, MoveAnimation.Shoot, true);
             var bloomS = FireSpecies("Cinderbloom", bloom, null, 0, 60, 17, 13, 11, spores, LoadMove("BodySlam"), LoadMove("PuffUp"));
+            Step9fKit.Cinderbloom(); // step 9f: the full recipe from sheet 11 replaces the modifier
             var s = FireSpecies("Cindercap", cap, bloomS, 16, 42, 13, 10, 10, spores, LoadMove("Tackle"), LoadMove("WarmNap"));
             AssetDatabase.SaveAssets();
             return s;
@@ -522,6 +526,7 @@ namespace Diorama.EditorTools
 
             var wingMove = Attack("FlameWing", "Flame Wing", Element.Fire, 50, 90, MoveAnimation.Lunge);
             var pyreS = FireSpecies("Pyrecrane", pyre, null, 0, 68, 18, 13, 17, wingMove, LoadMove("SteamJet"), LoadMove("PuffUp"));
+            Step9fKit.Pyrecrane(); // step 9f: the full recipe from sheet 11 replaces the modifier
             var s = FireSpecies("Embercrane", crane, pyreS, 16, 50, 14, 10, 15, wingMove, LoadMove("EmberPuff"), LoadMove("PuffUp"));
             AssetDatabase.SaveAssets();
             return s;

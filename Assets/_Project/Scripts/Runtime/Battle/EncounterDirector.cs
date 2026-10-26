@@ -384,6 +384,8 @@ namespace Diorama
             runes.ShowRunOnly();
             runes.SetCaption(keeperFight != null ? keeperFight.caption ?? $"{wild.Name} blocks the way!" : rare ? $"A rare wild {wild.Name} appeared!" : $"A wild {wild.Name} appeared!");
             if (rare) Dialogue.Say("rare.first");
+            // Step 9f: the Water visitor at the hot springs gets its own hint (Water beats the fire Keeper).
+            if (keeperFight == null && wild.species != null && wild.species.name == "Steambara") Dialogue.Say("steambara.first");
             yield return new WaitForSeconds(0.6f);
 
             _activeSlot = -1;
@@ -501,8 +503,9 @@ namespace Diorama
         }
 
         /// <summary>
-        /// After a win: every creature that fought gets its XP. The one on the pad shows it (XP bar, level-ups) and, if
-        /// due, evolves there; the others evolve in their pods after the zoom-out (<see cref="GrowthDirector"/>).
+        /// After a win: every creature that fought gets its XP. The one on the pad shows it (a big "+XP", its XP bar large,
+        /// level-ups) and, if due, evolves there; the others' pods glow with "+XP" (step 9f) and they evolve in their pods
+        /// after the zoom-out (<see cref="GrowthDirector"/>).
         /// </summary>
         IEnumerator Reward(BattleSystem battle, IslingInstance wild, bool rare)
         {
@@ -511,7 +514,10 @@ namespace Diorama
             int reward = progression.Reward(wild.level, rare);
             var fighters = battle.Participants;
             var onPad = stage.Player != null ? battle.player.isling : null;
-            foreach (var c in fighters)
+            // The benched ones first (their pods light up together), the one on the pad last.
+            var order = new List<IslingInstance>(fighters);
+            if (order.Remove(onPad)) order.Add(onPad);
+            foreach (var c in order)
             {
                 int xp = Progression.ShareFor(c, reward, fighters.Count, progression);
                 if (xp <= 0) continue;
@@ -520,8 +526,17 @@ namespace Diorama
                 var ups = Progression.AddXp(c, xp, progression);
                 Debug.Log($"[EncounterDirector] {c.Name} +{xp} XP{(ups.Count > 0 ? $", Lv {was} -> {c.level}" : "")} " +
                           $"({c.xp}/{progression.XpToNext(c.level)}){(c == onPad ? "" : " (in its pod)")}.");
-                if (c != onPad) continue;
+                if (c != onPad)
+                {
+                    int slot = pods.SlotOf(c);
+                    var pod = pods.Pod(slot);
+                    if (pod == null) continue;
+                    pods.FlashXp(slot);
+                    stage.PopXpAt(pod.transform.position, xp);
+                    continue;
+                }
                 runes.SetCaption($"{c.Name} gained {xp} XP!");
+                Dialogue.Say("xp.first");
                 yield return stage.PlayXp(c, xp, before, ups);
                 if (ups.Count > 0) runes.SetCaption($"{c.Name} grew to Lv {c.level}!");
             }

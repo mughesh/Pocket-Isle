@@ -30,6 +30,8 @@ namespace Diorama
         public IslandHandle handle;
         public BattleFx fx;
         public Material hudMaterial;
+        [Tooltip("Step 9f: the XP curve, for the XP bar on the stats card.")]
+        public ProgressionConfig progression;
 
         [Header("Sockets")]
         public Mesh socketMesh;
@@ -158,6 +160,7 @@ namespace Diorama
         float _bigUntil;
         float _cradleRefillAt = -1f, _cradleIn = 1f;
         float _waveStart = -1f;
+        readonly float[] _xpFlash = new float[Party.Size];
         int _gazedEmpty = -1;
         const int EmptyId = 1000; // gaze pick id of the empty socket
         MaterialPropertyBlock _socketBlock;
@@ -174,9 +177,11 @@ namespace Diorama
                 return;
             }
             if (hudMaterial == null) Debug.LogError("[PodRack] No HUD material; stats cards won't show.", this);
+            if (progression == null) Debug.LogError("[PodRack] No progression config; the stats card shows no XP bar (Set Up MR_Main (9f)).", this);
             _socketBlock = new MaterialPropertyBlock();
+            for (int i = 0; i < _xpFlash.Length; i++) _xpFlash[i] = -10f;
             _quad = BattleHud.VerticalQuad();
-            if (hudMaterial != null) _card = new PodCard(hudMaterial, _quad);
+            if (hudMaterial != null) _card = new PodCard(hudMaterial, _quad, progression);
             Layout();
             if (handle != null) handle.GrabStarted += CloseCard;
             Dialogue.RegisterTarget("leadPod", () => PointOf(party.LeadSlot), k => PulseOf(party.LeadSlot, k), () => FocusRadius(party.LeadSlot));
@@ -368,7 +373,7 @@ namespace Diorama
                 p.IslingOut = i == ActiveSlot;
                 float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * 6f);
                 p.Glow = i == CradleSlot ? (CradlePulse ? 0.9f + 0.6f * pulse : CradleGlow ? 0.8f : 0f)
-                    : Mathf.Max(i == GlowSlot || i == SelectedSlot ? 1f : 0f, WaveGlow(i));
+                    : Mathf.Max(Mathf.Max(i == GlowSlot || i == SelectedSlot ? 1f : 0f, WaveGlow(i)), XpGlow(i));
                 if (!p.Detached && !held) p.SetGrabDiameter(i == CradleSlot ? cradleGrabSize : _partyGrab * FocusScale(i));
             }
             for (int i = 0; i < Party.Size; i++)
@@ -537,6 +542,27 @@ namespace Diorama
             yield return new WaitForSeconds(delay);
             var p = _pods[slot];
             if (p != null && fx != null) fx.Burst(p.transform.position, 8, new Color(1f, 0.75f, 0.4f), World(0.02f), 0.5f, World(0.003f), Vector3.up * World(0.02f));
+        }
+
+        /// <summary>Step 9f: a benched Isling that fought got XP: its pod glows up and fades over ~1.6 s.</summary>
+        public void FlashXp(int slot)
+        {
+            if (slot >= 0 && slot < _xpFlash.Length) _xpFlash[slot] = Time.time;
+        }
+
+        /// <summary>The party slot whose pod holds this creature, or -1.</summary>
+        public int SlotOf(IslingInstance c)
+        {
+            for (int i = 0; i < Party.Size; i++)
+                if (c != null && _pods[i] != null && _pods[i].Isling == c) return i;
+            return -1;
+        }
+
+        float XpGlow(int slot)
+        {
+            if (slot < 0 || slot >= _xpFlash.Length) return 0f;
+            float u = Time.time - _xpFlash[slot];
+            return u <= 0f || u >= 1.6f ? 0f : 1.4f * Mathf.Sin(u / 1.6f * Mathf.PI);
         }
 
         float WaveGlow(int slot)

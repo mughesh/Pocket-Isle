@@ -27,10 +27,14 @@ namespace Diorama.EditorTools
 
         public static IslingSpecies Load(string name) => AssetDatabase.LoadAssetAtPath<IslingSpecies>($"{SpeciesDir}/{name}.asset");
 
+        /// <summary>Step 9f: the Water visitor at the hot springs, in the sim's parties when it exists.</summary>
+        public const string Helper = "Steambara";
+
         public static TypeChart Chart => AssetDatabase.LoadAssetAtPath<TypeChart>("Assets/_Project/Data/Battle/TypeChart.asset");
 
         /// <summary><paramref name="fights"/> fights of a Lv <paramref name="level"/> party (the starter + two random fire commons) per starter.</summary>
-        public static Dictionary<string, Outcome> Run(IslingSpecies keeper, int keeperLevel, int level, int fights, int seed = 1)
+        /// <remarks>Step 9f: with <paramref name="helper"/>, the starter + the helper + one random fire common.</remarks>
+        public static Dictionary<string, Outcome> Run(IslingSpecies keeper, int keeperLevel, int level, int fights, int seed = 1, IslingSpecies helper = null)
         {
             var chart = Chart;
             var commons = new List<IslingSpecies>();
@@ -49,7 +53,7 @@ namespace Diorama.EditorTools
                 for (int i = 0; i < fights; i++)
                 {
                     int a = (int)(rnd.Next() * commons.Count), b = (a + 1 + (int)(rnd.Next() * (commons.Count - 1))) % commons.Count;
-                    var party = new List<IslingInstance> { new IslingInstance(starter, level), new IslingInstance(commons[a], level), new IslingInstance(commons[b], level) };
+                    var party = new List<IslingInstance> { new IslingInstance(starter, level), new IslingInstance(helper != null ? helper : commons[a], level), new IslingInstance(commons[b], level) };
                     var r = Fight(party, new IslingInstance(keeper, keeperLevel), chart, seed * 7919 + i, out int turns);
                     o.fights++;
                     o.turns += turns;
@@ -75,8 +79,17 @@ namespace Diorama.EditorTools
                     if (c != except && !c.IsFainted) return true;
                 return false;
             }
+            // Step 9f: like a player who heard "Water beats fire", the one with the shield-breaking element goes first.
+            var lead = party[0];
+            var rules = new KeeperRules();
+            foreach (var c in party)
+                if (c.Element == rules.breaksWith)
+                {
+                    lead = c;
+                    break;
+                }
             BattleSystem battle = null;
-            battle = new BattleSystem(party[0], keeper, chart, seed, false, () => Reserve(battle.player.isling), new KeeperRules());
+            battle = new BattleSystem(lead, keeper, chart, seed, false, () => Reserve(battle.player.isling), rules);
             for (turns = 0; turns < 80 && !battle.IsOver; turns++)
             {
                 var me = battle.player.isling;
@@ -147,11 +160,11 @@ namespace Diorama.EditorTools
         /// fighting and winning every battle. <paramref name="wander"/> repeats every grass tile that many times (players
         /// who poke around).
         /// </summary>
-        public static TrailEstimate Trail(int runs, float wander, int seed = 3)
+        public static TrailEstimate Trail(int runs, float wander, int seed = 3, ProgressionConfig configOverride = null, int cinderLevelBonus = 0)
         {
             var hub = AssetDatabase.LoadAssetAtPath<WorldMap>("Assets/_Project/Data/WorldMap_StillIsle.asset");
             var cinder = AssetDatabase.LoadAssetAtPath<WorldMap>("Assets/_Project/Data/WorldMap_Cinderwood.asset");
-            var config = AssetDatabase.LoadAssetAtPath<ProgressionConfig>("Assets/_Project/Data/Battle/Progression.asset");
+            var config = configOverride != null ? configOverride : AssetDatabase.LoadAssetAtPath<ProgressionConfig>("Assets/_Project/Data/Battle/Progression.asset");
             var starter = Load("Pebbloop");
             var est = new TrailEstimate();
             if (hub == null || cinder == null || config == null || starter == null) return est;
@@ -173,8 +186,8 @@ namespace Diorama.EditorTools
                 Progression.AddXp(me, config.Reward(3, false), config);
                 Progression.AddXp(me, config.Reward(3, false), config);
                 int since = 0;
-                bh += Walk(hub, hubPath, wander, me, config, rnd, ref since);
-                bc += Walk(cinder, cinderPath, wander, me, config, rnd, ref since);
+                bh += Walk(hub, hubPath, wander, me, config, rnd, ref since, 0);
+                bc += Walk(cinder, cinderPath, wander, me, config, rnd, ref since, cinderLevelBonus);
                 levels.Add(me.level);
             }
             levels.Sort();
@@ -188,7 +201,7 @@ namespace Diorama.EditorTools
             return est;
         }
 
-        static int Walk(WorldMap map, List<Vector2Int> path, float wander, IslingInstance me, ProgressionConfig config, SeededRandom rnd, ref int since)
+        static int Walk(WorldMap map, List<Vector2Int> path, float wander, IslingInstance me, ProgressionConfig config, SeededRandom rnd, ref int since, int levelBonus)
         {
             int battles = 0;
             foreach (var t in path)
@@ -202,7 +215,7 @@ namespace Diorama.EditorTools
                     var table = map.GrassTableAt(t);
                     if (table == null || !table.Roll(rnd, out var wild, out bool rare)) continue;
                     battles++;
-                    Progression.AddXp(me, config.Reward(wild.level, rare), config);
+                    Progression.AddXp(me, config.Reward(wild.level + levelBonus, rare), config);
                 }
             }
             return battles;
@@ -267,26 +280,25 @@ namespace Diorama.EditorTools
             int keeperLevel = KeeperLevel;
             var k = new IslingInstance(keeper, keeperLevel);
             log.Append($"Lv {keeperLevel}: HP {k.MaxHp} (a base-40 Lv {keeperLevel} has {BattleMath.MaxHp(40, keeperLevel)}), atk {k.Attack} def {k.Defense} spd {k.Speed}\n");
-            log.Append("| Party (Lv 9 x 3) | Fights | Win % | Avg turns | Survivors per win |\n|---|---|---|---|---|\n");
-            int fights = 0, wins = 0;
-            foreach (var kv in Run(keeper, keeperLevel, 9, 1000))
-            {
-                var o = kv.Value;
-                fights += o.fights;
-                wins += o.wins;
-                log.Append($"| {kv.Key} + 2 fire | {o.fights} | {o.WinRate:P0} | {o.turns / (float)o.fights:0.0} | {(o.wins > 0 ? o.survivors / (float)o.wins : 0f):0.0} |\n");
-            }
-            log.Append($"| All | {fights} | {wins / (float)Mathf.Max(1, fights):P0} | | |\n");
-            foreach (int lv in new[] { 6, 8, 10, 12 })
-            {
-                int f = 0, w = 0;
-                foreach (var kv in Run(keeper, keeperLevel, lv, 300))
+            var helper = Load(Helper);
+            log.Append($"Parties of 3: the starter + {Helper} + one random fire common (+ {Helper}), or the starter + two fire commons (+ 2 fire).\n");
+            log.Append("| Lv | Party | Kilnpot | Pebbloop | Pufflet | All | Avg turns |\n|---|---|---|---|---|---|---|\n");
+            foreach (int lv in new[] { 6, 7, 8, 9, 10 })
+                foreach (var h in helper != null ? new[] { helper, null } : new IslingSpecies[] { null })
                 {
-                    f += kv.Value.fights;
-                    w += kv.Value.wins;
+                    var row = Run(keeper, keeperLevel, lv, lv == 8 || lv == 9 ? 1000 : 300, 1, h);
+                    int f = 0, w = 0, t = 0;
+                    log.Append($"| {lv} | {(h != null ? "+ " + Helper : "+ 2 fire")} |");
+                    foreach (var n in Starters)
+                    {
+                        var o = row.TryGetValue(n, out var x) ? x : default;
+                        f += o.fights;
+                        w += o.wins;
+                        t += o.turns;
+                        log.Append($" {o.WinRate:P0} |");
+                    }
+                    log.Append($" {w / (float)Mathf.Max(1, f):P0} | {t / (float)Mathf.Max(1, f):0.0} |\n");
                 }
-                log.Append($"  Lv {lv} party of 3: {w / (float)Mathf.Max(1, f):P0}\n");
-            }
             log.Append("\n| Trail | Tall-grass tiles | Battles | Starter level at the temple (p10 / mean / p90) |\n|---|---|---|---|\n");
             foreach (float wander in new[] { 1f, 2f, 3f })
             {
@@ -320,6 +332,47 @@ namespace Diorama.EditorTools
                 }
                 log.Append('\n');
             }
+            Object.DestroyImmediate(keeper);
+            Debug.Log(log.ToString());
+        }
+
+        /// <summary>
+        /// Step 9f sweep: the arrival level per XP multiplier (shortest trail and x2 grass), then a grid over the
+        /// Keeper's HP / attack / defense with the lowest and highest per-starter win % of a Lv 8 and a Lv 9 party with
+        /// Steambara. Targets: arrival 8-9, every starter 60-75%.
+        /// </summary>
+        public static void Sweep()
+        {
+            var log = new StringBuilder("[KeeperSim] Sweep\n| XP x | Cinderwood wild +Lv | shortest (p10 / mean / p90) | x2 grass |\n|---|---|---|---|\n");
+            var config = Object.Instantiate(AssetDatabase.LoadAssetAtPath<ProgressionConfig>("Assets/_Project/Data/Battle/Progression.asset"));
+            foreach (float m in new[] { 2.5f, 3f, 3.5f })
+                foreach (int bonus in new[] { 0, 2 })
+                {
+                    config.rewardMultiplier = m;
+                    var a = Trail(600, 1f, 3, config, bonus);
+                    var b = Trail(600, 2f, 3, config, bonus);
+                    log.Append($"| {m:0.0} | +{bonus} | {a.levelP10:0} / {a.level:0.0} / {a.levelP90:0} | {b.levelP10:0} / {b.level:0.0} / {b.levelP90:0} |\n");
+                }
+            Object.DestroyImmediate(config);
+            var keeper = Object.Instantiate(Load("Hearthstag"));
+            var helper = Load(Helper);
+            log.Append("\nKeeper Lv 10 grid, + Steambara parties (water leads), win % Kilnpot / Pebbloop / Pufflet at Lv 8 | Lv 9\n");
+            foreach (int hp in new[] { 105, 120, 135, 150 })
+                foreach (int atk in new[] { 10, 12 })
+                    foreach (int def in new[] { 9, 12, 15 })
+                    {
+                        keeper.baseStats.hp = hp;
+                        keeper.baseStats.attack = atk;
+                        keeper.baseStats.defense = def;
+                        log.Append($"hp {hp,3} atk {atk,2} def {def,2}:");
+                        foreach (int lv in new[] { 8, 9 })
+                        {
+                            var row = Run(keeper, 10, lv, 150, 1, helper);
+                            foreach (var n in Starters) log.Append($" {Mathf.RoundToInt((row.TryGetValue(n, out var o) ? o.WinRate : 0f) * 100f),3}");
+                            if (lv == 8) log.Append("  |");
+                        }
+                        log.Append('\n');
+                    }
             Object.DestroyImmediate(keeper);
             Debug.Log(log.ToString());
         }
