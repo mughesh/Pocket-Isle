@@ -215,6 +215,16 @@ namespace Diorama
             StartCoroutine(Encounter(table, habitat == Habitat.Water ? explorer.Tile + explorer.Facing : explorer.Tile));
         }
 
+        /// <summary>Testing (the Claude bridge): a grass battle on the spot with this wild Isling. False when one can't start.</summary>
+        public bool DebugEncounter(IslingInstance wild)
+        {
+            var table = GrassTableAt(explorer.Tile);
+            if (table == null) table = GrassTable;
+            if (InBattle || wild == null || table == null || party.members.Count == 0 || window.IsZoomed || SceneSwap.IsInside || SceneSwap.IsBusy) return false;
+            StartCoroutine(Encounter(table, explorer.Tile, wild));
+            return true;
+        }
+
         [ContextMenu("Test Grass Encounter")]
         void TestGrass() => StartEncounter(Habitat.Grass);
 
