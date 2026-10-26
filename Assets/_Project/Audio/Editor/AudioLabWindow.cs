@@ -11,9 +11,9 @@ namespace Diorama.Audio.EditorTools
     /// </summary>
     public class AudioLabWindow : EditorWindow
     {
-        enum Tab { Patches, Review, LoopTool }
+        enum Tab { Patches, Review, LoopTool, Ambience }
 
-        static readonly string[] TabNames = { "Patches", "Review", "Loop tool" };
+        static readonly string[] TabNames = { "Patches", "Review", "Loop tool", "Ambience" };
         const float ListWidth = 250f;
 
         Tab _tab;
@@ -101,7 +101,7 @@ namespace Diorama.Audio.EditorTools
         {
             using (new EditorGUILayout.HorizontalScope(EditorStyles.toolbar))
             {
-                _tab = (Tab)GUILayout.Toolbar((int)_tab, TabNames, EditorStyles.toolbarButton, GUILayout.Width(260));
+                _tab = (Tab)GUILayout.Toolbar((int)_tab, TabNames, EditorStyles.toolbarButton, GUILayout.Width(340));
                 GUILayout.FlexibleSpace();
                 bool auto = GUILayout.Toggle(_autoPlay, "Auto-play on slider release", EditorStyles.toolbarButton);
                 if (auto != _autoPlay)
@@ -134,6 +134,7 @@ namespace Diorama.Audio.EditorTools
                 case Tab.Patches: DrawPatches(); break;
                 case Tab.Review: DrawReview(); break;
                 case Tab.LoopTool: DrawLoopTool(); break;
+                case Tab.Ambience: AmbienceTools.DrawTab(this); break;
             }
         }
 

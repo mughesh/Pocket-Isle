@@ -29,6 +29,7 @@ namespace Diorama.Audio.EditorTools
             Battle();
             Cinderwood();
             Supporting();
+            Ambience();
             _list = null;
         }
 
@@ -568,6 +569,94 @@ namespace Diorama.Audio.EditorTools
                     Shimmer("A4", 1f, 1.6f, -5f).At(0.2f).Gain(0.3f),
                     Shimmer("D5", 1.1f, 1.6f).At(0.2f).Gain(0.25f),
                     M("Particles/Dust fall").Scat(8, 1.5f, 3f).At(0.3f).Gain(0.3f)));
+        }
+
+        // ---- P0: ambience beds (synth placeholders until the gen beds are picked) and sweeteners ----
+
+        /// <summary>3D one-shot scattered on the island by AmbienceDirector: quiet, low priority, never steals.</summary>
+        static Action<AudioCue> Sweet() => c =>
+        {
+            c.bus = AudioBus.Ambience;
+            c.spatial = true;
+            c.volume = SynthBatch1.CueVolume;
+            c.volumeJitter = 0.2f;
+            c.pitchMin = 0.96f;
+            c.pitchMax = 1.04f;
+            c.maxVoices = 3;
+            c.minInterval = 0.1f;
+            c.priority = 220;
+            c.maxDistance = 1.5f;
+        };
+
+        static void Ambience()
+        {
+            const float A = 30f;
+            Re("amb.stillisle", Ok, p => p.Loop(A, 3f,
+                    M("Wind/Breeze", 520f),
+                    M("Wind/Breeze", 1300f).Do(l =>
+                    {
+                        l.wind.leavesGain = 0.6f;
+                        l.wind.gustRate = 0.15f;
+                    }).Gain(0.35f)));
+            Re("amb.cinderwood", Ok, p => p.Loop(A, 3f,
+                    M("Wind/Breeze", 440f).Do(l => l.wind.gustDepth = 0.4f),
+                    M("Particles/Leaves", 300f).Do(l => l.particles.density = 150f).LP(4000f).Trem(0.2f, 0.6f).Gain(0.15f),
+                    M("Fire/Ember crackle").Do(l => l.fire.crackleRate = 4f).LP(3000f).Gain(0.15f)));
+            Re("amb.cinderwood.restored", Ok, p => p.Loop(A, 3f,
+                    M("Wind/Breeze", 520f),
+                    M("Fire/Campfire").Do(l => l.fire.intensity = 0.45f).Gain(0.35f),
+                    M("Particles/Leaves", 330f).Do(l => l.particles.density = 250f).LP(5000f).Gain(0.2f)));
+            Re("amb.lodge", Ok, p => p.Loop(A, 3f,
+                    M("Fire/Campfire").Do(l =>
+                    {
+                        l.fire.intensity = 0.45f;
+                        l.fire.lapFreq = 520f;
+                    }),
+                    M("Wind/Breeze", 400f).Do(l => l.wind.q = 3f).Gain(0.2f)));
+            Re("amb.pond", Ok, p => p.Loop(A, 3f,
+                    M("Bubbles/Spring (steady)").Do(l => l.bubbles.rate = 6f).Gain(0.6f),
+                    M("Wind/Breeze", 500f).Gain(0.6f)));
+            New("Ambience", "amb.forgehall", Ok, SynthBatch1.Amb(SynthBatch1.CueVolume), p => p.Loop(A, 3f,
+                    M("Fire/Campfire").Do(l =>
+                    {
+                        l.fire.intensity = 0.4f;
+                        l.fire.crackleRate = 3f;
+                        l.fire.hissGain = 0.05f;
+                        l.fire.lapGain = 1f;
+                        l.fire.lapFreq = 380f;
+                        l.fire.lapRate = 0.8f;
+                    }),
+                    M("Wind/Breeze", 420f).Do(l => l.wind.q = 3f).Gain(0.3f),
+                    M("Bubbles/Drip", 470f).Do(l =>
+                    {
+                        l.bubbles.atStart = 0;
+                        l.bubbles.rate = 0.3f;
+                        l.bubbles.decayScale = 4f;
+                    }).Env(0.2f, 1f, 1f).Gain(0.5f)));
+            New("Ambience", "amb.battle", Good, SynthBatch1.Amb(SynthBatch1.CueVolume), p => p.Loop(A, 3f,
+                    M("Wind/Breeze", 600f).Do(l => l.wind.gustDepth = 0.5f)));
+
+            New("Sweeteners", "sw.crackle", Good, Sweet(), p => p.One(0.16f,
+                    M("Fire/Ember crackle").Do(l =>
+                    {
+                        l.fire.intensity = 1f;
+                        l.fire.crackleRate = 150f;
+                        l.fire.hissGain = 0.05f;
+                        l.fire.lapGain = 0f;
+                    }).Env(0.003f, 0.12f)).Vars(4, 2f, 0.2f).Master(2f));
+            New("Sweeteners", "sw.drip", Good, Sweet(), p => p.One(0.15f, M("Bubbles/Drip", 600f).Do(l => l.bubbles.decayScale = 4f)).Vars(4, 3f));
+            New("Sweeteners", "sw.gust", Good, Sweet(), p => p.One(2.4f, M("Wind/Gust", 500f).Env(0.6f, 1.2f)).Vars(3, 2f, 0.2f));
+            New("Sweeteners", "sw.creak", Ok, Sweet(), p => p.One(0.8f, M("Friction/Wood creak", 300f).Env(0.05f, 0.5f)).Vars(3, 2f, 0.2f));
+            New("Sweeteners", "sw.pebble", Good, Sweet(), p => p.One(0.25f,
+                    Mn("Modal/Stone clack", "A6").Do(l => l.modal.exciterMs = 0.6f),
+                    M("Particles/Little rocks", 700f).At(0.04f).Gain(0.4f)).Vars(4, 3f));
+            // Organic sweeteners come from the gen batch: cue slots wait for its clips.
+            foreach (var id in new[] { "sw.bird", "sw.leaves", "sw.insect" })
+                New("Sweeteners", id, None, Sweet().And(c =>
+                {
+                    c.awaitingClips = true;
+                    c.notes = "Awaiting the gen batch (Import Gen Batch).";
+                }), null);
         }
 
         // ---- P1 ----

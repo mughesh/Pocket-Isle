@@ -4,8 +4,10 @@ namespace Diorama.Audio
     /// <summary>Every cue id as a constant: AudioService.Play2D(AudioIds.PodThrow).</summary>
     public static class AudioIds
     {
+        public const string AmbBattle = "amb.battle";
         public const string AmbCinderwood = "amb.cinderwood";
         public const string AmbCinderwoodRestored = "amb.cinderwood.restored";
+        public const string AmbForgehall = "amb.forgehall";
         public const string AmbLodge = "amb.lodge";
         public const string AmbPond = "amb.pond";
         public const string AmbStillisle = "amb.stillisle";
@@ -148,6 +150,14 @@ namespace Diorama.Audio
         public const string StepPath = "step.path";
         public const string StepStone = "step.stone";
         public const string StepWood = "step.wood";
+        public const string SwBird = "sw.bird";
+        public const string SwCrackle = "sw.crackle";
+        public const string SwCreak = "sw.creak";
+        public const string SwDrip = "sw.drip";
+        public const string SwGust = "sw.gust";
+        public const string SwInsect = "sw.insect";
+        public const string SwLeaves = "sw.leaves";
+        public const string SwPebble = "sw.pebble";
         public const string UiLesson = "ui.lesson";
         public const string UiPebble = "ui.pebble";
         public const string UiSaved = "ui.saved";

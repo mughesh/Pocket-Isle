@@ -13,8 +13,10 @@ MonoBehaviour:
   m_Name: AudioCueTable
   m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCueTable
   cues:
+  - {fileID: 11400000, guid: 0d412a20419f6eb4e9c0b91cd3cb4c14, type: 2}
   - {fileID: 11400000, guid: 9416e85b34bd04b4d9a49e9d00e46aec, type: 2}
   - {fileID: 11400000, guid: 1437a7e19652d4847a34cbf4099ef1d8, type: 2}
+  - {fileID: 11400000, guid: 52b3a3f206944d245b0ee46b0fc0479b, type: 2}
   - {fileID: 11400000, guid: a26fe394cddc3f343bb6b289649ca2cd, type: 2}
   - {fileID: 11400000, guid: 252abe3ab81401442bab2e949431a368, type: 2}
   - {fileID: 11400000, guid: 42b3a27f2d0cee34fae6b113cd8803af, type: 2}
@@ -157,6 +159,14 @@ MonoBehaviour:
   - {fileID: 11400000, guid: aa7b186e4e4166849aab028cd7821380, type: 2}
   - {fileID: 11400000, guid: a39e47d50be5ebf4697529b324c3eb9b, type: 2}
   - {fileID: 11400000, guid: bfdd6e0f13166784e96071b1590bc4fc, type: 2}
+  - {fileID: 11400000, guid: 18e58c24c21c50648933ba298f8438e7, type: 2}
+  - {fileID: 11400000, guid: 6373c4512b120ab408a442978d447466, type: 2}
+  - {fileID: 11400000, guid: a79c345ba092e854d8b14be36da57f9f, type: 2}
+  - {fileID: 11400000, guid: ac8c38a93515e6e43b7876445710fa07, type: 2}
+  - {fileID: 11400000, guid: fc3d169811dfc4a43a4db371cf99d2ca, type: 2}
+  - {fileID: 11400000, guid: 2001e95defd99c44bb6d959dbe903e7f, type: 2}
+  - {fileID: 11400000, guid: 19306c4a971d98e4986aaab57b03b0db, type: 2}
+  - {fileID: 11400000, guid: 08d24b3823ff4f84aa79516247bc1956, type: 2}
   - {fileID: 11400000, guid: 8fc4dfe95857d6644a0d78ed9ffbde78, type: 2}
   - {fileID: 11400000, guid: 185932de2fc98a24c82f7e3a86c664c1, type: 2}
   - {fileID: 11400000, guid: 4e63ee99ccef4324580e3db9e05c277a, type: 2}

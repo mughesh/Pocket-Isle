@@ -40,6 +40,14 @@ namespace Diorama.Audio.EditorTools
             Debug.Log($"[AudioLab] Remake: {made} new patches.");
         }
 
+        /// <summary>Part 5: remake (creates the bed and sweetener cues), profiles, a minute of each profile on a contact sheet.</summary>
+        public static void Ambience()
+        {
+            Remake();
+            AmbienceTools.CreateProfiles();
+            AmbienceTools.AnalyseProfiles();
+        }
+
         /// <summary>Part 2: every model preset rendered and tier-levelled into Temp/audio-analysis/Models.png (Claude reads it).</summary>
         public static void ModelGallery()
         {

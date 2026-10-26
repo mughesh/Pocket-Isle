@@ -212,3 +212,24 @@ Also new in step B:
 - `Tools > Pocket Isle > Audio > Import Gen Batch` (or **Import gen** in the Lab toolbar) copies new clips from the gen lane's manifest into `Clips/Gen/<cueId>/` and adds them to the cues next to the synth variants. Safe to re-run.
 - **Free-plan clips (`_FREE`) have no commercial licence.** `Tools > Pocket Isle > Audio > Release Check` lists them, and `ReleaseBuildGuard` (an `IPreprocessBuildWithReport`) **fails non-development builds** while any cue holds one. Development builds still go through for headset tests.
 - `.mp3` is not in Git LFS. This batch is all `.wav` (LFS). If a later batch brings `.mp3`, add `*.mp3 filter=lfs diff=lfs merge=lfs -text` to `.gitattributes` first (the audio lane doesn't edit it).
+
+## 4. Ambience (step audio-B)
+`AmbienceDirector` (runtime, created on first use) plays a 2D bed per area and scatters sweeteners as 3D one-shots on the
+island surface. Profiles: `Assets/_Project/Audio/Data/Ambience/` (StillIsle, CinderwoodFaded, CinderwoodRestored,
+ForgeHall, Lodge, Battle). Reference them from the scene / area scripts (add an `AmbienceProfile` field).
+
+| When | Call | Likely spot |
+|---|---|---|
+| Game start on the Still Isle, and back from a realm | `AmbienceDirector.SetArea(stillIsle, 2f)` | `Opening.Finish` / `ShardGates.OnTravelFinished(to)` |
+| Enter Cinderwood | `SetArea(restored ? cinderwoodRestored : cinderwoodFaded, 2f)` | `ShardGates.OnTravelFinished(to)` (pick by the realm's saved restored flag) |
+| Cinderwood restores | `SetArea(cinderwoodRestored, 4f)` (long crossfade with `restore.swell`) | `KeeperHall.Restore()` |
+| Enter / leave the Forge Hall | `SetArea(forgeHall, 1.5f)` / back to the Cinderwood one | `KeeperHall.OnSwapFinished(inside)` |
+| Lodge open / close | `SetArea(lodge, 1f)` / back | `LodgeRoom` open, `LodgeRoom.Close` |
+| Battle starts / ends | `AmbienceDirector.Duck(-6f, 0.5f, pauseSweeteners: true)` / `Duck(0f, 1f)`; for wind only use `SetArea(battle)` and restore the area after | `BattleStage` start / `OnBattleEnded` |
+| Dialogue line shows / ends | `Duck(-6f, 0.3f)` / `Duck(0f, 0.6f)` (sweeteners keep playing) | `Dialogue` show / hide |
+| Island moved or scaled | `AmbienceDirector.Bounds = new IslandBounds(playSurfaceCentreWorld, 0.35f * islandScale, 0.05f * islandScale);` | `IslandHandle.EndTransform`, `IslandPlacer.Place`, scale change (same place as `AudioService.DistanceScale`) |
+
+Until `Bounds` is set, sweeteners use a 0.35 m disc 0.5 m in front of the listener and log one warning.
+Sweetener cues: `sw.crackle`, `sw.drip`, `sw.gust`, `sw.creak`, `sw.pebble` (synth); `sw.bird`, `sw.leaves`, `sw.insect` wait
+for the gen batch (skipped until they have clips). Beds `amb.*` hold the synth placeholder and the gen bed (pick in Review).
+Audition without Play mode: **Audio Lab > Ambience tab**, pick a profile, Play (a minute, panned), Next take for another.
