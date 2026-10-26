@@ -26,6 +26,9 @@ namespace Diorama
         public Vector3 squash = Vector3.one;
         [Tooltip("Degrees it tips forward round its feet (a Keeper kneels and nods, step 9c).")]
         public float pitch;
+        [Tooltip("Trembling (step 9e, a frightened Keeper): extra map offset in tiles and roll in degrees, set every frame.")]
+        public Vector2 shake;
+        public float shakeRoll;
 
         public CreatureView View { get; private set; }
 
@@ -42,8 +45,8 @@ namespace Diorama
         public void Snap()
         {
             if (island == null || island.Content == null) return;
-            transform.localPosition = island.TileToLocal(tile + nudge, island.Content.capHeight + baseLift + lift);
-            transform.localRotation = Quaternion.Euler(0f, yaw, 0f) * Quaternion.Euler(pitch, 0f, 0f);
+            transform.localPosition = island.TileToLocal(tile + nudge + shake, island.Content.capHeight + baseLift + lift);
+            transform.localRotation = Quaternion.Euler(0f, yaw, 0f) * Quaternion.Euler(pitch, 0f, shakeRoll);
             transform.localScale = squash * (island.Zoom * Mathf.Max(0.0001f, grow));
         }
 

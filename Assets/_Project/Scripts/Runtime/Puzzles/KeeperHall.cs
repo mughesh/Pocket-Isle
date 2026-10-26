@@ -15,6 +15,9 @@ namespace Diorama
     /// outside, a restoration wave ripples out from the temple and the temple's return gate appears. Saved:
     /// <c>cinder.keeper</c> solved, the shard held (<see cref="ShardHolder.FireId"/> stage 1), the realm restored.
     /// Calmed, it rests by the burning forge; poke it for a happy snort. Run: back at the hall door; lost: the shrine.
+    /// Step 9e: frightened, it rages (<see cref="KeeperFury"/>: smoke aura, crown flames, trembling, ember eyes, snorts,
+    /// stomps); the battle opens with it rearing and stomping (the Spirit flinches back), phase 2 makes it all stronger,
+    /// and on victory the fury burns off into gold motes before it lowers its head and calms.
     /// </summary>
     public class KeeperHall : MonoBehaviour
     {
@@ -38,6 +41,10 @@ namespace Diorama
         [Tooltip("Diorama/Beacon material: the forge's flame once lit.")]
         public Material beaconMaterial;
         public PropRecipe shardRecipe;
+        [Tooltip("Diorama/Smoke material: the frightened aura (step 9e).")]
+        public Material smokeMaterial;
+        [Tooltip("Flinches back when it stomps at the start of the battle.")]
+        public LanternSpirit spirit;
 
         [Header("Hall tiles")]
         public Vector2 keeperSpot = new Vector2(4.5f, 3.6f);
@@ -73,6 +80,7 @@ namespace Diorama
         StageActor _model;
         KeeperLook _look;
         KeeperLook _battleLook;
+        KeeperFury _fury, _battleFury;
         BattleFx.Item _shell;
         Transform _flame;
         MeshRenderer _flameRenderer;
@@ -155,6 +163,18 @@ namespace Diorama
                 realmMap.SetPropOpen(templeGate, !Calmed);
             }
             if (_look != null) _look.calm = Calmed ? 1f : 0f;
+            if (_fury != null) _fury.fury = Calmed ? 0f : 1f;
+        }
+
+        KeeperFury AddFury(GameObject go)
+        {
+            var f = go.GetComponent<KeeperFury>();
+            if (f == null) f = go.AddComponent<KeeperFury>();
+            f.island = island;
+            f.fx = fx;
+            f.smokeMaterial = smokeMaterial;
+            f.beaconMaterial = beaconMaterial;
+            return f;
         }
 
         /// <summary>A save from mid-wave: once calmed, the realm is fully restored (after GameSave applied its value).</summary>
@@ -179,6 +199,9 @@ namespace Diorama
             _model.yaw = 0f;
             _look = go.AddComponent<KeeperLook>();
             _look.calm = Calmed ? 1f : 0f;
+            _fury = AddFury(go);
+            _fury.fury = Calmed ? 0f : 1f;
+            _fury.idleStomps = false;
         }
 
         void Update()
@@ -228,6 +251,9 @@ namespace Diorama
             _look.calm = Calmed ? 1f : 0f;
             _model.tile = keeperSpot;
             _model.pitch = 0f;
+            _fury.fury = Calmed ? 0f : 1f;
+            _fury.phase2 = false;
+            _fury.idleStomps = false;
             if (Calmed)
             {
                 _model.View.Daze(); // resting by its forge
@@ -260,6 +286,8 @@ namespace Diorama
                 yield return null;
             }
             _look.crownBoost = 1f;
+            _fury.fury = 1f;
+            _fury.idleStomps = true;
             if (fx != null) fx.Burst(_look.CrownWorld, 30, new Color(1f, 0.55f, 0.2f), TileWorld * 0.8f, 0.8f, TileWorld * 0.05f, Vector3.up * TileWorld * 0.6f);
             explorer.Locked = false;
             var fight = new EncounterDirector.KeeperFight
@@ -291,7 +319,12 @@ namespace Diorama
                 _battleLook = wild.GetComponent<KeeperLook>();
                 if (_battleLook == null) _battleLook = wild.gameObject.AddComponent<KeeperLook>();
                 _battleLook.calm = 0f;
+                _battleFury = AddFury(wild.gameObject);
+                _battleFury.fury = 1f;
+                _battleFury.phase2 = false;
+                _battleFury.idleStomps = false;
                 SetShell(true);
+                StartCoroutine(BattleIntro(_battleFury));
             }
             if (_shell != null && fx != null)
             {
@@ -300,6 +333,24 @@ namespace Diorama
                 _shell.transform.localScale = Vector3.one * (size / Mathf.Max(1e-4f, fx.transform.lossyScale.x));
                 _shell.SetAlpha(0.32f + 0.06f * Mathf.Sin(Time.time * 3f));
             }
+        }
+
+        /// <summary>The battle opens: it rears up and stomps, the Spirit flinches back; then it stomps now and then.</summary>
+        IEnumerator BattleIntro(KeeperFury fury)
+        {
+            yield return new WaitForSeconds(0.9f);
+            if (fury == null || _phase != Phase.Fighting) yield break;
+            fury.Stomped += OnBattleStomp;
+            fury.Stomp(26f);
+            Debug.Log("[KeeperHall] Battle intro: Hearthstag rears up and stomps.");
+            yield return new WaitForSeconds(1.2f);
+            if (fury != null) fury.idleStomps = true;
+        }
+
+        void OnBattleStomp(Vector3 feet)
+        {
+            if (_battleFury != null) _battleFury.Stomped -= OnBattleStomp;
+            if (spirit != null) spirit.Flinch(feet);
         }
 
         void SetShell(bool on)
@@ -342,6 +393,7 @@ namespace Diorama
                     break;
                 case BattleEventKind.KeeperPhase2:
                     _battleLook.crownBoost = 1.7f;
+                    if (_battleFury != null) _battleFury.phase2 = true;
                     if (!string.IsNullOrEmpty(phase2Line)) Dialogue.Say(phase2Line);
                     break;
             }
@@ -355,6 +407,8 @@ namespace Diorama
             if (_phase != Phase.Fighting) return;
             SetShell(false);
             _battleLook = null;
+            if (_battleFury != null) _battleFury.Stomped -= OnBattleStomp;
+            _battleFury = null;
             switch (result)
             {
                 case BattleResult.Won:
@@ -365,6 +419,7 @@ namespace Diorama
                     explorer.Teleport(hallEntry, new Vector2Int(0, -1));
                     Debug.Log("[KeeperHall] Ran from the Keeper: back at the hall door; it lies down again.");
                     if (_model != null) _model.View.Daze();
+                    if (_fury != null) _fury.idleStomps = false;
                     break;
                 default:
                     _phase = Phase.Idle;
@@ -385,8 +440,13 @@ namespace Diorama
             _look.calm = 0f;
             _look.SetAllCrystals(0.3f);
             explorer.Locked = true;
-            Debug.Log("[KeeperHall] Hearthstag kneels and calms.");
-            // Kneels.
+            // The fury burns off into gold motes: flames shrink, eyes blink and soften, the trembling stops.
+            _fury.phase2 = false;
+            _fury.fury = 1f;
+            Debug.Log("[KeeperHall] Hearthstag's fury burns off into gold motes.");
+            yield return _fury.BurnOff(1.8f);
+            Debug.Log("[KeeperHall] Hearthstag lowers its head and calms.");
+            // Lowers its head (kneels).
             for (float t = 0f; t < 0.6f; t += Time.deltaTime)
             {
                 _model.pitch = Mathf.SmoothStep(0f, 14f, t / 0.6f);

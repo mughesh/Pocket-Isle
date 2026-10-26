@@ -50,6 +50,64 @@ namespace Diorama.EditorTools
             g.Hide();
         }
 
+        // ---- Hearthstag's fury ----
+
+        static KeeperFury ActiveFury()
+        {
+            foreach (var f in Object.FindObjectsByType<KeeperFury>(FindObjectsSortMode.None))
+                if (f.isActiveAndEnabled) return f;
+            return null;
+        }
+
+        /// <summary>Close-up of the showing Keeper from the player's side: Logs/BattleShots/9e_fury_{name}.png.</summary>
+        public static void FuryShot(string name)
+        {
+            var f = ActiveFury();
+            var island = Find<IslandBuilder>();
+            if (f == null || island == null)
+            {
+                Debug.Log("[Step9eDebug] No Keeper showing.");
+                return;
+            }
+            var view = f.GetComponent<CreatureView>();
+            float h = view.height * f.transform.lossyScale.x;
+            var t = island.transform;
+            Vector3 c = f.transform.position + Vector3.up * (h * 0.55f);
+            var eye = c + t.rotation * new Vector3(h * 0.4f, h * 0.55f, h * 2.6f);
+            BattleDebug.Render($"Logs/BattleShots/9e_fury_{name}.png", eye, Quaternion.LookRotation(c - eye, Vector3.up));
+            Debug.Log($"[Step9eDebug] 9e_fury_{name}.png (fury {f.fury:0.00}, phase 2 {f.phase2}, stomping {f.Stomping}).");
+        }
+
+        public static void ShotMeet() => FuryShot("meet");
+        public static void ShotBattle() => FuryShot("battle");
+        public static void ShotPhase2() => FuryShot("phase2");
+        public static void ShotStomp() => FuryShot("stomp");
+        public static void ShotBurnOff() => FuryShot("burnoff");
+        public static void ShotCalm() => FuryShot("calm");
+
+        public static void Stomp()
+        {
+            var f = ActiveFury();
+            if (f != null) f.Stomp(26f);
+        }
+
+        /// <summary>The Keeper just above half HP (the next hit starts phase 2).</summary>
+        public static void KeeperToHalf()
+        {
+            var enc = Find<EncounterDirector>();
+            var b = enc != null ? enc.CurrentBattle : null;
+            if (b == null || b.keeper == null) return;
+            b.wild.isling.currentHp = Mathf.CeilToInt(b.wild.MaxHp * 0.52f);
+            Debug.Log($"[Step9eDebug] Keeper at {b.wild.Hp}/{b.wild.MaxHp}.");
+        }
+
+        /// <summary>Editor frame numbers (fps is the Editor's, not the device's).</summary>
+        public static void Stats()
+        {
+            Debug.Log($"[Step9eDebug] Stats: {1f / Mathf.Max(1e-4f, Time.smoothDeltaTime):0} fps (Editor), batches {UnityEditor.UnityStats.batches}, " +
+                      $"set-pass {UnityEditor.UnityStats.setPassCalls}, tris {UnityEditor.UnityStats.triangles / 1000f:0}k.");
+        }
+
         /// <summary>Puts the Spirit's home 5 cm below the cap top (inside the base) and reports where it ends up.</summary>
         public static void SpiritSink()
         {

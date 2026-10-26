@@ -1,12 +1,15 @@
 // Creature eye: dark sclera, iris with a vertical gradient, pupil and two highlights, painted on the front of a
 // flattened sphere. _Look (-1..1) slides iris and pupil toward the player; blinking scales the eye in code.
 // Port of eyeMat() in Docs/Reference/creature-diorama-v2.html. Colours are linear (CreatureView sets them).
+// _Glow (step 9e): rgb = an emissive tint, a = strength; the iris burns in it, the pupil glows faintly (a Keeper's
+// frightened red-ember eyes, warm amber once calmed). 0 = the normal eye.
 Shader "Diorama/Creature Eye"
 {
     Properties
     {
         _IrisColor ("Iris", Color) = (0.35, 0.2, 0.1, 1)
         _Look ("Look (xy, -1..1)", Vector) = (0, 0, 0, 0)
+        _Glow ("Glow (rgb, a = strength)", Color) = (0, 0, 0, 0)
         [HideInInspector] _WindowClip ("Island Window Clip", Float) = 0
         [HideInInspector] _WindowOrigin ("Island Window Origin", Vector) = (0, 0, 0, 0)
     }
@@ -22,6 +25,7 @@ Shader "Diorama/Creature Eye"
         CBUFFER_START(UnityPerMaterial)
             float4 _IrisColor;
             float4 _Look;
+            float4 _Glow;
             float  _WindowClip;
             float4 _WindowOrigin; // w = 1: sink with the creature root instead of the eye's own origin
         CBUFFER_END
@@ -80,6 +84,9 @@ Shader "Diorama/Creature Eye"
                 float3 iris = lerp(_IrisColor.rgb * 0.3, _IrisColor.rgb * 1.8, smoothstep(0.45, -0.65, lq.y));
                 c = lerp(c, iris, 1.0 - smoothstep(0.64, 0.69, d));
                 c = lerp(c, float3(0.002, 0.001, 0.004), 1.0 - smoothstep(0.3, 0.35, d));
+                float irisMask = 1.0 - smoothstep(0.64, 0.69, d);
+                c = lerp(c, _Glow.rgb * (1.2 + 0.8 * smoothstep(0.69, 0.2, d)), _Glow.a * irisMask);
+                c += _Glow.rgb * _Glow.a * 0.25;
                 // Highlights stay put (light from the upper left as you look at it); x is mirrored from three.js.
                 float2 hq = float2(-q.x, q.y);
                 float h1 = 1.0 - smoothstep(0.2, 0.235, length(hq - float2(-0.3, 0.36)));

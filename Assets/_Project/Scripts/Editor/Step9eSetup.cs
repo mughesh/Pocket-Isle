@@ -17,6 +17,7 @@ namespace Diorama.EditorTools
         public static void All()
         {
             var log = new StringBuilder("[Step9e] Set up:");
+            Fury(log);
             Balance(log);
             Fixes(log);
             Save(log);
@@ -45,6 +46,43 @@ namespace Diorama.EditorTools
             }
             var k = new IslingInstance(keeper, KeeperKit.Level);
             log.Append($"\n  Hearthstag Lv {KeeperKit.Level}: HP {k.MaxHp}, atk {k.Attack}, def {k.Defense}, spd {k.Speed}{(hall == null ? " (no Keeper Hall in the open scene)" : "")}");
+        }
+
+        public const string SmokeMaterialPath = "Assets/_Project/Materials/Battle/KeeperSmoke.mat";
+
+        /// <summary>B: the smoke material and the Keeper Hall's fury wiring (smoke, the Spirit to flinch).</summary>
+        public static void Fury(StringBuilder log)
+        {
+            var smoke = AssetDatabase.LoadAssetAtPath<Material>(SmokeMaterialPath);
+            if (smoke == null)
+            {
+                var shader = Shader.Find("Diorama/Smoke");
+                if (shader == null)
+                {
+                    log.Append("\n  MISSING shader Diorama/Smoke");
+                    return;
+                }
+                smoke = new Material(shader) { name = "KeeperSmoke" };
+                AssetDatabase.CreateAsset(smoke, SmokeMaterialPath);
+            }
+            var hall = Object.FindFirstObjectByType<KeeperHall>(FindObjectsInactive.Include);
+            if (hall == null)
+            {
+                log.Append("\n  Fury: NO Keeper Hall in the open scene");
+                return;
+            }
+            Undo.RecordObject(hall, "Step 9e");
+            hall.smokeMaterial = smoke;
+            hall.spirit = Object.FindFirstObjectByType<LanternSpirit>(FindObjectsInactive.Include);
+            EditorUtility.SetDirty(hall);
+            log.Append($"\n  Fury: smoke {SmokeMaterialPath}, beacon {(hall.beaconMaterial != null ? hall.beaconMaterial.name : "MISSING")}, Spirit {(hall.spirit != null ? "found" : "MISSING")}");
+        }
+
+        public static void FuryOnly()
+        {
+            var log = new StringBuilder("[Step9e] Fury:");
+            Fury(log);
+            Save(log);
         }
 
         /// <summary>Clips whose key is the pinch point (pinch grabs of the rim, pods, the shard, the log).</summary>

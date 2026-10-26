@@ -171,6 +171,7 @@ namespace Diorama
         static readonly int WindowOriginId = Shader.PropertyToID("_WindowOrigin");
         static readonly int FlashId = Shader.PropertyToID("_Flash");
         static readonly int IrisId = Shader.PropertyToID("_IrisColor");
+        static readonly int EyeGlowId = Shader.PropertyToID("_Glow");
         static readonly int LookId = Shader.PropertyToID("_Look");
         static readonly int[] PatchIds = new int[PieceStyle.MaxPatches];
         static readonly int[] PatchColorIds = new int[PieceStyle.MaxPatches];
@@ -252,6 +253,12 @@ namespace Diorama
             _breatheScale = 1f;
             ApplyStyles();
         }
+
+        /// <summary>Emissive eye tint (rgb) and strength (a), step 9e: a Keeper's glowing eyes. Clear = normal eyes.</summary>
+        [NonSerialized] public Color eyeGlow = Color.clear;
+
+        /// <summary>Blinks now.</summary>
+        public void BlinkNow() => _blinkStart = Time.time;
 
         /// <summary>White hit flash on the body (0 = off, 1 = white).</summary>
         public void SetFlash(float amount)
@@ -362,6 +369,7 @@ namespace Diorama
                 if (e == null || e.renderer == null) continue;
                 _eyeBlock.Clear();
                 _eyeBlock.SetVector(IrisId, e.iris.linear);
+                _eyeBlock.SetVector(EyeGlowId, new Vector4(eyeGlow.linear.r, eyeGlow.linear.g, eyeGlow.linear.b, eyeGlow.a));
                 _eyeBlock.SetVector(LookId, _look);
                 _eyeBlock.SetFloat(WindowClipId, _windowClip ? 1f : 0f);
                 _eyeBlock.SetVector(WindowOriginId, origin);

@@ -1,7 +1,7 @@
-// Hearth Shrine flame beacon (step 7b), additive, three modes:
+// Hearth Shrine flame beacon (step 7b), additive, four modes:
 // 0 = a soft flame column on a camera-facing quad (fades upward, flickers, slow pulse), seen from across the window;
 // 1 = a flat glow ring above the bowl whose arc fills with _Fill (the palm-hold progress);
-// 2 = a calm thin light pillar (step 9e: the gaze tile).
+// 2 = a calm thin light pillar (step 9e: the gaze tile); 3 = lava cracks spreading on a flat quad (a Keeper's stomp).
 Shader "Diorama/Beacon"
 {
     Properties
@@ -9,7 +9,7 @@ Shader "Diorama/Beacon"
         _Color ("Edge Colour", Color) = (1, 0.55, 0.2, 1)
         _Core ("Core Colour", Color) = (1, 0.9, 0.6, 1)
         _Intensity ("Intensity", Range(0, 3)) = 1
-        _Mode ("Mode (0 column, 1 ring, 2 pillar)", Float) = 0
+        _Mode ("Mode (0 column, 1 ring, 2 pillar, 3 cracks)", Float) = 0
         _Fill ("Ring Fill", Range(0, 1)) = 0
         [Enum(UnityEngine.Rendering.CompareFunction)] _ZTest ("Depth Test", Float) = 4
     }
@@ -83,6 +83,25 @@ Shader "Diorama/Beacon"
                     float pulse = 0.8 + 0.2 * sin(t * 1.6);
                     a = across * rise * licks * pulse;
                     col = lerp(_Color.rgb, _Core.rgb, saturate(across * (1.0 - y) * 1.5));
+                }
+                else if (_Mode > 2.5)
+                {
+                    // Lava cracks (step 9e, a Keeper's stomp), on a flat quad: jagged glowing lines radiate from the
+                    // middle out to _Fill (0..1), a hot core at the centre.
+                    float2 p = i.uv * 2.0 - 1.0;
+                    float r = length(p);
+                    const float n = 7.0;
+                    float k = atan2(p.y, p.x) / 6.28318 * n;
+                    float cell = floor(k + 0.5);
+                    float seed = frac(sin(cell * 12.9898 + 4.1) * 43758.5453);
+                    float wob = sin(r * 17.0 + seed * 20.0) * 0.14 + sin(r * 43.0 + seed * 7.0) * 0.05;
+                    float arc = abs(k - cell + wob) * r * 6.28318 / n;
+                    float crack = saturate(1.0 - arc / (0.045 * (1.2 - r)));
+                    float reach = _Fill * (0.55 + 0.45 * seed);
+                    crack *= (1.0 - smoothstep(reach - 0.08, reach, r)) * smoothstep(0.05, 0.18, r);
+                    float core = saturate(1.0 - r / (0.3 * _Fill + 1e-3)) * 0.6;
+                    a = max(crack, core) * (0.85 + 0.15 * sin(t * 6.0 + r * 12.0));
+                    col = lerp(_Color.rgb, _Core.rgb, saturate(crack * (1.0 - r) + core));
                 }
                 else if (_Mode > 1.5)
                 {

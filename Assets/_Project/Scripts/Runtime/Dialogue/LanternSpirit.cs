@@ -42,6 +42,26 @@ namespace Diorama
         [Tooltip("Kept out of the island's solid by this much (island-scale metres): x = beside the rim, y = feet above the cap.")]
         public Vector2 keepOut = new Vector2(0.025f, 0.012f);
 
+        /// <summary>
+        /// Flinches back from a world point (step 9e: a Keeper's stomp): a quick hop away and up that eases back
+        /// over <paramref name="seconds"/>.
+        /// </summary>
+        public void Flinch(Vector3 fromWorld, float distance = 0.035f, float seconds = 0.9f)
+        {
+            if (island == null) return;
+            Vector3 away = transform.position - fromWorld;
+            away.y = 0f;
+            away = away.sqrMagnitude > 1e-6f ? away.normalized : -island.transform.forward;
+            var parent = transform.parent != null ? transform.parent : island.transform;
+            _flinch = parent.InverseTransformVector((away + Vector3.up * 0.6f) * (distance * island.transform.lossyScale.x));
+            _flinchStart = Time.time;
+            _flinchSeconds = Mathf.Max(0.1f, seconds);
+            Debug.Log("[LanternSpirit] Flinches back.");
+        }
+
+        Vector3 _flinch;
+        float _flinchStart = -999f, _flinchSeconds = 1f;
+
         /// <summary>0 = hidden (before the opening's spark arrives), 1 = shown. Scales the model.</summary>
         public float Appear { get; set; } = 1f;
 
@@ -133,6 +153,8 @@ namespace Diorama
             float lift = Mathf.Sin(t * bobSpeed * Mathf.PI * 2f) * bobHeight + speakLift * Mathf.SmoothStep(0f, 1f, _speak);
             Vector3 pos = u < 1f ? Vector3.Lerp(_flyFrom, goal, k) + Vector3.up * (flyArc * Mathf.Sin(u * Mathf.PI)) : goal;
             transform.localPosition = pos + Vector3.up * lift * (u < 1f ? k : 1f);
+            float f = (Time.time - _flinchStart) / _flinchSeconds;
+            if (f >= 0f && f < 1f) transform.localPosition += _flinch * (Mathf.Sin(Mathf.Min(1f, f * 5f) * Mathf.PI * 0.5f) * (1f - Mathf.SmoothStep(0.2f, 1f, f)));
             // Never inside the island: beside its rim or above the cap (step 9e).
             float s = island.transform.lossyScale.x;
             transform.position = island.PushOutWorld(transform.position, new Vector3(keepOut.x, keepOut.y, keepOut.x) * s);

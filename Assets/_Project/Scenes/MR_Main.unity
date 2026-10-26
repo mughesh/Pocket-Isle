@@ -4441,6 +4441,8 @@ MonoBehaviour:
   keeperLevel: 10
   beaconMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
   shardRecipe: {fileID: 11400000, guid: 243f873e41708f049b1a176b344ec7c1, type: 2}
+  smokeMaterial: {fileID: 2100000, guid: 63c5a847d0fbf454882a87650c5454fc, type: 2}
+  spirit: {fileID: 1847074513}
   keeperSpot: {x: 4.5, y: 2.7}
   keeperPad: {x: 4, y: 3}
   partyPad: {x: 4, y: 6}
