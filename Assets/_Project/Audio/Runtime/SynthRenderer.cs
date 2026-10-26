@@ -129,6 +129,16 @@ namespace Diorama.Audio
             }
             else Array.Copy(buf, outBuf, length);
 
+            if (patch.levelMode == LevelMode.Tier)
+            {
+                if (!loop)
+                {
+                    Fades(outBuf);
+                    outBuf = Loudness.TrimSilence(outBuf, Rate);
+                }
+                if (patch.normalize) Loudness.LevelTo(outBuf, Rate, Loudness.TierDb(patch.tier) + patch.tierTrimDb);
+                return outBuf;
+            }
             if (patch.normalize) Normalize(outBuf, Mathf.Pow(10f, patch.peakDb / 20f));
             if (!loop) Fades(outBuf);
             return outBuf;
@@ -303,27 +313,6 @@ namespace Diorama.Audio
         }
 
         static int Harmonics(float f) => Mathf.Clamp(Mathf.FloorToInt(9000f / Mathf.Max(20f, f)), 1, 60);
-
-        /// <summary>Simper's trapezoidal state-variable filter: stable under fast cutoff sweeps.</summary>
-        struct Svf
-        {
-            float ic1, ic2;
-
-            public void Process(float x, float fc, float q, out float low, out float band, out float high)
-            {
-                fc = Mathf.Clamp(fc, 10f, Rate * 0.45f);
-                float g = Mathf.Tan(Mathf.PI * fc / Rate), k = 1f / Mathf.Max(0.3f, q);
-                float a1 = 1f / (1f + g * (g + k)), a2 = g * a1, a3 = g * a2;
-                float v3 = x - ic2;
-                float v1 = a1 * ic1 + a2 * v3;
-                float v2 = ic2 + a2 * ic1 + a3 * v3;
-                ic1 = 2f * v1 - ic1;
-                ic2 = 2f * v2 - ic2;
-                low = v2;
-                band = k * v1; // unity gain at the centre
-                high = x - k * v1 - v2;
-            }
-        }
 
         // ---- envelopes ----
 

@@ -28,7 +28,11 @@ namespace Diorama.Audio.EditorTools
         int _renderVariant;
         bool _stale = true;
         AudioClip _previewClip;
-        Texture2D _wave;
+        Texture2D _wave, _spec;
+        ClipStats _stats;
+
+        /// <summary>The patch open in the Lab (AudioScope's Analyse Group uses it).</summary>
+        public static SynthPatch Selected { get; private set; }
         float _peakDb, _rmsDb, _highShare, _seam;
 
         bool _autoPlay = true;
@@ -59,6 +63,7 @@ namespace Diorama.Audio.EditorTools
             AudioPreview.Stop();
             if (_previewClip != null) DestroyImmediate(_previewClip);
             if (_wave != null) DestroyImmediate(_wave);
+            if (_spec != null) DestroyImmediate(_spec);
         }
 
         void OnProjectChange() => Reload();
@@ -73,6 +78,7 @@ namespace Diorama.Audio.EditorTools
         void Select(SynthPatch p)
         {
             _selected = p;
+            Selected = p;
             _so = p != null ? new SerializedObject(p) : null;
             _stale = true;
             _renderVariant = 0;
@@ -112,6 +118,12 @@ namespace Diorama.Audio.EditorTools
                 if (GUILayout.Button("Bake all", EditorStyles.toolbarButton)) SynthBaker.BakeAll(_patches);
                 if (GUILayout.Button(new GUIContent("Sync cues", "Create missing cues, refresh their clips, rebuild the table, validate, write AudioIds.cs."), EditorStyles.toolbarButton))
                     AudioCueTools.SyncAll();
+                if (GUILayout.Button(new GUIContent("Analyse", "AudioScope: contact sheets + report.md in Temp/audio-analysis/ (all groups, or the open patch's group with Shift)."), EditorStyles.toolbarButton))
+                {
+                    if (Event.current.shift && _selected != null) AudioScope.AnalyseGroup(SynthBaker.Group(_selected));
+                    else AudioScope.AnalyseAll();
+                    EditorUtility.RevealInFinder(AudioScope.OutDir + "report.md");
+                }
             }
 
             switch (_tab)
@@ -199,10 +211,17 @@ namespace Diorama.Audio.EditorTools
             var waveRect = GUILayoutUtility.GetRect(10, 90, GUILayout.ExpandWidth(true));
             DrawWave(waveRect);
             float seconds = _render != null ? _render.Length / (float)SynthPatch.SampleRate : 0f;
+            var specRect = GUILayoutUtility.GetRect(10, 120, GUILayout.ExpandWidth(true));
+            if (_spec != null) GUI.DrawTexture(specRect, _spec, ScaleMode.StretchToFill);
             var facts = $"{seconds:0.00} s   peak {_peakDb:0.0} dBFS   RMS {_rmsDb:0.0} dBFS   above 9 kHz {_highShare * 100f:0.0}%";
+            float tierDb = Loudness.TierDb(p.tier) + p.tierTrimDb;
+            var scope = $"mid {_stats.midDb:0.0} dB" + (p.levelMode == LevelMode.Tier ? $" (tier {p.tier} {tierDb:0.0})" : " (peak levelled)") +
+                        $"   low {_stats.lowShare:0.00}   tail {_stats.tailShare:0.00}   silence {_stats.silenceShare:0.00}";
             if (p.mode == SynthMode.Loop) facts += $"   loop seam {_seam:0.0}x (above 4 = tick)";
             if (p.variants > 1) facts += $"   showing variant {_renderVariant + 1}/{p.variants}";
             EditorGUILayout.LabelField(facts, EditorStyles.miniLabel);
+            EditorGUILayout.LabelField(scope, EditorStyles.miniLabel);
+            if (_stats.lowShare > AudioScope.MaxLowShare) EditorGUILayout.HelpBox($"Mostly below 250 Hz (low share {_stats.lowShare:0.00}): small speakers won't play it. Move the body up to 300-1500 Hz.", MessageType.Warning);
             if (_highShare > 0.02f) EditorGUILayout.HelpBox("More than 2% of the energy is above 9 kHz: may sound harsh. Lower the filter or master low-pass.", MessageType.Warning);
             if (p.mode == SynthMode.Sequence)
                 foreach (var n in p.notes)
@@ -247,6 +266,8 @@ namespace Diorama.Audio.EditorTools
             if (_previewClip != null) DestroyImmediate(_previewClip);
             _previewClip = AudioPreview.MakeClip(_selected.id, _render);
             BuildWave(_render);
+            _stats = Loudness.Analyse(_render, SynthPatch.SampleRate);
+            _spec = AudioScope.ToTexture(AudioScope.Spectrogram(_render, SynthPatch.SampleRate, 600, 120), 600, 120, _spec);
         }
 
         void PlayCurrent(int variant)

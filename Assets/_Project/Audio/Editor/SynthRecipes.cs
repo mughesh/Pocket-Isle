@@ -24,6 +24,16 @@ namespace Diorama.Audio.EditorTools
             /// of these instead of either one alone.</summary>
             public string mixWith;
             public float mixGain = 0.6f;
+            /// <summary>Loudness tier; null = from the group and id (AudioTiers.Default).</summary>
+            public LoudnessTier? tier;
+            public float trimDb;
+
+            public Recipe Tier(LoudnessTier t, float trim = 0f)
+            {
+                tier = t;
+                trimDb = trim;
+                return this;
+            }
         }
 
         static readonly List<Func<IEnumerable<Recipe>>> Providers = new List<Func<IEnumerable<Recipe>>>();
@@ -56,6 +66,10 @@ namespace Diorama.Audio.EditorTools
             patch.gap = recipe.gap;
             patch.review = review ?? new AudioReview();
             recipe.build(patch);
+            if (recipe.set == "cry") return; // cries keep batch 1 peak levelling until step C
+            patch.levelMode = LevelMode.Tier;
+            patch.tier = recipe.tier ?? AudioTiers.Default(recipe.group, recipe.id, patch.mode == SynthMode.Loop);
+            patch.tierTrimDb = recipe.trimDb;
         }
     }
 

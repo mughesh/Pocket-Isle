@@ -45,6 +45,60 @@ namespace Diorama.Audio.EditorTools
             }
         }
 
+        /// <summary>
+        /// Reads a PCM (8/16/24/32-bit) or 32-bit float .wav as mono (channels averaged). Null if it isn't one.
+        /// </summary>
+        public static float[] ReadMono(string path, out int sampleRate)
+        {
+            sampleRate = 0;
+            try
+            {
+                var bytes = File.ReadAllBytes(path);
+                if (bytes.Length < 12 || bytes[0] != 'R' || bytes[1] != 'I' || bytes[2] != 'F' || bytes[3] != 'F') return null;
+                int pos = 12, format = 0, channels = 0, bits = 0;
+                while (pos + 8 <= bytes.Length)
+                {
+                    string id = System.Text.Encoding.ASCII.GetString(bytes, pos, 4);
+                    int size = BitConverter.ToInt32(bytes, pos + 4);
+                    int body = pos + 8;
+                    if (id == "fmt ")
+                    {
+                        format = BitConverter.ToInt16(bytes, body);
+                        channels = BitConverter.ToInt16(bytes, body + 2);
+                        sampleRate = BitConverter.ToInt32(bytes, body + 4);
+                        bits = BitConverter.ToInt16(bytes, body + 14);
+                        if (format == -2 && size >= 26) format = BitConverter.ToInt16(bytes, body + 24); // WAVE_FORMAT_EXTENSIBLE
+                    }
+                    else if (id == "data")
+                    {
+                        if (channels <= 0 || bits <= 0) return null;
+                        int bps = bits / 8, frames = Math.Min(size, bytes.Length - body) / (bps * channels);
+                        var mono = new float[frames];
+                        for (int f = 0; f < frames; f++)
+                        {
+                            float sum = 0f;
+                            for (int c = 0; c < channels; c++)
+                            {
+                                int o = body + (f * channels + c) * bps;
+                                float v;
+                                if (format == 3 && bits == 32) v = BitConverter.ToSingle(bytes, o);
+                                else if (bits == 16) v = BitConverter.ToInt16(bytes, o) / 32768f;
+                                else if (bits == 24) v = ((bytes[o] | (bytes[o + 1] << 8) | (bytes[o + 2] << 16)) << 8 >> 8) / 8388608f;
+                                else if (bits == 32) v = BitConverter.ToInt32(bytes, o) / 2147483648f;
+                                else v = (bytes[o] - 128) / 128f;
+                                sum += v;
+                            }
+                            mono[f] = sum / channels;
+                        }
+                        return mono;
+                    }
+                    pos = body + size + (size & 1);
+                }
+            }
+            catch (Exception) { }
+            return null;
+        }
+
         /// <summary>Duration in seconds from a .wav header, or -1 if it can't be read.</summary>
         public static float Duration(string path)
         {

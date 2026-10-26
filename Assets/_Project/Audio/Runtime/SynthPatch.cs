@@ -134,8 +134,12 @@ namespace Diorama.Audio
         [Tooltip("Drive into the soft limiter.")] [Range(0f, 4f)] public float gain = 1f;
         public bool limiter = true;
         [Tooltip("Keeps the top end soft (the brief: little above ~9 kHz); 16000 = off.")] [Range(1000f, 16000f)] public float lowpass = 9000f;
-        public bool normalize = true;
-        [Range(-24f, 0f)] public float peakDb = -3f;
+        [Tooltip("Level at bake time (off = raw render).")] public bool normalize = true;
+        [Tooltip("Tier: mid band (250 Hz - 6 kHz) to the tier's level, peaks under -1 dBFS, ends trimmed. Peak: batch 1 (cries).")]
+        public LevelMode levelMode = LevelMode.Peak;
+        public LoudnessTier tier = LoudnessTier.Island;
+        [Tooltip("Fine trim against the tier, dB.")] [Range(-6f, 6f)] public float tierTrimDb;
+        [Tooltip("Peak mode only.")] [Range(-24f, 0f)] public float peakDb = -3f;
 
         [Header("Review")]
         [Tooltip("Organic sound synth may not nail (marked with a star in the brief); flagged in the Review tab.")] public bool gap;
