@@ -1061,6 +1061,75 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: A Zeppelope! It's drifting... it never lands!
+  - id: gw.keeper.knots
+    once: 0
+    priority: 2
+    note: lesson in the tower hall; chip "Pull apart!"
+    target: galeowl
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: It's all tangled up! Pull the knots apart.
+  - id: gw.keeper.meet
+    once: 1
+    priority: 2
+    note: 'all three knots undone: it shakes free and flares up'
+    target: galeowl
+    validWhile: 
+    lines:
+    - speaker: 1
+      speakerName: Galeowl
+      text: Stay still! If the wind blows, the pieces blow away!
+    - speaker: 0
+      speakerName: Spirit
+      text: It's scared. Let's calm it down!
+  - id: gw.keeper.shield
+    once: 1
+    priority: 2
+    note: the Gust Wall goes up the first time
+    target: galeowl
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: A wall of wind! Fire should break it.
+  - id: gw.keeper.shield.break
+    once: 1
+    priority: 2
+    note: 
+    target: galeowl
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The wall is down. Now!
+  - id: gw.keeper.win
+    once: 1
+    priority: 2
+    note: it calms and bows
+    target: galeowl
+    validWhile: 
+    lines:
+    - speaker: 1
+      speakerName: Galeowl
+      text: I held the wind so nothing else would fly away.
+    - speaker: 1
+      speakerName: Galeowl
+      text: But a still world is a stuck world.
+    - speaker: 1
+      speakerName: Galeowl
+      text: Thank you, guardian. Let it blow.
+  - id: gw.restored
+    once: 1
+    priority: 2
+    note: the restoration wave from the tower
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Feel that? Galewick is breathing again!
   - id: hub.shard.first
     once: 1
     priority: 2

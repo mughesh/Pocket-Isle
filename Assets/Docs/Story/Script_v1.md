@@ -221,6 +221,23 @@ Step 10b, the hand moments (lesson lines stay pinned as a chip until the moment 
 - `gw.meet.zeppelope` · once (step 10c: the rare Zeppelope)
   - Spirit: A Zeppelope! It's drifting... it never lands!
 
+Step 10d (lines written; the tower hall that says them comes in part two):
+- `gw.keeper.knots` · → galeowl (lesson in the tower hall; chip "Pull apart!")
+  - Spirit: It's all tangled up! Pull the knots apart.
+- `gw.keeper.meet` · once · → galeowl (all three knots undone: it shakes free and flares up)
+  - Galeowl: Stay still! If the wind blows, the pieces blow away!
+  - Spirit: It's scared. Let's calm it down!
+- `gw.keeper.shield` · once · → galeowl (the Gust Wall goes up the first time)
+  - Spirit: A wall of wind! Fire should break it.
+- `gw.keeper.shield.break` · once · → galeowl
+  - Spirit: The wall is down. Now!
+- `gw.keeper.win` · once · → galeowl (it calms and bows)
+  - Galeowl: I held the wind so nothing else would fly away.
+  - Galeowl: But a still world is a stuck world.
+  - Galeowl: Thank you, guardian. Let it blow.
+- `gw.restored` · once (the restoration wave from the tower)
+  - Spirit: Feel that? Galewick is breathing again!
+
 ## Statue and finale
 - `hub.shard.first` · once · → statueSocket (step 9c: in the hub holding a shard)
   - Spirit: Put the shard in the statue. Something's calling it.

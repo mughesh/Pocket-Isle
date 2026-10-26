@@ -38,6 +38,8 @@ namespace Diorama
         [Header("Story")]
         [Tooltip("A realm Keeper (step 9c): fought once with its own rules (KeeperRules), never caught.")]
         public bool keeper;
+        [Tooltip("Step 10d: a Keeper's shield breaks to this element (Hearthstag Water, Galeowl Fire).")]
+        public Element keeperBreaksWith = Element.Water;
 
         public GameObject Prefab => recipe != null ? recipe.bakedPrefab : null;
     }

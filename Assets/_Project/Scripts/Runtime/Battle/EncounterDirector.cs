@@ -135,6 +135,8 @@ namespace Diorama
         public bool StartKeeper(KeeperFight fight)
         {
             if (InBattle || fight == null || fight.keeper == null || party.members.Count == 0 || window.IsZoomed || SceneSwap.IsBusy) return false;
+            // Step 10d: each Keeper's shield breaks to its own element.
+            if (fight.rules != null && fight.keeper.species != null) fight.rules.breaksWith = fight.keeper.species.keeperBreaksWith;
             StartCoroutine(Encounter(null, fight.myPad, fight.keeper, fight));
             return true;
         }

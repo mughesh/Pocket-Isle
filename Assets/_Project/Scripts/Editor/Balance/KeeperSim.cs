@@ -82,6 +82,7 @@ namespace Diorama.EditorTools
             // Step 9f: like a player who heard "Water beats fire", the one with the shield-breaking element goes first.
             var lead = party[0];
             var rules = new KeeperRules();
+            if (keeper.species != null) rules.breaksWith = keeper.species.keeperBreaksWith; // step 10d: Galeowl breaks to Fire
             foreach (var c in party)
                 if (c.Element == rules.breaksWith)
                 {

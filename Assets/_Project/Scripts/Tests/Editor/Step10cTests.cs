@@ -51,6 +51,20 @@ namespace Diorama.Tests
         }
 
         [Test]
+        public void Galeowl_IsAWindKeeperWhoseWallBreaksToFire()
+        {
+            var g = Load("Galeowl");
+            if (g == null) Assert.Inconclusive("Galeowl not written (Tools > Pocket Isle > Write Galeowl (10d part one)).");
+            Assert.IsTrue(g.keeper);
+            Assert.AreEqual(Element.Wind, g.element);
+            Assert.AreEqual(Element.Fire, g.keeperBreaksWith);
+            Assert.AreEqual(Element.Water, Load("Hearthstag").keeperBreaksWith, "Hearthstag unchanged");
+            Assert.AreEqual(3, g.moves.Length);
+            Assert.AreEqual(MoveKind.Support, g.moves[2].kind, "Gust Wall");
+            Assert.AreEqual(11, ShardScaling.KeeperLevel(GaleowlKit.Level, 1, 2), "Lv 11 at one other shard");
+        }
+
+        [Test]
         public void GalewickTables_MostlyWind_FireVisitors_RareZeppelope()
         {
             var map = AssetDatabase.LoadAssetAtPath<WorldMap>(GalewickTools.MapPath);
