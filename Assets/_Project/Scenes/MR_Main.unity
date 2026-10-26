@@ -575,8 +575,13 @@ MonoBehaviour:
   sideMaxLines: 2
   sideGap: 0.012
   charsPerSecond: 45
-  holdBase: 1.2
-  holdPerChar: 0.05
+  holdBase: 1.5
+  holdPerChar: 0.06
+  chipAfter: 6
+  chipFontScale: 0.85
+  iconSize: 0.014
+  reopenSeconds: 3
+  spiritGazeDegrees: 8
   maxViewAngle: 30
   aboveIslandMargin: 0.015
 --- !u!4 &232676578

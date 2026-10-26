@@ -56,8 +56,21 @@ namespace Diorama
 
         [Header("Timing")]
         public float charsPerSecond = 45f;
-        public float holdBase = 1.2f;
-        public float holdPerChar = 0.05f;
+        [Tooltip("Step 9h reading pace: a line stays up at least holdBase + holdPerChar x characters after it is typed in.")]
+        public float holdBase = 1.5f;
+        public float holdPerChar = 0.06f;
+
+        [Header("Lesson chip (step 9h)")]
+        [Tooltip("A lesson line that stays (pinned) shrinks to its hint chip after this long (s).")]
+        public float chipAfter = 6f;
+        [Tooltip("Chip text size (share of the font size).")]
+        [Range(0.5f, 1f)] public float chipFontScale = 0.85f;
+        [Tooltip("The small hand icon in the chip (metres).")]
+        public float iconSize = 0.014f;
+        [Tooltip("Looking at the chip or the Spirit opens the full line; it shrinks back this long after the look leaves (s).")]
+        public float reopenSeconds = 3f;
+        [Tooltip("Looking within this angle of the Spirit counts as looking at it (degrees).")]
+        public float spiritGazeDegrees = 8f;
 
         [Header("View")]
         [Tooltip("Half of the central view cone the bubble stays inside (degrees).")]
@@ -65,7 +78,7 @@ namespace Diorama
         [Tooltip("Step 9h: the bubble's bottom stays this far above the island's top (world metres) wherever the island is between the head and the bubble.")]
         public float aboveIslandMargin = 0.015f;
 
-        /// <summary>The line has been shown for its full time.</summary>
+        /// <summary>The line has been shown for its full time (never for a pinned lesson line).</summary>
         public event Action Finished;
         /// <summary>Poke or gaze + pinch.</summary>
         public event Action Skipped;
@@ -98,6 +111,23 @@ namespace Diorama
         int _chars;
         bool _showing;
         readonly bool[] _wasPinching = new bool[2];
+        // Step 9h: a pinned lesson line (never finishes) and its hint chip.
+        DialogueLine _line;
+        string _chipText;
+        bool _chip;
+        float _endAt, _lookedAt = -999f, _popStart = -1f;
+        Transform _icon;
+        MeshRenderer _iconRenderer;
+        Mesh _iconMesh;
+
+        /// <summary>The shown line stays until the lesson is done (a chip after a while).</summary>
+        public bool IsPinned => _showing && _chipText != null;
+        /// <summary>Showing the short chip instead of the full line.</summary>
+        public bool IsChip => _showing && _chip;
+        public string Text => _showing ? _text.text : null;
+
+        /// <summary>Seconds a line of <paramref name="chars"/> characters stays up after it is typed in.</summary>
+        public static float HoldSeconds(int chars, float holdBase, float holdPerChar) => holdBase + holdPerChar * chars;
 
         void Awake()
         {
@@ -108,7 +138,11 @@ namespace Diorama
             _root.gameObject.SetActive(false);
         }
 
-        void OnDestroy() => Destroy(_quad);
+        void OnDestroy()
+        {
+            Destroy(_quad);
+            if (_iconMesh != null) Destroy(_iconMesh);
+        }
 
         void Build()
         {
@@ -150,6 +184,69 @@ namespace Diorama
             _text.color = outlineColor;
             _text.rectTransform.sizeDelta = new Vector2(maxWidth, 0.2f);
             _text.sortingOrder = 2;
+
+            // The chip's hand icon: one solid mesh in the HUD material (every uv at the middle = the back colour).
+            var iconGo = new GameObject("Chip Hand");
+            iconGo.transform.SetParent(_visual, false);
+            _iconMesh = HandIconMesh();
+            iconGo.AddComponent<MeshFilter>().sharedMesh = _iconMesh;
+            _iconRenderer = iconGo.AddComponent<MeshRenderer>();
+            _iconRenderer.sharedMaterial = hudMaterial;
+            _iconRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            _iconRenderer.receiveShadows = false;
+            _iconRenderer.sortingOrder = 2;
+            _icon = iconGo.transform;
+            iconGo.SetActive(false);
+        }
+
+        /// <summary>
+        /// An open hand (palm, four fingers, thumb) as flat capsules in a 1 x 1 box round the origin, the fingers up,
+        /// the thumb to the left. Every uv is (0.5, 0.5) so the HUD shader fills it with the back colour.
+        /// </summary>
+        static Mesh HandIconMesh()
+        {
+            var verts = new System.Collections.Generic.List<Vector3>();
+            var tris = new System.Collections.Generic.List<int>();
+            void Capsule(Vector2 a, Vector2 b, float r)
+            {
+                const int n = 8;
+                Vector2 d = (b - a).sqrMagnitude > 1e-8f ? (b - a).normalized : Vector2.up;
+                Vector2 side = new Vector2(-d.y, d.x);
+                int c = verts.Count;
+                verts.Add((a + b) * 0.5f);
+                // Half circle round b, then round a (a closed fan round the middle).
+                for (int i = 0; i <= n; i++)
+                {
+                    float ang = Mathf.PI * i / n;
+                    verts.Add(b + (side * Mathf.Cos(ang) + d * Mathf.Sin(ang)) * r);
+                }
+                for (int i = 0; i <= n; i++)
+                {
+                    float ang = Mathf.PI * i / n;
+                    verts.Add(a - (side * Mathf.Cos(ang) + d * Mathf.Sin(ang)) * r);
+                }
+                int ring = 2 * (n + 1);
+                for (int i = 0; i < ring; i++)
+                {
+                    tris.Add(c);
+                    tris.Add(c + 1 + (i + 1) % ring);
+                    tris.Add(c + 1 + i);
+                }
+            }
+            Capsule(new Vector2(-0.1f, -0.22f), new Vector2(0.1f, -0.05f), 0.22f); // palm
+            Capsule(new Vector2(-0.19f, 0.02f), new Vector2(-0.2f, 0.3f), 0.075f); // index
+            Capsule(new Vector2(-0.05f, 0.04f), new Vector2(-0.05f, 0.42f), 0.075f); // middle
+            Capsule(new Vector2(0.09f, 0.03f), new Vector2(0.1f, 0.36f), 0.072f); // ring
+            Capsule(new Vector2(0.22f, -0.02f), new Vector2(0.25f, 0.2f), 0.065f); // little
+            Capsule(new Vector2(-0.26f, -0.2f), new Vector2(-0.42f, -0.02f), 0.08f); // thumb
+            var mesh = new Mesh { name = "Chip Hand Icon" };
+            mesh.SetVertices(verts);
+            var uv = new Vector2[verts.Count];
+            for (int i = 0; i < uv.Length; i++) uv[i] = new Vector2(0.5f, 0.5f);
+            mesh.uv = uv;
+            mesh.SetTriangles(tris, 0);
+            mesh.RecalculateBounds();
+            return mesh;
         }
 
         Transform Quad(string name, int order, out MeshRenderer renderer)
@@ -165,17 +262,42 @@ namespace Diorama
             return go.transform;
         }
 
-        public void Show(DialogueLine line, Transform anchor)
+        /// <summary>
+        /// Shows a line. <paramref name="chip"/> set = a lesson line that stays (pinned): it never finishes, shrinks to
+        /// that chip text (with a small hand) after <see cref="chipAfter"/>, and opens again while the chip or the Spirit
+        /// is looked at. Poking or pinching it doesn't skip it.
+        /// </summary>
+        public void Show(DialogueLine line, Transform anchor, string chip = null)
         {
             _anchor = anchor;
+            _line = line;
+            _chipText = string.IsNullOrEmpty(chip) ? null : chip;
+            _popStart = -1f;
             _root.gameObject.SetActive(true);
-            _text.text = line.text;
+            Layout(line.text, false);
+
+            _chars = line.text.Length;
+            _text.maxVisibleCharacters = 0;
+            _typeSeconds = _chars / Mathf.Max(1f, charsPerSecond);
+            _holdSeconds = HoldSeconds(_chars, holdBase, holdPerChar);
+            _shownAt = Time.time;
+            _endAt = _shownAt + _typeSeconds + _holdSeconds;
+            _showing = true;
+            for (int i = 0; i < 2; i++) _wasPinching[i] = true; // a pinch already held doesn't skip
+            Place(true);
+        }
+
+        /// <summary>Sizes the panel round the full line or the chip (icon + short text).</summary>
+        void Layout(string text, bool chip)
+        {
+            _chip = chip;
+            _text.text = text;
             _text.maxVisibleCharacters = 99999;
-            _pointing = line.speaker == DialogueSpeaker.Spirit && Dialogue.GetTarget(out _) == Dialogue.TargetState.Active;
-            float width = _pointing ? maxWidth * sideWidth : maxWidth;
-            _text.fontSize = fontSize;
-            var pref = _text.GetPreferredValues(line.text, width, 1f);
-            if (_pointing)
+            _pointing = _line.speaker == DialogueSpeaker.Spirit && Dialogue.GetTarget(out _) == Dialogue.TargetState.Active;
+            float width = chip ? maxWidth : _pointing ? maxWidth * sideWidth : maxWidth;
+            _text.fontSize = chip ? fontSize * chipFontScale : fontSize;
+            var pref = _text.GetPreferredValues(text, width, 1f);
+            if (_pointing && !chip)
             {
                 // At most sideMaxLines lines: shrink the text a little if it runs longer.
                 float lineHeight = _text.GetPreferredValues("Ag", width, 1f).y;
@@ -183,31 +305,41 @@ namespace Diorama
                 {
                     _text.fontSize *= 0.94f;
                     lineHeight = _text.GetPreferredValues("Ag", width, 1f).y;
-                    pref = _text.GetPreferredValues(line.text, width, 1f);
+                    pref = _text.GetPreferredValues(text, width, 1f);
                 }
             }
             _text.ForceMeshUpdate();
             float w = Mathf.Min(width, pref.x), h = pref.y;
+            float icon = chip ? iconSize + padding.x * 0.6f : 0f;
             _text.rectTransform.sizeDelta = new Vector2(w + 0.002f, h + 0.002f);
-            _size = new Vector2(w + padding.x * 2f, h + padding.y * 2f);
+            _text.transform.localPosition = new Vector3(icon * 0.5f, 0f, -0.001f);
+            _size = new Vector2(w + icon + padding.x * 2f, Mathf.Max(h, chip ? iconSize : 0f) + padding.y * 2f);
+            _icon.gameObject.SetActive(chip);
+            if (chip)
+            {
+                _icon.localPosition = new Vector3(-(w + icon) * 0.5f + iconSize * 0.5f - padding.x * 0.3f, 0f, -0.001f);
+                _icon.localScale = new Vector3(iconSize, iconSize, 1f);
+                Paint(_iconRenderer, outlineColor, 1f, 0f, 0f);
+            }
             _panel.localScale = new Vector3(_size.x, _size.y, 1f);
             float tail = 0.016f;
             _tail.localScale = new Vector3(tail, tail, 1f);
             PlaceTail();
             _clipper.Size = new Vector3(_size.x, _size.y, 0.02f);
 
-            var back = line.speaker == DialogueSpeaker.Keeper ? keeperColor : line.speaker == DialogueSpeaker.Heart ? heartColor : spiritColor;
-            Paint(_panelRenderer, back, _size.x / _size.y, Mathf.Min(0.45f, 0.012f / _size.y), 0.0018f / _size.y);
+            var back = _line.speaker == DialogueSpeaker.Keeper ? keeperColor : _line.speaker == DialogueSpeaker.Heart ? heartColor : spiritColor;
+            Paint(_panelRenderer, back, _size.x / _size.y, Mathf.Min(0.45f, (chip ? 0.5f * _size.y : 0.012f) / _size.y), 0.0018f / _size.y);
             Paint(_tailRenderer, back, 1f, 0.1f, 0.12f);
+        }
 
-            _chars = line.text.Length;
-            _text.maxVisibleCharacters = 0;
-            _typeSeconds = _chars / Mathf.Max(1f, charsPerSecond);
-            _holdSeconds = holdBase + holdPerChar * _chars;
-            _shownAt = Time.time;
-            _showing = true;
-            for (int i = 0; i < 2; i++) _wasPinching[i] = true; // a pinch already held doesn't skip
-            Place(true);
+        /// <summary>
+        /// A more important line is waiting (step 9h reading pace): this one ends once it has been up for its minimum
+        /// time, not at once. A pinned lesson line isn't affected.
+        /// </summary>
+        public void FinishSoon()
+        {
+            if (!_showing || _chipText != null) return;
+            _endAt = Mathf.Min(_endAt, Mathf.Max(Time.time, _shownAt + HoldSeconds(_chars, holdBase, holdPerChar)));
         }
 
         void Paint(MeshRenderer r, Color back, float aspect, float radius, float border)
@@ -224,35 +356,108 @@ namespace Diorama
 
         public void Hide()
         {
+            bool pop = _showing && _chipText != null;
             _showing = false; // IsGazed clears next frame, so a skipping pinch doesn't also reach tile gaze
+            _chipText = null;
+            if (pop && _root.gameObject.activeSelf)
+            {
+                // A lesson's chip pops when the lesson is done.
+                _popStart = Time.time;
+                return;
+            }
             _root.gameObject.SetActive(false);
         }
 
         void Skip(string how)
         {
+            float t = Time.time - _shownAt;
+            if (t < _typeSeconds)
+            {
+                // The first poke or pinch shows the whole line; the next one skips it.
+                _shownAt = Time.time - _typeSeconds;
+                _endAt = Mathf.Max(_endAt, Time.time + HoldSeconds(_chars, holdBase, holdPerChar) * 0.5f);
+                Debug.Log($"[DialogueBubble] {how}: the whole line at once.");
+                return;
+            }
+            if (_chipText != null)
+            {
+                // A lesson line stays until the lesson is done; on the chip, the poke opens the full line.
+                if (_chip) Reopen(how);
+                return;
+            }
             Debug.Log($"[DialogueBubble] Skipped by {how}.");
             _showing = false;
             Skipped?.Invoke();
         }
 
+        void Reopen(string why)
+        {
+            _lookedAt = Time.time;
+            if (!_chip) return;
+            Layout(_line.text, false);
+            Debug.Log($"[DialogueBubble] Chip opened ({why}): {_line.text}");
+        }
+
         void Update()
         {
+            if (_popStart >= 0f)
+            {
+                float u = (Time.time - _popStart) / 0.18f;
+                if (u >= 1f)
+                {
+                    _popStart = -1f;
+                    _root.gameObject.SetActive(false);
+                }
+                else _root.localScale = Vector3.one * (1f + 0.35f * u) * (1f - u * u);
+            }
             if (!_showing)
             {
                 IsGazed = false;
                 return;
             }
             float t = Time.time - _shownAt;
-            _text.maxVisibleCharacters = Mathf.Min(_chars, Mathf.CeilToInt(t * charsPerSecond));
+            _text.maxVisibleCharacters = _chip ? 99999 : Mathf.Min(_chars, Mathf.CeilToInt(t * charsPerSecond));
             _appear = Mathf.Min(1f, t / 0.15f);
             Place(false);
-            if (t >= _typeSeconds + _holdSeconds)
+            if (_chipText == null && Time.time >= _endAt)
             {
                 _showing = false;
                 Finished?.Invoke();
                 return;
             }
             GazePinch();
+            if (_chipText != null) UpdateChip(t);
+        }
+
+        /// <summary>Pinned: the full line for <see cref="chipAfter"/>, then the chip; looking at it or the Spirit reopens it.</summary>
+        void UpdateChip(float t)
+        {
+            if (LookingAtSpirit() || IsGazed && _chip) Reopen(IsGazed ? "looked at" : "looked at the Spirit");
+            bool chipTime = t >= Mathf.Max(chipAfter, _typeSeconds + 1f) && Time.time - _lookedAt >= reopenSeconds;
+            if (chipTime && !_chip)
+            {
+                Layout(_chipText, true);
+                Debug.Log($"[DialogueBubble] Chip: {_chipText}");
+            }
+        }
+
+        bool LookingAtSpirit()
+        {
+            if (_anchor == null || !HeadGaze.TryGetRay(out var ray)) return false;
+            Vector3 spirit = _anchor.parent != null ? _anchor.parent.position : _anchor.position;
+            return Vector3.Angle(ray.direction, spirit - ray.origin) < spiritGazeDegrees;
+        }
+
+        /// <summary>Debug (bridge): the chip now, or the full line again.</summary>
+        public void DebugChip(bool chip)
+        {
+            if (!_showing || _chipText == null) return;
+            if (chip)
+            {
+                _lookedAt = -999f;
+                Layout(_chipText, true);
+            }
+            else Reopen("debug");
         }
 
         /// <summary>Tail under the bubble, or (pointing) on the edge facing the Spirit.</summary>

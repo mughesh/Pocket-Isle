@@ -211,6 +211,31 @@ namespace Diorama.Tests
         }
 
         [Test]
+        public void LessonLine_StaysPinned_StoryLinesWaitUntilTheLessonIsDone()
+        {
+            var d = MakeDialogue();
+            d.PinLines(new[] { "hint" }, "Do it");
+            d.Fire("hint", false);
+            Assert.AreEqual("hint", d.CurrentTrigger);
+            d.Fire("story", false);
+            Assert.AreEqual("hint", d.CurrentTrigger, "a story line doesn't replace the lesson line (higher priority or not)");
+            d.Fire("walkHint", false);
+            Assert.AreEqual("hint", d.CurrentTrigger);
+            d.UnpinLines("onceHint");
+            Assert.AreEqual("onceHint", d.CurrentTrigger, "the praise comes first once the lesson is done");
+        }
+
+        [Test]
+        public void LessonOwnLine_ReplacesThePinnedLine()
+        {
+            var d = MakeDialogue();
+            d.PinLines(new[] { "hint", "walkHint" }, "Do it");
+            d.Fire("hint", false);
+            d.Fire("walkHint", false);
+            Assert.AreEqual("walkHint", d.CurrentTrigger, "the lesson's help line takes its place");
+        }
+
+        [Test]
         public void ControlHint_NeverShowsInBattle()
         {
             var d = MakeDialogue();

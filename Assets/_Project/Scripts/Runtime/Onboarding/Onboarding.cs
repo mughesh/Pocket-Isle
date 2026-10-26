@@ -9,8 +9,9 @@ namespace Diorama
 {
     /// <summary>
     /// The new game's lessons (step 8b), one at a time from <see cref="OnboardingScript"/> (Data/Onboarding/Onboarding_Main):
-    /// each waits for its start, says its line (again every <see cref="OnboardingScript.repeatSeconds"/> with the shorter
-    /// wording), shows its ghost hand (<see cref="GhostHands"/> listens to <see cref="LessonShown"/>) and the gold focus,
+    /// each waits for its start, says its line and keeps it up until the lesson is done (step 9h: <see cref="Dialogue.Pin"/>,
+    /// the bubble shrinks to the lesson's hint chip; if the line closes anyway it comes back with the shorter wording),
+    /// shows its ghost hand (<see cref="GhostHands"/> listens to <see cref="LessonShown"/>) and the gold focus,
     /// and on done plays a soft chime and the Spirit's praise. Wild battles and fishing stay off until the chain is done
     /// (<see cref="EncountersEnabled"/>); the grass lesson's tutorial patch meets the scripted first species. A battle lost
     /// or fled mid-tutorial goes back to the grass lesson. The current lesson is saved (<see cref="GameSave"/>): quitting
@@ -292,32 +293,41 @@ namespace Diorama
             _lineAway = 0f;
             if (l.goldTileSteps > 0) PickGoldTile(l.goldTileSteps);
             if (!string.IsNullOrEmpty(l.goldPath) && _goldPath == null) _goldPath = StartCoroutine(GoldPath(l));
-            if (!string.IsNullOrEmpty(l.line)) Dialogue.Repeat(l.line);
+            // Step 9h: one instruction at a time, and it stays until the lesson is done.
+            if (!string.IsNullOrEmpty(l.line))
+            {
+                Dialogue.Pin(new[] { l.line, l.again, l.help, script.handsLine }, l.chip);
+                Dialogue.Repeat(l.line);
+            }
             LessonShown?.Invoke(l);
         }
 
         void Teach(LessonData l)
         {
-            // Reminders: the line comes back once it has been away for a while.
+            if (string.IsNullOrEmpty(l.line)) return;
             bool talking = Dialogue.IsPending(l.line) || !string.IsNullOrEmpty(l.again) && Dialogue.IsPending(l.again) ||
-                           !string.IsNullOrEmpty(l.help) && Dialogue.IsPending(l.help);
-            _lineAway = talking ? 0f : _lineAway + Time.deltaTime;
-            if (!string.IsNullOrEmpty(l.help) && !_helped && _runner.Teaching >= l.helpAfter && !talking)
+                           !string.IsNullOrEmpty(l.help) && Dialogue.IsPending(l.help) || HandsMissing;
+            if (!string.IsNullOrEmpty(l.help) && !_helped && _runner.Teaching >= l.helpAfter)
             {
+                // The help line takes the lesson line's place (and stays).
                 _helped = true;
                 _lineAway = 0f;
                 Dialogue.Repeat(l.help);
+                return;
             }
-            else if (_lineAway >= script.repeatSeconds && !HandsMissing)
-            {
-                _lineAway = 0f;
-                var again = string.IsNullOrEmpty(l.again) ? l.line : l.again;
-                if (!string.IsNullOrEmpty(again)) Dialogue.Repeat(again);
-            }
+            // The line stays up; if it closed anyway (its condition paused it, the hands check), it comes back.
+            _lineAway = talking ? 0f : _lineAway + Time.deltaTime;
+            if (_lineAway < 1f) return;
+            _lineAway = 0f;
+            var back = _helped && !string.IsNullOrEmpty(l.help) ? l.help : string.IsNullOrEmpty(l.again) ? l.line : l.again;
+            Dialogue.Repeat(back);
         }
 
         void End(LessonData l, bool done)
         {
+            bool praise = done && l.praise && script.praise.Count > 0;
+            // The lesson's line and chip close; the praise comes first, then the lines that waited for the lesson.
+            Dialogue.Unpin(praise ? script.praise[_praiseIndex++ % script.praise.Count] : null);
             foreach (var id in new[] { l.line, l.again, l.help })
                 if (!string.IsNullOrEmpty(id)) Dialogue.Cancel(id);
             if (_goldPath != null)
@@ -326,11 +336,7 @@ namespace Diorama
                 _goldPath = null;
             }
             if (l.goldTileSteps > 0) _goldTile = null;
-            if (done && l.praise)
-            {
-                if (_audio != null && _audio.clip != null) _audio.PlayOneShot(_audio.clip, chimeVolume);
-                if (script.praise.Count > 0) Dialogue.Repeat(script.praise[_praiseIndex++ % script.praise.Count]);
-            }
+            if (done && l.praise && _audio != null && _audio.clip != null) _audio.PlayOneShot(_audio.clip, chimeVolume);
             if (HandsMissing) SetHandsMissing(false);
             if (_shown) LessonEnded?.Invoke(l, done);
             _shown = false;

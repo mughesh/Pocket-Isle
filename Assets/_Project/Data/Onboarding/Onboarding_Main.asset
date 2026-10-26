@@ -16,6 +16,7 @@ MonoBehaviour:
   - id: shard
     line: intro.shard
     again: 
+    chip: Touch it
     help: 
     helpAfter: 30
     startWhen: opening.shard
@@ -38,6 +39,7 @@ MonoBehaviour:
   - id: move
     line: intro.world
     again: lesson.move.again
+    chip: Grab the edge
     help: 
     helpAfter: 30
     startWhen: opening.move
@@ -60,8 +62,9 @@ MonoBehaviour:
   - id: starter
     line: intro.starter
     again: lesson.starter.again
-    help: 
-    helpAfter: 30
+    chip: Look + pinch
+    help: lesson.starter.again
+    helpAfter: 3.5
     startWhen: opening.starters
     delay: 0
     doneWhen: starterPicked
@@ -82,6 +85,7 @@ MonoBehaviour:
   - id: walk
     line: lesson.walk
     again: lesson.walk.again
+    chip: Thumb swipe
     help: lesson.walk.help
     helpAfter: 30
     startWhen: canWalk
@@ -104,6 +108,7 @@ MonoBehaviour:
   - id: stop
     line: lesson.stop
     again: lesson.stop.again
+    chip: Tap to stop
     help: 
     helpAfter: 30
     startWhen: canWalk
@@ -126,6 +131,7 @@ MonoBehaviour:
   - id: look
     line: lesson.look
     again: lesson.look.again
+    chip: Look + pinch
     help: 
     helpAfter: 30
     startWhen: canWalk
@@ -148,6 +154,7 @@ MonoBehaviour:
   - id: grass
     line: lesson.grass
     again: lesson.grass.again
+    chip: Into the grass
     help: 
     helpAfter: 30
     startWhen: canWalk
@@ -170,6 +177,7 @@ MonoBehaviour:
   - id: send
     line: pod.first
     again: lesson.send.again
+    chip: Toss the pod
     help: 
     helpAfter: 30
     startWhen: battle.send
@@ -192,6 +200,7 @@ MonoBehaviour:
   - id: rune
     line: battle.first
     again: lesson.rune.again
+    chip: Poke a rune
     help: 
     helpAfter: 30
     startWhen: battle.out
@@ -214,6 +223,7 @@ MonoBehaviour:
   - id: catch
     line: capture.first
     again: lesson.catch.again
+    chip: Flick the pod
     help: 
     helpAfter: 30
     startWhen: wildRed
@@ -236,6 +246,7 @@ MonoBehaviour:
   - id: free
     line: 
     again: 
+    chip: 
     help: 
     helpAfter: 30
     startWhen: 
@@ -258,6 +269,7 @@ MonoBehaviour:
   - id: twoHands
     line: lesson.twohands
     again: 
+    chip: Both hands
     help: 
     helpAfter: 30
     startWhen: '!battle & !swap'

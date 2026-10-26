@@ -22,7 +22,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Oh! Something's here. Touch it?
+      text: Something's here. Touch it?
   - id: intro.arrive
     once: 1
     priority: 1
@@ -32,10 +32,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Oh! You're awake. Hello, big one.
-    - speaker: 0
-      speakerName: Spirit
-      text: I'm a Lantern Spirit. A small one. Very small.
+      text: Hello, big one! I'm a Lantern Spirit.
   - id: intro.world
     once: 1
     priority: 1
@@ -45,10 +42,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: The world broke into floating pieces. This is one of them.
-    - speaker: 0
-      speakerName: Spirit
-      text: Hold its rocky edge to move it. Put it wherever feels comfy.
+      text: This little island is yours. Grab its rocky edge to move it.
   - id: intro.starter
     once: 1
     priority: 1
@@ -58,7 +52,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Every guardian needs an Isling friend. Pick one!
+      text: Pick an Isling friend!
   - id: starter.kilnpot
     once: 0
     priority: 1
@@ -98,10 +92,10 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: That statue... it has three empty holes.
+      text: That statue has three empty holes... The world broke into floating pieces.
     - speaker: 0
       speakerName: Spirit
-      text: I feel like I know it. Strange.
+      text: I feel like I know it.
   - id: lesson.move.again
     once: 0
     priority: 1
@@ -121,7 +115,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Look at one, then grab it or pinch.
+      text: Look at one and pinch, or grab it.
   - id: lesson.walk
     once: 0
     priority: 1

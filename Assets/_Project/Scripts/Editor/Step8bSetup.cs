@@ -144,58 +144,60 @@ namespace Diorama.EditorTools
             {
                 new LessonData
                 {
-                    id = "shard", line = "intro.shard", startWhen = "opening.shard", delay = 1.5f, validWhile = "opening.shard",
+                    id = "shard", line = "intro.shard", chip = "Touch it", startWhen = "opening.shard", delay = 1.5f, validWhile = "opening.shard",
                     doneWhen = "shardTouched", ghost = "poke", place = GhostPlace.AtTarget, target = "shardFront",
                 },
                 new LessonData
                 {
-                    id = "move", line = "intro.world", again = "lesson.move.again", startWhen = "opening.move", validWhile = "opening.move",
+                    id = "move", line = "intro.world", chip = "Grab the edge", again = "lesson.move.again", startWhen = "opening.move", validWhile = "opening.move",
                     // Step 8e: a pinch on the side of the base (pinch or palm both grab the island).
                     doneWhen = "islandGrabbed", skipAfter = 12f, ghost = "grab_rim_slide", place = GhostPlace.IslandSides, target = "rim",
                 },
                 new LessonData
                 {
-                    id = "starter", line = "intro.starter", again = "lesson.starter.again", startWhen = "opening.starters",
+                    id = "starter", line = "intro.starter", chip = "Look + pinch", again = "lesson.starter.again", startWhen = "opening.starters",
+                    // Step 9h: "Look at one and pinch, or grab it." follows the short line and stays.
+                    help = "lesson.starter.again", helpAfter = 3.5f,
                     doneWhen = "starterPicked", ghost = "grab_drop", place = GhostPlace.AtTarget, target = "starterPods",
                 },
                 new LessonData
                 {
-                    id = "walk", line = "lesson.walk", again = "lesson.walk.again", help = "lesson.walk.help", helpAfter = 30f,
+                    id = "walk", line = "lesson.walk", chip = "Thumb swipe", again = "lesson.walk.again", help = "lesson.walk.help", helpAfter = 30f,
                     startWhen = "canWalk", delay = 1.5f, doneWhen = "walked3",
                     ghost = "thumb_swipe_forward", place = GhostPlace.AboveIsland, target = "ghost", ghostScale = 0.6f,
                 },
                 new LessonData
                 {
-                    id = "stop", line = "lesson.stop", again = "lesson.stop.again", startWhen = "canWalk", delay = 0.8f, doneWhen = "stopped",
+                    id = "stop", line = "lesson.stop", chip = "Tap to stop", again = "lesson.stop.again", startWhen = "canWalk", delay = 0.8f, doneWhen = "stopped",
                     ghost = "thumb_tap", place = GhostPlace.AboveIsland, target = "ghost", ghostScale = 0.6f,
                 },
                 new LessonData
                 {
-                    id = "look", line = "lesson.look", again = "lesson.look.again", startWhen = "canWalk", delay = 0.8f,
+                    id = "look", line = "lesson.look", chip = "Look + pinch", again = "lesson.look.again", startWhen = "canWalk", delay = 0.8f,
                     doneWhen = "atGoldTile | gazeWalk", goldTileSteps = 3,
                     ghost = "pinch", place = GhostPlace.AboveTarget, target = "goldTile", ghostScale = 0.6f,
                 },
                 new LessonData
                 {
-                    id = "grass", line = "lesson.grass", again = "lesson.grass.again", startWhen = "canWalk", delay = 0.8f,
+                    id = "grass", line = "lesson.grass", chip = "Into the grass", again = "lesson.grass.again", startWhen = "canWalk", delay = 0.8f,
                     doneWhen = "grassBattle", praise = false, target = "landmark:firstGrass", goldPath = "firstGrass", tutorialGrass = true,
                 },
                 new LessonData
                 {
-                    id = "send", line = "pod.first", again = "lesson.send.again", startWhen = "battle.send", validWhile = "battle.send",
+                    id = "send", line = "pod.first", chip = "Toss the pod", again = "lesson.send.again", startWhen = "battle.send", validWhile = "battle.send",
                     doneWhen = "sentOut", failWhen = battleFail, rewindTo = "grass",
                     ghost = "grab_toss", place = GhostPlace.AtTarget, target = "leadPod",
                 },
                 new LessonData
                 {
                     // Step 8c: poke is taught (look + pinch still works).
-                    id = "rune", line = "battle.first", again = "lesson.rune.again", startWhen = "battle.out", validWhile = "battle",
+                    id = "rune", line = "battle.first", chip = "Poke a rune", again = "lesson.rune.again", startWhen = "battle.out", validWhile = "battle",
                     doneWhen = "moveUsed", failWhen = battleFail, rewindTo = "grass",
                     ghost = "poke", place = GhostPlace.AtTarget, target = "nearestRune",
                 },
                 new LessonData
                 {
-                    id = "catch", line = "capture.first", again = "lesson.catch.again", startWhen = "wildRed", validWhile = "battle",
+                    id = "catch", line = "capture.first", chip = "Flick the pod", again = "lesson.catch.again", startWhen = "wildRed", validWhile = "battle",
                     doneWhen = "podThrown", failWhen = battleFail, rewindTo = "grass",
                     ghost = "grab_flick", place = GhostPlace.AtTarget, target = "cradle",
                 },
@@ -207,7 +209,7 @@ namespace Diorama.EditorTools
                 {
                     // Step 8c: once, after the first battle: both hands turn and resize the island (8e: both hands pinch the
                     // left and right sides of the base).
-                    id = "twoHands", line = "lesson.twohands", startWhen = "!battle & !swap", delay = 2f, doneWhen = "twoHandGrab", skipAfter = 15f,
+                    id = "twoHands", line = "lesson.twohands", chip = "Both hands", startWhen = "!battle & !swap", delay = 2f, doneWhen = "twoHandGrab", skipAfter = 15f,
                     ghost = "grab_rim_slide", place = GhostPlace.IslandSides, target = "islandRim", bothHands = true,
                 },
             };

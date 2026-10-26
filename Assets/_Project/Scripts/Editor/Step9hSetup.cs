@@ -19,7 +19,38 @@ namespace Diorama.EditorTools
         {
             var log = new StringBuilder("[Step9h] Set up:");
             Fixes(log);
+            Lessons(log);
             Save(log);
+        }
+
+        public static void LessonsOnly()
+        {
+            var log = new StringBuilder("[Step9h] Lessons:");
+            Lessons(log);
+            Save(log);
+        }
+
+        /// <summary>
+        /// B (and C's pinch lesson): the lessons rewritten (chips, the starter's help line), Script_v1 re-imported (the
+        /// shorter opening), the bubble's reading pace.
+        /// </summary>
+        public static void Lessons(StringBuilder log)
+        {
+            var lessons = Step8bSetup.WriteLessons();
+            log.Append($"\n  {Step8bSetup.LessonsPath}: {lessons.lessons.Count} lessons ({string.Join(", ", lessons.lessons.ConvertAll(l => l.id + (string.IsNullOrEmpty(l.chip) ? "" : $" '{l.chip}'")))})");
+            var script = DialogueTools.Import();
+            log.Append($"\n  Script_v1 re-imported: {(script != null ? script.triggers.Count + " triggers" : "FAILED")}");
+            var bubble = Find<DialogueBubble>();
+            if (bubble == null)
+            {
+                log.Append("\n  MISSING DialogueBubble.");
+                return;
+            }
+            Undo.RecordObject(bubble, "Step 9h");
+            bubble.holdBase = 1.5f;
+            bubble.holdPerChar = 0.06f;
+            EditorUtility.SetDirty(bubble);
+            log.Append($"\n  Bubble: reading pace {bubble.holdBase} s + {bubble.holdPerChar} s a character after typing, chip after {bubble.chipAfter} s.");
         }
 
         public static void FixesOnly()

@@ -35,6 +35,8 @@ namespace Diorama
         public string line;
         [Tooltip("Shorter trigger for the reminders (every repeatSeconds while waiting). Empty = the line again.")]
         public string again;
+        [Tooltip("Step 9h: the hint chip the lesson's line shrinks to after a few seconds (a short verb: \"Grab the edge\"). Empty = the line itself.")]
+        public string chip;
         [Tooltip("Optional trigger said once after helpAfter seconds (walk lessons: the look + pinch alternative).")]
         public string help;
         public float helpAfter = 30f;
@@ -88,7 +90,7 @@ namespace Diorama
         public string handsLine = "lesson.hands";
         [Tooltip("Ghost clip for the hands check (both hands).")]
         public string handsGhost = "hands_up";
-        [Tooltip("A waiting lesson's line comes back after this long without it (s).")]
+        [Tooltip("Unused since step 9h (the lesson line stays until the lesson is done).")]
         public float repeatSeconds = 10f;
 
         public int IndexOf(string id)

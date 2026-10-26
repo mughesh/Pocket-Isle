@@ -19,6 +19,10 @@ namespace Diorama
     /// or a scene swap starts, every hint line (priority 1 or lower) that doesn't say it still holds is dropped. A "once"
     /// trigger dropped before any of its lines showed may fire again later. No idle hints while the tutorial runs.
     /// Editor: D cycles through every trigger id (ignoring once); the Inspector lists them with Fire buttons.
+    /// Step 9h: one instruction at a time, and it stays. While a lesson teaches, its triggers are pinned (<see cref="Pin"/>):
+    /// the lesson's last line never times out (the bubble shrinks it to a hint chip), only pinned triggers may show, and
+    /// every other line waits in the queue until <see cref="Unpin"/>. A more important line no longer cuts the one showing
+    /// at once: that one ends when it has been up for its minimum reading time.
     /// </summary>
     public class Dialogue : MonoBehaviour
     {
@@ -69,6 +73,8 @@ namespace Diorama
         bool _wasSwapping;
         readonly Dictionary<DialogueSpeaker, Transform> _anchors = new Dictionary<DialogueSpeaker, Transform>();
         Queued? _current;
+        readonly HashSet<string> _pinned = new HashSet<string>();
+        string _chip;
         float _lastInput, _lastIdle = -999f;
         int _lastHint = -1, _debugIndex = -1;
 
@@ -114,6 +120,54 @@ namespace Diorama
         static readonly Dictionary<DialogueSpeaker, Transform> _pendingAnchors = new Dictionary<DialogueSpeaker, Transform>();
 
         public static bool IsTalking => _instance != null && _instance._current.HasValue;
+
+        /// <summary>A lesson is teaching: only its own lines show (<see cref="Pin"/>).</summary>
+        public static bool IsPinned => _instance != null && _instance._pinned.Count > 0;
+
+        /// <summary>
+        /// Step 9h: a lesson starts teaching. Only these triggers may show until <see cref="Unpin"/>; the last line of the
+        /// one showing stays (no time-out), shrinking to <paramref name="chip"/> after a while. Other lines queue.
+        /// </summary>
+        public static void Pin(IEnumerable<string> triggers, string chip)
+        {
+            if (_instance != null) _instance.PinLines(triggers, chip);
+        }
+
+        /// <summary><see cref="Pin"/> on this Dialogue (tests).</summary>
+        public void PinLines(IEnumerable<string> triggers, string chip)
+        {
+            var d = this;
+            d._pinned.Clear();
+            foreach (var t in triggers)
+                if (!string.IsNullOrEmpty(t)) d._pinned.Add(t);
+            d._chip = chip;
+            // A line that is not the lesson's ends after its minimum time; then only lesson lines show.
+            if (d._current.HasValue && !d._pinned.Contains(d._current.Value.trigger) && d.bubble != null) d.bubble.FinishSoon();
+            Debug.Log($"[Dialogue] Pinned for the lesson: {string.Join(", ", d._pinned)} (chip '{chip}').");
+        }
+
+        /// <summary>
+        /// The lesson is over: its lines close (the chip pops), <paramref name="first"/> (the praise) shows next, then the
+        /// lines that waited.
+        /// </summary>
+        public static void Unpin(string first = null)
+        {
+            if (_instance != null) _instance.UnpinLines(first);
+        }
+
+        /// <summary><see cref="Unpin"/> on this Dialogue (tests).</summary>
+        public void UnpinLines(string first = null)
+        {
+            var d = this;
+            if (d._pinned.Count == 0) return;
+            var pinned = new List<string>(d._pinned);
+            d._pinned.Clear();
+            d._chip = null;
+            d._queue.RemoveAll(q => pinned.Contains(q.trigger));
+            bool showingLesson = d._current.HasValue && pinned.Contains(d._current.Value.trigger);
+            if (!string.IsNullOrEmpty(first)) d.FireFirst(first);
+            if (showingLesson || !d._current.HasValue) d.Next();
+        }
 
         /// <summary>Registers a target anchor by id (leadPod, cradle, ...). Re-registering replaces it.</summary>
         public static void RegisterTarget(string id, Func<Vector3?> point, Action<float> pulse, Func<float> radius = null) =>
@@ -267,17 +321,50 @@ namespace Diorama
             _notNow.Remove(id);
             if (IsQueuedOrShowing(id) && !force) return;
             _said.Add(id);
-            if (_current.HasValue && t.priority > _current.Value.priority)
+            bool pinned = _pinned.Contains(id);
+            if (_pinned.Count > 0)
             {
-                // Cut off the lower line (and anything else lower that waits) for this one.
+                if (pinned)
+                {
+                    // The lesson's own line (help, hands, a reminder) takes the lesson's place at once.
+                    _queue.RemoveAll(q => _pinned.Contains(q.trigger));
+                    int first = 0;
+                    foreach (var line in t.lines) _queue.Insert(first++, Make(line, t, id));
+                    Debug.Log($"[Dialogue] {id}: {t.lines.Count} lesson line(s).");
+                    if (!_current.HasValue || _pinned.Contains(_current.Value.trigger)) Next();
+                    return;
+                }
+                Debug.Log($"[Dialogue] {id}: waits until the lesson is done.");
+            }
+            else if (_current.HasValue && t.priority > _current.Value.priority)
+            {
+                // The lower lines that wait go; the one showing ends once it has been readable (reading pace).
                 _queue.RemoveAll(q => q.priority < t.priority);
-                _current = null;
+                if (_current.Value.priority <= 0) _current = null;
+                else if (bubble != null) bubble.FinishSoon();
             }
             int at = _queue.FindIndex(q => q.priority < t.priority);
             if (at < 0) at = _queue.Count;
-            foreach (var line in t.lines) _queue.Insert(at++, new Queued { line = line, priority = t.priority, trigger = id, target = t.target, validWhile = t.validWhile });
+            foreach (var line in t.lines) _queue.Insert(at++, Make(line, t, id));
             Debug.Log($"[Dialogue] {id}: {t.lines.Count} line(s){(t.once ? ", once" : "")}.");
             if (!_current.HasValue) Next();
+        }
+
+        static Queued Make(DialogueLine line, DialogueTrigger t, string id) =>
+            new Queued { line = line, priority = t.priority, trigger = id, target = t.target, validWhile = t.validWhile };
+
+        /// <summary>Queues a trigger's lines in front of everything (the praise after a lesson).</summary>
+        void FireFirst(string id)
+        {
+            var t = script != null ? script.Find(id) : null;
+            if (t == null)
+            {
+                Debug.LogWarning($"[Dialogue] No trigger '{id}'.", this);
+                return;
+            }
+            _said.Add(id);
+            int at = 0;
+            foreach (var line in t.lines) _queue.Insert(at++, Make(line, t, id));
         }
 
         bool IsQueuedOrShowing(string id) => _current.HasValue && _current.Value.trigger == id || _queue.Exists(q => q.trigger == id);
@@ -288,20 +375,24 @@ namespace Diorama
             SetTarget(null);
             // Lines that stopped applying while they waited are dropped.
             while (_queue.Count > 0 && !GameConditions.Check(_queue[0].validWhile)) Drop(0, "no longer applies");
-            if (_queue.Count == 0)
+            // While a lesson teaches only its own lines show; the others keep waiting.
+            int next = _pinned.Count == 0 ? (_queue.Count > 0 ? 0 : -1) : _queue.FindIndex(q => _pinned.Contains(q.trigger));
+            if (next < 0)
             {
                 if (bubble != null) bubble.Hide();
                 Speaking?.Invoke(null);
                 return;
             }
-            var q = _queue[0];
-            _queue.RemoveAt(0);
+            var q = _queue[next];
+            _queue.RemoveAt(next);
             _current = q;
             _shown.Add(q.trigger);
             _lastInput = Time.time;
             SetTarget(q.target);
             var anchor = AnchorFor(q.line.speaker);
-            if (bubble != null) bubble.Show(q.line, anchor);
+            // The lesson's last line stays (pinned) until the lesson is done.
+            bool stays = _pinned.Contains(q.trigger) && !_queue.Exists(o => o.trigger == q.trigger);
+            if (bubble != null) bubble.Show(q.line, anchor, stays ? (string.IsNullOrEmpty(_chip) ? q.line.text : _chip) : null);
             Speaking?.Invoke(q.line.speaker);
         }
 
@@ -433,6 +524,8 @@ namespace Diorama
         /// <summary>Drops everything queued and closes the bubble.</summary>
         public void ClearAll()
         {
+            _pinned.Clear();
+            _chip = null;
             _queue.Clear();
             _current = null;
             SetTarget(null);

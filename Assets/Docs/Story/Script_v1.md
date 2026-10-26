@@ -12,31 +12,31 @@ scene swap starting closes every hint line that has no `while` saying it still a
 Names are placeholders. The step 5c dialogue system loads this (convert to data asset).
 
 ## Opening (Still Isle)
+Step 9h: less text before the starter (one line each; the lesson lines stay up until the lesson is done).
 - `intro.shard` · once · → shard (only if the shard isn't touched within 3 s)
-  - Spirit: Oh! Something's here. Touch it?
+  - Spirit: Something's here. Touch it?
 - `intro.arrive` · once
-  - Spirit: Oh! You're awake. Hello, big one.
-  - Spirit: I'm a Lantern Spirit. A small one. Very small.
+  - Spirit: Hello, big one! I'm a Lantern Spirit.
 - `intro.world` · once · → rim
-  - Spirit: The world broke into floating pieces. This is one of them.
-  - Spirit: Hold its rocky edge to move it. Put it wherever feels comfy.
+  - Spirit: This little island is yours. Grab its rocky edge to move it.
 - `intro.starter` · once · → starterPods
-  - Spirit: Every guardian needs an Isling friend. Pick one!
+  - Spirit: Pick an Isling friend!
 - `starter.kilnpot` · Spirit: Kilnpot! Warm as a fresh-baked pot.
 - `starter.pebbloop` · Spirit: Pebbloop! Bubbly, and very round.
 - `starter.pufflet` · Spirit: Pufflet! Light as a cloud, twice as fluffy.
 - `intro.statue` · once · while !tutorial · → landmark:statue (first time within ~3 tiles of the statue)
-  - Spirit: That statue... it has three empty holes.
-  - Spirit: I feel like I know it. Strange.
+  - Spirit: That statue has three empty holes... The world broke into floating pieces.
+  - Spirit: I feel like I know it.
 
 ## Tutorials: lessons (step 8b)
-One lesson at a time (Data/Onboarding/Onboarding_Main). The first line comes when the lesson starts; the `.again` line
-every ~10 s while it waits. Shard, move and starter use the Opening lines above; send out, pick a move and catch use
+One lesson at a time (Data/Onboarding/Onboarding_Main). The first line comes when the lesson starts and stays up until
+the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at the chip or the Spirit opens it again); the
+`.again` line only comes if the line was closed (its condition paused it). Shard, move and starter use the Opening lines above; send out, pick a move and catch use
 `pod.first`, `battle.first` and `capture.first` below.
 - `lesson.move.again` · → rim
   - Spirit: Grab the rocky edge and slide it.
 - `lesson.starter.again` · → starterPods
-  - Spirit: Look at one, then grab it or pinch.
+  - Spirit: Look at one and pinch, or grab it.
 - `lesson.walk` · while canWalk · → ghost
   - Spirit: Slide your thumb along your finger to walk.
 - `lesson.walk.again` · while canWalk · → ghost

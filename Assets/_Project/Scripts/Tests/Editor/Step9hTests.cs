@@ -3,9 +3,34 @@ using UnityEngine;
 
 namespace Diorama.Tests
 {
-    /// <summary>Step 9h: lodge exit rule, bubble over the island.</summary>
+    /// <summary>Step 9h: lodge exit rule, bubble over the island, reading pace, lesson lines that stay.</summary>
     public class Step9hTests
     {
+        [Test]
+        public void ReadingPace_AtLeastOneAndAHalfSecondsPlusPerCharacter()
+        {
+            var go = new GameObject("bubble test");
+            try
+            {
+                var b = go.AddComponent<DialogueBubble>();
+                foreach (int n in new[] { 0, 10, 40, 70 })
+                    Assert.GreaterOrEqual(DialogueBubble.HoldSeconds(n, b.holdBase, b.holdPerChar), 1.5f + 0.06f * n - 1e-4f, $"{n} characters");
+            }
+            finally
+            {
+                Object.DestroyImmediate(go);
+            }
+        }
+
+        [Test]
+        public void Lessons_EveryTaughtLessonHasAChip()
+        {
+            var s = UnityEditor.AssetDatabase.LoadAssetAtPath<OnboardingScript>("Assets/_Project/Data/Onboarding/Onboarding_Main.asset");
+            Assert.IsNotNull(s);
+            foreach (var l in s.lessons)
+                if (!string.IsNullOrEmpty(l.line)) Assert.IsFalse(string.IsNullOrEmpty(l.chip), $"{l.id} has a line but no chip");
+        }
+
         static readonly Vector2Int Out = new Vector2Int(0, 1);
 
         [Test]
