@@ -154,6 +154,7 @@ MonoBehaviour:
   handle: {fileID: 270959111}
   fx: {fileID: 1078587927}
   hudMaterial: {fileID: 2100000, guid: 0656b6c4f92798e49a14cf09a2c6800e, type: 2}
+  progression: {fileID: 11400000, guid: c5e0845f05a2ec34a817839899fdc421, type: 2}
   socketMesh: {fileID: 4300000, guid: 659a9cd844d20ce4ca465ae3c2e631e2, type: 2}
   socketMaterial: {fileID: 2100000, guid: 6d560b85a19c2dd448fa64742823a9ec, type: 2}
   faceShare: 0.67
@@ -1131,6 +1132,7 @@ MonoBehaviour:
   placer: {fileID: 374318555}
   probe: {fileID: 374318558}
   cubeMaterial: {fileID: 2100000, guid: 465021766fd4ece4294b3a58730b1c8e, type: 2}
+  explorerPrefab: {fileID: 8420832083653867265, guid: 146fff80072d5d949ab0e3df7a660472, type: 3}
   moveMode: 0
   startTile: {x: 10, y: 7}
   cubeSize: 0.018
@@ -2769,7 +2771,9 @@ MonoBehaviour:
   followAngle: 55
   fontSize: 0.1
   rayLength: 1.2
-  bar: {x: 0.12, y: 0.016, z: 0.01}
+  frame: 0.012
+  grabOut: 0.03
+  grabIn: 0.012
 --- !u!114 &1200054857
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2796,7 +2800,7 @@ MonoBehaviour:
   hallEntry: {x: 4, y: 8}
   firstWalkLesson: walk
   presetCommons:
-  - Toastling
+  - Steambara
   - Kettlewing
 --- !u!4 &1200054858
 Transform:
