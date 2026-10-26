@@ -28,8 +28,8 @@ namespace Diorama.EditorTools
         /// <summary>Past the title, the seated camera, wild battles off (walk tests).</summary>
         public static void Start()
         {
-            var title = Object.FindFirstObjectByType<TitleScreen>();
-            if (title != null && TitleScreen.Showing) title.Cancel();
+            // The returning player's title waits for Continue (cancelling it would leave the explorer locked).
+            if (TitleScreen.Showing) RuneBoard.DebugPress("Continue");
             BattleDebug.SeatCamera();
             DevCheats.WildOff = true;
             Debug.Log($"[GalewickPlay] Started: title {TitleScreen.Showing}, opening {Opening.InProgress}, wild off.");
@@ -115,6 +115,68 @@ namespace Diorama.EditorTools
             Debug.Log($"[GalewickPlay] State: {(GameState.Instance != null ? GameState.Instance.Where : "?")}, restored {RealmState.Restored:0.##}, wind spin {RealmState.WindSpin:0.0}, " +
                       $"theme {(map != null && map.theme != null ? map.theme.name : "none")}, swap busy {SceneSwap.IsBusy}, locked {(e != null && e.Locked)}, " +
                       $"destination {(e != null && e.Destination.HasValue ? e.Destination.Value.ToString() : "none")}, puzzles {PuzzleState.Describe()}");
+        }
+
+        // ---- step 10b ----
+
+        static WheelPiece Mill
+        {
+            get
+            {
+                foreach (var w in Object.FindObjectsByType<WheelPiece>(FindObjectsSortMode.None))
+                    if (w.id == "gw.mill") return w;
+                return null;
+            }
+        }
+
+        /// <summary>One flick on the big mill (speed in arg.txt, default 0.9 m/s).</summary>
+        public static void Flick()
+        {
+            var m = Mill;
+            float speed = float.TryParse(Arg, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var s) ? s : 0.9f;
+            if (m != null) m.DebugFlick(speed);
+            Debug.Log($"[GalewickPlay] Mill: here {(m != null && m.Here)}, usable {(m != null && m.Usable)}, angle {(m != null ? m.Angle : 0f):0}, kept {(m != null && m.Spin.Kept)}, solved {(m != null && m.IsSolved)}");
+        }
+
+        /// <summary>Kite number arg.txt rises and flies (look + pinch).</summary>
+        public static void Kite()
+        {
+            var k = Object.FindFirstObjectByType<KitePiece>();
+            if (k == null) return;
+            k.DebugFly(int.TryParse(Arg, out int i) ? i : 0);
+            Debug.Log($"[GalewickPlay] {k.Describe()}");
+        }
+
+        /// <summary>Kite number arg.txt held 6 cm up and let go (too low: it drifts back).</summary>
+        public static void KiteLow()
+        {
+            var k = Object.FindFirstObjectByType<KitePiece>();
+            if (k == null) return;
+            k.DebugLiftAndRelease(int.TryParse(Arg, out int i) ? i : 0, 0.06f);
+            Debug.Log($"[GalewickPlay] {k.Describe()}");
+        }
+
+        /// <summary>A gust along the ridge path over the cloud bank (strength in arg.txt, default 0.9).</summary>
+        public static void Gust()
+        {
+            var b = Object.FindFirstObjectByType<CloudBankPiece>();
+            if (b == null) return;
+            float strength = float.TryParse(Arg, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var s) ? s : 0.9f;
+            b.DebugGust(strength);
+            Debug.Log($"[GalewickPlay] Cloud bank: {b.Describe()}, here {b.Here}");
+        }
+
+        /// <summary>A gust across the island toward the player (the ripple), anywhere in Galewick.</summary>
+        public static void GustAnywhere()
+        {
+            var g = Object.FindFirstObjectByType<GustField>();
+            if (g != null) g.DebugGust(new Vector2(0f, 1f));
+        }
+
+        public static void Tower()
+        {
+            var d = Object.FindFirstObjectByType<TowerDoor>();
+            if (d != null) d.DebugTry();
         }
 
         /// <summary>Uses the gate with id arg.txt ("wind", "home") on the current map: walks there first if needed.</summary>

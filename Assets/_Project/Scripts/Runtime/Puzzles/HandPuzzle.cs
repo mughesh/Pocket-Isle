@@ -47,6 +47,9 @@ namespace Diorama
         [Tooltip("Ghost clip at puzzle:<id>. Empty = no ghost.")]
         public string ghostClip;
         public float ghostScale = 1f;
+        [Tooltip("Step 10b: when set, the lesson line is pinned (it stays, shrinking to this chip) until the lesson is complete " +
+                 "(LessonComplete, or solved), not just until the first touch. Empty = the 9b behaviour (said once).")]
+        public string lessonChip;
 
         /// <summary>0..1 (a pump's strokes, a carry lifted / placed).</summary>
         public event Action<HandPuzzle, float> ProgressChanged;
@@ -111,6 +114,7 @@ namespace Diorama
 
         protected virtual void OnDestroy()
         {
+            if (_pinned) Dialogue.Unpin();
             PuzzleState.Restored -= OnRestored;
             if (id != null && _byId.TryGetValue(id, out var p) && p == this) _byId.Remove(id);
             EndLesson();
@@ -170,12 +174,38 @@ namespace Diorama
             bool want = !Interacted && !IsSolved && Usable && Available && !Busy;
             if (want && !LessonShowing) BeginLesson();
             else if (!want && LessonShowing) EndLesson();
+            UpdatePin();
+        }
+
+        bool _pinned, _lessonComplete;
+
+        /// <summary>Step 10b: the lesson's pinned line closes (the action it taught worked once).</summary>
+        protected void LessonComplete()
+        {
+            if (_lessonComplete) return;
+            _lessonComplete = true;
+            UpdatePin();
+        }
+
+        /// <summary>The pinned lesson line stays while the lesson shows or was touched but not yet completed, and the piece is usable.</summary>
+        void UpdatePin()
+        {
+            if (string.IsNullOrEmpty(lessonChip) || string.IsNullOrEmpty(lessonLine)) return;
+            bool want = !_lessonComplete && !IsSolved && Usable && Available && (LessonShowing || Interacted);
+            if (want == _pinned) return;
+            _pinned = want;
+            if (want)
+            {
+                Dialogue.Pin(new[] { lessonLine }, lessonChip);
+                Dialogue.Say(lessonLine);
+            }
+            else Dialogue.Unpin();
         }
 
         void BeginLesson()
         {
             LessonShowing = true;
-            if (!string.IsNullOrEmpty(lessonLine)) Dialogue.Say(lessonLine);
+            if (!string.IsNullOrEmpty(lessonLine) && string.IsNullOrEmpty(lessonChip)) Dialogue.Say(lessonLine);
             FocusHighlight.SetPending(() => this != null ? FocusPoint : null, FocusRadius);
             if (ghosts != null && !string.IsNullOrEmpty(ghostClip))
             {

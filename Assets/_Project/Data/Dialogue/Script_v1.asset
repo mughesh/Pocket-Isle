@@ -941,6 +941,106 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: This grass feels different. Something odd floats here.
+  - id: gw.mill
+    once: 0
+    priority: 2
+    note: lesson at the big mill; chip "Flick!"
+    target: puzzle:gw.mill
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The mill is stuck. Give its sails a flick!
+  - id: gw.mill.done
+    once: 1
+    priority: 2
+    note: 'three flicks: the sails keep turning, the drawbridge comes down'
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: There it goes! The bridge is coming down.
+  - id: gw.kites
+    once: 0
+    priority: 2
+    note: lesson in the kite field; chip "Pull it up!"
+    target: puzzle:gw.kites
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Kites! Lift one up into the sky.
+  - id: gw.kites.one
+    once: 0
+    priority: 2
+    note: 
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: One!
+  - id: gw.kites.two
+    once: 0
+    priority: 2
+    note: 
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Two!
+  - id: gw.kites.three
+    once: 0
+    priority: 2
+    note: 
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: All three!
+  - id: gw.gust
+    once: 0
+    priority: 2
+    note: lesson at the cloud bank; chip "Wave!"
+    target: puzzle:gw.clouds
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: This cloud is stuck. Wave your hand over the island!
+  - id: gw.gust.done
+    once: 1
+    priority: 2
+    note: the last puff blown off the ridge path
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The path is clear! Feel that breeze?
+  - id: gw.tower.kites
+    once: 0
+    priority: 2
+    note: at the tower door with fewer than three kites
+    target: landmark:tower
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The tower needs all three kites.
+  - id: gw.tower.open
+    once: 1
+    priority: 2
+    note: the kites tie onto the crown, the vanes turn
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The kites caught the wind. The door is opening!
   - id: hub.shard.first
     once: 1
     priority: 2

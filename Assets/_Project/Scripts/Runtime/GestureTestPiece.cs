@@ -91,6 +91,9 @@ namespace Diorama
 
         Transform _cube;
         ExplorerView _view;
+
+        /// <summary>Step 10b: the explorer's body (its visual, on the island), or null before Start.</summary>
+        public Transform Body => _cube;
         float _yaw = 180f;
         TextMeshPro _label;
         Vector2Int _tile, _fromTile;

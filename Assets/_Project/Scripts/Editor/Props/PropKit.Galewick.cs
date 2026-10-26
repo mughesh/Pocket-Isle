@@ -329,13 +329,17 @@ namespace Diorama.EditorTools
         // ---- the temple ----
 
         /// <summary>
-        /// Wind tower, 2 x 2: a tall round cloud-stone tower with a crenellated crown, an arched door to the player (dark,
-        /// closed until step 10b opens it), slit windows and wooden vanes on the crown that spin once the wind blows.
+        /// Wind tower, 2 x 2: a tall round cloud-stone tower with a crenellated crown, an arched wooden door to the player
+        /// (shut until step 10b opens it), slit windows and wooden vanes on the crown that spin once the wind blows.
+        /// Step 10b: <c>WindTowerOpen</c> is the same tower with a dark doorway instead of the door, and
+        /// <c>WindTowerDoor</c> the door leaf alone (it sinks when the kites open it).
         /// </summary>
-        static PropRecipe WindTower()
+        static PropRecipe WindTower() => TowerRecipe("WindTower", true);
+
+        static PropRecipe TowerRecipe(string name, bool shut)
         {
-            var tower = Recipe("WindTower", new Vector2Int(2, 2), true, false, 3200);
-            tower.palette = Palette(CloudStone, MillWood, Slate, Meadow, WarmWindow, C("#3B3A3F"));
+            var tower = Recipe(name, new Vector2Int(2, 2), true, false, 3200);
+            tower.palette = Palette(CloudStone, MillWood, Slate, Meadow, WarmWindow, SailWhite);
             tower.yawJitter = 0f;
             tower.scaleJitter = 0f;
             tower.resolution = 60;
@@ -364,9 +368,11 @@ namespace Diorama.EditorTools
             tower.pieces = new List<PropPiece>
             {
                 Piece(PShape("WindTower_Stone", crown.ToArray()), PropSlot.Clay),
-                Piece(PShape("WindTower_Door",
-                    Ell(new Vector3(0f, 0.42f, 0.6f), new Vector3(0.27f, 0.44f, 0.06f), 0f),
-                    Floor(0f)), PropSlot.Accent),
+                shut
+                    ? Piece(TowerDoorShape(), PropSlot.Wood)
+                    : Piece(PShape("WindTower_Inside",
+                        Ell(new Vector3(0f, 0.42f, 0.5f), new Vector3(0.27f, 0.44f, 0.05f), 0f),
+                        Floor(0f)), PropSlot.Stone),
                 Piece(PShape("WindTower_Frame",
                     Torus(new Vector3(0f, 0.45f, 0.72f), 0.3f, 0.05f, new Vector3(90f, 0f, 0f), 0f),
                     Plane(new Vector3(0f, 0.4f, 0f), Vector3.down, 0f),
@@ -377,7 +383,92 @@ namespace Diorama.EditorTools
                 Piece(PShape("WindTower_Vanes", Sails(0.85f, 0.16f, false)), PropSlot.Wood, PropMotion.Spin, 0.7f, hub),
                 Piece(PShape("WindTower_VaneCloth", Sails(0.85f, 0.16f, true)), PropSlot.Accent, PropMotion.Spin, 0.7f, hub + new Vector3(0f, 0f, -0.02f)),
             };
+            if (!shut) tower.palette[(int)PropSlot.Stone] = C("#2E2B2C");
             return tower;
+        }
+
+        static SdfShape TowerDoorShape() => PShape("WindTower_Door",
+            Ell(new Vector3(0f, 0.42f, 0.6f), new Vector3(0.27f, 0.44f, 0.07f), 0f),
+            Box(new Vector3(0.09f, 0.4f, 0.68f), new Vector3(0.012f, 0.36f, 0.02f), 0.005f, 0f).Sub(),
+            Box(new Vector3(-0.09f, 0.4f, 0.68f), new Vector3(0.012f, 0.36f, 0.02f), 0.005f, 0f).Sub(),
+            Floor(0f));
+
+        /// <summary>Step 10b: the open tower, the door leaf, the drawbridge, the ditch water under it, the mill's gear.</summary>
+        public static Dictionary<string, PropRecipe> WriteGalewickPuzzleProps()
+        {
+            var all = new Dictionary<string, PropRecipe>();
+            all["WindTowerOpen"] = TowerRecipe("WindTowerOpen", false);
+
+            var door = Recipe("WindTowerDoor", new Vector2Int(2, 2), false, false, 500);
+            door.palette = Palette(CloudStone, MillWood, CloudStone, Meadow, WarmWindow, SailWhite);
+            door.yawJitter = 0f;
+            door.scaleJitter = 0f;
+            door.resolution = 48;
+            door.pieces = new List<PropPiece> { Piece(TowerDoorShape(), PropSlot.Wood) };
+            all["WindTowerDoor"] = door;
+
+            // Drawbridge, 2 x 2: a plank deck between two side beams, lying flat with its near (+Z) edge as the hinge.
+            var bridge = Recipe("Drawbridge", new Vector2Int(2, 2), true, false, 1600);
+            bridge.palette = Palette(CloudStone, MillWood, C("#5E4A36"), Meadow, WarmWindow, C("#C9B99A"));
+            bridge.yawJitter = 0f;
+            bridge.scaleJitter = 0f;
+            bridge.resolution = 56;
+            var deck = new List<SdfPrimitive> { Box(new Vector3(0f, 0.06f, 0f), new Vector3(0.82f, 0.06f, 0.98f), 0.02f, 0f) };
+            for (int i = -4; i <= 4; i++)
+                deck.Add(Box(new Vector3(0f, 0.12f, i * 0.22f), new Vector3(0.84f, 0.012f, 0.012f), 0.004f, 0f).Sub());
+            bridge.pieces = new List<PropPiece>
+            {
+                Piece(PShape("Drawbridge_Deck", deck.ToArray()), PropSlot.Wood),
+                Piece(PShape("Drawbridge_Beams",
+                    Box(new Vector3(0.88f, 0.1f, 0f), new Vector3(0.07f, 0.1f, 1f), 0.02f, 0f),
+                    Box(new Vector3(-0.88f, 0.1f, 0f), new Vector3(0.07f, 0.1f, 1f), 0.02f, 0f)), PropSlot.Stone),
+                Piece(PShape("Drawbridge_Ropes",
+                    Cone(new Vector3(0.88f, 0.2f, -0.95f), new Vector3(0.88f, 0.24f, -0.75f), 0.025f, 0.025f, 0f),
+                    Cone(new Vector3(-0.88f, 0.2f, -0.95f), new Vector3(-0.88f, 0.24f, -0.75f), 0.025f, 0.025f, 0.01f)), PropSlot.Accent),
+            };
+            all["Drawbridge"] = bridge;
+
+            // The ditch water over the crossing while the bridge is up (the path under it would read as a way across).
+            var gap = Recipe("DitchGap", new Vector2Int(2, 2), false, false, 300);
+            gap.palette = Palette(C("#6FB6D8"), MillWood, CloudStone, Meadow, WarmWindow, C("#A9DDF0"));
+            gap.yawJitter = 0f;
+            gap.scaleJitter = 0f;
+            gap.outline = 0f;
+            gap.spec = 0.6f;
+            gap.pieces = new List<PropPiece>
+            {
+                Piece(PShape("DitchGap_Water", Box(new Vector3(0f, 0.015f, 0f), new Vector3(1f, 0.03f, 1f), 0.01f, 0f)), PropSlot.Clay),
+                Piece(PShape("DitchGap_Ripples",
+                    Ell(new Vector3(0.3f, 0.045f, -0.2f), new Vector3(0.22f, 0.006f, 0.06f), 0f),
+                    Ell(new Vector3(-0.35f, 0.045f, 0.35f), new Vector3(0.18f, 0.006f, 0.05f), 0f)), PropSlot.Accent),
+            };
+            all["DitchGap"] = gap;
+
+            // The mill gear: a toothed wooden cog facing the player on an iron axle (turned with the sails).
+            var gear = Recipe("MillGear", new Vector2Int(1, 1), false, false, 700);
+            gear.palette = Palette(CloudStone, MillWood, C("#4A4442"), Meadow, WarmWindow, SailWhite);
+            gear.yawJitter = 0f;
+            gear.scaleJitter = 0f;
+            gear.resolution = 48;
+            var cog = new List<SdfPrimitive>
+            {
+                Cone(new Vector3(0f, 0f, -0.04f), new Vector3(0f, 0f, 0.04f), 0.22f, 0.22f, 0f),
+                Cone(new Vector3(0f, 0f, -0.06f), new Vector3(0f, 0f, 0.06f), 0.07f, 0.07f, 0f).Sub(),
+            };
+            for (int i = 0; i < 8; i++)
+            {
+                float a = i * 45f;
+                var d = Quaternion.Euler(0f, 0f, a) * Vector3.right;
+                cog.Add(Box(d * 0.25f, new Vector3(0.05f, 0.04f, 0.04f), 0.01f, 0.01f, new Vector3(0f, 0f, a)));
+            }
+            gear.pieces = new List<PropPiece>
+            {
+                Piece(PShape("MillGear_Cog", cog.ToArray()), PropSlot.Wood, PropMotion.Spin, 1f),
+                Piece(PShape("MillGear_Axle", Cone(new Vector3(0f, 0f, -0.12f), new Vector3(0f, 0f, 0.08f), 0.05f, 0.05f, 0f)), PropSlot.Stone, PropMotion.Spin, 1f),
+            };
+            all["MillGear"] = gear;
+            foreach (var r in all.Values) EditorUtility.SetDirty(r);
+            return all;
         }
 
         // ---- the hills ----

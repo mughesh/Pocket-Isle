@@ -51,6 +51,11 @@ Shader "Diorama/Grass"
             float4 _DioramaGrassPush;
             float  _DioramaScale;
             float  _RealmStill; // step 10a: 1 = a still realm (Galewick unrestored): only a tiny idle sway
+            // Step 10b (GustField): a gust front sweeping across the island. Map space: xy = origin, zw = unit direction;
+            // front: x = distance along it, y = band width, z = strength (0 = none); dir: world direction it blows.
+            float4 _DioramaGust;
+            float4 _DioramaGustFront;
+            float4 _DioramaGustDir;
 
             struct Attributes
             {
@@ -65,6 +70,7 @@ Shader "Diorama/Grass"
                 float  h          : TEXCOORD0;
                 float  tall       : TEXCOORD1;
                 float  variation  : TEXCOORD2;
+                float  gust       : TEXCOORD5;
                 float3 islandPos  : TEXCOORD3;
                 float2 mapXZ      : TEXCOORD4;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -98,6 +104,18 @@ Shader "Diorama/Grass"
                 world.xz += normalize(d + 0.0001) * push * 0.7 * k;
                 world.y -= push * 0.35 * k;
 
+                // Step 10b: the gust front bends blades the way it blows and flattens them as it passes.
+                float gust = 0.0;
+                if (_DioramaGustFront.z > 0.001)
+                {
+                    float along = dot(mapBase.xz - _DioramaGust.xy, _DioramaGust.zw) - _DioramaGustFront.x;
+                    float behind = saturate(-along / max(1e-4, _DioramaGustFront.y * 3.0)); // a short wake behind the band
+                    float band = exp(-along * along / max(1e-6, _DioramaGustFront.y * _DioramaGustFront.y));
+                    gust = _DioramaGustFront.z * max(band, behind * exp(-behind * 2.0) * 0.6 * step(along, 0.0));
+                    world.xyz += _DioramaGustDir.xyz * gust * 0.95 * k;
+                    world.y -= gust * 0.45 * k;
+                }
+
                 // Battle clearing: blades bend away from its centre and shrink to a fifth of their height.
                 float clear = _WindowClip > 0.5 ? DioramaClearing(mapBase.xz) : 0.0;
                 if (clear > 0.0)
@@ -113,6 +131,7 @@ Shader "Diorama/Grass"
                 o.tall = step(_TallThreshold * scale, height) * (1.0 - clear);
                 o.mapXZ = mapBase.xz;
                 o.variation = DioramaStableHash(mapBase.xz);
+                o.gust = gust;
                 return o;
             }
 
@@ -124,6 +143,7 @@ Shader "Diorama/Grass"
                 float3 tipCol = lerp(_ShortTip.rgb, _TallTip.rgb, i.tall);
                 float3 c = lerp(baseCol, tipCol, smoothstep(0.0, 1.0, i.h));
                 c *= 0.88 + i.variation * 0.24;
+                c += i.gust * smoothstep(0.2, 1.0, i.h) * float3(0.32, 0.3, 0.22); // the bright ripple band
                 if (_WindowClip > 0.5) c = DioramaFocus(c, i.mapXZ);
                 return float4(c, 1.0);
             }

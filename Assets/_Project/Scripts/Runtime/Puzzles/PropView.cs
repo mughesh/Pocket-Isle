@@ -15,13 +15,14 @@ namespace Diorama
         static readonly int RestoredSelfId = Shader.PropertyToID("_RestoredSelf");
         static readonly int GlowAId = Shader.PropertyToID("_GlowA");
         static readonly int GlowBId = Shader.PropertyToID("_GlowB");
+        static readonly int SpinSelfId = Shader.PropertyToID("_SpinSelf");
 
         readonly IslandBuilder _island;
         readonly MeshFilter _filter;
         readonly MeshRenderer _renderer;
         readonly MaterialPropertyBlock _block = new MaterialPropertyBlock();
         PropRecipe _recipe;
-        float _appliedRestored = float.NaN, _appliedClip = float.NaN;
+        float _appliedRestored = float.NaN, _appliedClip = float.NaN, _appliedSpin = float.NaN;
         Vector4 _appliedBoostA, _appliedBoostB;
 
         public readonly Transform transform;
@@ -30,6 +31,8 @@ namespace Diorama
         public float restoredSelf = -1f;
         /// <summary>Extra glow per slot (Clay, Wood, Stone, Leaf) and (Glow, Accent, -, -).</summary>
         public Vector4 glowBoostA, glowBoostB;
+        /// <summary>Step 10b: own angle (radians) for the recipe's spinning pieces (a flicked windmill); -1000 = the realm's wind.</summary>
+        public float spinSelf = -1000f;
         /// <summary>Clipped and sunk at the island window's edge (off while a hand holds it up in the air).</summary>
         public bool windowClip = true;
 
@@ -118,11 +121,12 @@ namespace Diorama
         void Apply()
         {
             float clip = windowClip ? 1f : 0f;
-            if (_appliedRestored == restoredSelf && _appliedClip == clip && _appliedBoostA == glowBoostA && _appliedBoostB == glowBoostB) return;
+            if (_appliedRestored == restoredSelf && _appliedClip == clip && _appliedBoostA == glowBoostA && _appliedBoostB == glowBoostB && _appliedSpin == spinSelf) return;
             _block.Clear();
             if (_recipe != null) _recipe.ApplyTo(_block);
             _block.SetFloat(WindowClipId, clip);
             _block.SetFloat(RestoredSelfId, restoredSelf);
+            _block.SetFloat(SpinSelfId, spinSelf);
             if (_recipe != null && (glowBoostA != Vector4.zero || glowBoostB != Vector4.zero))
             {
                 var p = _recipe.palette;
@@ -135,6 +139,7 @@ namespace Diorama
             _appliedClip = clip;
             _appliedBoostA = glowBoostA;
             _appliedBoostB = glowBoostB;
+            _appliedSpin = spinSelf;
         }
 
         public void Hide()

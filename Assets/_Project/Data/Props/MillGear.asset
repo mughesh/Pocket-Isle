@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 374f6b77629fa034d93d2a7945ac7885, type: 3}
+  m_Name: MillGear
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.PropRecipe
+  pieces:
+  - shape: {fileID: 11400000, guid: 7c64b481f450b6247aa9a06fc754519a, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 1
+    motion: 4
+    motionAmount: 1
+    budgetWeight: 0
+  - shape: {fileID: 11400000, guid: 891c3fd20639e494f92dfd430e57e140, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 2
+    motion: 4
+    motionAmount: 1
+    budgetWeight: 0
+  palette:
+  - restored: {r: 0.91054904, g: 0.8835062, b: 0.8304879, a: 1}
+    unrestored: {r: 0.8509804, g: 0.83137256, b: 0.78039217, a: 1}
+    glow: 0
+  - restored: {r: 0.5790589, g: 0.40900305, b: 0.24991849, a: 1}
+    unrestored: {r: 0.5411765, g: 0.39215687, b: 0.2509804, a: 1}
+    glow: 0
+  - restored: {r: 0.31050983, g: 0.28595772, b: 0.27492708, a: 1}
+    unrestored: {r: 0.2901961, g: 0.26666668, b: 0.25882354, a: 1}
+    glow: 0
+  - restored: {r: 0.6049454, g: 0.801451, b: 0.3700103, a: 1}
+    unrestored: {r: 0.5529412, g: 0.7490196, b: 0.36862746, a: 1}
+    glow: 0
+  - restored: {r: 1, g: 0.7797694, b: 0.44713724, a: 1}
+    unrestored: {r: 1, g: 0.8235294, b: 0.47843137, a: 1}
+    glow: 1
+  - restored: {r: 1, g: 0.98331803, b: 0.9391803, a: 1}
+    unrestored: {r: 0.95686275, g: 0.94509804, b: 0.9019608, a: 1}
+    glow: 0
+  tips:
+    on: 0
+    onSlot: 0
+    tipSlot: 0
+    at: 0
+    byHeight: 0
+  spec: 0.15
+  outline: 0.022
+  footprint: {x: 1, y: 1}
+  blocksWalking: 0
+  randomYaw: 0
+  yawJitter: 0
+  scaleJitter: 0
+  resolution: 48
+  triangleBudget: 700
+  bakedMesh: {fileID: 4300000, guid: 0dbdae5e989a2db4b83465a366b16d8d, type: 2}

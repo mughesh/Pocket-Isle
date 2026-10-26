@@ -105,7 +105,8 @@ namespace Diorama.EditorTools
         // ---- prop keys ----
         const char KGate = 'Z', KShrine = 'Y', KCottage = 'h', KMill = 'M', KSmallMill = 'm', KWall = 'w', KWallTurned = 'W',
             KFence = '-', KFenceTurned = '|', KSign = 's', KKitePost = 'p', KHay = 'b', KCloud = 'c', KTower = 'T',
-            KKiteRed = 'k', KKiteTeal = 'K', KKiteGold = 'g', KVent = 'e', KLeaves = 'v', KStones = 'o';
+            KKiteRed = 'k', KKiteTeal = 'K', KKiteGold = 'g', KVent = 'e', KLeaves = 'v', KStones = 'o',
+            KBridge = 'D', KBank = 'C';
 
         static readonly (char key, string recipe, bool turned)[] Keys =
         {
@@ -115,6 +116,7 @@ namespace Diorama.EditorTools
             (KHay, "HayBale", false), (KCloud, "CloudPuff", false), (KTower, "WindTower", false),
             (KKiteRed, "Kite", false), (KKiteTeal, "KiteTeal", false), (KKiteGold, "KiteGold", false),
             (KVent, "EmberVent", false), (KLeaves, "LeafPile", false), (KStones, "SteppingStones", false),
+            (KBridge, "Drawbridge", false), (KBank, "CloudPuff", false),
         };
 
         // ---- generation state ----
@@ -425,6 +427,8 @@ namespace Diorama.EditorTools
 
         static void Ridge()
         {
+            // Step 10b: the cloud bank (three puffs on the narrow path) and the drawbridge (raised) are puzzle gates.
+            foreach (var c in CloudXY) Ground(c.x, c.y, IslandMap.Path);
             // The narrow 1-wide ridge path through the hill band (y 47), the cloud bank's tiles on it.
             for (int x = 19; x <= 26; x++) Ground(x, 47, IslandMap.Path);
             for (int x = 19; x <= 26; x++)
@@ -437,6 +441,8 @@ namespace Diorama.EditorTools
             Patch(30f, 44.5f, 1.6f, 1f);
             Patch(25f, 43.5f, 1.4f, 0.9f);
             Prop(28, 47, KSign);
+            foreach (var c in CloudXY) Prop(c, KBank);
+            Prop(CrossingXY, KBridge);
         }
 
         static void Tower()
@@ -541,6 +547,15 @@ namespace Diorama.EditorTools
 
         static bool IsPath(int x, int y) => In(x, y) && _g[x, y] == IslandMap.Path;
 
+        /// <summary>A puzzle gate tile (x, y): the drawbridge over the ditch or a cloud bank puff (open once solved).</summary>
+        public static bool IsGate(int x, int y)
+        {
+            if (x >= CrossingXY.x && x <= CrossingXY.x + 1 && y >= DitchY0 && y <= DitchY1) return true;
+            foreach (var c in CloudXY)
+                if (c.x == x && c.y == y) return true;
+            return false;
+        }
+
         static string ZoneId(int x, int y)
         {
             foreach (var z in Zones) if (z.key == _z[x, y]) return z.id;
@@ -597,7 +612,7 @@ namespace Diorama.EditorTools
                 {
                     var t = new Vector2Int(x + dx, y - dy);
                     if (!In(t.x, t.y) || _p[t.x, t.y] != IslandMap.Empty || _covered.Contains(t) || _g[t.x, t.y] == IslandMap.Water ||
-                        _g[t.x, t.y] == IslandMap.Path && key != KGate && key != KShrine)
+                        _g[t.x, t.y] == IslandMap.Path && key != KGate && key != KShrine && key != KBridge && key != KBank)
                     {
                         Debug.LogWarning($"[Galewick] {recipe.name} at x{x} y{y}: tile x{t.x} y{t.y} is taken; skipped.");
                         return;
@@ -607,6 +622,7 @@ namespace Diorama.EditorTools
             foreach (var t in tiles)
             {
                 _covered.Add(t);
+                if (key == KBridge) continue; // the crossing stays path under the drawbridge
                 if (f != Vector2Int.one || _g[t.x, t.y] == IslandMap.Tree || _g[t.x, t.y] == IslandMap.Rock) _g[t.x, t.y] = IslandMap.Grass;
             }
             _p[x, y] = key;
@@ -627,7 +643,7 @@ namespace Diorama.EditorTools
         /// <summary>Walkable tiles the explorer could never reach become hills; tall grass crumbs under 4 tiles become grass.</summary>
         static void SealCutOff()
         {
-            bool Walkable(int x, int y) => In(x, y) && IslandMap.IsWalkable(_g[x, y]) && !Blocks(x, y);
+            bool Walkable(int x, int y) => In(x, y) && IslandMap.IsWalkable(_g[x, y]) && (!Blocks(x, y) || IsGate(x, y));
             var seen = new HashSet<Vector2Int> { ArriveXY };
             var queue = new Queue<Vector2Int>();
             queue.Enqueue(ArriveXY);
@@ -767,6 +783,13 @@ namespace Diorama.EditorTools
             var problems = new List<string>();
             if (map.Columns != Size || map.Rows != Size) problems.Add($"map is {map.Columns}x{map.Rows}, not {Size}x{Size}");
 
+            // closed = gate tiles (x, y) that stay shut; every other puzzle gate counts as open (solved).
+            bool Walk(Vector2Int t, ICollection<Vector2Int> closed)
+            {
+                var xy = new Vector2Int(t.x, Size - 1 - t.y);
+                if (closed != null && closed.Contains(xy)) return false;
+                return map.CanWalk(t) || IsGate(xy.x, xy.y) && IslandMap.IsWalkable(map.At(t));
+            }
             HashSet<Vector2Int> Flood(ICollection<Vector2Int> closed)
             {
                 var seen = new HashSet<Vector2Int>();
@@ -780,8 +803,7 @@ namespace Diorama.EditorTools
                     foreach (var d in new[] { Vector2Int.right, Vector2Int.left, Vector2Int.up, Vector2Int.down })
                     {
                         var n = t + d;
-                        if (seen.Contains(n) || !map.CanWalk(n)) continue;
-                        if (closed != null && closed.Contains(new Vector2Int(n.x, Size - 1 - n.y))) continue;
+                        if (seen.Contains(n) || !Walk(n, closed)) continue;
                         seen.Add(n);
                         queue.Enqueue(n);
                     }
@@ -815,12 +837,22 @@ namespace Diorama.EditorTools
             if (Flood(noRidge).Contains(Tile(TowerXY + new Vector2Int(0, -2)))) problems.Add("the tower is reachable without the ridge path (the hill band leaks)");
             if (blocked != null && Flood(blocked).Contains(Tile(TowerXY + new Vector2Int(0, -2)))) problems.Add("the tower is reachable past the blocked tiles");
 
+            // Step 10b: with the props in place (bridge raised, clouds parked) the kite field and the tower are shut.
+            if (map.CanWalk(Tile(CrossingXY)) == false && map.CanWalk(Tile(CloudXY[0])) == false)
+            {
+                var shut = new HashSet<Vector2Int>();
+                for (int x = 0; x < Size; x++)
+                    for (int y = 0; y < Size; y++)
+                        if (IsGate(x, y)) shut.Add(new Vector2Int(x, y));
+                if (Flood(shut).Contains(Tile(KiteXY[0]))) problems.Add("the kite field is reachable with the drawbridge up");
+            }
+
             int walkable = 0, tall = 0, cut = 0;
             for (int r = 0; r < Size; r++)
                 for (int c = 0; c < Size; c++)
                 {
                     var t = new Vector2Int(c, r);
-                    if (!map.CanWalk(t)) continue;
+                    if (!Walk(t, null)) continue;
                     walkable++;
                     if (map.At(t) == IslandMap.TallGrass) tall++;
                     if (!reach.Contains(t)) cut++;

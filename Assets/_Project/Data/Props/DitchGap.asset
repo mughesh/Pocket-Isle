@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 374f6b77629fa034d93d2a7945ac7885, type: 3}
+  m_Name: DitchGap
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.PropRecipe
+  pieces:
+  - shape: {fileID: 11400000, guid: 6358cd4a2f3c5f542b82b86006d52d36, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 0
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 0
+  - shape: {fileID: 11400000, guid: c007e0edcab66cd4b837e033c744fe2f, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 5
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 0
+  palette:
+  - restored: {r: 0.43932948, g: 0.7831477, b: 0.906353, a: 1}
+    unrestored: {r: 0.43529412, g: 0.7137255, b: 0.84705883, a: 1}
+    glow: 0
+  - restored: {r: 0.5790589, g: 0.40900305, b: 0.24991849, a: 1}
+    unrestored: {r: 0.5411765, g: 0.39215687, b: 0.2509804, a: 1}
+    glow: 0
+  - restored: {r: 0.91054904, g: 0.8835062, b: 0.8304879, a: 1}
+    unrestored: {r: 0.8509804, g: 0.83137256, b: 0.78039217, a: 1}
+    glow: 0
+  - restored: {r: 0.6049454, g: 0.801451, b: 0.3700103, a: 1}
+    unrestored: {r: 0.5529412, g: 0.7490196, b: 0.36862746, a: 1}
+    glow: 0
+  - restored: {r: 1, g: 0.7797694, b: 0.44713724, a: 1}
+    unrestored: {r: 1, g: 0.8235294, b: 0.47843137, a: 1}
+    glow: 1
+  - restored: {r: 0.6864167, g: 0.93489844, b: 1, a: 1}
+    unrestored: {r: 0.6627451, g: 0.8666667, b: 0.9411765, a: 1}
+    glow: 0
+  tips:
+    on: 0
+    onSlot: 0
+    tipSlot: 0
+    at: 0
+    byHeight: 0
+  spec: 0.6
+  outline: 0
+  footprint: {x: 2, y: 2}
+  blocksWalking: 0
+  randomYaw: 0
+  yawJitter: 0
+  scaleJitter: 0
+  resolution: 40
+  triangleBudget: 300
+  bakedMesh: {fileID: 4300000, guid: 2e93b6f169a9df84f8d568690cf34ea2, type: 2}
