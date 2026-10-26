@@ -125,7 +125,7 @@ namespace Diorama.EditorTools
             kh.save = Object.FindFirstObjectByType<GameSave>(FindObjectsInactive.Include);
             kh.ghosts = ghosts;
             kh.keeperSpecies = keeper;
-            kh.keeperLevel = 12;
+            kh.keeperLevel = KeeperKit.Level;
             kh.beaconMaterial = beacon;
             kh.shardRecipe = shardProps["FireShard"];
             kh.keeperSpot = new Vector2(4.5f, 2.7f);

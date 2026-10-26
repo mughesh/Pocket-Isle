@@ -1,0 +1,337 @@
+using System.Collections.Generic;
+using System.Text;
+using UnityEditor;
+using UnityEngine;
+
+namespace Diorama.EditorTools
+{
+    /// <summary>
+    /// Step 9e balance: a headless Keeper fight simulator and an XP curve check (bridge:
+    /// exec:Diorama.EditorTools.KeeperSim.Report). Fights run the real <see cref="BattleSystem"/> with
+    /// <see cref="KeeperRules"/>; the player is a simple "best move" AI: the hardest-hitting attack (a Water move while
+    /// the crown shield is up), a switch to the healthiest reserve below 30% HP (once per creature), the next one in
+    /// after a faint. No supports, no running.
+    /// </summary>
+    public static class KeeperSim
+    {
+        const string SpeciesDir = "Assets/_Project/Data/Creatures/Species";
+        public static readonly string[] Starters = { "Kilnpot", "Pebbloop", "Pufflet" };
+        public static readonly string[] FireCommons = { "Toastling", "Waxle", "Kettlewing", "Ashmole", "Coalbeetle", "Mapadillo", "Cindercap" };
+
+        public struct Outcome
+        {
+            public int fights, wins;
+            public int turns, survivors;
+            public float WinRate => fights > 0 ? wins / (float)fights : 0f;
+        }
+
+        public static IslingSpecies Load(string name) => AssetDatabase.LoadAssetAtPath<IslingSpecies>($"{SpeciesDir}/{name}.asset");
+
+        public static TypeChart Chart => AssetDatabase.LoadAssetAtPath<TypeChart>("Assets/_Project/Data/Battle/TypeChart.asset");
+
+        /// <summary><paramref name="fights"/> fights of a Lv <paramref name="level"/> party (the starter + two random fire commons) per starter.</summary>
+        public static Dictionary<string, Outcome> Run(IslingSpecies keeper, int keeperLevel, int level, int fights, int seed = 1)
+        {
+            var chart = Chart;
+            var commons = new List<IslingSpecies>();
+            foreach (var n in FireCommons)
+            {
+                var s = Load(n);
+                if (s != null) commons.Add(s);
+            }
+            var rnd = new SeededRandom(seed);
+            var all = new Dictionary<string, Outcome>();
+            foreach (var starterName in Starters)
+            {
+                var starter = Load(starterName);
+                if (starter == null || keeper == null || commons.Count < 2) continue;
+                var o = new Outcome();
+                for (int i = 0; i < fights; i++)
+                {
+                    int a = (int)(rnd.Next() * commons.Count), b = (a + 1 + (int)(rnd.Next() * (commons.Count - 1))) % commons.Count;
+                    var party = new List<IslingInstance> { new IslingInstance(starter, level), new IslingInstance(commons[a], level), new IslingInstance(commons[b], level) };
+                    var r = Fight(party, new IslingInstance(keeper, keeperLevel), chart, seed * 7919 + i, out int turns);
+                    o.fights++;
+                    o.turns += turns;
+                    if (r == BattleResult.Won)
+                    {
+                        o.wins++;
+                        foreach (var c in party)
+                            if (!c.IsFainted) o.survivors++;
+                    }
+                }
+                all[starterName] = o;
+            }
+            return all;
+        }
+
+        /// <summary>One Keeper fight to the end (at most 80 turns).</summary>
+        public static BattleResult Fight(List<IslingInstance> party, IslingInstance keeper, TypeChart chart, int seed, out int turns)
+        {
+            var switched = new HashSet<IslingInstance>();
+            bool Reserve(IslingInstance except)
+            {
+                foreach (var c in party)
+                    if (c != except && !c.IsFainted) return true;
+                return false;
+            }
+            BattleSystem battle = null;
+            battle = new BattleSystem(party[0], keeper, chart, seed, false, () => Reserve(battle.player.isling), new KeeperRules());
+            for (turns = 0; turns < 80 && !battle.IsOver; turns++)
+            {
+                var me = battle.player.isling;
+                if (battle.PlayerMustSwitch)
+                {
+                    battle.Switch(Healthiest(party, me));
+                    turns--;
+                    continue;
+                }
+                if (me.currentHp < me.MaxHp * 0.3f && !switched.Contains(me))
+                {
+                    var next = Healthiest(party, me);
+                    if (next != null && next.currentHp > next.MaxHp * 0.6f)
+                    {
+                        switched.Add(me);
+                        battle.Switch(next);
+                        continue;
+                    }
+                }
+                battle.PlayTurn(BestMove(battle, chart));
+            }
+            return battle.Result;
+        }
+
+        static IslingInstance Healthiest(List<IslingInstance> party, IslingInstance except)
+        {
+            IslingInstance best = null;
+            foreach (var c in party)
+                if (c != except && !c.IsFainted && (best == null || c.currentHp / (float)c.MaxHp > best.currentHp / (float)best.MaxHp)) best = c;
+            return best;
+        }
+
+        /// <summary>The attack with the most expected damage; the shield-breaking element first while the shield is up.</summary>
+        public static int BestMove(BattleSystem battle, TypeChart chart)
+        {
+            var moves = battle.player.Moves;
+            var k = battle.keeper;
+            int best = -1;
+            float bestScore = float.MinValue;
+            for (int i = 0; i < moves.Length; i++)
+            {
+                var m = moves[i];
+                if (m == null || m.kind != MoveKind.Attack) continue;
+                float score = m.power * m.accuracy / 100f * chart.Multiplier(m.element, battle.wild.isling.Element);
+                if (k != null && k.Shielded && m.element == k.breaksWith) score += 1000f;
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    best = i;
+                }
+            }
+            return best < 0 ? 0 : best;
+        }
+
+        // ---- XP curve ----
+
+        public struct TrailEstimate
+        {
+            public int grassHub, grassCinder;
+            public float battlesHub, battlesCinder;
+            public float level, levelP10, levelP90;
+        }
+
+        /// <summary>
+        /// Walks the normal trail on the real maps (hub: start, first grass, fire gate; Cinderwood: arrival, first grass,
+        /// plaza, springs, log, temple; shortest tile paths between them) <paramref name="runs"/> times with the real
+        /// encounter rules (2 scripted battles, then 3 grace steps and 12.5% per tall-grass step), the starter (Lv 5)
+        /// fighting and winning every battle. <paramref name="wander"/> repeats every grass tile that many times (players
+        /// who poke around).
+        /// </summary>
+        public static TrailEstimate Trail(int runs, float wander, int seed = 3)
+        {
+            var hub = AssetDatabase.LoadAssetAtPath<WorldMap>("Assets/_Project/Data/WorldMap_StillIsle.asset");
+            var cinder = AssetDatabase.LoadAssetAtPath<WorldMap>("Assets/_Project/Data/WorldMap_Cinderwood.asset");
+            var config = AssetDatabase.LoadAssetAtPath<ProgressionConfig>("Assets/_Project/Data/Battle/Progression.asset");
+            var starter = Load("Pebbloop");
+            var est = new TrailEstimate();
+            if (hub == null || cinder == null || config == null || starter == null) return est;
+            var fireGate = hub.gates.Find(g => g.id == "fire");
+            var hubPath = Chain(hub, Mark(hub, "start"), Mark(hub, "firstGrass"), fireGate.Front(0));
+            var cinderPath = Chain(cinder, Mark(cinder, "start"), Mark(cinder, "firstGrass"), Mark(cinder, "plaza"), Mark(cinder, "springs"),
+                Mark(cinder, "log"), Mark(cinder, "temple"));
+            est.grassHub = GrassOn(hub, hubPath);
+            est.grassCinder = GrassOn(cinder, cinderPath);
+
+            var rnd = new SeededRandom(seed);
+            var levels = new List<int>();
+            float bh = 0f, bc = 0f;
+            var firstTable = hub.GrassTableAt(Mark(hub, "firstGrass"));
+            for (int run = 0; run < runs; run++)
+            {
+                var me = new IslingInstance(starter, 5);
+                // The tutorial battle and the first encounter (Lv 3, scripted).
+                Progression.AddXp(me, config.Reward(3, false), config);
+                Progression.AddXp(me, config.Reward(3, false), config);
+                int since = 0;
+                bh += Walk(hub, hubPath, wander, me, config, rnd, ref since);
+                bc += Walk(cinder, cinderPath, wander, me, config, rnd, ref since);
+                levels.Add(me.level);
+            }
+            levels.Sort();
+            est.battlesHub = bh / runs + 2f;
+            est.battlesCinder = bc / runs;
+            float sum = 0f;
+            foreach (var l in levels) sum += l;
+            est.level = sum / runs;
+            est.levelP10 = levels[runs / 10];
+            est.levelP90 = levels[runs * 9 / 10];
+            return est;
+        }
+
+        static int Walk(WorldMap map, List<Vector2Int> path, float wander, IslingInstance me, ProgressionConfig config, SeededRandom rnd, ref int since)
+        {
+            int battles = 0;
+            foreach (var t in path)
+            {
+                if (map.At(t) != IslandMap.TallGrass) continue;
+                int repeats = Mathf.FloorToInt(wander) + (rnd.Next() < wander - Mathf.Floor(wander) ? 1 : 0);
+                for (int k = 0; k < repeats; k++)
+                {
+                    if (++since <= 3 || rnd.Next() >= 0.125f) continue;
+                    since = 0;
+                    var table = map.GrassTableAt(t);
+                    if (table == null || !table.Roll(rnd, out var wild, out bool rare)) continue;
+                    battles++;
+                    Progression.AddXp(me, config.Reward(wild.level, rare), config);
+                }
+            }
+            return battles;
+        }
+
+        static Vector2Int Mark(WorldMap map, string name) => map.TryGetLandmark(name, out var t) ? t : map.startTile;
+
+        static int GrassOn(WorldMap map, List<Vector2Int> path)
+        {
+            int n = 0;
+            foreach (var t in path)
+                if (map.At(t) == IslandMap.TallGrass) n++;
+            return n;
+        }
+
+        static List<Vector2Int> Chain(WorldMap map, params Vector2Int[] stops)
+        {
+            var all = new List<Vector2Int>();
+            for (int i = 1; i < stops.Length; i++) all.AddRange(PathBetween(map, stops[i - 1], stops[i]));
+            return all;
+        }
+
+        /// <summary>Shortest 4-way path on walkable layout tiles (props ignored: the puzzle props open), start excluded.</summary>
+        static List<Vector2Int> PathBetween(WorldMap map, Vector2Int from, Vector2Int to)
+        {
+            var prev = new Dictionary<Vector2Int, Vector2Int>();
+            var q = new Queue<Vector2Int>();
+            q.Enqueue(from);
+            prev[from] = from;
+            var dirs = new[] { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
+            while (q.Count > 0)
+            {
+                var c = q.Dequeue();
+                if (c == to) break;
+                foreach (var d in dirs)
+                {
+                    var n = c + d;
+                    if (prev.ContainsKey(n) || n.x < 0 || n.y < 0 || n.y >= map.Rows || n.x >= map.Columns) continue;
+                    if (n != to && !IslandMap.IsWalkable(map.At(n))) continue;
+                    prev[n] = c;
+                    q.Enqueue(n);
+                }
+            }
+            var path = new List<Vector2Int>();
+            if (!prev.ContainsKey(to)) return path;
+            for (var c = to; c != from; c = prev[c]) path.Add(c);
+            path.Reverse();
+            return path;
+        }
+
+        // ---- report ----
+
+        public static void Report()
+        {
+            var keeper = Load("Hearthstag");
+            var log = new StringBuilder("[KeeperSim] Hearthstag ");
+            if (keeper == null)
+            {
+                Debug.LogError("[KeeperSim] Hearthstag species missing.");
+                return;
+            }
+            int keeperLevel = KeeperLevel;
+            var k = new IslingInstance(keeper, keeperLevel);
+            log.Append($"Lv {keeperLevel}: HP {k.MaxHp} (a base-40 Lv {keeperLevel} has {BattleMath.MaxHp(40, keeperLevel)}), atk {k.Attack} def {k.Defense} spd {k.Speed}\n");
+            log.Append("| Party (Lv 9 x 3) | Fights | Win % | Avg turns | Survivors per win |\n|---|---|---|---|---|\n");
+            int fights = 0, wins = 0;
+            foreach (var kv in Run(keeper, keeperLevel, 9, 1000))
+            {
+                var o = kv.Value;
+                fights += o.fights;
+                wins += o.wins;
+                log.Append($"| {kv.Key} + 2 fire | {o.fights} | {o.WinRate:P0} | {o.turns / (float)o.fights:0.0} | {(o.wins > 0 ? o.survivors / (float)o.wins : 0f):0.0} |\n");
+            }
+            log.Append($"| All | {fights} | {wins / (float)Mathf.Max(1, fights):P0} | | |\n");
+            foreach (int lv in new[] { 6, 8, 10, 12 })
+            {
+                int f = 0, w = 0;
+                foreach (var kv in Run(keeper, keeperLevel, lv, 300))
+                {
+                    f += kv.Value.fights;
+                    w += kv.Value.wins;
+                }
+                log.Append($"  Lv {lv} party of 3: {w / (float)Mathf.Max(1, f):P0}\n");
+            }
+            log.Append("\n| Trail | Tall-grass tiles | Battles | Starter level at the temple (p10 / mean / p90) |\n|---|---|---|---|\n");
+            foreach (float wander in new[] { 1f, 2f, 3f })
+            {
+                var t = Trail(1000, wander);
+                log.Append($"| x{wander:0} grass (hub {t.grassHub}, Cinderwood {t.grassCinder}) | {(t.grassHub + t.grassCinder) * wander:0} | hub {t.battlesHub:0.0}, Cinderwood {t.battlesCinder:0.0} | " +
+                           $"{t.levelP10:0} / {t.level:0.0} / {t.levelP90:0} |\n");
+            }
+            Debug.Log(log.ToString());
+        }
+
+        /// <summary>Grid search over the Keeper's attack / defense (HP base 88 = 2.2x a base-40 at Lv 10), Lv 10, Lv 9 party.</summary>
+        public static void Tune()
+        {
+            var keeper = Object.Instantiate(Load("Hearthstag"));
+            var log = new StringBuilder("[KeeperSim] Tune (Lv 10, HP base 88), win % of a Lv 9 party of 3 (rows atk, cols def 8..16):\n");
+            keeper.baseStats.hp = 88;
+            for (int atk = 6; atk <= 12; atk++)
+            {
+                log.Append($"atk {atk,2}:");
+                for (int def = 8; def <= 16; def += 2)
+                {
+                    keeper.baseStats.attack = atk;
+                    keeper.baseStats.defense = def;
+                    int f = 0, w = 0;
+                    foreach (var kv in Run(keeper, 10, 9, 300))
+                    {
+                        f += kv.Value.fights;
+                        w += kv.Value.wins;
+                    }
+                    log.Append($" {w * 100 / Mathf.Max(1, f),3}");
+                }
+                log.Append('\n');
+            }
+            Object.DestroyImmediate(keeper);
+            Debug.Log(log.ToString());
+        }
+
+        /// <summary>The Keeper's level in MR_Main's Keeper Hall (or 10 when the scene isn't open).</summary>
+        static int KeeperLevel
+        {
+            get
+            {
+                var hall = Object.FindFirstObjectByType<KeeperHall>(FindObjectsInactive.Include);
+                return hall != null ? hall.keeperLevel : 10;
+            }
+        }
+    }
+}

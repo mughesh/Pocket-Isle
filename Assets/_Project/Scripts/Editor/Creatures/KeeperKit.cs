@@ -20,6 +20,10 @@ namespace Diorama.EditorTools
         const string MoveRoot = "Assets/_Project/Data/Battle/Moves";
         public const string CrystalPartName = "CrownCrystal";
 
+        // Step 9e balance (KeeperSim): Lv 10, HP ~2.2x a normal Lv 10, a Lv 9 party of 3 wins ~65%.
+        public const int Level = 10;
+        public const int KeeperHp = 88, KeeperAttack = 8, KeeperDefense = 9;
+
         public static IslingSpecies Write()
         {
             var roundEar = AssetDatabase.LoadAssetAtPath<CreaturePart>($"{Root}/Parts/RoundEar.asset");
@@ -129,7 +133,7 @@ namespace Diorama.EditorTools
 
             var species = Species("Hearthstag", Element.Fire, recipe, null, 0);
             // HP ~2.5x a normal Lv 12 Isling (their base HP is ~40-58).
-            species.baseStats = new BaseStats { hp = 115, attack = 11, defense = 14, speed = 8 };
+            species.baseStats = new BaseStats { hp = KeeperHp, attack = KeeperAttack, defense = KeeperDefense, speed = 8 };
             species.moves = new[] { emberShot, crownCharge, crownShield };
             species.keeper = true;
             EditorUtility.SetDirty(species);
