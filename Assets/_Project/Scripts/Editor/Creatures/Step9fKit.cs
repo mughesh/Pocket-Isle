@@ -368,7 +368,7 @@ namespace Diorama.EditorTools
         /// A gender-neutral kid: big cream head and a small teal tunic (the body; the tunic is the "socks" zone below the
         /// chin), a pointed teal hood with a cream lining (its own rigid piece, the point bent back: the top-down cue),
         /// two arm nubs with cream hands, two leg nubs with brown boots, a brown backpack and a small lantern on a pivot
-        /// glowing the Spirit's colour. Eyes are flat face marks, cheeks painted patches (cheap). About 2 cm tall at zoom 1, under 3k
+        /// glowing the Spirit's colour. Eyes are flat face marks, cheeks painted patches (cheap). About 4 cm tall at zoom 1, under 3k
         /// triangles. Motion lives in <see cref="ExplorerView"/> (it finds the parts by name).
         /// </summary>
         public static CreatureRecipe Explorer()
@@ -418,7 +418,8 @@ namespace Diorama.EditorTools
                 Sphere(new Vector3(0f, 0.28f, 0.02f), 0.34f, 0f),
                 Cone(new Vector3(0f, -0.02f, 0f), new Vector3(0f, -0.4f, 0f), 0.19f, 0.27f, 0.08f),
                 Floor(-0.45f));
-            var recipe = Recipe("Explorer", body, 0.0126f,
+            // Mugesh, Oct 26: 2 cm "fits on a creature's hand"; now about a starter's height (~4 cm with the hood).
+            var recipe = Recipe("Explorer", body, 0.0245f,
                 new CreaturePalette
                 {
                     baseColor = Hex("#F5EDDA"), belly = Hex("#F5EDDA"), accent = Hex("#EBA28E"), socks = Hex("#2A7A7A"),

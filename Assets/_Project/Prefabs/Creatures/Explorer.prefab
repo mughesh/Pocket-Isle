@@ -862,7 +862,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8255370020105003464}
   - component: {fileID: 8420832083653867265}
-  - component: {fileID: 980242334293688549}
+  - component: {fileID: 4924498990557881424}
   m_Layer: 0
   m_Name: Explorer
   m_TagString: Untagged
@@ -899,11 +899,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.CreatureView
   rig: {fileID: 2294152867891002}
-  rigPosition: {x: 0, y: 0.0035311386, z: 0}
-  rigScale: 0.011770462
-  height: 0.016131138
-  centerHeight: 0.0063
-  sideRestHeight: 0.004007948
+  rigPosition: {x: 0, y: 0.0068661026, z: 0}
+  rigScale: 0.022887008
+  height: 0.031366102
+  centerHeight: 0.01225
+  sideRestHeight: 0.0077932323
   idle:
     breathe: 0.01
     breatheSpeed: 2
@@ -1329,8 +1329,8 @@ MonoBehaviour:
   lookDistance: 1.2
   maxHeadTurn: 30
   hopSeconds: 0.35
-  hopHeight: 0.0037800001
---- !u!114 &980242334293688549
+  hopHeight: 0.00735
+--- !u!114 &4924498990557881424
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1345,7 +1345,7 @@ MonoBehaviour:
   walkSwing: 28
   runSwing: 42
   runLean: 12
-  bounce: 0.0018
+  bounce: 0.0034
   glance: 35
   cheerSeconds: 1.1
 --- !u!1 &6249085922444773239
@@ -1373,8 +1373,8 @@ Transform:
   m_GameObject: {fileID: 6249085922444773239}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.0035311386, z: 0}
-  m_LocalScale: {x: 0.011770462, y: 0.011770462, z: 0.011770462}
+  m_LocalPosition: {x: 0, y: 0.0068661026, z: 0}
+  m_LocalScale: {x: 0.022887008, y: 0.022887008, z: 0.022887008}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7100402079891771630}

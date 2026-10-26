@@ -19,7 +19,7 @@ namespace Diorama
         [Tooltip("Forward lean while running, degrees.")]
         public float runLean = 12f;
         [Tooltip("Bounce per tile, metres at zoom 1.")]
-        public float bounce = 0.0018f;
+        public float bounce = 0.0034f;
         [Tooltip("Glance to the side while standing, degrees.")]
         public float glance = 35f;
         public float cheerSeconds = 1.1f;
