@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Diorama
@@ -23,8 +24,11 @@ namespace Diorama
 
         [Header("Map anchors (props grid: column, row)")]
         public Vector2Int bellows;
-        [Tooltip("Lit in this order (nearest the bellows first).")]
+        [Tooltip("Lit in this order (nearest the bellows first). Step 9f: east of the door, over the arch, west of it.")]
         public Vector2Int[] braziers = new Vector2Int[3];
+        [Tooltip("Step 9f: per brazier, x = how far back toward the cliff and y = how high it stands (tiles). Mugesh, Oct 26: " +
+                 "they sit round the door (right, over the arch, left) so all three stay in the window.")]
+        public Vector2[] brazierLift = new Vector2[0];
         [Tooltip("The forge door (3 x 1, its left tile).")]
         public Vector2Int door;
 
@@ -38,6 +42,9 @@ namespace Diorama
         public float pipeBack = 0.38f;
         [Tooltip("The bellows' nozzle in its own shape units (+X = west).")]
         public Vector3 nozzle = new Vector3(0.38f, 0.3f, -0.3f);
+        [Tooltip("Step 9f: the pipe climbs the door's sides and runs over the arch at this height (tiles), this far out from the frame's edges.")]
+        public float pipeOverDoor = 2.95f;
+        public float pipeDoorMargin = 0.75f;
         [Tooltip("Glow pulse speed along the pipe, tiles per second.")]
         public float pulseSpeed = 8f;
 
@@ -170,7 +177,7 @@ namespace Diorama
                 view.SetRecipe(brazierCold);
                 view.restoredSelf = -1f;
             }
-            view.Place(braziers[i], 0f, Quaternion.identity, here);
+            view.Place(BrazierTile(i), Lift(i).y, Quaternion.identity, here);
         }
 
         // ---- pumping ----
@@ -191,22 +198,57 @@ namespace Diorama
             if (_shown == was || fx == null) return;
             int i = Mathf.Clamp(_shown / PerBrazier, 0, braziers.Length - 1);
             float tile = TileWorld;
-            fx.Burst(MapWorld(new Vector3(braziers[i].x, 0.6f, braziers[i].y)), 6, new Color(0.5f, 0.48f, 0.46f, 0.7f), tile * 0.2f, 0.9f, tile * 0.05f, Vector3.up * tile * 0.5f);
+            fx.Burst(MapWorld(BrazierTop(i, 0.6f)), 6, new Color(0.5f, 0.48f, 0.46f, 0.7f), tile * 0.2f, 0.9f, tile * 0.05f, Vector3.up * tile * 0.5f);
         }
 
-        /// <summary>A glow runs from the nozzle up the riser, along the pipe and down into brazier <paramref name="i"/>.</summary>
-        IEnumerator Pulse(int i, int strokes)
+        Vector2 Lift(int i) => brazierLift != null && i < brazierLift.Length ? brazierLift[i] : Vector2.zero;
+
+        /// <summary>Where brazier <paramref name="i"/> stands (map column, row; back toward the cliff is a lower row).</summary>
+        Vector2 BrazierTile(int i) => new Vector2(braziers[i].x, braziers[i].y - Lift(i).x);
+
+        Vector3 BrazierTop(int i, float above)
+        {
+            var t = BrazierTile(i);
+            return new Vector3(t.x, Lift(i).y + above, t.y);
+        }
+
+        /// <summary>
+        /// The pulse's way along the pipe to brazier <paramref name="i"/> (map units): the nozzle, the riser, then along
+        /// the cliff foot; past the door's near side (the bellows is east of the door) it climbs, runs over the arch, and
+        /// comes down the far side for a brazier beyond it; a raised brazier is fed from below.
+        /// </summary>
+        List<Vector3> PipePath(int i)
         {
             var b = braziers[i];
-            Vector3 riser = new Vector3(NozzleMap.x, pipeHeight, bellows.y - pipeBack);
-            Vector3[] path =
+            float z = bellows.y - pipeBack, lift = Lift(i).y;
+            float near = door.x + 2 + pipeDoorMargin, far = door.x - pipeDoorMargin;
+            var path = new List<Vector3> { NozzleMap, new Vector3(NozzleMap.x, pipeHeight, z) };
+            if (b.x < near)
             {
-                NozzleMap, riser, new Vector3(b.x, pipeHeight, b.y - pipeBack), new Vector3(b.x, 0.62f, b.y - 0.17f),
-            };
+                path.Add(new Vector3(near, pipeHeight, z));
+                path.Add(new Vector3(near, pipeOverDoor, z));
+                if (lift > 0f)
+                {
+                    path.Add(new Vector3(b.x, pipeOverDoor, z));
+                    path.Add(BrazierTop(i, 0.3f));
+                    return path;
+                }
+                path.Add(new Vector3(far, pipeOverDoor, z));
+                path.Add(new Vector3(far, pipeHeight, z));
+            }
+            path.Add(new Vector3(b.x, pipeHeight, z));
+            path.Add(new Vector3(b.x, 0.62f, b.y - 0.17f));
+            return path;
+        }
+
+        /// <summary>A glow runs from the nozzle up the riser, along the pipe and into brazier <paramref name="i"/>.</summary>
+        IEnumerator Pulse(int i, int strokes)
+        {
+            var path = PipePath(i);
             var orb = fx != null ? fx.Get(BattleFx.Shape.Orb) : null;
             var warm = new Color(1f, 0.62f, 0.25f);
             if (orb != null) orb.Set(Color.white, warm, 1f, 1.5f, 1f, 0.3f);
-            for (int s = 0; s < path.Length - 1; s++)
+            for (int s = 0; s < path.Count - 1; s++)
             {
                 float length = (path[s + 1] - path[s]).magnitude;
                 for (float d = 0f; d < length; d += pulseSpeed * Time.deltaTime)
@@ -229,7 +271,7 @@ namespace Diorama
             if (strokes <= _shown) return;
             _shown = Mathf.Max(_shown, strokes);
             float tile = TileWorld;
-            Vector3 top = MapWorld(new Vector3(braziers[i].x, 0.62f, braziers[i].y));
+            Vector3 top = MapWorld(BrazierTop(i, 0.62f));
             bool lit = strokes % PerBrazier == 0;
             if (fx != null) fx.Burst(top, lit ? 30 : 8, new Color(1f, 0.65f, 0.25f), tile * (lit ? 0.9f : 0.35f), lit ? 0.9f : 0.5f, tile * 0.06f, Vector3.up * tile * (lit ? 1f : 0.4f));
             if (!lit) return;

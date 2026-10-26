@@ -5,17 +5,21 @@ using static Diorama.EditorTools.StarterKit;
 namespace Diorama.EditorTools
 {
     /// <summary>
-    /// Step 9b forge props. The map gets Bellows (with its press pad) and ForgePipe (one 1 x 1 prop whose iron pipe
-    /// runs <see cref="PipeSpan"/> tiles each way along the cliff foot: from the bellows' nozzle 3 tiles east of its
-    /// tile to the braziers 1 east, 1 west and 3 west of it). The forge puzzle draws its own pieces: BellowsBody (squashes under
+    /// Step 9b forge props. The map gets Bellows (with its press pad) and ForgePipe (one 1 x 1 prop on the door's
+    /// east tile; step 9f layout round the door: from the bellows' nozzle 2 tiles east, over the brazier 1 east, up the
+    /// door's east side, across over the arch (feeding the brazier there), down the west side to the brazier 3 west). The forge puzzle draws its own pieces: BellowsBody (squashes under
     /// the finger), BrazierWarm (coals glowing, no flame yet), ForgeDoorFrame
     /// (the forge mouth without its inside, a glow panel behind) and ForgeDoorLeaf (the iron-strapped door that sinks
     /// into the ground). Shape units are tiles; shape +X is map west (lower columns), +Z faces the player.
     /// </summary>
     public static partial class PropKit
     {
-        /// <summary>The pipe prop sits on the middle tile; the bellows is this many tiles east of it (see CinderwoodTools).</summary>
-        public const int PipeSpan = 3;
+        /// <summary>The bellows is this many tiles east of the pipe prop's tile (see CinderwoodTools).</summary>
+        public const int PipeSpan = 2;
+        /// <summary>Step 9f: the run over the arch (tiles), and the raised brazier on it: back toward the cliff, height.</summary>
+        public const float PipeOverDoor = 2.95f, TopBrazierBack = 0.38f, TopBrazierHeight = 3f;
+        /// <summary>The pipe's climbs beside the door, this far out from the door's outer tiles' centres (tiles).</summary>
+        public const float PipeDoorMargin = 0.75f;
         /// <summary>Pipe run height and its offset back toward the cliff (tiles), shared with the forge puzzle's glow pulses.</summary>
         public const float PipeHeight = 0.72f, PipeBack = 0.38f;
         /// <summary>
@@ -75,9 +79,10 @@ namespace Diorama.EditorTools
         };
 
         /// <summary>
-        /// The iron pipe along the cliff foot: rises from the bellows' nozzle (3 tiles east of this tile), runs west at
-        /// <see cref="PipeHeight"/> to 3 tiles west, and bends down over the braziers 1 east, 1 west and 3 west of here.
-        /// Brackets into the cliff. Walk-through (it hangs at the back of its tiles).
+        /// The iron pipe (this prop on the door's east tile, shape +X = west): rises from the bellows' nozzle 2 tiles east,
+        /// runs west at <see cref="PipeHeight"/> and drops into the brazier 1 east, climbs beside the door, runs over the
+        /// arch at <see cref="PipeOverDoor"/> with a bracket shelf for the raised brazier 1 west, comes down the far side
+        /// and drops into the brazier 3 west. Brackets into the cliff. Walk-through (it hangs at the back of its tiles).
         /// </summary>
         static PropRecipe ForgePipe()
         {
@@ -89,19 +94,30 @@ namespace Diorama.EditorTools
             pipe.outline = 0.016f;
             float h = PipeHeight, z = -PipeBack, r = 0.04f;
             float east = -(PipeSpan - 0.38f); // the nozzle (shape +X is west)
+            float o = PipeOverDoor, near = -PipeDoorMargin, far = 2f + PipeDoorMargin; // this tile is the door's east one
             var prims = new List<SdfPrimitive>
             {
                 Cone(new Vector3(east, 0.3f, z), new Vector3(east, h, z), r, r, 0f),
                 Sphere(new Vector3(east, h, z), r * 1.15f, 0.01f),
-                Cone(new Vector3(east, h, z), new Vector3(PipeSpan, h, z), r, r, 0.01f),
+                Cone(new Vector3(east, h, z), new Vector3(near, h, z), r, r, 0.01f),
+                Sphere(new Vector3(near, h, z), r * 1.15f, 0.01f),
+                Cone(new Vector3(near, h, z), new Vector3(near, o, z), r, r, 0.01f),
+                Sphere(new Vector3(near, o, z), r * 1.15f, 0.01f),
+                Cone(new Vector3(near, o, z), new Vector3(far, o, z), r, r, 0.01f),
+                Sphere(new Vector3(far, o, z), r * 1.15f, 0.01f),
+                Cone(new Vector3(far, o, z), new Vector3(far, h, z), r, r, 0.01f),
+                Sphere(new Vector3(far, h, z), r * 1.15f, 0.01f),
+                Cone(new Vector3(far, h, z), new Vector3(3f, h, z), r, r, 0.01f),
+                // The shelf the raised brazier stands on, over the arch.
+                Box(new Vector3(1f, o + 0.01f, -TopBrazierBack), new Vector3(0.24f, 0.03f, 0.2f), 0.01f, 0.02f),
             };
-            foreach (float x in new[] { -1f, 1f, 3f })
+            foreach (float x in new[] { -1f, 3f })
             {
                 prims.Add(Sphere(new Vector3(x, h, z), r * 1.2f, 0.01f));
                 prims.Add(Cone(new Vector3(x, h, z), new Vector3(x, 0.64f, -0.17f), r * 0.9f, r * 0.8f, 0.02f));
             }
-            foreach (float x in new[] { -2f, 0f, 2f })
-                prims.Add(Box(new Vector3(x, h, z - 0.06f), new Vector3(0.03f, 0.07f, 0.05f), 0.01f, 0.015f));
+            foreach (var (x, y) in new[] { (-1.6f, h), (near, 1.8f), (far, 1.8f), (0.2f, o), (1.8f, o), (far, h) })
+                prims.Add(Box(new Vector3(x, y, z - 0.12f), new Vector3(0.04f, 0.06f, 0.12f), 0.01f, 0.015f));
             pipe.pieces = new List<PropPiece> { Piece(PShape("ForgePipe_Iron", prims.ToArray()), PropSlot.Clay) };
             return pipe;
         }

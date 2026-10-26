@@ -140,6 +140,28 @@ namespace Diorama.EditorTools
             Object.DestroyImmediate(species);
         }
 
+        /// <summary>
+        /// After Mugesh's test: the forge braziers round the door (east, over the arch, west) instead of a row running
+        /// out of the window. Rewrites and bakes the pipe prop, rewrites the Cinderwood map, moves the bellows and the
+        /// braziers on the forge puzzle.
+        /// </summary>
+        public static void Forge()
+        {
+            var props = PropKit.WriteCinderwoodProps();
+            var pipe = PropBaker.Bake(props["ForgePipe"]);
+            Step9aSetup.MapOnly();
+            var forge = Object.FindFirstObjectByType<ForgeBellows>(FindObjectsInactive.Include);
+            if (forge == null)
+            {
+                Debug.LogError("[Step9f] Forge: no ForgeBellows in the open scene.");
+                return;
+            }
+            Step9bSetup.PlaceForge(forge);
+            SaveScene();
+            Debug.Log($"[Step9f] Forge: pipe {pipe}; bellows c{forge.bellows.x} r{forge.bellows.y}, braziers " +
+                      string.Join(", ", System.Array.ConvertAll(forge.braziers, b => $"c{b.x} r{b.y}")) + ".");
+        }
+
         /// <summary>E: the five fire evolutions as full recipes from sheet 11 (bake, registry, shots 9f_&lt;name&gt;.png).</summary>
         public static void Evolutions() => Build("Fire evolutions (sheet 11)", Step9fKit.Forgehorn(), Step9fKit.Emberdillo(), Step9fKit.Cindermole(),
             Step9fKit.Cinderbloom(), Step9fKit.Pyrecrane());

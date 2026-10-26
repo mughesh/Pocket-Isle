@@ -29,11 +29,14 @@ namespace Diorama.EditorTools
         public static readonly Vector2Int ShrineXY = new Vector2Int(24, 33);  // 2 x 2, front y 31
         public static readonly Vector2Int LogXY = new Vector2Int(20, 45);     // 2 x 1 across the trail
         public static readonly Vector2Int DoorXY = new Vector2Int(19, 56);    // forge door, 3 x 1
-        // Step 9b: the bellows beside the door, its pipe along the cliff foot, the braziers in a row under the pipe
-        // (lit nearest first). The pipe prop sits PropKit.PipeSpan tiles west of the bellows.
-        public static readonly Vector2Int BellowsXY = new Vector2Int(18, 55);
-        public static readonly Vector2Int PipeXY = new Vector2Int(18 - PropKit.PipeSpan, 55);
-        public static readonly Vector2Int[] BrazierXY = { new Vector2Int(16, 55), new Vector2Int(14, 55), new Vector2Int(12, 55) };
+        // Step 9b: the bellows beside the door and its pipe along the cliff foot. Step 9f (Mugesh, Oct 26: the third of
+        // three braziers in a row was out of the window): the braziers sit round the door, lit nearest first: east of it,
+        // over the arch (raised, no map prop: TopBrazier) and west of it. The pipe prop (on the door's east tile) sits
+        // PropKit.PipeSpan tiles west of the bellows.
+        public static readonly Vector2Int BellowsXY = new Vector2Int(23, 55);
+        public static readonly Vector2Int PipeXY = new Vector2Int(23 - PropKit.PipeSpan, 55);
+        public static readonly Vector2Int[] BrazierXY = { new Vector2Int(22, 55), new Vector2Int(20, 55), new Vector2Int(18, 55) };
+        public const int TopBrazier = 1;
         /// <summary>Step 9c: the temple's return gate (2 x 1, front y 51), hidden until the Keeper is calmed (KeeperHall).</summary>
         public static readonly Vector2Int TempleGateXY = new Vector2Int(24, 52);
         static readonly Vector2Int FirstGrassXY = new Vector2Int(15, 7);
@@ -491,7 +494,8 @@ namespace Diorama.EditorTools
             }
             Ground(DoorXY.x, DoorXY.y, IslandMap.Grass);
             Prop(DoorXY, KDoor);
-            foreach (var b in BrazierXY) Prop(b, KBrazier);
+            for (int i = 0; i < BrazierXY.Length; i++)
+                if (i != TopBrazier) Prop(BrazierXY[i], KBrazier);
             Prop(TempleGateXY, KGate);
             Prop(BellowsXY, KBellows);
             Prop(PipeXY, KPipe);

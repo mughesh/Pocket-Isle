@@ -2544,11 +2544,15 @@ MonoBehaviour:
   explorer: {fileID: 374318554}
   swap: {fileID: 221433162}
   fx: {fileID: 1078587927}
-  bellows: {x: 18, y: 4}
+  bellows: {x: 23, y: 4}
   braziers:
-  - {x: 16, y: 4}
-  - {x: 14, y: 4}
-  - {x: 12, y: 4}
+  - {x: 22, y: 4}
+  - {x: 20, y: 4}
+  - {x: 18, y: 4}
+  brazierLift:
+  - {x: 0, y: 0}
+  - {x: 0.38, y: 3}
+  - {x: 0, y: 0}
   door: {x: 19, y: 3}
   bodyRecipe: {fileID: 11400000, guid: b6f4ed7ffb944fd4c9f6bbfa3eab50af, type: 2}
   brazierCold: {fileID: 11400000, guid: 771dd8e345ee42345b16f0cd0367744c, type: 2}
@@ -2559,6 +2563,8 @@ MonoBehaviour:
   pipeHeight: 0.72
   pipeBack: 0.38
   nozzle: {x: 0.38, y: 0.3, z: -0.3}
+  pipeOverDoor: 2.95
+  pipeDoorMargin: 0.75
   pulseSpeed: 8
   glowSeconds: 1.6
   openSeconds: 2.6
@@ -2596,7 +2602,7 @@ MonoBehaviour:
   lessonLine: cinder.bellows.first
   ghostClip: poke
   ghostScale: 1
-  pad: {x: 18, y: 4}
+  pad: {x: 23, y: 4}
   padHeight: 0.57
   pressTravel: 0.3
   pressRadius: 0.5

@@ -185,6 +185,26 @@ namespace Diorama.EditorTools
 
         // ---- C: the forge (bellows, pipes, braziers, door) ----
 
+        /// <summary>The bellows (the pump's pad) and the braziers' tiles and lifts (step 9f: round the door, one over the arch).</summary>
+        public static void PlaceForge(ForgeBellows forge)
+        {
+            Undo.RecordObject(forge, "Forge layout");
+            var bellows = CinderwoodTools.Tile(CinderwoodTools.BellowsXY);
+            forge.bellows = bellows;
+            forge.braziers = System.Array.ConvertAll(CinderwoodTools.BrazierXY, CinderwoodTools.Tile);
+            forge.brazierLift = new Vector2[forge.braziers.Length];
+            forge.brazierLift[CinderwoodTools.TopBrazier] = new Vector2(PropKit.TopBrazierBack, PropKit.TopBrazierHeight);
+            forge.pipeOverDoor = PropKit.PipeOverDoor;
+            forge.pipeDoorMargin = PropKit.PipeDoorMargin;
+            EditorUtility.SetDirty(forge);
+            if (forge.pump != null)
+            {
+                Undo.RecordObject(forge.pump, "Forge layout");
+                forge.pump.pad = bellows;
+                EditorUtility.SetDirty(forge.pump);
+            }
+        }
+
         static void Forge(Transform root, WorldMap map, StringBuilder log)
         {
             var pump = Child<PumpPiece>(root, "Forge Bellows");
@@ -193,14 +213,12 @@ namespace Diorama.EditorTools
             Undo.RecordObject(pump, "Step 9b");
             Undo.RecordObject(forge, "Step 9b");
             Common(pump, map);
-            var bellows = CinderwoodTools.Tile(CinderwoodTools.BellowsXY);
             pump.id = "cinder.bellows";
             pump.reach = 4;
             pump.lessonLine = "cinder.bellows.first";
             // Poke the pad (Mugesh, Oct 26): the recorded poke ghost shows it.
             pump.ghostClip = "poke";
             pump.ghostScale = 1f;
-            pump.pad = bellows;
             pump.padHeight = PropKit.BellowsTop;
             pump.pressTravel = 0.3f;
             pump.pressRadius = 0.5f;
@@ -218,8 +236,7 @@ namespace Diorama.EditorTools
             forge.explorer = pump.explorer;
             forge.swap = Object.FindFirstObjectByType<SceneSwap>(FindObjectsInactive.Include);
             forge.fx = pump.fx;
-            forge.bellows = bellows;
-            forge.braziers = System.Array.ConvertAll(CinderwoodTools.BrazierXY, CinderwoodTools.Tile);
+            PlaceForge(forge);
             forge.door = CinderwoodTools.Tile(CinderwoodTools.DoorXY);
             forge.bodyRecipe = PropKit.Load("BellowsBody");
             forge.brazierCold = PropKit.Load("Brazier");
