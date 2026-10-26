@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28966354f9950c5429c46b779a504dcd, type: 3}
+  m_Name: move.shoot.water
+  m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
+  id: move.shoot.water
+  clips:
+  - {fileID: 8300000, guid: 95e1ccba29aee1b439c96ec62fd4a92a, type: 3}
+  - {fileID: 8300000, guid: e01c75d9d43f914469e3a68c315b1324, type: 3}
+  volume: 0.6
+  volumeJitter: 0.05
+  pitchMin: 0.97
+  pitchMax: 1.03
+  pitchStepSemitones: 0
+  bus: 2
+  spatial: 1
+  minDistance: 0.1
+  maxDistance: 1.5
+  loop: 0
+  maxVoices: 2
+  minInterval: 0.03
+  priority: 70
+  awaitingClips: 0
+  notes: 
+  review:
+    status: 0
+    note: 

@@ -18,7 +18,7 @@ namespace Diorama.Audio.EditorTools
         {
             var sb = new StringBuilder();
             sb.AppendLine($"Audio Lab report {System.DateTime.Now:yyyy-MM-dd HH:mm}  preview backend: {AudioPreview.Backend}");
-            sb.AppendLine("id | mode | s | peak dB | rms dB | >9k % | seam % | flags");
+            sb.AppendLine("id | mode | s | peak dB | rms dB | >9k % | seam (x usual step) | flags");
             int problems = 0;
             foreach (var p in SynthBaker.AllPatches())
             {
@@ -31,15 +31,33 @@ namespace Diorama.Audio.EditorTools
                     if (float.IsNaN(peak) || float.IsNaN(rms)) flags.Append(" NaN");
                     if (rms < -45f) flags.Append(" quiet");
                     if (high > 0.02f) flags.Append(" bright");
-                    if (p.mode == SynthMode.Loop && seam > 0.05f) flags.Append(" seam");
+                    if (p.mode == SynthMode.Loop && seam > 4f) flags.Append(" seam");
                     if (p.mode != SynthMode.Loop && (Mathf.Abs(data[0]) > 0.01f || Mathf.Abs(data[data.Length - 1]) > 0.01f)) flags.Append(" click");
                     if (flags.Length > 0) problems++;
-                    sb.AppendLine($"{p.id}{(p.variants > 1 ? $"_v{v + 1}" : "")} | {p.mode} | {data.Length / (float)SynthPatch.SampleRate:0.00} | {peak:0.0} | {rms:0.0} | {high * 100f:0.00} | {seam * 100f:0.0} |{flags}");
+                    sb.AppendLine($"{p.id}{(p.variants > 1 ? $"_v{v + 1}" : "")} | {p.mode} | {data.Length / (float)SynthPatch.SampleRate:0.00} | {peak:0.0} | {rms:0.0} | {high * 100f:0.00} | {seam:0.0} |{flags}");
                 }
             }
             sb.AppendLine($"problems: {problems}");
             Directory.CreateDirectory(Path.GetDirectoryName(ReportPath));
             File.WriteAllText(ReportPath, sb.ToString());
+        }
+
+        /// <summary>Resets every recipe patch to its code recipe (keeps reviews), bakes and syncs cues. Only for unreviewed batches.</summary>
+        public static void ReapplyRecipesAndBake()
+        {
+            int n = 0;
+            foreach (var p in SynthBaker.AllPatches())
+            {
+                var r = SynthRecipes.Find(p.id);
+                if (r == null || r.build == null) continue;
+                SynthRecipes.Apply(p, r);
+                EditorUtility.SetDirty(p);
+                n++;
+            }
+            AssetDatabase.SaveAssets();
+            SynthBaker.CreateAndBakeAll();
+            AudioCueTools.SyncAll();
+            Debug.Log($"[AudioLab] Reapplied {n} recipes.");
         }
 
         /// <summary>Bakes a throwaway one-shot and loop, logs their import settings, then deletes them.</summary>

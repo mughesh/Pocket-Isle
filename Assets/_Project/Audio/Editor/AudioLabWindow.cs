@@ -200,7 +200,7 @@ namespace Diorama.Audio.EditorTools
             DrawWave(waveRect);
             float seconds = _render != null ? _render.Length / (float)SynthPatch.SampleRate : 0f;
             var facts = $"{seconds:0.00} s   peak {_peakDb:0.0} dBFS   RMS {_rmsDb:0.0} dBFS   above 9 kHz {_highShare * 100f:0.0}%";
-            if (p.mode == SynthMode.Loop) facts += $"   loop seam {_seam * 100f:0.0}%";
+            if (p.mode == SynthMode.Loop) facts += $"   loop seam {_seam:0.0}x (above 4 = tick)";
             if (p.variants > 1) facts += $"   showing variant {_renderVariant + 1}/{p.variants}";
             EditorGUILayout.LabelField(facts, EditorStyles.miniLabel);
             if (_highShare > 0.02f) EditorGUILayout.HelpBox("More than 2% of the energy is above 9 kHz: may sound harsh. Lower the filter or master low-pass.", MessageType.Warning);

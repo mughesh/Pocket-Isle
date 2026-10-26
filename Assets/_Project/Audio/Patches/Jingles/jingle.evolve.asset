@@ -1,0 +1,261 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e32aa42b52848444bbb64add3d1f1e2d, type: 3}
+  m_Name: jingle.evolve
+  m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.SynthPatch
+  id: jingle.evolve
+  recipe: batch1
+  mode: 2
+  duration: 2.7
+  seed: 1
+  variants: 1
+  jitterPitch: 0.5
+  jitterTime: 0.08
+  jitterFilter: 0.1
+  layers:
+  - enabled: 1
+    label: 
+    instrument: 0
+    wave: 0
+    note: D5
+    hz: 440
+    gate: 0
+    startOffset: 0
+    gain: 1
+    pitchStart: 0
+    pitchEnd: 0
+    pitchTime: 0.1
+    pitchCurve: 1
+    amp:
+      attack: 0.003
+      hold: 0
+      decay: 0.5
+      sustain: 0
+      release: 0.05
+    vibratoRate: 0
+    vibratoDepth: 0
+    vibratoDelay: 0
+    tremoloRate: 0
+    tremoloDepth: 0
+    fmRatio: 4
+    fmIndex: 2
+    fmDecay: 0.025
+    filter: 0
+    cutoffStart: 2000
+    cutoffEnd: 2000
+    cutoffTime: 0.2
+    cutoffCurve: 1
+    resonance: 0.1
+    formant: 0
+    f1Start: 700
+    f1End: 300
+    f2Start: 1200
+    f2End: 2200
+    formantTime: 0.2
+    formantQ: 8
+    formantMix: 1
+    crackleDensity: 0
+    crackleLength: 2
+    crackleGain: 0.5
+  - enabled: 1
+    label: 
+    instrument: 0
+    wave: 0
+    note: D6
+    hz: 440
+    gate: 0
+    startOffset: 0
+    gain: 0.5
+    pitchStart: 0
+    pitchEnd: 0
+    pitchTime: 0.1
+    pitchCurve: 1
+    amp:
+      attack: 0.004
+      hold: 0
+      decay: 1.2
+      sustain: 0
+      release: 0.05
+    vibratoRate: 0
+    vibratoDepth: 0
+    vibratoDelay: 0
+    tremoloRate: 0
+    tremoloDepth: 0
+    fmRatio: 3.5
+    fmIndex: 2
+    fmDecay: 0.3
+    filter: 0
+    cutoffStart: 2000
+    cutoffEnd: 2000
+    cutoffTime: 0.2
+    cutoffCurve: 1
+    resonance: 0.1
+    formant: 0
+    f1Start: 700
+    f1End: 300
+    f2Start: 1200
+    f2End: 2200
+    formantTime: 0.2
+    formantQ: 8
+    formantMix: 1
+    crackleDensity: 0
+    crackleLength: 2
+    crackleGain: 0.5
+  - enabled: 1
+    label: 
+    instrument: 0
+    wave: 3
+    note: D3
+    hz: 440
+    gate: 0
+    startOffset: 0
+    gain: 0.4
+    pitchStart: 0
+    pitchEnd: 0
+    pitchTime: 0.1
+    pitchCurve: 1
+    amp:
+      attack: 0.2
+      hold: 0
+      decay: 1.5
+      sustain: 0
+      release: 0.05
+    vibratoRate: 0
+    vibratoDepth: 0
+    vibratoDelay: 0
+    tremoloRate: 0
+    tremoloDepth: 0
+    fmRatio: 0
+    fmIndex: 0
+    fmDecay: 0
+    filter: 1
+    cutoffStart: 900
+    cutoffEnd: 900
+    cutoffTime: 0.2
+    cutoffCurve: 1
+    resonance: 0.1
+    formant: 0
+    f1Start: 700
+    f1End: 300
+    f2Start: 1200
+    f2End: 2200
+    formantTime: 0.2
+    formantQ: 8
+    formantMix: 1
+    crackleDensity: 0
+    crackleLength: 2
+    crackleGain: 0.5
+  - enabled: 1
+    label: 
+    instrument: 0
+    wave: 0
+    note: D7
+    hz: 440
+    gate: 0
+    startOffset: 0
+    gain: 0.4
+    pitchStart: 0
+    pitchEnd: 0
+    pitchTime: 0.1
+    pitchCurve: 1
+    amp:
+      attack: 0.003
+      hold: 0
+      decay: 0.8
+      sustain: 0
+      release: 0.05
+    vibratoRate: 0
+    vibratoDepth: 0
+    vibratoDelay: 0
+    tremoloRate: 0
+    tremoloDepth: 0
+    fmRatio: 2.76
+    fmIndex: 1.4
+    fmDecay: 0.08
+    filter: 0
+    cutoffStart: 2000
+    cutoffEnd: 2000
+    cutoffTime: 0.2
+    cutoffCurve: 1
+    resonance: 0.1
+    formant: 0
+    f1Start: 700
+    f1End: 300
+    f2Start: 1200
+    f2End: 2200
+    formantTime: 0.2
+    formantQ: 8
+    formantMix: 1
+    crackleDensity: 0
+    crackleLength: 2
+    crackleGain: 0.5
+  loopCrossfade: 1
+  notes:
+  - note: D5
+    start: 0
+    length: 0.25
+    layer: 0
+    velocity: 1
+  - note: A5
+    start: 0.25
+    length: 0.25
+    layer: 0
+    velocity: 1
+  - note: F#5
+    start: 0.5
+    length: 0.25
+    layer: 0
+    velocity: 1
+  - note: D6
+    start: 0.75
+    length: 0.4
+    layer: 0
+    velocity: 1
+  - note: A6
+    start: 1.1
+    length: 0.5
+    layer: 0
+    velocity: 1
+  - note: D6
+    start: 1.1
+    length: 1.3
+    layer: 1
+    velocity: 1
+  - note: D3
+    start: 0
+    length: 1.6
+    layer: 2
+    velocity: 1
+  - note: A6
+    start: 1.25
+    length: 0.3
+    layer: 3
+    velocity: 1
+  - note: B6
+    start: 1.33
+    length: 0.3
+    layer: 3
+    velocity: 1
+  - note: D7
+    start: 1.41
+    length: 0.6
+    layer: 3
+    velocity: 1
+  gain: 1
+  limiter: 1
+  lowpass: 9000
+  normalize: 1
+  peakDb: -3
+  gap: 0
+  review:
+    status: 0
+    note: 

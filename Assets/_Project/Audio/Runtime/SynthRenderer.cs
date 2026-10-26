@@ -86,29 +86,28 @@ namespace Diorama.Audio
             int length = Mathf.CeilToInt(duration * Rate);
             var buf = new float[length + Mathf.CeilToInt(xfade * Rate)];
 
-            if (patch.mode == SynthMode.Sequence)
-            {
-                foreach (var n in patch.notes)
-                {
-                    if (n.layer < 0 || n.layer >= patch.layers.Count) continue;
-                    var layer = patch.layers[n.layer];
-                    if (layer == null || !layer.enabled) continue;
-                    float hz = SynthNotes.Hz(n.note, layer.hz);
-                    RenderLayer(layer, buf, hz * j.pitch, n.start * j.time, n.length * j.time, n.velocity, j, rng.Next());
-                }
-            }
-            else
+            if (patch.mode != SynthMode.Sequence)
             {
                 float total = buf.Length / (float)Rate;
                 foreach (var layer in patch.layers)
                 {
-                    if (layer == null || !layer.enabled) continue;
+                    if (layer == null || !layer.enabled || layer.instrument) continue;
                     float hz = SynthNotes.Hz(layer.note, layer.hz);
                     float offset = layer.startOffset * j.time;
                     float gate = layer.gate > 0f ? layer.gate * j.time : Mathf.Max(0f, total - offset - layer.amp.release * j.time);
                     if (loop) gate = total; // a loop sustains through the whole render, tail included
                     RenderLayer(layer, buf, hz * j.pitch, offset, gate, 1f, j, rng.Next());
                 }
+            }
+
+            // Notes: every note in Sequence mode, instrument layers in the others.
+            foreach (var n in patch.notes)
+            {
+                if (n.layer < 0 || n.layer >= patch.layers.Count) continue;
+                var layer = patch.layers[n.layer];
+                if (layer == null || !layer.enabled) continue;
+                float hz = SynthNotes.Hz(n.note, layer.hz);
+                RenderLayer(layer, buf, hz * j.pitch, n.start * j.time, n.length * j.time, n.velocity, j, rng.Next());
             }
 
             Master(patch, buf);
@@ -179,6 +178,9 @@ namespace Diorama.Audio
                 float s;
                 switch (L.wave)
                 {
+                    case SynthWave.Silence:
+                        s = 0f;
+                        break;
                     case SynthWave.WhiteNoise:
                         s = (float)(rng.NextDouble() * 2 - 1);
                         break;
@@ -241,7 +243,7 @@ namespace Diorama.Audio
                 if (L.formant)
                 {
                     float ft = L.formantTime * tScale;
-                    float fa = Shape(L.f1Start, L.f1End, ft, 1f, t), fb = Shape(L.f2Start, L.f2End, ft, 1f, t);
+                    float fa = Shape(L.f1Start, L.f1End, ft, 1f, t) * j.filter, fb = Shape(L.f2Start, L.f2End, ft, 1f, t) * j.filter;
                     f1.Process(s, fa, L.formantQ, out _, out float b1, out _);
                     f2.Process(s, fb, L.formantQ * 1.2f, out _, out float b2, out _);
                     float voiced = (b1 + 0.7f * b2) * 1.6f;
@@ -436,12 +438,21 @@ namespace Diorama.Audio
             highShare = sum > 1e-12 ? (float)(high / sum) : 0f;
         }
 
-        /// <summary>Largest jump between the last and first sample, relative to the peak (0 = a perfect loop join).</summary>
+        /// <summary>
+        /// How much the loop join (last sample to first) jumps, relative to the clip's usual sample-to-sample motion.
+        /// About 1 = invisible; above ~4 = an audible tick.
+        /// </summary>
         public static float LoopSeam(float[] buf)
         {
-            if (buf.Length < 2) return 0f;
-            float peak = Mathf.Max(1e-6f, Peak(buf));
-            return Mathf.Abs(buf[0] - buf[buf.Length - 1]) / peak;
+            if (buf.Length < 3) return 0f;
+            double sum = 0;
+            for (int i = 1; i < buf.Length; i++)
+            {
+                double d = buf[i] - buf[i - 1];
+                sum += d * d;
+            }
+            float rms = (float)Math.Sqrt(sum / (buf.Length - 1));
+            return Mathf.Abs(buf[0] - buf[buf.Length - 1]) / Mathf.Max(1e-6f, rms);
         }
     }
 }

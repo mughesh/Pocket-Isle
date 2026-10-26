@@ -1,0 +1,79 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e32aa42b52848444bbb64add3d1f1e2d, type: 3}
+  m_Name: xp.tick
+  m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.SynthPatch
+  id: xp.tick
+  recipe: batch1
+  mode: 0
+  duration: 0.12
+  seed: 1
+  variants: 1
+  jitterPitch: 0.5
+  jitterTime: 0.08
+  jitterFilter: 0.1
+  layers:
+  - enabled: 1
+    label: 
+    instrument: 0
+    wave: 0
+    note: D6
+    hz: 440
+    gate: 0
+    startOffset: 0
+    gain: 1
+    pitchStart: 0
+    pitchEnd: 0
+    pitchTime: 0.1
+    pitchCurve: 1
+    amp:
+      attack: 0.003
+      hold: 0
+      decay: 0.08
+      sustain: 0
+      release: 0.05
+    vibratoRate: 0
+    vibratoDepth: 0
+    vibratoDelay: 0
+    tremoloRate: 0
+    tremoloDepth: 0
+    fmRatio: 4
+    fmIndex: 2
+    fmDecay: 0.025
+    filter: 0
+    cutoffStart: 2000
+    cutoffEnd: 2000
+    cutoffTime: 0.2
+    cutoffCurve: 1
+    resonance: 0.1
+    formant: 0
+    f1Start: 700
+    f1End: 300
+    f2Start: 1200
+    f2End: 2200
+    formantTime: 0.2
+    formantQ: 8
+    formantMix: 1
+    crackleDensity: 0
+    crackleLength: 2
+    crackleGain: 0.5
+  loopCrossfade: 1
+  notes: []
+  gain: 1
+  limiter: 1
+  lowpass: 7500
+  normalize: 1
+  peakDb: -3
+  gap: 0
+  review:
+    status: 0
+    note: 

@@ -4,7 +4,8 @@ using UnityEngine;
 
 namespace Diorama.Audio
 {
-    public enum SynthWave { Sine, Triangle, SoftSquare, SoftSaw, WhiteNoise, PinkNoise, Buzz }
+    /// <summary>Silence: no source, for layers that are only crackle.</summary>
+    public enum SynthWave { Sine, Triangle, SoftSquare, SoftSaw, WhiteNoise, PinkNoise, Buzz, Silence }
     public enum SynthFilter { None, LowPass, HighPass, BandPass }
     public enum SynthMode { OneShot, Loop, Sequence }
     public enum ReviewStatus { None, Approved, Redo }
@@ -34,6 +35,7 @@ namespace Diorama.Audio
     {
         public bool enabled = true;
         public string label = "";
+        [Tooltip("Plays only through the patch's notes (bubbles, chirps, sparkles), not on its own.")] public bool instrument;
         public SynthWave wave = SynthWave.Sine;
         [Tooltip("Note name like D5 or F#4; overrides Hz when set.")] public string note = "";
         [Range(20f, 4000f)] public float hz = 440f;
@@ -87,7 +89,7 @@ namespace Diorama.Audio
         public SynthLayer Clone() => (SynthLayer)MemberwiseClone();
     }
 
-    /// <summary>One note of a jingle. The layer index picks the instrument (a layer of the same patch).</summary>
+    /// <summary>One note of a jingle (or of an instrument layer in a one-shot or loop). The layer index picks the instrument.</summary>
     [Serializable]
     public class SynthNote
     {
@@ -125,13 +127,13 @@ namespace Diorama.Audio
         [Header("Loop mode")]
         [Range(0.05f, 8f)] public float loopCrossfade = 1f;
 
-        [Header("Sequence mode (D major pentatonic: D E F# A B)")]
+        [Header("Notes (Sequence mode, or instrument layers; D major pentatonic: D E F# A B)")]
         public List<SynthNote> notes = new List<SynthNote>();
 
         [Header("Master")]
         [Tooltip("Drive into the soft limiter.")] [Range(0f, 4f)] public float gain = 1f;
         public bool limiter = true;
-        [Tooltip("Keeps the top end soft; 16000 = off.")] [Range(1000f, 16000f)] public float lowpass = 11000f;
+        [Tooltip("Keeps the top end soft (the brief: little above ~9 kHz); 16000 = off.")] [Range(1000f, 16000f)] public float lowpass = 9000f;
         public bool normalize = true;
         [Range(-24f, 0f)] public float peakDb = -3f;
 

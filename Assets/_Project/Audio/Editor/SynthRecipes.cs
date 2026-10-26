@@ -63,6 +63,8 @@ namespace Diorama.Audio.EditorTools
 
         public static SynthLayer Note(this SynthLayer l, string note) { l.note = note; return l; }
         public static SynthLayer Gain(this SynthLayer l, float g) { l.gain = g; return l; }
+        /// <summary>Only plays through notes (bubbles, chirps, sparkles inside a one-shot or loop).</summary>
+        public static SynthLayer Inst(this SynthLayer l) { l.instrument = true; return l; }
         public static SynthLayer At(this SynthLayer l, float seconds) { l.startOffset = seconds; return l; }
         public static SynthLayer Gate(this SynthLayer l, float seconds) { l.gate = seconds; return l; }
 
@@ -175,6 +177,15 @@ namespace Diorama.Audio.EditorTools
             return p;
         }
 
+        /// <summary>Adds notes ("A6@0.1:0.08/2") for instrument layers of a one-shot or loop.</summary>
+        public static SynthPatch Notes(this SynthPatch p, params string[] notes)
+        {
+            foreach (var n in notes) p.notes.Add(ParseNote(n));
+            return p;
+        }
+
+        public static SynthPatch Notes(this SynthPatch p, IEnumerable<string> notes) => p.Notes(new List<string>(notes).ToArray());
+
         public static SynthNote ParseNote(string s)
         {
             var note = new SynthNote();
@@ -205,7 +216,7 @@ namespace Diorama.Audio.EditorTools
             return p;
         }
 
-        public static SynthPatch Master(this SynthPatch p, float gain = 1f, float lowpass = 11000f, float peakDb = -3f)
+        public static SynthPatch Master(this SynthPatch p, float gain = 1f, float lowpass = 9000f, float peakDb = -3f)
         {
             p.gain = gain;
             p.lowpass = lowpass;

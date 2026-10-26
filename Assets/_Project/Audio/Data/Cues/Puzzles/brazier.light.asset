@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28966354f9950c5429c46b779a504dcd, type: 3}
+  m_Name: brazier.light
+  m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
+  id: brazier.light
+  clips:
+  - {fileID: 8300000, guid: d5c26473fc299bd4ab4f6d33c6b16df4, type: 3}
+  volume: 0.65
+  volumeJitter: 0.05
+  pitchMin: 0.97
+  pitchMax: 1.03
+  pitchStepSemitones: 0
+  bus: 2
+  spatial: 1
+  minDistance: 0.1
+  maxDistance: 1.5
+  loop: 0
+  maxVoices: 2
+  minInterval: 0.03
+  priority: 50
+  awaitingClips: 0
+  notes: 
+  review:
+    status: 0
+    note: 

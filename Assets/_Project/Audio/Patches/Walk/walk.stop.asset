@@ -1,0 +1,79 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e32aa42b52848444bbb64add3d1f1e2d, type: 3}
+  m_Name: walk.stop
+  m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.SynthPatch
+  id: walk.stop
+  recipe: batch1
+  mode: 0
+  duration: 0.1
+  seed: 1
+  variants: 2
+  jitterPitch: 0.6
+  jitterTime: 0.08
+  jitterFilter: 0.1
+  layers:
+  - enabled: 1
+    label: 
+    instrument: 0
+    wave: 1
+    note: 
+    hz: 1400
+    gate: 0
+    startOffset: 0
+    gain: 1
+    pitchStart: 4
+    pitchEnd: 0
+    pitchTime: 0.015
+    pitchCurve: 1
+    amp:
+      attack: 0.003
+      hold: 0
+      decay: 0.04
+      sustain: 0
+      release: 0.05
+    vibratoRate: 0
+    vibratoDepth: 0
+    vibratoDelay: 0
+    tremoloRate: 0
+    tremoloDepth: 0
+    fmRatio: 0
+    fmIndex: 0
+    fmDecay: 0
+    filter: 3
+    cutoffStart: 1680.0001
+    cutoffEnd: 1680.0001
+    cutoffTime: 0.1
+    cutoffCurve: 1
+    resonance: 0.45
+    formant: 0
+    f1Start: 700
+    f1End: 300
+    f2Start: 1200
+    f2End: 2200
+    formantTime: 0.2
+    formantQ: 8
+    formantMix: 1
+    crackleDensity: 0
+    crackleLength: 2
+    crackleGain: 0.5
+  loopCrossfade: 1
+  notes: []
+  gain: 1
+  limiter: 1
+  lowpass: 9000
+  normalize: 1
+  peakDb: -3
+  gap: 0
+  review:
+    status: 0
+    note: 
