@@ -941,6 +941,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.TitleLogo
   island: {fileID: 270959109}
   recipe: {fileID: 11400000, guid: bbc836fb16976464c9d988c1935268c8, type: 2}
+  baseRecipe: {fileID: 11400000, guid: 4d1b9df07bb832146a89a7d0074bc6bc, type: 2}
   material: {fileID: 2100000, guid: 816769f54a1129a4992d139a9519d8a4, type: 2}
   fx: {fileID: 1078587927}
   width: 0.3
@@ -949,6 +950,9 @@ MonoBehaviour:
   bob: 0.008
   swayDegrees: 3
   faceSpeed: 2.5
+  baseBob: 0.012
+  lanternGlow: {x: 0.7, y: 1.6}
+  speckEvery: 1.4
 --- !u!1 &301495217
 GameObject:
   m_ObjectHideFlags: 0

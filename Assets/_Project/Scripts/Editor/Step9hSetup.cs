@@ -20,7 +20,36 @@ namespace Diorama.EditorTools
             var log = new StringBuilder("[Step9h] Set up:");
             Fixes(log);
             Lessons(log);
+            Logo(log);
             Save(log);
+        }
+
+        public static void LogoOnly()
+        {
+            var log = new StringBuilder("[Step9h] Logo:");
+            Logo(log);
+            Save(log);
+        }
+
+        /// <summary>E: logo v2, the letters and the mini island baked, wired to the title's logo.</summary>
+        public static void Logo(StringBuilder log)
+        {
+            var letters = PropKit.WriteLogo();
+            log.Append($"\n  Letters: {PropBaker.Bake(letters)}");
+            var chunk = PropKit.WriteLogoBase();
+            log.Append($"\n  Base: {PropBaker.Bake(chunk)}");
+            int tris = (letters.bakedMesh != null ? letters.bakedMesh.triangles.Length / 3 : 0) + (chunk.bakedMesh != null ? chunk.bakedMesh.triangles.Length / 3 : 0);
+            log.Append($"\n  Logo total {tris} triangles (budget 10000), 2 renderers x 2 passes = 4 draws (budget 8).");
+            var logo = Find<TitleLogo>();
+            if (logo == null)
+            {
+                log.Append("\n  MISSING TitleLogo (Step9gSetup.TitleOnly first).");
+                return;
+            }
+            Undo.RecordObject(logo, "Step 9h");
+            logo.recipe = letters;
+            logo.baseRecipe = chunk;
+            EditorUtility.SetDirty(logo);
         }
 
         public static void LessonsOnly()

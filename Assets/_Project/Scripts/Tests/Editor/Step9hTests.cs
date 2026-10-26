@@ -61,6 +61,15 @@ namespace Diorama.Tests
             Assert.AreEqual(0.1f, mid.z, 1e-4f);
         }
 
+        [Test]
+        public void LogoV2_LettersAndBase_UnderTenThousandTriangles()
+        {
+            var letters = UnityEditor.AssetDatabase.LoadAssetAtPath<PropRecipe>("Assets/_Project/Data/Props/TitleLogo.asset");
+            var chunk = UnityEditor.AssetDatabase.LoadAssetAtPath<PropRecipe>("Assets/_Project/Data/Props/TitleLogoBase.asset");
+            if (letters == null || letters.bakedMesh == null || chunk == null || chunk.bakedMesh == null) Assert.Inconclusive("Run Step9hSetup.LogoOnly first.");
+            Assert.LessOrEqual(letters.bakedMesh.triangles.Length / 3 + chunk.bakedMesh.triangles.Length / 3, 10000);
+        }
+
         static readonly Vector2Int Out = new Vector2Int(0, 1);
 
         [Test]

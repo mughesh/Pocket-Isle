@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb15570c66aa7e84ebdc3a6c27a865c7, type: 3}
+  m_Name: Logo_Pocket_k3_Top
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.SdfShape
+  primitives:
+  - kind: 2
+    blend: 0
+    k: 0
+    mirrorX: 0
+    a: {x: -0.273457, y: 1.8556609, z: -0.08}
+    b: {x: -0.22259264, y: 2.7964926, z: -0.08}
+    size: {x: 0.152, y: 0.152, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 2
+    blend: 0
+    k: 0.02
+    mirrorX: 0
+    a: {x: -0.59943706, y: 2.4583051, z: -0.08}
+    b: {x: -0.28794855, y: 2.1112115, z: -0.08}
+    size: {x: 0.152, y: 0.152, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 2
+    blend: 0
+    k: 0.02
+    mirrorX: 0
+    a: {x: -0.39525327, y: 2.2208066, z: -0.08}
+    b: {x: -0.64978963, y: 1.8760067, z: -0.08}
+    size: {x: 0.152, y: 0.152, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 4
+    blend: 2
+    k: 0.01
+    mirrorX: 0
+    a: {x: 0, y: 2.7289512, z: 0}
+    b: {x: 0, y: -1, z: 0}
+    size: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    bumps: 0
+    bumpFrequency: 0

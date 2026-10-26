@@ -5,6 +5,45 @@ namespace Diorama.EditorTools
     /// <summary>Step 9h bridge helpers (exec:Diorama.EditorTools.Step9hDebug.X). Shots go to Logs/BattleShots/9h_*.png.</summary>
     public static class Step9hDebug
     {
+        /// <summary>Logo v2 alone, far from everything: Logs/BattleShots/9h_logo_front.png and 9h_logo_34.png.</summary>
+        public static void LogoShot()
+        {
+            var letters = PropKit.Load(PropKit.LogoName);
+            var chunk = PropKit.Load(PropKit.LogoBaseName);
+            var material = UnityEditor.AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Props/Logo.mat");
+            if (letters == null || letters.bakedMesh == null || chunk == null || chunk.bakedMesh == null || material == null)
+            {
+                Debug.LogError("[Step9hDebug] Logo not baked (Step9hSetup.LogoOnly).");
+                return;
+            }
+            var at = new Vector3(200f, 200f, 200f);
+            var made = new System.Collections.Generic.List<GameObject>();
+            foreach (var r in new[] { letters, chunk })
+            {
+                var go = new GameObject("Logo Shot " + r.name) { hideFlags = HideFlags.DontSave };
+                go.AddComponent<MeshFilter>().sharedMesh = r.bakedMesh;
+                var mr = go.AddComponent<MeshRenderer>();
+                mr.sharedMaterial = material;
+                var block = new MaterialPropertyBlock();
+                r.ApplyTo(block);
+                block.SetFloat("_WindowClip", 0f);
+                block.SetFloat("_RestoredSelf", 1f);
+                mr.SetPropertyBlock(block);
+                go.transform.position = at;
+                made.Add(go);
+            }
+            var b = letters.bakedMesh.bounds;
+            b.Encapsulate(chunk.bakedMesh.bounds);
+            var c = at + b.center;
+            float d = b.size.x * 1.2f;
+            var front = new Vector3(0f, 0.2f, 1f).normalized;
+            BattleDebug.Render("Logs/BattleShots/9h_logo_front.png", c + front * d, Quaternion.LookRotation(-front, Vector3.up));
+            var side = new Vector3(0.75f, 0.35f, 1f).normalized;
+            BattleDebug.Render("Logs/BattleShots/9h_logo_34.png", c + side * d, Quaternion.LookRotation(-side, Vector3.up));
+            foreach (var go in made) Object.DestroyImmediate(go);
+            Debug.Log($"[Step9hDebug] Logo shots: {letters.bakedMesh.triangles.Length / 3} + {chunk.bakedMesh.triangles.Length / 3} triangles.");
+        }
+
         /// <summary>A pinch for the pinch lesson (no hands in flat Play).</summary>
         public static void Pinch()
         {
