@@ -14,6 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
   id: step.grass
   clips:
+  - {fileID: 8300000, guid: 90d75567d9122c54c9f2b05939d83c66, type: 3}
+  - {fileID: 8300000, guid: b2de40dfe0818ed40b53fae6aa852c6d, type: 3}
+  - {fileID: 8300000, guid: 4a2cb2463e4474f4586cbf97a17b03b9, type: 3}
+  - {fileID: 8300000, guid: 5f22e0611847ff04faf5bc79d066bd08, type: 3}
+  - {fileID: 8300000, guid: 0f3167a133c7efd4a8e9a98cb2b8e244, type: 3}
+  - {fileID: 8300000, guid: 59e56e620293f7640b242864d13a124c, type: 3}
   - {fileID: 8300000, guid: 46d0708348327b84da00cfd0d994498a, type: 3}
   - {fileID: 8300000, guid: 3856bca68d687e5448cbaab012539246, type: 3}
   - {fileID: 8300000, guid: e38de5f139aa6754aad35f690485a6b2, type: 3}

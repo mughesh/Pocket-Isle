@@ -14,6 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
   id: step.stone
   clips:
+  - {fileID: 8300000, guid: 5c4529a634e2a5a42a28e03380b71878, type: 3}
+  - {fileID: 8300000, guid: b3722cc7daf44e04ea67120090978d54, type: 3}
+  - {fileID: 8300000, guid: 410f6356038ebe04d97c2bc477857859, type: 3}
+  - {fileID: 8300000, guid: 71486c6bb3daaa144bdb53d48314603e, type: 3}
+  - {fileID: 8300000, guid: ca0a6e2b0082fad49ac40ec6d168399c, type: 3}
+  - {fileID: 8300000, guid: c8a86e9c783a11140a088222f9e9f10f, type: 3}
   - {fileID: 8300000, guid: 33c7735af90390746bb54ca91a4c1c4e, type: 3}
   - {fileID: 8300000, guid: d141abe2b4f5c4d47976dfc56711d8ab, type: 3}
   - {fileID: 8300000, guid: a287510f31bb1604389d8ed673237341, type: 3}
