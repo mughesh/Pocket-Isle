@@ -24,6 +24,8 @@ namespace Diorama
         public float yaw;
         public float grow = 1f;
         public Vector3 squash = Vector3.one;
+        [Tooltip("Degrees it tips forward round its feet (a Keeper kneels and nods, step 9c).")]
+        public float pitch;
 
         public CreatureView View { get; private set; }
 
@@ -41,7 +43,7 @@ namespace Diorama
         {
             if (island == null || island.Content == null) return;
             transform.localPosition = island.TileToLocal(tile + nudge, island.Content.capHeight + baseLift + lift);
-            transform.localRotation = Quaternion.Euler(0f, yaw, 0f);
+            transform.localRotation = Quaternion.Euler(0f, yaw, 0f) * Quaternion.Euler(pitch, 0f, 0f);
             transform.localScale = squash * (island.Zoom * Mathf.Max(0.0001f, grow));
         }
 

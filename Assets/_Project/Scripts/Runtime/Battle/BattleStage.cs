@@ -40,6 +40,12 @@ namespace Diorama
         public StageActor Player => _player;
         public StageActor Wild => _wild;
 
+        /// <summary>
+        /// A move's outcome landed (at the moment of impact), or a Keeper event played (shield broken / raised, phase 2):
+        /// the Keeper's look follows (step 9c: cracked crystals, the shell, the crown flaring).
+        /// </summary>
+        public event Action<BattleEvent> Presented;
+
         void Start()
         {
             // The gold focus outline marks them (FocusHighlight); white flashes are for gaze hover only.
@@ -426,6 +432,22 @@ namespace Diorama
                         caption("Got away safely!");
                         yield return Wait(0.5f);
                         break;
+                    case BattleEventKind.ShieldBroken:
+                        caption($"{who}'s crown shield shattered!");
+                        Presented?.Invoke(e);
+                        if (self != null) hud.PopText(self.LocalTop + Vector3.up * 0.06f, "Shield down!", SuperColor, 0.8f, 1.4f);
+                        yield return Wait(0.9f);
+                        break;
+                    case BattleEventKind.ShieldRaised:
+                        // A standalone raise (not a move outcome): just the look.
+                        Presented?.Invoke(e);
+                        yield return Wait(0.4f);
+                        break;
+                    case BattleEventKind.KeeperPhase2:
+                        caption($"{who}'s crown burns brighter!");
+                        Presented?.Invoke(e);
+                        yield return Wait(0.8f);
+                        break;
                 }
             }
         }
@@ -463,7 +485,7 @@ namespace Diorama
 
         static bool IsOutcome(BattleEventKind k) =>
             k == BattleEventKind.Damage || k == BattleEventKind.Missed || k == BattleEventKind.Shielded ||
-            k == BattleEventKind.AttackRaised || k == BattleEventKind.Healed;
+            k == BattleEventKind.AttackRaised || k == BattleEventKind.Healed || k == BattleEventKind.ShieldRaised;
 
         StageActor Actor(BattleSide side) => side == BattleSide.Player ? _player : _wild;
 
@@ -491,8 +513,12 @@ namespace Diorama
 
         void Impact(BattleEvent o, StageActor user, StageActor target, ElementStyle userStyle)
         {
+            Presented?.Invoke(o);
             switch (o.kind)
             {
+                case BattleEventKind.ShieldRaised:
+                    hud.PopText(user.LocalTop + Vector3.up * 0.06f, "Shield up!", new Color(1f, 0.7f, 0.3f), 0.8f, 1.2f);
+                    break;
                 case BattleEventKind.Damage:
                     Hit(target, user, o);
                     break;
@@ -517,7 +543,8 @@ namespace Diorama
             var bar = o.side == BattleSide.Player ? _playerBar : _wildBar;
             hud.SetHp(bar, o.hpAfter);
             hud.PopText(target.LocalTop + Vector3.up * 0.042f, $"-{o.amount}", Color.white);
-            if (o.effectiveness == Effectiveness.Super) hud.PopText(target.LocalTop + Vector3.up * 0.075f, "Super effective!", SuperColor, 0.65f, 1.4f);
+            if (o.blocked) hud.PopText(target.LocalTop + Vector3.up * 0.075f, "Blocked!", new Color(1f, 0.7f, 0.3f), 0.75f, 1.4f);
+            else if (o.effectiveness == Effectiveness.Super) hud.PopText(target.LocalTop + Vector3.up * 0.075f, "Super effective!", SuperColor, 0.65f, 1.4f);
             else if (o.effectiveness == Effectiveness.NotVery) hud.PopText(target.LocalTop + Vector3.up * 0.075f, "Not very effective", WeakColor, 0.65f, 1.4f);
             if (o.shieldAbsorbed) DropShieldOf(o.side, true);
             StartCoroutine(Knockback(target, (target.tile - user.tile).normalized));

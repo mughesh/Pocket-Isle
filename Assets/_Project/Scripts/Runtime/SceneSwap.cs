@@ -36,6 +36,8 @@ namespace Diorama
 
         /// <summary>True while an interior shows (also during the swap back until its bottom).</summary>
         public static bool IsInside => _instance != null && _instance.Inside;
+        /// <summary>The scene's swap, or null.</summary>
+        public static SceneSwap Current => _instance;
         /// <summary>True while a swap animates.</summary>
         public static bool IsBusy => _instance != null && _instance.Busy;
 
@@ -133,6 +135,18 @@ namespace Diorama
             SwapAtBottom(to, tile, facing, Kind.Travel);
             island.Prepare();
             Debug.Log($"[SceneSwap] Now on {to.name} at c{tile.x} r{tile.y}.");
+        }
+
+        /// <summary>Back outside at once, no animation (losing a battle inside a Keeper's hall).</summary>
+        public void ReturnNow()
+        {
+            if (!enabled || !Inside || Busy) return;
+            var light = LightFor(_outdoor != null ? _outdoor.theme : null, false);
+            SwapAtBottom(_outdoor, ReturnTile, ReturnFacing, Kind.Return);
+            SetLight(light, light, 1f);
+            island.Prepare();
+            Debug.Log($"[SceneSwap] Back outside at once on {_outdoor.name} at c{ReturnTile.x} r{ReturnTile.y}.");
+            Finished?.Invoke(false);
         }
 
         /// <summary>Puts the island inside at once (loading a save made inside). The explorer stands outside already.</summary>

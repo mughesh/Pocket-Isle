@@ -1327,13 +1327,13 @@ MonoBehaviour:
   hall: {fileID: 11400000, guid: 826b78d0c19f2014a9858fa40dff5037, type: 2}
   island: {fileID: 270959109}
   explorer: {fileID: 374318554}
-  ringMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  ringMaterial: {fileID: 0}
   doorTiles:
   - {x: 4, y: 9}
   - {x: 5, y: 9}
   keeperSpot: {x: 4.5, y: 4}
   ringSize: 2.4
-  firstLine: cinder.hall.first
+  firstLine: 
 --- !u!1 &509277689
 GameObject:
   m_ObjectHideFlags: 0
@@ -1648,6 +1648,126 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &569611147
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 569611148}
+  - component: {fileID: 569611149}
+  m_Layer: 0
+  m_Name: Statue Socket
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &569611148
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 569611147}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1553131432}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &569611149
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 569611147}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1437310275e9d804fb27460ded232a52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.StatueSocket
+  id: shard.fire
+  map: {fileID: 11400000, guid: ab0469af29722704f949fec768f94b68, type: 2}
+  island: {fileID: 270959109}
+  window: {fileID: 270959113}
+  explorer: {fileID: 374318554}
+  grabGuard: {fileID: 270959111}
+  ghosts: {fileID: 1421177268}
+  fx: {fileID: 1078587927}
+  reach: 6
+  lessonLine: hub.shard.first
+  ghostClip: grab_drop
+  ghostScale: 1
+  holder: {fileID: 570826975}
+  shardRecipe: {fileID: 11400000, guid: 243f873e41708f049b1a176b344ec7c1, type: 2}
+  statueRecipe: {fileID: 11400000, guid: 4e524cd358b9b874f9c8ac964bd660a2, type: 2}
+  statueAnchor: {x: 14, y: 16}
+  statueYaw: 0
+  socket: {x: 0.24, y: 1.03, z: 0.52}
+  ringMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  grabRadius: 0.04
+  snapRadius: 0.06
+  placedLine: hub.shard.placed
+  moreLine: hub.shard.more
+--- !u!1 &570826974
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 570826976}
+  - component: {fileID: 570826975}
+  m_Layer: 0
+  m_Name: Shard Holder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &570826975
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 570826974}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ecd7e5b7dd7ab645874f2b1a8f12bd7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.ShardHolder
+  island: {fileID: 270959109}
+  holderRecipe: {fileID: 11400000, guid: 8459314ffc12ccc439e2bd3b4942c3a2, type: 2}
+  fireShardRecipe: {fileID: 11400000, guid: 243f873e41708f049b1a176b344ec7c1, type: 2}
+  cups:
+  - {x: 0.62, y: 0.16, z: 0}
+  - {x: 0, y: 0.16, z: 0}
+  - {x: -0.62, y: 0.16, z: 0}
+  metres: 0.0325
+  inset: {x: 0.12, y: 0.06}
+--- !u!4 &570826976
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 570826974}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1553131432}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &634390647
 GameObject:
@@ -3351,6 +3471,9 @@ Transform:
   - {fileID: 204973769}
   - {fileID: 1127440540}
   - {fileID: 423146277}
+  - {fileID: 570826976}
+  - {fileID: 2121894497}
+  - {fileID: 569611148}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1583412946
@@ -4253,6 +4376,82 @@ MonoBehaviour:
   installationRoutineCheckpoint:
     _installationRoutineId: 2063f481-1b63-4eda-9ee8-a00df98536bc
     _installationVariants: []
+--- !u!1 &2121894496
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2121894497}
+  - component: {fileID: 2121894498}
+  m_Layer: 0
+  m_Name: Keeper Hall
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2121894497
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2121894496}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1553131432}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2121894498
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2121894496}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8940da4ed106e64880d1edb2b9bebac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.KeeperHall
+  swap: {fileID: 221433162}
+  hall: {fileID: 11400000, guid: 826b78d0c19f2014a9858fa40dff5037, type: 2}
+  realmMap: {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
+  island: {fileID: 270959109}
+  explorer: {fileID: 374318554}
+  encounters: {fileID: 1499891275}
+  stage: {fileID: 1078587928}
+  fx: {fileID: 1078587927}
+  realm: {fileID: 270959114}
+  holder: {fileID: 570826975}
+  save: {fileID: 1541842443}
+  ghosts: {fileID: 1421177268}
+  keeperSpecies: {fileID: 11400000, guid: 372e47726df79e944b8e3ae698a9b00b, type: 2}
+  keeperLevel: 12
+  beaconMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  shardRecipe: {fileID: 11400000, guid: 243f873e41708f049b1a176b344ec7c1, type: 2}
+  keeperSpot: {x: 4.5, y: 2.7}
+  keeperPad: {x: 4, y: 3}
+  partyPad: {x: 4, y: 6}
+  hallEntry: {x: 4, y: 8}
+  forgeMouth: {x: 4.5, y: 1.15}
+  forgeMouthHeight: 0.4
+  waveOrigin: {x: 20, y: 3}
+  waveSeconds: 5
+  templeGate: {x: 24, y: 7}
+  meetLine: cinder.keeper.first
+  shieldLine: keeper.shield.first
+  brokenLine: keeper.shield.broken.first
+  phase2Line: keeper.phase2
+  winLine: cinder.keeper.win
+  shardLine: cinder.shard.take
+  restoredLine: cinder.restored
 --- !u!1 &2133717133
 GameObject:
   m_ObjectHideFlags: 0

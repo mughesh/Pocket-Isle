@@ -57,6 +57,8 @@ Shader "Diorama/Prop"
     CBUFFER_END
 
     float _RealmRestored; // RealmState: 0 = ash grey and cold, 1 = restored
+    // Step 9c restoration wave: xy = map xz of its origin, z = radius (map metres; <= 0 = no wave), w = edge width.
+    float4 _RestoreWave;
 
     struct PropAttributes
     {
@@ -68,7 +70,18 @@ Shader "Diorama/Prop"
     };
 
     // A puzzle prop drawn on its own (step 9b: a brazier warming up, the forge door heating) sets its own restoration.
-    float PropRestored() { return _RestoredSelf < 0.0 ? saturate(_RealmRestored) : saturate(_RestoredSelf); }
+    // While a restoration wave runs (step 9c), props inside its ring are already restored.
+    float PropRestored()
+    {
+        if (_RestoredSelf >= 0.0) return saturate(_RestoredSelf);
+        float r = saturate(_RealmRestored);
+        if (_RestoreWave.z > 0.0)
+        {
+            float2 m = DioramaMapPoint(UNITY_MATRIX_M._m03_m13_m23, _WindowClip).xz;
+            r = max(r, saturate((_RestoreWave.z - distance(m, _RestoreWave.xy)) / max(1e-4, _RestoreWave.w)));
+        }
+        return r;
+    }
 
     float3 PropOrigin() { return UNITY_MATRIX_M._m03_m13_m23; }
 

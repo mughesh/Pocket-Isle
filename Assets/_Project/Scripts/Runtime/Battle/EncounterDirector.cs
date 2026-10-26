@@ -114,6 +114,31 @@ namespace Diorama
         /// <summary>The battle being played, or null (testing).</summary>
         public BattleSystem CurrentBattle { get; private set; }
 
+        /// <summary>A Keeper battle (step 9c): who, its pad, the party's pad, its rules.</summary>
+        public sealed class KeeperFight
+        {
+            public IslingInstance keeper;
+            public Vector2Int keeperPad, myPad;
+            public KeeperRules rules = new KeeperRules();
+            public string caption;
+            [Tooltip("A Keeper is ~2.5x an Isling: the battle zoom stays below this so it fits.")]
+            public float maxZoom = 1.8f;
+        }
+
+        /// <summary>The Keeper battle being played, or null.</summary>
+        public KeeperFight Keeper { get; private set; }
+
+        /// <summary>
+        /// Starts a Keeper battle on fixed pads (inside an interior too): no pod to catch it, Keeper rules
+        /// (<see cref="KeeperRules"/>), otherwise the usual battle (send out, moves, switching, XP). False if a battle is on.
+        /// </summary>
+        public bool StartKeeper(KeeperFight fight)
+        {
+            if (InBattle || fight == null || fight.keeper == null || party.members.Count == 0 || window.IsZoomed || SceneSwap.IsBusy) return false;
+            StartCoroutine(Encounter(null, fight.myPad, fight.keeper, fight));
+            return true;
+        }
+
         enum ActKind { None, Move, Run, PodThrow, PodPick }
 
         struct Act
@@ -264,18 +289,19 @@ namespace Diorama
             if (usable) _act = new Act { kind = ActKind.PodPick, index = slot };
         }
 
-        IEnumerator Encounter(EncounterTable table, Vector2Int where, IslingInstance scripted = null)
+        IEnumerator Encounter(EncounterTable table, Vector2Int where, IslingInstance scripted = null, KeeperFight keeperFight = null)
         {
             InBattle = true;
+            Keeper = keeperFight;
             explorer.Locked = true;
             MapCreature.HideAll = true;
             BattleStarted?.Invoke();
             FirstEncounterDone = true;
             var wild = scripted;
             bool rare = false;
-            if (wild == null && !table.Roll(_rnd, out wild, out rare, IsCaught, uncaughtWeight))
+            if (wild == null && (table == null || !table.Roll(_rnd, out wild, out rare, IsCaught, uncaughtWeight)))
             {
-                Debug.LogError($"[EncounterDirector] {table.name} has no species to roll.", table);
+                Debug.LogError($"[EncounterDirector] {(table != null ? table.name : "No table")}: no species to roll.", table);
                 yield return Finish(false);
                 yield break;
             }
@@ -294,10 +320,10 @@ namespace Diorama
                 yield break;
             }
 
-            bool water = table.habitat == Habitat.Water;
-            var layout = _layout = Layout(water);
+            bool water = table != null && table.habitat == Habitat.Water;
+            var layout = _layout = keeperFight != null ? KeeperLayout(keeperFight) : Layout(water);
             string zone = island.world != null ? island.world.ZoneAt(where) : null;
-            Debug.Log($"[EncounterDirector] {(water ? "Water" : "Grass")} encounter ({table.name}{(zone != null ? $", zone {zone}" : "")}): wild {wild.Name} lv {wild.level}{(rare ? " (rare)" : "")} " +
+            Debug.Log($"[EncounterDirector] {(keeperFight != null ? "Keeper" : water ? "Water" : "Grass")} encounter ({(table != null ? table.name : "no table")}{(zone != null ? $", zone {zone}" : "")}): wild {wild.Name} lv {wild.level}{(rare ? " (rare)" : "")} " +
                       $"on pad c{layout.wildPad.x} r{layout.wildPad.y}, lead {lead.Name} lv {lead.level} for pad c{layout.myPad.x} r{layout.myPad.y}, " +
                       $"zoom x{layout.zoom:F2}{(layout.fallback ? " (fallback pads: no free pair)" : "")}.");
 
@@ -305,8 +331,15 @@ namespace Diorama
             window.SetFocus(layout.pivot);
             island.SetClearing(layout.pivot, layout.wildPad - layout.myPad, padDistance * 0.5f + 1.3f, 1.6f,
                 layout.pivot + layout.towardPlayer * 9f, 1.1f);
-            stage.SpawnPads(layout.myPad, layout.wildPad, table.habitat);
-            if (water)
+            stage.SpawnPads(layout.myPad, layout.wildPad, table != null ? table.habitat : Habitat.Grass);
+            if (keeperFight != null)
+            {
+                window.ZoomTo(layout.pivot, layout.zoom, zoomSeconds);
+                StartCoroutine(FadeStage(1f));
+                StartCoroutine(stage.RisePads(true));
+                yield return new WaitForSeconds(zoomSeconds + 0.1f);
+            }
+            else if (water)
             {
                 window.ZoomTo(layout.pivot, layout.zoom, zoomSeconds);
                 StartCoroutine(FadeStage(1f));
@@ -328,10 +361,10 @@ namespace Diorama
             stage.Spawn(wild, BattleSide.Wild, layout.wildPad, layout.myPad);
             runes.Avoid(null, stage.Wild);
             pods.InBattle = true;
-            pods.CradleVisible = true;
+            pods.CradleVisible = keeperFight == null; // a Keeper can't be caught
             pods.CradleGlow = pods.CradlePulse = false;
             // First meeting with a species not caught yet: a little "New!" sparkle as it appears.
-            bool isNew = IsCaught != null && wild.species != null && !IsCaught(wild.species) && Seen.Add(SpeciesRegistry.IdOf(wild.species));
+            bool isNew = keeperFight == null && IsCaught != null && wild.species != null && !IsCaught(wild.species) && Seen.Add(SpeciesRegistry.IdOf(wild.species));
             if (isNew)
             {
                 Debug.Log($"[EncounterDirector] First meeting with {wild.species.displayName}: New!");
@@ -339,7 +372,7 @@ namespace Diorama
             }
             yield return stage.WildAppears(rare, water ? (Vector2?)where : null);
             runes.ShowRunOnly();
-            runes.SetCaption(rare ? $"A rare wild {wild.Name} appeared!" : $"A wild {wild.Name} appeared!");
+            runes.SetCaption(keeperFight != null ? keeperFight.caption ?? $"{wild.Name} blocks the way!" : rare ? $"A rare wild {wild.Name} appeared!" : $"A wild {wild.Name} appeared!");
             if (rare) Dialogue.Say("rare.first");
             yield return new WaitForSeconds(0.6f);
 
@@ -360,7 +393,8 @@ namespace Diorama
             }
             stage.ShowWildBar(wild);
 
-            var battle = CurrentBattle = new BattleSystem(party.At(_activeSlot), wild, typeChart, (int)(_rnd.Next() * int.MaxValue), rare, HasReserve);
+            var battle = CurrentBattle = new BattleSystem(party.At(_activeSlot), wild, typeChart, (int)(_rnd.Next() * int.MaxValue), rare, HasReserve,
+                keeperFight != null ? keeperFight.rules : null);
             Dialogue.Say("battle.first");
             string prompt = null;
             UpdateCradle(battle);
@@ -767,6 +801,7 @@ namespace Diorama
         IEnumerator Finish(bool lost)
         {
             CurrentBattle = null;
+            Keeper = null;
             runes.Hide();
             pods.InBattle = pods.PartyGrab = pods.CradleGrab = pods.CradleVisible = pods.CradleGlow = pods.CradlePulse = false;
             pods.ActiveSlot = pods.GlowSlot = -1;
@@ -786,6 +821,8 @@ namespace Diorama
             stage.Cleanup();
             if (lost)
             {
+                // Lost inside (a Keeper's hall): outside first, then the shrine.
+                if (SceneSwap.IsInside && SceneSwap.Current != null) SceneSwap.Current.ReturnNow();
                 bool atShrine = shrines != null && shrines.LastShrine.HasValue;
                 if (shrines != null) shrines.Respawn();
                 else explorer.Teleport(explorer.SpawnTile);
@@ -825,6 +862,24 @@ namespace Diorama
             public Vector2 towardPlayer, pivot, explorerSpot;
             public float zoom;
             public bool fallback;
+        }
+
+        /// <summary>Fixed pads for a Keeper battle; the explorer stands beside the party's pad.</summary>
+        StageLayout KeeperLayout(KeeperFight f)
+        {
+            Vector2 line = ((Vector2)(f.keeperPad - f.myPad)).normalized;
+            Vector2 side = new Vector2(-line.y, line.x);
+            Vector2 pivot = ((Vector2)f.myPad + f.keeperPad) * 0.5f;
+            var layout = new StageLayout
+            {
+                myPad = f.myPad,
+                wildPad = f.keeperPad,
+                towardPlayer = -line,
+                pivot = pivot,
+                explorerSpot = f.myPad - line * 0.35f + side * 0.85f,
+            };
+            layout.zoom = Mathf.Min(FitZoom(pivot, new[] { (Vector2)f.myPad, f.keeperPad }), f.maxZoom);
+            return layout;
         }
 
         static readonly Vector2Int[] Directions =

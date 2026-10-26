@@ -15,7 +15,7 @@ MonoBehaviour:
   displayName: Ember Shot
   element: 1
   kind: 0
-  power: 42
+  power: 36
   accuracy: 95
   animation: 0
   arc: 0

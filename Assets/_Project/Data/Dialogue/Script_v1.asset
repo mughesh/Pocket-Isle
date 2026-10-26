@@ -751,23 +751,30 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: Something huge sleeps here... not yet.
-  - id: cw.keeper.meet
-    once: 0
+  - id: cinder.keeper.first
+    once: 1
     priority: 2
-    note: 
+    note: 'step 9c: first time in the Forge Hall; then the Keeper battle'
+    target: hearthstag
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: It's scared... the fire is trapped inside it.
+    - speaker: 0
+      speakerName: Spirit
+      text: Let's calm it down. Gently!
+  - id: keeper.shield.first
+    once: 1
+    priority: 2
+    note: first blocked hit
     target: 
     validWhile: 
     lines:
-    - speaker: 1
-      speakerName: Hearthstag
-      text: Stay back! If I share the fire, it will go out forever.
     - speaker: 0
       speakerName: Spirit
-      text: He's not mean. He's scared.
-    - speaker: 0
-      speakerName: Spirit
-      text: Let's calm him down.
-  - id: cw.keeper.shield
+      text: Its crown shields it! Water breaks it, or keep chipping away.
+  - id: keeper.shield.broken.first
     once: 1
     priority: 2
     note: 
@@ -776,34 +783,68 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: His crown blocks everything. Maybe water can crack it?
-  - id: cw.keeper.shield.break
-    once: 0
+      text: The shield's down. Now!
+  - id: keeper.phase2
+    once: 1
     priority: 2
-    note: 
+    note: below half HP
     target: 
     validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: It cracked! Now's our chance!
-  - id: cw.keeper.win
-    once: 0
+      text: It's fighting the fear. Keep going!
+  - id: cinder.keeper.win
+    once: 1
     priority: 2
-    note: 
+    note: it kneels and calms
+    target: hearthstag
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: It wasn't angry. It was scared, holding all the fire in.
+  - id: cinder.shard.take
+    once: 1
+    priority: 2
+    note: the fire shard floats to the player
+    target: fireShard
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The fire shard! Take it.
+  - id: cinder.restored
+    once: 1
+    priority: 2
+    note: the restoration wave outside
     target: 
     validWhile: 
     lines:
-    - speaker: 1
-      speakerName: Hearthstag
-      text: ...It's warm. The forest is warm again.
-    - speaker: 1
-      speakerName: Hearthstag
-      text: I was so afraid of the dark. Thank you, guardian.
-    - speaker: 1
-      speakerName: Hearthstag
-      text: Take this shard. Mend what broke.
-  - id: cw.restored
+    - speaker: 0
+      speakerName: Spirit
+      text: Cinderwood is warm again!
+  - id: hub.shard.first
+    once: 1
+    priority: 2
+    note: 'step 9c: in the hub holding a shard'
+    target: statueSocket
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Put the shard in the statue. Something's calling it.
+  - id: hub.shard.placed
+    once: 1
+    priority: 2
+    note: the shard locks in
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: I... feel warmer. Strange.
+  - id: hub.shard.more
     once: 1
     priority: 2
     note: 
@@ -812,17 +853,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Look! Cinderwood is glowing again!
-  - id: cw.shard.dock
-    once: 1
-    priority: 2
-    note: 
-    target: 
-    validWhile: 
-    lines:
-    - speaker: 0
-      speakerName: Spirit
-      text: The island's getting bigger. Did you feel that?
+      text: Two more shards are out there.
   - id: statue.shard.1
     once: 0
     priority: 2

@@ -87,6 +87,22 @@ namespace Diorama
             Apply();
         }
 
+        /// <summary>
+        /// Places it at an island-local point (on the rim, floating over the island), <paramref name="metres"/> per shape
+        /// unit, no window clip (things off the map: the shard holder, a shard in the air).
+        /// </summary>
+        public void PlaceLocal(Vector3 local, Quaternion rotation, float metres, bool show)
+        {
+            if (_renderer == null) return;
+            _renderer.enabled = show && _filter.sharedMesh != null;
+            if (!_renderer.enabled) return;
+            windowClip = false;
+            transform.localPosition = local;
+            transform.localRotation = rotation;
+            transform.localScale = Vector3.one * metres;
+            Apply();
+        }
+
         bool NearFootprint(Vector2 tile, float cap)
         {
             if (_island.FootprintContains(_island.TileToLocal(tile, cap))) return true;

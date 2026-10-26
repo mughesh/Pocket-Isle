@@ -115,8 +115,8 @@ namespace Diorama.EditorTools
             recipe.triangleBudget = 10000;
             EditorUtility.SetDirty(recipe);
 
-            var emberShot = Move("EmberShot", "Ember Shot", Element.Fire, 42, 95, MoveAnimation.Shoot);
-            var crownCharge = Move("CrownCharge", "Crown Charge", Element.Fire, 55, 90, MoveAnimation.Lunge);
+            var emberShot = Move("EmberShot", "Ember Shot", Element.Fire, 36, 95, MoveAnimation.Shoot);
+            var crownCharge = Move("CrownCharge", "Crown Charge", Element.Fire, 48, 90, MoveAnimation.Lunge);
             var crownShield = Asset<MoveData>($"{MoveRoot}/CrownShield.asset");
             crownShield.displayName = "Crown Shield";
             crownShield.element = Element.Fire;
@@ -129,7 +129,7 @@ namespace Diorama.EditorTools
 
             var species = Species("Hearthstag", Element.Fire, recipe, null, 0);
             // HP ~2.5x a normal Lv 12 Isling (their base HP is ~40-58).
-            species.baseStats = new BaseStats { hp = 115, attack = 14, defense = 14, speed = 8 };
+            species.baseStats = new BaseStats { hp = 115, attack = 11, defense = 14, speed = 8 };
             species.moves = new[] { emberShot, crownCharge, crownShield };
             species.keeper = true;
             EditorUtility.SetDirty(species);

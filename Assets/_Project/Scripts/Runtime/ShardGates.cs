@@ -162,7 +162,7 @@ namespace Diorama
             var p = _portals[i];
             float tile = island.map.tileSize;
             Vector3 ground = island.TileToLocal(Center(p.link), island.Content.capHeight);
-            bool visible = outside && !window.IsZoomed && island.FootprintContains(ground);
+            bool visible = outside && !window.IsZoomed && !Hidden(i) && island.FootprintContains(ground);
             if (visible && !p.seen && !explorer.Locked && !Onboarding.Running)
             {
                 p.seen = true;
@@ -195,9 +195,12 @@ namespace Diorama
             p.renderer.SetPropertyBlock(_block);
         }
 
+        /// <summary>A gate whose prop the map hides for now (step 9c: the temple's return gate before the Keeper is calmed).</summary>
+        bool Hidden(int i) => _scanned != null && _scanned.IsPropHidden(_portals[i].link.tile);
+
         Vector3? GatePoint(int i)
         {
-            if (this == null || i < 0 || i >= _portals.Count || !Outside) return null;
+            if (this == null || i < 0 || i >= _portals.Count || !Outside || Hidden(i)) return null;
             var p = _portals[i];
             float h = p.look.flat ? p.look.bottom + 0.2f : p.look.bottom + p.look.size.y * 0.5f;
             var local = island.TileToLocal(Center(p.link), island.Content.capHeight + h * island.map.tileSize);
@@ -287,6 +290,7 @@ namespace Diorama
 
         void Use(int i)
         {
+            if (Hidden(i)) return;
             _last = i;
             var p = _portals[i];
             if (!p.link.Open)

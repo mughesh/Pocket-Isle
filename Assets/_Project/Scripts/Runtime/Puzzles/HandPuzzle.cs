@@ -155,9 +155,12 @@ namespace Diorama
 
         // ---- lesson ----
 
+        /// <summary>Whether it can be worked at all right now (the statue socket: only while a shard is held).</summary>
+        protected virtual bool Available => true;
+
         void UpdateLesson()
         {
-            bool want = !Interacted && !IsSolved && Usable && !Busy;
+            bool want = !Interacted && !IsSolved && Usable && Available && !Busy;
             if (want && !LessonShowing) BeginLesson();
             else if (!want && LessonShowing) EndLesson();
         }

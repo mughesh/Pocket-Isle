@@ -19,7 +19,7 @@ MonoBehaviour:
   evolveLevel: 0
   baseStats:
     hp: 115
-    attack: 14
+    attack: 11
     defense: 14
     speed: 8
   moves:

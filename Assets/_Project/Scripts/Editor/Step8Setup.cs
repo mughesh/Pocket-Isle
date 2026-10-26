@@ -201,6 +201,8 @@ namespace Diorama.EditorTools
             cinderwood.gates = new List<GateLink>
             {
                 new GateLink { id = "home", tile = CinderwoodGate, to = hub, arrive = toHub, arriveFacing = new Vector2Int(0, 1), portal = HomeColor },
+                // Step 9c: a shortcut home from the temple, hidden until the Keeper is calmed (KeeperHall).
+                new GateLink { id = "home", tile = CinderwoodTools.Tile(CinderwoodTools.TempleGateXY), to = hub, arrive = toHub, arriveFacing = new Vector2Int(0, 1), portal = HomeColor },
             };
             EditorUtility.SetDirty(hub);
             EditorUtility.SetDirty(cinderwood);

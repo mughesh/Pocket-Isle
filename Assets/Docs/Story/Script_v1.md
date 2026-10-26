@@ -157,21 +157,25 @@ every ~10 s while it waits. Shard, move and starter use the Opening lines above;
   - Spirit: The forge is waking up!
 - `cinder.hall.first` · once · → hallKeeper (step 9b: first time inside the Forge Hall; Hearthstag comes in 9c)
   - Spirit: Something huge sleeps here... not yet.
-- `cw.keeper.meet`
-  - Hearthstag: Stay back! If I share the fire, it will go out forever.
-  - Spirit: He's not mean. He's scared.
-  - Spirit: Let's calm him down.
-- `cw.keeper.shield` · once: Spirit: His crown blocks everything. Maybe water can crack it?
-- `cw.keeper.shield.break` · Spirit: It cracked! Now's our chance!
-- `cw.keeper.win`
-  - Hearthstag: ...It's warm. The forest is warm again.
-  - Hearthstag: I was so afraid of the dark. Thank you, guardian.
-  - Hearthstag: Take this shard. Mend what broke.
-- `cw.restored` · once
-  - Spirit: Look! Cinderwood is glowing again!
-- `cw.shard.dock` · once: Spirit: The island's getting bigger. Did you feel that?
+- `cinder.keeper.first` · once · → hearthstag (step 9c: first time in the Forge Hall; then the Keeper battle)
+  - Spirit: It's scared... the fire is trapped inside it.
+  - Spirit: Let's calm it down. Gently!
+- `keeper.shield.first` · once (first blocked hit)
+  - Spirit: Its crown shields it! Water breaks it, or keep chipping away.
+- `keeper.shield.broken.first` · once: Spirit: The shield's down. Now!
+- `keeper.phase2` · once (below half HP): Spirit: It's fighting the fear. Keep going!
+- `cinder.keeper.win` · once · → hearthstag (it kneels and calms)
+  - Spirit: It wasn't angry. It was scared, holding all the fire in.
+- `cinder.shard.take` · once · → fireShard (the fire shard floats to the player)
+  - Spirit: The fire shard! Take it.
+- `cinder.restored` · once (the restoration wave outside)
+  - Spirit: Cinderwood is warm again!
 
 ## Statue and finale
+- `hub.shard.first` · once · → statueSocket (step 9c: in the hub holding a shard)
+  - Spirit: Put the shard in the statue. Something's calling it.
+- `hub.shard.placed` · once (the shard locks in): Spirit: I... feel warmer. Strange.
+- `hub.shard.more` · once: Spirit: Two more shards are out there.
 - `statue.shard.1`
   - Spirit: The statue's warmer. And I feel... brighter?
 - `statue.shard.2`

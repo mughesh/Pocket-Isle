@@ -149,7 +149,7 @@ MonoBehaviour:
 
     ...............................................r..e.........
 
-    ..............e.................................x....x......
+    ..............e.........Z.......................x....x......
 
     ............................................................
 
@@ -522,6 +522,14 @@ MonoBehaviour:
   gates:
   - id: home
     tile: {x: 7, y: 53}
+    to: {fileID: 11400000, guid: ab0469af29722704f949fec768f94b68, type: 2}
+    arrive: {x: 3, y: 16}
+    arriveFacing: {x: 0, y: 1}
+    isSealed: 0
+    portal: {r: 1, g: 0.85, b: 0.48, a: 1}
+    firstSeenLine: 
+  - id: home
+    tile: {x: 24, y: 7}
     to: {fileID: 11400000, guid: ab0469af29722704f949fec768f94b68, type: 2}
     arrive: {x: 3, y: 16}
     arriveFacing: {x: 0, y: 1}

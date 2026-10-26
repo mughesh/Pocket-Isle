@@ -34,6 +34,8 @@ namespace Diorama.EditorTools
         public static readonly Vector2Int BellowsXY = new Vector2Int(18, 55);
         public static readonly Vector2Int PipeXY = new Vector2Int(18 - PropKit.PipeSpan, 55);
         public static readonly Vector2Int[] BrazierXY = { new Vector2Int(16, 55), new Vector2Int(14, 55), new Vector2Int(12, 55) };
+        /// <summary>Step 9c: the temple's return gate (2 x 1, front y 51), hidden until the Keeper is calmed (KeeperHall).</summary>
+        public static readonly Vector2Int TempleGateXY = new Vector2Int(24, 52);
         static readonly Vector2Int FirstGrassXY = new Vector2Int(15, 7);
         static readonly Vector2Int PlazaXY = new Vector2Int(15, 33);
 
@@ -483,6 +485,7 @@ namespace Diorama.EditorTools
             Ground(DoorXY.x, DoorXY.y, IslandMap.Grass);
             Prop(DoorXY, KDoor);
             foreach (var b in BrazierXY) Prop(b, KBrazier);
+            Prop(TempleGateXY, KGate);
             Prop(BellowsXY, KBellows);
             Prop(PipeXY, KPipe);
             foreach (var (x, y) in new[] { (14, 52), (26, 50), (12, 49) }) Prop(x, y, KVent);
