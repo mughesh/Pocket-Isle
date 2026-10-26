@@ -36,6 +36,7 @@ namespace Diorama.Audio
         public bool enabled = true;
         public string label = "";
         [Tooltip("Plays only through the patch's notes (bubbles, chirps, sparkles), not on its own.")] public bool instrument;
+        [Tooltip("Oscillator = the wave below. The others are physical models (settings in their own section).")] public SynthModel model = SynthModel.Oscillator;
         public SynthWave wave = SynthWave.Sine;
         [Tooltip("Note name like D5 or F#4; overrides Hz when set.")] public string note = "";
         [Range(20f, 4000f)] public float hz = 440f;
@@ -86,7 +87,20 @@ namespace Diorama.Audio
         [Tooltip("Click length in ms.")] [Range(0.2f, 20f)] public float crackleLength = 2f;
         [Range(0f, 2f)] public float crackleGain = 0.5f;
 
-        public SynthLayer Clone() => (SynthLayer)MemberwiseClone();
+        [Header("Model settings (used by the chosen model)")]
+        public ModalSettings modal = new ModalSettings();
+        public ParticleSettings particles = new ParticleSettings();
+        public BubbleSettings bubbles = new BubbleSettings();
+        public FireSettings fire = new FireSettings();
+        public WindSettings wind = new WindSettings();
+        public FrictionSettings friction = new FrictionSettings();
+        public BreathSettings breath = new BreathSettings();
+
+        [Header("Group and scatter")]
+        [Tooltip("Index into the patch's layer groups (-1 = none): the group's offset and gain apply too.")] [Range(-1, 7)] public int group = -1;
+        public ScatterSettings scatter = new ScatterSettings();
+
+        public SynthLayer Clone() => JsonUtility.FromJson<SynthLayer>(JsonUtility.ToJson(this));
     }
 
     /// <summary>One note of a jingle (or of an instrument layer in a one-shot or loop). The layer index picks the instrument.</summary>
@@ -96,7 +110,7 @@ namespace Diorama.Audio
         public string note = "D5";
         [Range(0f, 10f)] public float start;
         [Range(0.02f, 10f)] public float length = 0.25f;
-        [Range(0, 3)] public int layer;
+        [Range(0, 15)] public int layer;
         [Range(0f, 1.5f)] public float velocity = 1f;
     }
 
@@ -123,6 +137,7 @@ namespace Diorama.Audio
         [Range(0f, 0.5f)] public float jitterFilter = 0.1f;
 
         public List<SynthLayer> layers = new List<SynthLayer>();
+        [Tooltip("Transient / body / tail / sparkle sets: move and level several layers together.")] public List<LayerGroup> groups = new List<LayerGroup>();
 
         [Header("Loop mode")]
         [Range(0.05f, 8f)] public float loopCrossfade = 1f;

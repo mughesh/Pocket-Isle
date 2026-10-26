@@ -92,11 +92,27 @@ namespace Diorama.Audio
                 foreach (var layer in patch.layers)
                 {
                     if (layer == null || !layer.enabled || layer.instrument) continue;
+                    if (!InGroup(patch, layer, out float groupOffset, out float groupGain)) continue;
                     float hz = SynthNotes.Hz(layer.note, layer.hz);
-                    float offset = layer.startOffset * j.time;
+                    float offset = (layer.startOffset + groupOffset) * j.time;
+                    var sc = layer.scatter;
+                    if (sc != null && sc.count > 0)
+                    {
+                        // N copies at seeded random points of the window, each with its own pitch, level and seed.
+                        var srng = new System.Random(rng.Next());
+                        for (int c = 0; c < sc.count; c++)
+                        {
+                            float at = offset + Mathf.Pow((float)srng.NextDouble(), sc.bunching) * sc.window * j.time;
+                            float pj = Mathf.Pow(2f, Range(srng, -1f, 1f) * sc.pitchJitter / 12f);
+                            float vel = 1f - sc.gainJitter * (float)srng.NextDouble();
+                            float g = layer.gate > 0f ? layer.gate * j.time : Mathf.Max(0f, total - at - layer.amp.release * j.time);
+                            RenderLayer(layer, buf, hz * j.pitch * pj, at, g, vel * groupGain, j, srng.Next(), hz);
+                        }
+                        continue;
+                    }
                     float gate = layer.gate > 0f ? layer.gate * j.time : Mathf.Max(0f, total - offset - layer.amp.release * j.time);
                     if (loop) gate = total; // a loop sustains through the whole render, tail included
-                    RenderLayer(layer, buf, hz * j.pitch, offset, gate, 1f, j, rng.Next());
+                    RenderLayer(layer, buf, hz * j.pitch, offset, gate, groupGain, j, rng.Next(), hz);
                 }
             }
 
@@ -106,8 +122,10 @@ namespace Diorama.Audio
                 if (n.layer < 0 || n.layer >= patch.layers.Count) continue;
                 var layer = patch.layers[n.layer];
                 if (layer == null || !layer.enabled) continue;
+                if (!InGroup(patch, layer, out float groupOffset, out float groupGain)) continue;
                 float hz = SynthNotes.Hz(n.note, layer.hz);
-                RenderLayer(layer, buf, hz * j.pitch, n.start * j.time, n.length * j.time, n.velocity, j, rng.Next());
+                RenderLayer(layer, buf, hz * j.pitch, (n.start + groupOffset) * j.time, n.length * j.time, n.velocity * groupGain, j, rng.Next(),
+                    SynthNotes.Hz(layer.note, layer.hz));
             }
 
             Master(patch, buf);
@@ -144,11 +162,26 @@ namespace Diorama.Audio
             return outBuf;
         }
 
+        /// <summary>False when the layer's group is switched off; otherwise the group's offset and gain (0 and 1 without a group).</summary>
+        static bool InGroup(SynthPatch patch, SynthLayer layer, out float offset, out float gain)
+        {
+            offset = 0f;
+            gain = 1f;
+            if (layer.group < 0 || patch.groups == null || layer.group >= patch.groups.Count) return true;
+            var g = patch.groups[layer.group];
+            if (g == null) return true;
+            offset = g.offset;
+            gain = g.gain;
+            return g.enabled;
+        }
+
         // ---- one layer ----
 
-        static void RenderLayer(SynthLayer L, float[] buf, float hz, float offset, float gate, float velocity, Jitter j, int seed)
+        /// <param name="ownHz">The layer's own pitch (note or Hz, before jitter): models scale their frequencies by hz / ownHz.</param>
+        static void RenderLayer(SynthLayer L, float[] buf, float hz, float offset, float gate, float velocity, Jitter j, int seed, float ownHz)
         {
             var rng = new System.Random(seed);
+            var model = L.model != SynthModel.Oscillator ? SynthModels.Create(L, rng.Next()) : null;
             var env = L.amp;
             float tScale = j.time;
             float a = Mathf.Max(0.003f, env.attack * tScale), h = env.hold * tScale, d = Mathf.Max(0.001f, env.decay * tScale);
@@ -186,7 +219,8 @@ namespace Diorama.Audio
                 float f = hz * Mathf.Pow(2f, semis / 12f);
 
                 float s;
-                switch (L.wave)
+                if (model != null) s = model.Next(t, f, f / Mathf.Max(1f, ownHz));
+                else switch (L.wave)
                 {
                     case SynthWave.Silence:
                         s = 0f;

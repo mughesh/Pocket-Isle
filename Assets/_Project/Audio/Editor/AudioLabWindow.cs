@@ -36,6 +36,7 @@ namespace Diorama.Audio.EditorTools
         float _peakDb, _rmsDb, _highShare, _seam;
 
         bool _autoPlay = true;
+        int _presetIndex, _presetLayer;
         bool _pendingPlay;
         double _lastChange;
 
@@ -228,6 +229,8 @@ namespace Diorama.Audio.EditorTools
                     if (SynthNotes.TryParse(n.note, out int m) && !SynthNotes.InScale(m))
                         EditorGUILayout.HelpBox($"{n.note} is outside D major pentatonic (D E F# A B).", MessageType.Warning);
 
+            DrawModelPresetRow(p);
+
             _fieldScroll = EditorGUILayout.BeginScrollView(_fieldScroll);
             _so.Update();
             EditorGUI.BeginChangeCheck();
@@ -247,6 +250,41 @@ namespace Diorama.Audio.EditorTools
                 if (_autoPlay) _pendingPlay = true;
             }
             EditorGUILayout.EndScrollView();
+        }
+
+        /// <summary>Model preset -> layer N (Apply), or as a new layer (Add layer).</summary>
+        void DrawModelPresetRow(SynthPatch p)
+        {
+            var names = ModelPresets.Names;
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                GUILayout.Label("Model preset", GUILayout.Width(80));
+                _presetIndex = Mathf.Clamp(EditorGUILayout.Popup(_presetIndex, names), 0, names.Length - 1);
+                GUILayout.Label("layer", GUILayout.Width(34));
+                _presetLayer = Mathf.Max(0, EditorGUILayout.IntField(_presetLayer, GUILayout.Width(28)));
+                using (new EditorGUI.DisabledScope(_presetLayer >= p.layers.Count))
+                    if (GUILayout.Button(new GUIContent("Apply", "Set this layer's model and settings to the preset (keeps note, offset, gain, group)."), GUILayout.Width(50)))
+                    {
+                        Undo.RecordObject(p, "Apply model preset");
+                        ModelPresets.Apply(names[_presetIndex], p.layers[_presetLayer]);
+                        AfterScriptedChange(p);
+                    }
+                if (GUILayout.Button(new GUIContent("Add layer", "Append a new layer made from the preset."), GUILayout.Width(70)))
+                {
+                    Undo.RecordObject(p, "Add model layer");
+                    p.layers.Add(ModelPresets.Layer(names[_presetIndex]));
+                    _presetLayer = p.layers.Count - 1;
+                    AfterScriptedChange(p);
+                }
+            }
+        }
+
+        void AfterScriptedChange(SynthPatch p)
+        {
+            EditorUtility.SetDirty(p);
+            _so.Update();
+            _stale = true;
+            if (_autoPlay) _pendingPlay = true;
         }
 
         void EnsureRender(int variant = -1)

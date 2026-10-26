@@ -105,6 +105,21 @@ namespace Diorama.Audio.EditorTools
             return entries;
         }
 
+        /// <summary>A contact sheet of raw renders (no cue): Temp/audio-analysis/&lt;name&gt;.png. Labels are the tile titles.</summary>
+        public static void Sheet(string name, IList<KeyValuePair<string, float[]>> renders, float tierDb = float.NaN)
+        {
+            var entries = new List<Entry>();
+            foreach (var kv in renders)
+            {
+                var e = new Entry { cue = kv.Key, group = name, clipPath = kv.Key + ".wav", kind = "render", samples = kv.Value, tierDb = tierDb };
+                e.stats = Loudness.Analyse(kv.Value, SynthPatch.SampleRate);
+                Check(e, LoudnessTier.Island);
+                entries.Add(e);
+            }
+            Directory.CreateDirectory(OutDir);
+            WriteSheet(name, entries, OutDir);
+        }
+
         static string Kind(string path)
         {
             if (path.Contains("/Gen/")) return path.Contains("_FREE") ? "gen-free" : "gen";
