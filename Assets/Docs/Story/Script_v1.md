@@ -127,6 +127,10 @@ every ~10 s while it waits. Shard, move and starter use the Opening lines above;
   - Spirit: A Shard Gate. It leads to another piece of the world.
   - Spirit: Step in when you're ready.
 - `rare.first` · once (first gold sparkle): Spirit: Ooh, sparkly! That one's rare.
+- `xp.first` · once · → nearPad (step 9f: the first XP after a win)
+  - Spirit: Your Islings learn from every battle. Watch them grow!
+- `steambara.first` · once · → wildPad (step 9f: the first wild Steambara)
+  - Spirit: A water Isling, visiting the springs! Water beats fire...
 
 ## Cinderwood (fire)
 - `cw.arrive` · once

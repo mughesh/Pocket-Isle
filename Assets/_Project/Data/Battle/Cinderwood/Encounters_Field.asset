@@ -15,32 +15,32 @@ MonoBehaviour:
   habitat: 0
   entries:
   - species: {fileID: 11400000, guid: fb46257ae3b4b0144a5861244b1b96f6, type: 2}
-    minLevel: 4
-    maxLevel: 6
+    minLevel: 6
+    maxLevel: 8
     weight: 30
     rare: 0
   - species: {fileID: 11400000, guid: bf28c73db405a224da137bbcb4724879, type: 2}
-    minLevel: 4
-    maxLevel: 6
+    minLevel: 6
+    maxLevel: 8
     weight: 20
     rare: 0
   - species: {fileID: 11400000, guid: e7c3963a9c30b4e42bc8e0dffffc34f3, type: 2}
-    minLevel: 4
-    maxLevel: 6
+    minLevel: 6
+    maxLevel: 8
     weight: 12
     rare: 0
   - species: {fileID: 11400000, guid: c83d34536ca6d6c468180c164437c61b, type: 2}
-    minLevel: 4
-    maxLevel: 6
+    minLevel: 6
+    maxLevel: 8
     weight: 17
     rare: 0
   - species: {fileID: 11400000, guid: 145b535be59a83343a76aaed5434324f, type: 2}
-    minLevel: 4
-    maxLevel: 6
+    minLevel: 6
+    maxLevel: 8
     weight: 16
     rare: 0
   - species: {fileID: 11400000, guid: 8daccdc828815e049b974338e5a2368e, type: 2}
-    minLevel: 4
-    maxLevel: 6
+    minLevel: 6
+    maxLevel: 8
     weight: 5
     rare: 1

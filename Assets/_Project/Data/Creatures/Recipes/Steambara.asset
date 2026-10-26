@@ -1,0 +1,108 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e27712b2a6f9fc45ae0b54784bf7327, type: 3}
+  m_Name: Steambara
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.CreatureRecipe
+  baseRecipe: {fileID: 0}
+  body: {fileID: 11400000, guid: 3445bc0235fc70c4b93eab8316a77dfd, type: 2}
+  height: 0.034
+  zones:
+    belly: 0
+    bellyDirection: {x: 0, y: 0, z: 0}
+    bellyAt: 0
+    bellyMaxY: 0
+    bellyDrips: 0
+    bellyDripLength: 0
+    socks: 0
+    socksY: 0
+    tips: 0
+    tipAxis: {x: 0, y: 0, z: 0}
+    tipAt: 0
+    spots: 0
+    spotScale: 0
+    cracks: 0
+    crackScale: 0
+    crackWidth: 0
+    crackPulse: 0
+    patches:
+    - center: {x: 0, y: -0.2, z: 0.36}
+      radius: 0.24
+      color: 1
+      mirrorX: 0
+    - center: {x: 0, y: 0.04, z: 0.64}
+      radius: 0.15
+      color: 1
+      mirrorX: 0
+  parts:
+  - part: {fileID: 11400000, guid: 8dc39b0b4741de740b42205a1b696d55, type: 2}
+    position: {x: 0, y: -0.36, z: -0.04}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: {x: 1.3, y: 1.3, z: 1.3}
+    mirror: 0
+    parent: -1
+  - part: {fileID: 11400000, guid: 798ff29359e8b624e98ef8e1ec13cbbe, type: 2}
+    position: {x: 0.2, y: 0.36, z: 0.14}
+    rotation: {x: 0, y: 0, z: -30}
+    scale: {x: 0.42, y: 0.42, z: 0.42}
+    mirror: 1
+    parent: -1
+  - part: {fileID: 11400000, guid: 773773a712b99394b852b965c4efe97c, type: 2}
+    position: {x: 0, y: 0.37, z: 0.22}
+    rotation: {x: 0, y: 20, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+    mirror: 0
+    parent: -1
+  face:
+    eyeSize: 0.045
+    eyeSpacing: 0.15
+    eyeHeight: 0.24
+    eyeStretch: 0.45
+    decals:
+    - kind: 0
+      at: {x: 0.05, y: 0.13}
+      size: {x: 0.02, y: 0.014}
+      color: 6
+      mirrorX: 1
+    - kind: 1
+      at: {x: 0, y: 0.04}
+      size: {x: 0.03, y: 0}
+      color: 6
+      mirrorX: 0
+  palette:
+    baseColor: {r: 0.54509807, g: 0.40784314, b: 0.2509804, a: 1}
+    belly: {r: 0.9411765, g: 0.8745098, b: 0.7529412, a: 1}
+    accent: {r: 0.41960785, g: 0.65882355, b: 0.40784314, a: 1}
+    socks: {r: 0.43137255, g: 0.3137255, b: 0.1882353, a: 1}
+    glow: {r: 0.9411765, g: 0.9411765, b: 0.9411765, a: 1}
+    extra: {r: 0.8980392, g: 0.5411765, b: 0.19607843, a: 1}
+    face: {r: 0.16470589, g: 0.1254902, b: 0.09411765, a: 1}
+    iris: {r: 0.16470589, g: 0.1254902, b: 0.09411765, a: 1}
+  spec: 0.2
+  glow: 0
+  outline: 0.035
+  idle:
+    breathe: 0.012
+    breatheSpeed: 1.6
+    jiggle: 0
+    hover: 0
+    bob: 0
+    sway: 1
+    swaySpeed: 0.7
+  heightScale: 1.25
+  extraParts: []
+  overridePalette: 0
+  hueShift: 0
+  saturationScale: 1
+  valueScale: 1
+  resolution: 88
+  triangleBudget: 6000
+  bakedPrefab: {fileID: 8284812056110227514, guid: 746bf826cec42974db0f81224d58460b, type: 3}

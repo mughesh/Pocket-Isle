@@ -18,9 +18,9 @@ MonoBehaviour:
   evolvesTo: {fileID: 0}
   evolveLevel: 0
   baseStats:
-    hp: 88
-    attack: 8
-    defense: 9
+    hp: 110
+    attack: 10
+    defense: 11
     speed: 8
   moves:
   - {fileID: 11400000, guid: e266d7c5dc6fe2b46a2985b69204f0e6, type: 2}

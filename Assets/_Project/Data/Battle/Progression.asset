@@ -17,6 +17,7 @@ MonoBehaviour:
   levelCap: 30
   rewardBase: 5
   rewardPerLevel: 4
+  rewardMultiplier: 3
   rareMultiplier: 2
   fullShare: 1
   faintedShare: 1

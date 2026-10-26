@@ -598,6 +598,26 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: Ooh, sparkly! That one's rare.
+  - id: xp.first
+    once: 1
+    priority: 1
+    note: 'step 9f: the first XP after a win'
+    target: nearPad
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Your Islings learn from every battle. Watch them grow!
+  - id: steambara.first
+    once: 1
+    priority: 1
+    note: 'step 9f: the first wild Steambara'
+    target: wildPad
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: A water Isling, visiting the springs! Water beats fire...
   - id: cw.arrive
     once: 1
     priority: 2

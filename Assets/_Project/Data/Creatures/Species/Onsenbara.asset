@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8421308f89f57d498f601bfba37a8cf, type: 3}
+  m_Name: Onsenbara
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.IslingSpecies
+  displayName: Onsenbara
+  element: 2
+  recipe: {fileID: 11400000, guid: fb9d645b0afa8b04ebbaf59baac55820, type: 2}
+  evolvesTo: {fileID: 0}
+  evolveLevel: 0
+  baseStats:
+    hp: 64
+    attack: 15
+    defense: 16
+    speed: 9
+  moves:
+  - {fileID: 11400000, guid: 7228fd7cb3681c3418b97e4b4c372060, type: 2}
+  - {fileID: 11400000, guid: fb75b2132a7d9b44d9257962632f7cf0, type: 2}
+  - {fileID: 11400000, guid: 6b6725a9ac7128d419cc0057fb20c9c4, type: 2}
+  keeper: 0
