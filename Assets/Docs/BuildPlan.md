@@ -31,7 +31,12 @@ Prompts for Claude Code: `Assets/Docs/Prompts/step-NN-*.md`. Design: `Assets/Doc
 - **Step 9d built Oct 26 (headset test pending): the rest of the fire roster.** Steamswan, Coalbeetle/Forgehorn,
   Mapadillo/Emberdillo, Ashmole/Cindermole, Cindercap/Cinderbloom, Embercrane/Pyrecrane in the Cinderwood tables;
   Glazegolem and Kilngolem look rare (gold kintsugi).
-- Next: headset test of 9b-9d, then the next realm.
+- **Step 9e built Oct 26 (headset test pending): dev panel, Hearthstag's fury, Keeper balance, small fixes.** Dev / QA
+  panel on a GameState API, QA APK + QA guide; Hearthstag frightened fury and burn-off calm; Keeper Lv 10 (headless
+  battle sim: Lv 9 team of 3 wins ~69%); Spirit and bubble stay out of the island; gaze ring shows through trees;
+  pinch-grab ghosts land the pinch point on the target.
+- Not in 9e: title screen, main menu, settings, Quick Journey (own design session).
+- Next: headset test of 9b-9e, then the next realm.
 
 ## Principle
 - **Every system data-driven** (ScriptableObjects): species, moves, type chart, maps, temples, dialogue.

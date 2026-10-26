@@ -182,8 +182,15 @@ chains, dim ember crystals). Walk onto the open doorway to go in; the Keeper's s
 huge sleeps here... not yet."); the door tiles lead back out in front of the forge, facing away.
 
 ### Keeper and shard as built (step 9c, Oct 26)
-- **Hearthstag**: Fire Keeper, Lv 12, base HP 115 (~2.5x), atk 11, def 14, spd 8; Ember Shot (36), Crown Charge (48, every
+- **Hearthstag**: Fire Keeper, **Lv 10, base HP 88 (HP 123 = 2.2x a normal Lv 10), atk 8, def 9, spd 8** (step 9e
+  balance: a Lv 9 team of 3 wins ~69% in the headless sim; `KeeperSim`); Ember Shot (36), Crown Charge (48, every
   3rd turn), Crown Shield. ~2.5x an Isling; frightened = ash fur + flickering dull red crystals, calmed = chestnut + gold.
+- **Fury (step 9e)**: frightened it reads overwhelmed and dangerous, never gory: grey-violet smoke aura with ember sparks,
+  flame tongues on the crown, constant trembling, red-ember glowing eyes, the smile turned to a frown, smoke snorts every
+  few seconds, a stomp now and then (rears, slams: lava cracks on the ground, dust, the tiles bounce). The battle opens
+  with a rear-up stomp (the Spirit flinches back); phase 2 = thicker aura, bigger flames, harder trembling. Won: the
+  aura burns off into rising gold motes, flames shrink, eyes blink to warm amber, trembling stops, it lowers its head,
+  then the palette shift.
 - **Crown shield**: starts up; hits do 10% ("Blocked!") and crack a crystal; a Water move or 3 hits break it; 2 open
   turns, then it raises it again. Below 50% HP: phase 2 (shot x1.5, crown brighter). No capture; Run always works (back
   at the hall door); losing = the last shrine, healed, nothing lost. The fight resets until won.
@@ -192,6 +199,16 @@ huge sleeps here... not yet."); the door tiles lead back out in front of the for
   gate appears in front of the temple (24, 52). Revisiting: Hearthstag rests by the burning forge; poke it for a snort.
 - **Hub**: holding a shard, the statue's matching socket glows and the Spirit points; carry the shard from the holder to
   the socket (or look + pinch): it locks in, the statue's rims and cracks glow, moss falls, the Spirit feels warmer.
+
+### Dev / QA panel (step 9e, Oct 26)
+- Editor and QA builds only (scripting define `POCKET_DEV`; **Tools > Pocket Isle > Build QA APK / Build Release APK**).
+  Left-hand menu pinch (palm up) or F2 opens a 2D panel beside the island's left side; poke or look + pinch.
+- Tabs: Go to (hub and Cinderwood landmarks, the Forge Hall), Party (heal, levels, team of 3 presets, add any species,
+  one-hit KO, invincible), Encounter (fight any species now, wild on/off, rare x10), Story (tutorial, opening, realm
+  restored, log, forge, Keeper, shard flags), Save (3 snapshots + auto, new game), Tools (fps, readouts, time x1/2/4,
+  walk x2, report bug). QA guide: `Assets/Docs/QA-Guide.md`.
+- Built on `GameState`: live changes apply at once; story changes edit the save and reload the scene. **Quick Journey**
+  (the judges' short flow, own design session) will reuse it: a preset = a SaveData + a reload.
 
 ### Look of the two states (decided Oct 24)
 The element "not flowing" shows as things being **still and unlit**, not as colour loss. The bright palette is the
