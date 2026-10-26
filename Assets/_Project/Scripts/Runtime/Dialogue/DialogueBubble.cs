@@ -62,6 +62,8 @@ namespace Diorama
         [Header("View")]
         [Tooltip("Half of the central view cone the bubble stays inside (degrees).")]
         public float maxViewAngle = 30f;
+        [Tooltip("Step 9h: the bubble's bottom stays this far above the island's top (world metres) wherever the island is between the head and the bubble.")]
+        public float aboveIslandMargin = 0.015f;
 
         /// <summary>The line has been shown for its full time.</summary>
         public event Action Finished;
@@ -311,11 +313,51 @@ namespace Diorama
             // Never inside the island (step 9e): the whole panel stays above the cap or beside the rim.
             if (island != null && island.map != null)
                 target = island.PushOutWorld(target, new Vector3(_size.x * 0.5f + 0.005f, _size.y * 0.5f + 0.008f, _size.x * 0.5f + 0.005f));
+            if (island != null && island.map != null && cam != null) target = KeepAboveIsland(cam.transform.position, target);
             _root.position = snap ? target : Vector3.Lerp(_root.position, target, 1f - Mathf.Exp(-Time.deltaTime * 10f));
             _root.localScale = Vector3.one * Mathf.SmoothStep(0.6f, 1f, _appear);
             if (cam == null) return;
             Vector3 away = _root.position - cam.transform.position;
             if (away.sqrMagnitude > 1e-6f) _root.rotation = Quaternion.LookRotation(away, Vector3.up);
+        }
+
+        /// <summary>
+        /// Step 9h: when the island lies between the head and the bubble's bottom edge (seen from above), or under it,
+        /// the bottom is lifted above the island's top plus <see cref="aboveIslandMargin"/>: it never sinks into it, also
+        /// when the Spirit flies low over the middle or the player sits far back.
+        /// </summary>
+        Vector3 KeepAboveIsland(Vector3 head, Vector3 center)
+        {
+            var t = island.transform;
+            float s = Mathf.Max(1e-4f, t.lossyScale.x);
+            Vector3 h = t.InverseTransformPoint(head);
+            Vector3 b = t.InverseTransformPoint(center - Vector3.up * (_size.y * 0.5f));
+            var half = island.FootprintHalfSize + new Vector2(0.02f, 0.02f);
+            float top = island.CapTopLocal + aboveIslandMargin / s;
+            if (b.y >= top || !CrossesFootprint(new Vector2(h.x, h.z), new Vector2(b.x, b.z), half)) return center;
+            return center + t.up * ((top - b.y) * s);
+        }
+
+        /// <summary>The segment a..b (island-local xz) touches the footprint rectangle |x| &lt;= half.x, |z| &lt;= half.y.</summary>
+        public static bool CrossesFootprint(Vector2 a, Vector2 b, Vector2 half)
+        {
+            float t0 = 0f, t1 = 1f;
+            Vector2 d = b - a;
+            for (int axis = 0; axis < 2; axis++)
+            {
+                float p = axis == 0 ? a.x : a.y, dp = axis == 0 ? d.x : d.y, h = axis == 0 ? half.x : half.y;
+                if (Mathf.Abs(dp) < 1e-7f)
+                {
+                    if (p < -h || p > h) return false;
+                    continue;
+                }
+                float u0 = (-h - p) / dp, u1 = (h - p) / dp;
+                if (u0 > u1) (u0, u1) = (u1, u0);
+                t0 = Mathf.Max(t0, u0);
+                t1 = Mathf.Min(t1, u1);
+                if (t0 > t1) return false;
+            }
+            return true;
         }
 
         /// <summary>Moves the bubble up (in the view) until it covers none of the <see cref="KeepClear"/> spheres.</summary>

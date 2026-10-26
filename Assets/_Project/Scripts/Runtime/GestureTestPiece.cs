@@ -120,6 +120,20 @@ namespace Diorama
         /// <summary>The tile a GoTo path is heading for, if any.</summary>
         public Vector2Int? Destination => _destination;
 
+        /// <summary>The last step (column, row), zero after a teleport.</summary>
+        public Vector2Int LastStep => _tile - _fromTile;
+
+        /// <summary>The direction a swipe walks (zero while standing or following a GoTo path).</summary>
+        public Vector2Int Heading => _heading;
+
+        /// <summary>Turns on the spot (step 9h: a battle starts facing the wild Isling). Ignored while walking.</summary>
+        public void Face(Vector2Int direction)
+        {
+            if (direction.sqrMagnitude != 1 || _stepT < 1f) return;
+            _facing = direction;
+            UpdateExplorer();
+        }
+
         /// <summary>False while a battle or the battle zoom is on (no walking, no GoTo).</summary>
         public bool CanMove => !_locked && !Zoomed;
 

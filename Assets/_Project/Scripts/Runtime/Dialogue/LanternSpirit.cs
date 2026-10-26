@@ -42,6 +42,10 @@ namespace Diorama
         [Tooltip("Kept out of the island's solid by this much (island-scale metres): x = beside the rim, y = feet above the cap.")]
         public Vector2 keepOut = new Vector2(0.025f, 0.012f);
 
+        [Header("In a battle (step 9h)")]
+        [Tooltip("During a battle the Spirit waits beside the near rim on the non-dominant side, out of the line from the head to the pads: x outside the side edge, y above the cap, z in from the near edge (island-local metres).")]
+        public Vector3 battleOffset = new Vector3(0.035f, 0.06f, 0.05f);
+
         /// <summary>
         /// Flinches back from a world point (step 9e: a Keeper's stomp): a quick hop away and up that eases back
         /// over <paramref name="seconds"/>.
@@ -71,7 +75,7 @@ namespace Diorama
         CreatureView _view;
         Transform _model, _anchor;
         float _speak, _speakTarget;
-        bool _away, _clamped;
+        bool _away, _clamped, _battle;
         float _sideSign = 1f;
         Vector3 _targetWorld, _flyFrom, _lastGoal;
         float _flyStart = -999f, _lingerUntil = -999f;
@@ -113,6 +117,17 @@ namespace Diorama
             if (_model.gameObject.activeSelf != appear > 0.001f) _model.gameObject.SetActive(appear > 0.001f);
             _speak = Mathf.MoveTowards(_speak, _speakTarget, Time.deltaTime * 3f);
             UpdateTarget();
+            bool battle = GameConditions.Check("battle");
+            if (battle != _battle)
+            {
+                _battle = battle;
+                if (!_away)
+                {
+                    _flyFrom = transform.localPosition;
+                    _flyStart = Time.time;
+                }
+                Debug.Log(battle ? $"[LanternSpirit] Battle: waiting beside the near rim ({(DominantHand.Left ? "right" : "left")} side, the non-dominant one)." : "[LanternSpirit] Battle over: back to the corner.");
+            }
             Place(Time.time);
             if (_view != null) _view.SetFlash(Mathf.Max(speakBrighten * Mathf.SmoothStep(0f, 1f, _speak), shineBrighten * FocusHighlight.Shine));
         }
@@ -171,6 +186,12 @@ namespace Diorama
         Vector3 HomeLocal()
         {
             var b = island.LocalBounds;
+            if (_battle)
+            {
+                // Island +X is the player's left: a right-handed player gets it on the left side.
+                float x = DominantHand.Left ? b.min.x - battleOffset.x : b.max.x + battleOffset.x;
+                return new Vector3(x, island.map.capHeight + battleOffset.y, b.max.z - battleOffset.z);
+            }
             return new Vector3(b.max.x - cornerOffset.x, island.map.capHeight + cornerOffset.y, b.max.z - cornerOffset.z);
         }
 

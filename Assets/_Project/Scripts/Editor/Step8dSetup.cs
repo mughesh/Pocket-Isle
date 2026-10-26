@@ -63,16 +63,9 @@ namespace Diorama.EditorTools
                 shrines.palm = new PalmHover();
                 EditorUtility.SetDirty(shrines);
             }
-            var lodge = Object.FindFirstObjectByType<LodgeRoom>(FindObjectsInactive.Include);
-            if (lodge != null)
-            {
-                Undo.RecordObject(lodge, "Step 8d");
-                lodge.palm = new PalmHover();
-                EditorUtility.SetDirty(lodge);
-            }
             var p = new PalmHover();
-            log.Append($"\n  palm over the flame / door arch: palm joint facing > {p.facing}, {p.height.x * 100f:0}-{p.height.y * 100f:0} cm above, " +
-                       $"within {p.radius * 100f:0} cm (scaled with the island){(shrines == null || lodge == null ? " - SHRINES OR LODGE MISSING" : "")}");
+            log.Append($"\n  palm over the flame: palm joint facing > {p.facing}, {p.height.x * 100f:0}-{p.height.y * 100f:0} cm above, " +
+                       $"within {p.radius * 100f:0} cm (scaled with the island){(shrines == null ? " - SHRINES MISSING" : "")}");
 
             EditorSceneManager.MarkSceneDirty(active);
             EditorSceneManager.SaveScene(active);

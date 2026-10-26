@@ -17,7 +17,8 @@ namespace Diorama
     /// - grab a rim pod and drop or toss it on the floor: that Isling joins the room (never the last one: it wobbles and
     ///   the Spirit says so);
     /// - with an Isling on the pedestal, look + pinch a rim pod (or the empty socket) = the same swap;
-    /// - walk onto either door tile, look + pinch the door arch, or hold a palm over it (a ring fills): back outside.
+    /// - walk out onto either door tile (a swipe toward it or a tap / look + pinch on it, <see cref="AimedOut"/>) or look +
+    ///   pinch the door arch: back outside.
     /// </summary>
     public class LodgeRoom : MonoBehaviour
     {
@@ -44,11 +45,12 @@ namespace Diorama
         [Tooltip("Centre of the honeycomb pod wall (lodge tiles; its anchor plus half its footprint).")]
         public Vector2 honeycombCenter = new Vector2(1.5f, 0f);
 
-        [Header("Leave by palm over the arch (like entering)")]
-        [Tooltip("Diorama/Beacon material (the filling ring).")]
+        [Tooltip("The step from inside onto a door tile (column, row): rows grow toward the door.")]
+        public Vector2Int doorOutward = new Vector2Int(0, 1);
+
+        [Header("Door ring")]
+        [Tooltip("Diorama/Beacon material (the ring over the arch while it is looked at).")]
         public Material beaconMaterial;
-        public PalmHover palm = new PalmHover();
-        public float palmHoldSeconds = 0.8f;
 
         [Header("Limits and sizes")]
         [Tooltip("Islings walking the room (the rest sleep in the honeycomb). Each costs about 9 draws (body pieces, outlines, eyes): lower it if the lodge drops frames.")]
@@ -85,7 +87,6 @@ namespace Diorama
         Transform _pageArrow;
         TMPro.TextMeshPro _pageText;
         readonly Dictionary<LodgeIsling, float> _since = new Dictionary<LodgeIsling, float>();
-        float _doorHold;
         Transform _doorRing;
         MeshRenderer _doorRingRenderer;
         MaterialPropertyBlock _block;
@@ -115,7 +116,7 @@ namespace Diorama
             _card = new IslingCard(hudMaterial, _quad, island.transform);
             _block = new MaterialPropertyBlock();
             MakeDoorRing();
-            if (beaconMaterial == null) Debug.LogError("[LodgeRoom] No beacon material: leaving by palm works but shows no ring (Set Up MR_Main (7c)).", this);
+            if (beaconMaterial == null) Debug.LogError("[LodgeRoom] No beacon material: the door arch shows no ring when looked at (Set Up MR_Main (7c)).", this);
             swap.Entered += OnEntered;
             swap.Returned += OnReturned;
             pods.LodgeDropped += OnRimDropped;
@@ -193,7 +194,6 @@ namespace Diorama
             if (pods.PickHandler == OnRimPicked) pods.PickHandler = null;
             pods.SetExternalGaze(this, false);
             pods.SelectedSlot = -1;
-            _doorHold = 0f;
             if (_doorRing != null) _doorRing.gameObject.SetActive(false);
         }
 
@@ -551,14 +551,22 @@ namespace Diorama
 
         void OnStep(Vector2Int tile)
         {
-            if (!Active) return;
+            if (!Active || !IsDoor(tile)) return;
+            var dest = explorer.Destination;
+            if (!AimedOut(explorer.LastStep, doorOutward, explorer.Heading, dest.HasValue && IsDoor(dest.Value)))
+            {
+                Debug.Log($"[LodgeRoom] On the door tile c{tile.x} r{tile.y} but not walking out (step {explorer.LastStep}, heading {explorer.Heading}): staying in.");
+                return;
+            }
+            Debug.Log("[LodgeRoom] Out the door.");
+            Leave();
+        }
+
+        bool IsDoor(Vector2Int tile)
+        {
             foreach (var d in doorTiles)
-                if (d == tile)
-                {
-                    Debug.Log("[LodgeRoom] Out the door.");
-                    Leave();
-                    return;
-                }
+                if (d == tile) return true;
+            return false;
         }
 
         /// <summary>The middle of the door arch's opening, <paramref name="height"/> tiles above the floor (world).</summary>
@@ -580,33 +588,33 @@ namespace Diorama
         static readonly int FillId = Shader.PropertyToID("_Fill");
         static readonly int IntensityId = Shader.PropertyToID("_Intensity");
 
-        /// <summary>Hold a palm over the arch (like over a shrine's flame): the ring fills, then out you go.</summary>
-        void UpdateDoorPalm(bool free)
+        /// <summary>
+        /// The ring over the arch while it is looked at (look + pinch leaves). Step 9h: no palm-over-the-arch exit any
+        /// more, a hand resting near the door took players out by accident.
+        /// </summary>
+        void UpdateDoorRing(bool free)
         {
-            Vector3 top = DoorLocal(archHeight + 0.15f);
-            bool warming = free && palm.IsOver(island.transform.TransformPoint(top), island.transform.up, grabGuard, "door");
-            _doorHold = warming ? _doorHold + Time.deltaTime : Mathf.MoveTowards(_doorHold, 0f, Time.deltaTime * 2f);
-            if (_doorRing != null)
-            {
-                bool show = free && (_doorHold > 0.01f || _gazedDoor);
-                _doorRing.gameObject.SetActive(show);
-                if (show)
-                {
-                    _doorRing.localPosition = top;
-                    _doorRing.localRotation = Quaternion.Euler(90f, 0f, 0f);
-                    _doorRing.localScale = Vector3.one * Tile * island.Zoom * 1.3f;
-                    _block.Clear();
-                    _block.SetFloat(ModeId, 1f);
-                    _block.SetFloat(FillId, Mathf.Clamp01(_doorHold / palmHoldSeconds));
-                    _block.SetFloat(IntensityId, 1.2f);
-                    _doorRingRenderer.SetPropertyBlock(_block);
-                }
-            }
-            if (_doorHold < palmHoldSeconds) return;
-            _doorHold = 0f;
-            Debug.Log("[LodgeRoom] Palm held over the door arch.");
-            Leave();
+            if (_doorRing == null) return;
+            bool show = free && _gazedDoor;
+            _doorRing.gameObject.SetActive(show);
+            if (!show) return;
+            _doorRing.localPosition = DoorLocal(archHeight + 0.15f);
+            _doorRing.localRotation = Quaternion.Euler(90f, 0f, 0f);
+            _doorRing.localScale = Vector3.one * Tile * island.Zoom * 1.3f;
+            _block.Clear();
+            _block.SetFloat(ModeId, 1f);
+            _block.SetFloat(FillId, 0f);
+            _block.SetFloat(IntensityId, 1.2f);
+            _doorRingRenderer.SetPropertyBlock(_block);
         }
+
+        /// <summary>
+        /// Step 9h: a step onto a door tile leaves only when the move was aimed out of the room: the step goes toward the
+        /// door (<paramref name="outward"/>) and either a swipe walks that way or the tapped / looked-at destination is a
+        /// door tile. A path that only passes the door, or ends beside it, stays inside.
+        /// </summary>
+        public static bool AimedOut(Vector2Int step, Vector2Int outward, Vector2Int heading, bool destinationIsDoor) =>
+            step == outward && (heading == outward || destinationIsDoor);
 
         void Leave()
         {
@@ -721,7 +729,7 @@ namespace Diorama
             else if (_gazedDoor) FocusHighlight.Hover(DoorWorld(0f), 0.9f * TileWorld);
             if (_pageText != null) _pageText.color = _gazedPage ? Color.white : new Color(1f, 0.8f, 0.4f);
             pods.SetExternalGaze(this, _gazed != null || _gazedComb >= 0 || _gazedDoor || _gazedPage);
-            UpdateDoorPalm(free);
+            UpdateDoorRing(free);
             if (!free) return;
 
             for (int h = 0; h < 2; h++)

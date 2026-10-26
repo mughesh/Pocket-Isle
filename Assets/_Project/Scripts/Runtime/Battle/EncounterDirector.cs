@@ -339,6 +339,11 @@ namespace Diorama
                       $"zoom x{layout.zoom:F2}{(layout.fallback ? " (fallback pads: no free pair)" : "")}.");
 
             explorer.StandOffset = layout.explorerSpot - explorer.Tile;
+            // Step 9h: the explorer turns to face the wild Isling (it kept its walking direction).
+            var toWild = (Vector2)layout.wildPad - (Vector2)layout.explorerSpot;
+            explorer.Face(Mathf.Abs(toWild.x) > Mathf.Abs(toWild.y)
+                ? new Vector2Int(toWild.x > 0f ? 1 : -1, 0)
+                : new Vector2Int(0, toWild.y > 0f ? 1 : -1));
             window.SetFocus(layout.pivot);
             island.SetClearing(layout.pivot, layout.wildPad - layout.myPad, padDistance * 0.5f + 1.3f, 1.6f,
                 layout.pivot + layout.towardPlayer * 9f, 1.1f);

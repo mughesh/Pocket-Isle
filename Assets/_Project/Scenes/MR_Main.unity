@@ -293,12 +293,8 @@ MonoBehaviour:
   - {x: 5, y: 1}
   - {x: 6, y: 2}
   honeycombCenter: {x: 1.5, y: 0}
+  doorOutward: {x: 0, y: 1}
   beaconMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
-  palm:
-    facing: 0.5
-    height: {x: 0.03, y: 0.15}
-    radius: 0.06
-  palmHoldSeconds: 0.8
   maxInRoom: 8
   grabSize: 0.07
   dropDistance: 0.06
@@ -582,6 +578,7 @@ MonoBehaviour:
   holdBase: 1.2
   holdPerChar: 0.05
   maxViewAngle: 30
+  aboveIslandMargin: 0.015
 --- !u!4 &232676578
 Transform:
   m_ObjectHideFlags: 0
@@ -3969,6 +3966,7 @@ GameObject:
   - component: {fileID: 1583412949}
   - component: {fileID: 1583412948}
   - component: {fileID: 1583412947}
+  - component: {fileID: 1583412950}
   m_Layer: 0
   m_Name: '[BuildingBlock] MR Utility Kit'
   m_TagString: Untagged
@@ -4042,7 +4040,7 @@ MonoBehaviour:
     - {fileID: 5618556046422172173, guid: 31818101cde292945ab80af5d14bec54, type: 3}
     - {fileID: 5618556046422172173, guid: c2bd5595e9fe2493a92d4bc0bb264603, type: 3}
     SceneJsons: []
-    LoadSceneOnStartup: 1
+    LoadSceneOnStartup: 0
     EnableHighFidelityScene: 0
     SeatWidth: 0.6
     SceneJson: 
@@ -4080,6 +4078,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1583412950
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1583412946}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50bce9cf6e1c39a4ea4374f6ae03994b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.RoomSceneLoader
+  placer: {fileID: 374318555}
 --- !u!1 &1736066349
 GameObject:
   m_ObjectHideFlags: 0
@@ -4417,6 +4428,7 @@ MonoBehaviour:
   lingerSeconds: 1.5
   fovHalfAngle: 35
   keepOut: {x: 0.025, y: 0.012}
+  battleOffset: {x: 0.035, y: 0.06, z: 0.05}
 --- !u!1 &1858573326
 GameObject:
   m_ObjectHideFlags: 0
