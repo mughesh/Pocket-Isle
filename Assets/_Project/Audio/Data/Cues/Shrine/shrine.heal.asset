@@ -15,7 +15,7 @@ MonoBehaviour:
   id: shrine.heal
   clips:
   - {fileID: 8300000, guid: b62e06726296ceb48b0cbe2cfdc0ed4f, type: 3}
-  volume: 0.6
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97
   pitchMax: 1.03

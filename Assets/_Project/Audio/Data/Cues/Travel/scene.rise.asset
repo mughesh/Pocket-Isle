@@ -15,7 +15,7 @@ MonoBehaviour:
   id: scene.rise
   clips:
   - {fileID: 8300000, guid: cc99129256b561a42b35dbc47ed430cf, type: 3}
-  volume: 0.5
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.98
   pitchMax: 1.02

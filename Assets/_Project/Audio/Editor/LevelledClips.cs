@@ -1,0 +1,67 @@
+using System.Collections.Generic;
+using System.IO;
+using UnityEditor;
+using UnityEngine;
+
+namespace Diorama.Audio.EditorTools
+{
+    /// <summary>
+    /// Imported clips (Kenney, the ElevenLabs gen batch) are never played as they are: each gets a trimmed, tier-levelled copy
+    /// in Clips/Levelled/&lt;same sub path&gt;.wav (mono 48 kHz), and the cue plays the copy. The source files stay untouched
+    /// (and stay out of the build, since nothing references them).
+    /// </summary>
+    public static class LevelledClips
+    {
+        public const string LevelledRoot = AudioImportRules.Root + "Levelled/";
+
+        /// <summary>Sources that are levelled before use (music is levelled by the Loop tool, not here).</summary>
+        public static bool IsSource(string path) =>
+            path.StartsWith(AudioImportRules.Root + "Kenney/") || path.StartsWith(AudioImportRules.Root + "Gen/");
+
+        public static string PathFor(string sourcePath)
+        {
+            var rel = sourcePath.Substring(AudioImportRules.Root.Length);
+            return LevelledRoot + Path.ChangeExtension(rel, ".wav").Replace('\\', '/');
+        }
+
+        /// <summary>The levelled copy of each source (made if missing, or always with force); non-sources pass through.</summary>
+        public static List<AudioClip> For(IEnumerable<AudioClip> clips, LoudnessTier tier, float trimDb, bool force = false)
+        {
+            var list = new List<AudioClip>();
+            foreach (var clip in clips)
+            {
+                if (clip == null) continue;
+                var src = AssetDatabase.GetAssetPath(clip);
+                if (!IsSource(src))
+                {
+                    list.Add(clip);
+                    continue;
+                }
+                var dst = PathFor(src);
+                if (force || !File.Exists(dst))
+                {
+                    if (!Bake(clip, dst, tier, trimDb)) continue;
+                }
+                var levelled = AssetDatabase.LoadAssetAtPath<AudioClip>(dst);
+                if (levelled != null) list.Add(levelled);
+            }
+            return list;
+        }
+
+        /// <summary>Trim the ends, level the mid band to the tier, peaks under -1 dBFS. Deterministic (same bytes per source).</summary>
+        public static bool Bake(AudioClip source, string dst, LoudnessTier tier, float trimDb)
+        {
+            var samples = ClipReader.ReadMono48k(source);
+            if (samples == null)
+            {
+                Debug.LogError($"[AudioLab] Can't read {AssetDatabase.GetAssetPath(source)}; no levelled copy made.");
+                return false;
+            }
+            samples = Loudness.TrimSilence(samples, SynthPatch.SampleRate);
+            if (tier != LoudnessTier.Music) Loudness.LevelTo(samples, SynthPatch.SampleRate, Loudness.TierDb(tier) + trimDb);
+            WavIO.Write(dst, samples, 1, SynthPatch.SampleRate);
+            AssetDatabase.ImportAsset(dst, ImportAssetOptions.ForceUpdate);
+            return true;
+        }
+    }
+}

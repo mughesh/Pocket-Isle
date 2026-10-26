@@ -15,7 +15,7 @@ MonoBehaviour:
   id: explorer.stretch
   clips:
   - {fileID: 8300000, guid: 336a512ebaea57d4bb5848ba69d6d772, type: 3}
-  volume: 0.35
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97
   pitchMax: 1.03

@@ -15,7 +15,7 @@ MonoBehaviour:
   id: jingle.levelup
   clips:
   - {fileID: 8300000, guid: d51d1bc5868bfbc4db0462aa7e944184, type: 3}
-  volume: 0.95
+  volume: 0.8
   volumeJitter: 0
   pitchMin: 1
   pitchMax: 1

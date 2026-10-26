@@ -15,7 +15,7 @@ MonoBehaviour:
   id: rune.select
   clips:
   - {fileID: 8300000, guid: f78dba8a3f91f1d4bb5a07911c895a4e, type: 3}
-  volume: 0.45
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.99
   pitchMax: 1.01

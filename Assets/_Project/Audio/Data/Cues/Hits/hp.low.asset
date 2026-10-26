@@ -15,7 +15,7 @@ MonoBehaviour:
   id: hp.low
   clips:
   - {fileID: 8300000, guid: 86edc4e116eabdf4baf99d660f32ff04, type: 3}
-  volume: 0.4
+  volume: 0.8
   volumeJitter: 0
   pitchMin: 1
   pitchMax: 1

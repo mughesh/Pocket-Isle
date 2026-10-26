@@ -15,7 +15,7 @@ MonoBehaviour:
   id: spirit.appear
   clips:
   - {fileID: 8300000, guid: ab92160ca5c982e4080d8c1bbe579b03, type: 3}
-  volume: 0.5
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97
   pitchMax: 1.03

@@ -15,7 +15,7 @@ MonoBehaviour:
   id: spirit.focus
   clips:
   - {fileID: 8300000, guid: a98c1d7b6b697e44eba671bf0d348a3e, type: 3}
-  volume: 0.4
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97
   pitchMax: 1.03

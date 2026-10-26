@@ -15,7 +15,7 @@ MonoBehaviour:
   id: evo.burst
   clips:
   - {fileID: 8300000, guid: 63529bbba74a67643aae04c75b37b81c, type: 3}
-  volume: 0.85
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97
   pitchMax: 1.03

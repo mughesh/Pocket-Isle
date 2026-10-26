@@ -15,7 +15,7 @@ MonoBehaviour:
   id: xp.tick
   clips:
   - {fileID: 8300000, guid: e2286234ce931db4492cd0ff08361010, type: 3}
-  volume: 0.35
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.99
   pitchMax: 1.01

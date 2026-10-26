@@ -16,7 +16,7 @@ MonoBehaviour:
   clips:
   - {fileID: 8300000, guid: 6120c3106f2a9814cab06870b1cbdd91, type: 3}
   - {fileID: 8300000, guid: 35280582f8da6924aa99198b58fa1ae4, type: 3}
-  volume: 0.5
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97
   pitchMax: 1.03

@@ -15,7 +15,7 @@ MonoBehaviour:
   id: battle.run
   clips:
   - {fileID: 8300000, guid: da094bd15dad9c34e965cf55e85c195c, type: 3}
-  volume: 0.5
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97
   pitchMax: 1.03

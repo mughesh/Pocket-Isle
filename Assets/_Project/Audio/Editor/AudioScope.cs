@@ -107,8 +107,8 @@ namespace Diorama.Audio.EditorTools
 
         static string Kind(string path)
         {
-            if (path.Contains("/Clips/Gen/")) return path.Contains("_FREE") ? "gen-free" : "gen";
-            if (path.Contains("/Clips/Kenney/")) return "kenney";
+            if (path.Contains("/Gen/")) return path.Contains("_FREE") ? "gen-free" : "gen";
+            if (path.Contains("/Kenney/")) return "kenney";
             if (path.Contains("_mix_")) return "mix";
             return "synth";
         }

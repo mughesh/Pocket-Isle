@@ -15,7 +15,7 @@ MonoBehaviour:
   id: ui.saved
   clips:
   - {fileID: 8300000, guid: 34ccf86c7f5da024a943f9d29ee2e670, type: 3}
-  volume: 0.35
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.99
   pitchMax: 1.01

@@ -15,7 +15,7 @@ MonoBehaviour:
   id: keeper.crown.shield
   clips:
   - {fileID: 8300000, guid: eb36906f82a74304db46b64bac0fa8d3, type: 3}
-  volume: 0.6
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97
   pitchMax: 1.03

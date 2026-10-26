@@ -15,7 +15,7 @@ MonoBehaviour:
   id: rune.hover
   clips:
   - {fileID: 8300000, guid: 9422b9a45e758604594ebf4996ec3717, type: 3}
-  volume: 0.15
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.99
   pitchMax: 1.01

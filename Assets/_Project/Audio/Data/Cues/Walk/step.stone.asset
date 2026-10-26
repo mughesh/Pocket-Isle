@@ -14,17 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
   id: step.stone
   clips:
-  - {fileID: 8300000, guid: 48c5ee3a655b28f47bb719f83e7f2369, type: 3}
-  - {fileID: 8300000, guid: 8013ff0da6db8584d9c763186a8cdca8, type: 3}
-  - {fileID: 8300000, guid: 2abeb3a725670ca4a94dd14594230df6, type: 3}
-  - {fileID: 8300000, guid: 821583e492464c74f9a58e38941a928d, type: 3}
-  - {fileID: 8300000, guid: ed3625d0700863545b5ade348c4f109c, type: 3}
-  - {fileID: 8300000, guid: 823bc02f9a9a48946a134c939e54fa4b, type: 3}
-  - {fileID: 8300000, guid: 055d4306e2c0c1140a1bb20f7bcdc1b0, type: 3}
-  - {fileID: 8300000, guid: 2319fb643631e0344852621cd1e3df95, type: 3}
-  - {fileID: 8300000, guid: f0451e473cd8cda4ba6521bd322deb38, type: 3}
-  - {fileID: 8300000, guid: 2e32b341c0e0efb489a53414cfc2076a, type: 3}
-  volume: 0.25
+  - {fileID: 8300000, guid: 33c7735af90390746bb54ca91a4c1c4e, type: 3}
+  - {fileID: 8300000, guid: d141abe2b4f5c4d47976dfc56711d8ab, type: 3}
+  - {fileID: 8300000, guid: a287510f31bb1604389d8ed673237341, type: 3}
+  - {fileID: 8300000, guid: 7d68d9ac43a1f384987a7e6732fcabba, type: 3}
+  - {fileID: 8300000, guid: 32d5028c593b0e241b467aca3d48b34d, type: 3}
+  - {fileID: 8300000, guid: 142a0f19c6aa57b42bc1043098996a35, type: 3}
+  - {fileID: 8300000, guid: 8e4cf53e95f3d9549a76c3070351deb7, type: 3}
+  - {fileID: 8300000, guid: ade83743dbd7f4843a4cc12730c28d6c, type: 3}
+  - {fileID: 8300000, guid: 6bebecb1806ef624796db41fad5ab0d7, type: 3}
+  - {fileID: 8300000, guid: a38b3c49b03eef944b77a46aa1b49313, type: 3}
+  volume: 0.8
   volumeJitter: 0.1
   pitchMin: 0.95
   pitchMax: 1.05

@@ -70,8 +70,9 @@ namespace Diorama.Audio.EditorTools
             return slash > 0 ? rel.Substring(0, slash) : "";
         }
 
-        /// <summary>Creates cues that are missing (recipe settings) and refreshes every cue's clip list.</summary>
-        public static int SyncCues()
+        /// <summary>Creates cues that are missing (recipe settings) and refreshes every cue's clip list. Imported clips
+        /// (Kenney, gen) go in as their levelled copies; relevel = rebuild those copies (after a tier change).</summary>
+        public static int SyncCues(bool relevel = false)
         {
             var cues = AllCues().ToDictionary(c => c.id, c => c);
             var patches = SynthBaker.AllPatches().ToDictionary(p => p.id, p => p);
@@ -93,7 +94,7 @@ namespace Diorama.Audio.EditorTools
                 patches.TryGetValue(r.id, out var patch);
                 if (!string.IsNullOrEmpty(r.mixWith) && patch != null) clips.AddRange(MixBaker.Clips(patch, r));
                 else if (patch != null) clips.AddRange(SynthBaker.Clips(patch));
-                clips.AddRange(ExtraClips(r.extraClips));
+                clips.AddRange(LevelledClips.For(ExtraClips(r.extraClips), AudioTiers.ForCue(cue, patch), AudioTiers.TrimFor(cue, patch), relevel));
                 if (!cue.clips.SequenceEqual(clips))
                 {
                     cue.clips = clips.ToArray();
@@ -198,7 +199,7 @@ namespace Diorama.Audio.EditorTools
             {
                 var path = AssetDatabase.GUIDToAssetPath(guid);
                 var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(path);
-                if (clip != null && !used.Contains(clip))
+                if (clip != null && !used.Contains(clip) && !LevelledClips.IsSource(path)) // sources play through their levelled copies
                 {
                     unused++;
                     sb.AppendLine($"UNUSED CLIP: {path}");

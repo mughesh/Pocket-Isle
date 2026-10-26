@@ -15,7 +15,7 @@ MonoBehaviour:
   id: catch.toRim
   clips:
   - {fileID: 8300000, guid: f0f0b10855b81264c9f76337faad59bb, type: 3}
-  volume: 0.5
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97
   pitchMax: 1.03

@@ -15,7 +15,7 @@ MonoBehaviour:
   id: move.charge
   clips:
   - {fileID: 8300000, guid: 4429b5449604174478ed0690513b41a4, type: 3}
-  volume: 0.55
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97
   pitchMax: 1.03

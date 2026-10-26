@@ -15,7 +15,7 @@ MonoBehaviour:
   id: enc.rustle
   clips:
   - {fileID: 8300000, guid: 2dde606764a732f4eb8baf738169ea55, type: 3}
-  volume: 0.6
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97
   pitchMax: 1.03

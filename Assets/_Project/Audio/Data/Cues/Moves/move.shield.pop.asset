@@ -15,7 +15,7 @@ MonoBehaviour:
   id: move.shield.pop
   clips:
   - {fileID: 8300000, guid: a3785d3d9c8d1a743adfe7b3a851634a, type: 3}
-  volume: 0.6
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97
   pitchMax: 1.03

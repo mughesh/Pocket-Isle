@@ -15,7 +15,7 @@ MonoBehaviour:
   id: catch.toStorage
   clips:
   - {fileID: 8300000, guid: ceb7d3b758d8d0f4b93ecb1d76a17f6e, type: 3}
-  volume: 0.55
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97
   pitchMax: 1.03

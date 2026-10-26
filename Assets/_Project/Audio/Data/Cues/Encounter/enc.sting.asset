@@ -15,7 +15,7 @@ MonoBehaviour:
   id: enc.sting
   clips:
   - {fileID: 8300000, guid: 76fd375eee2fd044ab3f529b8c0332b4, type: 3}
-  volume: 0.6
+  volume: 0.8
   volumeJitter: 0
   pitchMin: 1
   pitchMax: 1

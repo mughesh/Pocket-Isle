@@ -15,7 +15,7 @@ MonoBehaviour:
   id: scene.sink
   clips:
   - {fileID: 8300000, guid: 8b7579aa803048e438ff66a4fb4283eb, type: 3}
-  volume: 0.5
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.98
   pitchMax: 1.02

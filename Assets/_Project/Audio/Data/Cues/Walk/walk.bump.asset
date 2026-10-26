@@ -16,10 +16,10 @@ MonoBehaviour:
   clips:
   - {fileID: 8300000, guid: f26ae386aa9e1f744911e23b460862ed, type: 3}
   - {fileID: 8300000, guid: be3009c611f3c1046b5b36b60dca2f08, type: 3}
-  - {fileID: 8300000, guid: fc91387daaaf98f4e8ee2ab267a2cb30, type: 3}
-  - {fileID: 8300000, guid: 91866e7f773352943a1dd1d9f6c5d96e, type: 3}
-  - {fileID: 8300000, guid: ab93fad29689bba4188efe6bd40bcb25, type: 3}
-  volume: 0.45
+  - {fileID: 8300000, guid: a25967c415a9e7f4983cce2e9f893f59, type: 3}
+  - {fileID: 8300000, guid: aab288cd8f2772f4b8291c1396c19e95, type: 3}
+  - {fileID: 8300000, guid: 9a1c97231838ece4680b27f893990b8c, type: 3}
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97
   pitchMax: 1.03

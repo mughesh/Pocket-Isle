@@ -15,7 +15,7 @@ MonoBehaviour:
   id: pond.splash
   clips:
   - {fileID: 8300000, guid: 7ca9e66e89f566148aaa764c6cc9f811, type: 3}
-  volume: 0.5
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97
   pitchMax: 1.03

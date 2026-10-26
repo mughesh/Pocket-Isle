@@ -15,7 +15,7 @@ MonoBehaviour:
   id: amb.cinderwood
   clips:
   - {fileID: 8300000, guid: 35b90c0451f624c41b03c0018c647c29, type: 3}
-  volume: 0.3
+  volume: 0.8
   volumeJitter: 0
   pitchMin: 1
   pitchMax: 1

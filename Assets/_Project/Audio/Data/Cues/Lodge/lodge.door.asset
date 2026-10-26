@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
   id: lodge.door
   clips:
-  - {fileID: 8300000, guid: 8db8e355a78b56246b6fdf9d885dbd9e, type: 3}
-  - {fileID: 8300000, guid: 5935fc2ca59f33a48bc3f9c32d51e4af, type: 3}
-  volume: 0.5
+  - {fileID: 8300000, guid: 6781aded928837540841d27f19577df0, type: 3}
+  - {fileID: 8300000, guid: b7eb45f545f6dd14bbe18904d2f4f81c, type: 3}
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97
   pitchMax: 1.03

@@ -15,7 +15,7 @@ MonoBehaviour:
   id: keeper.crown.crack
   clips:
   - {fileID: 8300000, guid: 831b01c7ced7517408b996edd9b5b38e, type: 3}
-  volume: 0.75
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97
   pitchMax: 1.03

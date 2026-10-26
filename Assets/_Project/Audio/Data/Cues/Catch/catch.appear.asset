@@ -15,7 +15,7 @@ MonoBehaviour:
   id: catch.appear
   clips:
   - {fileID: 8300000, guid: 0b1b529895bb2bd44961bd8aa35b184d, type: 3}
-  volume: 0.55
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97
   pitchMax: 1.03

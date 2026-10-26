@@ -116,6 +116,9 @@ MonoBehaviour:
   limiter: 1
   lowpass: 9000
   normalize: 1
+  levelMode: 1
+  tier: 3
+  tierTrimDb: 0
   peakDb: -3
   gap: 0
   review:

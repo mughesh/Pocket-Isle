@@ -15,7 +15,7 @@ MonoBehaviour:
   id: amb.lodge
   clips:
   - {fileID: 8300000, guid: 5abea66a7df2a7e4da61f49466c07d6e, type: 3}
-  volume: 0.3
+  volume: 0.8
   volumeJitter: 0
   pitchMin: 1
   pitchMax: 1

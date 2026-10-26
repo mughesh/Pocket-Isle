@@ -15,7 +15,7 @@ MonoBehaviour:
   id: pod.lead
   clips:
   - {fileID: 8300000, guid: efa449b8053d1a3438003d44636e56a6, type: 3}
-  volume: 0.4
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97
   pitchMax: 1.03

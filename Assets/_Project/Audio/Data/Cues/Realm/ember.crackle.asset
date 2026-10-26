@@ -15,7 +15,7 @@ MonoBehaviour:
   id: ember.crackle
   clips:
   - {fileID: 8300000, guid: 861a5cafb8e08784b9ce5dde213221a3, type: 3}
-  volume: 0.35
+  volume: 0.8
   volumeJitter: 0
   pitchMin: 1
   pitchMax: 1

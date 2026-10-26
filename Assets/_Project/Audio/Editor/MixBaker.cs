@@ -6,7 +6,7 @@ namespace Diorama.Audio.EditorTools
 {
     /// <summary>
     /// Bakes a synth patch mixed with each clip of a prefix (catch.shatter = synth sparkle + Kenney light glass), so the
-    /// cue plays both layers at once: Clips/Synth/&lt;group&gt;/&lt;id&gt;_mix_vN.wav, mono 48 kHz, -3 dBFS peak.
+    /// cue plays both layers at once: Clips/Synth/&lt;group&gt;/&lt;id&gt;_mix_vN.wav, mono 48 kHz, levelled like the patch (tier or peak).
     /// </summary>
     public static class MixBaker
     {
@@ -49,9 +49,17 @@ namespace Diorama.Audio.EditorTools
                 var mix = new float[Mathf.Max(synth.Length, other.Length)];
                 for (int i = 0; i < mix.Length; i++)
                     mix[i] = (i < synth.Length ? synth[i] : 0f) + (i < other.Length ? other[i] * recipe.mixGain : 0f);
-                float peak = SynthRenderer.Peak(mix), target = Mathf.Pow(10f, patch.peakDb / 20f);
-                if (peak > 1e-6f)
-                    for (int i = 0; i < mix.Length; i++) mix[i] *= target / peak;
+                if (patch.levelMode == LevelMode.Tier)
+                {
+                    mix = Loudness.TrimSilence(mix, SynthPatch.SampleRate);
+                    Loudness.LevelTo(mix, SynthPatch.SampleRate, Loudness.TierDb(patch.tier) + patch.tierTrimDb);
+                }
+                else
+                {
+                    float peak = SynthRenderer.Peak(mix), target = Mathf.Pow(10f, patch.peakDb / 20f);
+                    if (peak > 1e-6f)
+                        for (int i = 0; i < mix.Length; i++) mix[i] *= target / peak;
+                }
                 int fade = Mathf.Min(mix.Length / 2, 144);
                 for (int i = 0; i < fade; i++) mix[mix.Length - 1 - i] *= i / (float)fade;
                 var path = MixPath(patch, k);

@@ -15,7 +15,7 @@ MonoBehaviour:
   id: shrine.flame
   clips:
   - {fileID: 8300000, guid: 48f45076da4510148a4b6a366bf03afd, type: 3}
-  volume: 0.35
+  volume: 0.8
   volumeJitter: 0
   pitchMin: 1
   pitchMax: 1

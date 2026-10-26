@@ -15,7 +15,7 @@ MonoBehaviour:
   id: amb.pond
   clips:
   - {fileID: 8300000, guid: 33f0b0b29dca25d408acf21e966b73bc, type: 3}
-  volume: 0.3
+  volume: 0.8
   volumeJitter: 0
   pitchMin: 1
   pitchMax: 1

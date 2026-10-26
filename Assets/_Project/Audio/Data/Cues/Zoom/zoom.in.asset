@@ -15,7 +15,7 @@ MonoBehaviour:
   id: zoom.in
   clips:
   - {fileID: 8300000, guid: 79432f6694b16a948b1efb394888c46a, type: 3}
-  volume: 0.4
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.99
   pitchMax: 1.01

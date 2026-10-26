@@ -15,7 +15,7 @@ MonoBehaviour:
   id: island.recenter
   clips:
   - {fileID: 8300000, guid: b02b1792325b36a4194fd0fdbfab709c, type: 3}
-  volume: 0.45
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.99
   pitchMax: 1.01

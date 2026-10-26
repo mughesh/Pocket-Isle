@@ -15,7 +15,7 @@ MonoBehaviour:
   id: move.shield.up
   clips:
   - {fileID: 8300000, guid: 1e7efe053878a994cb79d856bff12a11, type: 3}
-  volume: 0.5
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97
   pitchMax: 1.03

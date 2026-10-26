@@ -10,13 +10,15 @@ namespace Diorama.Audio.EditorTools
     /// <summary>
     /// Sound batch 1: every game cue from the audio brief. Style: cozy toy, small and close. Soft attacks, little above
     /// ~9 kHz, short tails; wood, glass, bell, kalimba, marimba, soft air. Tonal sounds and jingles use D major pentatonic.
-    /// Loudness hierarchy lives in the cue volumes: UI ~0.3, steps and rustles ~0.3, moves ~0.6, catch / level-up ~0.95.
+    /// Loudness hierarchy lives in the loudness tiers (bake-time levelling); every cue plays at CueVolume (step B).
     /// Loop rates (tremolo, vibrato) are whole cycles per loop so the crossfade joins in phase.
     /// </summary>
     [InitializeOnLoad]
     public static class SynthBatch1
     {
         public const string Set = "batch1";
+        /// <summary>One volume for every cue: the tiers carry the loud / quiet order. The volume arguments below are batch 1 history.</summary>
+        public const float CueVolume = 0.8f;
 
         static List<SynthRecipes.Recipe> _list;
 
@@ -694,6 +696,9 @@ namespace Diorama.Audio.EditorTools
             // Music slots (no clips yet)
             foreach (var id in new[] { "music.title", "music.hub", "music.cinderwood", "music.battle.wild", "music.battle.keeper", "music.lodge" })
                 _list.Add(new SynthRecipes.Recipe { set = Set, group = "Music", id = id, cue = Music(), extraClips = new[] { "Clips/Music/" + id } });
+
+            foreach (var r in _list)
+                if (r.cue != null && r.group != "Music") r.cue = r.cue.And(c => c.volume = CueVolume);
         }
     }
 }

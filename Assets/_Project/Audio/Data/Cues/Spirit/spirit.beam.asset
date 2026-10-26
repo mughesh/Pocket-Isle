@@ -15,7 +15,7 @@ MonoBehaviour:
   id: spirit.beam
   clips:
   - {fileID: 8300000, guid: e1aa9ba7ecf71d948a6a4cbae0793b5e, type: 3}
-  volume: 0.3
+  volume: 0.8
   volumeJitter: 0
   pitchMin: 1
   pitchMax: 1

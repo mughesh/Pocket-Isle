@@ -15,7 +15,7 @@ MonoBehaviour:
   id: shrine.fill
   clips:
   - {fileID: 8300000, guid: 5545b05434774b9429dc633a1a57f9b4, type: 3}
-  volume: 0.35
+  volume: 0.8
   volumeJitter: 0
   pitchMin: 1
   pitchMax: 1

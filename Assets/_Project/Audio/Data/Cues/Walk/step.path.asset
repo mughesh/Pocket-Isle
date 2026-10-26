@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
   id: step.path
   clips:
-  - {fileID: 8300000, guid: e6a7f73a2d4eb904b84f87158cfe568a, type: 3}
-  - {fileID: 8300000, guid: 3238c97fe2909b0449441f2d5681f55c, type: 3}
-  - {fileID: 8300000, guid: 0df34e5de2856ee43ac3657cff472850, type: 3}
-  - {fileID: 8300000, guid: ec9a482b56092944897dd8fe2ddb0da3, type: 3}
-  - {fileID: 8300000, guid: 3534772b0471c044d88736efc1c2b63f, type: 3}
-  volume: 0.25
+  - {fileID: 8300000, guid: 36870c42777695141b0df0fa8162b14c, type: 3}
+  - {fileID: 8300000, guid: cb1c3f847e52a9b468e6a208fe6f6b35, type: 3}
+  - {fileID: 8300000, guid: 9b03260053c5f4f40a8dfe5063219fc3, type: 3}
+  - {fileID: 8300000, guid: 268e90c8a169e6e49b38145d86a2e184, type: 3}
+  - {fileID: 8300000, guid: 125c3e120fa3b5344a743af4ddff4f82, type: 3}
+  volume: 0.8
   volumeJitter: 0.1
   pitchMin: 0.95
   pitchMax: 1.05

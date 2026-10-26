@@ -15,7 +15,7 @@ MonoBehaviour:
   id: shard.crack
   clips:
   - {fileID: 8300000, guid: eb446aff8e347cd40b050bd44ae9c89c, type: 3}
-  volume: 0.7
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97
   pitchMax: 1.03

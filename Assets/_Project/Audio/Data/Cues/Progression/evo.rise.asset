@@ -15,7 +15,7 @@ MonoBehaviour:
   id: evo.rise
   clips:
   - {fileID: 8300000, guid: b5aef7fc6ac82ca4d8d0813a9896a3c2, type: 3}
-  volume: 0.5
+  volume: 0.8
   volumeJitter: 0
   pitchMin: 1
   pitchMax: 1

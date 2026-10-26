@@ -15,10 +15,10 @@ MonoBehaviour:
   id: island.scale
   clips:
   - {fileID: 8300000, guid: b1bb8c9085c4f5b4182e16d6b8173030, type: 3}
-  - {fileID: 8300000, guid: 67d57253945beee47aa17a3296161a68, type: 3}
-  - {fileID: 8300000, guid: 1d30cb9b201733a46908222a36536802, type: 3}
-  - {fileID: 8300000, guid: 9b7d8afe98a8c634bb8655358b52ca16, type: 3}
-  volume: 0.35
+  - {fileID: 8300000, guid: 006b5a8959916aa4f81d08d30a613324, type: 3}
+  - {fileID: 8300000, guid: def38512d4932c84788b34b79bd61d57, type: 3}
+  - {fileID: 8300000, guid: 55dc6fe1dcf0d034d84bbbabfca28470, type: 3}
+  volume: 0.8
   volumeJitter: 0
   pitchMin: 1
   pitchMax: 1

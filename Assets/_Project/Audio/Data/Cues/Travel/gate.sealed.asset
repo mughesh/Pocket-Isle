@@ -15,7 +15,7 @@ MonoBehaviour:
   id: gate.sealed
   clips:
   - {fileID: 8300000, guid: c194cd88ad307384a8cc5a3baaa1a0da, type: 3}
-  volume: 0.45
+  volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97
   pitchMax: 1.03

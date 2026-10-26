@@ -15,7 +15,7 @@ MonoBehaviour:
   id: catch.dazed
   clips:
   - {fileID: 8300000, guid: bef47ccf003254f4aa14b7a5b8c36dae, type: 3}
-  volume: 0.35
+  volume: 0.8
   volumeJitter: 0
   pitchMin: 1
   pitchMax: 1
