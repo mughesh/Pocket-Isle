@@ -1,0 +1,90 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e27712b2a6f9fc45ae0b54784bf7327, type: 3}
+  m_Name: Cindermole
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.CreatureRecipe
+  baseRecipe: {fileID: 11400000, guid: 3416fcbf280357c4bbbc36773e3c09fc, type: 2}
+  body: {fileID: 0}
+  height: 0.045
+  zones:
+    belly: 0
+    bellyDirection: {x: 0, y: 0, z: 0}
+    bellyAt: 0
+    bellyMaxY: 0
+    bellyDrips: 0
+    bellyDripLength: 0
+    socks: 0
+    socksY: 0
+    tips: 0
+    tipAxis: {x: 0, y: 0, z: 0}
+    tipAt: 0
+    spots: 0
+    spotScale: 0
+    cracks: 0
+    crackScale: 0
+    crackWidth: 0
+    crackPulse: 0
+    patches: []
+  parts: []
+  face:
+    eyeSize: 0
+    eyeSpacing: 0
+    eyeHeight: 0
+    eyeStretch: 0
+    decals: []
+  palette:
+    baseColor: {r: 0.3529412, g: 0.2901961, b: 0.2509804, a: 1}
+    belly: {r: 0.9098039, g: 0.8235294, b: 0.6901961, a: 1}
+    accent: {r: 0.76862746, g: 0.5803922, b: 0.5411765, a: 1}
+    socks: {r: 0.72156864, g: 0.5176471, b: 0.47058824, a: 1}
+    glow: {r: 1, g: 0.47843137, b: 0.15686275, a: 1}
+    extra: {r: 1, g: 0.8235294, b: 0.47843137, a: 1}
+    face: {r: 0.16470589, g: 0.1254902, b: 0.09411765, a: 1}
+    iris: {r: 0.16470589, g: 0.1254902, b: 0.09411765, a: 1}
+  spec: 0.2
+  glow: 0
+  outline: 0.035
+  idle:
+    breathe: 0
+    breatheSpeed: 0
+    jiggle: 0
+    hover: 0
+    bob: 0
+    sway: 0
+    swaySpeed: 0
+  heightScale: 1.25
+  extraParts:
+  - part: {fileID: 11400000, guid: d2de439f45b65be41b0165256fd8246a, type: 2}
+    position: {x: 0, y: 0.17, z: 0.53}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: {x: 0.5, y: 0.5, z: 0.5}
+    mirror: 0
+    parent: -1
+  - part: {fileID: 11400000, guid: e06881b1cad8ecf4f8f5a76077082abd, type: 2}
+    position: {x: 0.1, y: 0.44, z: 0.1}
+    rotation: {x: 0, y: 30, z: 0}
+    scale: {x: 1.2, y: 1.2, z: 1.2}
+    mirror: 0
+    parent: -1
+  - part: {fileID: 11400000, guid: e06881b1cad8ecf4f8f5a76077082abd, type: 2}
+    position: {x: -0.12, y: 0.42, z: 0.02}
+    rotation: {x: 0, y: -40, z: 10}
+    scale: {x: 1, y: 1, z: 1}
+    mirror: 0
+    parent: -1
+  overridePalette: 1
+  hueShift: 0
+  saturationScale: 1
+  valueScale: 1
+  resolution: 88
+  triangleBudget: 6000
+  bakedPrefab: {fileID: 4308732869821974624, guid: 0527da886caadd74ca805dd6e05af989, type: 3}

@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8421308f89f57d498f601bfba37a8cf, type: 3}
+  m_Name: Ashmole
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.IslingSpecies
+  displayName: Ashmole
+  element: 1
+  recipe: {fileID: 11400000, guid: 3416fcbf280357c4bbbc36773e3c09fc, type: 2}
+  evolvesTo: {fileID: 11400000, guid: e8216c644c642f243b9695b347727e28, type: 2}
+  evolveLevel: 16
+  baseStats:
+    hp: 48
+    attack: 12
+    defense: 11
+    speed: 8
+  moves:
+  - {fileID: 11400000, guid: 8a87ff0ba262e4d45a4965afddfe3bc1, type: 2}
+  - {fileID: 11400000, guid: f499284a1cf70f94c98503f36a90c7b6, type: 2}
+  - {fileID: 11400000, guid: 6b6725a9ac7128d419cc0057fb20c9c4, type: 2}
+  keeper: 0
