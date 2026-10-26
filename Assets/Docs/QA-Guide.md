@@ -41,7 +41,22 @@ clear storage): they turn red, press again within 3 seconds.
 Cheats (one-hit KO, invincible, wild battles off, rare x10, time and walk speed) last until the app closes. They are
 never saved.
 
-## 4. What's new in this build (step 9h)
+## 4. What's new in this build (steps 10a-10b, Oct 27: Galewick, the wind realm)
+
+- **Galewick is reachable only through the dev panel** in this build: **Go to > GW: arrival** (or village, big mill,
+  kite field, ridge, tower, shrine, rare grass, fire patch). The hub's wind gate stays sealed until it's finished.
+- Windmill highlands, bright but **completely still** until restored (Story tab > **Galewick restored**: grass waves,
+  sails turn, kites fly on posts, seeds drift).
+- **Flick the big mill**: flick its sails with a fingertip (or look at them and pinch), 3 flicks within 4 s. The
+  drawbridge comes down over the ditch.
+- **Kites**: pinch a kite in the kite field and pull it up about a hand's height over the island, then let go. It flies
+  above the island on a string to the explorer. Three kites follow you.
+- **Fan the wind** (on the ridge): sweep an open flat hand fast over the island. The grass ripples and the clouds on
+  the path blow away.
+- **Wind tower**: arrive with all three kites; they tie onto the tower and the door opens. (Inside comes later.)
+- Wild Islings and Keepers are stronger once you hold a shard (+3 / +2 levels per shard).
+
+## Earlier (step 9h)
 
 - **No room-scan prompt** on a new headset (the island just floats when the headset has no room scan).
 - **Instructions stay** until you do them: after a few seconds the Spirit's bubble shrinks to a small chip with a hand

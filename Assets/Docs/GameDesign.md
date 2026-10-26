@@ -269,6 +269,24 @@ the base bobs. 9.8k triangles, 4 draws.
   estimates in the config; the real route time comes from the timer in the dev readout (opening start to the shard
   in the statue).
 
+## Galewick as built (steps 10a-10b, Oct 27)
+- 60 x 60 (`GalewickTools`): arrival meadow + return gate, windmill village (4 cottages, 2 small mills, big mill),
+  shrine, a ditch crossed only at the drawbridge, the kite field loop (3 kites), a hill band crossed only by the
+  1-wide ridge path (cloud bank), the wind tower on the ridge top; pockets: fire visitors (scorched patch), rare grass.
+  Rolling hills = hillocks (the theme's tree prop) instead of tile heights. Zones with placeholder tables (Pufflet + fire
+  visitors) until 10c.
+- Still while unrestored (`RealmTheme.stillWhenUnrestored` 0.92: grass and sway damped), restored = sails turning
+  (prop motion Spin), kites on posts (motion Fly), seeds drifting, grass waving.
+- Hub wind gate <-> Galewick; builds keep it sealed (`GalewickConfig.open`) until 10d is done.
+- Levels across realms: wild +3 per shard held (not in the hub), Keepers +2 per other shard (`ShardScaling`).
+- Hand moments (10b): **mill** (Wheel piece: a fingertip flick > 0.5 m/s across the sails adds spin; 3 flicks in 4 s
+  keep it turning, the gear turns, the drawbridge lowers), **kites** (pinch/fist a kite, lift past 15 cm and let go or
+  toss it up: it flies 30-46 cm over the island on a string to the backpack, figure-eight, follows the explorer, out of
+  the battle view, saved), **gust** (open flat hand sweeping > 0.6 m/s within 30 cm over the island: a ripple runs
+  across all the grass, streaks, mills twitch; works anywhere in Galewick), **cloud bank** (3 puffs on the ridge path,
+  about 3 gusts each, look + pinch-hold also works), **tower** (arrive with 3 kites: they tie onto the crown, vanes
+  turn, the door opens). Each teaches itself once with a pinned chip (Flick! / Pull it up! / Wave!) and a ghost.
+
 ### Look of the two states (decided Oct 24)
 The element "not flowing" shows as things being **still and unlit**, not as colour loss. The bright palette is the
 default; restoring the realm makes things **move and glow**.
