@@ -26,7 +26,7 @@ namespace Diorama.EditorTools
         {
             DioramaSceneSetup.EnsureFolder(Root);
             DioramaSceneSetup.EnsureFolder($"{Root}/Shapes");
-            var logo = Recipe(LogoName, Vector2Int.one, false, false, 6650);
+            var logo = Recipe(LogoName, Vector2Int.one, false, false, 6450);
             logo.resolution = 56;
             logo.outline = 0.05f;
             logo.spec = 0.45f;
@@ -36,11 +36,11 @@ namespace Diorama.EditorTools
             logo.palette = Palette(H("#FFA01C"), H("#7A5236"), H("#9C988F"), H("#2E9A3C"), H("#FFD27A", 1.1f), H("#3E9440"));
 
             var pieces = new List<PropPiece>();
-            // "Isle" on the island's front lip (over the earth band), "Pocket" stacked above, touching it.
+            // "Isle" standing on the grass at the front (its feet on top, not sunk in), "Pocket" stacked above it.
             // Strokes thin enough for the counters (the holes in P, o, e, c) to stay open: fat strokes closed them to slits
             // that read as cracks.
-            Word(pieces, "Isle", 1.2f, 0.135f, -0.1f, 0.82f, 0.1f, PropSlot.Leaf, 11);
-            Word(pieces, "Pocket", 1.0f, 0.12f, 1.32f, 0.55f, 0.07f, PropSlot.Clay, 3);
+            Word(pieces, "Isle", 1.2f, 0.135f, 0.2f, 0.75f, 0.1f, PropSlot.Leaf, 11);
+            Word(pieces, "Pocket", 1.0f, 0.12f, 1.62f, 0.5f, 0.07f, PropSlot.Clay, 3);
             logo.pieces = pieces;
             UnityEditor.EditorUtility.SetDirty(logo);
             return logo;
@@ -57,8 +57,7 @@ namespace Diorama.EditorTools
             b.spec = 0.15f;
             b.scaleJitter = 0f;
             b.yawJitter = 0f;
-            // Clay red (mushroom caps, flowers), Wood earth + lantern frame, Stone rock, Leaf grass, Glow lantern light and
-            // little glowing flowers, Accent moss.
+            // Clay berries, Wood earth + trunk, Stone rock, Leaf grass, Glow lantern light, Accent moss and foliage.
             b.palette = Palette(H("#F2554A"), H("#6E4A30"), H("#9A958C"), H("#86C24A"), H("#FFD27A", 1.2f), H("#5DA83A"));
 
             var pieces = new List<PropPiece>();
@@ -76,69 +75,48 @@ namespace Diorama.EditorTools
                 Ell(new Vector3(-0.15f, -1.4f, 0f), new Vector3(0.55f, 0.38f, 0.36f), 0.3f).Bumps(0.04f, 6f),
                 new SdfPrimitive { kind = SdfKind.Plane, blend = SdfBlend.Intersect, a = new Vector3(0f, -0.4f, 0f), b = Vector3.up, k = 0.04f }),
                 PropSlot.Stone, 1.8f));
-            // Rock spires behind the words, moss on top (the reference's grey crags).
-            pieces.Add(Weighted(PShape("LogoBase_Spires",
-                Ell(new Vector3(0.45f, 0.95f, -0.6f), new Vector3(0.45f, 1.15f, 0.36f), 0.1f).Bumps(0.05f, 5f),
-                Ell(new Vector3(-0.35f, 0.75f, -0.68f), new Vector3(0.38f, 0.92f, 0.32f), 0.15f).Bumps(0.05f, 6f),
-                Ell(new Vector3(1.25f, 0.5f, -0.5f), new Vector3(0.32f, 0.62f, 0.3f), 0.12f).Bumps(0.04f, 7f),
-                Ell(new Vector3(-1.1f, 0.38f, -0.55f), new Vector3(0.28f, 0.48f, 0.26f), 0.12f).Bumps(0.04f, 7f),
-                Floor(-0.1f)), PropSlot.Stone, 1.4f));
-            pieces.Add(Weighted(PShape("LogoBase_Moss",
-                Ell(new Vector3(0.45f, 2.02f, -0.58f), new Vector3(0.34f, 0.13f, 0.3f), 0.05f).Bumps(0.02f, 9f),
-                Ell(new Vector3(-0.35f, 1.6f, -0.66f), new Vector3(0.29f, 0.11f, 0.26f), 0.05f).Bumps(0.02f, 9f),
-                Ell(new Vector3(1.25f, 1.08f, -0.48f), new Vector3(0.24f, 0.09f, 0.22f), 0.05f).Bumps(0.02f, 9f)), PropSlot.Accent, 0.5f));
-            pieces.Add(Weighted(PShape("LogoBase_Stones",
-                Ell(new Vector3(2.0f, 0.02f, 0.55f), new Vector3(0.22f, 0.14f, 0.18f), 0.05f).Bumps(0.02f, 8f),
-                Ell(new Vector3(1.72f, -0.02f, 0.78f), new Vector3(0.14f, 0.09f, 0.12f), 0.05f).Bumps(0.02f, 8f)), PropSlot.Stone, 0.3f));
-            // A small lantern on the grass beside "Isle" (its light pulses: TitleLogo).
-            var lantern = new Vector3(-2.0f, 0f, 0.5f);
-            pieces.Add(Weighted(PShape("LogoBase_LanternFrame",
-                Cone(lantern + new Vector3(0f, 0.02f, 0f), lantern + new Vector3(0f, 0.08f, 0f), 0.17f, 0.15f, 0f),
-                Cone(lantern + new Vector3(0f, 0.45f, 0f), lantern + new Vector3(0f, 0.55f, 0f), 0.17f, 0.05f, 0.02f),
-                Cone(lantern + new Vector3(0.12f, 0.08f, 0f), lantern + new Vector3(0.12f, 0.45f, 0f), 0.025f, 0.025f, 0.01f),
-                Cone(lantern + new Vector3(-0.12f, 0.08f, 0f), lantern + new Vector3(-0.12f, 0.45f, 0f), 0.025f, 0.025f, 0.01f),
-                Torus(lantern + new Vector3(0f, 0.6f, 0f), 0.05f, 0.018f, new Vector3(90f, 0f, 0f), 0.01f)), PropSlot.Wood, 0.4f));
-            pieces.Add(Weighted(PShape("LogoBase_LanternLight",
-                Ell(lantern + new Vector3(0f, 0.27f, 0f), new Vector3(0.11f, 0.17f, 0.11f), 0f)), PropSlot.Glow, 0.2f));
-
-            // Life on the land (low poly, part of the same mesh): two red mushrooms, little flowers (red and glowing), grass
-            // tufts at the edges.
-            var caps = new List<SdfPrimitive>();
-            int stem = 0;
-            // Where the letters don't hide them: the land's left and right ends.
-            foreach (var (at, h) in new[] { (new Vector3(2.15f, 0f, 0.1f), 0.34f), (new Vector3(1.9f, 0f, 0.42f), 0.2f), (new Vector3(-2.3f, 0f, -0.15f), 0.28f) })
-            {
-                // Each stem its own piece (far apart in one piece they bake to nothing).
-                pieces.Add(Weighted(PShape($"LogoBase_MushroomStem{stem++}", Cone(at, at + Vector3.up * h, 0.055f, 0.045f, 0f)), PropSlot.Stone, 0.1f));
-                caps.Add(Ell(at + Vector3.up * (h + 0.02f), new Vector3(h * 0.55f, h * 0.32f, h * 0.55f), caps.Count == 0 ? 0f : 0.02f));
-            }
-            caps.Add(new SdfPrimitive { kind = SdfKind.Plane, blend = SdfBlend.Intersect, a = new Vector3(0f, 0.12f, 0f), b = Vector3.down, k = 0.01f });
-            pieces.Add(Weighted(PShape("LogoBase_MushroomCaps", caps.ToArray()), PropSlot.Clay, 0.4f));
-            // Little flowers along the front lip and the ends, red and glowing: one small piece each (a piece is meshed on
-            // its own grid, so tiny far-apart heads in one piece bake to nothing).
-            var rng = new System.Random(5);
-            float R(float a, float c) => a + (float)rng.NextDouble() * (c - a);
-            var flowers = new[] { new Vector2(2.3f, 0.5f), new Vector2(1.75f, 0.9f), new Vector2(-1.85f, 0.85f), new Vector2(-2.4f, 0.35f), new Vector2(0.05f, 1.0f), new Vector2(2.05f, -0.4f) };
-            for (int i = 0; i < flowers.Length; i++)
-            {
-                var foot = new Vector3(flowers[i].x, 0f, flowers[i].y);
-                float h = R(0.1f, 0.18f);
-                pieces.Add(Weighted(PShape($"LogoBase_Flower{i}",
-                    Cone(foot, foot + Vector3.up * h, 0.025f, 0.022f, 0f),
-                    Sphere(foot + Vector3.up * (h + 0.035f), 0.065f, 0.02f)), i % 2 == 0 ? PropSlot.Clay : PropSlot.Glow, 0.1f));
-            }
-            var tufts = new List<SdfPrimitive>();
-            foreach (var at in new[] { new Vector2(2.3f, 0.45f), new Vector2(-2.35f, 0.3f), new Vector2(0.2f, -0.95f), new Vector2(-1.75f, 0.85f) })
-                for (int i = 0; i < 3; i++)
-                {
-                    var foot = new Vector3(at.x + R(-0.08f, 0.08f), 0f, at.y + R(-0.06f, 0.06f));
-                    tufts.Add(Cone(foot, foot + new Vector3(R(-0.07f, 0.07f), R(0.2f, 0.32f), R(-0.04f, 0.04f)), 0.045f, 0.012f, tufts.Count == 0 ? 0f : 0.015f));
-                }
-            pieces.Add(Weighted(PShape("LogoBase_LogoTufts", tufts.ToArray()), PropSlot.Accent, 0.35f));
+            // The game's own props on the land (their SDF shapes reused, scaled down): mossy boulders behind the words (the
+            // reference's grey crags), the hub tree at the back, a berry bush at the left end, the hub lantern at the right
+            // end (its light pulses: TitleLogo).
+            Reuse(pieces, "MossBoulder", new Vector3(0.35f, -0.05f, -0.62f), 1.7f, s => s == PropSlot.Leaf ? PropSlot.Accent : PropSlot.Stone);
+            Reuse(pieces, "MossBoulder", new Vector3(-0.75f, -0.05f, -0.7f), 1.2f, s => s == PropSlot.Leaf ? PropSlot.Accent : PropSlot.Stone);
+            Reuse(pieces, "CalmTree", new Vector3(-1.75f, -0.02f, -0.45f), 1.55f, s => s == PropSlot.Wood ? PropSlot.Wood : s == PropSlot.Leaf ? PropSlot.Accent : (PropSlot?)null);
+            Reuse(pieces, "BerryBush", new Vector3(2.05f, -0.02f, 0.25f), 0.6f, s => s == PropSlot.Leaf ? PropSlot.Accent : PropSlot.Clay);
+            Reuse(pieces, "MossBoulder", new Vector3(1.7f, -0.04f, 0.72f), 0.32f, s => s == PropSlot.Leaf ? PropSlot.Accent : PropSlot.Stone);
+            Reuse(pieces, "HubLantern", new Vector3(-2.05f, -0.02f, 0.45f), 0.7f, s => s == PropSlot.Glow ? PropSlot.Glow : PropSlot.Stone);
 
             b.pieces = pieces;
             UnityEditor.EditorUtility.SetDirty(b);
             return b;
+        }
+
+        /// <summary>
+        /// Copies a baked prop's pieces (its SDF shapes) onto the logo land: <paramref name="height"/> tall, standing on
+        /// <paramref name="at"/>, slots mapped into the land's palette (null = left out).
+        /// </summary>
+        static void Reuse(List<PropPiece> pieces, string recipe, Vector3 at, float height, System.Func<PropSlot, PropSlot?> map)
+        {
+            var src = Load(recipe);
+            if (src == null || src.bakedMesh == null)
+            {
+                Debug.LogError($"[PropKit] Logo land: {recipe} isn't baked; left out.");
+                return;
+            }
+            var bounds = src.bakedMesh.bounds;
+            float k = height / Mathf.Max(1e-4f, bounds.size.y);
+            var lift = new Vector3(-bounds.center.x * k, -bounds.min.y * k, -bounds.center.z * k);
+            foreach (var p in src.pieces)
+            {
+                var slot = map(p.slot);
+                if (p.shape == null || !slot.HasValue) continue;
+                var q = p;
+                q.position = at + lift + p.position * k;
+                q.scale = (p.scale <= 0f ? 1f : p.scale) * k;
+                q.slot = slot.Value;
+                q.motion = PropMotion.None;
+                q.budgetWeight = 0.4f;
+                pieces.Add(q);
+            }
         }
 
         static PropPiece Weighted(SdfShape shape, PropSlot slot, float weight)
