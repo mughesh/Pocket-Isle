@@ -21,6 +21,12 @@ namespace Diorama
         [Min(0.1f)] public float rewardMultiplier = 3f;
         [Min(1f)] public float rareMultiplier = 2f;
 
+        [Header("Realms in any order (step 10a)")]
+        [Tooltip("Wild Islings outside the hub gain this many levels per shard the player holds.")]
+        [Min(0)] public int wildLevelsPerShard = 3;
+        [Tooltip("Keepers gain this many levels per other shard the player holds.")]
+        [Min(0)] public int keeperLevelsPerShard = 2;
+
         [Header("Sharing")]
         [Tooltip("Every creature that fought in the battle gets the full reward.")]
         public bool fullShare = true;

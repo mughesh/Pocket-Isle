@@ -164,6 +164,7 @@ namespace Diorama
                 return;
             }
             if (progression == null) Debug.LogError("[EncounterDirector] No ProgressionConfig; wins pay no XP (Tools > Pocket Isle > Set Up MR_Main (7 progression)).", this);
+            ShardScaling.Config = progression;
             if (firstSpecies == null) Debug.LogError("[EncounterDirector] No first-encounter species: a new game's first grass rolls the table (Set Up MR_Main (8 hub)).", this);
             MapCreature.HideAll = false;
             int s = seed != 0 ? seed : System.Environment.TickCount;
@@ -315,6 +316,17 @@ namespace Diorama
                 Debug.LogError($"[EncounterDirector] {(table != null ? table.name : "No table")}: no species to roll.", table);
                 yield return Finish(false);
                 yield break;
+            }
+            if (scripted == null)
+            {
+                // Step 10a: realms in any order: wild levels grow with the shards held (not in the hub).
+                string realm = island != null && island.world != null ? island.world.realm : null;
+                int scaled = ShardScaling.WildLevel(wild.level, realm);
+                if (scaled != wild.level)
+                {
+                    Debug.Log($"[EncounterDirector] {wild.species.name} Lv {wild.level} -> {scaled} ({ShardScaling.Held()} shard(s) held).");
+                    wild = new IslingInstance(wild.species, scaled);
+                }
             }
             var lead = party.Lead;
             if (lead == null)

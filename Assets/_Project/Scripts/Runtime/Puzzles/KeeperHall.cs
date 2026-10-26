@@ -39,6 +39,8 @@ namespace Diorama
         public GhostHands ghosts;
         public IslingSpecies keeperSpecies;
         [Min(1)] public int keeperLevel = 12;
+        [Tooltip("Step 10a: this Keeper's own shard (saved id); the other shards held raise its level.")]
+        public string ownShard = "shard.fire";
         [Tooltip("Diorama/Beacon material: the forge's flame once lit.")]
         public Material beaconMaterial;
         public PropRecipe shardRecipe;
@@ -299,9 +301,11 @@ namespace Diorama
             }
             if (fx != null) fx.Burst(_look.CrownWorld, 30, new Color(1f, 0.55f, 0.2f), TileWorld * 0.8f, 0.8f, TileWorld * 0.05f, Vector3.up * TileWorld * 0.6f);
             explorer.Locked = false;
+            // Step 10a: Keepers grow with the other realms' shards the player holds.
+            int level = ShardScaling.KeeperLevel(keeperLevel, ownShard);
             var fight = new EncounterDirector.KeeperFight
             {
-                keeper = new IslingInstance(keeperSpecies, keeperLevel),
+                keeper = new IslingInstance(keeperSpecies, level),
                 keeperPad = keeperPad,
                 myPad = partyPad,
                 caption = $"{keeperSpecies.displayName} blocks the way, crown ablaze!",
@@ -314,7 +318,7 @@ namespace Diorama
                 _phase = Phase.Idle;
                 yield break;
             }
-            Debug.Log($"[KeeperHall] The Keeper battle starts: {keeperSpecies.displayName} Lv {keeperLevel}.");
+            Debug.Log($"[KeeperHall] The Keeper battle starts: {keeperSpecies.displayName} Lv {level} (base {keeperLevel}, {ShardScaling.Held(ownShard)} other shard(s)).");
         }
 
         // ---- the battle's look ----
