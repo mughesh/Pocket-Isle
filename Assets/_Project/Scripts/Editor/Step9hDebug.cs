@@ -44,6 +44,39 @@ namespace Diorama.EditorTools
             Debug.Log($"[Step9hDebug] Logo shots: {letters.bakedMesh.triangles.Length / 3} + {chunk.bakedMesh.triangles.Length / 3} triangles.");
         }
 
+        /// <summary>The two-hands lesson's ghost (both near rim corners), without starting a new game.</summary>
+        public static void GhostTwoHands()
+        {
+            var g = Object.FindFirstObjectByType<GhostHands>();
+            if (g != null) g.Show("grab_rim_slide", GhostPlace.RimCorners, null, 1f, DominantHand.Left, true);
+        }
+
+        /// <summary>The explorer next to the Cinderwood shrine (the palm ghost shows until the lodge was visited).</summary>
+        public static void GoShrine() => GoSpot("CW: shrine");
+
+        /// <summary>The explorer at the fallen log (its lesson ghost carries it to the ledge).</summary>
+        public static void GoLog() => GoSpot("CW: log");
+
+        static void GoSpot(string label)
+        {
+            var s = Object.FindFirstObjectByType<GameState>();
+            if (s == null) return;
+            foreach (var spot in s.Spots)
+                if (spot.label == label)
+                {
+                    s.GoTo(spot);
+                    return;
+                }
+        }
+
+        /// <summary>Puts the Editor's "last played" slot back to Full adventure (after a Quick preset test).</summary>
+        public static void LastAdventure()
+        {
+            PlayerPrefs.SetInt("pocketisle.lastSlot", (int)SaveSlot.Adventure);
+            PlayerPrefs.Save();
+            Debug.Log("[Step9hDebug] Last played slot: Full adventure.");
+        }
+
         /// <summary>A pinch for the pinch lesson (no hands in flat Play).</summary>
         public static void Pinch()
         {

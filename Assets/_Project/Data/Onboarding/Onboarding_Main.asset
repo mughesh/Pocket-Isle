@@ -53,11 +53,11 @@ MonoBehaviour:
     rewindTo: 
     praise: 1
     ghost: pinch
-    place: 5
-    target: 
+    place: 2
+    target: ghost
     source: 
     targetLift: 0
-    ghostScale: 1
+    ghostScale: 0.6
     bothHands: 0
     ghostSpread: 0
     goldPath: 
@@ -84,6 +84,31 @@ MonoBehaviour:
     targetLift: 0
     ghostScale: 1
     bothHands: 0
+    ghostSpread: 0
+    goldPath: 
+    goldTileSteps: 0
+    tutorialGrass: 0
+  - id: twoHands
+    line: lesson.twohands
+    again: 
+    chip: Both hands
+    help: 
+    helpAfter: 30
+    startWhen: opening.twoHands
+    delay: 0.5
+    doneWhen: twoHandGrab
+    validWhile: opening.twoHands
+    skipAfter: 15
+    failWhen: 
+    rewindTo: 
+    praise: 1
+    ghost: grab_rim_slide
+    place: 6
+    target: 
+    source: 
+    targetLift: 0
+    ghostScale: 1
+    bothHands: 1
     ghostSpread: 0
     goldPath: 
     goldTileSteps: 0
@@ -309,31 +334,6 @@ MonoBehaviour:
     targetLift: 0
     ghostScale: 1
     bothHands: 0
-    ghostSpread: 0
-    goldPath: 
-    goldTileSteps: 0
-    tutorialGrass: 0
-  - id: twoHands
-    line: lesson.twohands
-    again: 
-    chip: Both hands
-    help: 
-    helpAfter: 30
-    startWhen: '!battle & !swap'
-    delay: 2
-    doneWhen: twoHandGrab
-    validWhile: 
-    skipAfter: 15
-    failWhen: 
-    rewindTo: 
-    praise: 1
-    ghost: grab_rim_slide
-    place: 4
-    target: islandRim
-    source: 
-    targetLift: 0
-    ghostScale: 1
-    bothHands: 1
     ghostSpread: 0
     goldPath: 
     goldTileSteps: 0

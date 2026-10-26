@@ -150,8 +150,10 @@ namespace Diorama.EditorTools
                 new LessonData
                 {
                     // Step 9h: pinch is taught before anything needs it; the ghost pinches beside the player's own hand.
+                    // After the headset test: the small demo above the island's front like the thumb demos (beside the real
+                    // hand it lay along the back of it).
                     id = "pinch", line = "lesson.pinch", chip = "Pinch!", startWhen = "opening.pinch", validWhile = "opening.pinch",
-                    doneWhen = "pinched", ghost = "pinch", place = GhostPlace.BesideHand, ghostScale = 1f,
+                    doneWhen = "pinched", ghost = "pinch", place = GhostPlace.AboveIsland, target = "ghost", ghostScale = 0.6f,
                 },
                 new LessonData
                 {
@@ -159,6 +161,13 @@ namespace Diorama.EditorTools
                     // Step 8e: a pinch on the side of the base (pinch or palm both grab the island).
                     // Step 9h: the ghost grabs the near rim's corner on the dominant side (was the base's side).
                     doneWhen = "islandGrabbed", skipAfter = 12f, ghost = "grab_rim_slide", place = GhostPlace.AtTarget, source = "rimCorner",
+                },
+                new LessonData
+                {
+                    // Step 9h: right after moving the island (was after the first battle): both hands pinch the near corners
+                    // and pull apart (the move recording, the left hand mirrored).
+                    id = "twoHands", line = "lesson.twohands", chip = "Both hands", startWhen = "opening.twoHands", validWhile = "opening.twoHands",
+                    delay = 0.5f, doneWhen = "twoHandGrab", skipAfter = 15f, ghost = "grab_rim_slide", place = GhostPlace.RimCorners, bothHands = true,
                 },
                 new LessonData
                 {
@@ -213,13 +222,6 @@ namespace Diorama.EditorTools
                 new LessonData
                 {
                     id = "free", doneWhen = "wonOrCaught", failWhen = battleFail, rewindTo = "grass", praise = false,
-                },
-                new LessonData
-                {
-                    // Step 8c: once, after the first battle: both hands turn and resize the island (8e: both hands pinch the
-                    // left and right sides of the base).
-                    id = "twoHands", line = "lesson.twohands", chip = "Both hands", startWhen = "!battle & !swap", delay = 2f, doneWhen = "twoHandGrab", skipAfter = 15f,
-                    ghost = "grab_rim_slide", place = GhostPlace.IslandSides, target = "islandRim", bothHands = true,
                 },
             };
             s.praise = new List<string> { "praise.nice", "praise.like", "praise.perfect" };

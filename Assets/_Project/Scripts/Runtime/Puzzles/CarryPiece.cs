@@ -118,6 +118,19 @@ namespace Diorama
 
         public override float FocusRadius => (halfLength + 0.2f) * TileWorld;
 
+        /// <summary>Step 9h: the lesson ghost carries the piece to the nearest spot (a little above it).</summary>
+        public override Vector3? GhostDropPoint
+        {
+            get
+            {
+                if (_view == null || !_view.Visible || spots.Count == 0) return null;
+                int best = 0;
+                for (int i = 1; i < spots.Count; i++)
+                    if ((spots[i].tile - new Vector2(_pos.x, _pos.z)).sqrMagnitude < (spots[best].tile - new Vector2(_pos.x, _pos.z)).sqrMagnitude) best = i;
+                return MapToWorld(new Vector3(spots[best].tile.x, spots[best].height + 0.35f, spots[best].tile.y));
+            }
+        }
+
         protected override void Start()
         {
             if (recipe == null)

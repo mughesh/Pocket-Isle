@@ -101,6 +101,10 @@ namespace Diorama
             Dialogue.RegisterTargetResolver("puzzle", arg => _byId.TryGetValue(arg, out var p) && p != null
                 ? new Dialogue.Target { point = () => p != null ? p.FocusPoint : null, pulse = k => { }, radius = () => p != null ? p.FocusRadius : 0f }
                 : null);
+            // Step 9h: where a carried piece's ghost lets go (the nearest spot), "puzzleTo:<id>".
+            Dialogue.RegisterTargetResolver("puzzleTo", arg => _byId.TryGetValue(arg, out var p) && p != null
+                ? new Dialogue.Target { point = () => p != null ? p.GhostDropPoint : null, pulse = k => { }, radius = () => 0f }
+                : null);
             PuzzleState.Restored += OnRestored;
             ApplyState();
         }
@@ -155,6 +159,9 @@ namespace Diorama
 
         // ---- lesson ----
 
+        /// <summary>Step 9h: where the lesson's grab ghost lets go (a carry's spot); null = the ghost plays at the piece as before.</summary>
+        public virtual Vector3? GhostDropPoint => null;
+
         /// <summary>Whether it can be worked at all right now (the statue socket: only while a shard is held).</summary>
         protected virtual bool Available => true;
 
@@ -171,7 +178,12 @@ namespace Diorama
             if (!string.IsNullOrEmpty(lessonLine)) Dialogue.Say(lessonLine);
             FocusHighlight.SetPending(() => this != null ? FocusPoint : null, FocusRadius);
             if (ghosts != null && !string.IsNullOrEmpty(ghostClip))
-                ghosts.Show(ghostClip, GhostPlace.AtTarget, "puzzle:" + id, ghostScale, DominantHand.Left, false);
+            {
+                // A piece you carry: the ghost grabs it and lets go over its spot (step 9h); others play at the piece.
+                if (GhostDropPoint.HasValue)
+                    ghosts.Show(ghostClip, GhostPlace.AtTarget, "puzzleTo:" + id, ghostScale, DominantHand.Left, false, 0f, "puzzle:" + id);
+                else ghosts.Show(ghostClip, GhostPlace.AtTarget, "puzzle:" + id, ghostScale, DominantHand.Left, false);
+            }
             Debug.Log($"[{GetType().Name}] {id}: lesson ({lessonLine}, ghost {(string.IsNullOrEmpty(ghostClip) ? "none" : ghostClip)}).");
         }
 

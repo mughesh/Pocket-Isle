@@ -47,6 +47,9 @@ namespace Diorama
         [Tooltip("Palm facing down over the bowl: facing, height above the bowl rim, horizontal radius (scaled with the island).")]
         public PalmHover palm = new PalmHover();
         public float holdSeconds = 0.8f;
+        [Tooltip("Step 9h: a ghost palm hovers over the flame while the explorer stands at a shrine, until the lodge was visited once.")]
+        public GhostHands ghosts;
+        public string ghostClip = "palm_hover";
 
         /// <summary>The explorer rested at this shrine (anchor tile): healed, time to save.</summary>
         public event Action<Vector2Int> Rested;
@@ -144,6 +147,11 @@ namespace Diorama
             _block = new MaterialPropertyBlock();
             explorer.OnStep += OnStep;
             Dialogue.RegisterTarget("shrine", ShrinePoint, k => { }, () => 1.6f * island.map.tileSize * island.Zoom * island.transform.lossyScale.x);
+            // Where the ghost's palm hovers: over the bowl of the shrine the explorer stands at, at the palm check's height.
+            Dialogue.RegisterTarget("shrineFlame", () => _ghostShrine >= 0 && _ghostShrine < _shrines.Count
+                ? island.transform.TransformPoint(island.TileToLocal(Center(_shrines[_ghostShrine]), island.Content.capHeight + bowlHeight * island.map.tileSize)) +
+                  island.transform.up * ((palm.height.x + palm.height.y) * 0.5f * island.transform.lossyScale.x)
+                : (Vector3?)null, k => { }, () => 0f);
             Scan();
         }
 
@@ -217,8 +225,35 @@ namespace Diorama
             if (_gazed >= 0)
                 FocusHighlight.Hover(island.transform.TransformPoint(island.TileToLocal(Center(_shrines[_gazed]), island.Content.capHeight)),
                     1.2f * island.map.tileSize * island.Zoom * island.transform.lossyScale.x);
-            for (int i = 0; i < _shrines.Count; i++) UpdateShrine(i, outside);
+            int near = -1;
+            for (int i = 0; i < _shrines.Count; i++)
+            {
+                UpdateShrine(i, outside);
+                if (_beacons[i].near > 0.5f && near < 0) near = i;
+            }
             if (outside) UpdatePinch();
+            UpdateGhost(near);
+        }
+
+        int _ghostShrine = -1;
+
+        /// <summary>
+        /// Step 9h: while the explorer stands at a shrine (and no lesson owns the ghost), a ghost palm hovers over its flame,
+        /// until the player has been inside the lodge once.
+        /// </summary>
+        void UpdateGhost(int near)
+        {
+            if (ghosts == null) return;
+            bool visited = Dialogue.HasSaid("lodge.first") || Dialogue.HasSaid("lodge.first.empty");
+            int want = near >= 0 && !visited && !Onboarding.Running && !_entering ? near : -1;
+            if (want == _ghostShrine) return;
+            _ghostShrine = want;
+            if (want >= 0)
+            {
+                ghosts.Show(ghostClip, GhostPlace.AtTarget, "shrineFlame", 1f, DominantHand.Left, false);
+                Debug.Log("[HearthShrines] Ghost palm over the flame.");
+            }
+            else if (ghosts.ClipName == ghostClip && !ghosts.previewing) ghosts.Hide();
         }
 
         void UpdateShrine(int i, bool outside)

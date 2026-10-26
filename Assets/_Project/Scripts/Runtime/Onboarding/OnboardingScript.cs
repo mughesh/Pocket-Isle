@@ -24,6 +24,11 @@ namespace Diorama
         /// at hand height). Without a tracked hand, where a resting hand would be.
         /// </summary>
         BesideHand,
+        /// <summary>
+        /// Step 9h (after the headset test): both hands grab the near rim's corners, the right hand the near-right one,
+        /// the left (mirrored) the near-left one, each pinch landing on its corner (the grab clip pulls apart: resize).
+        /// </summary>
+        RimCorners,
     }
 
     /// <summary>

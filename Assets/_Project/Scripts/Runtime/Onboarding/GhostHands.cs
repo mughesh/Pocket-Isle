@@ -169,11 +169,14 @@ namespace Diorama
         }
 
         /// <summary>The near rim's corner on the dominant side, a little below the cap (where a hand takes the rocky edge).</summary>
-        Vector3? RimCorner()
+        Vector3? RimCorner() => CornerOf(DominantHand.Left);
+
+        /// <summary>The near rim's corner on the player's left or right (island +X is the player's left).</summary>
+        Vector3? CornerOf(bool left)
         {
             if (island == null || island.map == null) return null;
             var half = island.FootprintHalfSize;
-            float x = DominantHand.Left ? half.x - cornerInset : -(half.x - cornerInset);
+            float x = left ? half.x - cornerInset : -(half.x - cornerInset);
             return island.transform.TransformPoint(new Vector3(x, island.CapTopLocal - sideDrop, half.y));
         }
 
@@ -337,12 +340,24 @@ namespace Diorama
                 loopFade = 1f;
             }
             float alpha = _visible * loopFade;
-            float placeScale = (_request.place == GhostPlace.AtTarget || _request.place == GhostPlace.IslandSides) && library != null ? library.targetScale : 1f;
+            float placeScale = (_request.place == GhostPlace.AtTarget || _request.place == GhostPlace.IslandSides || _request.place == GhostPlace.RimCorners) && library != null ? library.targetScale : 1f;
             float scale = _request.scale * placeScale * Mathf.Max(0.05f, _clip.size) * Mathf.Lerp(1f, struggleScale, _struggle);
 
             var a = _request.both ? _left ?? _right : _request.left ? _left ?? _right : _right ?? _left;
             var b = _request.both ? (a == _left ? _right : _left) : null;
-            if (_request.place == GhostPlace.IslandSides)
+            if (_request.place == GhostPlace.RimCorners)
+            {
+                // Each hand pinches its own near corner (the clip mirrored for the left hand).
+                var g2 = GrabOf(_clip);
+                foreach (var h in new[] { _left, _right })
+                {
+                    if (h == null) continue;
+                    var corner = CornerOf(h.left);
+                    if (!corner.HasValue) Hidden(h);
+                    else Pose(h, corner.Value, frame, t, scale, alpha, 0f, g2.has ? g2.grab : -1f, g2.release, null);
+                }
+            }
+            else if (_request.place == GhostPlace.IslandSides)
             {
                 // Each hand on its own side of the base, the clip turned so the palm faces the island.
                 Pose(a, SidePoint(a.left), frame, t, scale, alpha, SideYaw(a.left));
@@ -381,6 +396,13 @@ namespace Diorama
                     var b = island.LocalBounds;
                     var local = new Vector3(b.center.x, island.CapTopLocal, b.center.z + b.extents.z * aboveIslandFront);
                     point = island.transform.TransformPoint(local) + Vector3.up * aboveIslandHeight;
+                    break;
+                }
+                case GhostPlace.RimCorners:
+                {
+                    if (island == null) return false;
+                    var b = island.LocalBounds;
+                    point = island.transform.TransformPoint(new Vector3(b.center.x, island.CapTopLocal - sideDrop, island.FootprintHalfSize.y));
                     break;
                 }
                 case GhostPlace.IslandSides:

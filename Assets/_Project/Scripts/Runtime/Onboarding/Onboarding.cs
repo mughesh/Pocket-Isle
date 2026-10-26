@@ -174,7 +174,8 @@ namespace Diorama
         public void Restore(string lessonId, bool finished)
         {
             if (_runner == null) return;
-            if (finished)
+            // Step 9h moved the two-hands lesson into the opening: a save that waited for it at the end is done.
+            if (finished || lessonId == "twoHands")
             {
                 _runner.Finish();
                 EncountersEnabled = true;

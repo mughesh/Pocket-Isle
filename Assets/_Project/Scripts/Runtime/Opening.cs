@@ -106,7 +106,7 @@ namespace Diorama
         static readonly int CrackPulseId = Shader.PropertyToID("_CrackPulse");
         static readonly int EmissiveId = Shader.PropertyToID("_Emissive");
 
-        enum Stage { None, Shard, Unfold, Spirit, Pinch, Move, Starters, Walk, Done }
+        enum Stage { None, Shard, Unfold, Spirit, Pinch, Move, TwoHands, Starters, Walk, Done }
 
         Stage _stage;
         Transform _shard;
@@ -159,6 +159,7 @@ namespace Diorama
             GameConditions.Register("opening.shard", () => _shardWaiting);
             GameConditions.Register("opening.pinch", () => _stage == Stage.Pinch);
             GameConditions.Register("opening.move", () => _stage == Stage.Move);
+            GameConditions.Register("opening.twoHands", () => _stage == Stage.TwoHands);
             GameConditions.Register("opening.starters", () => _stage == Stage.Starters && _starterPods.Count > 0);
             _run = StartCoroutine(save.Loaded ? Returning() : NewGame());
         }
@@ -368,6 +369,13 @@ namespace Diorama
             if (handle != null) handle.HintGlow = 0f;
             Debug.Log($"[Opening] Move prompt: {(grabbed ? "the island was moved" : "no grab, moving on")}.");
             yield return WaitLines(8f);
+
+            // Step 9h: two hands (turn, resize) right after one hand moved it (the lesson skips itself after 15 s; the
+            // Quick Journey cuts it).
+            _stage = Stage.TwoHands;
+            for (float t = 0f; onboarding != null && onboarding.CurrentId == "twoHands" && t < 20f; t += Time.deltaTime) yield return null;
+            while (handle != null && handle.IsGrabbed) yield return null;
+            yield return WaitLines(4f);
 
             // Starter choice.
             _stage = Stage.Starters;

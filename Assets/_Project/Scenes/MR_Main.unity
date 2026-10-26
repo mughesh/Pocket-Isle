@@ -700,6 +700,8 @@ MonoBehaviour:
     height: {x: 0.03, y: 0.15}
     radius: 0.06
   holdSeconds: 0.8
+  ghosts: {fileID: 1421177268}
+  ghostClip: palm_hover
 --- !u!4 &261742742
 Transform:
   m_ObjectHideFlags: 0
