@@ -108,6 +108,63 @@ namespace Diorama
         public static Quaternion Mirror(Quaternion q) => new Quaternion(q.x, -q.y, -q.z, q.w);
     }
 
+    /// <summary>
+    /// Step 9h: plays a grab clip on the real objects without re-recording. A clip replays the hand where it was
+    /// recorded, so its grab rarely lands on the pod or rim it demonstrates. The grab frame (thumb and index close) is
+    /// pinned on the real source, the release frame (they open again) on the real target, and the path in between is
+    /// blended by time. Pure math (EditMode-tested).
+    /// </summary>
+    public static class GhostRetarget
+    {
+        /// <summary>
+        /// The grab (first sample whose thumb-index gap is under <paramref name="close"/>) and the release (the first one
+        /// after it back over <paramref name="open"/>). False when the hand never closes (a poke, a palm).
+        /// </summary>
+        public static bool FindGrab(IReadOnlyList<float> gaps, float close, float open, out int grab, out int release)
+        {
+            grab = release = -1;
+            if (gaps == null) return false;
+            // A grab starts from an open hand: samples before the hand first opens don't count.
+            int start = 0;
+            while (start < gaps.Count && gaps[start] <= open) start++;
+            for (int i = start; i < gaps.Count; i++)
+            {
+                if (grab < 0)
+                {
+                    if (gaps[i] < close) grab = i;
+                }
+                else if (gaps[i] > open)
+                {
+                    release = i;
+                    break;
+                }
+            }
+            if (grab < 0) return false;
+            if (release < 0) release = gaps.Count - 1; // held to the end
+            return release > grab;
+        }
+
+        /// <summary>Thresholds from the clip's own closest gap: closed within 1 cm of it, open again 1.5 cm further.</summary>
+        public static void Thresholds(IReadOnlyList<float> gaps, out float close, out float open)
+        {
+            float min = float.MaxValue;
+            foreach (var g in gaps) min = Mathf.Min(min, g);
+            close = Mathf.Max(0.015f, min + 0.01f);
+            open = close + 0.015f;
+        }
+
+        /// <summary>
+        /// The shift added to the hand at clip time <paramref name="t"/>: the source shift up to the grab, the target shift
+        /// from the release on, eased from one to the other in between.
+        /// </summary>
+        public static Vector3 Offset(float t, float grabTime, float releaseTime, Vector3 sourceShift, Vector3 targetShift)
+        {
+            if (t <= grabTime) return sourceShift;
+            if (t >= releaseTime || releaseTime <= grabTime) return targetShift;
+            return Vector3.Lerp(sourceShift, targetShift, Mathf.SmoothStep(0f, 1f, (t - grabTime) / (releaseTime - grabTime)));
+        }
+    }
+
     /// <summary>The recorded clips (Data/Onboarding/GhostClips); a clip here replaces the placeholder of the same name.</summary>
     [CreateAssetMenu(menuName = "Pocket Isle/Ghost Clip Library", fileName = "GhostClips")]
     public class GhostClipLibrary : ScriptableObject

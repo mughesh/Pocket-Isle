@@ -365,6 +365,7 @@ namespace Diorama
             _said.Add(id);
             int at = 0;
             foreach (var line in t.lines) _queue.Insert(at++, Make(line, t, id));
+            Debug.Log($"[Dialogue] {id}: first in line.");
         }
 
         bool IsQueuedOrShowing(string id) => _current.HasValue && _current.Value.trigger == id || _queue.Exists(q => q.trigger == id);

@@ -3494,6 +3494,7 @@ MonoBehaviour:
   wristFingers: {x: -0.35, y: 0.25, z: 1}
   wristDorsal: {x: 1, y: 0.35, z: 0.25}
   bothSpread: 0.18
+  cornerInset: 0.05
   sideDrop: 0.015
   sideOut: 0.012
   besideHandOut: 0.08

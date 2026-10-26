@@ -39,6 +39,8 @@ namespace Diorama
         public Vector3 wristDorsal = new Vector3(1f, 0.35f, 0.25f);
         [Tooltip("Both hands (show me your hands) sit this far apart (m).")]
         public float bothSpread = 0.18f;
+        [Tooltip("Step 9h: the island-move ghost grabs the near rim this far in from the dominant side's corner (island-local m).")]
+        public float cornerInset = 0.05f;
         [Tooltip("Island sides (pinch grab, step 8e): the clip's key joint sits this far below the cap top (island-local m) and this far out from the base (world m).")]
         public float sideDrop = 0.04f;
         public float sideOut = 0.08f;
@@ -72,10 +74,19 @@ namespace Diorama
         {
             public string clip;
             public GhostPlace place;
-            public string target;
-            public float scale, spread;
+            public string target, source;
+            public float scale, spread, lift;
             public bool left, both;
         }
+
+        /// <summary>A clip's grab and release (seconds into the trimmed clip), found once from its thumb-index gap.</summary>
+        struct Grab
+        {
+            public bool has;
+            public float grab, release;
+        }
+
+        readonly Dictionary<GhostHandClip, Grab> _grabs = new Dictionary<GhostHandClip, Grab>();
 
         Ghost _left, _right;
         Transform _dot;
@@ -117,6 +128,8 @@ namespace Diorama
             MakePlaceholders();
             MakeDot();
             Dialogue.RegisterTarget("ghost", () => KeyPoint, k => { }, () => 0f);
+            // Step 9h: the island-move ghost grabs the near rim's corner on the dominant side (island +X is the player's left).
+            Dialogue.RegisterTarget("rimCorner", RimCorner, k => { }, () => 0f);
             if (onboarding != null)
             {
                 onboarding.LessonShown += OnLessonShown;
@@ -152,7 +165,16 @@ namespace Diorama
                 Hide();
                 return;
             }
-            Show(l.ghost, l.place, l.target, l.ghostScale, DominantHand.Left, l.bothHands, l.ghostSpread);
+            Show(l.ghost, l.place, l.target, l.ghostScale, DominantHand.Left, l.bothHands, l.ghostSpread, l.source, l.targetLift);
+        }
+
+        /// <summary>The near rim's corner on the dominant side, a little below the cap (where a hand takes the rocky edge).</summary>
+        Vector3? RimCorner()
+        {
+            if (island == null || island.map == null) return null;
+            var half = island.FootprintHalfSize;
+            float x = DominantHand.Left ? half.x - cornerInset : -(half.x - cornerInset);
+            return island.transform.TransformPoint(new Vector3(x, island.CapTopLocal - sideDrop, half.y));
         }
 
         void OnLessonEnded(LessonData l, bool done)
@@ -181,7 +203,9 @@ namespace Diorama
         /// Shows a clip (restarts it). Left = show the left hand (the clip is mirrored if it was recorded with the other).
         /// At a target the size is also x the library's <see cref="GhostClipLibrary.targetScale"/>. Spread = both hands' gap (0 = default).
         /// </summary>
-        public void Show(string clip, GhostPlace place, string target, float scale, bool left, bool both, float spread = 0f)
+        /// <param name="source">Step 9h, grab clips: where the grab lands; <paramref name="target"/> is then where the release lands.</param>
+        /// <param name="lift">The release spot sits this far above the target (m).</param>
+        public void Show(string clip, GhostPlace place, string target, float scale, bool left, bool both, float spread = 0f, string source = null, float lift = 0f)
         {
             var c = Find(clip);
             if (c == null)
@@ -190,13 +214,20 @@ namespace Diorama
                 Hide();
                 return;
             }
-            _request = new Request { clip = clip, place = place, target = target, scale = Mathf.Max(0.1f, scale), left = left, both = both, spread = spread };
+            _request = new Request
+            {
+                clip = clip, place = place, target = target, source = source, scale = Mathf.Max(0.1f, scale), left = left, both = both,
+                spread = spread, lift = lift,
+            };
             _clip = c;
             _showing = true;
             _time = 0f;
             _loops = 0;
             _struggle = 0f;
-            Debug.Log($"[GhostHands] {clip} ({(c.hideFlags == HideFlags.DontSave ? "placeholder" : "recorded")}) {place}{(string.IsNullOrEmpty(target) ? "" : " at " + target)}, " +
+            var grab = GrabOf(c);
+            Debug.Log($"[GhostHands] {clip} ({(c.hideFlags == HideFlags.DontSave ? "placeholder" : "recorded")}) {place}" +
+                      $"{(string.IsNullOrEmpty(source) ? "" : $" grabs at {source} ({(grab.has ? $"grab {grab.grab:0.00} s, release {grab.release:0.00} s" : "no grab in the clip: key frame there")})")}" +
+                      $"{(string.IsNullOrEmpty(target) ? "" : (string.IsNullOrEmpty(source) ? " at " : ", lets go at ") + target)}, " +
                       $"{(both ? "both hands" : left ? "left hand" : "right hand")}, x{scale:0.##}.");
         }
 
@@ -279,6 +310,14 @@ namespace Diorama
                 _keyValid = false;
                 return;
             }
+            // Step 9h: a grab clip grabs at the source and lets go at the target.
+            var grab = string.IsNullOrEmpty(_request.source) ? default : GrabOf(_clip);
+            Vector3? release = null;
+            if (grab.has && !string.IsNullOrEmpty(_request.target) && Dialogue.TryGetTarget(_request.target, out var rt) && rt.point != null)
+            {
+                var p = rt.point();
+                if (p.HasValue) release = p.Value + Vector3.up * _request.lift;
+            }
 
             float speed = Mathf.Lerp(1f, struggleSpeed, _struggle) * Mathf.Max(0.05f, _clip.speed);
             float loopLength = _clip.Duration / speed + _clip.holdEnd;
@@ -313,7 +352,8 @@ namespace Diorama
             else
             {
                 Vector3 side = frame * Vector3.right * ((_request.spread > 0f ? _request.spread : bothSpread) * 0.5f);
-                Pose(a, point + (b != null ? (a.left ? -side : side) : Vector3.zero), frame, t, scale, alpha);
+                Pose(a, point + (b != null ? (a.left ? -side : side) : Vector3.zero), frame, t, scale, alpha, 0f,
+                    grab.has ? grab.grab : -1f, grab.release, release);
                 if (b != null) Pose(b, point + (b.left ? -side : side), frame, t, scale, alpha);
                 else Hidden(a == _left ? _right : _left);
             }
@@ -371,7 +411,13 @@ namespace Diorama
                 case GhostPlace.AtTarget:
                 case GhostPlace.AboveTarget:
                 {
-                    if (!Dialogue.TryGetTarget(_request.target, out var target) || target.point == null) return false;
+                    // With a source (step 9h), the clip is pinned there and only lets go at the target.
+                    string id = string.IsNullOrEmpty(_request.source) ? _request.target : _request.source.Replace("#", _loops.ToString());
+                    if (!Dialogue.TryGetTarget(id, out var target) || target.point == null)
+                    {
+                        if (_warned.Add("target:" + id)) Debug.LogWarning($"[GhostHands] {_request.clip}: target '{id}' isn't registered (yet): the ghost waits.", this);
+                        return false;
+                    }
                     var p = target.point();
                     if (!p.HasValue) return false;
                     point = p.Value + (_request.place == GhostPlace.AboveTarget ? Vector3.up * aboveTargetHeight : Vector3.zero);
@@ -405,32 +451,86 @@ namespace Diorama
         /// Poses one ghost so the clip's key joint at its key time sits on <paramref name="point"/>, the clip turned
         /// <paramref name="yaw"/> degrees about up (island sides).
         /// </summary>
-        void Pose(Ghost g, Vector3 point, Quaternion frame, float t, float scale, float alpha, float yaw = 0f)
+        /// <summary>
+        /// Poses one ghost so the clip's key joint at its key time sits on <paramref name="point"/>, the clip turned
+        /// <paramref name="yaw"/> degrees about up (island sides). Step 9h: with a grab time, the pinch point at the grab
+        /// sits on <paramref name="point"/> instead, and (with <paramref name="release"/>) the pinch point at the release
+        /// is moved onto that spot, blended over the carry (<see cref="GhostRetarget"/>).
+        /// </summary>
+        void Pose(Ghost g, Vector3 point, Quaternion frame, float t, float scale, float alpha, float yaw = 0f,
+            float grabTime = -1f, float releaseTime = -1f, Vector3? release = null)
         {
             bool mirror = _clip.leftHand != g.left;
             var view = _clip.anchor == GhostAnchor.Wrist ? WristView(g.left) : Quaternion.identity;
             var offset = _clip.placeOffset;
             if (g.left) offset = GhostHandClip.Mirror(offset);
+            bool retarget = grabTime >= 0f;
+            float travel = Mathf.Clamp(_clip.travel, 0.05f, 1f);
 
-            // Where the key joint is at the key time, relative to the clip frame's origin.
-            _clip.Sample(_clip.keyTime * _clip.Duration, mirror, out var kp, out var kr, _rot, _pos);
-            Vector3 keyInRoot = _clip.keyPinch
-                ? (KeyInRoot(g, HandJointId.HandThumbTip) + KeyInRoot(g, HandJointId.HandIndexTip)) * 0.5f
-                : KeyInRoot(g, _clip.keyJoint);
+            // Where the key joint is at the key time (the grab), relative to the clip frame's origin.
+            _clip.Sample(retarget ? grabTime : _clip.keyTime * _clip.Duration, mirror, out var kp, out var kr, _rot, _pos);
+            Vector3 keyInRoot = _clip.keyPinch || retarget ? PinchInRoot(g) : KeyInRoot(g, _clip.keyJoint);
             if (yaw != 0f) frame *= Quaternion.Euler(0f, yaw, 0f);
             Vector3 key = view * kp + view * kr * keyInRoot;
             Vector3 origin = point + frame * (offset * scale) - frame * (key * scale);
 
+            Vector3 shift = Vector3.zero;
+            if (retarget && release.HasValue)
+            {
+                _clip.Sample(releaseTime, mirror, out var lp, out var lr, _rot, _pos);
+                lp = kp + (lp - kp) * travel;
+                Vector3 letGo = origin + frame * ((view * lp + view * lr * PinchInRoot(g)) * scale);
+                shift = GhostRetarget.Offset(t, grabTime, releaseTime, Vector3.zero, release.Value - letGo);
+            }
+
             _clip.Sample(t, mirror, out var rp, out var rr, _rot, _pos);
-            rp = kp + (rp - kp) * Mathf.Clamp(_clip.travel, 0.05f, 1f);
+            rp = kp + (rp - kp) * travel;
             for (int i = 0; i < JointCount; i++)
                 if (g.joints[i] != null) g.joints[i].SetLocalPositionAndRotation(_pos[i], _rot[i]);
             float parentScale = g.root.parent != null ? g.root.parent.lossyScale.x : 1f;
             g.root.localScale = Vector3.one * (scale / Mathf.Max(1e-5f, parentScale));
-            g.root.SetPositionAndRotation(origin + frame * (view * rp * scale), frame * view * rr);
+            g.root.SetPositionAndRotation(origin + frame * (view * rp * scale) + shift, frame * view * rr);
             g.block.SetFloat(AlphaId, alpha);
             g.renderer.SetPropertyBlock(g.block);
             g.renderer.enabled = alpha > 0.002f;
+        }
+
+        Vector3 PinchInRoot(Ghost g) => (KeyInRoot(g, HandJointId.HandThumbTip) + KeyInRoot(g, HandJointId.HandIndexTip)) * 0.5f;
+
+        /// <summary>
+        /// Step 9h: a clip's grab and release from its thumb-index gap (sampled at 30 Hz on the ghost's skeleton), found
+        /// once. No grab = a poke or palm clip (its key frame goes on the target as before).
+        /// </summary>
+        Grab GrabOf(GhostHandClip c)
+        {
+            if (c == null) return default;
+            if (_grabs.TryGetValue(c, out var known)) return known;
+            var g = _right ?? _left;
+            var result = new Grab();
+            if (g != null && c.anchor == GhostAnchor.Island)
+            {
+                var gaps = new List<float>();
+                const float step = 1f / 30f;
+                for (float t = 0f; t <= c.Duration + 1e-4f; t += step)
+                {
+                    c.Sample(t, false, out _, out _, _rot, _pos);
+                    gaps.Add(Vector3.Distance(KeyInRoot(g, HandJointId.HandThumbTip), KeyInRoot(g, HandJointId.HandIndexTip)));
+                }
+                GhostRetarget.Thresholds(gaps, out float close, out float open);
+                if (GhostRetarget.FindGrab(gaps, close, open, out int gi, out int ri))
+                    result = new Grab { has = true, grab = Mathf.Min(gi * step, c.Duration), release = Mathf.Min(ri * step, c.Duration) };
+            }
+            _grabs[c] = result;
+            Debug.Log($"[GhostHands] {c.clipName}: {(result.has ? $"grab at {result.grab:0.00} s, release at {result.release:0.00} s (of {c.Duration:0.00})" : "no grab (one contact point)")}.");
+            return result;
+        }
+
+        /// <summary>Debug shots: holds the clip at its grab (0) or release (1) frame.</summary>
+        public void DebugFreezeAt(int which)
+        {
+            var g = GrabOf(_clip);
+            if (_clip == null || !g.has) return;
+            debugFreeze = (which == 0 ? g.grab : g.release) / Mathf.Max(0.01f, _clip.Duration);
         }
 
         /// <summary>The key joint's position in the hand root's frame (unscaled) with the joints as just sampled.</summary>

@@ -142,6 +142,19 @@ namespace Diorama
             Dialogue.RegisterTarget("rim", RimPoint, k => { if (handle != null) handle.HintGlow = k; }, () => 0f);
             Dialogue.RegisterTarget("starterPods", () => _starterPods.Count > 1 && _starterPods[1] != null ? _starterPods[1].transform.position : (Vector3?)null,
                 k => { }, () => pods.podPrefab != null ? pods.podPrefab.radius * FloatScale * podFocusGrow * island.transform.lossyScale.x : 0.03f);
+            // Step 9h, the starter ghost: grabs the pod the player looks at, else the next one each loop (left, middle,
+            // right; "starterPod:<loop>"), and sets it on the rim socket the chosen pod flies to.
+            Dialogue.RegisterTargetResolver("starterPod", arg => new Dialogue.Target
+            {
+                point = () =>
+                {
+                    var p = StarterPodForGhost(arg);
+                    return p != null ? p.transform.position : (Vector3?)null;
+                },
+                pulse = k => { },
+                radius = () => 0f,
+            });
+            Dialogue.RegisterTarget("starterSocket", () => _stage == Stage.Starters && pods != null ? pods.HomeWorld(0) : (Vector3?)null, k => { }, () => 0f);
             DialogueBubble.KeepClear += StarterPodsInView;
             GameConditions.Register("opening.shard", () => _shardWaiting);
             GameConditions.Register("opening.pinch", () => _stage == Stage.Pinch);
@@ -987,6 +1000,15 @@ namespace Diorama
         }
 
         /// <summary>The move lesson's spot: the base skirt on the player's right (the ghost palm-grabs the side, step 8d).</summary>
+        /// <summary>The looked-at starter pod, else pod (loop mod count): index 0 is the player's left.</summary>
+        PodView StarterPodForGhost(string loop)
+        {
+            if (_stage != Stage.Starters || _starterPods.Count == 0) return null;
+            if (_gazedPod >= 0 && _gazedPod < _starterPods.Count && _starterPods[_gazedPod] != null) return _starterPods[_gazedPod];
+            int.TryParse(loop, out int n);
+            return _starterPods[Mathf.Abs(n) % _starterPods.Count];
+        }
+
         Vector3? RimPoint()
         {
             if (_stage != Stage.Move || island == null) return null;

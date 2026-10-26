@@ -68,6 +68,10 @@ namespace Diorama
         public GhostPlace place;
         [Tooltip("Dialogue target id the ghost and the Spirit use (shard, rim, starterPods, ghost, goldTile, leadPod, runes, cradle, landmark:x).")]
         public string target;
+        [Tooltip("Step 9h, grab clips: the dialogue target the grab frame lands on (the pod, the rim corner); the release frame then lands on target (empty = no release spot). '#' becomes the loop number (starterPod:#).")]
+        public string source;
+        [Tooltip("The release spot sits this far above the target (m): a toss over the pad.")]
+        public float targetLift;
         [Tooltip("Ghost size: 1 = real hand, 0.6 for the demos above the island.")]
         public float ghostScale = 1f;
         [Tooltip("Show both hands (mirrored).")]

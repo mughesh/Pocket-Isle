@@ -178,7 +178,8 @@ namespace Diorama
             Pending(_chain.targets[_step]);
             string ghost = _chain.ghosts[_step];
             if (ghosts != null && !string.IsNullOrEmpty(ghost))
-                ghosts.Show(ghost, GhostPlace.AtTarget, _chain.targets[_step], 1f, DominantHand.Left, false);
+                // Step 9h: a grab ghost grabs the real pod (the step's target) and lets go over the room's middle.
+                ghosts.Show(ghost, GhostPlace.AtTarget, "lodgeCenter", 1f, DominantHand.Left, false, 0f, _chain.targets[_step]);
         }
 
         void HideGhost()

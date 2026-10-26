@@ -146,6 +146,12 @@ namespace Diorama
             Dialogue.RegisterTarget("goldTile", GoldTilePoint, GoldTilePulse,
                 () => island == null || island.map == null ? 0f : 0.5f * island.map.tileSize * island.Zoom * island.transform.lossyScale.x);
 
+            // Step 9h: every ghost needs somewhere to play.
+            foreach (var l in script.lessons)
+                if (!string.IsNullOrEmpty(l.ghost) && (l.place == GhostPlace.AtTarget || l.place == GhostPlace.AboveTarget) &&
+                    string.IsNullOrEmpty(l.source) && string.IsNullOrEmpty(l.target))
+                    Debug.LogWarning($"[Onboarding] Lesson '{l.id}' has a ghost at a target but no source or target: its ghost never shows.", this);
+
             _audio = gameObject.AddComponent<AudioSource>();
             _audio.playOnAwake = false;
             _audio.spatialBlend = 0f;

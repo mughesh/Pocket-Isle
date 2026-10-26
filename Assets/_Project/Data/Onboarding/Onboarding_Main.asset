@@ -30,6 +30,8 @@ MonoBehaviour:
     ghost: poke
     place: 1
     target: shardFront
+    source: 
+    targetLift: 0
     ghostScale: 1
     bothHands: 0
     ghostSpread: 0
@@ -53,6 +55,8 @@ MonoBehaviour:
     ghost: pinch
     place: 5
     target: 
+    source: 
+    targetLift: 0
     ghostScale: 1
     bothHands: 0
     ghostSpread: 0
@@ -74,8 +78,10 @@ MonoBehaviour:
     rewindTo: 
     praise: 1
     ghost: grab_rim_slide
-    place: 4
-    target: rim
+    place: 1
+    target: 
+    source: rimCorner
+    targetLift: 0
     ghostScale: 1
     bothHands: 0
     ghostSpread: 0
@@ -98,7 +104,9 @@ MonoBehaviour:
     praise: 1
     ghost: grab_drop
     place: 1
-    target: starterPods
+    target: starterSocket
+    source: starterPod:#
+    targetLift: 0
     ghostScale: 1
     bothHands: 0
     ghostSpread: 0
@@ -122,6 +130,8 @@ MonoBehaviour:
     ghost: thumb_swipe_forward
     place: 2
     target: ghost
+    source: 
+    targetLift: 0
     ghostScale: 0.6
     bothHands: 0
     ghostSpread: 0
@@ -145,6 +155,8 @@ MonoBehaviour:
     ghost: thumb_tap
     place: 2
     target: ghost
+    source: 
+    targetLift: 0
     ghostScale: 0.6
     bothHands: 0
     ghostSpread: 0
@@ -168,6 +180,8 @@ MonoBehaviour:
     ghost: pinch
     place: 3
     target: goldTile
+    source: 
+    targetLift: 0
     ghostScale: 0.6
     bothHands: 0
     ghostSpread: 0
@@ -191,6 +205,8 @@ MonoBehaviour:
     ghost: 
     place: 0
     target: landmark:firstGrass
+    source: 
+    targetLift: 0
     ghostScale: 1
     bothHands: 0
     ghostSpread: 0
@@ -213,7 +229,9 @@ MonoBehaviour:
     praise: 1
     ghost: grab_toss
     place: 1
-    target: leadPod
+    target: nearPad
+    source: leadPod
+    targetLift: 0.05
     ghostScale: 1
     bothHands: 0
     ghostSpread: 0
@@ -237,6 +255,8 @@ MonoBehaviour:
     ghost: poke
     place: 1
     target: nearestRune
+    source: 
+    targetLift: 0
     ghostScale: 1
     bothHands: 0
     ghostSpread: 0
@@ -259,7 +279,9 @@ MonoBehaviour:
     praise: 1
     ghost: grab_flick
     place: 1
-    target: cradle
+    target: 
+    source: cradle
+    targetLift: 0
     ghostScale: 1
     bothHands: 0
     ghostSpread: 0
@@ -283,6 +305,8 @@ MonoBehaviour:
     ghost: 
     place: 0
     target: 
+    source: 
+    targetLift: 0
     ghostScale: 1
     bothHands: 0
     ghostSpread: 0
@@ -306,6 +330,8 @@ MonoBehaviour:
     ghost: grab_rim_slide
     place: 4
     target: islandRim
+    source: 
+    targetLift: 0
     ghostScale: 1
     bothHands: 1
     ghostSpread: 0

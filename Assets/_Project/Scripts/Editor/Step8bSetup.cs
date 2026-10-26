@@ -157,14 +157,16 @@ namespace Diorama.EditorTools
                 {
                     id = "move", line = "intro.world", chip = "Grab the edge", again = "lesson.move.again", startWhen = "opening.move", validWhile = "opening.move",
                     // Step 8e: a pinch on the side of the base (pinch or palm both grab the island).
-                    doneWhen = "islandGrabbed", skipAfter = 12f, ghost = "grab_rim_slide", place = GhostPlace.IslandSides, target = "rim",
+                    // Step 9h: the ghost grabs the near rim's corner on the dominant side (was the base's side).
+                    doneWhen = "islandGrabbed", skipAfter = 12f, ghost = "grab_rim_slide", place = GhostPlace.AtTarget, source = "rimCorner",
                 },
                 new LessonData
                 {
                     id = "starter", line = "intro.starter", chip = "Look + pinch", again = "lesson.starter.again", startWhen = "opening.starters",
                     // Step 9h: "Look at one and pinch, or grab it." follows the short line and stays.
                     help = "lesson.starter.again", helpAfter = 3.5f,
-                    doneWhen = "starterPicked", ghost = "grab_drop", place = GhostPlace.AtTarget, target = "starterPods",
+                    // Step 9h: grabs the looked-at pod (else the next one each loop) and sets it on the rim socket.
+                    doneWhen = "starterPicked", ghost = "grab_drop", place = GhostPlace.AtTarget, source = "starterPod:#", target = "starterSocket",
                 },
                 new LessonData
                 {
@@ -192,7 +194,8 @@ namespace Diorama.EditorTools
                 {
                     id = "send", line = "pod.first", chip = "Toss the pod", again = "lesson.send.again", startWhen = "battle.send", validWhile = "battle.send",
                     doneWhen = "sentOut", failWhen = battleFail, rewindTo = "grass",
-                    ghost = "grab_toss", place = GhostPlace.AtTarget, target = "leadPod",
+                    // Step 9h: grabs the real lead pod and lets go over the near pad.
+                    ghost = "grab_toss", place = GhostPlace.AtTarget, source = "leadPod", target = "nearPad", targetLift = 0.05f,
                 },
                 new LessonData
                 {
@@ -205,7 +208,7 @@ namespace Diorama.EditorTools
                 {
                     id = "catch", line = "capture.first", chip = "Flick the pod", again = "lesson.catch.again", startWhen = "wildRed", validWhile = "battle",
                     doneWhen = "podThrown", failWhen = battleFail, rewindTo = "grass",
-                    ghost = "grab_flick", place = GhostPlace.AtTarget, target = "cradle",
+                    ghost = "grab_flick", place = GhostPlace.AtTarget, source = "cradle",
                 },
                 new LessonData
                 {

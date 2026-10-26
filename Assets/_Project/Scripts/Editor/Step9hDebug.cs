@@ -12,6 +12,16 @@ namespace Diorama.EditorTools
             if (o != null) o.DebugPinch();
         }
 
+        /// <summary>Holds the showing ghost at its grab (then its release) frame; shoot in the next command.</summary>
+        public static void GhostGrab() => FreezeAt(0);
+        public static void GhostRelease() => FreezeAt(1);
+
+        static void FreezeAt(int which)
+        {
+            var g = Object.FindFirstObjectByType<GhostHands>();
+            if (g != null) g.DebugFreezeAt(which);
+        }
+
         public static void Chip() => SetChip(true);
         public static void Full() => SetChip(false);
 
@@ -46,10 +56,12 @@ namespace Diorama.EditorTools
             if (name.StartsWith("ghost_") && g != null && g.KeyPoint.HasValue)
             {
                 // Close on the ghost's key point, from the player's side, with the island behind it.
+                // From the player's head side (Camera.main), looking at the key point.
                 var key = g.KeyPoint.Value;
-                var from = key + (eye - key).normalized * 0.32f + Vector3.up * 0.04f;
+                var head = Camera.main != null ? Camera.main.transform.position : eye;
+                var from = key + (head - key).normalized * 0.32f + Vector3.up * 0.06f;
                 eye = from;
-                rot = Quaternion.LookRotation(Vector3.Lerp(key, t.position, 0.25f) - from, Vector3.up);
+                rot = Quaternion.LookRotation(key - from, Vector3.up);
             }
             BattleDebug.Render($"Logs/BattleShots/9h_{name}.png", eye, rot);
             Debug.Log($"[Step9hDebug] Shot 9h_{name}.png");

@@ -31,6 +31,36 @@ namespace Diorama.Tests
                 if (!string.IsNullOrEmpty(l.line)) Assert.IsFalse(string.IsNullOrEmpty(l.chip), $"{l.id} has a line but no chip");
         }
 
+        [Test]
+        public void Retarget_FindsTheGrabAndTheRelease_InASyntheticClip()
+        {
+            // Open hand, closes at sample 3, carried, opens at sample 7.
+            var gaps = new[] { 0.06f, 0.05f, 0.03f, 0.012f, 0.01f, 0.011f, 0.02f, 0.045f, 0.06f };
+            GhostRetarget.Thresholds(gaps, out float close, out float open);
+            Assert.IsTrue(GhostRetarget.FindGrab(gaps, close, open, out int grab, out int release));
+            Assert.AreEqual(3, grab);
+            Assert.AreEqual(7, release);
+        }
+
+        [Test]
+        public void Retarget_NoGrabInAPokeClip()
+        {
+            var gaps = new[] { 0.06f, 0.055f, 0.05f, 0.052f, 0.06f };
+            Assert.IsFalse(GhostRetarget.FindGrab(gaps, 0.015f, 0.03f, out _, out _));
+        }
+
+        [Test]
+        public void Retarget_SourceShiftBeforeTheGrab_TargetShiftAfterTheRelease_BlendedBetween()
+        {
+            var s = new Vector3(0.1f, 0f, 0f);
+            var t = new Vector3(0f, 0f, 0.2f);
+            Assert.AreEqual(s, GhostRetarget.Offset(0.2f, 0.5f, 1.5f, s, t));
+            Assert.AreEqual(t, GhostRetarget.Offset(1.6f, 0.5f, 1.5f, s, t));
+            var mid = GhostRetarget.Offset(1.0f, 0.5f, 1.5f, s, t);
+            Assert.AreEqual(0.05f, mid.x, 1e-4f);
+            Assert.AreEqual(0.1f, mid.z, 1e-4f);
+        }
+
         static readonly Vector2Int Out = new Vector2Int(0, 1);
 
         [Test]
