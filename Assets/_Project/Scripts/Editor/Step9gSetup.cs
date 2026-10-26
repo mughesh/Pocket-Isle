@@ -21,6 +21,14 @@ namespace Diorama.EditorTools
             var log = new StringBuilder("[Step9g] Set up:");
             Title(log);
             Menu(log);
+            Quick(log);
+            Save(log);
+        }
+
+        public static void QuickOnly()
+        {
+            var log = new StringBuilder("[Step9g] Quick:");
+            Quick(log);
             Save(log);
         }
 
@@ -136,6 +144,66 @@ namespace Diorama.EditorTools
                        $"{(System.IO.File.Exists(audioCredits) ? ", audio credits added" : ", no AudioCredits.md yet")}.");
             DialogueTools.Import();
             log.Append("\n  Dialogue script reimported (menu.first).");
+        }
+
+        /// <summary>
+        /// C: the Quick Journey config (Data/QuickJourney.asset: created once, then only the gift species are filled in
+        /// when empty, so tuning survives a re-run), the director with its end runes, and the dialogue lines.
+        /// </summary>
+        public static void Quick(StringBuilder log)
+        {
+            var config = AssetDatabase.LoadAssetAtPath<QuickJourneyConfig>(QuickJourneySim.ConfigPath);
+            if (config == null)
+            {
+                config = ScriptableObject.CreateInstance<QuickJourneyConfig>();
+                AssetDatabase.CreateAsset(config, QuickJourneySim.ConfigPath);
+                log.Append("\n  Created Data/QuickJourney.asset.");
+            }
+            if (config.giftSpecies == null || config.giftSpecies.Length < 2 || config.giftSpecies.All(s => s == null))
+                config.giftSpecies = new[] { KeeperSim.Load(KeeperSim.Helper), KeeperSim.Load("Toastling") };
+            // The Keeper sim's 75-85% band per starter (QuickJourneySim.Sweep, Oct 26): Steambara leads the fight, so the
+            // gifts' level matters most; Pebbloop (Water) needs less, Pufflet more.
+            if (config.perStarter == null || config.perStarter.Length == 0)
+                config.perStarter = new[]
+                {
+                    new QuickJourneyConfig.StarterTuning { starter = KeeperSim.Load("Kilnpot"), giftLevel = 8, raiseTo = 8 },
+                    new QuickJourneyConfig.StarterTuning { starter = KeeperSim.Load("Pebbloop"), giftLevel = 7, raiseTo = 7 },
+                    new QuickJourneyConfig.StarterTuning { starter = KeeperSim.Load("Pufflet"), giftLevel = 8, raiseTo = 10 },
+                };
+            EditorUtility.SetDirty(config);
+
+            var island = Find<IslandBuilder>();
+            var runesRef = Find<BattleRunes>();
+            if (island == null || runesRef == null)
+            {
+                log.Append("\n  MISSING island or battle runes: open MR_Main.");
+                return;
+            }
+            var go = Child(island.transform, "Quick Journey");
+            var director = Component<QuickJourneyDirector>(go);
+            var runes = Component<RuneBoard>(Child(go.transform, "Quick Runes"));
+            Wire(runes, island, runesRef);
+            Undo.RecordObject(director, "Step 9g");
+            director.config = config;
+            director.party = Find<Party>();
+            director.pods = Find<PodRack>();
+            director.spirit = Find<LanternSpirit>();
+            director.island = island;
+            director.explorer = Find<GestureTestPiece>();
+            director.encounters = Find<EncounterDirector>();
+            director.onboarding = Find<Onboarding>();
+            director.save = Find<GameSave>();
+            director.swap = Find<SceneSwap>();
+            director.fx = Find<BattleFx>();
+            director.runes = runes;
+            director.hub = AssetDatabase.LoadAssetAtPath<WorldMap>("Assets/_Project/Data/WorldMap_StillIsle.asset");
+            director.cinderwood = AssetDatabase.LoadAssetAtPath<WorldMap>(CinderwoodTools.MapPath);
+            EditorUtility.SetDirty(director);
+            int missing = new Object[] { director.party, director.pods, director.spirit, director.explorer, director.encounters, director.onboarding,
+                director.save, director.swap, director.fx, director.hub, director.cinderwood }.Count(o => o == null);
+            log.Append($"\n  Quick Journey: gifts {string.Join(" + ", config.giftSpecies.Select(s => s != null ? s.name : "MISSING"))} Lv {config.giftLevel}, " +
+                       $"cuts {string.Join(", ", config.cutLessons)}; director {(missing == 0 ? "wired" : $"{missing} reference(s) MISSING")}.");
+            DialogueTools.Import();
         }
 
         /// <summary>A rune board placed and painted like the battle runes.</summary>

@@ -798,6 +798,7 @@ Transform:
   - {fileID: 59714806}
   - {fileID: 980002959}
   - {fileID: 1916101687}
+  - {fileID: 1252366428}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &270959111
@@ -1933,6 +1934,60 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1553131432}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &622588087
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 622588088}
+  - component: {fileID: 622588089}
+  m_Layer: 0
+  m_Name: Quick Runes
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &622588088
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 622588087}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1252366428}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &622588089
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 622588087}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbec2679a89a2514db6ca02fdf0e34cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.RuneBoard
+  island: {fileID: 270959109}
+  grabGuard: {fileID: 270959111}
+  hudMaterial: {fileID: 2100000, guid: 0656b6c4f92798e49a14cf09a2c6800e, type: 2}
+  offset: {x: 0, y: 0.05, z: 0.02}
+  fontSize: 0.11
+  maxDrift: 15
+  driftSpeed: 1.5
+  maxTilt: 40
+  pressDepth: 0.008
+  holdSeconds: 2
 --- !u!1 &634390647
 GameObject:
   m_ObjectHideFlags: 0
@@ -3096,6 +3151,65 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1252366427
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1252366428}
+  - component: {fileID: 1252366429}
+  m_Layer: 0
+  m_Name: Quick Journey
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1252366428
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1252366427}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 622588088}
+  m_Father: {fileID: 270959110}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1252366429
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1252366427}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0a1c7fcf1ebd5141a3e09a7c0fe0e36, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.QuickJourneyDirector
+  config: {fileID: 11400000, guid: 523803fb10e63354aaa37e507b0c359f, type: 2}
+  party: {fileID: 1499891276}
+  pods: {fileID: 78739058}
+  spirit: {fileID: 1847074513}
+  island: {fileID: 270959109}
+  explorer: {fileID: 374318554}
+  encounters: {fileID: 1499891275}
+  onboarding: {fileID: 1380201671}
+  save: {fileID: 1541842443}
+  swap: {fileID: 221433162}
+  fx: {fileID: 1078587927}
+  runes: {fileID: 622588089}
+  hub: {fileID: 11400000, guid: ab0469af29722704f949fec768f94b68, type: 2}
+  cinderwood: {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
 --- !u!1 &1294784575
 GameObject:
   m_ObjectHideFlags: 0

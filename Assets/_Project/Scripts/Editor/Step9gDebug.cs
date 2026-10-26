@@ -18,10 +18,38 @@ namespace Diorama.EditorTools
         /// <summary>Settings and the last played slot back to defaults (Editor PlayerPrefs after a test).</summary>
         public static void ResetPrefs()
         {
-            foreach (var k in new[] { "pocketisle.hand", "pocketisle.fewerHints", "pocketisle.lastSlot", VolumeSettings.Music, VolumeSettings.Sfx, VolumeSettings.Ambience })
+            foreach (var k in new[] { "pocketisle.hand", "pocketisle.fewerHints", "pocketisle.lastSlot", "pocketisle.quickSeconds", "pocketisle.quickDone",
+                         VolumeSettings.Music, VolumeSettings.Sfx, VolumeSettings.Ambience })
                 PlayerPrefs.DeleteKey(k);
             PlayerPrefs.Save();
             Debug.Log("[Step9gDebug] Prefs reset (settings, last slot).");
+        }
+
+        public static void QuickStart() => Quick(GameState.QuickStage.Start);
+        public static void QuickGift() => Quick(GameState.QuickStage.Gift);
+        public static void QuickGate() => Quick(GameState.QuickStage.Gate);
+        public static void QuickTemple() => Quick(GameState.QuickStage.Temple);
+
+        static void Quick(GameState.QuickStage stage)
+        {
+            var s = Object.FindFirstObjectByType<GameState>();
+            if (s != null) s.QuickPreset(stage);
+        }
+
+        /// <summary>The Quick Journey's end card as if the shard had just locked in.</summary>
+        public static void QuickEnd()
+        {
+            var d = Object.FindFirstObjectByType<QuickJourneyDirector>();
+            if (d != null) d.DebugEnd();
+        }
+
+        public static void Party()
+        {
+            var p = Object.FindFirstObjectByType<Party>();
+            if (p == null) return;
+            Debug.Log($"[Step9gDebug] Party: {string.Join(", ", p.members.ConvertAll(c => $"{c.Name} Lv {c.level}"))}; quick {QuickJourney.Active}, " +
+                      $"in Cinderwood {QuickJourney.InCinderwood}, chance x{QuickJourney.EncounterChance(1f):0.##}, gift {PuzzleState.IsSolved(QuickJourney.GiftId)}, " +
+                      $"timer {QuickJourney.Format(QuickJourney.Seconds)}{(QuickJourney.TimerDone ? " done" : "")}.");
         }
 
         /// <summary>Like the left-hand menu gesture.</summary>

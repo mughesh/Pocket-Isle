@@ -39,6 +39,9 @@ namespace Diorama
 
         public bool IsEvent(string name) => _eventNames.Contains(name);
 
+        /// <summary>Lessons this returns true for are passed over (step 9g: the Quick Journey's cuts).</summary>
+        public Func<string, bool> Skip { get; set; }
+
         /// <summary>Records that something happened (stays true until a rewind clears it).</summary>
         public bool Mark(string name)
         {
@@ -90,6 +93,7 @@ namespace Diorama
 
         void Enter()
         {
+            while (Skip != null && Index >= 0 && Index < _lessons.Count && Skip(_lessons[Index].id)) Index++;
             _held = 0f;
             _entered = false;
             Teaching = 0f;

@@ -956,6 +956,40 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: (glows, slots into the Heart's forehead)
+  - id: quick.gift
+    once: 1
+    priority: 2
+    note: after the capture lesson, in the hub; two pods fly from the Spirit to the
+      rim
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The road to Cinderwood is long. Take two friends with you!
+  - id: quick.gate
+    once: 1
+    priority: 2
+    note: 'right after the gift: the Spirit points at the fire gate'
+    target: gate:fire
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Bring back the fire shard!
+  - id: quick.end
+    once: 1
+    priority: 2
+    note: the fire shard locks into the statue; then the Keep exploring / Title runes
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: You woke the first piece of the world!
+    - speaker: 0
+      speakerName: Spirit
+      text: Thank you for playing the Quick Journey.
   idleHints:
   - speaker: 0
     speakerName: Spirit

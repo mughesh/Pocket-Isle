@@ -95,7 +95,7 @@ namespace Diorama
                 Debug.LogError("[Onboarding] No OnboardingScript (Tools > Pocket Isle > Set Up MR_Main (8b onboarding)): no lessons.", this);
                 return;
             }
-            _runner = new LessonRunner(script.lessons, Events);
+            _runner = new LessonRunner(script.lessons, Events) { Skip = QuickJourney.SkipsLesson };
         }
 
         void OnDestroy()

@@ -32,7 +32,9 @@ namespace Diorama
         {
             creature = null;
             rare = false;
-            float Weight(Entry e) => e.species == null ? 0f : e.weight * (isCaught != null && !isCaught(e.species) ? uncaughtWeight : 1f) * (e.rare ? DevCheats.RareBoost : 1f);
+            // Step 9g: the Quick Journey has no rare surprises in Cinderwood (QuickJourneyConfig.rareWeight).
+            float rareScale = DevCheats.RareBoost * QuickJourney.RareScale;
+            float Weight(Entry e) => e.species == null ? 0f : e.weight * (isCaught != null && !isCaught(e.species) ? uncaughtWeight : 1f) * (e.rare ? rareScale : 1f);
             float total = 0f;
             foreach (var e in entries) total += Weight(e);
             if (total <= 0f) return false;

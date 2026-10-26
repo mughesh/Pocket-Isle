@@ -198,6 +198,15 @@ every ~10 s while it waits. Shard, move and starter use the Opening lines above;
   - Spirit: I'll be right here. In the middle of everything.
 - `end` · Spirit: (glows, slots into the Heart's forehead)
 
+## Quick Journey (step 9g, the quick save slot only)
+- `quick.gift` · once (after the capture lesson, in the hub; two pods fly from the Spirit to the rim)
+  - Spirit: The road to Cinderwood is long. Take two friends with you!
+- `quick.gate` · once · → gate:fire (right after the gift: the Spirit points at the fire gate)
+  - Spirit: Bring back the fire shard!
+- `quick.end` · once (the fire shard locks into the statue; then the Keep exploring / Title runes)
+  - Spirit: You woke the first piece of the world!
+  - Spirit: Thank you for playing the Quick Journey.
+
 ## Idle hints (random, rare, only when nothing is happening for ~40 s)
 - Spirit: Your Islings get stronger every battle.
 - Spirit: The other gates lead to water and wind. Just saying.

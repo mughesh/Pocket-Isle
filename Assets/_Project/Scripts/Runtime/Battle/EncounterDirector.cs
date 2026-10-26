@@ -255,7 +255,8 @@ namespace Diorama
                 return;
             }
             if (++_stepsSinceBattle <= graceSteps) return;
-            if (DevCheats.WildOff || _rnd.Next() >= grassChance) return;
+            // Step 9g: the Quick Journey halves it in Cinderwood (QuickJourneyConfig.encounterRate).
+            if (DevCheats.WildOff || _rnd.Next() >= QuickJourney.EncounterChance(grassChance)) return;
             StartCoroutine(Encounter(table, tile));
         }
 
@@ -511,7 +512,8 @@ namespace Diorama
         {
             if (progression == null) yield break;
             runes.HideMoves();
-            int reward = progression.Reward(wild.level, rare);
+            // Step 9g: x2 in the Quick Journey's Cinderwood (QuickJourneyConfig.xpMultiplier).
+            int reward = QuickJourney.Reward(progression.Reward(wild.level, rare));
             var fighters = battle.Participants;
             var onPad = stage.Player != null ? battle.player.isling : null;
             // The benched ones first (their pods light up together), the one on the pad last.

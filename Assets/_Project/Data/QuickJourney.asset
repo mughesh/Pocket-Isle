@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67d46c191a7996a4c9c6be446f6bb773, type: 3}
+  m_Name: QuickJourney
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.QuickJourneyConfig
+  cutLessons:
+  - stop
+  - twoHands
+  giftSpecies:
+  - {fileID: 11400000, guid: 081cd6bac15516a438300833ff827291, type: 2}
+  - {fileID: 11400000, guid: fb46257ae3b4b0144a5861244b1b96f6, type: 2}
+  giftLevel: 8
+  raiseTo: 8
+  perStarter:
+  - starter: {fileID: 11400000, guid: 4e0827bf455d6eb4c853967a75296d1d, type: 2}
+    giftLevel: 8
+    raiseTo: 8
+  - starter: {fileID: 11400000, guid: 3e6a8bbe90a2d0447b3543119e52c28a, type: 2}
+    giftLevel: 7
+    raiseTo: 7
+  - starter: {fileID: 11400000, guid: 11737ef7d2b67d84b8a98e2c3f8eeb9d, type: 2}
+    giftLevel: 8
+    raiseTo: 10
+  encounterRate: 0.5
+  xpMultiplier: 2
+  rareWeight: 0
+  goldPathHint: 1
+  goldPathAfter: 4
+  goldPathEvery: 7
+  goldPathTiles: 14
+  openingSeconds: 75
+  lessonSeconds: 70
+  battleSeconds: 45
+  walkSecondsPerTile: 0.5
+  giftSeconds: 15
+  gateSeconds: 6
+  logSeconds: 35
+  forgeSeconds: 50
+  keeperSeconds: 150
+  statueSeconds: 30
+  trailTalkSeconds: 25

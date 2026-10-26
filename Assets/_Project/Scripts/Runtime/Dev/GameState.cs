@@ -356,7 +356,7 @@ namespace Diorama
             return true;
         }
 
-        /// <summary>A new game (the opening plays). The current save goes to the automatic slot 0 first.</summary>
+        /// <summary>A new game (the opening plays) in the slot being played. The current save goes to the automatic slot 0 first.</summary>
         public void NewGame()
         {
             SaveSlot(0);
@@ -365,6 +365,67 @@ namespace Diorama
                 save.Suspended = true;
                 save.DeleteSave();
             }
+            SaveSlots.PendingNew = SaveSlots.Active;
+            Reload();
+        }
+
+        // ---- Quick Journey presets (step 9g) ----
+
+        public enum QuickStage { Start, Gift, Gate, Temple }
+
+        /// <summary>
+        /// Jumps into the quick slot at a stage of the route: Start = the opening from the shard; Gift = in the hub at the
+        /// first grass with the tutorial done (the gift comes); Gate = after the gift at the fire gate; Temple = Cinderwood at
+        /// the forge door with the log placed. Writes quick.json and reloads (like a relaunch).
+        /// </summary>
+        public void QuickPreset(QuickStage stage)
+        {
+            if (save != null) save.Suspended = true;
+            Diorama.SaveSlots.Choose(Diorama.SaveSlot.Quick);
+            if (stage == QuickStage.Start)
+            {
+                Diorama.SaveSlots.Delete(Diorama.SaveSlot.Quick);
+                Diorama.SaveSlots.PendingNew = Diorama.SaveSlot.Quick;
+                Debug.Log("[GameState] Quick Journey preset: start (the opening).");
+                Reload();
+                return;
+            }
+            var config = QuickJourney.Config;
+            var lead = party != null && party.members.Count > 0 ? party.members[0].species : registry != null ? registry.Find("Kilnpot") : null;
+            var (gift, raise) = config != null ? config.LevelsFor(lead) : (8, 8);
+            var team = new List<IslingInstance>();
+            if (lead != null) team.Add(new IslingInstance(lead, stage == QuickStage.Gift ? 6 : raise));
+            if (stage != QuickStage.Gift && config != null)
+                foreach (var s in config.giftSpecies)
+                    if (s != null) team.Add(new IslingInstance(s, gift));
+            var map = stage == QuickStage.Temple ? cinderwood : hub;
+            var tile = map != null ? map.startTile : Vector2Int.zero;
+            if (stage == QuickStage.Gift && hub != null && hub.TryGetLandmark("firstGrass", out var grass)) tile = NearestWalkable(hub, grass + new Vector2Int(0, 2));
+            if (stage == QuickStage.Gate && hub != null)
+            {
+                int fire = hub.gates.FindIndex(g => g.id == "fire");
+                if (fire >= 0) tile = NearestWalkable(hub, hub.gates[fire].Front(0) + new Vector2Int(0, 1));
+            }
+            if (stage == QuickStage.Temple && cinderwood != null && cinderwood.TryGetLandmark("temple", out var door)) tile = NearestWalkable(cinderwood, door + new Vector2Int(0, 1));
+            var data = new SaveData
+            {
+                party = SaveGame.ToSaved(team),
+                map = map != null ? map.name : null,
+                explorerX = tile.x,
+                explorerY = tile.y,
+                facingX = 0,
+                facingY = -1,
+                tutorialDone = true,
+                firstEncounterDone = true,
+                said = Dialogue.Said.ToList(),
+                caught = team.Select(c => SpeciesRegistry.IdOf(c.species)).Distinct().ToList(),
+                walkMode = explorer != null ? explorer.moveMode.ToString() : null,
+                dominantHand = DominantHand.Saved,
+            };
+            if (stage != QuickStage.Gift) data.puzzles.Add(new SavedPuzzle { id = QuickJourney.GiftId, solved = true, stage = 1 });
+            if (stage == QuickStage.Temple) data.puzzles.Add(new SavedPuzzle { id = LogId, solved = true, stage = 2 });
+            SaveGame.Write(Diorama.SaveSlots.PathOf(Diorama.SaveSlot.Quick), data);
+            Debug.Log($"[GameState] Quick Journey preset: {stage} ({data.map} c{tile.x} r{tile.y}, {string.Join(", ", team.Select(c => $"{c.Name} Lv {c.level}"))}).");
             Reload();
         }
 

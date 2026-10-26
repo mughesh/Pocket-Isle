@@ -98,6 +98,64 @@ namespace Diorama.Tests
         }
 
         [Test]
+        public void Quick_DialsApplyOnlyInTheQuickSlot()
+        {
+            var c = ScriptableObject.CreateInstance<QuickJourneyConfig>();
+            try
+            {
+                Assert.AreEqual(0.125f, QuickJourney.EncounterChance(0.125f, false, c), 1e-6f);
+                Assert.AreEqual(0.0625f, QuickJourney.EncounterChance(0.125f, true, c), 1e-6f);
+                Assert.AreEqual(100, QuickJourney.Reward(100, false, c));
+                Assert.AreEqual(200, QuickJourney.Reward(100, true, c));
+                Assert.AreEqual(1f, QuickJourney.RareScaleFor(false, c));
+                Assert.AreEqual(0f, QuickJourney.RareScaleFor(true, c));
+                Assert.IsFalse(QuickJourney.SkipsLesson("stop", false, c));
+                Assert.IsTrue(QuickJourney.SkipsLesson("stop", true, c));
+                Assert.IsTrue(QuickJourney.SkipsLesson("twoHands", true, c));
+                Assert.IsFalse(QuickJourney.SkipsLesson("walk", true, c), "hand-verb lessons stay");
+                Assert.AreEqual(0.125f, QuickJourney.EncounterChance(0.125f, true, null), 1e-6f, "no config, no dials");
+            }
+            finally
+            {
+                Object.DestroyImmediate(c);
+            }
+        }
+
+        [Test]
+        public void Quick_LessonRunner_PassesOverCutLessons()
+        {
+            var lessons = new System.Collections.Generic.List<LessonData>
+            {
+                new LessonData { id = "walk", doneWhen = "walked3" },
+                new LessonData { id = "stop", doneWhen = "stopped" },
+                new LessonData { id = "look", doneWhen = "gazeWalk" },
+            };
+            var runner = new LessonRunner(lessons, new[] { "walked3", "stopped", "gazeWalk" }) { Skip = id => id == "stop" };
+            runner.Resume("stop");
+            Assert.AreEqual("look", runner.Current.id, "a saved cut lesson resumes at the next one");
+            runner.Begin(0);
+            Assert.AreEqual("walk", runner.Current.id);
+        }
+
+        [Test]
+        public void Quick_Config_GivesSteambaraAndToastling_AtLv8()
+        {
+            var c = AssetDatabase.LoadAssetAtPath<QuickJourneyConfig>("Assets/_Project/Data/QuickJourney.asset");
+            if (c == null) Assert.Inconclusive("Run Step9gSetup.QuickOnly first.");
+            CollectionAssert.AreEquivalent(new[] { "Steambara", "Toastling" }, System.Array.ConvertAll(c.giftSpecies, s => s != null ? s.name : null));
+            Assert.AreEqual(8, c.giftLevel, "the default gift is Lv 8");
+            foreach (var n in new[] { "Kilnpot", "Pebbloop", "Pufflet" })
+            {
+                var s = AssetDatabase.LoadAssetAtPath<IslingSpecies>($"Assets/_Project/Data/Creatures/Species/{n}.asset");
+                var (gift, raise) = c.LevelsFor(s);
+                Assert.That(gift, Is.InRange(6, 10), $"{n} gift level");
+                Assert.That(raise, Is.InRange(6, 11), $"{n} raise level");
+            }
+            Assert.Less(c.encounterRate, 1f);
+            Assert.Greater(c.xpMultiplier, 1f);
+        }
+
+        [Test]
         public void Logo_IsBaked_UnderTheBudget()
         {
             var logo = AssetDatabase.LoadAssetAtPath<PropRecipe>("Assets/_Project/Data/Props/TitleLogo.asset");

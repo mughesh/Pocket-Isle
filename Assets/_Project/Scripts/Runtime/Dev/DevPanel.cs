@@ -339,6 +339,12 @@ namespace Diorama
                     Add("Load auto", () => Status(state.LoadSlot(0) ? "Loading the auto slot..." : "The auto slot is empty."), null, true);
                     Add("New game", () => state.NewGame(), null, true);
                     Add("Show save path", () => Status(GameSave.SavePath, 12f));
+                    NextRow();
+                    // Step 9g: the Quick Journey (its own save slot).
+                    Add("Quick: start", () => state.QuickPreset(GameState.QuickStage.Start), null, true);
+                    Add("Quick: at gift", () => state.QuickPreset(GameState.QuickStage.Gift), null, true);
+                    Add("Quick: at gate", () => state.QuickPreset(GameState.QuickStage.Gate), null, true);
+                    Add("Quick: at temple", () => state.QuickPreset(GameState.QuickStage.Temple), null, true);
                     break;
                 case Tab.Tools:
                     Add(() => $"FPS: {OnOff(_fpsOn)}", () => _fpsOn = !_fpsOn, () => _fpsOn);
@@ -413,7 +419,8 @@ namespace Diorama
             switch (_tab)
             {
                 case Tab.Save:
-                    return $"1: {GameState.SlotLabel(1) ?? "empty"}   2: {GameState.SlotLabel(2) ?? "empty"}\n3: {GameState.SlotLabel(3) ?? "empty"}   auto: {GameState.SlotLabel(0) ?? "empty"}";
+                    return $"1: {GameState.SlotLabel(1) ?? "empty"}   2: {GameState.SlotLabel(2) ?? "empty"}\n3: {GameState.SlotLabel(3) ?? "empty"}   auto: {GameState.SlotLabel(0) ?? "empty"}\n" +
+                           $"Playing {SaveSlots.Label(SaveSlots.Active)}; quick timer {QuickJourney.Format(QuickJourney.Seconds)}{(QuickJourney.TimerDone ? " (done)" : "")}";
                 case Tab.Story:
                     return "Story changes save, edit the save and reload the game.";
                 case Tab.Party:

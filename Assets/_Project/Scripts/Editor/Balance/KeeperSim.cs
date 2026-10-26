@@ -221,7 +221,7 @@ namespace Diorama.EditorTools
             return battles;
         }
 
-        static Vector2Int Mark(WorldMap map, string name) => map.TryGetLandmark(name, out var t) ? t : map.startTile;
+        internal static Vector2Int Mark(WorldMap map, string name) => map.TryGetLandmark(name, out var t) ? t : map.startTile;
 
         static int GrassOn(WorldMap map, List<Vector2Int> path)
         {
@@ -231,7 +231,7 @@ namespace Diorama.EditorTools
             return n;
         }
 
-        static List<Vector2Int> Chain(WorldMap map, params Vector2Int[] stops)
+        internal static List<Vector2Int> Chain(WorldMap map, params Vector2Int[] stops)
         {
             var all = new List<Vector2Int>();
             for (int i = 1; i < stops.Length; i++) all.AddRange(PathBetween(map, stops[i - 1], stops[i]));
@@ -239,7 +239,7 @@ namespace Diorama.EditorTools
         }
 
         /// <summary>Shortest 4-way path on walkable layout tiles (props ignored: the puzzle props open), start excluded.</summary>
-        static List<Vector2Int> PathBetween(WorldMap map, Vector2Int from, Vector2Int to)
+        internal static List<Vector2Int> PathBetween(WorldMap map, Vector2Int from, Vector2Int to)
         {
             var prev = new Dictionary<Vector2Int, Vector2Int>();
             var q = new Queue<Vector2Int>();
@@ -378,7 +378,7 @@ namespace Diorama.EditorTools
         }
 
         /// <summary>The Keeper's level in MR_Main's Keeper Hall (or 10 when the scene isn't open).</summary>
-        static int KeeperLevel
+        internal static int KeeperLevel
         {
             get
             {
