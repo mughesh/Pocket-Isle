@@ -18,12 +18,13 @@ The app appears in the library under **Unknown Sources**.
 - **Controllers:** the left controller's menu button.
 - **Unity Editor:** F2.
 
-The panel opens within arm's reach in front of you, a little toward your main hand. It stays where it is; turn well
-away and it comes back in front. The same gesture closes it (or **Tools > Close**).
+The panel opens about an arm's length in front of you, a little toward your main hand. It stays where it is; turn well
+away and it comes back in front. **To move it**, pinch the small bar under it (or point at the bar and pinch) and drag;
+it opens at that spot from then on, until the app closes. The same gesture closes it (or **Tools > Close**).
 
-Press a button by **poking it** with a fingertip, by **pointing at it** (a thin line from your hand shows up when it
-points at the panel) **and pinching**, or by **looking at it and pinching**. Some buttons ask for a second
-press to confirm (new game, reset story, load, clear storage): they turn red, press again within 3 seconds.
+Press a button by **poking it** with a fingertip, or by **pointing at it** (a thin line from your hand shows up when it
+points at the panel) **and pinching**. Some buttons ask for a second press to confirm (new game, reset story, load,
+clear storage): they turn red, press again within 3 seconds.
 
 ## 3. What each tab does
 
@@ -34,7 +35,7 @@ press to confirm (new game, reset story, load, clear storage): they turn red, pr
 | **Encounter** | Same species picker, then **Fight now** for a wild battle on the spot. Wild battles on / off. Rare x10. |
 | **Story** | Skip / reset the tutorial. **Replay opening** (a new game). Cinderwood restored on / off. Log placed / fallen. Forge + door lit / cold. Keeper calm / frightened. Fire shard held / none. Shard in the statue on / off. Reset all story. *Story buttons save, change the save and reload the game: wait 2-3 seconds.* |
 | **Save** | **Save 1-3** keep a snapshot; **Load 1-3** go back to one (reloads). **Load auto** = the snapshot taken automatically before the last new game. **New game**. Show save path. |
-| **Tools** | FPS counter. Debug readouts (lines and numbers for us). Time x1 / x2 / x4. Walk x2. **Report bug**. Close. |
+| **Tools** | FPS counter. Debug readouts (lines and numbers for us, off at start). Time x1 / x2 / x4. Walk x2. Debug labels. Record ghost (the next missing ghost-hand clip, for Mugesh). **Report bug**. Close. |
 
 Cheats (one-hit KO, invincible, wild battles off, rare x10, time and walk speed) last until the app closes. They are
 never saved.

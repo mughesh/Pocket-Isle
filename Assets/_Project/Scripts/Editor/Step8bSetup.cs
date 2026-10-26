@@ -112,7 +112,6 @@ namespace Diorama.EditorTools
             EditorUtility.SetDirty(ghosts);
             Undo.RecordObject(recorder, "Step 8b");
             recorder.island = opening.island;
-            recorder.input = onboarding.input;
             recorder.library = library;
             EditorUtility.SetDirty(recorder);
             log.Append($"\n  'Ghost Hands' (copies {(ghosts.leftSource != null ? ghosts.leftSource.name : "NO LEFT")} / {(ghosts.rightSource != null ? ghosts.rightSource.name : "NO RIGHT")}, " +

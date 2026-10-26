@@ -107,11 +107,18 @@ namespace Diorama.EditorTools
             {
                 Undo.RecordObject(panel, "Step 9e");
                 panel.size = new Vector2(0.36f, 0.32f);
-                panel.distance = 0.4f;
+                panel.distance = 0.55f;
                 panel.sideAngle = 14f;
                 panel.downAngle = 22f;
                 panel.followAngle = 55f;
                 EditorUtility.SetDirty(panel);
+            }
+            var readout = Object.FindFirstObjectByType<DevReadout>(FindObjectsInactive.Include);
+            if (readout != null)
+            {
+                Undo.RecordObject(readout, "Step 9e");
+                readout.showOnStart = false;
+                EditorUtility.SetDirty(readout);
             }
             var holder = Object.FindFirstObjectByType<ShardHolder>(FindObjectsInactive.Include);
             if (holder != null)
@@ -130,7 +137,7 @@ namespace Diorama.EditorTools
                 socket.grabRadius = 0.07f;
                 EditorUtility.SetDirty(socket);
             }
-            log.Append($"\n  Refine: panel {(panel != null ? "within reach" : "MISSING")}, shards {(holder != null && holder.spirit != null ? "ride with the Spirit" : "MISSING holder or Spirit")}, " +
+            log.Append($"\n  Refine: panel {(panel != null ? "within reach" : "MISSING")}, readout {(readout != null ? "hidden at start" : "MISSING")}, shards {(holder != null && holder.spirit != null ? "ride with the Spirit" : "MISSING holder or Spirit")}, " +
                        $"socket grab {(socket != null ? "7 cm" : "MISSING")}");
         }
 

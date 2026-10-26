@@ -781,7 +781,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.RealmRestoration
   island: {fileID: 270959109}
-  input: {fileID: 374318556}
   fadeSeconds: 2
 --- !u!1 &301495217
 GameObject:
@@ -2764,12 +2763,13 @@ MonoBehaviour:
   grabGuard: {fileID: 270959111}
   hudMaterial: {fileID: 2100000, guid: 0656b6c4f92798e49a14cf09a2c6800e, type: 2}
   size: {x: 0.36, y: 0.32}
-  distance: 0.4
+  distance: 0.55
   sideAngle: 14
   downAngle: 22
   followAngle: 55
   fontSize: 0.1
   rayLength: 1.2
+  bar: {x: 0.12, y: 0.016, z: 0.01}
 --- !u!114 &1200054857
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3065,7 +3065,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.GhostClipRecorder
   island: {fileID: 270959109}
-  input: {fileID: 374318556}
   library: {fileID: 11400000, guid: 7e26b85907efc8041b13452a19693a8b, type: 2}
   rate: 30
 --- !u!114 &1421177268
@@ -3440,8 +3439,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.DevReadout
   lineMaterial: {fileID: 2100000, guid: 6620a41a1b093284a841d00dc2217702, type: 2}
-  input: {fileID: 374318556}
-  showOnStart: 1
+  showOnStart: 0
   panelOffset: {x: -0.1, y: -0.11, z: 0.45}
   fontSize: 0.09
 --- !u!4 &1536485481

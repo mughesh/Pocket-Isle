@@ -168,9 +168,8 @@ namespace Diorama.EditorTools
             }
             Undo.RecordObject(readout, "Step 8d");
             readout.lineMaterial = Material(DevMaterialPath, "Diorama/Dev Lines");
-            readout.input = Object.FindFirstObjectByType<MicrogestureInput>(FindObjectsInactive.Include);
             EditorUtility.SetDirty(readout);
-            log.Append("\n  dev readout (editor and development builds only): shard contact, palm over the flame / door; F1 or 3 right-hand thumb taps toggle");
+            log.Append("\n  dev readout (editor and development builds only): shard contact, palm over the flame / door; F1 or the dev panel toggles");
         }
 
         static Material Material(string path, string shaderName)

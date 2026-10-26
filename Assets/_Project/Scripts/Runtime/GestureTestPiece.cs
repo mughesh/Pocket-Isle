@@ -56,7 +56,7 @@ namespace Diorama
         public int runPathSteps = 8;
 
         [Header("Debug")]
-        [Tooltip("Shows the world-space debug labels at start. Five quick left-hand thumb taps toggle them (development builds).")]
+        [Tooltip("Shows the world-space debug labels at start. The dev panel's Tools tab toggles them.")]
         public bool showDebugLabels;
 
         [Header("Hold to walk")]
@@ -172,7 +172,6 @@ namespace Diorama
             DebugLabels.Track(labelGo);
 
             input.Gesture += OnGesture;
-            input.TapBurst += OnTapBurst;
             if (placer != null) placer.Placed += PositionLabel;
             if (probe == null && moveMode == MoveMode.HoldToWalk) Debug.LogError("[GestureTestPiece] No ThumbHoldProbe assigned; HoldToWalk will stop right after each swipe.");
             PositionLabel();
@@ -185,19 +184,12 @@ namespace Diorama
             if (input != null)
             {
                 input.Gesture -= OnGesture;
-                input.TapBurst -= OnTapBurst;
             }
             if (placer != null) placer.Placed -= PositionLabel;
         }
 
         bool Zoomed => window != null && window.IsZoomed;
 
-        void OnTapBurst(int count, GestureSource source)
-        {
-            if (count != 5 || source != GestureSource.LeftHand || !(Debug.isDebugBuild || Application.isEditor)) return;
-            DebugLabels.Visible = !DebugLabels.Visible;
-            Debug.Log($"[GestureTestPiece] Debug labels {(DebugLabels.Visible ? "on" : "off")}.");
-        }
 
         /// <summary>
         /// Walks to <paramref name="target"/> along the shortest walkable path (run when it is longer than

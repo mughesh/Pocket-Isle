@@ -9,17 +9,15 @@ namespace Diorama
     /// <summary>
     /// Dev-only measurements in the headset (step 8d): a few lines of text low-left in the view and wire shapes in the
     /// world, set every frame by whoever measures something (the shard contact, palm over the flame). Only in the
-    /// Editor, development builds and QA builds (POCKET_DEV, step 9e: hidden at start, the dev panel's Tools tab shows
-    /// it); a release build destroys it at once. Shown from the start; F1 or three quick right-hand thumb taps toggle it.
+    /// Editor, development builds and QA builds (POCKET_DEV); a release build destroys it at once. Hidden at start
+    /// (step 9e: it covered things); the dev panel's Tools tab or F1 shows it.
     /// Callers check <see cref="Active"/> before building strings.
     /// </summary>
     public class DevReadout : MonoBehaviour
     {
         [Tooltip("Diorama/Dev Lines material (wire shapes).")]
         public Material lineMaterial;
-        [Tooltip("Optional: three right-hand thumb taps toggle the readout.")]
-        public MicrogestureInput input;
-        public bool showOnStart = true;
+        public bool showOnStart;
         [Tooltip("Text panel in front of the head (m): x right, y up, z ahead.")]
         public Vector3 panelOffset = new Vector3(-0.1f, -0.11f, 0.45f);
         public float fontSize = 0.09f;
@@ -53,26 +51,11 @@ namespace Diorama
             if (lineMaterial == null) Debug.LogWarning("[DevReadout] No line material: text only.", this);
         }
 
-        void OnEnable()
-        {
-            if (input != null) input.TapBurst += OnTapBurst;
-        }
-
-        void OnDisable()
-        {
-            if (input != null) input.TapBurst -= OnTapBurst;
-        }
-
         void OnDestroy()
         {
             if (_instance == this) _instance = null;
             if (_mesh != null) Destroy(_mesh);
             if (_text != null) Destroy(_text.gameObject);
-        }
-
-        void OnTapBurst(int count, GestureSource source)
-        {
-            if (count == 3 && source == GestureSource.RightHand) Toggle();
         }
 
         void Toggle()

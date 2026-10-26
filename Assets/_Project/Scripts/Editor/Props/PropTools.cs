@@ -202,12 +202,10 @@ namespace Diorama.EditorTools
 
             if (!island.TryGetComponent(out RealmRestoration restoration)) restoration = Undo.AddComponent<RealmRestoration>(island.gameObject);
             restoration.island = island;
-            restoration.input = Object.FindFirstObjectByType<MicrogestureInput>();
             EditorUtility.SetDirty(restoration);
             AssetDatabase.SaveAssets();
             island.Rebuild();
-            report.Append($"\n  MR_Main: prop material, hot spring cap + steam, RealmRestoration on {island.name}" +
-                          $"{(restoration.input == null ? " (no MicrogestureInput found: no device toggle)" : "")}");
+            report.Append($"\n  MR_Main: prop material, hot spring cap + steam, RealmRestoration on {island.name}");
         }
 
         static readonly Vector2Int[] Sides = { Vector2Int.right, Vector2Int.left, Vector2Int.up, Vector2Int.down };

@@ -13,13 +13,12 @@ namespace Diorama
     /// seconds, relative to the view toward the island (grabs, pokes) or to the wrist's own starting pose (thumb gestures).
     /// In the Editor <see cref="Saved"/> (GhostClipTools) writes the asset into the library; on the headset the clip goes
     /// to <c>ghostclips/&lt;name&gt;.json</c> in the app's files folder (pull it with adb, then Tools > Pocket Isle >
-    /// Ghost Hands > Import Clips). Device (development builds): four quick left thumb taps record the next clip in
-    /// <see cref="GhostClipLibrary.Wanted"/> that isn't recorded yet.
+    /// Ghost Hands > Import Clips). On the headset the dev panel's Tools > Record ghost records the next clip in
+    /// <see cref="GhostClipLibrary.Wanted"/> that isn't recorded yet (step 9e: no more thumb-tap shortcut).
     /// </summary>
     public class GhostClipRecorder : MonoBehaviour
     {
         public IslandBuilder island;
-        public MicrogestureInput input;
         public GhostClipLibrary library;
         [Tooltip("Samples per second.")]
         public float rate = 30f;
@@ -33,26 +32,18 @@ namespace Diorama
 
         TextMeshPro _label;
 
-        void Start()
+        /// <summary>Records the next clip in <see cref="GhostClipLibrary.Wanted"/> that isn't recorded yet; its name, or null.</summary>
+        public string RecordNextWanted()
         {
-            if (input != null) input.TapBurst += OnTapBurst;
-        }
-
-        void OnDestroy()
-        {
-            if (input != null) input.TapBurst -= OnTapBurst;
-        }
-
-        void OnTapBurst(int count, GestureSource source)
-        {
-            if (count != 4 || source != GestureSource.LeftHand || !(Debug.isDebugBuild || Application.isEditor) || IsRecording) return;
+            if (IsRecording) return null;
             foreach (var w in GhostClipLibrary.Wanted)
             {
                 if (library != null && library.Find(w.name) != null || File.Exists(DevicePath(w.name))) continue;
                 Record(w.name, w.anchor, w.seconds, null);
-                return;
+                return w.name;
             }
             Debug.Log("[GhostClipRecorder] Every wanted clip is recorded.");
+            return null;
         }
 
         public static string DevicePath(string name) => Path.Combine(Application.persistentDataPath, DeviceFolder, name + ".json");

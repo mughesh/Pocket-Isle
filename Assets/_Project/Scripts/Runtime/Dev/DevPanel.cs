@@ -11,12 +11,14 @@ namespace Diorama
     /// The in-headset dev / QA panel (step 9e). Only in the Editor and QA builds (scripting define POCKET_DEV); a release
     /// build compiles it out and the object removes itself. Opened and closed with the left hand's menu gesture (palm up,
     /// pinch: Meta's app menu button for hand tracking, <c>OVRInput.Button.Start</c> on <c>Controller.LHand</c>; also the
-    /// left controller's menu button), F2 in the Editor. A plain 2D panel opens within arm's reach in front of the
-    /// player, a little toward the dominant hand and below the eyes, facing them; it stays put (world-locked) and comes
-    /// back in front when the head turns well away. Buttons work with a poke (a fingertip touches the panel), with each
-    /// hand's own ray (ISDK pointer pose: a thin line to the panel, pinch to press; this panel only) and with
-    /// look + pinch; in the Editor also with a mouse click. Destructive ones (new game, reset story, load) ask for a
-    /// second press. Everything goes through <see cref="GameState"/> (Quick Journey reuses it).
+    /// left controller's menu button), F2 in the Editor. A plain 2D panel opens a little past arm's reach in front of
+    /// the player, toward the dominant hand and below the eyes, facing them; it stays put (world-locked) and comes back
+    /// in front when the head turns well away. The bar under it moves it (pinch it, or point at it and pinch, then drag);
+    /// it keeps that spot (relative to the head's facing) until the app closes. Buttons work with a poke (a fingertip
+    /// touches the panel) and with each hand's own ray (ISDK pointer pose: a thin line to the panel, pinch to press; this
+    /// panel only); in the Editor also with a mouse click. No look + pinch (step 9e: it fought the game's own gaze).
+    /// Destructive ones (new game, reset story, load) ask for a second press. Everything goes through
+    /// <see cref="GameState"/> (Quick Journey reuses it).
     /// Tabs: Go to, Party, Encounter, Story, Save, Tools (see Assets/Docs/QA-Guide.md).
     /// </summary>
     public class DevPanel : MonoBehaviour
@@ -29,8 +31,8 @@ namespace Diorama
         public Material hudMaterial;
         [Tooltip("Panel size (m).")]
         public Vector2 size = new Vector2(0.36f, 0.32f);
-        [Tooltip("Distance from the head (m): within arm's reach for pokes.")]
-        public float distance = 0.4f;
+        [Tooltip("Distance from the head (m): an easy reach for pokes, not in the face.")]
+        public float distance = 0.55f;
         [Tooltip("Degrees toward the dominant hand, and below the eyes.")]
         public float sideAngle = 14f;
         public float downAngle = 22f;
@@ -39,6 +41,8 @@ namespace Diorama
         public float fontSize = 0.1f;
         [Tooltip("Hand rays reach this far (m).")]
         public float rayLength = 1.2f;
+        [Tooltip("The move bar under the panel (m): width, height, gap below the panel.")]
+        public Vector3 bar = new Vector3(0.12f, 0.016f, 0.01f);
 
 #if UNITY_EDITOR || POCKET_DEV
         enum Tab { GoTo, Party, Encounter, Story, Save, Tools }
@@ -88,6 +92,13 @@ namespace Diorama
         readonly bool[] _rayOnPanel = new bool[2];
         readonly bool[] _fingerNear = new bool[2];
         readonly MeshRenderer[] _ray = new MeshRenderer[2], _rayDot = new MeshRenderer[2];
+        readonly bool[] _rayOnBar = new bool[2];
+        MeshRenderer _bar;
+        bool _barNear;
+        int _dragHand = -1;
+        Vector3 _dragFrom, _dragRootFrom;
+        bool _moved;
+        Vector3 _offset;
         Vector3 _anchorForward;
         int _species;
         int _level = 9;
@@ -152,6 +163,9 @@ namespace Diorama
             _title.alignment = TextAlignmentOptions.Left;
             _status = Text(_root, "Status", new Vector2(0f, -size.y * 0.5f + 0.028f), new Vector2(size.x - 0.02f, 0.045f), fontSize * 0.8f);
             _status.alignment = TextAlignmentOptions.TopLeft;
+            _bar = Quad(_root, "Move Bar");
+            _bar.transform.localPosition = new Vector3(0f, BarY, 0f);
+            _bar.transform.localScale = new Vector3(bar.x, bar.y, 1f);
             string[] names = { "Go to", "Party", "Encounter", "Story", "Save", "Tools" };
             float w = (size.x - 0.02f) / names.Length;
             for (int i = 0; i < names.Length; i++)
@@ -330,6 +344,8 @@ namespace Diorama
                     Add(() => $"Readouts: {OnOff(DevReadout.Shown)}", () => DevReadout.Shown = !DevReadout.Shown, () => DevReadout.Shown);
                     Add(() => $"Time x{Time.timeScale:0}", () => Time.timeScale = Time.timeScale >= 4f ? 1f : Time.timeScale * 2f, () => Time.timeScale > 1f);
                     Add(() => $"Walk x2: {OnOff(_walkFast)}", ToggleWalk, () => _walkFast);
+                    Add(() => $"Labels: {OnOff(DebugLabels.Visible)}", () => DebugLabels.Visible = !DebugLabels.Visible, () => DebugLabels.Visible);
+                    Add("Record ghost", RecordGhost);
                     Add("Report bug", ReportBug);
                     Add("Close", () => SetOpen(false));
                     break;
@@ -371,6 +387,13 @@ namespace Diorama
             state.explorer.runSeconds = _walkFast ? _runSeconds * 0.5f : _runSeconds;
         }
 
+        void RecordGhost()
+        {
+            var recorder = FindFirstObjectByType<GhostClipRecorder>();
+            string clip = recorder != null ? recorder.RecordNextWanted() : null;
+            Status(recorder == null ? "No ghost clip recorder in the scene." : clip != null ? $"Recording '{clip}' after the countdown." : "Nothing to record (all clips done, or one is recording).");
+        }
+
         void ReportBug()
         {
             string name = BugReport.Write(state, _fpsValue);
@@ -409,6 +432,7 @@ namespace Diorama
             if (!open)
             {
                 DevCheats.PanelGazed = false;
+                _dragHand = -1;
                 for (int h = 0; h < 2; h++)
                     if (_ray[h] != null) _ray[h].enabled = _rayDot[h].enabled = false;
             }
@@ -423,22 +447,94 @@ namespace Diorama
         /// <summary>
         /// In front of the head (yaw only), toward the dominant hand and below the eyes, at arm's reach, facing the head.
         /// World-locked: it only moves when (re)opened or when the head has turned more than <see cref="followAngle"/> away.
+        /// Once dragged by its bar it goes to that spot instead (kept relative to the head's facing).
         /// </summary>
         void Place(bool snap)
         {
-            var cam = Camera.main;
-            if (cam == null) return;
-            Vector3 head = cam.transform.position, fwd = cam.transform.forward;
-            fwd.y = 0f;
-            if (fwd.sqrMagnitude < 1e-6f) return;
-            fwd.Normalize();
+            if (_dragHand >= 0 || !TryHeadYaw(out var head, out var fwd)) return;
             if (!snap && Vector3.Angle(fwd, _anchorForward) < followAngle) return;
             _anchorForward = fwd;
-            float side = DominantHand.Left ? -sideAngle : sideAngle;
-            Vector3 dir = Quaternion.AngleAxis(side, Vector3.up) * fwd;
-            dir = Quaternion.AngleAxis(downAngle, Vector3.Cross(Vector3.up, dir)) * dir;
-            _root.position = head + dir * distance;
-            _root.rotation = Quaternion.LookRotation(_root.position - head, Vector3.up);
+            if (_moved) _root.position = head + Quaternion.LookRotation(fwd) * _offset;
+            else
+            {
+                float side = DominantHand.Left ? -sideAngle : sideAngle;
+                Vector3 dir = Quaternion.AngleAxis(side, Vector3.up) * fwd;
+                dir = Quaternion.AngleAxis(downAngle, Vector3.Cross(Vector3.up, dir)) * dir;
+                _root.position = head + dir * distance;
+            }
+            Face(head);
+        }
+
+        static bool TryHeadYaw(out Vector3 head, out Vector3 fwd)
+        {
+            head = fwd = default;
+            var cam = Camera.main;
+            if (cam == null) return false;
+            head = cam.transform.position;
+            fwd = cam.transform.forward;
+            fwd.y = 0f;
+            if (fwd.sqrMagnitude < 1e-6f) return false;
+            fwd.Normalize();
+            return true;
+        }
+
+        void Face(Vector3 head)
+        {
+            Vector3 away = _root.position - head;
+            if (away.sqrMagnitude > 1e-6f) _root.rotation = Quaternion.LookRotation(away, Vector3.up);
+        }
+
+        float BarY => -size.y * 0.5f - bar.z - bar.y * 0.5f;
+
+        bool OnBar(Vector2 p, float margin = 0f) => Mathf.Abs(p.x) <= bar.x * 0.5f + margin && Mathf.Abs(p.y - BarY) <= bar.y * 0.5f + margin;
+
+        /// <summary>
+        /// Moving the panel by its bar: a pinch on the bar (or the ray on it + pinch) holds it, the panel follows the pinch
+        /// point and keeps facing the head; letting go keeps the spot.
+        /// </summary>
+        void Drag()
+        {
+            _barNear = false;
+            for (int h = 0; h < 2; h++)
+            {
+                if (_dragHand >= 0 && _dragHand != h) continue;
+                var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
+                if (!IslandHandle.TryGetPinchPoint(hand, out var pinch)) continue;
+                Vector3 l = _root.InverseTransformPoint(pinch);
+                if (OnBar(new Vector2(l.x, l.y), 0.025f) && Mathf.Abs(l.z) < 0.05f) _barNear = true;
+            }
+            if (_dragHand < 0) return;
+            var held = HandRegistry.Get(_dragHand == 0 ? Handedness.Left : Handedness.Right);
+            if (held == null || !held.IsTrackedDataValid || !held.GetIndexFingerIsPinching() || !IslandHandle.TryGetPinchPoint(held, out var now))
+            {
+                _dragHand = -1;
+                if (TryHeadYaw(out var head, out var fwd))
+                {
+                    _moved = true;
+                    _anchorForward = fwd;
+                    _offset = Quaternion.Inverse(Quaternion.LookRotation(fwd)) * (_root.position - head);
+                }
+                Debug.Log("[DevPanel] Moved.");
+                return;
+            }
+            DevCheats.PanelGazed = true;
+            _root.position = _dragRootFrom + (now - _dragFrom);
+            var cam = Camera.main;
+            if (cam != null) Face(cam.transform.position);
+        }
+
+        bool StartDrag(int h, IHand hand, bool byRay)
+        {
+            if (!IslandHandle.TryGetPinchPoint(hand, out var pinch)) return false;
+            if (!byRay)
+            {
+                Vector3 l = _root.InverseTransformPoint(pinch);
+                if (!OnBar(new Vector2(l.x, l.y), 0.025f) || Mathf.Abs(l.z) >= 0.05f) return false;
+            }
+            _dragHand = h;
+            _dragFrom = pinch;
+            _dragRootFrom = _root.position;
+            return true;
         }
 
         // ---- every frame ----
@@ -457,11 +553,7 @@ namespace Diorama
             if (_confirming != null && Time.unscaledTime > _confirmUntil) _confirming = null;
             _hover = null;
             DevCheats.PanelGazed = false;
-            if (HeadGaze.TryGetRay(out var ray) && Hit(ray, out var p))
-            {
-                DevCheats.PanelGazed = true;
-                _hover = ButtonAt(p);
-            }
+            Drag();
             Pokes();
             Rays();
             Pinches();
@@ -478,14 +570,17 @@ namespace Diorama
         }
 
         /// <summary>The panel-local point where a ray meets the panel (inside its rectangle).</summary>
-        bool Hit(Ray ray, out Vector2 p)
+        bool Hit(Ray ray, out Vector2 p) => HitPlane(ray, out p) && Mathf.Abs(p.x) <= size.x * 0.5f && Mathf.Abs(p.y) <= size.y * 0.5f;
+
+        /// <summary>The panel-local point where a ray meets the panel's plane (in front of the ray's origin).</summary>
+        bool HitPlane(Ray ray, out Vector2 p)
         {
             p = default;
             Vector3 o = _root.InverseTransformPoint(ray.origin), d = _root.InverseTransformDirection(ray.direction);
             if (d.z <= 1e-4f) return false;
             Vector3 h = o + d * (-o.z / d.z);
             p = new Vector2(h.x, h.y);
-            return Mathf.Abs(h.x) <= size.x * 0.5f && Mathf.Abs(h.y) <= size.y * 0.5f;
+            return true;
         }
 
         Button ButtonAt(Vector2 p)
@@ -506,12 +601,10 @@ namespace Diorama
                 var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
                 bool pinching = hand != null && hand.IsTrackedDataValid && hand.GetIndexFingerIsPinching();
                 bool busy = grabGuard != null && grabGuard.IsHandBusy(h == 0);
-                if (pinching && !_wasPinching[h] && !busy)
+                if (pinching && !_wasPinching[h] && !busy && _dragHand < 0)
                 {
-                    // That hand's ray first; look + pinch only when the ray isn't on the panel.
-                    string side = h == 0 ? "left" : "right";
-                    if (_rayHover[h] != null) Press(_rayHover[h], $"ray + pinch ({side})");
-                    else if (_hover != null && !_rayOnPanel[h]) Press(_hover, $"look + pinch ({side})");
+                    // A pinch at the bar (or the ray on it) moves the panel; the ray on a button presses it.
+                    if (!StartDrag(h, hand, _rayOnBar[h]) && _rayHover[h] != null) Press(_rayHover[h], $"ray + pinch ({(h == 0 ? "left" : "right")})");
                 }
                 _wasPinching[h] = pinching;
             }
@@ -526,20 +619,23 @@ namespace Diorama
             for (int h = 0; h < 2; h++)
             {
                 _rayHover[h] = null;
-                _rayOnPanel[h] = false;
+                _rayOnPanel[h] = _rayOnBar[h] = false;
                 _ray[h].enabled = _rayDot[h].enabled = false;
                 var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
-                if (hand == null || !hand.IsTrackedDataValid || _fingerNear[h] || !hand.GetPointerPose(out var pose)) continue;
-                if (!Hit(new Ray(pose.position, pose.forward), out var p)) continue;
+                if (hand == null || !hand.IsTrackedDataValid || _fingerNear[h] || _dragHand >= 0 || !hand.GetPointerPose(out var pose)) continue;
+                if (!HitPlane(new Ray(pose.position, pose.forward), out var p)) continue;
+                bool onBar = OnBar(p, 0.01f);
+                if (!onBar && (Mathf.Abs(p.x) > size.x * 0.5f || Mathf.Abs(p.y) > size.y * 0.5f)) continue;
                 Vector3 end = _root.TransformPoint(new Vector3(p.x, p.y, -0.003f));
                 Vector3 a = pose.position, along = end - a;
                 float len = along.magnitude;
                 if (len > rayLength) continue;
                 _rayOnPanel[h] = true;
+                _rayOnBar[h] = onBar;
                 DevCheats.PanelGazed = true;
-                _rayHover[h] = ButtonAt(p);
+                _rayHover[h] = onBar ? null : ButtonAt(p);
                 bool pinching = hand.GetIndexFingerIsPinching();
-                Color c = _rayHover[h] != null ? new Color(1f, 0.9f, 0.55f, pinching ? 1f : 0.85f) : new Color(1f, 1f, 1f, 0.5f);
+                Color c = _rayHover[h] != null || onBar ?new Color(1f, 0.9f, 0.55f, pinching ? 1f : 0.85f) : new Color(1f, 1f, 1f, 0.5f);
                 // The line: a long thin rounded quad from the hand to the hit, turned to face the head.
                 var cam = Camera.main;
                 Vector3 up = along / Mathf.Max(1e-4f, len);
@@ -627,6 +723,8 @@ namespace Diorama
             _status.text = Time.unscaledTime < _statusUntil && !string.IsNullOrEmpty(_statusText) ? _statusText : TabInfo();
             foreach (var b in _tabs) PaintButton(b, true);
             foreach (var b in _content) PaintButton(b, false);
+            bool barLit = _dragHand >= 0 || _barNear || _rayOnBar[0] || _rayOnBar[1];
+            Paint(_bar, new Color(0.85f, 0.85f, 0.8f, barLit ? 0.9f : 0.45f), barLit ? new Color(1f, 0.9f, 0.55f, 1f) : Color.clear, bar.x / bar.y, 0.5f, barLit ? 0.2f : 0f);
         }
 
         void PaintButton(Button b, bool tab)
