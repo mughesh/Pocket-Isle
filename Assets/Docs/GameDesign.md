@@ -182,8 +182,10 @@ chains, dim ember crystals). Walk onto the open doorway to go in; the Keeper's s
 huge sleeps here... not yet."); the door tiles lead back out in front of the forge, facing away.
 
 ### Keeper and shard as built (step 9c, Oct 26)
-- **Hearthstag**: Fire Keeper, **Lv 10, base HP 88 (HP 123 = 2.2x a normal Lv 10), atk 8, def 9, spd 8** (step 9e
-  balance: a Lv 9 team of 3 wins ~69% in the headless sim; `KeeperSim`); Ember Shot (36), Crown Charge (48, every
+- **Hearthstag**: Fire Keeper, **Lv 10, base HP 110 (HP 154 = 2.75x a normal Lv 10), atk 10, def 11, spd 8** (step 9f
+  balance, `KeeperSim`: a Lv 8 team of 3 with Steambara, Water leading, wins ~80% with Kilnpot, ~62% with Pufflet, ~93%
+  with Pebbloop; **without a Water Isling Kilnpot and Pufflet can't win at Lv 8-10**. Was HP 88 / atk 8 / def 9 for a
+  Lv 9 team of two fire commons in 9e); Ember Shot (36), Crown Charge (48, every
   3rd turn), Crown Shield. ~2.5x an Isling; frightened = ash fur + flickering dull red crystals, calmed = chestnut + gold.
 - **Fury (step 9e)**: frightened it reads overwhelmed and dangerous, never gory: grey-violet smoke aura with ember sparks,
   flame tongues on the crown, constant trembling, red-ember glowing eyes, the smile turned to a frown, smoke snorts every
@@ -241,7 +243,14 @@ Debug toggle: G (Editor) or three quick left-hand thumb taps (dev builds), 2 s f
 | Hearthstag | Keeper: stag, chunky ember-crystal crown, sturdy legs | — | Temple |
 Avoided for originality: lizards, foxes, cats, pigs, moths, pinecones (all used by Pokémon fire types).
 
-**Fire roster as built (step 9d, Oct 26):** all 10 fire lines exist (Steambara is the water roster's).
+**Fire roster as built (step 9d, Oct 26):** all 10 fire lines exist (Steambara is the water roster's). Step 9f: the
+five evolutions (Forgehorn, Emberdillo, Cindermole, Cinderbloom, Pyrecrane) are full recipes from sheet 11 now.
+**Steambara -> Onsenbara (step 9f):** Water, evolves at 14; capybara in a steam cloud with a fruit (Onsenbara: bigger,
+wooden tub ring, towel). Spring Splash (Water shoot 45, breaks the Keeper's shield) / Tackle / Warm Nap; Onsenbara Hot
+Soak (Water slam 60) / Spring Splash / Warm Nap. Hot springs ~35%, berry grove ~10%; `steambara.first` on the first one.
+**The explorer (step 9f):** concept 12 Option A, a teal-hooded kid with a backpack lantern (Spirit gold), ~2 cm, 3k
+tris; walk bounce with arm / leg swing and hood bob, run leans, idle glances and lantern sway, tap hop, cheer (arms up)
+when the log or the forge door is solved.
 | Line | Evolves at | Where (Cinderwood) | Moves (base) |
 |---|---|---|---|
 | Kettlewing -> **Steamswan** (teapot swan) | 14 | forest, field, grove, springs | Steam Jet / Tackle / Hunker Down |
@@ -281,6 +290,11 @@ explore → tall grass encounter → battle → capture → party / Hearth Lodge
 - **Types:** Water > Fire > Wind > Water, plus **Neutral** (hub creatures; no strengths or weaknesses).
   Strong ×1.5, weak ×0.67 (tune later).
 - **Levels:** XP to creatures that fought; level cap ~30; each species evolves at a set level (~12–16).
+  Step 9f: a win or a catch pays (5 + 4 x wild level) **x 3**; Cinderwood's wild Islings are 2 levels up. The shortest
+  trail reaches the temple at **~Lv 8** (p10 7, p90 10; ~9.5 if you walk each grass twice). XP is visible: an XP bar and
+  "→ next level" on the pod card and the lodge card; after a win a big "+XP" over the pad, the pad's XP bar at twice its
+  size filling over ~1 s, "Lv N!" with a gold ring and a hop per level; benched Islings that fought: their pods glow
+  with "+XP". First time: `xp.first` ("Your Islings learn from every battle. Watch them grow!").
 - **Keepers:** temple hand puzzle, then a battle with a special phase (e.g. shielded until hit by its weakness).
 - **Losing everything:** explorer returns to the last Hearth Shrine, team healed, nothing lost.
 
