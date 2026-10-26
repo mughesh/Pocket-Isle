@@ -15,31 +15,21 @@ MonoBehaviour:
   primitives:
   - kind: 1
     blend: 0
-    k: 0.1
+    k: 0
     mirrorX: 0
     a: {x: 0, y: 0.04, z: 0}
     b: {x: 0, y: 0, z: 0}
-    size: {x: 0.5, y: 0.2, z: 0.5}
+    size: {x: 0.36, y: 0.14, z: 0.34}
     rotation: {x: 0, y: 0, z: 0}
     bumps: 0.012
-    bumpFrequency: 16
-  - kind: 3
-    blend: 0
-    k: 0.08
-    mirrorX: 0
-    a: {x: 0, y: 0, z: 0}
-    b: {x: 0, y: 0, z: 0}
-    size: {x: 0.42, y: 0.085, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    bumps: 0.01
-    bumpFrequency: 16
+    bumpFrequency: 30
   - kind: 2
     blend: 0
-    k: 0.06
+    k: 0.04
     mirrorX: 0
-    a: {x: 0, y: 0.18, z: 0}
-    b: {x: 0.05, y: 0.34, z: 0.02}
-    size: {x: 0.07, y: 0.045, z: 0}
+    a: {x: 0, y: 0.12, z: 0}
+    b: {x: 0, y: 0.22, z: 0}
+    size: {x: 0.05, y: 0.04, z: 0}
     rotation: {x: 0, y: 0, z: 0}
     bumps: 0
     bumpFrequency: 0

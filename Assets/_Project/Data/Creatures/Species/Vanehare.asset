@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8421308f89f57d498f601bfba37a8cf, type: 3}
+  m_Name: Vanehare
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.IslingSpecies
+  displayName: Vanehare
+  element: 3
+  recipe: {fileID: 11400000, guid: fe55a1be6904d9d429f8cc13c4808ff6, type: 2}
+  evolvesTo: {fileID: 11400000, guid: f153f243408217343b2997c77202dfe1, type: 2}
+  evolveLevel: 16
+  baseStats:
+    hp: 40
+    attack: 12
+    defense: 9
+    speed: 15
+  moves:
+  - {fileID: 11400000, guid: 30a8e67157f83e44eab4cf8578732ee1, type: 2}
+  - {fileID: 11400000, guid: 39f69d2f16d41be49be1199baa8a699c, type: 2}
+  - {fileID: 11400000, guid: dc4cdfd9106c04b4ea02d64706c2dc09, type: 2}
+  keeper: 0

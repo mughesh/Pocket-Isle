@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b913e0ddf4c852c4290bf55fd3b11900, type: 3}
+  m_Name: WhirlPinwheel
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.CreaturePart
+  shape: {fileID: 11400000, guid: 2ef2cef5b9d7b364da96e2c5fc02bffa, type: 2}
+  pivot: {x: 0, y: 0, z: 0}
+  motion: 3
+  motionAxis: {x: 0, y: 0, z: 1}
+  motionAmount: 0
+  motionSpeed: 2.2
+  style:
+    color: 5
+    gradient: 0
+    gradientTo: 0
+    inner: 0
+    innerColor: 0
+    innerDirection: {x: 0, y: 0, z: 0}
+    innerAt: 0
+    tip: 1
+    tipColor: 4
+    tipAxis: {x: 1, y: 0, z: 0}
+    tipAt: 0.6
+    glow: 0
+    spec: 0.5
+    jiggle: 0
+    outline: 0.02
+  resolution: 36
+  triangleBudget: 700

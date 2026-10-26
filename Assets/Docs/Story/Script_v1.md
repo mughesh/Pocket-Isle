@@ -216,6 +216,10 @@ Step 10b, the hand moments (lesson lines stay pinned as a chip until the moment 
   - Spirit: The tower needs all three kites.
 - `gw.tower.open` · once (the kites tie onto the crown, the vanes turn)
   - Spirit: The kites caught the wind. The door is opening!
+- `gw.meet.kitelet` · once (step 10c: the first wild Kitelet)
+  - Spirit: A Kitelet! It wants to fly, but there's no wind.
+- `gw.meet.zeppelope` · once (step 10c: the rare Zeppelope)
+  - Spirit: A Zeppelope! It's drifting... it never lands!
 
 ## Statue and finale
 - `hub.shard.first` · once · → statueSocket (step 9c: in the hub holding a shard)

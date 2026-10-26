@@ -165,11 +165,15 @@ namespace Diorama.EditorTools
             map.SetZones(Text(_z));
             // Placeholder tables until step 10c's wind roster: Pufflet (the wind starter) and fire visitors. Levels like
             // Cinderwood's (+ its wild bonus); shards held add more at runtime (ShardScaling).
-            map.grassTable = Table("Encounters_Galewick", 5, 7, ("Pufflet", 50f, false), ("Kettlewing", 30f, false), ("Toastling", 20f, false));
+            // Step 10c: once the wind roster exists, ~70% wind, ~20% fire visitors, the rare pocket's Zeppelope ~5%.
+            bool wind = AssetDatabase.LoadAssetAtPath<IslingSpecies>("Assets/_Project/Data/Creatures/Species/Kitelet.asset") != null;
+            map.grassTable = wind
+                ? Table("Encounters_Galewick", 5, 7, ("Kitelet", 40f, false), ("Whirlby", 30f, false), ("Toastling", 30f, false))
+                : Table("Encounters_Galewick", 5, 7, ("Pufflet", 50f, false), ("Kettlewing", 30f, false), ("Toastling", 20f, false));
             map.zoneLegend = new List<MapZone>();
             foreach (var z in Zones)
             {
-                var table = z.id switch
+                var table = wind ? WindTable(z.id) : z.id switch
                 {
                     "arrival" => Table("Encounters_GwArrival", 3, 5, ("Pufflet", 55f, false), ("Kettlewing", 25f, false), ("Toastling", 20f, false)),
                     "village" => Table("Encounters_GwVillage", 3, 5, ("Pufflet", 45f, false), ("Kettlewing", 30f, false), ("Toastling", 25f, false)),
@@ -200,6 +204,18 @@ namespace Diorama.EditorTools
                        $"return gate c{ReturnGate.x} r{ReturnGate.y}, {map.zoneLegend.Count} zones, {map.landmarks.Count} landmarks");
             return map;
         }
+
+        /// <summary>Step 10c: the zone tables with the wind roster.</summary>
+        static EncounterTable WindTable(string zone) => zone switch
+        {
+            "arrival" => Table("Encounters_GwArrival", 3, 5, ("Kitelet", 35f, false), ("Whirlby", 30f, false), ("Pufflet", 15f, false), ("Toastling", 20f, false)),
+            "village" => Table("Encounters_GwVillage", 3, 5, ("Whirlby", 30f, false), ("Kitelet", 25f, false), ("Vanehare", 20f, false), ("Toastling", 15f, false), ("Coalbeetle", 10f, false)),
+            "kites" => Table("Encounters_GwKites", 4, 6, ("Kitelet", 40f, false), ("Vanehare", 25f, false), ("Samarling", 15f, false), ("Kettlewing", 20f, false)),
+            "ridge" => Table("Encounters_GwRidge", 5, 7, ("Samarling", 30f, false), ("Vanehare", 25f, false), ("Whirlby", 20f, false), ("Coalbeetle", 15f, false), ("Pufflet", 10f, false)),
+            "rare" => Table("Encounters_GwRare", 6, 8, ("Samarling", 35f, false), ("Vanehare", 30f, false), ("Kitelet", 30f, false), ("Zeppelope", 5f, true)),
+            "fire" => Table("Encounters_GwFire", 4, 6, ("Toastling", 30f, false), ("Coalbeetle", 30f, false), ("Ashmole", 30f, false), ("Whirlby", 10f, false)),
+            _ => null,
+        };
 
         /// <summary>The Galewick config asset (wind gate open in the Editor, sealed in builds), created once.</summary>
         public static GalewickConfig Config()

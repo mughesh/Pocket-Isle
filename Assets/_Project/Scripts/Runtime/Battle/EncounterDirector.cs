@@ -404,6 +404,9 @@ namespace Diorama
             if (rare) Dialogue.Say("rare.first");
             // Step 9f: the Water visitor at the hot springs gets its own hint (Water beats the fire Keeper).
             if (keeperFight == null && wild.species != null && wild.species.name == "Steambara") Dialogue.Say("steambara.first");
+            // Step 10c: first meetings in Galewick.
+            if (keeperFight == null && wild.species != null && wild.species.name == "Kitelet") Dialogue.Say("gw.meet.kitelet");
+            if (keeperFight == null && wild.species != null && wild.species.name == "Zeppelope") Dialogue.Say("gw.meet.zeppelope");
             yield return new WaitForSeconds(0.6f);
 
             _activeSlot = -1;

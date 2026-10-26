@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8421308f89f57d498f601bfba37a8cf, type: 3}
+  m_Name: Zeppelope
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.IslingSpecies
+  displayName: Zeppelope
+  element: 3
+  recipe: {fileID: 11400000, guid: 30bd6d85e68a8354c9541e7b01103539, type: 2}
+  evolvesTo: {fileID: 11400000, guid: d0a2d7345b8d55142bef973f5458bf4c, type: 2}
+  evolveLevel: 18
+  baseStats:
+    hp: 52
+    attack: 13
+    defense: 12
+    speed: 11
+  moves:
+  - {fileID: 11400000, guid: 8d687cc702e13c547bc914fd461e63e7, type: 2}
+  - {fileID: 11400000, guid: 39f69d2f16d41be49be1199baa8a699c, type: 2}
+  - {fileID: 11400000, guid: 3b67ad77c7d29084bb360e9edbd5f24c, type: 2}
+  keeper: 0

@@ -1041,6 +1041,26 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: The kites caught the wind. The door is opening!
+  - id: gw.meet.kitelet
+    once: 1
+    priority: 2
+    note: 'step 10c: the first wild Kitelet'
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: A Kitelet! It wants to fly, but there's no wind.
+  - id: gw.meet.zeppelope
+    once: 1
+    priority: 2
+    note: 'step 10c: the rare Zeppelope'
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: A Zeppelope! It's drifting... it never lands!
   - id: hub.shard.first
     once: 1
     priority: 2

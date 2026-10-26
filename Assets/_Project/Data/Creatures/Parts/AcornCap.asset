@@ -22,17 +22,17 @@ MonoBehaviour:
     color: 2
     gradient: 0
     gradientTo: 0
-    inner: 1
-    innerColor: 5
-    innerDirection: {x: 0, y: 1, z: 0}
-    innerAt: 0.55
+    inner: 0
+    innerColor: 0
+    innerDirection: {x: 0, y: 0, z: 0}
+    innerAt: 0
     tip: 0
     tipColor: 0
     tipAxis: {x: 0, y: 0, z: 0}
     tipAt: 0
     glow: 0
-    spec: 0.1
+    spec: 0.15
     jiggle: 0
-    outline: 0.03
-  resolution: 44
-  triangleBudget: 900
+    outline: 0.022
+  resolution: 34
+  triangleBudget: 700

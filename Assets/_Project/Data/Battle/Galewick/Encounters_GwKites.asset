@@ -14,18 +14,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.EncounterTable
   habitat: 0
   entries:
-  - species: {fileID: 11400000, guid: 11737ef7d2b67d84b8a98e2c3f8eeb9d, type: 2}
+  - species: {fileID: 11400000, guid: e1054a36995581d4fb04d178172c417b, type: 2}
     minLevel: 6
     maxLevel: 8
-    weight: 50
+    weight: 40
+    rare: 0
+  - species: {fileID: 11400000, guid: 00f77a932360d8041a63e5d3c6a824fa, type: 2}
+    minLevel: 6
+    maxLevel: 8
+    weight: 25
+    rare: 0
+  - species: {fileID: 11400000, guid: d7a7d38225e334e46badc0bd0188948b, type: 2}
+    minLevel: 6
+    maxLevel: 8
+    weight: 15
     rare: 0
   - species: {fileID: 11400000, guid: bf28c73db405a224da137bbcb4724879, type: 2}
     minLevel: 6
     maxLevel: 8
-    weight: 35
-    rare: 0
-  - species: {fileID: 11400000, guid: fb46257ae3b4b0144a5861244b1b96f6, type: 2}
-    minLevel: 6
-    maxLevel: 8
-    weight: 15
+    weight: 20
     rare: 0
