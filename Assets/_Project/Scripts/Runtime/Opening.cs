@@ -24,6 +24,9 @@ namespace Diorama
     /// lessons. The opening starts the chain, publishes its stages (<c>opening.shard</c>, <c>opening.move</c>,
     /// <c>opening.starters</c>) and marks what the player did (<c>shardTouched</c>, <c>islandGrabbed</c>, <c>starterPicked</c>).
     /// Editor and development builds: N skips the opening (Kilnpot) and the lessons up to <see cref="firstWalkLesson"/>.
+    /// Step 9g: the <see cref="TitleScreen"/> shows after the explorer stretches and before the Spirit (a new player picks
+    /// Full adventure or Quick journey; skipped when "New journey" already picked the slot), and over the returning rise
+    /// (Continue / New journey / Settings; the explorer stays locked until Continue).
     /// </summary>
     [DefaultExecutionOrder(110)] // after GameSave (100) has loaded the save
     public class Opening : MonoBehaviour
@@ -39,6 +42,8 @@ namespace Diorama
         public GameSave save;
         [Tooltip("Optional. Runs the lessons (step 8b).")]
         public Onboarding onboarding;
+        [Tooltip("Optional. The logo and the slot runes (step 9g).")]
+        public TitleScreen title;
         [Tooltip("N (skip) jumps the lessons to this one.")]
         public string firstWalkLesson = "walk";
         [Tooltip("Diorama/Toon material for the shard (mossy stone, gold cracks).")]
@@ -171,6 +176,9 @@ namespace Diorama
             island.swapSink = 1f;
             yield return WaitPlaced();
             Debug.Log($"[Opening] Returning player: the island rises on {island.world.name} c{explorer.Tile.x} r{explorer.Tile.y}.");
+            // Step 9g: the logo's and runes' first draw happens here, not as the title shows.
+            if (title != null) yield return WarmUp();
+            if (title != null) title.BeginReturning(returnRiseSeconds);
             for (float t = 0f; t < returnRiseSeconds; t += Time.deltaTime)
             {
                 float u = t / returnRiseSeconds;
@@ -179,6 +187,12 @@ namespace Diorama
                 spirit.Appear = Mathf.Clamp01((u - 0.7f) / 0.3f);
                 yield return null;
             }
+            // Step 9g: the island is up; gameplay waits for Continue.
+            island.swapSink = 0f;
+            island.swapRadial = false;
+            explorer.Shrink = 1f;
+            spirit.Appear = 1f;
+            if (title != null) yield return title.Returning();
             EndRise();
             _stage = Stage.Done;
         }
@@ -301,6 +315,15 @@ namespace Diorama
             explorer.Hop();
             yield return new WaitForSeconds(0.4f);
 
+            // Step 9g: the title (the logo out of the statue, Full adventure / Quick journey), unless "New journey" picked.
+            if (SaveSlots.PendingNew.HasValue)
+            {
+                Debug.Log($"[Opening] New journey in {SaveSlots.Label(SaveSlots.PendingNew.Value)}: no slot question.");
+                SaveSlots.PendingNew = null;
+            }
+            else if (title != null)
+                yield return title.NewPlayer(island.transform.InverseTransformPoint(LandmarkWorld("statue", 1.2f) ?? island.transform.position));
+
             // A spark leaves the statue and becomes the Spirit by the rim.
             _stage = Stage.Spirit;
             yield return Spark();
@@ -350,6 +373,7 @@ namespace Diorama
         {
             if (_run != null) StopCoroutine(_run);
             if (_shard != null) Destroy(_shard.gameObject);
+            if (title != null) title.Cancel();
             foreach (var p in _starterPods)
                 if (p != null) Destroy(p.gameObject);
             _starterPods.Clear();
@@ -579,10 +603,13 @@ namespace Diorama
             }
             var gates = FindFirstObjectByType<ShardGates>();
             var portal = gates != null ? gates.portalMaterial : null;
+            var hud = title != null && title.runes != null ? title.runes.hudMaterial : null;
+            if (title != null) title.WarmUp(at);
             for (int f = 0; f < 3; f++)
             {
                 if (shardMaterial != null) Graphics.RenderMesh(new RenderParams(shardMaterial), mesh, 0, tiny);
                 if (portal != null) Graphics.RenderMesh(new RenderParams(portal), mesh, 0, tiny);
+                if (hud != null) Graphics.RenderMesh(new RenderParams(hud), mesh, 0, tiny);
                 yield return null;
             }
             if (fx != null)
@@ -591,8 +618,9 @@ namespace Diorama
                 fx.Release(ring);
             }
             if (pod != null) Destroy(pod.gameObject);
+            if (title != null) title.EndWarmUp();
             Destroy(mesh);
-            Debug.Log($"[Opening] Shader warmup: shard, fx, pod{(portal != null ? ", portal" : "")} drawn once ({(Time.realtimeSinceStartup - started) * 1000f:0} ms).");
+            Debug.Log($"[Opening] Shader warmup: shard, fx, pod{(portal != null ? ", portal" : "")}{(title != null ? ", logo" : "")} drawn once ({(Time.realtimeSinceStartup - started) * 1000f:0} ms).");
         }
 
         /// <summary>A lumpy, slightly tall rock (a jittered, subdivided icosahedron), about 1 unit tall, origin in the middle.</summary>

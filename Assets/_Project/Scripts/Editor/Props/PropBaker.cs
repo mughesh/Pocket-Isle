@@ -77,7 +77,8 @@ namespace Diorama.EditorTools
                 var size = eval.Bounds.size * s;
                 float longest = Mathf.Max(size.x, Mathf.Max(size.y, size.z));
                 var pivot = piece.shape == null && piece.part != null ? piece.part.pivot : Vector3.zero;
-                pieces.Add((piece, eval, pivot, longest * longest * (piece.mirrorX ? 2f : 1f)));
+                float share = piece.budgetWeight > 0f ? piece.budgetWeight : longest * longest;
+                pieces.Add((piece, eval, pivot, share * (piece.mirrorX ? 2f : 1f)));
             }
             if (pieces.Count == 0)
             {

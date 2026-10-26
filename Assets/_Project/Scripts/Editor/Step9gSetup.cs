@@ -1,0 +1,128 @@
+using System.Linq;
+using System.Text;
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+
+namespace Diorama.EditorTools
+{
+    /// <summary>
+    /// Step 9g: title screen, game menu, settings, Quick Journey. One method per section
+    /// (bridge: exec:Diorama.EditorTools.Step9gSetup.X), <see cref="All"/> for everything. Safe to re-run.
+    /// </summary>
+    public static class Step9gSetup
+    {
+        const string ScenePath = "Assets/_Project/Scenes/MR_Main.unity";
+        const string LogoMaterialPath = "Assets/_Project/Materials/Props/Logo.mat";
+
+        [MenuItem("Tools/Pocket Isle/Set Up MR_Main (9g title, menus, quick)", priority = 60)]
+        public static void All()
+        {
+            var log = new StringBuilder("[Step9g] Set up:");
+            Title(log);
+            Save(log);
+        }
+
+        public static void TitleOnly()
+        {
+            var log = new StringBuilder("[Step9g] Title:");
+            Title(log);
+            Save(log);
+        }
+
+        static T Find<T>() where T : Object => Object.FindFirstObjectByType<T>(FindObjectsInactive.Include);
+
+        static GameObject Child(Transform parent, string name)
+        {
+            var t = parent.Find(name);
+            if (t != null) return t.gameObject;
+            var go = new GameObject(name);
+            Undo.RegisterCreatedObjectUndo(go, "Step 9g");
+            go.transform.SetParent(parent, false);
+            return go;
+        }
+
+        static T Component<T>(GameObject go) where T : Component => go.TryGetComponent(out T c) ? c : Undo.AddComponent<T>(go);
+
+        /// <summary>A: the logo prop (written and baked), its material, the Title object (logo + runes) wired to the opening.</summary>
+        public static void Title(StringBuilder log)
+        {
+            var recipe = PropKit.WriteLogo();
+            var report = PropBaker.Bake(recipe);
+            log.Append($"\n  Logo: {report}");
+            var material = LogoMaterial();
+
+            var island = Find<IslandBuilder>();
+            var opening = Find<Opening>();
+            var runesRef = Find<BattleRunes>();
+            if (island == null || opening == null || runesRef == null)
+            {
+                log.Append("\n  MISSING island, opening or battle runes: open MR_Main.");
+                return;
+            }
+            var titleGo = Child(island.transform, "Title");
+            var title = Component<TitleScreen>(titleGo);
+            var logo = Component<TitleLogo>(Child(titleGo.transform, "Title Logo"));
+            var runes = Component<RuneBoard>(Child(titleGo.transform, "Title Runes"));
+            Undo.RecordObject(title, "Step 9g");
+            Undo.RecordObject(logo, "Step 9g");
+            Undo.RecordObject(runes, "Step 9g");
+            Undo.RecordObject(opening, "Step 9g");
+            logo.island = island;
+            logo.recipe = recipe;
+            logo.material = material;
+            logo.fx = Find<BattleFx>();
+            Wire(runes, island, runesRef);
+            title.island = island;
+            title.logo = logo;
+            title.runes = runes;
+            title.save = Find<GameSave>();
+            opening.title = title;
+            foreach (var o in new Object[] { title, logo, runes, opening }) EditorUtility.SetDirty(o);
+            log.Append($"\n  Title: logo {(logo.fx != null ? "+ fx" : "(no fx)")}, runes, wired to the opening.");
+        }
+
+        /// <summary>A rune board placed and painted like the battle runes.</summary>
+        static void Wire(RuneBoard board, IslandBuilder island, BattleRunes like)
+        {
+            Undo.RecordObject(board, "Step 9g");
+            board.island = island;
+            board.grabGuard = like.grabGuard;
+            board.hudMaterial = like.hudMaterial;
+            board.offset = like.offset;
+            board.fontSize = like.fontSize;
+            board.pressDepth = like.pressDepth;
+            EditorUtility.SetDirty(board);
+        }
+
+        /// <summary>Diorama/Prop without the island window clip, its own (restored) colours, no battle sinking.</summary>
+        static Material LogoMaterial()
+        {
+            var m = AssetDatabase.LoadAssetAtPath<Material>(LogoMaterialPath);
+            if (m == null)
+            {
+                m = new Material(Shader.Find("Diorama/Prop")) { name = "Logo" };
+                AssetDatabase.CreateAsset(m, LogoMaterialPath);
+            }
+            m.SetFloat("_WindowClip", 0f);
+            m.SetFloat("_RestoredSelf", 1f);
+            m.SetFloat("_ClearSink", 0f);
+            EditorUtility.SetDirty(m);
+            return m;
+        }
+
+        static void Save(StringBuilder log)
+        {
+            AssetDatabase.SaveAssets();
+            var scene = EditorSceneManager.GetActiveScene();
+            if (scene.path == ScenePath && !EditorApplication.isPlaying)
+            {
+                EditorSceneManager.MarkSceneDirty(scene);
+                EditorSceneManager.SaveScene(scene);
+                log.Append("\n  Scene saved.");
+            }
+            else log.Append($"\n  Scene NOT saved (active: {scene.path}, playing {EditorApplication.isPlaying}).");
+            Debug.Log(log.ToString());
+        }
+    }
+}

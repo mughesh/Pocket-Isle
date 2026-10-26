@@ -279,8 +279,10 @@ namespace Diorama.EditorTools
                 Debug.LogError("[Step8] Stop Play mode first (stopping autosaves, so delete after stopping).");
                 return;
             }
-            SaveGame.Delete(GameSave.SavePath);
-            Debug.Log($"[Step8] New game: deleted {GameSave.SavePath}; entering Play (N skips the opening).");
+            // Step 9g: both slots, so the opening offers Full adventure / Quick journey.
+            SaveGame.Delete(SaveSlots.PathOf(SaveSlot.Adventure));
+            SaveGame.Delete(SaveSlots.PathOf(SaveSlot.Quick));
+            Debug.Log("[Step8] New game: deleted both save slots; entering Play (N skips the opening).");
             EditorApplication.isPlaying = true;
         }
 

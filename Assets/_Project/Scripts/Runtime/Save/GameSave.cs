@@ -7,7 +7,7 @@ using UnityEngine.InputSystem;
 namespace Diorama
 {
     /// <summary>
-    /// Save / load (one JSON file, <see cref="SaveGame"/>). On start: a save restores the party and storage, the
+    /// Save / load (one JSON file per slot, <see cref="SaveGame"/>; step 9g: the active <see cref="SaveSlots"/> slot). On start: a save restores the party and storage, the
     /// explorer's tile and facing, the last shrine, the realm's restoration, the dialogue lines already said, the caught
     /// species and the walk mode; no save = the scene's new game (Kilnpot Lv 5 for now); a bad save is renamed and the
     /// game starts new. Autosaves at a shrine (with a small "Saved" puff by the Spirit), after a catch, after a battle,
@@ -35,7 +35,8 @@ namespace Diorama
         readonly HashSet<string> _caught = new HashSet<string>();
         bool _ready;
 
-        public static string SavePath => SaveGame.DefaultPath;
+        /// <summary>The active slot's file (step 9g: save.json = Full adventure, quick.json = Quick Journey).</summary>
+        public static string SavePath => SaveSlots.ActivePath;
 
         /// <summary>A save was found and applied at start (returning player: no opening).</summary>
         public bool Loaded { get; private set; }

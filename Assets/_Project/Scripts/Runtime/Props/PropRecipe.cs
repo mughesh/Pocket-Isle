@@ -55,6 +55,8 @@ namespace Diorama
         public PropMotion motion;
         [Tooltip("Sway / wobble distance in shape units (0 = a default per motion).")]
         public float motionAmount;
+        [Tooltip("Share of the prop's triangle budget (0 = by size: longest side squared). Step 9g: the logo's thin letters.")]
+        public float budgetWeight;
     }
 
     /// <summary>Faces of one slot that point up are painted with another slot (glowing leaf tips on a canopy).</summary>
