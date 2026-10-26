@@ -86,6 +86,18 @@ namespace Diorama
         [Tooltip("Scales the falling leaves.")]
         [Range(0f, 1f)] public float leaves = 1f;
 
+        [Tooltip("Step 10a: drifting seeds while restored (Galewick 1, others 0).")]
+        [Range(0f, 1f)] public float seeds;
+
+        [Header("Wind (step 10a)")]
+        [Tooltip("How still the realm is while unrestored: 0 = sways as usual, 1 = nothing moves (Galewick ~0.9: a tiny idle only). Fades to 0 as it is restored.")]
+        [Range(0f, 1f)] public float stillWhenUnrestored;
+        [Tooltip("Windmill sails turn at this many radians a second once restored (0 = never; Galewick ~1.4).")]
+        [Min(0f)] public float windSpin;
+        [Tooltip("Grass blade height and width (1 = Cinderwood's). Galewick: taller and thinner wind grass.")]
+        public float bladeHeight = 1f;
+        public float bladeWidth = 1f;
+
         [Header("Light (interiors)")]
         [Tooltip("While this map shows, the main light takes this colour and intensity (interiors: warm hearth light).")]
         public bool overrideLight;

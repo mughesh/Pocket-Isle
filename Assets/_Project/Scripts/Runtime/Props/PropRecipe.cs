@@ -17,6 +17,10 @@ namespace Diorama
         Flicker,
         [Tooltip("Puffs up, drifts and wobbles around its centre in a loop; gone while the realm is unrestored (steam, smoke).")]
         Steam,
+        [Tooltip("Step 10a: turns round its centre about +Z with the realm's wind (windmill sails); still while the wind is still. Amount = speed factor (1 = the wind's pace).")]
+        Spin,
+        [Tooltip("Step 10a: only there once the realm is restored, then drifts and flutters (kites on posts). Amount in shape units.")]
+        Fly,
     }
 
     [Serializable]

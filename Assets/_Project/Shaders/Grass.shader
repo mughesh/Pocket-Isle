@@ -50,6 +50,7 @@ Shader "Diorama/Grass"
 
             float4 _DioramaGrassPush;
             float  _DioramaScale;
+            float  _RealmStill; // step 10a: 1 = a still realm (Galewick unrestored): only a tiny idle sway
 
             struct Attributes
             {
@@ -88,6 +89,7 @@ Shader "Diorama/Grass"
                 float sway = sin(t * 1.7 + mapBase.x * 17.0 + mapBase.z * 11.0) * 0.6
                            + sin(t * 2.9 + mapBase.x * 6.0 - mapBase.z * 9.0) * 0.3;
                 float k = h * h * height;
+                sway *= 1.0 - saturate(_RealmStill);
                 world.x += sway * 0.22 * k;
                 world.z += sway * 0.1 * k;
 

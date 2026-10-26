@@ -189,6 +189,8 @@ namespace Diorama.EditorTools
             PropMotion.Sway => 0.05f,
             PropMotion.Flicker => 0.03f,
             PropMotion.Steam => 0.06f,
+            PropMotion.Spin => 1f,
+            PropMotion.Fly => 0.08f,
             _ => 0f,
         };
 

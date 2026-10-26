@@ -65,7 +65,7 @@ namespace Diorama.EditorTools
             Debug.Log("[Step6Fixes] MR_Main: cradle 2x and higher (grab 8 cm, party 5 cm), Embers + Falling Leaves under the island, palettes and script updated.");
         }
 
-        static RealmDrift Drift(IslandBuilder island, string name, RealmDrift.Kind kind)
+        internal static RealmDrift Drift(IslandBuilder island, string name, RealmDrift.Kind kind)
         {
             var old = island.transform.Find(name);
             if (old != null) Object.DestroyImmediate(old.gameObject);
@@ -81,7 +81,7 @@ namespace Diorama.EditorTools
 
         static Color Hex(float r, float g, float b) => new Color(r, g, b, 1f);
 
-        static Material DriftMaterial(string name, float mode, Color color, Color core, float size, Vector2 travel, Vector2 period,
+        internal static Material DriftMaterial(string name, float mode, Color color, Color core, float size, Vector2 travel, Vector2 period,
             float opacity, UnityEngine.Rendering.BlendMode src, UnityEngine.Rendering.BlendMode dst)
         {
             var shader = Shader.Find("Diorama/Realm Drift");

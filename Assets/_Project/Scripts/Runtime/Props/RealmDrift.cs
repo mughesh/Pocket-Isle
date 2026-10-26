@@ -13,7 +13,7 @@ namespace Diorama
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public class RealmDrift : MonoBehaviour
     {
-        public enum Kind { Embers, Leaves }
+        public enum Kind { Embers, Leaves, Seeds }
 
         const int Grid = 16;
 
@@ -44,6 +44,8 @@ namespace Diorama
             {
                 var theme = island != null ? island.Theme : null;
                 if (kind == Kind.Embers) return RealmState.Restored * (theme != null ? theme.embers : 1f);
+                // Step 10a: seeds drift over restored Galewick (only realms whose theme asks for them).
+                if (kind == Kind.Seeds) return RealmState.Restored * (theme != null ? theme.seeds : 0f);
                 return (1f - RealmState.Restored) * (theme != null ? theme.leaves : 1f);
             }
         }

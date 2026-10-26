@@ -2,7 +2,9 @@
 // the colour picked per vertex from a 6-slot palette (uv0.x) that blends from the unrestored to the restored colours
 // by the global _RealmRestored. Glow-slot lights sputter dim at 0 and burn steady at 1; other glows scale with it.
 // Motion per piece (uv0.y):
-// sway, flicker (glow + wobble) or steam (puffs in a loop around the piece centre, uv1). The palette comes from a
+// sway, flicker (glow + wobble), steam (puffs in a loop around the piece centre, uv1), spin (step 10a: windmill
+// sails turning round the piece centre about +Z with the realm's wind) or fly (step 10a: kites on posts, only there and
+// fluttering once the realm is restored). A still realm (Galewick unrestored, _RealmStill) damps sway to a tiny idle. The palette comes from a
 // property block per prop type, so each type is one instanced draw plus its outline pass (same material).
 // Island window sinking / clipping and the battle clearing: DioramaWindow.hlsl.
 Shader "Diorama/Prop"
@@ -37,6 +39,7 @@ Shader "Diorama/Prop"
 
         [HideInInspector] _WindowClip ("Island Window Clip", Float) = 0
         [HideInInspector] _RestoredSelf ("Own Restoration (-1 = the realm's)", Float) = -1
+        [HideInInspector] _SpinSelf ("Own Spin Angle (radians, -1000 = the realm's wind)", Float) = -1000
     }
 
     HLSLINCLUDE
@@ -56,11 +59,16 @@ Shader "Diorama/Prop"
         float  _ClearSink;
         float  _WindowClip;
         float  _RestoredSelf;
+        float  _SpinSelf;
     CBUFFER_END
 
     float _RealmRestored; // RealmState: 0 = ash grey and cold, 1 = restored
     // Step 9c restoration wave: xy = map xz of its origin, z = radius (map metres; <= 0 = no wave), w = edge width.
     float4 _RestoreWave;
+    // Step 10a (RealmState): 0 = sway as usual, 1 = nothing sways (a still realm); the wind's spin angle (radians,
+    // grows only while the realm's wind blows) for spinning pieces.
+    float _RealmStill;
+    float _WindSpin;
 
     struct PropAttributes
     {
@@ -95,7 +103,7 @@ Shader "Diorama/Prop"
     }
 
     // Object-space motion. flicker scales the glow; size scales the outline (steam shrinks to nothing).
-    float3 PropMotion(float3 p, float4 uv0, float3 centre, float hash, out float flicker, out float size)
+    float3 PropMotion(float3 p, inout float3 n, float4 uv0, float3 centre, float hash, out float flicker, out float size)
     {
         float t = _Time.y;
         int m = (int)round(uv0.y);
@@ -105,7 +113,7 @@ Shader "Diorama/Prop"
         if (m == 1) // sway
         {
             float s = sin(t * 1.3 + hash * 6.283) * 0.65 + sin(t * 2.3 + hash * 12.0) * 0.35;
-            p.xz += float2(1.0, 0.45) * s * amt * hh;
+            p.xz += float2(1.0, 0.45) * s * amt * hh * (1.0 - saturate(_RealmStill));
         }
         else if (m == 2) // flicker
         {
@@ -121,6 +129,24 @@ Shader "Diorama/Prop"
             float3 d = p - centre;
             d.x += sin(t * 2.0 + p.y * 10.0 + hash * 6.0) * amt * 0.5;
             p = centre + d * size + float3(sin(t * 0.7 + hash * 4.0) * amt, cyc * amt * 6.0, 0.0);
+        }
+        else if (m == 4) // spin: round the piece centre about +Z; amount = how fast it follows the wind spin
+        {
+            float ang = (_SpinSelf > -999.0 ? _SpinSelf : _WindSpin * amt * (0.85 + 0.3 * hash)) + hash * 6.283;
+            float c = cos(ang), sn = sin(ang);
+            float3 d = p - centre;
+            d.xy = float2(c * d.x - sn * d.y, sn * d.x + c * d.y);
+            n.xy = float2(c * n.x - sn * n.y, sn * n.x + c * n.y);
+            p = centre + d;
+        }
+        else if (m == 5) // fly: only once restored (grows from its centre), a lazy drift plus a flutter toward the bottom
+        {
+            size = PropRestored();
+            float3 d = p - centre;
+            float drift = sin(t * 0.9 + hash * 6.283);
+            float bob = sin(t * 1.6 + hash * 11.0);
+            p = centre + d * size + float3(drift * amt, bob * amt * 0.45, cos(t * 0.7 + hash * 4.0) * amt * 0.4) * size;
+            p.x += sin(t * 6.0 + h * 9.0 + hash * 20.0) * amt * 0.25 * (1.0 - h) * size;
         }
         return p;
     }
@@ -228,11 +254,12 @@ Shader "Diorama/Prop"
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
                 float hash = PropHash();
                 float flicker, size;
-                float3 p = PropMotion(v.positionOS.xyz, v.uv0, v.uv1, hash, flicker, size);
+                float3 nOS = v.normalOS;
+                float3 p = PropMotion(v.positionOS.xyz, nOS, v.uv0, v.uv1, hash, flicker, size);
                 o.positionWS = PropWindowVertex(p, o.islandPos);
                 o.positionCS = TransformWorldToHClip(o.positionWS);
-                o.normalOS = v.normalOS;
-                o.normalWS = TransformObjectToWorldNormal(v.normalOS);
+                o.normalOS = nOS;
+                o.normalWS = TransformObjectToWorldNormal(nOS);
                 o.paint = float4(v.uv0.x, flicker, 1.0 + (hash - 0.5) * 0.08, hash);
                 o.height = v.uv0.z;
                 return o;
@@ -302,15 +329,16 @@ Shader "Diorama/Prop"
                 UNITY_TRANSFER_INSTANCE_ID(v, o);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
                 float flicker, size;
-                float3 p = PropMotion(v.positionOS.xyz, v.uv0, v.uv1, PropHash(), flicker, size);
+                float3 nOS = v.normalOS;
+                float3 p = PropMotion(v.positionOS.xyz, nOS, v.uv0, v.uv1, PropHash(), flicker, size);
                 float2 focus = DioramaFocusAmounts(TransformObjectToWorld(float3(0.0, 0.0, 0.0)));
                 o.focus = float3(focus, 0.0);
-                p += v.normalOS * _OutlineWidth * size * (1.0 + 1.3 * focus.x + 0.45 * focus.y);
+                p += nOS * _OutlineWidth * size * (1.0 + 1.3 * focus.x + 0.45 * focus.y);
                 o.positionWS = PropWindowVertex(p, o.islandPos);
                 o.positionCS = TransformWorldToHClip(o.positionWS);
                 o.slot = v.uv0.x;
                 o.height = v.uv0.z;
-                o.normalOS = v.normalOS;
+                o.normalOS = nOS;
                 return o;
             }
 
@@ -360,7 +388,8 @@ Shader "Diorama/Prop"
                 UNITY_TRANSFER_INSTANCE_ID(v, o);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
                 float flicker, size;
-                float3 p = PropMotion(v.positionOS.xyz, v.uv0, v.uv1, PropHash(), flicker, size);
+                float3 nOS = v.normalOS;
+                float3 p = PropMotion(v.positionOS.xyz, nOS, v.uv0, v.uv1, PropHash(), flicker, size);
                 o.positionCS = TransformWorldToHClip(PropWindowVertex(p, o.islandPos));
                 return o;
             }

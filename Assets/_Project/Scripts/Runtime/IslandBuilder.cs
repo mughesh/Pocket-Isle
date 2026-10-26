@@ -628,7 +628,9 @@ namespace Diorama
                 }
             });
 
-            // ---- grass blades ----
+            // ---- grass blades (step 10a: the theme can make them taller and thinner, Galewick's wind grass) ----
+            float bladeH = Theme != null && Theme.bladeHeight > 0f ? Theme.bladeHeight : 1f;
+            float bladeW = Theme != null && Theme.bladeWidth > 0f ? Theme.bladeWidth : 1f;
             var bladeMesh = Keep(ProceduralMeshes.GrassBlade());
             var blades = AddBatch(bladeMesh, grass, true, ThemeRole.Blades);
             ForEachCell(content, cells, new List<Batch> { blades }, (r, c, ch) =>
@@ -641,8 +643,8 @@ namespace Diorama
                 {
                     float x = p.x - (rnd.Next() - 0.5f) * tile * 0.96f;
                     float z = p.z + (rnd.Next() - 0.5f) * tile * 0.96f;
-                    float h = tall ? 0.05f + rnd.Next() * 0.035f : 0.014f + rnd.Next() * 0.016f;
-                    float w = tall ? 0.0065f + rnd.Next() * 0.002f : 0.005f;
+                    float h = (tall ? 0.05f + rnd.Next() * 0.035f : 0.014f + rnd.Next() * 0.016f) * bladeH;
+                    float w = (tall ? 0.0065f + rnd.Next() * 0.002f : 0.005f) * bladeW;
                     float ry = rnd.Next() * Mathf.PI;
                     float tilt = (rnd.Next() - 0.5f) * 0.35f;
                     blades.local.Add(Matrix4x4.TRS(new Vector3(x, cap, z), MirroredEulerXYZ(tilt, ry, 0f), new Vector3(w, h, w)));
@@ -1004,6 +1006,7 @@ namespace Diorama
             foreach (var b in _batches)
                 if (b.rim) b.props.SetFloat(FlashId, rimHighlight);
             var theme = Theme;
+            RealmState.Wind(theme);
             if (theme == null) return;
             var t = theme.Evaluate(RealmState.Restored);
             bool tint = rimTheme != null && rimTint > 0f;
