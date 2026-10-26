@@ -33,5 +33,13 @@ namespace Diorama.EditorTools
         static IslingSpecies Load(string name) => AssetDatabase.LoadAssetAtPath<IslingSpecies>($"Assets/_Project/Data/Creatures/Species/{name}.asset");
 
         public static void Steamswan() => Build("Steamswan", FireRosterKit.Steamswan());
+
+        static void Line(string what, IslingSpecies s) => Build(what, s, s != null ? s.evolvesTo : null);
+
+        public static void Coalbeetle() => Line("Coalbeetle -> Forgehorn", FireRosterKit.Coalbeetle());
+        public static void Mapadillo() => Line("Mapadillo -> Emberdillo", FireRosterKit.Mapadillo());
+        public static void Ashmole() => Line("Ashmole -> Cindermole", FireRosterKit.Ashmole());
+        public static void Cindercap() => Line("Cindercap -> Cinderbloom", FireRosterKit.Cindercap());
+        public static void Embercrane() => Line("Embercrane -> Pyrecrane", FireRosterKit.Embercrane());
     }
 }

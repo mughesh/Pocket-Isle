@@ -1,0 +1,88 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e27712b2a6f9fc45ae0b54784bf7327, type: 3}
+  m_Name: Coalbeetle
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.CreatureRecipe
+  baseRecipe: {fileID: 0}
+  body: {fileID: 11400000, guid: f9a806f7a36b8ae42a1f81b5b36777b9, type: 2}
+  height: 0.036
+  zones:
+    belly: 0
+    bellyDirection: {x: 0, y: 0, z: 0}
+    bellyAt: 0
+    bellyMaxY: 0
+    bellyDrips: 0
+    bellyDripLength: 0
+    socks: 0
+    socksY: 0
+    tips: 0
+    tipAxis: {x: 0, y: 0, z: 0}
+    tipAt: 0
+    spots: 0
+    spotScale: 0
+    cracks: 0
+    crackScale: 0
+    crackWidth: 0
+    crackPulse: 0
+    patches:
+    - center: {x: 0, y: -0.4, z: 0.1}
+      radius: 0.3
+      color: 1
+      mirrorX: 0
+  parts:
+  - part: {fileID: 11400000, guid: 1a6ad96d7dc803e4b9ffab72ee791049, type: 2}
+    position: {x: 0, y: 0.04, z: 0.46}
+    rotation: {x: -15, y: 0, z: 0}
+    scale: {x: 1.1, y: 1.1, z: 1.1}
+    mirror: 0
+    parent: -1
+  - part: {fileID: 11400000, guid: fa2b5b3530e581541a8ffa454be6b66f, type: 2}
+    position: {x: 0.03, y: 0.12, z: -0.1}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+    mirror: 1
+    parent: -1
+  face:
+    eyeSize: 0.045
+    eyeSpacing: 0.12
+    eyeHeight: -0.1
+    eyeStretch: 1.2
+    decals: []
+  palette:
+    baseColor: {r: 0.22745098, g: 0.22745098, b: 0.22745098, a: 1}
+    belly: {r: 0.41568628, g: 0.41568628, b: 0.41568628, a: 1}
+    accent: {r: 0.2901961, g: 0.2901961, b: 0.2901961, a: 1}
+    socks: {r: 0.22745098, g: 0.22745098, b: 0.22745098, a: 1}
+    glow: {r: 0.8980392, g: 0.39215687, b: 0.11764706, a: 1}
+    extra: {r: 1, g: 0.6901961, b: 0.3137255, a: 1}
+    face: {r: 0.101960786, g: 0.101960786, b: 0.101960786, a: 1}
+    iris: {r: 0.101960786, g: 0.101960786, b: 0.101960786, a: 1}
+  spec: 0.45
+  glow: 0
+  outline: 0.035
+  idle:
+    breathe: 0.014
+    breatheSpeed: 2.2
+    jiggle: 0
+    hover: 0
+    bob: 0
+    sway: 1.5
+    swaySpeed: 0
+  heightScale: 1.25
+  extraParts: []
+  overridePalette: 0
+  hueShift: 0
+  saturationScale: 1
+  valueScale: 1
+  resolution: 88
+  triangleBudget: 6000
+  bakedPrefab: {fileID: 987188627221553797, guid: f2b9181a00eca864b9f3d7158d0c3920, type: 3}

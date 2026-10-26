@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8421308f89f57d498f601bfba37a8cf, type: 3}
+  m_Name: Coalbeetle
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.IslingSpecies
+  displayName: Coalbeetle
+  element: 1
+  recipe: {fileID: 11400000, guid: 6e8250388f37aa944bdd8714f6886fed, type: 2}
+  evolvesTo: {fileID: 11400000, guid: 6670d437b2d600f46b99b02f24a66b40, type: 2}
+  evolveLevel: 16
+  baseStats:
+    hp: 44
+    attack: 12
+    defense: 13
+    speed: 7
+  moves:
+  - {fileID: 11400000, guid: 078594c7bd1aee442b2e6cd674c39d31, type: 2}
+  - {fileID: 11400000, guid: 39f69d2f16d41be49be1199baa8a699c, type: 2}
+  - {fileID: 11400000, guid: 3b67ad77c7d29084bb360e9edbd5f24c, type: 2}
+  keeper: 0
