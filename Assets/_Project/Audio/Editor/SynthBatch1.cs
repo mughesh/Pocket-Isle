@@ -130,7 +130,7 @@ namespace Diorama.Audio.EditorTools
             c.notes = "Awaiting Lyria: drop the track in Clips/Music/, cut the loop with Audio Lab > Loop tool, add the _loop clip here.";
         };
 
-        static Action<AudioCue> And(this Action<AudioCue> a, Action<AudioCue> b) => c =>
+        internal static Action<AudioCue> And(this Action<AudioCue> a, Action<AudioCue> b) => c =>
         {
             a(c);
             b(c);
@@ -696,6 +696,8 @@ namespace Diorama.Audio.EditorTools
             // Music slots (no clips yet)
             foreach (var id in new[] { "music.title", "music.hub", "music.cinderwood", "music.battle.wild", "music.battle.keeper", "music.lodge" })
                 _list.Add(new SynthRecipes.Recipe { set = Set, group = "Music", id = id, cue = Music(), extraClips = new[] { "Clips/Music/" + id } });
+
+            SynthRemakes.Overlay(_list);
 
             foreach (var r in _list)
                 if (r.cue != null && r.group != "Music") r.cue = r.cue.And(c => c.volume = CueVolume);

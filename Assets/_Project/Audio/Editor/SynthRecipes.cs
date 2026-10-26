@@ -27,6 +27,13 @@ namespace Diorama.Audio.EditorTools
             /// <summary>Loudness tier; null = from the group and id (AudioTiers.Default).</summary>
             public LoudnessTier? tier;
             public float trimDb;
+            public SynthConfidence confidence;
+
+            public Recipe Conf(SynthConfidence c)
+            {
+                confidence = c;
+                return this;
+            }
 
             public Recipe Tier(LoudnessTier t, float trim = 0f)
             {
@@ -64,6 +71,7 @@ namespace Diorama.Audio.EditorTools
             patch.id = recipe.id;
             patch.recipe = recipe.set;
             patch.gap = recipe.gap;
+            patch.confidence = recipe.confidence;
             patch.review = review ?? new AudioReview();
             recipe.build(patch);
             if (recipe.set == "cry") return; // cries keep batch 1 peak levelling until step C

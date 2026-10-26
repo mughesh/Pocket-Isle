@@ -152,7 +152,7 @@ namespace Diorama.Audio
         [Tooltip("Above 1 bunches copies at the start (debris settling), 1 = even.")] [Range(0.2f, 4f)] public float bunching = 1f;
     }
 
-    /// <summary>One running model voice: Next(t, f, k) with t the layer time, f the current pitch in Hz, k = f / the layer's own pitch.</summary>
+    /// <summary>One running model voice: Next(t, f, k) with t the layer time, f the current pitch in Hz, k = f / 440 (noise models scale by it).</summary>
     public interface IModelVoice
     {
         float Next(float t, float f, float k);
@@ -304,8 +304,12 @@ namespace Diorama.Audio
                     case ModalExciter.Click:
                         return (n == 0 ? 1f : 0f) + 0.3f * White(_rng) * Mathf.Exp(-n / (0.0003f * Rate));
                     case ModalExciter.Mallet:
-                        // Half-sine pulse with unit area: a longer mallet rings the low modes, not the high ones.
-                        return n < _excLen ? Mathf.Sin(Mathf.PI * (n + 0.5f) / _excLen) * Mathf.PI / (2f * _excLen) : 0f;
+                    {
+                        // Soft pulse with unit area: fast rise, exponential fall (tau = length / 3). Its spectrum is a smooth
+                        // low-pass with no nulls, so a longer mallet softens the high modes without cancelling any body mode.
+                        float tau = Mathf.Max(1f, _excLen / 3f), rise = 1f - Mathf.Exp(-(n + 1) / Mathf.Max(1f, 0.1f * tau));
+                        return rise * Mathf.Exp(-n / tau) / tau;
+                    }
                     default:
                         return White(_rng) * Mathf.Exp(-n / (float)_excLen) * 2f / _excLen;
                 }

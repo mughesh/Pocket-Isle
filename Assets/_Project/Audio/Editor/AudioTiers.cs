@@ -8,7 +8,7 @@ namespace Diorama.Audio.EditorTools
         static readonly HashSet<string> HitIds = new HashSet<string>
         {
             "move.slam", "walk.bump", "catch.hit", "catch.wobble", "log.drop", "keeper.stomp", "pads.rise", "island.release",
-            "keeper.crown.shield", "shard.dock", "statue.socket", "rune.select", "walk.stop",
+            "keeper.crown.shield", "shard.dock", "rune.select", "walk.stop", "ui.pebble",
         };
 
         static readonly HashSet<string> BigIds = new HashSet<string>

@@ -32,6 +32,14 @@ namespace Diorama.Audio.EditorTools
             Debug.Log($"[AudioLab] Re-baked {baked.Count} patches to their tiers.");
         }
 
+        /// <summary>Part 3: create the new patches and cues, re-apply every non-cry recipe, bake, sync, analyse.</summary>
+        public static void Remake()
+        {
+            int made = SynthBaker.CreateMissing();
+            RebakeToTiers();
+            Debug.Log($"[AudioLab] Remake: {made} new patches.");
+        }
+
         /// <summary>Part 2: every model preset rendered and tier-levelled into Temp/audio-analysis/Models.png (Claude reads it).</summary>
         public static void ModelGallery()
         {

@@ -177,3 +177,33 @@ virtual 512, spatializer plugin **Meta XR Audio**.
 3. A battle with 3 moves each: music ducks under the victory jingle, comes back.
 4. Pause the app (Quest button) and resume: loops continue, no stuck loops.
 5. fps stays at 72 in a battle with all loops running (shrine flame + gate hum + ambience).
+
+## 3. Step audio-B: new cues (Oct 27)
+All are in the cue table and `AudioIds`. "?" = the script isn't on the audio branch or the exact spot needs a look.
+
+| Event | Cue | Script / method |
+|---|---|---|
+| Finger pokes the floating shard | `shard.touch` (3D, 3 variants) | `Opening.Contact(at, push, how)` |
+| Logo rises out of the statue | `logo.rise` | `Opening` where the logo starts rising (`WarmUp` / `Spark`?) |
+| Looked-at starter pod grows and wiggles | `pod.wiggle` | `Opening.UpdateStarters` when the focused pod starts its wiggle |
+| Lesson done ("Nice!") | `ui.lesson` (2D) | `Onboarding.End(l, done: true)`; replaces `MakeChime` |
+| Hold-rune fill starts / released early | `rune.hold` (2.4 s rise that ends in a ting at 2 s) | hold-rune script (main lane, ?): `var h = AudioService.Play(AudioIds.RuneHold, pos);` on hold start, `h.Stop(0.1f)` if released before it fills (`Play` returns a handle) |
+| Game menu opens / closes | `menu.open`, `menu.close` (2D) | `GamePause.SetPaused(true/false)` or the menu script (?) |
+| Gold path tiles appear | `path.gold` (3D at the first gold tile) | `Onboarding.GoldPath` / `PickGoldTile` |
+| Spirit gifts two pods | `gift.pods` | the quick-gift beat (Spirit / `PodRack`?) |
+| Log lands on the ledge | `log.drop` | `FallenLog.OnLanded` |
+| Glow runs along the pipe | `pipe.glow` | `ForgeBellows.Pulse(i, strokes)` start |
+| Brazier coals warm | `brazier.warm` | `ForgeBellows.OnStroked` (first strokes) / `DrawBrazier` warming |
+| Keeper stomps | `keeper.stomp` | `KeeperFury.Stomp()` / `KeeperHall.OnBattleStomp(feet)` |
+| Keeper smoke snort | `keeper.snort` | `KeeperFury.Snort()` |
+| Crown crystal breaks | `keeper.crown.break` | `KeeperRules.Break()` |
+| Keeper calms, aura burns off | `keeper.calm` | `KeeperHall.Victory()` start |
+| Shard floats over (loop) | `shard.float` (loop) | `KeeperHall.ShardRise()` start, stop in `CollectShard` |
+| Shard docks in the rim holder | `shard.dock` | `KeeperHall.ShardToHolder()` end |
+| Shard locks into the statue | `statue.socket`, then `jingle.shard` | the end beat (main lane, ?) |
+| Settings pebble tick | `ui.pebble` | settings menu (P1, ?) |
+
+Also new in step B:
+- **Synth footsteps:** `step.grass`, `step.path`, `step.stone`, `step.wood` now hold 6 synth variants **and** the Kenney ones. Mugesh picks in the Review tab; until then the cue plays both at random.
+- **Loudness:** every cue plays at volume 0.8. The loud / quiet order is now baked into the clips (loudness tiers). Don't trim cue volumes to fix the balance; tell the audio lane instead.
+- **Imported clips** (Kenney, later ElevenLabs) are played through levelled copies in `Clips/Levelled/`; the source files aren't referenced and stay out of the build.

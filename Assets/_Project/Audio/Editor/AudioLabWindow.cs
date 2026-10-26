@@ -363,7 +363,7 @@ namespace Diorama.Audio.EditorTools
         /// <summary>One line in the Review tab: a patch, or (later) a cue with clips from elsewhere.</summary>
         public class ReviewRow
         {
-            public string id, group, info;
+            public string id, group, info, tag = "";
             public bool gap;
             public AudioReview review;
             public Object owner;
@@ -385,6 +385,7 @@ namespace Diorama.Audio.EditorTools
                 rows.Add(new ReviewRow
                 {
                     id = p.id, group = SynthBaker.Group(p), gap = p.gap, review = p.review, owner = p,
+                    tag = p.confidence == SynthConfidence.None ? "" : "synth-" + p.confidence.ToString().ToLowerInvariant(),
                     play = () => PlayPatchVariant(patch),
                 });
             }
@@ -450,6 +451,7 @@ namespace Diorama.Audio.EditorTools
                     Dot(new Rect(dot.x, dot.y + 5, 8, 8), r.review.status);
                     if (GUILayout.Button("▶", GUILayout.Width(26))) r.play?.Invoke();
                     GUILayout.Label(new GUIContent((r.gap ? "★ " : "") + r.id, r.info), GUILayout.Width(190));
+                    GUILayout.Label(r.tag, EditorStyles.miniLabel, GUILayout.Width(74));
                     if (GUILayout.Toggle(r.review.status == ReviewStatus.Approved, "Approve", EditorStyles.miniButtonLeft, GUILayout.Width(60)) != (r.review.status == ReviewStatus.Approved))
                         SetStatus(r, r.review.status == ReviewStatus.Approved ? ReviewStatus.None : ReviewStatus.Approved);
                     if (GUILayout.Toggle(r.review.status == ReviewStatus.Redo, "Redo", EditorStyles.miniButtonRight, GUILayout.Width(50)) != (r.review.status == ReviewStatus.Redo))

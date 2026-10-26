@@ -9,6 +9,8 @@ namespace Diorama.Audio
     public enum SynthFilter { None, LowPass, HighPass, BandPass }
     public enum SynthMode { OneShot, Loop, Sequence }
     public enum ReviewStatus { None, Approved, Redo }
+    /// <summary>Claude's honest read of a synth sound after looking at its spectrogram (step B): good, ok, or weak (thin, buzzy, noisy).</summary>
+    public enum SynthConfidence { None, Good, Ok, Weak }
 
     /// <summary>Mugesh's verdict on a sound, written in the Audio Lab's Review tab. The next session reads the Redo notes.</summary>
     [Serializable]
@@ -158,6 +160,7 @@ namespace Diorama.Audio
 
         [Header("Review")]
         [Tooltip("Organic sound synth may not nail (marked with a star in the brief); flagged in the Review tab.")] public bool gap;
+        [Tooltip("synth-good / synth-ok / synth-weak, set by the recipe after reading the spectrogram.")] public SynthConfidence confidence;
         public AudioReview review = new AudioReview();
     }
 }

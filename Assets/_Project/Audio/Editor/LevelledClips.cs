@@ -57,6 +57,18 @@ namespace Diorama.Audio.EditorTools
                 Debug.LogError($"[AudioLab] Can't read {AssetDatabase.GetAssetPath(source)}; no levelled copy made.");
                 return false;
             }
+            // Speaker-safe: a mostly-sub clip gets a 180 Hz high-pass (4th order) so small speakers play its body.
+            if (tier != LoudnessTier.Music && Loudness.Analyse(samples, SynthPatch.SampleRate).lowShare > AudioScope.MaxLowShare)
+            {
+                var h1 = new Svf();
+                var h2 = new Svf();
+                for (int i = 0; i < samples.Length; i++)
+                {
+                    h1.Process(samples[i], 180f, 0.54f, out _, out _, out float y);
+                    h2.Process(y, 180f, 1.31f, out _, out _, out y);
+                    samples[i] = y;
+                }
+            }
             samples = Loudness.TrimSilence(samples, SynthPatch.SampleRate);
             if (tier != LoudnessTier.Music) Loudness.LevelTo(samples, SynthPatch.SampleRate, Loudness.TierDb(tier) + trimDb);
             WavIO.Write(dst, samples, 1, SynthPatch.SampleRate);
