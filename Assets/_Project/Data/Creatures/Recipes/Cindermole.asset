@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e27712b2a6f9fc45ae0b54784bf7327, type: 3}
   m_Name: Cindermole
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.CreatureRecipe
-  baseRecipe: {fileID: 11400000, guid: 3416fcbf280357c4bbbc36773e3c09fc, type: 2}
-  body: {fileID: 0}
-  height: 0.045
+  baseRecipe: {fileID: 0}
+  body: {fileID: 11400000, guid: 7441fe4d76f26514cb93450d9e693493, type: 2}
+  height: 0.0475
   zones:
     belly: 0
     bellyDirection: {x: 0, y: 0, z: 0}
@@ -33,33 +33,70 @@ MonoBehaviour:
     crackScale: 0
     crackWidth: 0
     crackPulse: 0
-    patches: []
-  parts: []
+    patches:
+    - center: {x: 0, y: -0.16, z: 0.4}
+      radius: 0.3
+      color: 1
+      mirrorX: 0
+    - center: {x: 0, y: 0.12, z: 0.56}
+      radius: 0.05
+      color: 2
+      mirrorX: 0
+  parts:
+  - part: {fileID: 11400000, guid: 1ea6da57c56f72c45a03b94103995cad, type: 2}
+    position: {x: 0.32, y: -0.04, z: 0.26}
+    rotation: {x: 0, y: 10, z: 0}
+    scale: {x: 1.25, y: 1.25, z: 1.25}
+    mirror: 1
+    parent: -1
+  - part: {fileID: 11400000, guid: 82a75776cba56c74fbf130f8501991be, type: 2}
+    position: {x: 0, y: 0.34, z: 0.13}
+    rotation: {x: -8, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+    mirror: 0
+    parent: -1
+  - part: {fileID: 11400000, guid: 8c05e4886f8f842459b055dcb3672a5e, type: 2}
+    position: {x: 0, y: 0.42, z: 0.42}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+    mirror: 0
+    parent: -1
+  - part: {fileID: 11400000, guid: 798ff29359e8b624e98ef8e1ec13cbbe, type: 2}
+    position: {x: 0.24, y: 0.44, z: 0.04}
+    rotation: {x: 0, y: 0, z: -30}
+    scale: {x: 0.35, y: 0.35, z: 0.35}
+    mirror: 1
+    parent: -1
   face:
-    eyeSize: 0
-    eyeSpacing: 0
-    eyeHeight: 0
-    eyeStretch: 0
-    decals: []
+    eyeSize: 0.045
+    eyeSpacing: 0.13
+    eyeHeight: 0.27
+    eyeStretch: 0.3
+    decals:
+    - kind: 1
+      at: {x: 0, y: 0.03}
+      size: {x: 0.03, y: 0}
+      color: 6
+      mirrorX: 0
   palette:
-    baseColor: {r: 0.3529412, g: 0.2901961, b: 0.2509804, a: 1}
-    belly: {r: 0.9098039, g: 0.8235294, b: 0.6901961, a: 1}
+    baseColor: {r: 0.47843137, g: 0.41568628, b: 0.3529412, a: 1}
+    belly: {r: 0.9411765, g: 0.8745098, b: 0.7529412, a: 1}
     accent: {r: 0.76862746, g: 0.5803922, b: 0.5411765, a: 1}
-    socks: {r: 0.72156864, g: 0.5176471, b: 0.47058824, a: 1}
-    glow: {r: 1, g: 0.47843137, b: 0.15686275, a: 1}
-    extra: {r: 1, g: 0.8235294, b: 0.47843137, a: 1}
+    socks: {r: 0.76862746, g: 0.5803922, b: 0.5411765, a: 1}
+    glow: {r: 0.8980392, g: 0.39215687, b: 0.11764706, a: 1}
+    extra: {r: 0.22745098, g: 0.19607843, b: 0.19607843, a: 1}
     face: {r: 0.16470589, g: 0.1254902, b: 0.09411765, a: 1}
     iris: {r: 0.16470589, g: 0.1254902, b: 0.09411765, a: 1}
   spec: 0.2
   glow: 0
   outline: 0.035
   idle:
-    breathe: 0
-    breatheSpeed: 0
+    breathe: 0.018
+    breatheSpeed: 1.9
     jiggle: 0
     hover: 0
     bob: 0
-    sway: 0
+    sway: 1.5
     swaySpeed: 0
   heightScale: 1.25
   extraParts:

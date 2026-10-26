@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e27712b2a6f9fc45ae0b54784bf7327, type: 3}
   m_Name: Pyrecrane
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.CreatureRecipe
-  baseRecipe: {fileID: 11400000, guid: e2f6e0db4f8ad75439621f8e3f7b0556, type: 2}
-  body: {fileID: 0}
-  height: 0.045
+  baseRecipe: {fileID: 0}
+  body: {fileID: 11400000, guid: 07d951494c069074d8a9468a34548264, type: 2}
+  height: 0.065
   zones:
     belly: 0
     bellyDirection: {x: 0, y: 0, z: 0}
@@ -22,8 +22,8 @@ MonoBehaviour:
     bellyMaxY: 0
     bellyDrips: 0
     bellyDripLength: 0
-    socks: 0
-    socksY: 0
+    socks: 1
+    socksY: -0.55
     tips: 0
     tipAxis: {x: 0, y: 0, z: 0}
     tipAt: 0
@@ -33,34 +33,122 @@ MonoBehaviour:
     crackScale: 0
     crackWidth: 0
     crackPulse: 0
-    patches: []
-  parts: []
+    patches:
+    - center: {x: 0, y: -0.1, z: 0.4}
+      radius: 0.38
+      color: 1
+      mirrorX: 0
+    - center: {x: 0, y: 0.42, z: 0.3}
+      radius: 0.17
+      color: 1
+      mirrorX: 0
+    - center: {x: 0, y: 0.74, z: 0.38}
+      radius: 0.19
+      color: 1
+      mirrorX: 0
+    - center: {x: 0, y: 0.97, z: 0.2}
+      radius: 0.14
+      color: 5
+      mirrorX: 0
+  parts:
+  - part: {fileID: 11400000, guid: 8d96362e58c98c946b4a3c7e3c4b6233, type: 2}
+    position: {x: 0, y: 0.75, z: 0.4}
+    rotation: {x: 8, y: 0, z: 0}
+    scale: {x: 1.35, y: 1.35, z: 1.35}
+    mirror: 0
+    parent: -1
+  - part: {fileID: 11400000, guid: 6ff9a9bb72d27e34b9a0b177eb761c70, type: 2}
+    position: {x: 0, y: 0.95, z: 0.13}
+    rotation: {x: -28, y: 0, z: 0}
+    scale: {x: 1.15, y: 1.15, z: 1.15}
+    mirror: 0
+    parent: -1
+  - part: {fileID: 11400000, guid: 6ff9a9bb72d27e34b9a0b177eb761c70, type: 2}
+    position: {x: 0.06, y: 0.93, z: 0.1}
+    rotation: {x: -40, y: 0, z: -22}
+    scale: {x: 1, y: 1, z: 1}
+    mirror: 1
+    parent: -1
+  - part: {fileID: 11400000, guid: 6ff9a9bb72d27e34b9a0b177eb761c70, type: 2}
+    position: {x: 0, y: 0.92, z: 0.04}
+    rotation: {x: -58, y: 0, z: 0}
+    scale: {x: 0.95, y: 0.95, z: 0.95}
+    mirror: 0
+    parent: -1
+  - part: {fileID: 11400000, guid: 91ea87cdebeec91458c58c6d04ca4c49, type: 2}
+    position: {x: 0.38, y: 0.02, z: -0.1}
+    rotation: {x: 0, y: 25, z: 5}
+    scale: {x: 1.5, y: 1.5, z: 1.5}
+    mirror: 1
+    parent: -1
+  - part: {fileID: 11400000, guid: 6ff9a9bb72d27e34b9a0b177eb761c70, type: 2}
+    position: {x: 0.44, y: -0.14, z: -0.3}
+    rotation: {x: -120, y: 0, z: -20}
+    scale: {x: 0.8, y: 0.8, z: 0.8}
+    mirror: 1
+    parent: -1
+  - part: {fileID: 11400000, guid: 6ff9a9bb72d27e34b9a0b177eb761c70, type: 2}
+    position: {x: 0.42, y: -0.24, z: -0.26}
+    rotation: {x: -130, y: 0, z: -15}
+    scale: {x: 0.75, y: 0.75, z: 0.75}
+    mirror: 1
+    parent: -1
+  - part: {fileID: 11400000, guid: 6ff9a9bb72d27e34b9a0b177eb761c70, type: 2}
+    position: {x: 0.4, y: -0.32, z: -0.2}
+    rotation: {x: -140, y: 0, z: -10}
+    scale: {x: 0.7, y: 0.7, z: 0.7}
+    mirror: 1
+    parent: -1
+  - part: {fileID: 11400000, guid: 6ff9a9bb72d27e34b9a0b177eb761c70, type: 2}
+    position: {x: 0, y: -0.04, z: -0.5}
+    rotation: {x: -62, y: 0, z: 0}
+    scale: {x: 2.05, y: 2.05, z: 2.05}
+    mirror: 0
+    parent: -1
+  - part: {fileID: 11400000, guid: 6ff9a9bb72d27e34b9a0b177eb761c70, type: 2}
+    position: {x: 0.06, y: -0.05, z: -0.49}
+    rotation: {x: -60, y: 0, z: -22}
+    scale: {x: 2, y: 2, z: 2}
+    mirror: 1
+    parent: -1
+  - part: {fileID: 11400000, guid: 6ff9a9bb72d27e34b9a0b177eb761c70, type: 2}
+    position: {x: 0.12, y: -0.07, z: -0.47}
+    rotation: {x: -56, y: 0, z: -44}
+    scale: {x: 1.9, y: 1.9, z: 1.9}
+    mirror: 1
+    parent: -1
+  - part: {fileID: 11400000, guid: 6ff9a9bb72d27e34b9a0b177eb761c70, type: 2}
+    position: {x: 0.17, y: -0.1, z: -0.44}
+    rotation: {x: -50, y: 0, z: -66}
+    scale: {x: 1.75, y: 1.75, z: 1.75}
+    mirror: 1
+    parent: -1
   face:
-    eyeSize: 0
-    eyeSpacing: 0
-    eyeHeight: 0
-    eyeStretch: 0
+    eyeSize: 0.042
+    eyeSpacing: 0.12
+    eyeHeight: 0.8
+    eyeStretch: 0.65
     decals: []
   palette:
-    baseColor: {r: 0.18039216, g: 0.16470589, b: 0.15686275, a: 1}
-    belly: {r: 1, g: 0.9411765, b: 0.84705883, a: 1}
-    accent: {r: 0.22745098, g: 0.20392157, b: 0.1882353, a: 1}
-    socks: {r: 0.16470589, g: 0.15686275, b: 0.14901961, a: 1}
-    glow: {r: 1, g: 0.41568628, b: 0.1254902, a: 1}
-    extra: {r: 0.84705883, g: 0.15686275, b: 0.11764706, a: 1}
+    baseColor: {r: 0.22745098, g: 0.22745098, b: 0.22745098, a: 1}
+    belly: {r: 0.9411765, g: 0.9019608, b: 0.8156863, a: 1}
+    accent: {r: 0.3529412, g: 0.3137255, b: 0.28235295, a: 1}
+    socks: {r: 0.22745098, g: 0.22745098, b: 0.22745098, a: 1}
+    glow: {r: 0.8980392, g: 0.39215687, b: 0.11764706, a: 1}
+    extra: {r: 0.8, g: 0.13333334, b: 0.13333334, a: 1}
     face: {r: 0.16470589, g: 0.1254902, b: 0.09411765, a: 1}
-    iris: {r: 0.7529412, g: 0.2509804, b: 0.1254902, a: 1}
+    iris: {r: 0.16470589, g: 0.1254902, b: 0.09411765, a: 1}
   spec: 0.2
   glow: 0
   outline: 0.035
   idle:
-    breathe: 0
-    breatheSpeed: 0
+    breathe: 0.012
+    breatheSpeed: 1.6
     jiggle: 0
     hover: 0
     bob: 0
-    sway: 0
-    swaySpeed: 0
+    sway: 1.6
+    swaySpeed: 0.7
   heightScale: 1.3
   extraParts:
   - part: {fileID: 11400000, guid: 6ff9a9bb72d27e34b9a0b177eb761c70, type: 2}
