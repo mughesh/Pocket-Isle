@@ -13,7 +13,7 @@ namespace Diorama
     /// pinch: Meta's app menu button for hand tracking, <c>OVRInput.Button.Start</c> on <c>Controller.LHand</c>; also the
     /// left controller's menu button), F2 in the Editor. A plain 2D panel opens a little past arm's reach in front of
     /// the player, toward the dominant hand and below the eyes, facing them; it stays put (world-locked) and comes back
-    /// in front when the head turns well away. The bar under it moves it (pinch it, or point at it and pinch, then drag);
+    /// in front when the head turns well away. Its edge moves it like the island's rim (pinch the frame, or point at it and pinch, then drag);
     /// it keeps that spot (relative to the head's facing) until the app closes. Buttons work with a poke (a fingertip
     /// touches the panel) and with each hand's own ray (ISDK pointer pose: a thin line to the panel, pinch to press; this
     /// panel only); in the Editor also with a mouse click. No look + pinch (step 9e: it fought the game's own gaze).
@@ -41,8 +41,9 @@ namespace Diorama
         public float fontSize = 0.1f;
         [Tooltip("Hand rays reach this far (m).")]
         public float rayLength = 1.2f;
-        [Tooltip("The move bar under the panel (m): width, height, gap below the panel.")]
-        public Vector3 bar = new Vector3(0.12f, 0.016f, 0.01f);
+        [Tooltip("The grab frame round the panel (m): visible width; a pinch from this far outside to this far inside the edge grabs it.")]
+        public float frame = 0.012f;
+        public float grabOut = 0.03f, grabIn = 0.012f;
 
 #if UNITY_EDITOR || POCKET_DEV
         enum Tab { GoTo, Party, Encounter, Story, Save, Tools }
@@ -92,9 +93,9 @@ namespace Diorama
         readonly bool[] _rayOnPanel = new bool[2];
         readonly bool[] _fingerNear = new bool[2];
         readonly MeshRenderer[] _ray = new MeshRenderer[2], _rayDot = new MeshRenderer[2];
-        readonly bool[] _rayOnBar = new bool[2];
-        MeshRenderer _bar;
-        bool _barNear;
+        readonly bool[] _rayOnFrame = new bool[2];
+        MeshRenderer _frame;
+        bool _frameNear;
         int _dragHand = -1;
         Vector3 _dragFrom, _dragRootFrom;
         bool _moved;
@@ -163,9 +164,10 @@ namespace Diorama
             _title.alignment = TextAlignmentOptions.Left;
             _status = Text(_root, "Status", new Vector2(0f, -size.y * 0.5f + 0.028f), new Vector2(size.x - 0.02f, 0.045f), fontSize * 0.8f);
             _status.alignment = TextAlignmentOptions.TopLeft;
-            _bar = Quad(_root, "Move Bar");
-            _bar.transform.localPosition = new Vector3(0f, BarY, 0f);
-            _bar.transform.localScale = new Vector3(bar.x, bar.y, 1f);
+            _frame = Quad(_root, "Grab Frame");
+            _frame.sortingOrder = -2;
+            _frame.transform.localPosition = new Vector3(0f, 0f, 0.001f);
+            _frame.transform.localScale = new Vector3(size.x + frame * 2f, size.y + frame * 2f, 1f);
             string[] names = { "Go to", "Party", "Encounter", "Story", "Save", "Tools" };
             float w = (size.x - 0.02f) / names.Length;
             for (int i = 0; i < names.Length; i++)
@@ -447,7 +449,7 @@ namespace Diorama
         /// <summary>
         /// In front of the head (yaw only), toward the dominant hand and below the eyes, at arm's reach, facing the head.
         /// World-locked: it only moves when (re)opened or when the head has turned more than <see cref="followAngle"/> away.
-        /// Once dragged by its bar it goes to that spot instead (kept relative to the head's facing).
+        /// Once dragged by its frame it goes to that spot instead (kept relative to the head's facing).
         /// </summary>
         void Place(bool snap)
         {
@@ -484,24 +486,32 @@ namespace Diorama
             if (away.sqrMagnitude > 1e-6f) _root.rotation = Quaternion.LookRotation(away, Vector3.up);
         }
 
-        float BarY => -size.y * 0.5f - bar.z - bar.y * 0.5f;
+        /// <summary>On the panel's edge band (like the island's rim): up to <paramref name="outside"/> beyond the edge, <paramref name="inside"/> within it.</summary>
+        bool OnFrame(Vector2 p, float outside, float inside)
+        {
+            float ex = Mathf.Abs(p.x) - size.x * 0.5f, ey = Mathf.Abs(p.y) - size.y * 0.5f;
+            return ex <= outside && ey <= outside && (ex >= -inside || ey >= -inside);
+        }
 
-        bool OnBar(Vector2 p, float margin = 0f) => Mathf.Abs(p.x) <= bar.x * 0.5f + margin && Mathf.Abs(p.y - BarY) <= bar.y * 0.5f + margin;
+        bool PinchOnFrame(Vector3 pinch)
+        {
+            Vector3 l = _root.InverseTransformPoint(pinch);
+            return Mathf.Abs(l.z) < 0.05f && OnFrame(new Vector2(l.x, l.y), grabOut, grabIn);
+        }
 
         /// <summary>
-        /// Moving the panel by its bar: a pinch on the bar (or the ray on it + pinch) holds it, the panel follows the pinch
+        /// Moving the panel by its frame: a pinch on the edge band (or the ray on the frame + pinch) holds it, the panel follows the pinch
         /// point and keeps facing the head; letting go keeps the spot.
         /// </summary>
         void Drag()
         {
-            _barNear = false;
+            _frameNear = false;
             for (int h = 0; h < 2; h++)
             {
                 if (_dragHand >= 0 && _dragHand != h) continue;
                 var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
                 if (!IslandHandle.TryGetPinchPoint(hand, out var pinch)) continue;
-                Vector3 l = _root.InverseTransformPoint(pinch);
-                if (OnBar(new Vector2(l.x, l.y), 0.025f) && Mathf.Abs(l.z) < 0.05f) _barNear = true;
+                if (PinchOnFrame(pinch)) _frameNear = true;
             }
             if (_dragHand < 0) return;
             var held = HandRegistry.Get(_dragHand == 0 ? Handedness.Left : Handedness.Right);
@@ -526,11 +536,7 @@ namespace Diorama
         bool StartDrag(int h, IHand hand, bool byRay)
         {
             if (!IslandHandle.TryGetPinchPoint(hand, out var pinch)) return false;
-            if (!byRay)
-            {
-                Vector3 l = _root.InverseTransformPoint(pinch);
-                if (!OnBar(new Vector2(l.x, l.y), 0.025f) || Mathf.Abs(l.z) >= 0.05f) return false;
-            }
+            if (!byRay && !PinchOnFrame(pinch)) return false;
             _dragHand = h;
             _dragFrom = pinch;
             _dragRootFrom = _root.position;
@@ -603,8 +609,8 @@ namespace Diorama
                 bool busy = grabGuard != null && grabGuard.IsHandBusy(h == 0);
                 if (pinching && !_wasPinching[h] && !busy && _dragHand < 0)
                 {
-                    // A pinch at the bar (or the ray on it) moves the panel; the ray on a button presses it.
-                    if (!StartDrag(h, hand, _rayOnBar[h]) && _rayHover[h] != null) Press(_rayHover[h], $"ray + pinch ({(h == 0 ? "left" : "right")})");
+                    // A pinch at the edge (or the ray on the frame) moves the panel; the ray on a button presses it.
+                    if (!StartDrag(h, hand, _rayOnFrame[h]) && _rayHover[h] != null) Press(_rayHover[h], $"ray + pinch ({(h == 0 ? "left" : "right")})");
                 }
                 _wasPinching[h] = pinching;
             }
@@ -619,19 +625,20 @@ namespace Diorama
             for (int h = 0; h < 2; h++)
             {
                 _rayHover[h] = null;
-                _rayOnPanel[h] = _rayOnBar[h] = false;
+                _rayOnPanel[h] = _rayOnFrame[h] = false;
                 _ray[h].enabled = _rayDot[h].enabled = false;
                 var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
                 if (hand == null || !hand.IsTrackedDataValid || _fingerNear[h] || _dragHand >= 0 || !hand.GetPointerPose(out var pose)) continue;
                 if (!HitPlane(new Ray(pose.position, pose.forward), out var p)) continue;
-                bool onBar = OnBar(p, 0.01f);
+                // The ray on the frame (just outside the edge) grabs; inside it presses buttons.
+                bool onBar = !Hit(new Ray(pose.position, pose.forward), out _) && OnFrame(p, frame + 0.01f, 0f);
                 if (!onBar && (Mathf.Abs(p.x) > size.x * 0.5f || Mathf.Abs(p.y) > size.y * 0.5f)) continue;
                 Vector3 end = _root.TransformPoint(new Vector3(p.x, p.y, -0.003f));
                 Vector3 a = pose.position, along = end - a;
                 float len = along.magnitude;
                 if (len > rayLength) continue;
                 _rayOnPanel[h] = true;
-                _rayOnBar[h] = onBar;
+                _rayOnFrame[h] = onBar;
                 DevCheats.PanelGazed = true;
                 _rayHover[h] = onBar ? null : ButtonAt(p);
                 bool pinching = hand.GetIndexFingerIsPinching();
@@ -723,8 +730,9 @@ namespace Diorama
             _status.text = Time.unscaledTime < _statusUntil && !string.IsNullOrEmpty(_statusText) ? _statusText : TabInfo();
             foreach (var b in _tabs) PaintButton(b, true);
             foreach (var b in _content) PaintButton(b, false);
-            bool barLit = _dragHand >= 0 || _barNear || _rayOnBar[0] || _rayOnBar[1];
-            Paint(_bar, new Color(0.85f, 0.85f, 0.8f, barLit ? 0.9f : 0.45f), barLit ? new Color(1f, 0.9f, 0.55f, 1f) : Color.clear, bar.x / bar.y, 0.5f, barLit ? 0.2f : 0f);
+            bool lit = _dragHand >= 0 || _frameNear || _rayOnFrame[0] || _rayOnFrame[1];
+            float fh = size.y + frame * 2f;
+            Paint(_frame, Color.clear, lit ? new Color(1f, 0.9f, 0.55f, 0.95f) : new Color(0.85f, 0.85f, 0.8f, 0.35f), (size.x + frame * 2f) / fh, 0.08f, frame * 1.4f / fh);
         }
 
         void PaintButton(Button b, bool tab)

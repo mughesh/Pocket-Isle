@@ -19,7 +19,7 @@ The app appears in the library under **Unknown Sources**.
 - **Unity Editor:** F2.
 
 The panel opens about an arm's length in front of you, a little toward your main hand. It stays where it is; turn well
-away and it comes back in front. **To move it**, pinch the small bar under it (or point at the bar and pinch) and drag;
+away and it comes back in front. **To move it**, pinch its edge, any side, like the island's rim (or point at the frame just outside it and pinch) and drag;
 it opens at that spot from then on, until the app closes. The same gesture closes it (or **Tools > Close**).
 
 Press a button by **poking it** with a fingertip, or by **pointing at it** (a thin line from your hand shows up when it
