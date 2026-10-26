@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8421308f89f57d498f601bfba37a8cf, type: 3}
+  m_Name: Cindercap
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.IslingSpecies
+  displayName: Cindercap
+  element: 1
+  recipe: {fileID: 11400000, guid: c0421823363beb646a5cee6d6456da74, type: 2}
+  evolvesTo: {fileID: 11400000, guid: cf5f1d1f4df13fe499df0f36434d2e06, type: 2}
+  evolveLevel: 16
+  baseStats:
+    hp: 42
+    attack: 13
+    defense: 10
+    speed: 10
+  moves:
+  - {fileID: 11400000, guid: 73c21888ffbe3f940934df4cd033b5d3, type: 2}
+  - {fileID: 11400000, guid: 39f69d2f16d41be49be1199baa8a699c, type: 2}
+  - {fileID: 11400000, guid: 6b6725a9ac7128d419cc0057fb20c9c4, type: 2}
+  keeper: 0
