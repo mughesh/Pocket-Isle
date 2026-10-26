@@ -15,8 +15,8 @@ MonoBehaviour:
   displayName: Kettlewing
   element: 1
   recipe: {fileID: 11400000, guid: b6b3e94a443f6414ebdd03ff8511bc18, type: 2}
-  evolvesTo: {fileID: 0}
-  evolveLevel: 0
+  evolvesTo: {fileID: 11400000, guid: d1eca71a0e226844a9ba1fe6e8a21398, type: 2}
+  evolveLevel: 14
   baseStats:
     hp: 38
     attack: 11
@@ -26,3 +26,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 5a5dcbcb7a50b984f9f06a89afdf21b5, type: 2}
   - {fileID: 11400000, guid: 39f69d2f16d41be49be1199baa8a699c, type: 2}
   - {fileID: 11400000, guid: 3b67ad77c7d29084bb360e9edbd5f24c, type: 2}
+  keeper: 0
