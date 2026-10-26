@@ -68,10 +68,10 @@ namespace Diorama.Audio
         }
 
         /// <summary>Scales the clip so its mid level hits the target, then holds peaks under the ceiling.</summary>
-        public static void LevelTo(float[] buf, int rate, float targetDb, float ceilingDb = CeilingDb)
+        /// <param name="passes">Limiting a peaky clip lowers its mid level a little; each pass makes that up (imports need more).</param>
+        public static void LevelTo(float[] buf, int rate, float targetDb, float ceilingDb = CeilingDb, int passes = 2)
         {
-            // Two passes: limiting a peaky clip lowers its mid level a little, the second pass makes that up.
-            for (int pass = 0; pass < 2; pass++)
+            for (int pass = 0; pass < passes; pass++)
             {
                 float mid = MidLevelDb(buf, rate);
                 if (mid < -110f) return;

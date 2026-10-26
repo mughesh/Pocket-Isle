@@ -42,6 +42,28 @@ namespace Diorama.Audio.EditorTools
             File.WriteAllText(ReportPath, sb.ToString());
         }
 
+        /// <summary>
+        /// Release check: fails while any cue plays a free-plan ElevenLabs clip (no commercial licence), listing them; also
+        /// runs the cue validation. Logs/AudioLab/release.txt. Returns true when it passes.
+        /// </summary>
+        [MenuItem("Tools/Pocket Isle/Audio/Release Check", priority = 94)]
+        public static bool ReleaseCheck()
+        {
+            var free = GenImporter.FreeClipsInCues();
+            var table = AudioCueTools.BuildTable();
+            var validation = AudioCueTools.Validate(table);
+            var sb = new StringBuilder();
+            bool pass = free.Count == 0;
+            sb.AppendLine(pass ? "PASS release check" : $"FAIL release check: {free.Count} free-plan clips in cues (no commercial licence). Regenerate on a paid plan or remove them:");
+            foreach (var f in free) sb.AppendLine("  " + f);
+            sb.AppendLine(validation);
+            Directory.CreateDirectory(Path.GetDirectoryName(ReportPath));
+            File.WriteAllText("Logs/AudioLab/release.txt", sb.ToString());
+            if (pass) Debug.Log("[AudioLab] Release check passed. " + validation);
+            else Debug.LogError("[AudioLab] " + sb);
+            return pass;
+        }
+
         /// <summary>Source vs imported (build) size of everything under Clips/, per folder: Logs/AudioLab/sizes.txt.</summary>
         public static void SizeReport()
         {

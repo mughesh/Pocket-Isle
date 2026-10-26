@@ -15,6 +15,9 @@ MonoBehaviour:
   id: keeper.fury
   clips:
   - {fileID: 8300000, guid: ce7b2f90ca445bd418a308b136254682, type: 3}
+  - {fileID: 8300000, guid: 1facd23a4cab3674996748baae31f071, type: 3}
+  - {fileID: 8300000, guid: 4d5f4fa093283dc4db698b9c9d58864b, type: 3}
+  - {fileID: 8300000, guid: 46d2687c3c62b494a843b502c608d736, type: 3}
   volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97

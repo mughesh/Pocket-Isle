@@ -15,6 +15,8 @@ MonoBehaviour:
   id: restore.swell
   clips:
   - {fileID: 8300000, guid: 9027f50396354de4bba7e255004d6b3a, type: 3}
+  - {fileID: 8300000, guid: 678b2fb4c5cee3a4fa140d3aeb2bf1d5, type: 3}
+  - {fileID: 8300000, guid: b4c9951db4c1421429248d0e3640a6d1, type: 3}
   volume: 0.8
   volumeJitter: 0.05
   pitchMin: 1

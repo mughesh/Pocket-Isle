@@ -15,6 +15,9 @@ MonoBehaviour:
   id: log.lift
   clips:
   - {fileID: 8300000, guid: 9c9e9a358d160bf4b8b57e7e8ea6cecc, type: 3}
+  - {fileID: 8300000, guid: 2678e890879944a42b6356c963761835, type: 3}
+  - {fileID: 8300000, guid: bcab2a8cae93e644ba573c7601195379, type: 3}
+  - {fileID: 8300000, guid: 00e98aba459481a45a9ee1b6e6706fd1, type: 3}
   volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97

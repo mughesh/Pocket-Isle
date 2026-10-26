@@ -94,7 +94,11 @@ namespace Diorama.Audio.EditorTools
                 patches.TryGetValue(r.id, out var patch);
                 if (!string.IsNullOrEmpty(r.mixWith) && patch != null) clips.AddRange(MixBaker.Clips(patch, r));
                 else if (patch != null) clips.AddRange(SynthBaker.Clips(patch));
-                clips.AddRange(LevelledClips.For(ExtraClips(r.extraClips), AudioTiers.ForCue(cue, patch), AudioTiers.TrimFor(cue, patch), relevel));
+                var tier = AudioTiers.ForCue(cue, patch);
+                float trim = AudioTiers.TrimFor(cue, patch);
+                clips.AddRange(LevelledClips.For(ExtraClips(r.extraClips), tier, trim, relevel, !cue.loop));
+                // Gen batch variants (GenImporter) sit next to the synth ones.
+                clips.AddRange(LevelledClips.For(ExtraClips(new[] { "Clips/Gen/" + r.id + "/" }), tier, trim, relevel, !cue.loop));
                 if (!cue.clips.SequenceEqual(clips))
                 {
                     cue.clips = clips.ToArray();

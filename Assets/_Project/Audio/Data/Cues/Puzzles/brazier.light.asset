@@ -15,6 +15,9 @@ MonoBehaviour:
   id: brazier.light
   clips:
   - {fileID: 8300000, guid: d5c26473fc299bd4ab4f6d33c6b16df4, type: 3}
+  - {fileID: 8300000, guid: 5660ea396dd61244996ecfc51e3fea42, type: 3}
+  - {fileID: 8300000, guid: 6dbb60caa88566b4c91b06ff4d44f3f1, type: 3}
+  - {fileID: 8300000, guid: 0a03c6dc5c1fba3459e75c34e9321abb, type: 3}
   volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97

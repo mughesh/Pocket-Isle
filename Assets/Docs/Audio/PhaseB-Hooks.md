@@ -207,3 +207,8 @@ Also new in step B:
 - **Synth footsteps:** `step.grass`, `step.path`, `step.stone`, `step.wood` now hold 6 synth variants **and** the Kenney ones. Mugesh picks in the Review tab; until then the cue plays both at random.
 - **Loudness:** every cue plays at volume 0.8. The loud / quiet order is now baked into the clips (loudness tiers). Don't trim cue volumes to fix the balance; tell the audio lane instead.
 - **Imported clips** (Kenney, later ElevenLabs) are played through levelled copies in `Clips/Levelled/`; the source files aren't referenced and stay out of the build.
+
+### Gen batch (ElevenLabs) and the release guard
+- `Tools > Pocket Isle > Audio > Import Gen Batch` (or **Import gen** in the Lab toolbar) copies new clips from the gen lane's manifest into `Clips/Gen/<cueId>/` and adds them to the cues next to the synth variants. Safe to re-run.
+- **Free-plan clips (`_FREE`) have no commercial licence.** `Tools > Pocket Isle > Audio > Release Check` lists them, and `ReleaseBuildGuard` (an `IPreprocessBuildWithReport`) **fails non-development builds** while any cue holds one. Development builds still go through for headset tests.
+- `.mp3` is not in Git LFS. This batch is all `.wav` (LFS). If a later batch brings `.mp3`, add `*.mp3 filter=lfs diff=lfs merge=lfs -text` to `.gitattributes` first (the audio lane doesn't edit it).

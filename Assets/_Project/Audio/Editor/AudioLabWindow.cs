@@ -119,6 +119,8 @@ namespace Diorama.Audio.EditorTools
                 if (GUILayout.Button("Bake all", EditorStyles.toolbarButton)) SynthBaker.BakeAll(_patches);
                 if (GUILayout.Button(new GUIContent("Sync cues", "Create missing cues, refresh their clips, rebuild the table, validate, write AudioIds.cs."), EditorStyles.toolbarButton))
                     AudioCueTools.SyncAll();
+                if (GUILayout.Button(new GUIContent("Import gen", "Import new clips from the ElevenLabs gen lane's manifest.json (Tools > Pocket Isle > Audio > Import Gen Batch)."), EditorStyles.toolbarButton))
+                    GenImporter.ImportMenu();
                 if (GUILayout.Button(new GUIContent("Analyse", "AudioScope: contact sheets + report.md in Temp/audio-analysis/ (all groups, or the open patch's group with Shift)."), EditorStyles.toolbarButton))
                 {
                     if (Event.current.shift && _selected != null) AudioScope.AnalyseGroup(SynthBaker.Group(_selected));

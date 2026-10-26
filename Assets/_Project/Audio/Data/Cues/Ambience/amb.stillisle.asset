@@ -15,6 +15,7 @@ MonoBehaviour:
   id: amb.stillisle
   clips:
   - {fileID: 8300000, guid: 29a6147e5adcbe2498c4d3112c6c5b2b, type: 3}
+  - {fileID: 8300000, guid: 080c8d2c4c029aa49a07a675787d5a67, type: 3}
   volume: 0.8
   volumeJitter: 0
   pitchMin: 1

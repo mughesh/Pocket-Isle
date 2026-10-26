@@ -62,3 +62,14 @@ Originals: `D:/UNITY/projects/_audio-sources/kenney/` (outside the repo).
 
 ## Music
 Planned: Lyria (Google). Add each track here with its licence terms when it lands in `Clips/Music/`.
+
+## ElevenLabs Sound Effects (gen lane, imported by Tools > Pocket Isle > Audio > Import Gen Batch)
+Source: `../_audio-sources/elevenlabs/manifest.json` (outside the repo; prompts and verdicts are there and in each cue's Review note).
+Copies: `Assets/_Project/Audio/Clips/Gen/<cueId>/`; the cues play the levelled copies in `Clips/Levelled/Gen/`.
+
+| Plan | Licence | Files |
+|---|---|---|
+| Free (`_FREE` in the name) | **No commercial licence; attribution required.** Editor listening only. The release check and `ReleaseBuildGuard` block release builds while any cue holds one. | all 35 clips of the Oct 27 batch (beds, Cinderwood, walk.bump) |
+| Paid | "Generated with ElevenLabs Sound Effects, paid plan (commercial licence)" | none yet |
+
+Before release: regenerate the clips Mugesh keeps on a paid month (same prompts, from the manifest) or remove them from the cues.
