@@ -344,6 +344,9 @@ namespace Diorama
                 }
                 if (broke) keeper.Break();
             }
+            // Dev panel switches (step 9e).
+            if (DevCheats.OneHitKo && target == wild) damage = Mathf.Max(damage, target.Hp);
+            if (DevCheats.Invincible && target == player) damage = 0;
             target.isling.currentHp = Mathf.Max(0, target.Hp - damage);
             Raise(new BattleEvent
             {

@@ -9,8 +9,9 @@ namespace Diorama
     /// <summary>
     /// Dev-only measurements in the headset (step 8d): a few lines of text low-left in the view and wire shapes in the
     /// world, set every frame by whoever measures something (the shard contact, palm over the flame). Only in the
-    /// Editor and development builds; a release build destroys it at once. Shown from the start; F1 or three quick
-    /// right-hand thumb taps toggle it. Callers check <see cref="Active"/> before building strings.
+    /// Editor, development builds and QA builds (POCKET_DEV, step 9e: hidden at start, the dev panel's Tools tab shows
+    /// it); a release build destroys it at once. Shown from the start; F1 or three quick right-hand thumb taps toggle it.
+    /// Callers check <see cref="Active"/> before building strings.
     /// </summary>
     public class DevReadout : MonoBehaviour
     {
@@ -38,13 +39,15 @@ namespace Diorama
 
         void Awake()
         {
+#if !POCKET_DEV
             if (!Application.isEditor && !Debug.isDebugBuild)
             {
                 Destroy(this);
                 return;
             }
+#endif
             _instance = this;
-            _shown = showOnStart;
+            _shown = showOnStart && (Application.isEditor || Debug.isDebugBuild);
             _mesh = new Mesh { name = "Dev Readout Lines" };
             _mesh.MarkDynamic();
             if (lineMaterial == null) Debug.LogWarning("[DevReadout] No line material: text only.", this);
@@ -76,6 +79,16 @@ namespace Diorama
         {
             _shown = !_shown;
             Debug.Log($"[DevReadout] {(_shown ? "on" : "off")}.");
+        }
+
+        /// <summary>Shows or hides the readout (the dev panel); false when there is none.</summary>
+        public static bool Shown
+        {
+            get => Active;
+            set
+            {
+                if (_instance != null && _instance._shown != value) _instance.Toggle();
+            }
         }
 
         /// <summary>A line of text under <paramref name="key"/> (sorted by key), kept while it is set every frame.</summary>

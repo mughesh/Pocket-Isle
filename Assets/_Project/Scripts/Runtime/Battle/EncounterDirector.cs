@@ -255,7 +255,7 @@ namespace Diorama
                 return;
             }
             if (++_stepsSinceBattle <= graceSteps) return;
-            if (_rnd.Next() >= grassChance) return;
+            if (DevCheats.WildOff || _rnd.Next() >= grassChance) return;
             StartCoroutine(Encounter(table, tile));
         }
 

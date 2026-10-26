@@ -50,6 +50,35 @@ namespace Diorama.EditorTools
             g.Hide();
         }
 
+        // ---- dev panel ----
+
+        public static void PanelOpen() => DevPanel.DebugOpen(true);
+        public static void PanelClose() => DevPanel.DebugOpen(false);
+
+        /// <summary>Presses the panel button named in Temp/ClaudeBridge/press.txt (label prefix; tabs too).</summary>
+        public static void Press()
+        {
+            string label = System.IO.File.ReadAllText("Temp/ClaudeBridge/press.txt").Trim();
+            Debug.Log($"[Step9eDebug] Press '{label}': {(DevPanel.DebugPress(label) ? "ok" : "not found")}.");
+        }
+
+        /// <summary>The panel from the seat: Logs/BattleShots/9e_panel_{tab}.png (tab name in press.txt).</summary>
+        public static void PanelShot()
+        {
+            var ui = GameObject.Find("Dev Panel UI");
+            if (ui == null) return;
+            string name = System.IO.File.ReadAllText("Temp/ClaudeBridge/press.txt").Trim().Replace(' ', '_').ToLowerInvariant();
+            var t = ui.transform;
+            BattleDebug.Render($"Logs/BattleShots/9e_panel_{name}.png", t.position - t.forward * 0.42f, t.rotation);
+            Debug.Log($"[Step9eDebug] 9e_panel_{name}.png");
+        }
+
+        public static void State()
+        {
+            var s = GameState.Instance;
+            if (s != null) Debug.Log($"[Step9eDebug] State:\n{s.Describe()}");
+        }
+
         // ---- Hearthstag's fury ----
 
         static KeeperFury ActiveFury()

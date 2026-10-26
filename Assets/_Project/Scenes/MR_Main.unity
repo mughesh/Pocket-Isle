@@ -2730,6 +2730,88 @@ Transform:
   m_Children: []
   m_Father: {fileID: 200327675}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1200054855
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1200054858}
+  - component: {fileID: 1200054857}
+  - component: {fileID: 1200054856}
+  m_Layer: 0
+  m_Name: Dev Panel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1200054856
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1200054855}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45927e0b5fd088046837cf32998faf14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.DevPanel
+  state: {fileID: 1200054857}
+  island: {fileID: 270959109}
+  grabGuard: {fileID: 270959111}
+  hudMaterial: {fileID: 2100000, guid: 0656b6c4f92798e49a14cf09a2c6800e, type: 2}
+  size: {x: 0.4, y: 0.32}
+  sideGap: 0.04
+  height: 0.13
+  maxViewAngle: 28
+  fontSize: 0.1
+--- !u!114 &1200054857
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1200054855}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c81a1e0e814d7294cb3a86a82521c6fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.GameState
+  party: {fileID: 1499891276}
+  explorer: {fileID: 374318554}
+  swap: {fileID: 221433162}
+  save: {fileID: 1541842443}
+  encounters: {fileID: 1499891275}
+  realm: {fileID: 270959114}
+  onboarding: {fileID: 1380201671}
+  registry: {fileID: 11400000, guid: 520e7c86330e4ec478d9211900d5bd4b, type: 2}
+  hub: {fileID: 11400000, guid: ab0469af29722704f949fec768f94b68, type: 2}
+  cinderwood: {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
+  forgeHall: {fileID: 11400000, guid: 826b78d0c19f2014a9858fa40dff5037, type: 2}
+  hallEntry: {x: 4, y: 8}
+  firstWalkLesson: walk
+  presetCommons:
+  - Toastling
+  - Kettlewing
+--- !u!4 &1200054858
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1200054855}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1294784575
 GameObject:
   m_ObjectHideFlags: 0
@@ -4614,3 +4696,4 @@ SceneRoots:
   - {fileID: 1536485481}
   - {fileID: 1811331407}
   - {fileID: 1553131432}
+  - {fileID: 1200054858}

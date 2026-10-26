@@ -288,6 +288,14 @@ namespace Diorama
             _look.crownBoost = 1f;
             _fury.fury = 1f;
             _fury.idleStomps = true;
+            if (!Active)
+            {
+                // Left during the meeting (the dev panel's teleport): no battle outside the hall.
+                _phase = Phase.Idle;
+                explorer.Locked = false;
+                Debug.Log("[KeeperHall] Left the hall during the meeting: no battle.");
+                yield break;
+            }
             if (fx != null) fx.Burst(_look.CrownWorld, 30, new Color(1f, 0.55f, 0.2f), TileWorld * 0.8f, 0.8f, TileWorld * 0.05f, Vector3.up * TileWorld * 0.6f);
             explorer.Locked = false;
             var fight = new EncounterDirector.KeeperFight

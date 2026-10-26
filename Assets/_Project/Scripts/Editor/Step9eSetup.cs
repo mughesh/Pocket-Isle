@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Text;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -17,6 +18,7 @@ namespace Diorama.EditorTools
         public static void All()
         {
             var log = new StringBuilder("[Step9e] Set up:");
+            Panel(log);
             Fury(log);
             Balance(log);
             Fixes(log);
@@ -49,6 +51,56 @@ namespace Diorama.EditorTools
         }
 
         public const string SmokeMaterialPath = "Assets/_Project/Materials/Battle/KeeperSmoke.mat";
+
+        /// <summary>A: the "Dev Panel" object (GameState + DevPanel) and its references.</summary>
+        public static void Panel(StringBuilder log)
+        {
+            T Find<T>() where T : Object => Object.FindFirstObjectByType<T>(FindObjectsInactive.Include);
+            var state = Find<GameState>();
+            GameObject go;
+            if (state != null) go = state.gameObject;
+            else
+            {
+                go = new GameObject("Dev Panel");
+                Undo.RegisterCreatedObjectUndo(go, "Step 9e");
+                state = go.AddComponent<GameState>();
+            }
+            var panel = go.GetComponent<DevPanel>();
+            if (panel == null) panel = go.AddComponent<DevPanel>();
+            Undo.RecordObject(state, "Step 9e");
+            Undo.RecordObject(panel, "Step 9e");
+            state.party = Find<Party>();
+            state.explorer = Find<GestureTestPiece>();
+            state.swap = Find<SceneSwap>();
+            state.save = Find<GameSave>();
+            state.encounters = Find<EncounterDirector>();
+            state.realm = Find<RealmRestoration>();
+            state.onboarding = Find<Onboarding>();
+            state.registry = state.save != null ? state.save.registry : null;
+            state.hub = AssetDatabase.LoadAssetAtPath<WorldMap>("Assets/_Project/Data/WorldMap_StillIsle.asset");
+            state.cinderwood = AssetDatabase.LoadAssetAtPath<WorldMap>(CinderwoodTools.MapPath);
+            state.forgeHall = AssetDatabase.LoadAssetAtPath<WorldMap>(ForgeHallTools.HallPath);
+            state.hallEntry = ForgeHallTools.EntryTile;
+            var opening = Find<Opening>();
+            if (opening != null) state.firstWalkLesson = opening.firstWalkLesson;
+            panel.state = state;
+            panel.island = Find<IslandBuilder>();
+            panel.grabGuard = Find<IslandHandle>();
+            var cursor = Find<TileCursor>();
+            panel.hudMaterial = cursor != null ? cursor.hudMaterial : null;
+            EditorUtility.SetDirty(state);
+            EditorUtility.SetDirty(panel);
+            int missing = new Object[] { state.party, state.explorer, state.swap, state.save, state.encounters, state.realm, state.onboarding, state.registry,
+                state.hub, state.cinderwood, state.forgeHall, panel.island, panel.grabGuard, panel.hudMaterial }.Count(o => o == null);
+            log.Append($"\n  Dev Panel: GameState + DevPanel wired ({(missing == 0 ? "all references found" : $"{missing} reference(s) MISSING")}).");
+        }
+
+        public static void PanelOnly()
+        {
+            var log = new StringBuilder("[Step9e] Panel:");
+            Panel(log);
+            Save(log);
+        }
 
         /// <summary>B: the smoke material and the Keeper Hall's fury wiring (smoke, the Spirit to flinch).</summary>
         public static void Fury(StringBuilder log)
