@@ -313,6 +313,9 @@ namespace Diorama
                     Add("Replay opening", () => state.NewGame(), null, true);
                     Add(() => $"Cinderwood restored: {OnOff(state.Restored(state.cinderwood))}", () => Edit(state.SetRestored(state.cinderwood, !state.Restored(state.cinderwood))),
                         () => state.Restored(state.cinderwood));
+                    if (state.galewick != null)
+                        Add(() => $"Galewick restored: {OnOff(state.Restored(state.galewick))}", () => Edit(state.SetRestored(state.galewick, !state.Restored(state.galewick))),
+                            () => state.Restored(state.galewick));
                     Add(() => $"Log: {(GameState.Solved(GameState.LogId) ? "placed" : "fallen")}",
                         () => Edit(state.SetPuzzle(GameState.LogId, !GameState.Solved(GameState.LogId), GameState.Solved(GameState.LogId) ? 0 : 2)), () => GameState.Solved(GameState.LogId));
                     Add(() => $"Forge + door: {(GameState.Solved(GameState.BellowsId) ? "lit, open" : "cold")}",

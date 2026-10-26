@@ -32,6 +32,8 @@ namespace Diorama
         public WorldMap hub;
         public WorldMap cinderwood;
         public WorldMap forgeHall;
+        [Tooltip("Step 10a: the wind realm (Go to works even while its gate is sealed in builds).")]
+        public WorldMap galewick;
         public Vector2Int hallEntry = new Vector2Int(4, 8);
         [Tooltip("Lesson the tutorial restarts at (the first one after the opening).")]
         public string firstWalkLesson = "walk";
@@ -104,6 +106,18 @@ namespace Diorama
                 AddMark(cinderwood, "CW: forge door", "temple");
             }
             if (forgeHall != null) _spots.Add(new Spot { label = "Forge Hall", map = forgeHall, tile = hallEntry, facing = north, interior = true });
+            if (galewick != null)
+            {
+                AddMark(galewick, "GW: arrival", "start");
+                AddMark(galewick, "GW: village", "plaza");
+                AddMark(galewick, "GW: big mill", "mill");
+                AddMark(galewick, "GW: shrine", "shrine");
+                AddMark(galewick, "GW: kite field", "kites");
+                AddMark(galewick, "GW: ridge", "ridge");
+                AddMark(galewick, "GW: tower", "tower");
+                AddMark(galewick, "GW: rare grass", "rare");
+                AddMark(galewick, "GW: fire patch", "fire");
+            }
         }
 
         void AddMark(WorldMap map, string label, string landmark)
@@ -317,6 +331,7 @@ namespace Diorama
         {
             d.puzzles.Clear();
             if (cinderwood != null) d.SetRestored(cinderwood.name, 0f);
+            if (galewick != null) d.SetRestored(galewick.name, 0f);
         }, "reset all story");
 
         // ---- saves ----
@@ -439,6 +454,7 @@ namespace Diorama
             sb.AppendLine($"Storage: {party.storage.Count}");
             sb.AppendLine($"Tutorial: {(TutorialDone ? "done" : $"at '{onboarding.CurrentId}'")}");
             sb.AppendLine($"Cinderwood restored: {Restored(cinderwood)}");
+            if (galewick != null) sb.AppendLine($"Galewick restored: {Restored(galewick)}");
             sb.AppendLine($"Story: {string.Join(", ", PuzzleState.ToSaved().Select(p => $"{p.id} {(p.solved ? "solved" : $"stage {p.stage}")}"))}");
             sb.AppendLine($"In battle: {encounters != null && encounters.InBattle}");
             sb.AppendLine($"Cheats: one-hit {DevCheats.OneHitKo}, invincible {DevCheats.Invincible}, wild off {DevCheats.WildOff}, rare x{DevCheats.RareBoost}, time x{Time.timeScale}");

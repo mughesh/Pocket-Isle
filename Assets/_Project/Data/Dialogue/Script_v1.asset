@@ -858,6 +858,89 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: Cinderwood is warm again!
+  - id: gate.wind.first
+    once: 1
+    priority: 2
+    note: first time the wind gate comes into the window, once it leads somewhere
+    target: gate:wind
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Listen... no wind through this tunnel at all.
+  - id: realm.galewick.first
+    once: 1
+    priority: 2
+    note: first arrival in Galewick
+    target: landmark:firstGrass
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Galewick... it's never this quiet.
+    - speaker: 0
+      speakerName: Spirit
+      text: The grass isn't even swaying.
+  - id: gw.village.first
+    once: 1
+    priority: 2
+    note: first time near the village plaza
+    target: landmark:plaza
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Windmills, and not one sail turning.
+  - id: gw.mill.first
+    once: 1
+    priority: 2
+    note: first time by the big mill and the ditch
+    target: landmark:mill
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The bridge is up. That big mill must lower it.
+  - id: gw.kites.first
+    once: 1
+    priority: 2
+    note: first time in the kite field
+    target: landmark:kites
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Kites, lying in the grass. Nobody to fly them.
+  - id: gw.ridge.first
+    once: 1
+    priority: 2
+    note: first time near the ridge path
+    target: landmark:ridge
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: A cloud sits right on the path. Stuck, like everything.
+  - id: gw.tower.first
+    once: 1
+    priority: 2
+    note: first time near the wind tower
+    target: landmark:tower
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The wind tower. Its vanes should be spinning.
+  - id: gw.rare.first
+    once: 1
+    priority: 2
+    note: first time in the rare grass
+    target: landmark:rare
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: This grass feels different. Something odd floats here.
   - id: hub.shard.first
     once: 1
     priority: 2

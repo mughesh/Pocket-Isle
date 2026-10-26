@@ -171,6 +171,116 @@ MonoBehaviour:
   save: {fileID: 1541842443}
   riseSeconds: 1
   leaveSeconds: 1.2
+--- !u!1 &71918013
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 71918014}
+  - component: {fileID: 71918017}
+  - component: {fileID: 71918016}
+  - component: {fileID: 71918015}
+  m_Layer: 0
+  m_Name: Drifting Seeds
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &71918014
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 71918013}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 270959110}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &71918015
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 71918013}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ddaf53db8a2c4394d9b68194a7b60b91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.RealmDrift
+  island: {fileID: 270959109}
+  kind: 2
+  treeWeight: 0.35
+  tallGrassWeight: 0.8
+  fireWeight: 0
+  groundWeight: 0.3
+  waterWeight: 0
+--- !u!23 &71918016
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 71918013}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 19b53cc07a1ebc7469da27106183ede3, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &71918017
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 71918013}
+  m_Mesh: {fileID: 0}
 --- !u!1 &78739057
 GameObject:
   m_ObjectHideFlags: 0
@@ -515,6 +625,7 @@ MonoBehaviour:
   worlds:
   - {fileID: 11400000, guid: ab0469af29722704f949fec768f94b68, type: 2}
   - {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
+  - {fileID: 11400000, guid: 1c0f5df7c1c50ad4789ffbf83b2addd2, type: 2}
   seconds: 1.2
 --- !u!4 &221433163
 Transform:
@@ -803,6 +914,7 @@ Transform:
   - {fileID: 980002959}
   - {fileID: 1916101687}
   - {fileID: 1252366428}
+  - {fileID: 71918014}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &270959111
@@ -3139,6 +3251,7 @@ MonoBehaviour:
   hub: {fileID: 11400000, guid: ab0469af29722704f949fec768f94b68, type: 2}
   cinderwood: {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
   forgeHall: {fileID: 11400000, guid: 826b78d0c19f2014a9858fa40dff5037, type: 2}
+  galewick: {fileID: 11400000, guid: 1c0f5df7c1c50ad4789ffbf83b2addd2, type: 2}
   hallEntry: {x: 4, y: 8}
   firstWalkLesson: walk
   presetCommons:
@@ -4484,6 +4597,7 @@ MonoBehaviour:
   fx: {fileID: 1078587927}
   portalMaterial: {fileID: 2100000, guid: c44ab4528771f3c43b6d4c78e2eb6871, type: 2}
   grabGuard: {fileID: 270959111}
+  galewick: {fileID: 11400000, guid: 03d1dafe75ab9fc41b8a1faba99e63e4, type: 2}
 --- !u!4 &1858573328
 Transform:
   m_ObjectHideFlags: 0
@@ -5064,6 +5178,7 @@ MonoBehaviour:
   ghosts: {fileID: 1421177268}
   keeperSpecies: {fileID: 11400000, guid: 372e47726df79e944b8e3ae698a9b00b, type: 2}
   keeperLevel: 10
+  ownShard: shard.fire
   beaconMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
   shardRecipe: {fileID: 11400000, guid: 243f873e41708f049b1a176b344ec7c1, type: 2}
   smokeMaterial: {fileID: 2100000, guid: 63c5a847d0fbf454882a87650c5454fc, type: 2}

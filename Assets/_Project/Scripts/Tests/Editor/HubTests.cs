@@ -63,7 +63,7 @@ namespace Diorama.Tests
         }
 
         [Test]
-        public void Gates_FireLeadsToCinderwoodAndHomeLeadsBack_WaterAndWindSealed()
+        public void Gates_FireLeadsToCinderwoodAndHomeLeadsBack_WaterSealed()
         {
             var hub = Load(HubPath);
             var cw = Load(CinderwoodPath);
@@ -81,7 +81,9 @@ namespace Diorama.Tests
             Assert.IsTrue(near >= 1 && near <= 2, $"you arrive beside Cinderwood's return gate (off its front by {near})");
             Assert.AreEqual(new Vector2Int(0, -1), fire.arriveFacing, "arrival faces north (up the trail)");
             Assert.IsFalse(Gate(hub, "water").Open);
-            Assert.IsFalse(Gate(hub, "wind").Open);
+            // Step 10a: the wind gate leads to Galewick (builds keep it sealed through GalewickConfig, see Step10aTests).
+            var wind = Gate(hub, "wind");
+            Assert.IsTrue(wind.to == null || wind.to.name == "WorldMap_Galewick", "the wind gate leads to Galewick or nowhere yet");
             Assert.IsTrue(ExplorerPath.CanReach(cw, cw.startTile, fire.arrive, FarSteps), "return gate reachable from Cinderwood's start");
         }
 

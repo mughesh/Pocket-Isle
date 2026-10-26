@@ -194,12 +194,12 @@ MonoBehaviour:
     firstSeenLine: 
   - id: wind
     tile: {x: 26, y: 15}
-    to: {fileID: 0}
-    arrive: {x: 0, y: 0}
-    arriveFacing: {x: 0, y: 0}
-    isSealed: 1
+    to: {fileID: 11400000, guid: 1c0f5df7c1c50ad4789ffbf83b2addd2, type: 2}
+    arrive: {x: 10, y: 54}
+    arriveFacing: {x: 0, y: -1}
+    isSealed: 0
     portal: {r: 0.86, g: 0.95, b: 1, a: 1}
-    firstSeenLine: 
+    firstSeenLine: gate.wind.first
   landmarks:
   - name: start
     tile: {x: 15, y: 22}

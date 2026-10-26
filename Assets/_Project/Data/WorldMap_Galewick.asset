@@ -1,0 +1,534 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8376f4ae30d857a45a9d450ac2b7be0f, type: 3}
+  m_Name: WorldMap_Galewick
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.WorldMap
+  layout: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    XRRRRFFFFFFRFFRFRRRRFRFFFFFFFFRFFFFRFFRFFFFRFFFRRFFRRFRRFFFX
+
+    XFFRFRFFRRFRRFFFFFFRFFFFFFRFRRRFFRRFRFFRFRFFRRFFRRFFFRFRRFFX
+
+    XFRRFFRFFFFRFFFFGGGGFFFFFRFFRFFRRFRRRRRFFFRRFFRFFRRFFFFFRFRX
+
+    XFRRRRRFFFFGGGGGGGGGGGGGGGGFRFRFFFFFRRRRRFFFFRFFRGGGGGFFRRFX
+
+    XFRRFFRFRFFGGGGGPPPPPGGGGGGFFFRRFFFRFFFFRRRRRFRFGGGGGGGFFRRX
+
+    XFRRRRRRRRFGGGGGPPPPPGGGGGGFFRFRRFRFRRFFRRRRRFFGGGTTGGGGFFRX
+
+    XFFRFRFRFRFGTTTTPPPPPGTTTGGFRRRRFRFRRFFRFFRRRRFGGTTTTTGGGFRX
+
+    XRFRFFFRRFRGGTGTPPPPPGGTTGGFFFRRRFRRFRFFFRRFFFGGGTTTTTGGFFFX
+
+    XFFRFRRRFRFGGGGGGGPPGGTTTGGFRFFRRRRRRFRFFRRRRRGGGTTTTTGGFRFX
+
+    XRFRRRRRRRFRFGFFFGPPPGRFFRFRFFRRRRFFFFRFFRRFRRFGGGTPGGGGRRFX
+
+    XRRRFRRRRRRFFRFRFFGPPFFFFFFGRRFFFRFFRRRFFRRRRRFRGGGPGGGFFRFX
+
+    XFFFRFFFRRRFFFFFFFGPPPPPPPPPGGGFFFFRRFRFFFFRRFFFRFGPGGFRFRFX
+
+    XRFRFFFRFRFFRFRFGFFFFFFFFFFPPPGGGFFFRFFFRFFRFFFRRFRPFFFRFRFX
+
+    XRRRRFRRRRRFRFRRRRRRRFRFFGGPPPPPPGGFRRGGGFFRFFFFFFPPFFRRRFFX
+
+    XFFFRFRRRRFRFFRRRRFRRRFRTTTGGGPPPPPGGGGGGGGGGGFFFRPFFFRRRFFX
+
+    XRRRFRRRRRFFRFRFRRFFRRFFTTTFFFGGGPPPTTTTTGGGGGGGFPPFRRRFFRRX
+
+    XFFRRFFFFRFRRRFFRFRRRRFFFFRFRRGFTTPPPTTTTGGGGTTTTPFFFFRFFFFX
+
+    XFRRFFRFRRRRRFRRRRRFFRFRFFRRFRGFTTTPPPGPPPGGGGTTPPFFRRRRRFFX
+
+    XRRFFRRFFFFRRRRFFFFRRFRFRRFRRFGGTTTGPPPGGGPPPGGPPGFRFFFRFFFX
+
+    XRRRRFFRFRFFFFFFFRFRRFRFRFRFFRGGGGPPGGGGGGGGGPPPGGGFFFFRRFRX
+
+    XRRFFFRRRRRRRFFFRRRFRFFRRRRFFGGGGPPGGGGTTTGGGGPPGGGGFFFFRFRX
+
+    XFRRRFFRFRRFRFFRFRRFRFFFFFRFGGGGGPGGGGTTTTTGGGGPGGGGFFFRFRFX
+
+    XFFRFFFRFFRRRFFRRFFRFRFRRRFRFGGGGPGGGGTTTTTGGGGPGGGGFFFFFFFX
+
+    XFFRRFFFFFFRRFRRRRRRRRFFFRFGFGGGGPGGGGTTTTTGGGGPGGGGFFFRRFRX
+
+    XRRRRFRRRFRFFRFFRFFFRFFFFRFGFFTTTPPGGGGGTTGGGGPPGGGGFFRFFFRX
+
+    XRRFRFRRRFFFRRRFRRFFFRFRFFFGFGTTTTPPGGGGGGGGGPPGGGGGRFFFRFFX
+
+    XRRRFFFRRRRRRRRFRRFRRFFFRRFGFFTTTPPPPPPGGGPPPGGGGGFFFRRFFFFX
+
+    XRFFRRRFRRRFFRRRRRFFFFFRFRRGFFFGPPPGGGGPPPTTTGGGGGGFFFFRFFFX
+
+    XFFRRRRFFRFRFFFRFRFRRRRRRRFFFRFGPPGGGGGGGTTTTGGGGGFFFRFFFFRX
+
+    XFFRRRFRRRFFFFFFFFRFFRFRFFFRFFRGPPGGGGGGGGGGGGGGFFFFFFFRFRFX
+
+    XFFRRFFRRFRFRRFFWWWWWWWWWWWWWWWWPPWWWWWWWWWWWWWFFFFFFRRRFFRX
+
+    XFFFRFFRRFFFFFFFWWWWWWWWWWWWWWWWPPWWWWWWWWWWWWWFRFFRFFRFRFFX
+
+    XRFRRRFFRFGGGGGGGGGGGGGGGGGGGGGGPPTGGGGFRFRFFRFFFRRRRRRFFFFX
+
+    XRFFRRFRFFGGGGFTTGGGGGGGGGGGGGGGPPTTGGGRFRFFFRFRFFRFFFRFFRFX
+
+    XRFFFFRFFFGGGGTTTTGGGGGGGGGGGGGGPPTGGGGFRRRRFRRRRFRFFRRFRRFX
+
+    XFFFRFRRFRTTGGTTTTGGGGGGGGGGGPPPPPGGGGGFRRRFFRFFFRFFRRFRRRFX
+
+    XRRFFRFFRFTTTGGTTGGGGGGPPPPPPPPPGGGGGGGFRFRRFFRFGGRFFFFRRRRX
+
+    XRFRFFFFFFTTTGGGGGGGTTTPPPPPPGGGGGGGGGGFFFRFFGGGGGGGRFFRRRFX
+
+    XFFRFRFRRFTTTGGGGGGGTTTPPPPPGGGGGGGGGGGFRRRFGGGGGGGGGGFFRFFX
+
+    XRRFRRFRFRGGGGGGGGGGGTGPPPPGGGGGGGGGGGGFFFFGGGGGGGGGGGFFRRFX
+
+    XFRRFRFFFFGGGGGGGGGGGGPPPGGGPPPPPGGGGGGFFRGGGGGGTGGGGGGFRFFX
+
+    XRRRFFFRRRGFGGGGGGGGGPPPGGGGGGGGPPPPPPPFFFGGGGTTTTGGGGGRFRFX
+
+    XFRFRRFRRFGGTTPGGGGGPPPGGGGGGGGGGGGGTTPPPPPGGGTTTTTGGGGFRRFX
+
+    XFRRRFFFRFGTTTPGGGGPPPGGGGGGGTGGTTTGTTTTRFPPPPPPPTTGGGGFFFFX
+
+    XRRFRRFRRFGGTTPGPPPPPGGGGGGGTTTTTTTTGGTFFFFGGGGGGGGGGGGFRFFX
+
+    XFRRRRFRFFGGGGPPPPPGGGGGGGGGTTTGTTTGGGGFRFGGGGGGGGGTTGFRRFFX
+
+    XRFFFFFFFFGGGPPPGGGGGGGGGGGGGTGGGGGGGGGRRFFFGGGGGGTTTTFFFFFX
+
+    XFFGGGTGGGGGGPPGGGGGGGGGGGGGGGGGGGGGGGGFRFFFFFGGGGGTTRRRRRRX
+
+    XRFFRTTTGGGGPPGTTGFFFFFRFFRFFRFRFFFFFFFFRRFRFFFGFFRFFFRRRFRX
+
+    XRRRRTTTGGGPPPTTTTFRFFRRRRFFFRFFFFRRFRRFRFRRRFFFFFFRRFRRRFFX
+
+    XFFRFGTGGGGPPTTTTGFFFRFRRFRRFRFRFRFRRRFRRFFFRFRRFFFFRRFRRFRX
+
+    XFFFFGGGGGGPPTTTGGFRRRFFRFRFRFFRFRRRRRFRRRRRRFRRRFRRFFRFRFFX
+
+    XRRRFGGGGGGPGGGGGGFRRRRFRRFRFFFFFFRRFFFFRRRRFRRFRFFFFFFFFRRX
+
+    XFRRFGPPPPPPPGGGGGFRRFRRRRRFFFRRFRRFRRFFFFFRRRFRRRRRFFFFRRRX
+
+    XRRRFGPPPPPPPGGGGGFFFFRFFRFFRRFFFRFFFRRRRRFFFFFFRRFFRRRFFFRX
+
+    XFRRFGPPPPPPPGGGGGFFRFFRRRFRRRRFRRFFRRRRRRRFFFFRRFFFRFRFRFFX
+
+    XRFRFGGGGGGGGGGGGGFFRFRRFFFRFRFFFFFFFRFFRRFRRFRRRFFRRFFFRFRX
+
+    XFFFFFFFFFFFFFFFFFFRRRFFFRFFFFRRFFFFFRFFFFFRFRFFRRFRFRFFFFRX
+
+    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+  tileSize: 0.05
+  capHeight: 0.006
+  seed: 1021
+  startTile: {x: 10, y: 54}
+  props: '............................................................
+
+    ............................................................
+
+    ............................................................
+
+    .................T..........................................
+
+    ............................................................
+
+    ........................c............................p......
+
+    ............c...................................c...........
+
+    ............................................................
+
+    ..............p.......p.....................................
+
+    ............................................................
+
+    .............c..............................................
+
+    ............................................................
+
+    ............................s...............................
+
+    ................c...........................................
+
+    ............................................................
+
+    ...........................c................................
+
+    ............................................................
+
+    ..............................c.............................
+
+    ............................................................
+
+    .................................................b..........
+
+    ................................p..........K................
+
+    ............................................................
+
+    ...................................k........................
+
+    .............................b..............................
+
+    ...........................W................................
+
+    ...........................W................g...p...........
+
+    ...........................W................................
+
+    ...........................W................................
+
+    ...........................W.......s........................
+
+    ........................................p...................
+
+    ............................................................
+
+    ............................................................
+
+    ............................................................
+
+    ..........wwwwww.....----...................................
+
+    .........................h..M...............................
+
+    ...................h...............b........................
+
+    ............b........................W......................
+
+    ......................b...........s..W......................
+
+    .................m............b......W......................
+
+    ...............................m.....W......................
+
+    ..............Y....................b.W..............e.......
+
+    ..................h.......h...................e.............
+
+    ..................................................v.........
+
+    ..............................p.............................
+
+    .......................p..s.................................
+
+    ...................................................e........
+
+    .............................................v..............
+
+    ......................wwwww.................................
+
+    ...www..........................................e...........
+
+    ............................................................
+
+    ............................................................
+
+    .........s..................................................
+
+    ............................................................
+
+    .......Z........p...........................................
+
+    ............................................................
+
+    ...............b............................................
+
+    ............................................................
+
+    .........o..................................................
+
+    ............................................................
+
+    ............................................................'
+  propLegend:
+  - key: Z
+    recipe: {fileID: 11400000, guid: 22df831919cb43d41a95a73e294ddda4, type: 2}
+    turned: 0
+    yaw: 0
+  - key: Y
+    recipe: {fileID: 11400000, guid: b4ff74f9eeb49724995b03596b7d6943, type: 2}
+    turned: 0
+    yaw: 0
+  - key: h
+    recipe: {fileID: 11400000, guid: 5744bb1ecfccdab4bacae14a3c7e6452, type: 2}
+    turned: 0
+    yaw: 0
+  - key: M
+    recipe: {fileID: 11400000, guid: af760acb3feb8ac408d0da79d027cfd9, type: 2}
+    turned: 0
+    yaw: 0
+  - key: m
+    recipe: {fileID: 11400000, guid: 94f3ed9fca8fe024fa525b334e4d5c26, type: 2}
+    turned: 0
+    yaw: 0
+  - key: w
+    recipe: {fileID: 11400000, guid: adf1e211d1633e9419588fc2a47e8514, type: 2}
+    turned: 0
+    yaw: 0
+  - key: W
+    recipe: {fileID: 11400000, guid: adf1e211d1633e9419588fc2a47e8514, type: 2}
+    turned: 1
+    yaw: 0
+  - key: '-'
+    recipe: {fileID: 11400000, guid: 6812f7b4182f5f147b5c424160bcf9a3, type: 2}
+    turned: 0
+    yaw: 0
+  - key: '|'
+    recipe: {fileID: 11400000, guid: 6812f7b4182f5f147b5c424160bcf9a3, type: 2}
+    turned: 1
+    yaw: 0
+  - key: s
+    recipe: {fileID: 11400000, guid: 98744b52e043e8a47933b62f13bfb65e, type: 2}
+    turned: 0
+    yaw: 0
+  - key: p
+    recipe: {fileID: 11400000, guid: d438e7e920f590c48b3c8ba9ad7c614a, type: 2}
+    turned: 0
+    yaw: 0
+  - key: b
+    recipe: {fileID: 11400000, guid: 4e418f6953aaa094ba47f45306f08d8a, type: 2}
+    turned: 0
+    yaw: 0
+  - key: c
+    recipe: {fileID: 11400000, guid: 257f22ee3e426244c8b7611f0b678d54, type: 2}
+    turned: 0
+    yaw: 0
+  - key: T
+    recipe: {fileID: 11400000, guid: 7f6333efcd5486543b6e1e2873318d3d, type: 2}
+    turned: 0
+    yaw: 0
+  - key: k
+    recipe: {fileID: 11400000, guid: 59c299b2e20c0a4489e074a4853deac2, type: 2}
+    turned: 0
+    yaw: 0
+  - key: K
+    recipe: {fileID: 11400000, guid: b4cf2d3bed7fc9e4fa94171e2566c902, type: 2}
+    turned: 0
+    yaw: 0
+  - key: g
+    recipe: {fileID: 11400000, guid: 284360bcd811b04469c9c81c673ef016, type: 2}
+    turned: 0
+    yaw: 0
+  - key: e
+    recipe: {fileID: 11400000, guid: 7d85616a23651da489249e129ac22b2a, type: 2}
+    turned: 0
+    yaw: 0
+  - key: v
+    recipe: {fileID: 11400000, guid: 4162e5c48d17bfd43a59ab2a7d2c1331, type: 2}
+    turned: 0
+    yaw: 0
+  - key: o
+    recipe: {fileID: 11400000, guid: cc9a99a98bf9cd94999ebf9174b7800f, type: 2}
+    turned: 0
+    yaw: 0
+  viewZoom: 1
+  theme: {fileID: 11400000, guid: 00eb863b1cab9d949bbc2afcd309ad65, type: 2}
+  grassTable: {fileID: 11400000, guid: b05def27f8e958143a5d2f774c2cea3d, type: 2}
+  waterTable: {fileID: 0}
+  zones: '............................................................
+
+    ........ttttttttttttttttttttttt.............................
+
+    ........ttttttttttttttttttttttt.............xxxxxxxxxxxxxx..
+
+    ........ttttttttttttttttttttttt.............xxxxxxxxxxxxxx..
+
+    ........ttttttttttttttttttttttt.............xxxxxxxxxxxxxx..
+
+    ........ttttttttttttttttttttttt.............xxxxxxxxxxxxxx..
+
+    ........ttttttttttttttttttttttt.............xxxxxxxxxxxxxx..
+
+    ........ttttttttttttttttttttttt.............xxxxxxxxxxxxxx..
+
+    ........ttttttttttttttttttttttt.............xxxxxxxxxxxxxx..
+
+    ..........rrrrrrrrrrrrrrrrrrrrrrrrrrr.......xxxxxxxxxxxxxx..
+
+    ..........rrrrrrrrrrrrrrrrrrrrrrrrrrr.......xxxxxxxxxxxxxx..
+
+    ..........rrrrrrrrrrrrrrrrrrrrrrrrrrr.......xxxxxxxxxxxxxx..
+
+    ..........rrrrrrrrrrrrrrrrrrrrrrrrrrr.......xxxxxxxxxxxxxx..
+
+    ..........rrrrrrrrrrrrrrrrrrrrrrrrrrr.......xxxxxxxxxxxxxx..
+
+    ..........rrrrrrrrrrrrrrrrrrrrrrrrrrr.......xxxxxxxxxxxxxx..
+
+    ..........rrrrrrrrrrrrrrrrrrrrrrrrrrr.......xxxxxxxxxxxxxx..
+
+    ..........................kkkkkkkkkkkkkkkkkkkkkkkkk.........
+
+    ..........................kkkkkkkkkkkkkkkkkkkkkkkkk.........
+
+    ..........................kkkkkkkkkkkkkkkkkkkkkkkkk.........
+
+    ..........................kkkkkkkkkkkkkkkkkkkkkkkkk.........
+
+    ..........................kkkkkkkkkkkkkkkkkkkkkkkkk.........
+
+    ..........................kkkkkkkkkkkkkkkkkkkkkkkkk.........
+
+    ..........................kkkkkkkkkkkkkkkkkkkkkkkkk.........
+
+    ..........................kkkkkkkkkkkkkkkkkkkkkkkkk.........
+
+    ..........................kkkkkkkkkkkkkkkkkkkkkkkkk.........
+
+    ..........................kkkkkkkkkkkkkkkkkkkkkkkkk.........
+
+    ..........................kkkkkkkkkkkkkkkkkkkkkkkkk.........
+
+    ..........................kkkkkkkkkkkkkkkkkkkkkkkkk.........
+
+    ..........................kkkkkkkkkkkkkkkkkkkkkkkkk.........
+
+    ..........................kkkkkkkkkkkkkkkkkkkkkkkkk.........
+
+    ..........................kkkkkkkkkkkkkkkkkkkkkkkkk.........
+
+    ............................................................
+
+    ............................................................
+
+    ....vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv...................
+
+    ....vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv...................
+
+    ....vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvffffffffffffffff...
+
+    ....vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvffffffffffffffff...
+
+    ....vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvffffffffffffffff...
+
+    ....vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvffffffffffffffff...
+
+    ....vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvffffffffffffffff...
+
+    ....vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvffffffffffffffff...
+
+    ....vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvffffffffffffffff...
+
+    ....vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvffffffffffffffff...
+
+    ....vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvffffffffffffffff...
+
+    ....vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvffffffffffffffff...
+
+    ....vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvffffffffffffffff...
+
+    ....vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvffffffffffffffff...
+
+    ....vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvffffffffffffffff...
+
+    ....vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvffffffffffffffff...
+
+    ....aaaaaaaaaaaaaaavvvvvvvvvvvvvvvvvvvvvvffffffffffffffff...
+
+    ....aaaaaaaaaaaaaaavvvvvvvvvvvvvvvvvvvvvvffffffffffffffff...
+
+    ....aaaaaaaaaaaaaaa......................ffffffffffffffff...
+
+    ....aaaaaaaaaaaaaaa.........................................
+
+    ....aaaaaaaaaaaaaaa.........................................
+
+    ....aaaaaaaaaaaaaaa.........................................
+
+    ....aaaaaaaaaaaaaaa.........................................
+
+    ....aaaaaaaaaaaaaaa.........................................
+
+    ....aaaaaaaaaaaaaaa.........................................
+
+    ............................................................
+
+    ............................................................'
+  zoneLegend:
+  - key: v
+    id: village
+    grassTable: {fileID: 11400000, guid: 582892c0e4a04c643a79aecee5bb99fb, type: 2}
+  - key: a
+    id: arrival
+    grassTable: {fileID: 11400000, guid: b12525db2c0d1414883f68c761372351, type: 2}
+  - key: f
+    id: fire
+    grassTable: {fileID: 11400000, guid: f810dd1d52f482e46976df8b2db75463, type: 2}
+  - key: k
+    id: kites
+    grassTable: {fileID: 11400000, guid: 125ab86e6ae2ea145bc5a4bbe7478062, type: 2}
+  - key: r
+    id: ridge
+    grassTable: {fileID: 11400000, guid: ea76e8cd1d42e1548ad5eef658f2dd3c, type: 2}
+  - key: x
+    id: rare
+    grassTable: {fileID: 11400000, guid: afb8ccf9f0ce38045b197fcba03b8f4e, type: 2}
+  - key: t
+    id: tower
+    grassTable: {fileID: 0}
+  realm: galewick
+  arrivalLine: realm.galewick.first
+  gates:
+  - id: home
+    tile: {x: 7, y: 53}
+    to: {fileID: 11400000, guid: ab0469af29722704f949fec768f94b68, type: 2}
+    arrive: {x: 27, y: 16}
+    arriveFacing: {x: 0, y: 1}
+    isSealed: 0
+    portal: {r: 1, g: 0.85, b: 0.48, a: 1}
+    firstSeenLine: 
+  landmarks:
+  - name: start
+    tile: {x: 10, y: 54}
+    line: 
+    radius: 0
+  - name: firstGrass
+    tile: {x: 14, y: 51}
+    line: 
+    radius: 0
+  - name: plaza
+    tile: {x: 24, y: 39}
+    line: gw.village.first
+    radius: 4
+  - name: shrine
+    tile: {x: 14, y: 40}
+    line: 
+    radius: 0
+  - name: mill
+    tile: {x: 29, y: 36}
+    line: gw.mill.first
+    radius: 3
+  - name: kites
+    tile: {x: 40, y: 23}
+    line: gw.kites.first
+    radius: 6
+  - name: ridge
+    tile: {x: 25, y: 12}
+    line: gw.ridge.first
+    radius: 3
+  - name: tower
+    tile: {x: 17, y: 5}
+    line: gw.tower.first
+    radius: 4
+  - name: rare
+    tile: {x: 51, y: 8}
+    line: gw.rare.first
+    radius: 4
+  - name: fire
+    tile: {x: 49, y: 44}
+    line: 
+    radius: 0

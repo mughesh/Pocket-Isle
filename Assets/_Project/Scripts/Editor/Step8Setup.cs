@@ -196,7 +196,7 @@ namespace Diorama.EditorTools
             {
                 new GateLink { id = "fire", tile = StillIsleTools.FireGate, to = cinderwood, arrive = toCinder, arriveFacing = CinderwoodTools.ArriveFacing, portal = FireColor, firstSeenLine = "gate.fire.first" },
                 new GateLink { id = "water", tile = StillIsleTools.WaterGate, isSealed = true, portal = WaterColor },
-                new GateLink { id = "wind", tile = StillIsleTools.WindGate, isSealed = true, portal = WindColor },
+                WindLink(),
             };
             cinderwood.gates = new List<GateLink>
             {
@@ -208,6 +208,39 @@ namespace Diorama.EditorTools
             EditorUtility.SetDirty(cinderwood);
             AssetDatabase.SaveAssets();
             log.Append($"\n  gates: hub fire c{StillIsleTools.FireGate.x} r{StillIsleTools.FireGate.y} <-> Cinderwood home c{CinderwoodGate.x} r{CinderwoodGate.y}; water and wind sealed");
+        }
+
+        /// <summary>
+        /// Step 10a: the hub's wind gate leads to Galewick once its map exists (sealed in builds by GalewickConfig until 10d);
+        /// before that it stays sealed like the water gate. Kept here so re-running the 9a setup doesn't re-seal it.
+        /// </summary>
+        internal static GateLink WindLink()
+        {
+            var galewick = AssetDatabase.LoadAssetAtPath<WorldMap>(GalewickTools.MapPath);
+            if (galewick == null) return new GateLink { id = "wind", tile = StillIsleTools.WindGate, isSealed = true, portal = WindColor };
+            return new GateLink
+            {
+                id = "wind", tile = StillIsleTools.WindGate, to = galewick, arrive = GalewickTools.Arrive, arriveFacing = GalewickTools.ArriveFacing,
+                portal = WindColor, firstSeenLine = "gate.wind.first",
+            };
+        }
+
+        /// <summary>Step 10a: Galewick's return gate (by the arrival) back to the hub's wind gate.</summary>
+        internal static void LinkGalewick(WorldMap hub, WorldMap galewick, StringBuilder log)
+        {
+            int wind = hub.gates.FindIndex(g => g.id == "wind");
+            var link = WindLink();
+            if (wind >= 0) hub.gates[wind] = link;
+            else hub.gates.Add(link);
+            var toHub = StillIsleTools.WindGate + new Vector2Int(1, 1);
+            galewick.gates = new List<GateLink>
+            {
+                new GateLink { id = "home", tile = GalewickTools.ReturnGate, to = hub, arrive = toHub, arriveFacing = new Vector2Int(0, 1), portal = HomeColor },
+            };
+            EditorUtility.SetDirty(hub);
+            EditorUtility.SetDirty(galewick);
+            AssetDatabase.SaveAssets();
+            log.Append($"\n  gates: hub wind c{StillIsleTools.WindGate.x} r{StillIsleTools.WindGate.y} <-> Galewick home c{GalewickTools.ReturnGate.x} r{GalewickTools.ReturnGate.y} (builds: sealed until GalewickConfig.open)");
         }
 
         // ---- C: the opening ----

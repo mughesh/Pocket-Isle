@@ -26,6 +26,8 @@ namespace Diorama
         public Material portalMaterial;
         [Tooltip("Pinches from a hand that is grabbing or touching the rim are ignored.")]
         public IslandHandle grabGuard;
+        [Tooltip("Step 10a: the wind gate stays sealed in builds until Galewick is finished (GalewickConfig.open).")]
+        public GalewickConfig galewick;
 
         static readonly int ColorId = Shader.PropertyToID("_Color");
         static readonly int ShapeId = Shader.PropertyToID("_Shape");
@@ -134,7 +136,7 @@ namespace Diorama
                 _portals.Add(p);
             }
             Debug.Log($"[ShardGates] {_portals.Count} gate(s) on {_scanned.name}: " +
-                      string.Join(", ", _portals.ConvertAll(p => $"{p.link.id} c{p.link.tile.x} r{p.link.tile.y} {(p.link.Open ? "-> " + p.link.to.name : "sealed")}")) + ".");
+                      string.Join(", ", _portals.ConvertAll(p => $"{p.link.id} c{p.link.tile.x} r{p.link.tile.y} {(IsOpen(p.link) ? "-> " + p.link.to.name : "sealed")}")) + ".");
         }
 
         // ---- per frame ----
@@ -189,7 +191,7 @@ namespace Diorama
             _block.SetColor(ColorId, p.link.portal);
             _block.SetFloat(ShapeId, look.flat ? 1f : 0f);
             _block.SetFloat(ArchStartId, look.archStart);
-            _block.SetFloat(SealedId, p.link.Open ? 0f : 1f);
+            _block.SetFloat(SealedId, IsOpen(p.link) ? 0f : 1f);
             _block.SetFloat(BumpId, p.bump);
             _block.SetFloat(IntensityId, _gazed == i ? 1.25f : 1f);
             p.renderer.SetPropertyBlock(_block);
@@ -234,6 +236,9 @@ namespace Diorama
         }
 
         bool AtFront(GateLink g, Vector2Int tile) => tile == g.Front(0) || tile == g.Front(1);
+
+        /// <summary>Open, and (step 10a) the wind gate only while Galewick is allowed (the Editor, or a build after 10d).</summary>
+        public bool IsOpen(GateLink g) => g.Open && (g.id != "wind" || galewick == null || galewick.IsOpen);
 
         /// <summary>Look + pinch on a gate (also Step8Debug): use it from its front, otherwise walk there first.</summary>
         public void Pick(int index, string how)
@@ -293,7 +298,7 @@ namespace Diorama
             if (Hidden(i)) return;
             _last = i;
             var p = _portals[i];
-            if (!p.link.Open)
+            if (!IsOpen(p.link))
             {
                 p.bump = 1f;
                 Dialogue.Say("gate.sealed");

@@ -179,6 +179,25 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
 - `cinder.restored` · once (the restoration wave outside)
   - Spirit: Cinderwood is warm again!
 
+## Galewick (wind, step 10a)
+- `gate.wind.first` · once · → gate:wind (first time the wind gate comes into the window, once it leads somewhere)
+  - Spirit: Listen... no wind through this tunnel at all.
+- `realm.galewick.first` · once · → landmark:firstGrass (first arrival in Galewick)
+  - Spirit: Galewick... it's never this quiet.
+  - Spirit: The grass isn't even swaying.
+- `gw.village.first` · once · → landmark:plaza (first time near the village plaza)
+  - Spirit: Windmills, and not one sail turning.
+- `gw.mill.first` · once · → landmark:mill (first time by the big mill and the ditch)
+  - Spirit: The bridge is up. That big mill must lower it.
+- `gw.kites.first` · once · → landmark:kites (first time in the kite field)
+  - Spirit: Kites, lying in the grass. Nobody to fly them.
+- `gw.ridge.first` · once · → landmark:ridge (first time near the ridge path)
+  - Spirit: A cloud sits right on the path. Stuck, like everything.
+- `gw.tower.first` · once · → landmark:tower (first time near the wind tower)
+  - Spirit: The wind tower. Its vanes should be spinning.
+- `gw.rare.first` · once · → landmark:rare (first time in the rare grass)
+  - Spirit: This grass feels different. Something odd floats here.
+
 ## Statue and finale
 - `hub.shard.first` · once · → statueSocket (step 9c: in the hub holding a shard)
   - Spirit: Put the shard in the statue. Something's calling it.
