@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f697fb04f6c3fc46ba21dc9d66f53db, type: 3}
+  m_Name: Pyrecrane
+  m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.CryProfile
+  speciesId: Pyrecrane
+  element: 1
+  bodyHeight: 0.065
+  basePitch: 369.99442
+  syllables: []
+  evolvedFrom: Embercrane
+  semitoneShift: -4
+  slow: 1.2
+  sub: 1
+  keeper: 0
+  gain: 1

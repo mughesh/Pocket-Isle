@@ -1,0 +1,182 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e32aa42b52848444bbb64add3d1f1e2d, type: 3}
+  m_Name: cry.Steambara
+  m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.SynthPatch
+  id: cry.Steambara
+  recipe: cry
+  mode: 0
+  duration: 0.88
+  seed: 52583
+  variants: 2
+  jitterPitch: 0.4
+  jitterTime: 0.06
+  jitterFilter: 0.08
+  layers:
+  - enabled: 1
+    label: syllable
+    instrument: 0
+    wave: 3
+    note: 
+    hz: 739.98883
+    gate: 0.2
+    startOffset: 0.01
+    gain: 1
+    pitchStart: 0
+    pitchEnd: -3
+    pitchTime: 0.2
+    pitchCurve: 0.8
+    amp:
+      attack: 0.012
+      hold: 0
+      decay: 0.2
+      sustain: 0.7
+      release: 0.06
+    vibratoRate: 9
+    vibratoDepth: 0.7
+    vibratoDelay: 0
+    tremoloRate: 0
+    tremoloDepth: 0
+    fmRatio: 0
+    fmIndex: 0
+    fmDecay: 0
+    filter: 0
+    cutoffStart: 2000
+    cutoffEnd: 2000
+    cutoffTime: 0.2
+    cutoffCurve: 1
+    resonance: 0.1
+    formant: 1
+    f1Start: 644.6261
+    f1End: 339.27692
+    f2Start: 949.97534
+    f2End: 983.903
+    formantTime: 0.2
+    formantQ: 7
+    formantMix: 0.85
+    crackleDensity: 0
+    crackleLength: 2
+    crackleGain: 0.5
+  - enabled: 1
+    label: syllable
+    instrument: 0
+    wave: 3
+    note: 
+    hz: 739.98883
+    gate: 0.24
+    startOffset: 0.25
+    gain: 1
+    pitchStart: 0
+    pitchEnd: 0
+    pitchTime: 0.24
+    pitchCurve: 0.8
+    amp:
+      attack: 0.012
+      hold: 0
+      decay: 0.24
+      sustain: 0.7
+      release: 0.06
+    vibratoRate: 9
+    vibratoDepth: 0.7
+    vibratoDelay: 0
+    tremoloRate: 6
+    tremoloDepth: 0.3
+    fmRatio: 0
+    fmIndex: 0
+    fmDecay: 0
+    filter: 0
+    cutoffStart: 2000
+    cutoffEnd: 2000
+    cutoffTime: 0.2
+    cutoffCurve: 1
+    resonance: 0.1
+    formant: 1
+    f1Start: 339.27692
+    f1End: 339.27692
+    f2Start: 983.903
+    f2End: 983.903
+    formantTime: 0.24
+    formantQ: 7
+    formantMix: 0.85
+    crackleDensity: 0
+    crackleLength: 2
+    crackleGain: 0.5
+  - enabled: 1
+    label: bubbles
+    instrument: 1
+    wave: 0
+    note: 
+    hz: 1479.9777
+    gate: 0
+    startOffset: 0
+    gain: 0.5
+    pitchStart: 0
+    pitchEnd: 10
+    pitchTime: 0.03
+    pitchCurve: 0.6
+    amp:
+      attack: 0.003
+      hold: 0
+      decay: 0.05
+      sustain: 0
+      release: 0.05
+    vibratoRate: 0
+    vibratoDepth: 0
+    vibratoDelay: 0
+    tremoloRate: 0
+    tremoloDepth: 0
+    fmRatio: 0
+    fmIndex: 0
+    fmDecay: 0
+    filter: 0
+    cutoffStart: 2000
+    cutoffEnd: 2000
+    cutoffTime: 0.2
+    cutoffCurve: 1
+    resonance: 0.1
+    formant: 0
+    f1Start: 700
+    f1End: 300
+    f2Start: 1200
+    f2End: 2200
+    formantTime: 0.2
+    formantQ: 8
+    formantMix: 1
+    crackleDensity: 0
+    crackleLength: 2
+    crackleGain: 0.5
+  loopCrossfade: 1
+  notes:
+  - note: A5
+    start: 0.45
+    length: 0.05
+    layer: 2
+    velocity: 0.6
+  - note: D6
+    start: 0.49999997
+    length: 0.05
+    layer: 2
+    velocity: 0.5
+  - note: E6
+    start: 0.54999995
+    length: 0.05
+    layer: 2
+    velocity: 0.40000004
+  gain: 1
+  limiter: 1
+  lowpass: 8000
+  normalize: 1
+  peakDb: -3
+  gap: 0
+  review:
+    status: 0
+    note: 

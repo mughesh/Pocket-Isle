@@ -150,7 +150,11 @@ Ambience loops play with `PlayLoop2D(id, 1.5f)`; keep the handle per map and `St
 | `Puzzles/ForgeBellows.cs` | uses `PuzzleSounds.Puff / Whoosh / Rumble` | the three cues above; delete its AudioSource |
 
 ## 4. Cries and voices
-- `cry.<speciesId>` per species (`AudioIds.Cry(species.id)`). Battle: on `WildAppears`, on send-out (`PodBurst`), at faint.
+- `cry.<speciesId>` per species: `AudioIds.Cry(SpeciesRegistry.IdOf(species))`. The id is the species **asset name**,
+  case-sensitive (`cry.Kilnpot`, `cry.Hearthstag`). All 26 registry species have one, `LanternSpirit` included.
+  Battle: on `WildAppears`, on send-out (`PodBurst`), at faint. Lodge: `LodgeRoom.Wake` / `Inspect`.
+- New species later: run **Tools > Pocket Isle > Audio > Make Cry Profiles (missing only)**, then Audio Lab **Create
+  missing**, **Bake all**, **Sync cues**. An evolution gets its base form's voice automatically.
 - Variants come from pitch, not extra clips: grab the handle and set pitch after play:
   - **hurt:** `Play(AudioIds.Cry(id), actor)` then `h.SetPitch(1.25f)` and stop early `h.Stop(0.15f)` after ~60% of the clip.
   - **faint:** `h.SetPitch(0.8f)` (slower and lower in one; Unity pitch changes both).

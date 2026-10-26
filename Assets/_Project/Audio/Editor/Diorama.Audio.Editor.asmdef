@@ -2,7 +2,8 @@
     "name": "Diorama.Audio.Editor",
     "rootNamespace": "Diorama.Audio.EditorTools",
     "references": [
-        "Diorama.Audio"
+        "Diorama.Audio",
+        "Diorama.Runtime"
     ],
     "includePlatforms": [
         "Editor"

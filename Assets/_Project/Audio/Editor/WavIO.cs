@@ -29,10 +29,14 @@ namespace Diorama.Audio.EditorTools
                 w.Write(new[] { 'd', 'a', 't', 'a' });
                 w.Write(dataBytes);
                 var bytes = new byte[dataBytes];
+                // TPDF dither below one LSB keeps quiet tails from turning into grit. Seeded by the file name, so re-baking
+                // an unchanged patch writes the same bytes (no Git LFS churn).
+                uint h = 2166136261;
+                foreach (var ch in Path.GetFileName(path)) h = (h ^ ch) * 16777619;
+                var rng = new System.Random((int)h);
                 for (int i = 0; i < samples.Length; i++)
                 {
-                    // TPDF dither below one LSB keeps quiet tails from turning into grit.
-                    float d = (UnityEngine.Random.value - UnityEngine.Random.value) / 32768f;
+                    float d = (float)(rng.NextDouble() - rng.NextDouble()) / 32768f;
                     short v = (short)Mathf.Clamp(Mathf.RoundToInt((samples[i] + d) * 32767f), -32768, 32767);
                     bytes[2 * i] = (byte)(v & 0xff);
                     bytes[2 * i + 1] = (byte)((v >> 8) & 0xff);
