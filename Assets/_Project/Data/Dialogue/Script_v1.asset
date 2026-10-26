@@ -96,6 +96,16 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: I feel like I know it.
+  - id: lesson.pinch
+    once: 0
+    priority: 1
+    note: 'step 9h, after `intro.arrive`: the ghost pinches beside your own hand'
+    target: 
+    validWhile: tutorial
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Tap your thumb and finger together. Like this!
   - id: lesson.move.again
     once: 0
     priority: 1

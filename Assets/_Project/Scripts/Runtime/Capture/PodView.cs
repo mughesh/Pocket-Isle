@@ -36,12 +36,16 @@ namespace Diorama
         static readonly int GreyId = Shader.PropertyToID("_Grey");
         static readonly int CrackId = Shader.PropertyToID("_Crack");
         static readonly int ShatterId = Shader.PropertyToID("_Shatter");
+        static readonly int GoldId = Shader.PropertyToID("_Gold");
+        static readonly int WhiteId = Shader.PropertyToID("_White");
         static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
 
         /// <summary>Glow target 0..1 (lead pod, armed cradle pod).</summary>
         public float Glow { get; set; }
-        /// <summary>Hover target 0..1 (gaze or a fingertip near it): a little bigger and brighter.</summary>
+        /// <summary>Hover target 0..1 (gaze or a fingertip near it): ~8% bigger, a white rim (step 9h).</summary>
         public float Hover { get; set; }
+        /// <summary>Step 9h focus language: the player can act on this pod right now (gold rim).</summary>
+        public float Actionable { get; set; }
         /// <summary>Dialogue highlight 0..1 (a hint points at this pod): brighter and a little bigger.</summary>
         public float Pulse { get; set; }
         /// <summary>0..1: white cracks race over the glass (the pod is about to shatter).</summary>
@@ -58,7 +62,7 @@ namespace Diorama
         GameObject _mini;
         CreatureView _miniView;
         bool _miniFainted;
-        float _glow, _hover, _spin;
+        float _glow, _hover, _spin, _gold;
         MaterialPropertyBlock _glassBlock, _bandBlock;
         Vector3 _baseScale = Vector3.one;
         bool _hasBaseScale;
@@ -149,7 +153,8 @@ namespace Diorama
             bool fainted = Isling != null && Isling.IsFainted;
             _glow = Mathf.MoveTowards(_glow, fainted ? 0f : Glow, Time.deltaTime * 3f);
             _hover = Mathf.MoveTowards(_hover, Hover, Time.deltaTime * 6f);
-            transform.localScale = BaseScale * (1f + 0.1f * _hover + 0.08f * Pulse);
+            _gold = Mathf.MoveTowards(_gold, fainted ? 0f : Actionable, Time.deltaTime * 4f);
+            transform.localScale = BaseScale * (1f + 0.08f * _hover + 0.08f * Pulse);
 
             if (_mini != null)
             {
@@ -177,6 +182,8 @@ namespace Diorama
                 _glassBlock.SetFloat(GreyId, fainted ? 1f : 0f);
                 _glassBlock.SetFloat(CrackId, fainted ? 1f : 0f);
                 _glassBlock.SetFloat(ShatterId, Shatter);
+                _glassBlock.SetFloat(GoldId, _gold);
+                _glassBlock.SetFloat(WhiteId, _hover);
                 glass.SetPropertyBlock(_glassBlock);
             }
             if (band != null)

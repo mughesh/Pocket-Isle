@@ -46,6 +46,15 @@ namespace Diorama.EditorTools
                 log.Append("\n  MISSING DialogueBubble.");
                 return;
             }
+            var onboarding = Find<Onboarding>();
+            var fx = Find<BattleFx>();
+            if (onboarding != null)
+            {
+                Undo.RecordObject(onboarding, "Step 9h");
+                onboarding.fx = fx;
+                EditorUtility.SetDirty(onboarding);
+            }
+            log.Append($"\n  Pinch lesson: sparkle fx {(onboarding != null && fx != null ? "linked" : "MISSING")}.");
             Undo.RecordObject(bubble, "Step 9h");
             bubble.holdBase = 1.5f;
             bubble.holdPerChar = 0.06f;

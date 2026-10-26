@@ -374,6 +374,8 @@ namespace Diorama
                 float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * 6f);
                 p.Glow = i == CradleSlot ? (CradlePulse ? 0.9f + 0.6f * pulse : CradleGlow ? 0.8f : 0f)
                     : Mathf.Max(Mathf.Max(i == GlowSlot || i == SelectedSlot ? 1f : 0f, WaveGlow(i)), XpGlow(i));
+                // Step 9h: gold = act on this now (the lead pod to send out, the armed cradle pod).
+                p.Actionable = i == GlowSlot || i == CradleSlot && (CradleGlow || CradlePulse) ? 1f : 0f;
                 if (!p.Detached && !held) p.SetGrabDiameter(i == CradleSlot ? cradleGrabSize : _partyGrab * FocusScale(i));
             }
             for (int i = 0; i < Party.Size; i++)

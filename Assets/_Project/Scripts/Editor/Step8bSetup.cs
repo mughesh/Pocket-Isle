@@ -149,6 +149,12 @@ namespace Diorama.EditorTools
                 },
                 new LessonData
                 {
+                    // Step 9h: pinch is taught before anything needs it; the ghost pinches beside the player's own hand.
+                    id = "pinch", line = "lesson.pinch", chip = "Pinch!", startWhen = "opening.pinch", validWhile = "opening.pinch",
+                    doneWhen = "pinched", ghost = "pinch", place = GhostPlace.BesideHand, ghostScale = 1f,
+                },
+                new LessonData
+                {
                     id = "move", line = "intro.world", chip = "Grab the edge", again = "lesson.move.again", startWhen = "opening.move", validWhile = "opening.move",
                     // Step 8e: a pinch on the side of the base (pinch or palm both grab the island).
                     doneWhen = "islandGrabbed", skipAfter = 12f, ghost = "grab_rim_slide", place = GhostPlace.IslandSides, target = "rim",

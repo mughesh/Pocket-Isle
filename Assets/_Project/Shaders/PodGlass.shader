@@ -14,6 +14,8 @@ Shader "Diorama/Pod Glass"
         _Crack ("Crack Light", Range(0, 1)) = 0
         _CrackScale ("Crack Scale (1/m)", Float) = 140
         _Shatter ("Shatter Cracks", Range(0, 1)) = 0
+        _Gold ("Can Act Now (gold rim)", Range(0, 1)) = 0
+        _White ("Hovered (white rim)", Range(0, 1)) = 0
     }
 
     SubShader
@@ -44,6 +46,8 @@ Shader "Diorama/Pod Glass"
                 float _Crack;
                 float _CrackScale;
                 float _Shatter;
+                float _Gold;
+                float _White;
             CBUFFER_END
 
             struct Attributes
@@ -129,6 +133,9 @@ Shader "Diorama/Pod Glass"
 
                 // Hint target (gold) or gazed (white): a glowing rim (FocusHighlight globals).
                 float2 focus = DioramaFocusAmounts(TransformObjectToWorld(float3(0.0, 0.0, 0.0)));
+                // Step 9h: this pod's own focus (every pod the player can act on now is gold, a hovered one white).
+                focus.y = max(focus.y, _White);
+                focus.x = max(focus.x, _Gold) * (1.0 - _White);
                 float rimGlow = smoothstep(0.25, 0.9, fres);
                 col = lerp(col, _DioramaHoverColor.rgb * 1.2, rimGlow * focus.y * 0.8);
                 col = lerp(col, _DioramaHighlightColor.rgb * 1.4, rimGlow * focus.x);

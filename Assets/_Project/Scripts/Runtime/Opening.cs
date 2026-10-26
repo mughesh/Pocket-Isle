@@ -73,6 +73,8 @@ namespace Diorama
         public float riseSeconds = 1.6f;
         [Tooltip("intro.world waits this long for a grab of the rim (s).")]
         public float moveWaitSeconds = 12f;
+        [Tooltip("Step 9h: the pinch lesson waits this long for two pinches, then the opening moves on (s).")]
+        public float pinchWaitSeconds = 45f;
         public float returnRiseSeconds = 2f;
 
         [Header("Starter pods")]
@@ -104,7 +106,7 @@ namespace Diorama
         static readonly int CrackPulseId = Shader.PropertyToID("_CrackPulse");
         static readonly int EmissiveId = Shader.PropertyToID("_Emissive");
 
-        enum Stage { None, Shard, Unfold, Spirit, Move, Starters, Walk, Done }
+        enum Stage { None, Shard, Unfold, Spirit, Pinch, Move, Starters, Walk, Done }
 
         Stage _stage;
         Transform _shard;
@@ -142,6 +144,7 @@ namespace Diorama
                 k => { }, () => pods.podPrefab != null ? pods.podPrefab.radius * FloatScale * podFocusGrow * island.transform.lossyScale.x : 0.03f);
             DialogueBubble.KeepClear += StarterPodsInView;
             GameConditions.Register("opening.shard", () => _shardWaiting);
+            GameConditions.Register("opening.pinch", () => _stage == Stage.Pinch);
             GameConditions.Register("opening.move", () => _stage == Stage.Move);
             GameConditions.Register("opening.starters", () => _stage == Stage.Starters && _starterPods.Count > 0);
             _run = StartCoroutine(save.Loaded ? Returning() : NewGame());
@@ -329,6 +332,13 @@ namespace Diorama
             yield return Spark();
             Dialogue.Say("intro.arrive");
             yield return WaitLines(14f);
+
+            // Step 9h: pinch is taught before anything needs it (the pinch lesson, beside the player's own hand).
+            _stage = Stage.Pinch;
+            for (float t = 0f; onboarding != null && onboarding.CurrentId == "pinch" && t < pinchWaitSeconds; t += Time.deltaTime) yield return null;
+            Debug.Log($"[Opening] Pinch lesson {(onboarding != null && onboarding.CurrentId == "pinch" ? $"not done in {pinchWaitSeconds:0} s: moving on" : "done")}.");
+            if (onboarding != null && onboarding.CurrentId == "pinch") onboarding.SkipTo("move");
+            yield return WaitLines(4f);
 
             // Moving the island is prompted (the move lesson), not forced.
             _stage = Stage.Move;
@@ -857,6 +867,8 @@ namespace Diorama
                 // The starter inside waves: the pod wiggles while looked at.
                 pod.transform.localRotation = Quaternion.Euler(0f, 0f, focus ? 12f * Mathf.Sin(t * 9f) : 0f);
                 pod.Hover = focus ? 1f : 0f;
+                // Step 9h: every starter pod is gold while you pick (the looked-at one white).
+                pod.Actionable = 1f;
             }
             UpdatePodPinch();
         }

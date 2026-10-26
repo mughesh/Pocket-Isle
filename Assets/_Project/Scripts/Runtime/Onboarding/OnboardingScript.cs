@@ -19,6 +19,11 @@ namespace Diorama
         /// the left and right sides. The clip is turned so its palm faces the island.
         /// </summary>
         IslandSides,
+        /// <summary>
+        /// Step 9h (the pinch lesson): right beside the player's own dominant hand, following it (~8 cm to the outside,
+        /// at hand height). Without a tracked hand, where a resting hand would be.
+        /// </summary>
+        BesideHand,
     }
 
     /// <summary>

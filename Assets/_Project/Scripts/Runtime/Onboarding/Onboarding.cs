@@ -46,6 +46,14 @@ namespace Diorama
         [Header("Hands")]
         public float handsMissingSeconds = 3f;
 
+        [Header("Pinch lesson (step 9h)")]
+        [Tooltip("The lesson that counts pinches (either hand).")]
+        public string pinchLesson = "pinch";
+        [Min(1)] public int pinchCount = 2;
+        [Tooltip("Pooled particles for the gold sparkle at the fingertips on each pinch.")]
+        public BattleFx fx;
+        public Color sparkleColor = new Color(1f, 0.82f, 0.35f);
+
         [Header("Chime")]
         [Range(0f, 1f)] public float chimeVolume = 0.35f;
 
@@ -53,7 +61,7 @@ namespace Diorama
         public static readonly string[] Events =
         {
             "shardTouched", "islandGrabbed", "starterPicked", "walked3", "stopped", "gazeWalk",
-            "grassBattle", "sentOut", "moveUsed", "podThrown", "wonOrCaught", "battleFailed", "twoHandGrab",
+            "grassBattle", "sentOut", "moveUsed", "podThrown", "wonOrCaught", "battleFailed", "twoHandGrab", "pinched",
         };
 
         static Onboarding _instance;
@@ -80,7 +88,8 @@ namespace Diorama
         public Vector2Int? GoldTile => _goldTile;
 
         LessonRunner _runner;
-        int _steps, _praiseIndex;
+        int _steps, _praiseIndex, _pinches;
+        readonly bool[] _wasPinching = { true, true };
         float _lineAway, _untracked;
         bool _helped, _shown;
         Vector2Int? _goldTile;
@@ -283,12 +292,46 @@ namespace Diorama
             var current = _runner.Current;
             if (_runner.State == LessonRunner.Phase.Waiting && current != null && !string.IsNullOrEmpty(current.goldPath) && _goldPath == null)
                 _goldPath = StartCoroutine(GoldPath(current));
-            if (_runner.State == LessonRunner.Phase.Teaching) Teach(current);
+            if (_runner.State == LessonRunner.Phase.Teaching)
+            {
+                Teach(current);
+                if (current.id == pinchLesson) CountPinches();
+            }
+        }
+
+        /// <summary>The pinch lesson: each new pinch (either hand) sparkles gold at the fingertips; enough of them = done.</summary>
+        void CountPinches()
+        {
+            for (int h = 0; h < 2; h++)
+            {
+                var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
+                bool pinching = hand != null && hand.IsTrackedDataValid && hand.GetIndexFingerIsPinching();
+                if (pinching && !_wasPinching[h]) Pinched(hand, h == 0);
+                _wasPinching[h] = pinching;
+            }
+        }
+
+        void Pinched(IHand hand, bool left)
+        {
+            _pinches++;
+            Debug.Log($"[Onboarding] Pinch {_pinches}/{pinchCount} ({(left ? "left" : "right")}).");
+            if (fx != null && hand != null && HandLookup.TryGetJoint(hand, HandJointId.HandThumbTip, out var thumb) &&
+                HandLookup.TryGetJoint(hand, HandJointId.HandIndexTip, out var index))
+                fx.Burst((thumb + index) * 0.5f, 10, sparkleColor, 0.06f, 0.45f, 0.004f, Vector3.up * 0.03f);
+            if (_pinches >= pinchCount) _runner.Mark("pinched");
+        }
+
+        /// <summary>Debug (bridge): a pinch as if made with a hand (no sparkle without a tracked hand).</summary>
+        public void DebugPinch()
+        {
+            if (_runner != null && _runner.Current != null && _runner.Current.id == pinchLesson) Pinched(null, false);
         }
 
         void Show(LessonData l)
         {
             _shown = true;
+            _pinches = 0;
+            _wasPinching[0] = _wasPinching[1] = true; // a pinch already held doesn't count
             _helped = false;
             _lineAway = 0f;
             if (l.goldTileSteps > 0) PickGoldTile(l.goldTileSteps);

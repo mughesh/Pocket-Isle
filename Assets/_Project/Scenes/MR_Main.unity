@@ -3386,6 +3386,10 @@ MonoBehaviour:
   patchRadius: 1
   walkSteps: 3
   handsMissingSeconds: 3
+  pinchLesson: pinch
+  pinchCount: 2
+  fx: {fileID: 1078587927}
+  sparkleColor: {r: 1, g: 0.82, b: 0.35, a: 1}
   chimeVolume: 0.35
 --- !u!4 &1380201672
 Transform:
@@ -3492,6 +3496,8 @@ MonoBehaviour:
   bothSpread: 0.18
   sideDrop: 0.015
   sideOut: 0.012
+  besideHandOut: 0.08
+  restingHand: {x: 0.16, y: 0.3, z: 0.32}
   fadeSeconds: 0.3
   struggleLoops: 3
   struggleSpeed: 0.6
@@ -4544,6 +4550,7 @@ MonoBehaviour:
   growSeconds: 1.2
   riseSeconds: 1.6
   moveWaitSeconds: 12
+  pinchWaitSeconds: 45
   returnRiseSeconds: 2
   podScale: 2.4
   podFocusGrow: 1.25

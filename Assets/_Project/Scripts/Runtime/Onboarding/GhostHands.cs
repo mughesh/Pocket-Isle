@@ -42,6 +42,10 @@ namespace Diorama
         [Tooltip("Island sides (pinch grab, step 8e): the clip's key joint sits this far below the cap top (island-local m) and this far out from the base (world m).")]
         public float sideDrop = 0.04f;
         public float sideOut = 0.08f;
+        [Tooltip("Beside the player's hand (step 9h, the pinch lesson): this far to the outside of the dominant hand (m).")]
+        public float besideHandOut = 0.08f;
+        [Tooltip("Without a tracked hand: where a resting hand would be, from the head (x outward, y down, z forward; m).")]
+        public Vector3 restingHand = new Vector3(0.16f, 0.3f, 0.32f);
 
         [Header("Feel")]
         public float fadeSeconds = 0.3f;
@@ -345,6 +349,24 @@ namespace Diorama
                     var b = island.LocalBounds;
                     point = island.transform.TransformPoint(new Vector3(b.center.x, island.CapTopLocal - sideDrop, b.center.z));
                     break;
+                }
+                case GhostPlace.BesideHand:
+                {
+                    // Follows the player's own dominant hand, a little to its outside, at its height.
+                    bool left = _request.left;
+                    Vector3 headFwd = cam != null ? cam.transform.forward : Vector3.forward;
+                    headFwd.y = 0f;
+                    headFwd = headFwd.sqrMagnitude > 1e-6f ? headFwd.normalized : Vector3.forward;
+                    Vector3 outward = Vector3.Cross(Vector3.up, headFwd) * (left ? -1f : 1f);
+                    var hand = HandRegistry.Get(left ? Handedness.Left : Handedness.Right);
+                    Vector3 at = hand != null && hand.IsTrackedDataValid && HandLookup.TryGetJoint(hand, HandJointId.HandPalm, out var palm)
+                        ? palm
+                        : head + outward * restingHand.x - Vector3.up * restingHand.y + headFwd * restingHand.z;
+                    point = at + outward * besideHandOut;
+                    var look = point - head;
+                    look.y = 0f;
+                    frame = look.sqrMagnitude > 1e-6f ? Quaternion.LookRotation(look, Vector3.up) : Quaternion.LookRotation(headFwd, Vector3.up);
+                    return true;
                 }
                 case GhostPlace.AtTarget:
                 case GhostPlace.AboveTarget:

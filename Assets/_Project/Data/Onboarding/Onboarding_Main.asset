@@ -36,6 +36,29 @@ MonoBehaviour:
     goldPath: 
     goldTileSteps: 0
     tutorialGrass: 0
+  - id: pinch
+    line: lesson.pinch
+    again: 
+    chip: Pinch!
+    help: 
+    helpAfter: 30
+    startWhen: opening.pinch
+    delay: 0
+    doneWhen: pinched
+    validWhile: opening.pinch
+    skipAfter: 0
+    failWhen: 
+    rewindTo: 
+    praise: 1
+    ghost: pinch
+    place: 5
+    target: 
+    ghostScale: 1
+    bothHands: 0
+    ghostSpread: 0
+    goldPath: 
+    goldTileSteps: 0
+    tutorialGrass: 0
   - id: move
     line: intro.world
     again: lesson.move.again
