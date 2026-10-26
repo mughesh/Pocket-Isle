@@ -191,6 +191,14 @@ namespace Diorama.EditorTools
             if (g != null) g.DebugGust(new Vector2(0f, 1f));
         }
 
+        /// <summary>A wild battle right here with the species named in arg.txt (Lv 7).</summary>
+        public static void Fight()
+        {
+            var state = GameState.Instance;
+            var s = UnityEditor.AssetDatabase.LoadAssetAtPath<IslingSpecies>($"Assets/_Project/Data/Creatures/Species/{Arg}.asset");
+            Debug.Log($"[GalewickPlay] Fight {Arg}: {(state != null && state.Fight(s, 7))}");
+        }
+
         public static void Tower()
         {
             var d = Object.FindFirstObjectByType<TowerDoor>();
