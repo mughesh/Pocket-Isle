@@ -224,6 +224,17 @@ Debug toggle: G (Editor) or three quick left-hand thumb taps (dev builds), 2 s f
 | Hearthstag | Keeper: stag, chunky ember-crystal crown, sturdy legs | — | Temple |
 Avoided for originality: lizards, foxes, cats, pigs, moths, pinecones (all used by Pokémon fire types).
 
+**Fire roster as built (step 9d, Oct 26):** all 10 fire lines exist (Steambara is the water roster's).
+| Line | Evolves at | Where (Cinderwood) | Moves (base) |
+|---|---|---|---|
+| Kettlewing -> **Steamswan** (teapot swan) | 14 | forest, field, grove, springs | Steam Jet / Tackle / Hunker Down |
+| **Coalbeetle -> Forgehorn** | 16 | forest 15, field 17 | Horn Ram / Tackle / Hunker Down |
+| **Mapadillo -> Emberdillo** | 15 | forest 10, field 16, grove 10 | Roll Out / Ember Puff / Hunker Down |
+| **Ashmole -> Cindermole** | 16 | village / arrival 15, ruins 25 | Dig Strike / Ember Puff / Warm Nap |
+| **Cindercap -> Cinderbloom** (lava-cracked cap) | 16 | lantern glade 30 | Spore Drift / Tackle / Warm Nap |
+| **Embercrane -> Pyrecrane** (rare) | 16 | field 5, springs 5 (rare) | Flame Wing / Ember Puff / Puff Up |
+- Glazegolem / Kilngolem read as rare: deep teal glaze, gold kintsugi cracks that glow and pulse.
+
 ## Core loop
 explore → tall grass encounter → battle → capture → party / Hearth Lodge → Temple Keeper → shard → statue
 

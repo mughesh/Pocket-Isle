@@ -28,7 +28,10 @@ Prompts for Claude Code: `Assets/Docs/Prompts/step-NN-*.md`. Design: `Assets/Doc
 - **Step 9c built Oct 26 (headset test pending): Hearthstag and the first shard.** Keeper model + battle rules (crown
   shield, phase 2), the Forge Hall meeting and fight, victory and calming, the fire shard into a rim holder, the
   restoration wave, the temple return gate, the shard into the hub statue.
-- Next: step 9d (the rest of the fire roster).
+- **Step 9d built Oct 26 (headset test pending): the rest of the fire roster.** Steamswan, Coalbeetle/Forgehorn,
+  Mapadillo/Emberdillo, Ashmole/Cindermole, Cindercap/Cinderbloom, Embercrane/Pyrecrane in the Cinderwood tables;
+  Glazegolem and Kilngolem look rare (gold kintsugi).
+- Next: headset test of 9b-9d, then the next realm.
 
 ## Principle
 - **Every system data-driven** (ScriptableObjects): species, moves, type chart, maps, temples, dialogue.
