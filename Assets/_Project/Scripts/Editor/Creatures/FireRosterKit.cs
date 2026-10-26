@@ -134,6 +134,45 @@ namespace Diorama.EditorTools
             return species;
         }
 
+        // ---- 7. Glazegolem / Kilngolem: a rare look ----
+
+        /// <summary>
+        /// Mugesh, Oct 26: Glazegolem should read as rare at a glance. A deep teal glaze (glossier), and its cracks become
+        /// gold kintsugi seams that glow softly and pulse (a faint shimmer). Kilngolem the same, a shade warmer.
+        /// Edits the fire kit's recipes in place (FireKit.Write would undo it; re-run this after).
+        /// </summary>
+        public static IslingSpecies GlazegolemRare()
+        {
+            var glaze = AssetDatabase.LoadAssetAtPath<CreatureRecipe>($"{Root}/Recipes/Glazegolem.asset");
+            var kiln = AssetDatabase.LoadAssetAtPath<CreatureRecipe>($"{Root}/Recipes/Kilngolem.asset");
+            if (glaze == null || kiln == null)
+            {
+                Debug.LogError("[FireRosterKit] Glazegolem / Kilngolem recipes missing (write the fire kit first).");
+                return null;
+            }
+            glaze.palette = new CreaturePalette
+            {
+                baseColor = Hex("#2A6E78"), belly = Hex("#4FB0B0"), accent = Hex("#1E4A50"), socks = Hex("#2A6E78"),
+                glow = Hex("#FFC84A"), extra = Hex("#3A2A20"), face = Hex("#1A1414"), iris = Hex("#FFC84A"),
+            };
+            var z = glaze.zones;
+            z.cracks = true;
+            z.crackScale = 1.4f;
+            z.crackWidth = 0.05f;
+            z.crackPulse = 1f;
+            glaze.zones = z;
+            glaze.spec = 0.9f;
+            EditorUtility.SetDirty(glaze);
+            kiln.palette = new CreaturePalette
+            {
+                baseColor = Hex("#1F5A66"), belly = Hex("#3E9A9E"), accent = Hex("#7A4A24"), socks = Hex("#1F5A66"),
+                glow = Hex("#FFD060"), extra = Hex("#2E2A28"), face = Hex("#1A1414"), iris = Hex("#FFD060"),
+            };
+            EditorUtility.SetDirty(kiln);
+            AssetDatabase.SaveAssets();
+            return AssetDatabase.LoadAssetAtPath<IslingSpecies>($"{Root}/Species/Glazegolem.asset");
+        }
+
         /// <summary>An evolution as modifiers on its base (no concept yet): bigger, extra parts, its own palette.</summary>
         static CreatureRecipe Evolution(string name, CreatureRecipe baseRecipe, float heightScale, CreaturePalette palette, params PlacedPart[] extras)
         {

@@ -17,10 +17,15 @@ MonoBehaviour:
   - species: {fileID: 11400000, guid: bf28c73db405a224da137bbcb4724879, type: 2}
     minLevel: 5
     maxLevel: 7
-    weight: 60
+    weight: 55
     rare: 0
   - species: {fileID: 11400000, guid: fb46257ae3b4b0144a5861244b1b96f6, type: 2}
     minLevel: 5
     maxLevel: 7
-    weight: 40
+    weight: 35
+    rare: 0
+  - species: {fileID: 11400000, guid: 145b535be59a83343a76aaed5434324f, type: 2}
+    minLevel: 5
+    maxLevel: 7
+    weight: 10
     rare: 0

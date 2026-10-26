@@ -151,18 +151,19 @@ namespace Diorama.EditorTools
             map.SetLayout(Text(_g));
             map.SetProps(Text(_p));
             map.SetZones(Text(_z));
-            map.grassTable = Table("Encounters_Cinderwood", 3, 5, ("Toastling", 32f, false), ("Waxle", 32f, false), ("Kettlewing", 31f, false), ("Glazegolem", 5f, true));
+            // Step 9d: the rest of the fire roster joins (Coalbeetle, Mapadillo, Ashmole, Cindercap; Embercrane a ~5% rare).
+            map.grassTable = Table("Encounters_Cinderwood", 3, 5, ("Toastling", 28f, false), ("Waxle", 28f, false), ("Kettlewing", 24f, false), ("Ashmole", 15f, false), ("Glazegolem", 5f, true));
             map.zoneLegend = new List<MapZone>();
             foreach (var z in Zones)
             {
                 var table = z.id switch
                 {
-                    "forest" => Table("Encounters_Forest", 3, 5, ("Toastling", 60f, false), ("Waxle", 30f, false), ("Kettlewing", 10f, false)),
-                    "field" => Table("Encounters_Field", 4, 6, ("Toastling", 50f, false), ("Kettlewing", 30f, false), ("Waxle", 20f, false)),
-                    "glade" => Table("Encounters_Glade", 5, 7, ("Waxle", 70f, false), ("Toastling", 30f, false)),
-                    "grove" => Table("Encounters_Grove", 5, 7, ("Kettlewing", 60f, false), ("Toastling", 40f, false)),
-                    "springs" => Table("Encounters_Springs", 6, 8, ("Kettlewing", 70f, false), ("Waxle", 30f, false)),
-                    "ruins" => Table("Encounters_Ruins", 7, 9, ("Glazegolem", 25f, true), ("Toastling", 40f, false), ("Waxle", 35f, false)),
+                    "forest" => Table("Encounters_Forest", 3, 5, ("Toastling", 45f, false), ("Waxle", 22f, false), ("Kettlewing", 8f, false), ("Coalbeetle", 15f, false), ("Mapadillo", 10f, false)),
+                    "field" => Table("Encounters_Field", 4, 6, ("Toastling", 30f, false), ("Kettlewing", 20f, false), ("Waxle", 12f, false), ("Coalbeetle", 17f, false), ("Mapadillo", 16f, false), ("Embercrane", 5f, true)),
+                    "glade" => Table("Encounters_Glade", 5, 7, ("Waxle", 50f, false), ("Toastling", 20f, false), ("Cindercap", 30f, false)),
+                    "grove" => Table("Encounters_Grove", 5, 7, ("Kettlewing", 55f, false), ("Toastling", 35f, false), ("Mapadillo", 10f, false)),
+                    "springs" => Table("Encounters_Springs", 6, 8, ("Kettlewing", 65f, false), ("Waxle", 30f, false), ("Embercrane", 5f, true)),
+                    "ruins" => Table("Encounters_Ruins", 7, 9, ("Glazegolem", 25f, true), ("Toastling", 25f, false), ("Waxle", 25f, false), ("Ashmole", 25f, false)),
                     _ => null,
                 };
                 map.zoneLegend.Add(new MapZone { key = z.key.ToString(), id = z.id, grassTable = table });

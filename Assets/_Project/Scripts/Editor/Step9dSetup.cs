@@ -41,5 +41,9 @@ namespace Diorama.EditorTools
         public static void Ashmole() => Line("Ashmole -> Cindermole", FireRosterKit.Ashmole());
         public static void Cindercap() => Line("Cindercap -> Cinderbloom", FireRosterKit.Cindercap());
         public static void Embercrane() => Line("Embercrane -> Pyrecrane", FireRosterKit.Embercrane());
+        public static void GlazegolemRare() => Line("Glazegolem rare look", FireRosterKit.GlazegolemRare());
+
+        /// <summary>Rewrites the Cinderwood map and its zone tables (with the new Islings) and runs the layout checks.</summary>
+        public static void Tables() => Step9aSetup.MapOnly();
     }
 }

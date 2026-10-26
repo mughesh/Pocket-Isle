@@ -30,9 +30,9 @@ MonoBehaviour:
     spots: 0
     spotScale: 0
     cracks: 1
-    crackScale: 1.6
-    crackWidth: 0.045
-    crackPulse: 0.8
+    crackScale: 1.4
+    crackWidth: 0.05
+    crackPulse: 1
     patches:
     - center: {x: 0, y: 0.6, z: 0}
       radius: 0.17
@@ -58,15 +58,16 @@ MonoBehaviour:
     eyeStretch: 0.8
     decals: []
   palette:
-    baseColor: {r: 0.627451, g: 0.32156864, b: 0.1764706, a: 1}
-    belly: {r: 0.8509804, g: 0.5568628, b: 0.19607843, a: 1}
-    accent: {r: 0.2901961, g: 0.14117648, b: 0.078431375, a: 1}
-    socks: {r: 0.627451, g: 0.32156864, b: 0.1764706, a: 1}
-    glow: {r: 1, g: 0.47843137, b: 0.15686275, a: 1}
-    extra: {r: 0.41960785, g: 0.22745098, b: 0.11764706, a: 1}
-    face: {r: 0.16470589, g: 0.101960786, b: 0.078431375, a: 1}
-    iris: {r: 1, g: 0.47843137, b: 0.15686275, a: 1}
-  spec: 0.08
+    baseColor: {r: 0.16470589, g: 0.43137255, b: 0.47058824, a: 1}
+    belly: {r: 0.30980393, g: 0.6901961, b: 0.6901961, a: 1}
+    accent: {r: 0.11764706, g: 0.2901961, b: 0.3137255, a: 1}
+    socks: {r: 0.16470589, g: 0.43137255, b: 0.47058824, a: 1}
+    glow: {r: 1, g: 0.78431374, b: 0.2901961, a: 1}
+    extra: {r: 0.22745098, g: 0.16470589, b: 0.1254902, a: 1}
+    face: {r: 0.101960786, g: 0.078431375, b: 0.078431375, a: 1}
+    iris: {r: 1, g: 0.78431374, b: 0.2901961, a: 1}
+  spec: 0.9
+  glow: 0
   outline: 0.035
   idle:
     breathe: 0.008
