@@ -11,7 +11,8 @@ namespace Diorama
     /// In battle its look follows the fight: a shell of ember light while shielded, a crystal goes dark per blocked
     /// hit, the shell shatters and the crown dims when broken, flares back when it rises again, burns brighter in phase 2.
     /// Won: it kneels, calms (grey to chestnut, gold crown, ~2 s), nods; the forge ignites; the fire shard rises from the
-    /// forge and floats to the player: grab it (pinch, or look + pinch) and it flies into the rim holder. Then back
+    /// forge and floats to the player (big, easy to grab): grab it (pinch, or look + pinch) and it shrinks and flies to
+    /// the Lantern Spirit, who carries it (<see cref="ShardHolder"/>). Then back
     /// outside, a restoration wave ripples out from the temple and the temple's return gate appears. Saved:
     /// <c>cinder.keeper</c> solved, the shard held (<see cref="ShardHolder.FireId"/> stage 1), the realm restored.
     /// Calmed, it rests by the burning forge; poke it for a happy snort. Run: back at the hall door; lost: the shrine.
@@ -127,7 +128,7 @@ namespace Diorama
             Dialogue.RegisterTarget("hearthstag", () => _model != null && _model.gameObject.activeSelf ? _model.WorldCenter : (Vector3?)null, k => { },
                 () => 1.2f * TileWorld);
             Dialogue.RegisterTarget("fireShard", () => _shardHovering ? island.transform.TransformPoint(_shardLocal) : (Vector3?)null, k => { },
-                () => 0.03f * island.transform.lossyScale.x);
+                () => 0.05f * island.transform.lossyScale.x);
             ApplyState();
             StartCoroutine(EnforceRestoredAfterLoad());
             if (Active && !Calmed) StartCoroutine(Meet());
@@ -510,17 +511,22 @@ namespace Diorama
             _shardHome = hover;
             if (!string.IsNullOrEmpty(shardLine)) Dialogue.Say(shardLine);
             if (ghosts != null) ghosts.Show("grab_drop", GhostPlace.AtTarget, "fireShard", 1f, DominantHand.Left, false);
-            FocusHighlight.SetPending(() => _shardHovering ? island.transform.TransformPoint(_shardLocal) : (Vector3?)null, 0.03f * island.transform.lossyScale.x);
+            FocusHighlight.SetPending(() => _shardHovering ? island.transform.TransformPoint(_shardLocal) : (Vector3?)null, 0.05f * island.transform.lossyScale.x);
             explorer.Locked = false;
             Debug.Log("[KeeperHall] The fire shard floats in front of the player: grab it (pinch, or look + pinch).");
         }
 
         Vector3 _shardHome;
 
-        void DrawShard()
+        /// <summary>Metres per shape unit of the floating shard: big to grab (the holder's offer size).</summary>
+        float BigShard => holder != null ? holder.offerMetres : 0.05f;
+
+        void DrawShard() => DrawShard(BigShard);
+
+        void DrawShard(float metres)
         {
             if (_shard == null) return;
-            _shard.PlaceLocal(_shardLocal, Quaternion.Euler(0f, Time.time * 60f, 0f), 0.026f * 1.3f, true);
+            _shard.PlaceLocal(_shardLocal, Quaternion.Euler(0f, Time.time * 60f, 0f), metres, true);
         }
 
         void UpdateShardPickup()
@@ -533,9 +539,9 @@ namespace Diorama
             if (HeadGaze.TryGetRay(out var ray))
             {
                 var pick = new HeadGaze.ConePick(ray, -1);
-                pick.Consider(0, world, Mathf.Max(HeadGaze.MinRadius * island.transform.lossyScale.x, 0.03f * island.transform.lossyScale.x));
+                pick.Consider(0, world, Mathf.Max(HeadGaze.MinRadius * island.transform.lossyScale.x, 0.05f * island.transform.lossyScale.x));
                 gazed = pick.Best == 0;
-                if (gazed) FocusHighlight.Hover(world, 0.03f * island.transform.lossyScale.x);
+                if (gazed) FocusHighlight.Hover(world, 0.05f * island.transform.lossyScale.x);
             }
             for (int h = 0; h < 2; h++)
             {
@@ -544,7 +550,7 @@ namespace Diorama
                 bool started = pinching && !_wasPinching[h];
                 _wasPinching[h] = pinching;
                 if (!started) continue;
-                bool near = IslandHandle.TryGetPinchPoint(hand, out var p) && (p - world).magnitude < 0.06f;
+                bool near = IslandHandle.TryGetPinchPoint(hand, out var p) && (p - world).magnitude < 0.09f;
                 if (near || gazed)
                 {
                     CollectShard(near ? $"{(h == 0 ? "left" : "right")} pinch" : "look + pinch");
@@ -557,7 +563,7 @@ namespace Diorama
         public void CollectShard(string how)
         {
             if (_phase != Phase.Shard || !_shardHovering) return;
-            Debug.Log($"[KeeperHall] Fire shard taken ({how}): into the rim holder.");
+            Debug.Log($"[KeeperHall] Fire shard taken ({how}): it flies to the Spirit.");
             StartCoroutine(ShardToHolder());
         }
 
@@ -566,14 +572,16 @@ namespace Diorama
             _phase = Phase.Leaving;
             if (ghosts != null && ghosts.ClipName == "grab_drop") ghosts.Hide();
             FocusHighlight.Clear();
-            Vector3 from = _shardLocal;
-            Vector3 to = holder != null ? holder.CupLocal(0) : from;
+            Vector3 from = _shardLocal, to = from;
             if (holder != null) holder.FireOut = true;
-            for (float t = 0f; t < 0.8f; t += Time.deltaTime)
+            float small = holder != null ? holder.carryMetres : 0.016f;
+            for (float t = 0f; t < 0.9f; t += Time.deltaTime)
             {
-                float k = Mathf.SmoothStep(0f, 1f, t / 0.8f);
+                float k = Mathf.SmoothStep(0f, 1f, t / 0.9f);
+                // The Spirit bobs: aim at where its shard spot is now; shrink on the way.
+                if (holder != null) to = holder.CupLocal(0);
                 _shardLocal = Vector3.Lerp(from, to, k) + Vector3.up * (0.05f * Mathf.Sin(k * Mathf.PI));
-                DrawShard();
+                DrawShard(Mathf.Lerp(BigShard, small, k));
                 yield return null;
             }
             _shardHovering = false;

@@ -1713,7 +1713,7 @@ MonoBehaviour:
   statueYaw: 0
   socket: {x: 0.24, y: 1.03, z: 0.52}
   ringMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
-  grabRadius: 0.04
+  grabRadius: 0.07
   snapRadius: 0.06
   placedLine: hub.shard.placed
   moreLine: hub.shard.more
@@ -1747,14 +1747,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.ShardHolder
   island: {fileID: 270959109}
-  holderRecipe: {fileID: 11400000, guid: 8459314ffc12ccc439e2bd3b4942c3a2, type: 2}
+  spirit: {fileID: 1847074513}
   fireShardRecipe: {fileID: 11400000, guid: 243f873e41708f049b1a176b344ec7c1, type: 2}
-  cups:
-  - {x: 0.62, y: 0.16, z: 0}
-  - {x: 0, y: 0.16, z: 0}
-  - {x: -0.62, y: 0.16, z: 0}
-  metres: 0.0325
-  inset: {x: 0.12, y: 0.06}
+  carryMetres: 0.022
+  offerMetres: 0.05
+  orbitRadius: 0.035
+  orbitHeight: 0.03
+  offerSpot: {x: 0.15, y: 0.12, z: 0.6}
 --- !u!4 &570826976
 Transform:
   m_ObjectHideFlags: 0
@@ -2764,11 +2763,13 @@ MonoBehaviour:
   island: {fileID: 270959109}
   grabGuard: {fileID: 270959111}
   hudMaterial: {fileID: 2100000, guid: 0656b6c4f92798e49a14cf09a2c6800e, type: 2}
-  size: {x: 0.4, y: 0.32}
-  sideGap: 0.04
-  height: 0.13
-  maxViewAngle: 28
+  size: {x: 0.36, y: 0.32}
+  distance: 0.4
+  sideAngle: 14
+  downAngle: 22
+  followAngle: 55
   fontSize: 0.1
+  rayLength: 1.2
 --- !u!114 &1200054857
 MonoBehaviour:
   m_ObjectHideFlags: 0

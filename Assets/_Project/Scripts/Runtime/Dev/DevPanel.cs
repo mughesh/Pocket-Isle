@@ -11,8 +11,10 @@ namespace Diorama
     /// The in-headset dev / QA panel (step 9e). Only in the Editor and QA builds (scripting define POCKET_DEV); a release
     /// build compiles it out and the object removes itself. Opened and closed with the left hand's menu gesture (palm up,
     /// pinch: Meta's app menu button for hand tracking, <c>OVRInput.Button.Start</c> on <c>Controller.LHand</c>; also the
-    /// left controller's menu button), F2 in the Editor. A plain 2D panel floats beside the island's left side, facing
-    /// the player, kept inside the central view. Buttons work with a poke (index tip through the panel) and with
+    /// left controller's menu button), F2 in the Editor. A plain 2D panel opens within arm's reach in front of the
+    /// player, a little toward the dominant hand and below the eyes, facing them; it stays put (world-locked) and comes
+    /// back in front when the head turns well away. Buttons work with a poke (a fingertip touches the panel), with each
+    /// hand's own ray (ISDK pointer pose: a thin line to the panel, pinch to press; this panel only) and with
     /// look + pinch; in the Editor also with a mouse click. Destructive ones (new game, reset story, load) ask for a
     /// second press. Everything goes through <see cref="GameState"/> (Quick Journey reuses it).
     /// Tabs: Go to, Party, Encounter, Story, Save, Tools (see Assets/Docs/QA-Guide.md).
@@ -26,13 +28,17 @@ namespace Diorama
         [Tooltip("Diorama/Hud material (panel and buttons).")]
         public Material hudMaterial;
         [Tooltip("Panel size (m).")]
-        public Vector2 size = new Vector2(0.4f, 0.32f);
-        [Tooltip("Gap between the island's left edge and the panel (m), and its height above the cap (m).")]
-        public float sideGap = 0.04f;
-        public float height = 0.13f;
-        [Tooltip("The panel stays within this angle of the head's forward (degrees).")]
-        public float maxViewAngle = 28f;
+        public Vector2 size = new Vector2(0.36f, 0.32f);
+        [Tooltip("Distance from the head (m): within arm's reach for pokes.")]
+        public float distance = 0.4f;
+        [Tooltip("Degrees toward the dominant hand, and below the eyes.")]
+        public float sideAngle = 14f;
+        public float downAngle = 22f;
+        [Tooltip("Comes back in front when the head turns further than this from it (degrees).")]
+        public float followAngle = 55f;
         public float fontSize = 0.1f;
+        [Tooltip("Hand rays reach this far (m).")]
+        public float rayLength = 1.2f;
 
 #if UNITY_EDITOR || POCKET_DEV
         enum Tab { GoTo, Party, Encounter, Story, Save, Tools }
@@ -76,8 +82,13 @@ namespace Diorama
         float _confirmUntil, _statusUntil;
         string _statusText;
         readonly bool[] _wasPinching = { true, true };
-        readonly float[] _pokeZ = { -1f, -1f };
+        readonly bool[] _pokeArmed = { true, true };
         readonly float[] _pokeCooldown = new float[2];
+        readonly Button[] _rayHover = new Button[2];
+        readonly bool[] _rayOnPanel = new bool[2];
+        readonly bool[] _fingerNear = new bool[2];
+        readonly MeshRenderer[] _ray = new MeshRenderer[2], _rayDot = new MeshRenderer[2];
+        Vector3 _anchorForward;
         int _species;
         int _level = 9;
         bool _fpsOn, _walkFast;
@@ -149,6 +160,14 @@ namespace Diorama
                 string n = names[i];
                 _tabs.Add(MakeButton(() => n, () => ShowTab(tab), () => _tab == tab, false,
                     new Vector2(-size.x * 0.5f + 0.01f + w * (i + 0.5f), size.y * 0.5f - 0.044f), new Vector2(w - 0.004f, 0.026f)));
+            }
+            for (int h = 0; h < 2; h++)
+            {
+                _ray[h] = Quad(transform, h == 0 ? "Left Ray" : "Right Ray");
+                _rayDot[h] = Quad(transform, h == 0 ? "Left Ray Dot" : "Right Ray Dot");
+                _ray[h].sortingOrder = 2;
+                _rayDot[h].sortingOrder = 3;
+                _ray[h].enabled = _rayDot[h].enabled = false;
             }
             _fps = Text(transform, "FPS Overlay", Vector2.zero, new Vector2(0.12f, 0.02f), fontSize * 0.9f);
             _fps.alignment = TextAlignmentOptions.Left;
@@ -387,7 +406,12 @@ namespace Diorama
         {
             _open = open;
             if (_root != null) _root.gameObject.SetActive(open);
-            if (!open) DevCheats.PanelGazed = false;
+            if (!open)
+            {
+                DevCheats.PanelGazed = false;
+                for (int h = 0; h < 2; h++)
+                    if (_ray[h] != null) _ray[h].enabled = _rayDot[h].enabled = false;
+            }
             else
             {
                 Place(true);
@@ -396,25 +420,25 @@ namespace Diorama
             Debug.Log($"[DevPanel] {(open ? "Open" : "Closed")}.");
         }
 
+        /// <summary>
+        /// In front of the head (yaw only), toward the dominant hand and below the eyes, at arm's reach, facing the head.
+        /// World-locked: it only moves when (re)opened or when the head has turned more than <see cref="followAngle"/> away.
+        /// </summary>
         void Place(bool snap)
         {
             var cam = Camera.main;
-            if (cam == null || island == null || island.map == null) return;
-            var t = island.transform;
-            var half = island.FootprintHalfSize;
-            // Island +X is the player's left.
-            Vector3 edge = t.TransformPoint(new Vector3(half.x + 0.02f, island.CapTopLocal, 0f));
-            Vector3 right = t.right;
-            right.y = 0f;
-            right = right.sqrMagnitude > 1e-6f ? right.normalized : Vector3.left;
-            Vector3 target = edge + right * (sideGap + size.x * 0.5f) + Vector3.up * height;
-            Vector3 head = cam.transform.position, fwd = cam.transform.forward, dir = target - head;
-            float angle = Vector3.Angle(fwd, dir);
-            if (angle > maxViewAngle && dir.sqrMagnitude > 1e-6f)
-                target = head + Vector3.RotateTowards(dir, fwd * dir.magnitude, (angle - maxViewAngle) * Mathf.Deg2Rad, 0f);
-            _root.position = snap ? target : Vector3.Lerp(_root.position, target, 1f - Mathf.Exp(-Time.unscaledDeltaTime * 6f));
-            Vector3 away = _root.position - head;
-            if (away.sqrMagnitude > 1e-6f) _root.rotation = Quaternion.LookRotation(away, Vector3.up);
+            if (cam == null) return;
+            Vector3 head = cam.transform.position, fwd = cam.transform.forward;
+            fwd.y = 0f;
+            if (fwd.sqrMagnitude < 1e-6f) return;
+            fwd.Normalize();
+            if (!snap && Vector3.Angle(fwd, _anchorForward) < followAngle) return;
+            _anchorForward = fwd;
+            float side = DominantHand.Left ? -sideAngle : sideAngle;
+            Vector3 dir = Quaternion.AngleAxis(side, Vector3.up) * fwd;
+            dir = Quaternion.AngleAxis(downAngle, Vector3.Cross(Vector3.up, dir)) * dir;
+            _root.position = head + dir * distance;
+            _root.rotation = Quaternion.LookRotation(_root.position - head, Vector3.up);
         }
 
         // ---- every frame ----
@@ -438,8 +462,9 @@ namespace Diorama
                 DevCheats.PanelGazed = true;
                 _hover = ButtonAt(p);
             }
-            Pinches();
             Pokes();
+            Rays();
+            Pinches();
             Mouse();
             Refresh();
         }
@@ -481,33 +506,81 @@ namespace Diorama
                 var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
                 bool pinching = hand != null && hand.IsTrackedDataValid && hand.GetIndexFingerIsPinching();
                 bool busy = grabGuard != null && grabGuard.IsHandBusy(h == 0);
-                if (pinching && !_wasPinching[h] && !busy && _hover != null) Press(_hover, $"look + pinch ({(h == 0 ? "left" : "right")})");
+                if (pinching && !_wasPinching[h] && !busy)
+                {
+                    // That hand's ray first; look + pinch only when the ray isn't on the panel.
+                    string side = h == 0 ? "left" : "right";
+                    if (_rayHover[h] != null) Press(_rayHover[h], $"ray + pinch ({side})");
+                    else if (_hover != null && !_rayOnPanel[h]) Press(_hover, $"look + pinch ({side})");
+                }
                 _wasPinching[h] = pinching;
             }
         }
 
-        /// <summary>A fingertip coming through the panel from the front presses the button it crosses.</summary>
+        /// <summary>
+        /// Each hand's pointer ray (ISDK pointer pose): when it meets the panel a thin line and a dot show and the button
+        /// under it lights up. Hidden while that hand's fingertip is near the panel (it is poking).
+        /// </summary>
+        void Rays()
+        {
+            for (int h = 0; h < 2; h++)
+            {
+                _rayHover[h] = null;
+                _rayOnPanel[h] = false;
+                _ray[h].enabled = _rayDot[h].enabled = false;
+                var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
+                if (hand == null || !hand.IsTrackedDataValid || _fingerNear[h] || !hand.GetPointerPose(out var pose)) continue;
+                if (!Hit(new Ray(pose.position, pose.forward), out var p)) continue;
+                Vector3 end = _root.TransformPoint(new Vector3(p.x, p.y, -0.003f));
+                Vector3 a = pose.position, along = end - a;
+                float len = along.magnitude;
+                if (len > rayLength) continue;
+                _rayOnPanel[h] = true;
+                DevCheats.PanelGazed = true;
+                _rayHover[h] = ButtonAt(p);
+                bool pinching = hand.GetIndexFingerIsPinching();
+                Color c = _rayHover[h] != null ? new Color(1f, 0.9f, 0.55f, pinching ? 1f : 0.85f) : new Color(1f, 1f, 1f, 0.5f);
+                // The line: a long thin rounded quad from the hand to the hit, turned to face the head.
+                var cam = Camera.main;
+                Vector3 up = along / Mathf.Max(1e-4f, len);
+                Vector3 toCam = cam != null ? cam.transform.position - (a + end) * 0.5f : -along;
+                Vector3 normal = Vector3.ProjectOnPlane(toCam, up);
+                if (normal.sqrMagnitude < 1e-8f) normal = Vector3.Cross(up, Vector3.right);
+                var t = _ray[h].transform;
+                t.SetPositionAndRotation((a + end) * 0.5f, Quaternion.LookRotation(-normal, up));
+                t.localScale = new Vector3(0.0035f, len, 1f);
+                Paint(_ray[h], new Color(c.r, c.g, c.b, c.a * 0.55f), Color.clear, 0.0035f / Mathf.Max(1e-4f, len), 0.5f, 0f);
+                var d = _rayDot[h].transform;
+                d.SetPositionAndRotation(end, _root.rotation);
+                d.localScale = Vector3.one * (pinching ? 0.007f : 0.011f);
+                Paint(_rayDot[h], c, Color.clear, 1f, 0.5f, 0f);
+                _ray[h].enabled = _rayDot[h].enabled = true;
+            }
+        }
+
+        /// <summary>
+        /// A fingertip touching the panel presses the button under it (from a little in front to a little behind the
+        /// surface, so a slow or shallow poke counts); it re-arms once the finger pulls back 1.5 cm. A fingertip within
+        /// 4 cm lights the button it is over.
+        /// </summary>
         void Pokes()
         {
             for (int h = 0; h < 2; h++)
             {
+                _fingerNear[h] = false;
                 var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
-                if (!HandLookup.TryGetJoint(hand, HandJointId.HandIndexTip, out var tip))
-                {
-                    _pokeZ[h] = -1f;
-                    continue;
-                }
+                if (!HandLookup.TryGetJoint(hand, HandJointId.HandIndexTip, out var tip)) continue;
                 Vector3 l = _root.InverseTransformPoint(tip);
-                float before = _pokeZ[h];
-                _pokeZ[h] = l.z;
-                if (before < -0.004f && l.z >= -0.004f && l.z < 0.03f && Time.unscaledTime >= _pokeCooldown[h])
+                bool over = Mathf.Abs(l.x) <= size.x * 0.5f + 0.02f && Mathf.Abs(l.y) <= size.y * 0.5f + 0.02f;
+                _fingerNear[h] = over && l.z > -0.06f && l.z < 0.04f;
+                if (l.z < -0.015f || !over) _pokeArmed[h] = true;
+                var b = over ? ButtonAt(new Vector2(l.x, l.y)) : null;
+                if (b != null && l.z > -0.04f && l.z < 0.03f) _hover = b;
+                if (_pokeArmed[h] && b != null && l.z >= -0.006f && l.z < 0.03f && Time.unscaledTime >= _pokeCooldown[h])
                 {
-                    var b = ButtonAt(new Vector2(l.x, l.y));
-                    if (b != null)
-                    {
-                        _pokeCooldown[h] = Time.unscaledTime + 0.35f;
-                        Press(b, $"poke ({(h == 0 ? "left" : "right")})");
-                    }
+                    _pokeArmed[h] = false;
+                    _pokeCooldown[h] = Time.unscaledTime + 0.3f;
+                    Press(b, $"poke ({(h == 0 ? "left" : "right")})");
                 }
             }
         }
@@ -562,8 +635,9 @@ namespace Diorama
             if (b.text.text != text) b.text.text = text;
             bool on = b.on != null && b.on();
             Color back = b == _confirming ? ConfirmColor : tab ? on ? TabOnColor : TabColor : on ? OnColor : b.action == null ? PanelColor : ButtonColor;
-            Color border = b == _hover ? new Color(1f, 0.9f, 0.55f, 1f) : new Color(1f, 1f, 1f, b.action == null ? 0f : 0.18f);
-            Paint(b.quad, back, border, b.size.x / b.size.y, 0.3f, b == _hover ? 0.12f : 0.06f);
+            bool lit = b == _hover || b == _rayHover[0] || b == _rayHover[1];
+            Color border = lit ? new Color(1f, 0.9f, 0.55f, 1f) : new Color(1f, 1f, 1f, b.action == null ? 0f : 0.18f);
+            Paint(b.quad, back, border, b.size.x / b.size.y, 0.3f, lit ? 0.12f : 0.06f);
         }
 
         void Paint(MeshRenderer r, Color back, Color border, float aspect, float radius, float borderWidth)

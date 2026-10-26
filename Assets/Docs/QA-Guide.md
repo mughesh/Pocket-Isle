@@ -18,9 +18,11 @@ The app appears in the library under **Unknown Sources**.
 - **Controllers:** the left controller's menu button.
 - **Unity Editor:** F2.
 
-The panel floats beside the island's left side. The same gesture closes it (or **Tools > Close**).
+The panel opens within arm's reach in front of you, a little toward your main hand. It stays where it is; turn well
+away and it comes back in front. The same gesture closes it (or **Tools > Close**).
 
-Press a button by **poking it** with a fingertip, or by **looking at it and pinching**. Some buttons ask for a second
+Press a button by **poking it** with a fingertip, by **pointing at it** (a thin line from your hand shows up when it
+points at the panel) **and pinching**, or by **looking at it and pinching**. Some buttons ask for a second
 press to confirm (new game, reset story, load, clear storage): they turn red, press again within 3 seconds.
 
 ## 3. What each tab does

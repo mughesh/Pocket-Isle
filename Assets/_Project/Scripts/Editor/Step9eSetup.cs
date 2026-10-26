@@ -19,6 +19,7 @@ namespace Diorama.EditorTools
         {
             var log = new StringBuilder("[Step9e] Set up:");
             Panel(log);
+            Refine(log);
             Fury(log);
             Balance(log);
             Fixes(log);
@@ -93,6 +94,51 @@ namespace Diorama.EditorTools
             int missing = new Object[] { state.party, state.explorer, state.swap, state.save, state.encounters, state.realm, state.onboarding, state.registry,
                 state.hub, state.cinderwood, state.forgeHall, panel.island, panel.grabGuard, panel.hudMaterial }.Count(o => o == null);
             log.Append($"\n  Dev Panel: GameState + DevPanel wired ({(missing == 0 ? "all references found" : $"{missing} reference(s) MISSING")}).");
+        }
+
+        /// <summary>
+        /// After Mugesh's test: the panel within reach (size and placement values, the scene had the old ones) and
+        /// shards riding with the Spirit (the rim holder is gone).
+        /// </summary>
+        public static void Refine(StringBuilder log)
+        {
+            var panel = Object.FindFirstObjectByType<DevPanel>(FindObjectsInactive.Include);
+            if (panel != null)
+            {
+                Undo.RecordObject(panel, "Step 9e");
+                panel.size = new Vector2(0.36f, 0.32f);
+                panel.distance = 0.4f;
+                panel.sideAngle = 14f;
+                panel.downAngle = 22f;
+                panel.followAngle = 55f;
+                EditorUtility.SetDirty(panel);
+            }
+            var holder = Object.FindFirstObjectByType<ShardHolder>(FindObjectsInactive.Include);
+            if (holder != null)
+            {
+                Undo.RecordObject(holder, "Step 9e");
+                holder.spirit = Object.FindFirstObjectByType<LanternSpirit>(FindObjectsInactive.Include);
+                holder.carryMetres = 0.022f;
+                holder.offerMetres = 0.05f;
+                holder.orbitRadius = 0.035f;
+                EditorUtility.SetDirty(holder);
+            }
+            var socket = Object.FindFirstObjectByType<StatueSocket>(FindObjectsInactive.Include);
+            if (socket != null)
+            {
+                Undo.RecordObject(socket, "Step 9e");
+                socket.grabRadius = 0.07f;
+                EditorUtility.SetDirty(socket);
+            }
+            log.Append($"\n  Refine: panel {(panel != null ? "within reach" : "MISSING")}, shards {(holder != null && holder.spirit != null ? "ride with the Spirit" : "MISSING holder or Spirit")}, " +
+                       $"socket grab {(socket != null ? "7 cm" : "MISSING")}");
+        }
+
+        public static void RefineOnly()
+        {
+            var log = new StringBuilder("[Step9e] Refine:");
+            Refine(log);
+            Save(log);
         }
 
         public static void PanelOnly()

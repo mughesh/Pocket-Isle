@@ -98,15 +98,12 @@ namespace Diorama.EditorTools
                 EditorUtility.SetDirty(forgeHall);
             }
 
-            // The rim holder.
+            // Held shards ride with the Lantern Spirit (step 9e; the rim holder is gone).
             var holder = Child<ShardHolder>(root, "Shard Holder");
             Undo.RecordObject(holder, "Step 9c");
             holder.island = island;
-            holder.holderRecipe = shardProps["ShardHolder"];
+            holder.spirit = Object.FindFirstObjectByType<LanternSpirit>(FindObjectsInactive.Include);
             holder.fireShardRecipe = shardProps["FireShard"];
-            holder.cups = PropKit.HolderCups;
-            holder.metres = PropKit.ShardMetres * 1.25f; // a little bigger on the rim than the shard's real size
-            holder.inset = new Vector2(0.12f, 0.06f);   // in from the footprint's cut corner
             EditorUtility.SetDirty(holder);
 
             // Hearthstag in the Forge Hall.
@@ -165,7 +162,7 @@ namespace Diorama.EditorTools
                         found = true;
                     }
             EditorUtility.SetDirty(socket);
-            log.Append($"\n  'Shard Holder' on the rim (back-left), 'Keeper Hall' (Hearthstag Lv {kh.keeperLevel} on pad c{kh.keeperPad.x} r{kh.keeperPad.y}, " +
+            log.Append($"\n  'Shard Holder' (shards ride with the Spirit), 'Keeper Hall' (Hearthstag Lv {kh.keeperLevel} on pad c{kh.keeperPad.x} r{kh.keeperPad.y}, " +
                        $"wave from c{kh.waveOrigin.x} r{kh.waveOrigin.y}, temple gate c{kh.templeGate.x} r{kh.templeGate.y}), " +
                        $"'Statue Socket' {(found ? $"at the statue c{socket.statueAnchor.x} r{socket.statueAnchor.y}" : "NO STATUE on the hub map")}");
 

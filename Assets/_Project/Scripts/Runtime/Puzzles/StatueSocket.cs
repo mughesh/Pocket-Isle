@@ -4,10 +4,11 @@ using UnityEngine;
 namespace Diorama
 {
     /// <summary>
-    /// The hub statue's fire socket (step 9c), a Carry-style hand puzzle with the rim holder as home: while the fire
-    /// shard is held (<see cref="ShardHolder"/>), the red socket glows and the Spirit points at it the first time
-    /// (<see cref="HandPuzzle.lessonLine"/>, ghost: grab the shard from the holder). Grab the shard (pinch or fist near
-    /// it): it follows the hand; let go near the socket and it locks in, anywhere else it flies back to the holder.
+    /// The hub statue's fire socket (step 9c), a Carry-style hand puzzle: while the fire shard is held
+    /// (<see cref="ShardHolder"/>, it rides with the Spirit), near the statue the Spirit offers it (it floats out in front
+    /// of the player, big), the red socket glows and the Spirit points at it the first time (<see cref="HandPuzzle.lessonLine"/>,
+    /// ghost: grab the shard). Grab the shard (pinch or fist near it): it follows the hand and shrinks to socket size as
+    /// it nears the socket; let go near the socket and it locks in, anywhere else it flies back to the offer spot.
     /// Look + pinch the shard: it floats into the socket by itself. Locked in: a light pulse, the statue's red rims and
     /// cracks glow, moss falls away, the Spirit feels warmer ("shard.fire" solved, saved). The island stops drawing the
     /// statue then and this draws it (glowing) with the shard in its socket.
@@ -28,7 +29,7 @@ namespace Diorama
 
         [Header("Grab")]
         [Tooltip("World metres round the shard.")]
-        public float grabRadius = 0.04f;
+        public float grabRadius = 0.07f;
         [Tooltip("Released this close to the socket (world metres): it locks in.")]
         public float snapRadius = 0.06f;
 
@@ -56,7 +57,7 @@ namespace Diorama
         protected override Vector2 HomeTile => statueAnchor + Vector2.one;
 
         public override Vector3? FocusPoint => Here && ShardHolder.HasFire && holder != null ? holder.CupWorld(0) : (Vector3?)null;
-        public override float FocusRadius => 0.025f * island.transform.lossyScale.x;
+        public override float FocusRadius => 0.045f * island.transform.lossyScale.x;
 
         Vector2 StatueCenter => statueAnchor + Vector2.one;
 
@@ -118,6 +119,7 @@ namespace Diorama
         {
             ReadHands(_hands);
             bool here = Here;
+            if (holder != null) holder.Offering = here && !IsSolved && ShardHolder.HasFire && Usable;
             if (_hand >= 0) Hold();
             else if (!_flying && !IsSolved && ShardHolder.HasFire && Usable) TryGrab();
             if (_hand >= 0) IslandHandle.MarkHandHeld(_hand == 0);
@@ -147,10 +149,10 @@ namespace Diorama
             if (HeadGaze.TryGetRay(out var ray))
             {
                 var pick = new HeadGaze.ConePick(ray, -1);
-                pick.Consider(0, cup, Mathf.Max(HeadGaze.MinRadius * island.transform.lossyScale.x, 0.03f * island.transform.lossyScale.x));
+                pick.Consider(0, cup, Mathf.Max(HeadGaze.MinRadius * island.transform.lossyScale.x, 0.05f * island.transform.lossyScale.x));
                 if (pick.Best == 0)
                 {
-                    FocusHighlight.Hover(cup, 0.025f * island.transform.lossyScale.x);
+                    FocusHighlight.Hover(cup, 0.045f * island.transform.lossyScale.x);
                     if (GazePinch(_hands))
                     {
                         MarkInteracted();
@@ -168,14 +170,14 @@ namespace Diorama
             {
                 _hand = -1;
                 bool near = (_shardWorld - SocketWorld).magnitude <= snapRadius * Mathf.Max(1f, island.transform.lossyScale.x);
-                Debug.Log($"[StatueSocket] Released {(near ? "at the socket: it locks in" : "away from the socket: back to the holder")}.");
+                Debug.Log($"[StatueSocket] Released {(near ? "at the socket: it locks in" : "away from the socket: back to the Spirit's offer spot")}.");
                 StartCoroutine(Fly(_shardWorld, near));
                 return;
             }
             _shardWorld = Vector3.Lerp(_shardWorld, s.GripPoint + _grabOffset * 0.3f, 1f - Mathf.Exp(-Time.deltaTime / 0.05f));
         }
 
-        /// <summary>Flies the shard to the socket (locks in) or back to the holder.</summary>
+        /// <summary>Flies the shard to the socket (locks in) or back to the offer spot.</summary>
         IEnumerator Fly(Vector3 from, bool toSocket)
         {
             _flying = true;
@@ -231,7 +233,11 @@ namespace Diorama
             {
                 bool show = here && (_hand >= 0 || _flying || solved);
                 Vector3 world = solved && !_flying ? SocketWorld : _shardWorld;
-                if (show) _shard.PlaceLocal(island.transform.InverseTransformPoint(world), Quaternion.Euler(0f, Time.time * 50f, 0f), 0.026f * 0.8f, true);
+                // Big in the hand, socket size as it nears the socket.
+                float big = holder != null ? holder.offerMetres : 0.026f * 0.8f;
+                float near = Mathf.Clamp01((world - SocketWorld).magnitude / (0.15f * Mathf.Max(1f, island.transform.lossyScale.x)));
+                float metres = solved && !_flying ? 0.026f * 0.8f : Mathf.Lerp(0.026f * 0.8f, big, near);
+                if (show) _shard.PlaceLocal(island.transform.InverseTransformPoint(world), Quaternion.Euler(0f, Time.time * 50f, 0f), metres, true);
                 else _shard.Hide();
             }
             if (_ring != null)
