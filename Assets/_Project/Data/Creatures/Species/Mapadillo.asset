@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8421308f89f57d498f601bfba37a8cf, type: 3}
+  m_Name: Mapadillo
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.IslingSpecies
+  displayName: Mapadillo
+  element: 1
+  recipe: {fileID: 11400000, guid: da0085c27da7e0d40b3059dc96c92826, type: 2}
+  evolvesTo: {fileID: 11400000, guid: d29c3a843fbf8ec4ba0bfd09274a05da, type: 2}
+  evolveLevel: 15
+  baseStats:
+    hp: 46
+    attack: 10
+    defense: 14
+    speed: 9
+  moves:
+  - {fileID: 11400000, guid: 6160939ded96a914c8b8fac85cd0568f, type: 2}
+  - {fileID: 11400000, guid: f499284a1cf70f94c98503f36a90c7b6, type: 2}
+  - {fileID: 11400000, guid: 3b67ad77c7d29084bb360e9edbd5f24c, type: 2}
+  keeper: 0

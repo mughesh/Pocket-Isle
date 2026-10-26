@@ -255,11 +255,11 @@ namespace Diorama.EditorTools
                 new IdleStyle { breathe = 0.016f, breatheSpeed = 2.3f, sway = 1.5f },
                 new List<PlacedPart>
                 {
-                    Place(plate, new Vector3(0f, 0.32f, 0.22f), new Vector3(-30f, 0f, 0f), 1.2f),
-                    Place(plate, new Vector3(0f, 0.36f, -0.08f), new Vector3(-5f, 0f, 0f), 1.3f),
-                    Place(plate, new Vector3(0f, 0.26f, -0.38f), new Vector3(25f, 0f, 0f), 1.2f),
-                    Place(plate, new Vector3(0.3f, 0.2f, 0.06f), new Vector3(-15f, 0f, -50f), 1.15f, true),
-                    Place(plate, new Vector3(0.3f, 0.12f, -0.28f), new Vector3(15f, 0f, -55f), 1.1f, true),
+                    Place(plate, new Vector3(0f, 0.28f, 0.22f), new Vector3(-35f, 0f, 0f), 1.55f),
+                    Place(plate, new Vector3(0f, 0.34f, -0.08f), new Vector3(-5f, 0f, 0f), 1.65f),
+                    Place(plate, new Vector3(0f, 0.24f, -0.38f), new Vector3(30f, 0f, 0f), 1.55f),
+                    Place(plate, new Vector3(0.3f, 0.12f, 0.08f), new Vector3(-20f, 0f, -62f), 1.4f, true),
+                    Place(plate, new Vector3(0.3f, 0.06f, -0.26f), new Vector3(20f, 0f, -66f), 1.35f, true),
                     Place(ear, new Vector3(0.12f, -0.02f, 0.46f), new Vector3(0f, 0f, -25f), 0.45f, true),
                     Place(tail, new Vector3(0f, -0.22f, -0.54f), new Vector3(10f, 0f, 0f), 1f),
                 });
