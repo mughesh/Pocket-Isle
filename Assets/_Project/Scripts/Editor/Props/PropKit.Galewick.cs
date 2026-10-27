@@ -216,41 +216,88 @@ namespace Diorama.EditorTools
 
         // ---- kites ----
 
-        /// <summary>Diamond kite lying almost flat in the grass, its tail of four bows curling away (+X).</summary>
+        /// <summary>
+        /// Diamond kite lying flat in the grass, nose away from the player (-Z): a crisp four-sided sail (two opposite
+        /// panels in the second colour), a spine and a cross spar on top, and a tail string with four bow ties curling
+        /// away (+X). Oct 27 (Mugesh: "kite should be looking better"): was an oval blob. Stood up it is the flying kite.
+        /// </summary>
         static IEnumerable<PropRecipe> Kites()
         {
-            var sail = PShape("Kite_Sail",
-                Ell(new Vector3(0f, 0.05f, -0.02f), new Vector3(0.24f, 0.025f, 0.34f), 0f, new Vector3(-6f, 45f, 0f)),
-                Box(new Vector3(0f, 0.05f, -0.02f), new Vector3(0.2f, 0.02f, 0.2f), 0.02f, 0f, new Vector3(-6f, 45f, 0f)));
+            const float top = 0.34f, bottom = 0.38f, half = 0.25f, cross = 0.12f, y = 0.05f;
+            var c = new Vector3(0f, y, 0f);
+            var sail = PShape("Kite_Sail", KiteDiamond(c, Quaternion.identity, top, bottom, half, cross, 0.02f, 0, 0).ToArray());
+            var panelA = PShape("Kite_PanelA", KiteDiamond(c, Quaternion.identity, top, bottom, half, cross, 0.024f, -1, -1).ToArray());
+            var panelB = PShape("Kite_PanelB", KiteDiamond(c, Quaternion.identity, top, bottom, half, cross, 0.024f, 1, 1).ToArray());
             var spars = PShape("Kite_Spars",
-                Cone(new Vector3(0f, 0.08f, -0.32f), new Vector3(0f, 0.04f, 0.28f), 0.018f, 0.018f, 0f),
-                Cone(new Vector3(-0.24f, 0.07f, -0.08f), new Vector3(0.24f, 0.07f, -0.08f), 0.016f, 0.016f, 0.01f));
-            var tail = new List<SdfPrimitive>();
-            for (int i = 0; i < 4; i++)
+                Cone(new Vector3(0f, y + 0.026f, -top + 0.02f), new Vector3(0f, y + 0.026f, bottom - 0.02f), 0.016f, 0.016f, 0f),
+                Cone(new Vector3(-half + 0.02f, y + 0.03f, -cross), new Vector3(half - 0.02f, y + 0.03f, -cross), 0.014f, 0.014f, 0.006f));
+            // The tail: a thin string from the bottom corner, four bow ties along it, curling off to +X.
+            var points = new[]
             {
-                float t = (i + 1) / 4f;
-                var at = new Vector3(0.08f + t * 0.36f, 0.03f, 0.3f + Mathf.Sin(t * 3f) * 0.08f);
-                tail.Add(Ell(at + new Vector3(-0.03f, 0f, 0f), new Vector3(0.045f, 0.025f, 0.03f), i == 0 ? 0f : 0.01f, new Vector3(0f, 30f, 0f)));
-                tail.Add(Ell(at + new Vector3(0.03f, 0f, 0f), new Vector3(0.045f, 0.025f, 0.03f), 0.01f, new Vector3(0f, -30f, 0f)));
+                new Vector3(0f, y, bottom), new Vector3(0.09f, 0.04f, bottom + 0.08f), new Vector3(0.21f, 0.035f, bottom + 0.11f),
+                new Vector3(0.33f, 0.03f, bottom + 0.07f), new Vector3(0.43f, 0.03f, bottom - 0.01f),
+            };
+            var tail = new List<SdfPrimitive>();
+            for (int i = 0; i + 1 < points.Length; i++) tail.Add(Cone(points[i], points[i + 1], 0.007f, 0.007f, i == 0 ? 0f : 0.005f));
+            var bows = new List<SdfPrimitive>();
+            for (int i = 1; i < points.Length; i++)
+            {
+                var along = (points[i] - points[i - 1]).normalized;
+                float yaw = Mathf.Atan2(along.x, along.z) * Mathf.Rad2Deg;
+                var side = Quaternion.Euler(0f, yaw, 0f) * Vector3.right;
+                bows.Add(Ell(points[i] + side * 0.03f, new Vector3(0.032f, 0.014f, 0.022f), i == 1 ? 0f : 0.004f, new Vector3(0f, yaw + 25f, 0f)));
+                bows.Add(Ell(points[i] - side * 0.03f, new Vector3(0.032f, 0.014f, 0.022f), 0.004f, new Vector3(0f, yaw - 25f, 0f)));
+                bows.Add(Sphere(points[i], 0.014f, 0.006f));
             }
-            var bows = PShape("Kite_Bows", tail.ToArray());
+            var tailShape = PShape("Kite_Tail", tail.ToArray());
+            var bowShape = PShape("Kite_Bows", bows.ToArray());
             var colours = new[] { (KiteRed, KiteGold), (KiteTeal, KiteRed), (KiteGold, KiteTeal) };
             for (int i = 0; i < KiteNames.Length; i++)
             {
-                var kite = Recipe(KiteNames[i], new Vector2Int(1, 1), false, false, 700);
+                var kite = Recipe(KiteNames[i], new Vector2Int(1, 1), false, false, 900);
                 kite.palette = Palette(colours[i].Item1, MillWood, CloudStone, Meadow, WarmWindow, colours[i].Item2);
                 kite.yawJitter = 30f;
                 kite.scaleJitter = 0.06f;
-                kite.outline = 0.016f;
-                kite.resolution = 48;
+                kite.outline = 0.014f;
+                kite.resolution = 72;
                 kite.pieces = new List<PropPiece>
                 {
                     Piece(sail, PropSlot.Clay),
+                    Piece(panelA, PropSlot.Accent),
+                    Piece(panelB, PropSlot.Accent),
                     Piece(spars, PropSlot.Wood),
-                    Piece(bows, PropSlot.Accent),
+                    Piece(tailShape, PropSlot.Stone),
+                    Piece(bowShape, PropSlot.Accent),
                 };
                 yield return kite;
             }
+        }
+
+        /// <summary>
+        /// A flat diamond (a thin slab cut by four planes) in the frame <paramref name="rot"/> at <paramref name="c"/>:
+        /// local +Y is the sail's normal, the nose at -Z (<paramref name="top"/>), the tail corner at +Z, the side corners
+        /// at x = +-<paramref name="half"/>, z = -<paramref name="cross"/>. Non-zero <paramref name="qx"/> / <paramref name="qz"/>
+        /// keep one quadrant (the side of the spine and of the cross spar with that sign): a two-colour panel.
+        /// </summary>
+        static List<SdfPrimitive> KiteDiamond(Vector3 c, Quaternion rot, float top, float bottom, float half, float cross, float thick, int qx, int qz)
+        {
+            var T = new Vector3(0f, 0f, -top);
+            var R = new Vector3(half, 0f, -cross);
+            var B = new Vector3(0f, 0f, bottom);
+            var L = new Vector3(-half, 0f, -cross);
+            var list = new List<SdfPrimitive>
+            {
+                Box(c + rot * new Vector3(0f, 0f, (bottom - top) * 0.5f), new Vector3(half + 0.04f, thick, (top + bottom) * 0.5f + 0.04f), 0.004f, 0f, rot.eulerAngles),
+            };
+            foreach (var (a, b) in new[] { (T, R), (R, B), (B, L), (L, T) })
+            {
+                var d = b - a;
+                var n = new Vector3(d.z, 0f, -d.x).normalized; // outward for this corner order
+                list.Add(Plane(c + rot * a, rot * n, 0.004f));
+            }
+            if (qx != 0) list.Add(Plane(c, rot * new Vector3(-qx, 0f, 0f), 0f));
+            if (qz != 0) list.Add(Plane(c + rot * new Vector3(0f, 0f, -cross), rot * new Vector3(0f, 0f, -qz), 0f));
+            return list;
         }
 
         /// <summary>A tall pole with a kite tied on: the kite (and its tail) only shows and flies once Galewick is restored.</summary>
@@ -268,9 +315,8 @@ namespace Diorama.EditorTools
                     Ell(new Vector3(0f, 0.03f, 0f), new Vector3(0.12f, 0.05f, 0.12f), 0.05f),
                     Sphere(new Vector3(0f, 1.58f, 0f), 0.05f, 0.02f),
                     Floor(0f)), PropSlot.Wood),
-                Piece(PShape("KitePost_Kite",
-                    Box(Vector3.zero, new Vector3(0.18f, 0.18f, 0.02f), 0.02f, 0f, new Vector3(0f, 0f, 45f)),
-                    Ell(new Vector3(0f, 0.05f, 0f), new Vector3(0.17f, 0.3f, 0.025f), 0.02f)), PropSlot.Clay, PropMotion.Fly, 0.1f, kite),
+                Piece(PShape("KitePost_Kite", KiteDiamond(Vector3.zero, Quaternion.Euler(90f, 0f, 0f), 0.2f, 0.26f, 0.17f, 0.07f, 0.02f, 0, 0).ToArray()),
+                    PropSlot.Clay, PropMotion.Fly, 0.1f, kite),
                 Piece(PShape("KitePost_Tail",
                     Ell(new Vector3(0f, -0.36f, 0f), new Vector3(0.05f, 0.03f, 0.02f), 0f),
                     Ell(new Vector3(0.04f, -0.52f, 0f), new Vector3(0.05f, 0.03f, 0.02f), 0.01f),

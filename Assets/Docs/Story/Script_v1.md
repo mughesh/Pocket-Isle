@@ -208,8 +208,8 @@ Step 10b, the hand moments (lesson lines stay pinned as a chip until the moment 
 - `gw.kites.one` · Spirit: One!
 - `gw.kites.two` · Spirit: Two!
 - `gw.kites.three` · Spirit: All three!
-- `gw.gust` · → puzzle:gw.clouds (lesson at the cloud bank; chip "Wave!")
-  - Spirit: This cloud is stuck. Wave your hand over the island!
+- `gw.gust` · → puzzle:gw.clouds (lesson at the cloud bank; chip "Sweep!")
+  - Spirit: This cloud is stuck. Sweep your open hand fast over the island!
 - `gw.gust.done` · once (the last puff blown off the ridge path)
   - Spirit: The path is clear! Feel that breeze?
 - `gw.tower.kites` · → landmark:tower (at the tower door with fewer than three kites)

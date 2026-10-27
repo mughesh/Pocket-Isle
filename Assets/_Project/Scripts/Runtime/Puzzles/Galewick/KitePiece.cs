@@ -466,6 +466,8 @@ namespace Diorama
         void Draw()
         {
             bool show = Here || _tied && island != null && island.world == map && !SceneSwap.IsInside;
+            // Tied on the crown they show only while the tower is in the island window (Mugesh, Oct 27: they hung in the air far from it).
+            if (_tied) show &= TowerInWindow;
             float tileM = island.map.tileSize * island.Zoom;
             var strings = new List<(Vector3 a, Vector3 b)>();
             for (int i = 0; i < _kites.Count; i++)
@@ -487,6 +489,17 @@ namespace Diorama
                     strings.Add((k.state == K.Tied ? TiedAnchor : BackpackLocal, k.pos + rot * new Vector3(0f, 0f, 0.25f) * tileM * grow));
             }
             DrawStrings(strings, show);
+        }
+
+        /// <summary>The tower's crown is over the island (its footprint plus a tile), so the kites tied there may show.</summary>
+        bool TowerInWindow
+        {
+            get
+            {
+                var a = TiedAnchor;
+                var half = island.FootprintHalfSize + Vector2.one * (island.map.tileSize * island.Zoom);
+                return Mathf.Abs(a.x) <= half.x && Mathf.Abs(a.z) <= half.y;
+            }
         }
 
         Vector3 TiedAnchor => island.TileToLocal(new Vector2(tiedAt.x, tiedAt.z), island.Content.capHeight + tiedAt.y * island.map.tileSize);

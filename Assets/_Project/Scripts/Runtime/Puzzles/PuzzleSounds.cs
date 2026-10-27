@@ -6,7 +6,7 @@ namespace Diorama
     public static class PuzzleSounds
     {
         const int Rate = 44100;
-        static AudioClip _thud, _puff, _whoosh, _rumble;
+        static AudioClip _thud, _puff, _whoosh, _rumble, _breeze;
 
         /// <summary>A heavy wooden thud: low knock plus a short noisy body.</summary>
         public static AudioClip Thud => _thud != null ? _thud : _thud = Make("Puzzle Thud", 0.55f, (t, n) =>
@@ -31,6 +31,15 @@ namespace Diorama
             return env * (Mathf.Sin(2f * Mathf.PI * 45f * t + Mathf.Sin(t * 13f)) * 0.5f + n * 0.25f);
         });
 
+        /// <summary>A gust of wind (Galewick's hand sweep, Oct 27): airy noise swelling and falling, a faint rising whistle.</summary>
+        public static AudioClip Breeze => _breeze != null ? _breeze : _breeze = Make("Puzzle Breeze", 1.1f, (t, n) =>
+        {
+            float u = Mathf.Clamp01(t / 1.1f);
+            float env = Mathf.Pow(Mathf.Sin(Mathf.PI * Mathf.Pow(u, 0.7f)), 1.5f);
+            float whistle = Mathf.Sin(2f * Mathf.PI * (380f + 260f * u) * t) * n * 0.35f;
+            return env * (n * 0.5f + whistle);
+        });
+
         static AudioClip Make(string name, float seconds, System.Func<float, float, float> f)
         {
             int count = (int)(Rate * seconds);
@@ -49,6 +58,6 @@ namespace Diorama
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void ResetStatics() => _thud = _puff = _whoosh = _rumble = null;
+        static void ResetStatics() => _thud = _puff = _whoosh = _rumble = _breeze = null;
     }
 }

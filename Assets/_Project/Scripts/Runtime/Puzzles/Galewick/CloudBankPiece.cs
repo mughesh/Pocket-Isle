@@ -8,7 +8,7 @@ namespace Diorama
     /// (<see cref="GustField"/>) whose sweep passes over a puff pushes it the way it blew and thins it (about three good
     /// gusts per puff, <see cref="CloudBank"/>); a gone puff drifts off and opens its tile. All gone = the path is open
     /// (saved: stage = a bit per gone puff, solved = all). Look + pinch-hold a puff: it blows away slowly. Teaches itself
-    /// once ("Wave your hand over the island!", chip "Wave!", a palm ghost over the first puff).
+    /// once ("Sweep your open hand fast over the island!", chip "Sweep!", a palm-sweep ghost over the first puff).
     /// </summary>
     [DefaultExecutionOrder(-10)]
     public class CloudBankPiece : HandPuzzle

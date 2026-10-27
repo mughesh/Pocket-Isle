@@ -23,6 +23,26 @@ MonoBehaviour:
     motion: 0
     motionAmount: 0
     budgetWeight: 0
+  - shape: {fileID: 11400000, guid: 4aa5d64c54182db4e832146ce540195c, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 5
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 0
+  - shape: {fileID: 11400000, guid: 7b30884e248e0924db2390cd4a45dcb8, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 5
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 0
   - shape: {fileID: 11400000, guid: f9767429b4d2b3146aa63f23e638f83c, type: 2}
     part: {fileID: 0}
     position: {x: 0, y: 0, z: 0}
@@ -30,6 +50,16 @@ MonoBehaviour:
     scale: 1
     mirrorX: 0
     slot: 1
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 0
+  - shape: {fileID: 11400000, guid: 14eda476fc8ce6a49a31b16fd6d05a5b, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 2
     motion: 0
     motionAmount: 0
     budgetWeight: 0
@@ -69,12 +99,12 @@ MonoBehaviour:
     at: 0
     byHeight: 0
   spec: 0.15
-  outline: 0.016
+  outline: 0.014
   footprint: {x: 1, y: 1}
   blocksWalking: 0
   randomYaw: 0
   yawJitter: 30
   scaleJitter: 0.06
-  resolution: 48
-  triangleBudget: 700
+  resolution: 72
+  triangleBudget: 900
   bakedMesh: {fileID: 4300000, guid: 8faee759d5068954ea6c0955e2bac73f, type: 2}

@@ -138,7 +138,7 @@ namespace Diorama.EditorTools
             wheel.reach = 4;
             wheel.lessonLine = "gw.mill";
             wheel.lessonChip = "Flick!";
-            wheel.ghostClip = "grab_flick";
+            wheel.ghostClip = "finger_flick";
             wheel.anchor = GalewickTools.Tile(GalewickTools.MillXY);
             wheel.footprint = new Vector2Int(2, 2);
             wheel.recipe = PropKit.Load("Windmill");
@@ -161,7 +161,7 @@ namespace Diorama.EditorTools
             mill.gearRecipe = PropKit.Load("MillGear");
             EditorUtility.SetDirty(wheel);
             EditorUtility.SetDirty(mill);
-            log.Append($"\n  'Big Mill' {Wired(wheel)}: c{wheel.anchor.x} r{wheel.anchor.y}, 3 flicks in 4 s lower the drawbridge at c{mill.bridge.x} r{mill.bridge.y}; lesson gw.mill + ghost grab_flick");
+            log.Append($"\n  'Big Mill' {Wired(wheel)}: c{wheel.anchor.x} r{wheel.anchor.y}, 3 flicks in 4 s lower the drawbridge at c{mill.bridge.x} r{mill.bridge.y}; lesson gw.mill + ghost finger_flick");
             return wheel;
         }
 
@@ -259,14 +259,14 @@ namespace Diorama.EditorTools
             bank.id = "gw.clouds";
             bank.reach = 4;
             bank.lessonLine = "gw.gust";
-            bank.lessonChip = "Wave!";
-            bank.ghostClip = "palm_hover";
+            bank.lessonChip = "Sweep!";
+            bank.ghostClip = "palm_sweep";
             bank.puffs = new Vector2Int[GalewickTools.CloudXY.Length];
             for (int i = 0; i < bank.puffs.Length; i++) bank.puffs[i] = GalewickTools.Tile(GalewickTools.CloudXY[i]);
             bank.recipe = PropKit.Load("CloudPuff");
             bank.gusts = gust;
             EditorUtility.SetDirty(bank);
-            log.Append($"\n  'Cloud Bank' {Wired(bank)}: 3 puffs on the ridge path, ~3 gusts each; lesson gw.gust + ghost palm_hover");
+            log.Append($"\n  'Cloud Bank' {Wired(bank)}: 3 puffs on the ridge path, ~3 gusts each; lesson gw.gust + ghost palm_sweep");
         }
 
         // ---- D: the tower door ----

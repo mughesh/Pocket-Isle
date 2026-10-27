@@ -38,6 +38,8 @@ namespace Diorama
         public float bandWidth = 0.07f;
         [Tooltip("Sails turn this much extra per gust at full strength (radians).")]
         public float spinNudge = 1.2f;
+        [Tooltip("The whoosh of a gust at full strength (weaker gusts are quieter and a little lower).")]
+        [Range(0f, 1f)] public float volume = 0.55f;
 
         /// <summary>A gust: island-local origin (xz), unit direction (xz), strength 0..1.</summary>
         public event Action<Vector2, Vector2, float> Gusted;
@@ -53,6 +55,7 @@ namespace Diorama
         Vector2 _origin, _dir;
         float _strength, _front = 99f, _frontEnd;
         float _cross;
+        AudioSource _audio;
 
         bool Active => island != null && map != null && island.world == map && !SceneSwap.IsInside && !SceneSwap.IsBusy &&
                        (window == null || !window.IsZoomed) && (encounters == null || !encounters.InBattle) && !GamePause.IsPaused;
@@ -89,6 +92,7 @@ namespace Diorama
             bool over = island.FootprintContains(local);
             float height = (local.y - island.CapTopLocal) * scale;
             var gust = _trackers[h].Feed(Time.deltaTime, local * scale, open, over, height);
+            if (gust.HasValue) TileTouch.Block(h == 0, 0.8f); // the sweeping hand's fingertips brush the grass: no walking
             if (gust.HasValue) Blow(gust.Value.origin / scale, gust.Value.direction, gust.Value.strength, $"{(h == 0 ? "left" : "right")} hand, {gust.Value.speed:0.00} m/s");
         }
 
@@ -117,6 +121,14 @@ namespace Diorama
             RealmState.SpinNudge += spinNudge * _strength;
             Debug.Log($"[GustField] Gust {Count} by the {how}: strength {_strength:0.00}, toward ({_dir.x:0.0}, {_dir.y:0.0}).");
             Streaks();
+            if (_audio == null)
+            {
+                _audio = gameObject.AddComponent<AudioSource>();
+                _audio.playOnAwake = false;
+                _audio.spatialBlend = 0f;
+            }
+            _audio.pitch = Mathf.Lerp(0.85f, 1.1f, _strength) * UnityEngine.Random.Range(0.95f, 1.05f);
+            _audio.PlayOneShot(PuzzleSounds.Breeze, volume * Mathf.Lerp(0.5f, 1f, _strength));
             Gusted?.Invoke(_origin, _dir, _strength);
         }
 

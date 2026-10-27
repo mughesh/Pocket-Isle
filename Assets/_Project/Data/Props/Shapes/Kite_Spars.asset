@@ -17,19 +17,19 @@ MonoBehaviour:
     blend: 0
     k: 0
     mirrorX: 0
-    a: {x: 0, y: 0.08, z: -0.32}
-    b: {x: 0, y: 0.04, z: 0.28}
-    size: {x: 0.018, y: 0.018, z: 0}
+    a: {x: 0, y: 0.076000005, z: -0.32}
+    b: {x: 0, y: 0.076000005, z: 0.35999998}
+    size: {x: 0.016, y: 0.016, z: 0}
     rotation: {x: 0, y: 0, z: 0}
     bumps: 0
     bumpFrequency: 0
   - kind: 2
     blend: 0
-    k: 0.01
+    k: 0.006
     mirrorX: 0
-    a: {x: -0.24, y: 0.07, z: -0.08}
-    b: {x: 0.24, y: 0.07, z: -0.08}
-    size: {x: 0.016, y: 0.016, z: 0}
+    a: {x: -0.23, y: 0.08, z: -0.12}
+    b: {x: 0.23, y: 0.08, z: -0.12}
+    size: {x: 0.014, y: 0.014, z: 0}
     rotation: {x: 0, y: 0, z: 0}
     bumps: 0
     bumpFrequency: 0

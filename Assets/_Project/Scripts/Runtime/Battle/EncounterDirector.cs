@@ -401,6 +401,8 @@ namespace Diorama
                 StartCoroutine(NewSparkle());
             }
             yield return stage.WildAppears(rare, water ? (Vector2?)where : null);
+            // Oct 27 (Mugesh): its name, level and HP show as soon as it appears, not only once a pod is thrown.
+            stage.ShowWildBar(wild);
             runes.ShowRunOnly();
             runes.SetCaption(keeperFight != null ? keeperFight.caption ?? $"{wild.Name} blocks the way!" : rare ? $"A rare wild {wild.Name} appeared!" : $"A wild {wild.Name} appeared!");
             if (rare) Dialogue.Say("rare.first");
@@ -426,7 +428,6 @@ namespace Diorama
                 BattleEnded?.Invoke(BattleResult.Fled);
                 yield break;
             }
-            stage.ShowWildBar(wild);
 
             var battle = CurrentBattle = new BattleSystem(party.At(_activeSlot), wild, typeChart, (int)(_rnd.Next() * int.MaxValue), rare, HasReserve,
                 keeperFight != null ? keeperFight.rules : null);

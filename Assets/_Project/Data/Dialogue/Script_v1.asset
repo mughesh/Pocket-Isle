@@ -1004,13 +1004,13 @@ MonoBehaviour:
   - id: gw.gust
     once: 0
     priority: 2
-    note: lesson at the cloud bank; chip "Wave!"
+    note: lesson at the cloud bank; chip "Sweep!"
     target: puzzle:gw.clouds
     validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: This cloud is stuck. Wave your hand over the island!
+      text: This cloud is stuck. Sweep your open hand fast over the island!
   - id: gw.gust.done
     once: 1
     priority: 2

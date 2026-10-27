@@ -39,6 +39,7 @@ namespace Diorama
         public static readonly string[] Names =
         {
             "poke", "grab_rim_slide", "grab_drop", "thumb_swipe_forward", "thumb_tap", "pinch", "grab_toss", "grab_flick", "palm_hover", "hands_up",
+            "finger_flick", "palm_sweep",
         };
 
         /// <summary>Builds a placeholder clip from the right hand's rest pose (joint-local), or null for an unknown name.</summary>
@@ -256,6 +257,41 @@ namespace Diorama
                     {
                         Open(0f, new Vector3(0f, 0.012f, 0f), f, d, 0.15f), Open(0.5f, new Vector3(0f, -0.008f, 0f), f, d, 0.15f),
                         Open(1f, new Vector3(0f, 0.012f, 0f), f, d, 0.15f),
+                    };
+                }
+                case "finger_flick":
+                {
+                    // Oct 27: the mill's sails. A pointing finger brushes quickly sideways across the top of the sails
+                    // (the turn's direction), then comes back slowly, pulled toward the player so it doesn't read as a flick back.
+                    seconds = 1.6f;
+                    keyJoint = HandJointId.HandIndexTip;
+                    keyTime = 0.3f;
+                    // Rolled on its side (the back of the hand to the right, the palm leading the brush to the left) so the
+                    // pointing finger shows from the seat.
+                    Vector3 f = new Vector3(0f, -0.3f, 1f), d = new Vector3(1f, 0.25f, 0.1f);
+                    Key Point(float t, Vector3 p) => new Key
+                    {
+                        t = t, pos = p, fingers = f, dorsal = d,
+                        thumb = 0.55f, index = 0.04f, middle = 0.85f, ring = 0.9f, pinky = 0.92f, swing = 0.5f,
+                    };
+                    return new List<Key>
+                    {
+                        Point(0f, new Vector3(0.045f, 0.03f, -0.02f)), Point(0.3f, new Vector3(0.045f, 0.03f, 0f)),
+                        Point(0.42f, new Vector3(-0.045f, 0.03f, 0f)), Point(0.55f, new Vector3(-0.05f, 0.03f, -0.01f)),
+                        Point(0.8f, new Vector3(0f, 0.04f, -0.06f)), Point(1f, new Vector3(0.045f, 0.03f, -0.02f)),
+                    };
+                }
+                case "palm_sweep":
+                {
+                    // Oct 27: the gust. A flat open hand, palm down, sweeps fast across over the island, then lifts back.
+                    seconds = 2.2f;
+                    keyTime = 0.35f;
+                    Vector3 f = Vector3.forward, d = Vector3.up;
+                    return new List<Key>
+                    {
+                        Open(0f, new Vector3(0.14f, 0.07f, 0f), f, d, 0.08f), Open(0.22f, new Vector3(0.14f, 0.04f, 0f), f, d, 0.08f),
+                        Open(0.45f, new Vector3(-0.14f, 0.04f, 0f), f, d, 0.08f), Open(0.55f, new Vector3(-0.16f, 0.06f, 0f), f, d, 0.08f),
+                        Open(1f, new Vector3(0.14f, 0.07f, 0f), f, d, 0.08f),
                     };
                 }
                 case "hands_up":

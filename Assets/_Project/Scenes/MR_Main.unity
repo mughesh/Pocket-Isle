@@ -1702,9 +1702,9 @@ MonoBehaviour:
   fx: {fileID: 1078587927}
   reach: 4
   lessonLine: gw.gust
-  ghostClip: palm_hover
+  ghostClip: palm_sweep
   ghostScale: 1
-  lessonChip: Wave!
+  lessonChip: Sweep!
   puffs:
   - {x: 21, y: 12}
   - {x: 22, y: 12}
@@ -2616,6 +2616,7 @@ MonoBehaviour:
   radius: 0.68
   nearPlane: 0.022
   slack: 0.015
+  touchGuard: 1.2
   handCooldown: 0.25
   drag: 1.5
   minFlickSpeed: 0.5
@@ -4424,6 +4425,7 @@ MonoBehaviour:
   crossSeconds: 0.75
   bandWidth: 0.07
   spinNudge: 1.2
+  volume: 0.55
 --- !u!4 &1589595548
 Transform:
   m_ObjectHideFlags: 0
@@ -5375,6 +5377,7 @@ MonoBehaviour:
   radius: 0.68
   nearPlane: 0.022
   slack: 0.015
+  touchGuard: 1.2
   handCooldown: 0.25
   drag: 1.5
   minFlickSpeed: 0.5
@@ -5742,7 +5745,7 @@ MonoBehaviour:
   fx: {fileID: 1078587927}
   reach: 4
   lessonLine: gw.mill
-  ghostClip: grab_flick
+  ghostClip: finger_flick
   ghostScale: 1
   lessonChip: Flick!
   anchor: {x: 28, y: 34}
@@ -5752,6 +5755,7 @@ MonoBehaviour:
   radius: 1.25
   nearPlane: 0.022
   slack: 0.015
+  touchGuard: 1.2
   handCooldown: 0.25
   drag: 1.5
   minFlickSpeed: 0.5

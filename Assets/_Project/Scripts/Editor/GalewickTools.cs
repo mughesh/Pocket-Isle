@@ -55,27 +55,31 @@ namespace Diorama.EditorTools
         public static Vector2Int TowerFront => Tile(TowerXY.x, TowerXY.y - 2);
 
         // The main trail (2 wide around the centre line). The kite loop and the narrow ridge path are drawn separately.
+        // Oct 27 (Mugesh: zig-zag paths are hard to walk): every leg runs straight north-south or east-west, so a swipe
+        // walks a whole leg; diagonal legs rasterised into one-tile stair steps that stopped the walk at every jog.
         static readonly Vector2[] Trail =
         {
-            new Vector2(10.5f, 3.5f), new Vector2(11.5f, 8.5f), new Vector2(14.5f, 12.5f), new Vector2(19.5f, 14.5f),
-            new Vector2(23.5f, 18.5f), new Vector2(27.5f, 21.5f), new Vector2(32.5f, 23.5f), new Vector2(32.5f, 30.5f),
-            new Vector2(34.5f, 32.5f),
+            new Vector2(10.5f, 3.5f), new Vector2(10.5f, 13.5f), new Vector2(24.5f, 13.5f), new Vector2(24.5f, 22.5f),
+            new Vector2(32.5f, 22.5f), new Vector2(32.5f, 33.5f),
         };
         // North of the kite loop up to the ridge's east end, and from the ridge's west end up to the tower plaza.
         static readonly Vector2[] TrailNorth =
         {
-            new Vector2(36.5f, 40.5f), new Vector2(33.5f, 43.5f), new Vector2(28.5f, 45.5f), new Vector2(25.5f, 46.5f),
+            new Vector2(36.5f, 40.5f), new Vector2(36.5f, 45.5f), new Vector2(27.5f, 45.5f), new Vector2(27.5f, 47f),
         };
         static readonly Vector2[] TrailTop =
         {
-            new Vector2(19.5f, 47.5f), new Vector2(18.5f, 50.5f), new Vector2(17.5f, 53.5f),
+            new Vector2(19.5f, 47f), new Vector2(19.5f, 52.5f),
         };
+        // Side paths (1 wide), straight legs between the corners.
         static readonly Vector2Int[][] SidePaths =
         {
-            new[] { new Vector2Int(28, 18), new Vector2Int(36, 17), new Vector2Int(44, 15), new Vector2Int(48, 15) }, // fire-visitor patch
-            new[] { new Vector2Int(46, 38), new Vector2Int(49, 42), new Vector2Int(51, 46), new Vector2Int(51, 49) }, // rare pocket
-            new[] { new Vector2Int(14, 13), new Vector2Int(14, 16) },                                                 // shrine
+            new[] { new Vector2Int(29, 22), new Vector2Int(29, 18), new Vector2Int(44, 18), new Vector2Int(44, 15), new Vector2Int(48, 15) }, // fire-visitor patch
+            new[] { new Vector2Int(47, 38), new Vector2Int(51, 38), new Vector2Int(51, 49) },                                                 // rare pocket
+            new[] { new Vector2Int(14, 13), new Vector2Int(14, 16) },                                                                         // shrine
         };
+        /// <summary>The kite field's loop (Oct 27: a rectangle, was an ellipse of stair steps): x and y ranges of its 1-wide ring.</summary>
+        static readonly RectInt KiteLoop = new RectInt(33, 32, 14, 8);
 
         struct Zone
         {
@@ -420,12 +424,13 @@ namespace Diorama.EditorTools
 
         static void KiteField()
         {
-            // The loop: a 1-wide ring path round the open middle.
+            // The loop: a 1-wide rectangular ring path round the open middle.
             for (int x = 1; x < Size - 1; x++)
-                for (int y = 30; y < 44; y++)
+                for (int y = 28; y < 46; y++)
                 {
                     float e = Mathf.Sqrt(Sq((x - KiteCenter.x) / KiteRx) + Sq((y - KiteCenter.y) / KiteRy));
-                    if (Mathf.Abs(e - 1f) < 0.11f) _g[x, y] = IslandMap.Path;
+                    bool inX = x >= KiteLoop.xMin && x <= KiteLoop.xMax, inY = y >= KiteLoop.yMin && y <= KiteLoop.yMax;
+                    if (inX && (y == KiteLoop.yMin || y == KiteLoop.yMax) || inY && (x == KiteLoop.xMin || x == KiteLoop.xMax)) _g[x, y] = IslandMap.Path;
                     else if (e < 1.45f && (_g[x, y] == IslandMap.Tree || _g[x, y] == IslandMap.Rock)) _g[x, y] = IslandMap.Grass;
                 }
             foreach (var (x, y, rx, ry) in new[] { (40f, 36f, 2.4f, 1.6f), (31.5f, 33f, 1.5f, 1.3f), (47f, 37f, 1.4f, 2f), (38f, 42.5f, 1.8f, 0.9f), (43f, 30.5f, 1.8f, 0.8f) })

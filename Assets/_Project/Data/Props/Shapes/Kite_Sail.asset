@@ -13,23 +13,53 @@ MonoBehaviour:
   m_Name: Kite_Sail
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.SdfShape
   primitives:
-  - kind: 1
-    blend: 0
-    k: 0
-    mirrorX: 0
-    a: {x: 0, y: 0.05, z: -0.02}
-    b: {x: 0, y: 0, z: 0}
-    size: {x: 0.24, y: 0.025, z: 0.34}
-    rotation: {x: -6, y: 45, z: 0}
-    bumps: 0
-    bumpFrequency: 0
   - kind: 5
     blend: 0
     k: 0
     mirrorX: 0
-    a: {x: 0, y: 0.05, z: -0.02}
-    b: {x: 0.02, y: 0, z: 0}
-    size: {x: 0.2, y: 0.02, z: 0.2}
-    rotation: {x: -6, y: 45, z: 0}
+    a: {x: 0, y: 0.05, z: 0.019999996}
+    b: {x: 0.004, y: 0, z: 0}
+    size: {x: 0.29, y: 0.02, z: 0.4}
+    rotation: {x: -0, y: 0, z: 0}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 4
+    blend: 2
+    k: 0.004
+    mirrorX: 0
+    a: {x: 0, y: 0.05, z: -0.34}
+    b: {x: 0.6606279, y: 0, z: -0.7507135}
+    size: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 4
+    blend: 2
+    k: 0.004
+    mirrorX: 0
+    a: {x: 0.25, y: 0.05, z: -0.12}
+    b: {x: 0.8944272, y: 0, z: 0.4472136}
+    size: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 4
+    blend: 2
+    k: 0.004
+    mirrorX: 0
+    a: {x: 0, y: 0.05, z: 0.38}
+    b: {x: -0.8944272, y: 0, z: 0.4472136}
+    size: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 4
+    blend: 2
+    k: 0.004
+    mirrorX: 0
+    a: {x: -0.25, y: 0.05, z: -0.12}
+    b: {x: -0.6606279, y: 0, z: -0.7507135}
+    size: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
     bumps: 0
     bumpFrequency: 0

@@ -31,6 +31,8 @@ namespace Diorama
         public float nearPlane = 0.022f;
         [Tooltip("Extra world metres on the radius (hand tracking wobble).")]
         public float slack = 0.015f;
+        [Tooltip("Tiles round the sails (in front, behind and past the tips) where a fingertip doesn't walk the explorer.")]
+        public float touchGuard = 1.2f;
         [Tooltip("Per hand: after a flick, the next counts after this long (one swipe = one flick).")]
         public float handCooldown = 0.25f;
 
@@ -160,6 +162,8 @@ namespace Diorama
                 float off = Vector3.Dot(rel, normal);
                 Vector3 inPlane = rel - normal * off;
                 float r = inPlane.magnitude;
+                // A fingertip at the sails is flicking, not touching tiles: its dips onto the grass don't walk (Oct 27).
+                if (Mathf.Abs(off) < touchGuard * tile && r < reach + touchGuard * tile) TileTouch.Block(h == 0, 0.8f);
                 if (Mathf.Abs(off) > nearPlane || r > reach || r < 0.15f * tile || _cool[h] > 0f) continue;
                 // Counter-clockwise as the player sees it (+Z toward them) is positive, like the shader's angle.
                 Vector3 tangent = Vector3.Cross(normal, inPlane / r);

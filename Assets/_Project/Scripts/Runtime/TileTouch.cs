@@ -10,6 +10,8 @@ namespace Diorama
     /// (<see cref="GestureTestPiece.GoTo"/>).
     /// Ignored while the explorer can't move (battle), for a hand that is grabbing or near the rim, while a dialogue
     /// bubble is being poked, and while the fingertip moves fast (a reach or a flick, not a touch).
+    /// Oct 27: also while a hand puzzle has <see cref="Block"/>ed that hand (a fingertip at a mill's sails, a gust sweep):
+    /// the finger dipping onto the grass after a flick no longer walks the explorer.
     /// </summary>
     public class TileTouch : MonoBehaviour
     {
@@ -44,6 +46,19 @@ namespace Diorama
         }
 
         readonly Finger[] _fingers = { new Finger(), new Finger() };
+        static readonly float[] _blockedUntil = new float[2];
+
+        /// <summary>A hand puzzle owns this hand's fingertip for the next <paramref name="seconds"/>: its touches don't walk.</summary>
+        public static void Block(bool leftHand, float seconds)
+        {
+            int h = leftHand ? 0 : 1;
+            _blockedUntil[h] = Mathf.Max(_blockedUntil[h], Time.time + seconds);
+        }
+
+        static bool Blocked(bool leftHand) => Time.time < _blockedUntil[leftHand ? 0 : 1];
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetBlocks() => _blockedUntil[0] = _blockedUntil[1] = 0f;
 
         void Update()
         {
@@ -65,10 +80,10 @@ namespace Diorama
             f.last = tip;
             f.hasLast = true;
 
-            bool busy = grabGuard != null && grabGuard.IsHandBusy(left);
+            bool busy = grabGuard != null && grabGuard.IsHandBusy(left) || Blocked(left);
             if (!explorer.CanMove || busy || (bubble != null && bubble.IsBeingPoked) || f.speed > maxSpeed)
             {
-                if (f.dipped) Debug.Log($"[TileTouch] {(left ? "Left" : "Right")} touch dropped ({(busy ? "near the rim" : f.speed > maxSpeed ? "moving fast" : "busy")}).");
+                if (f.dipped) Debug.Log($"[TileTouch] {(left ? "Left" : "Right")} touch dropped ({(Blocked(left) ? "a hand puzzle has it" : busy ? "near the rim" : f.speed > maxSpeed ? "moving fast" : "busy")}).");
                 f.dipped = false;
                 return;
             }
