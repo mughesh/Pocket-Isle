@@ -166,21 +166,22 @@ namespace Diorama.EditorTools
             map.SetZones(Text(_z));
             // Placeholder tables until step 11c's water roster: the water Islings there are, wind visitors in the meadow.
             // Levels a step above Galewick's (the third realm); shards held add more at runtime (ShardScaling).
-            map.grassTable = Table("Encounters_Lilymere", 6, 8, ("Pebbloop", 50f, false), ("Steambara", 30f, false), ("Kitelet", 20f, false));
-            map.waterTable = Table("Encounters_LmWater", 6, 8, ("Pebbloop", 70f, false), ("Steambara", 30f, false));
+            map.grassTable = Table("Encounters_Lilymere", 6, 8, ("Marimoss", 35f, false), ("Lilyvole", 25f, false), ("Drizzcan", 15f, false), ("Kitelet", 15f, false), ("Pebbloop", 10f, false));
+            // Step 11c: the water roster (~70% water, ~20% wind visitors, the rare pond's Bottlewhale ~5%).
+            map.waterTable = Table("Encounters_LmWater", 6, 8, ("Sailfold", 45f, false), ("Pebbloop", 25f, false), ("Marimoss", 15f, false), ("Steambara", 15f, false));
             map.waterTable.habitat = Habitat.Water;
             map.zoneLegend = new List<MapZone>();
             foreach (var z in Zones)
             {
                 var table = z.id switch
                 {
-                    "arrival" => Table("Encounters_LmArrival", 4, 6, ("Pebbloop", 60f, false), ("Steambara", 25f, false), ("Pufflet", 15f, false)),
-                    "village" => Table("Encounters_LmVillage", 4, 6, ("Pebbloop", 50f, false), ("Steambara", 35f, false), ("Kitelet", 15f, false)),
-                    "channel" => Table("Encounters_LmChannel", 5, 7, ("Pebbloop", 45f, false), ("Steambara", 40f, false), ("Whirlby", 15f, false)),
-                    "marsh" => Table("Encounters_LmMarsh", 5, 7, ("Steambara", 55f, false), ("Pebbloop", 45f, false)),
-                    "garden" => Table("Encounters_LmGarden", 6, 8, ("Pebbloop", 50f, false), ("Steambara", 35f, false), ("Vanehare", 15f, false)),
-                    "pond" => Table("Encounters_LmPond", 7, 9, ("Steambara", 50f, false), ("Pebbloop", 40f, false), ("Riverloom", 10f, true)),
-                    "wind" => Table("Encounters_LmWind", 5, 7, ("Kitelet", 35f, false), ("Whirlby", 30f, false), ("Vanehare", 20f, false), ("Pebbloop", 15f, false)),
+                    "arrival" => Table("Encounters_LmArrival", 4, 6, ("Marimoss", 40f, false), ("Lilyvole", 30f, false), ("Kitelet", 20f, false), ("Pebbloop", 10f, false)),
+                    "village" => Table("Encounters_LmVillage", 4, 6, ("Lilyvole", 35f, false), ("Drizzcan", 30f, false), ("Samarling", 20f, false), ("Marimoss", 10f, false), ("Steambara", 5f, false)),
+                    "channel" => Table("Encounters_LmChannel", 5, 7, ("Sailfold", 35f, false), ("Drizzcan", 25f, false), ("Vanehare", 20f, false), ("Lilyvole", 10f, false), ("Pebbloop", 10f, false)),
+                    "marsh" => Table("Encounters_LmMarsh", 5, 7, ("Marimoss", 40f, false), ("Drizzcan", 30f, false), ("Steambara", 20f, false), ("Kitelet", 10f, false)),
+                    "garden" => Table("Encounters_LmGarden", 6, 8, ("Lilyvole", 35f, false), ("Marimoss", 25f, false), ("Vanehare", 20f, false), ("Sailfold", 10f, false), ("Pebbloop", 10f, false)),
+                    "pond" => Table("Encounters_LmPond", 7, 9, ("Sailfold", 35f, false), ("Drizzcan", 25f, false), ("Samarling", 20f, false), ("Steambara", 15f, false), ("Bottlewhale", 5f, true)),
+                    "wind" => Table("Encounters_LmWind", 5, 7, ("Kitelet", 35f, false), ("Samarling", 25f, false), ("Vanehare", 20f, false), ("Marimoss", 20f, false)),
                     _ => null,
                 };
                 map.zoneLegend.Add(new MapZone { key = z.key.ToString(), id = z.id, grassTable = table });

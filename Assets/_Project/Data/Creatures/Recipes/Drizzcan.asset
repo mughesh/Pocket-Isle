@@ -1,0 +1,106 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e27712b2a6f9fc45ae0b54784bf7327, type: 3}
+  m_Name: Drizzcan
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.CreatureRecipe
+  baseRecipe: {fileID: 0}
+  body: {fileID: 11400000, guid: bd1bf60e10aae66468d315adb62530d8, type: 2}
+  height: 0.04
+  zones:
+    belly: 0
+    bellyDirection: {x: 0, y: 0, z: 0}
+    bellyAt: 0
+    bellyMaxY: 0
+    bellyDrips: 0
+    bellyDripLength: 0
+    socks: 0
+    socksY: 0
+    tips: 0
+    tipAxis: {x: 0, y: 0, z: 0}
+    tipAt: 0
+    spots: 0
+    spotScale: 0
+    cracks: 0
+    crackScale: 0
+    crackWidth: 0
+    crackPulse: 0
+    patches:
+    - center: {x: 0, y: -0.2, z: 0.18}
+      radius: 0.24
+      color: 1
+      mirrorX: 0
+  parts:
+  - part: {fileID: 11400000, guid: df33caad4cd13f04b965f4b308cf38fa, type: 2}
+    position: {x: 0, y: 0.1, z: 0.4}
+    rotation: {x: 10, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+    mirror: 0
+    parent: -1
+  - part: {fileID: 11400000, guid: 4917353c8623bde488e7c7b3ae79849f, type: 2}
+    position: {x: 0, y: 0, z: 0.58}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+    mirror: 0
+    parent: -1
+  - part: {fileID: 11400000, guid: 4917353c8623bde488e7c7b3ae79849f, type: 2}
+    position: {x: 0.05, y: -0.05, z: 0.56}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: {x: 0.8, y: 0.8, z: 0.8}
+    mirror: 0
+    parent: -1
+  - part: {fileID: 11400000, guid: 609e44c769f063c408653c90c008fb8a, type: 2}
+    position: {x: 0.18, y: 0.22, z: 0.12}
+    rotation: {x: 0, y: -30, z: -10}
+    scale: {x: 1, y: 1, z: 1}
+    mirror: 1
+    parent: -1
+  - part: {fileID: 11400000, guid: 6a00f553585224045b3cddf9d0fefc36, type: 2}
+    position: {x: 0, y: 0.18, z: -0.4}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+    mirror: 0
+    parent: -1
+  face:
+    eyeSize: 0.042
+    eyeSpacing: 0.11
+    eyeHeight: 0.22
+    eyeStretch: 1.15
+    decals: []
+  palette:
+    baseColor: {r: 0.47843137, g: 0.6039216, b: 0.6901961, a: 1}
+    belly: {r: 0.72156864, g: 0.8156863, b: 0.8784314, a: 1}
+    accent: {r: 0.40784314, g: 0.53333336, b: 0.627451, a: 1}
+    socks: {r: 0.40784314, g: 0.53333336, b: 0.627451, a: 1}
+    glow: {r: 0.53333336, g: 0.78431374, b: 0.9098039, a: 1}
+    extra: {r: 0.53333336, g: 0.78431374, b: 0.9098039, a: 1}
+    face: {r: 0.16470589, g: 0.1254902, b: 0.09411765, a: 1}
+    iris: {r: 0.16470589, g: 0.1254902, b: 0.09411765, a: 1}
+  spec: 0.2
+  glow: 0
+  outline: 0.035
+  idle:
+    breathe: 0.014
+    breatheSpeed: 1.8
+    jiggle: 0.003
+    hover: 0
+    bob: 0
+    sway: 2
+    swaySpeed: 0
+  heightScale: 1.25
+  extraParts: []
+  overridePalette: 0
+  hueShift: 0
+  saturationScale: 1
+  valueScale: 1
+  resolution: 88
+  triangleBudget: 6000
+  bakedPrefab: {fileID: 6187492488540890895, guid: 6ea96f7520b07ae4a87432d4ecdf9576, type: 3}

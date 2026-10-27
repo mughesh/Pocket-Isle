@@ -1,0 +1,88 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e27712b2a6f9fc45ae0b54784bf7327, type: 3}
+  m_Name: Sailfold
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.CreatureRecipe
+  baseRecipe: {fileID: 0}
+  body: {fileID: 11400000, guid: 12f4cff4a3469be4d8dda3f0295dee78, type: 2}
+  height: 0.027
+  zones:
+    belly: 0
+    bellyDirection: {x: 0, y: 0, z: 0}
+    bellyAt: 0
+    bellyMaxY: 0
+    bellyDrips: 0
+    bellyDripLength: 0
+    socks: 0
+    socksY: 0
+    tips: 0
+    tipAxis: {x: 0, y: 0, z: 0}
+    tipAt: 0
+    spots: 0
+    spotScale: 0
+    cracks: 0
+    crackScale: 0
+    crackWidth: 0
+    crackPulse: 0
+    patches:
+    - center: {x: 0, y: -0.14, z: 0.24}
+      radius: 0.16
+      color: 1
+      mirrorX: 0
+  parts:
+  - part: {fileID: 11400000, guid: 58013f88aaa768e4c92f81cc97bb0da0, type: 2}
+    position: {x: 0, y: 0.04, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+    mirror: 0
+    parent: -1
+  - part: {fileID: 11400000, guid: 3276e80848e1bf44988321835c92b613, type: 2}
+    position: {x: 0.14, y: -0.18, z: 0.06}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+    mirror: 1
+    parent: -1
+  face:
+    eyeSize: 0.04
+    eyeSpacing: 0.2
+    eyeHeight: 0.02
+    eyeStretch: 1.1
+    decals: []
+  palette:
+    baseColor: {r: 0.9411765, g: 0.92156863, b: 0.8784314, a: 1}
+    belly: {r: 0.9098039, g: 0.8862745, b: 0.83137256, a: 1}
+    accent: {r: 0.84705883, g: 0.8156863, b: 0.7529412, a: 1}
+    socks: {r: 0.9098039, g: 0.8784314, b: 0.8156863, a: 1}
+    glow: {r: 0.84705883, g: 0.8156863, b: 0.7529412, a: 1}
+    extra: {r: 0.53333336, g: 0.72156864, b: 0.84705883, a: 1}
+    face: {r: 0.16470589, g: 0.1254902, b: 0.09411765, a: 1}
+    iris: {r: 0.16470589, g: 0.1254902, b: 0.09411765, a: 1}
+  spec: 0.15
+  glow: 0
+  outline: 0.035
+  idle:
+    breathe: 0.008
+    breatheSpeed: 1.4
+    jiggle: 0
+    hover: 0.004
+    bob: 0.004
+    sway: 7
+    swaySpeed: 0.7
+  heightScale: 1.25
+  extraParts: []
+  overridePalette: 0
+  hueShift: 0
+  saturationScale: 1
+  valueScale: 1
+  resolution: 88
+  triangleBudget: 6000
+  bakedPrefab: {fileID: 5791673724857210323, guid: 203f3931d0aad0444a86270e34e826dc, type: 3}

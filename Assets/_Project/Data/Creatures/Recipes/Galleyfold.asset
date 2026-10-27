@@ -1,0 +1,100 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e27712b2a6f9fc45ae0b54784bf7327, type: 3}
+  m_Name: Galleyfold
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.CreatureRecipe
+  baseRecipe: {fileID: 0}
+  body: {fileID: 11400000, guid: 0e62a168e00792f4e8d19e03e8926ede, type: 2}
+  height: 0.038
+  zones:
+    belly: 0
+    bellyDirection: {x: 0, y: 0, z: 0}
+    bellyAt: 0
+    bellyMaxY: 0
+    bellyDrips: 0
+    bellyDripLength: 0
+    socks: 0
+    socksY: 0
+    tips: 0
+    tipAxis: {x: 0, y: 0, z: 0}
+    tipAt: 0
+    spots: 0
+    spotScale: 0
+    cracks: 0
+    crackScale: 0
+    crackWidth: 0
+    crackPulse: 0
+    patches:
+    - center: {x: 0, y: -0.18, z: 0.3}
+      radius: 0.2
+      color: 1
+      mirrorX: 0
+  parts:
+  - part: {fileID: 11400000, guid: 58013f88aaa768e4c92f81cc97bb0da0, type: 2}
+    position: {x: 0, y: 0.06, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: {x: 1.25, y: 1.25, z: 1.25}
+    mirror: 0
+    parent: -1
+  - part: {fileID: 11400000, guid: d827867902b9d1942a072f4618abcd26, type: 2}
+    position: {x: 0.26, y: 0.05, z: 0}
+    rotation: {x: 0, y: 0, z: -6}
+    scale: {x: 1, y: 1, z: 1}
+    mirror: 0
+    parent: -1
+  - part: {fileID: 11400000, guid: 9c42b6f52d689ea41bbafd6f433e8f39, type: 2}
+    position: {x: -0.26, y: 0.04, z: 0}
+    rotation: {x: 0, y: 0, z: 6}
+    scale: {x: 1, y: 1, z: 1}
+    mirror: 0
+    parent: -1
+  - part: {fileID: 11400000, guid: 0d948010c21e2ad48aae9ecafee7d676, type: 2}
+    position: {x: 0.18, y: -0.22, z: 0.08}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+    mirror: 1
+    parent: -1
+  face:
+    eyeSize: 0.045
+    eyeSpacing: 0.24
+    eyeHeight: 0.02
+    eyeStretch: 1.1
+    decals: []
+  palette:
+    baseColor: {r: 0.9411765, g: 0.92156863, b: 0.8784314, a: 1}
+    belly: {r: 0.9098039, g: 0.8862745, b: 0.83137256, a: 1}
+    accent: {r: 0.40784314, g: 0.627451, b: 0.7529412, a: 1}
+    socks: {r: 0.9098039, g: 0.8784314, b: 0.8156863, a: 1}
+    glow: {r: 0.47058824, g: 0.65882355, b: 0.78431374, a: 1}
+    extra: {r: 0.53333336, g: 0.72156864, b: 0.84705883, a: 1}
+    face: {r: 0.16470589, g: 0.1254902, b: 0.09411765, a: 1}
+    iris: {r: 0.16470589, g: 0.1254902, b: 0.09411765, a: 1}
+  spec: 0.15
+  glow: 0
+  outline: 0.035
+  idle:
+    breathe: 0.008
+    breatheSpeed: 1.2
+    jiggle: 0
+    hover: 0.004
+    bob: 0.005
+    sway: 6
+    swaySpeed: 0.6
+  heightScale: 1.25
+  extraParts: []
+  overridePalette: 0
+  hueShift: 0
+  saturationScale: 1
+  valueScale: 1
+  resolution: 88
+  triangleBudget: 6000
+  bakedPrefab: {fileID: 4440766283686474926, guid: 0b6f3075f797a4346884bae5ec269710, type: 3}

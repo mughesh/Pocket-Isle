@@ -411,6 +411,8 @@ namespace Diorama
             // Step 10c: first meetings in Galewick.
             if (keeperFight == null && wild.species != null && wild.species.name == "Kitelet") Dialogue.Say("gw.meet.kitelet");
             if (keeperFight == null && wild.species != null && wild.species.name == "Zeppelope") Dialogue.Say("gw.meet.zeppelope");
+            if (keeperFight == null && wild.species != null && wild.species.name == "Sailfold") Dialogue.Say("lm.meet.sailfold");
+            if (keeperFight == null && wild.species != null && wild.species.name == "Bottlewhale") Dialogue.Say("lm.meet.bottlewhale");
             yield return new WaitForSeconds(0.6f);
 
             _activeSlot = -1;

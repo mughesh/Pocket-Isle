@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8421308f89f57d498f601bfba37a8cf, type: 3}
+  m_Name: Drizzcan
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.IslingSpecies
+  displayName: Drizzcan
+  element: 2
+  recipe: {fileID: 11400000, guid: 36024305c9c0283439512c64be29a162, type: 2}
+  evolvesTo: {fileID: 11400000, guid: 15d688f3572879b43b60a1eb55e870ae, type: 2}
+  evolveLevel: 16
+  baseStats:
+    hp: 44
+    attack: 11
+    defense: 10
+    speed: 10
+  moves:
+  - {fileID: 11400000, guid: 23983e632db345e449c6d7700aece247, type: 2}
+  - {fileID: 11400000, guid: 39f69d2f16d41be49be1199baa8a699c, type: 2}
+  - {fileID: 11400000, guid: dc4cdfd9106c04b4ea02d64706c2dc09, type: 2}
+  keeper: 0
+  keeperBreaksWith: 2

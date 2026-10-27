@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8421308f89f57d498f601bfba37a8cf, type: 3}
+  m_Name: Bottlewhale
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.IslingSpecies
+  displayName: Bottlewhale
+  element: 2
+  recipe: {fileID: 11400000, guid: 667922f85d3b7094cb667f4f8a36c285, type: 2}
+  evolvesTo: {fileID: 11400000, guid: 5af7e2459d76d994faf3cb21c19ab077, type: 2}
+  evolveLevel: 18
+  baseStats:
+    hp: 52
+    attack: 13
+    defense: 12
+    speed: 10
+  moves:
+  - {fileID: 11400000, guid: 56527befad7c536428bddbe9cea7ad8f, type: 2}
+  - {fileID: 11400000, guid: 5f9aecbf9b514934fab29e58f655a1b7, type: 2}
+  - {fileID: 11400000, guid: 6b6725a9ac7128d419cc0057fb20c9c4, type: 2}
+  keeper: 0
+  keeperBreaksWith: 2

@@ -1400,6 +1400,26 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: It's flowing! The whole lagoon is filling up!
+  - id: lm.meet.sailfold
+    once: 1
+    priority: 2
+    note: 'step 11c: the first wild Sailfold'
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: A Sailfold! Folded from an old map, I bet. It sails anywhere.
+  - id: lm.meet.bottlewhale
+    once: 1
+    priority: 2
+    note: 'step 11c: the rare Bottlewhale'
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: A Bottlewhale! Look, there's a tiny ship inside it!
   - id: objective.more
     once: 0
     priority: 2

@@ -17,17 +17,17 @@ namespace Diorama.EditorTools
         const string Root = "Assets/_Project/Data/Creatures";
         const string MoveRoot = "Assets/_Project/Data/Battle/Moves";
 
-        static IslingSpecies LoadSpecies(string name) => AssetDatabase.LoadAssetAtPath<IslingSpecies>($"{Root}/Species/{name}.asset");
-        static MoveData LoadMove(string file) => AssetDatabase.LoadAssetAtPath<MoveData>($"{MoveRoot}/{file}.asset");
+        internal static IslingSpecies LoadSpecies(string name) => AssetDatabase.LoadAssetAtPath<IslingSpecies>($"{Root}/Species/{name}.asset");
+        internal static MoveData LoadMove(string file) => AssetDatabase.LoadAssetAtPath<MoveData>($"{MoveRoot}/{file}.asset");
 
-        static void Budget(CreaturePart part, int resolution, int triangles)
+        internal static void Budget(CreaturePart part, int resolution, int triangles)
         {
             part.resolution = resolution;
             part.triangleBudget = triangles;
             EditorUtility.SetDirty(part);
         }
 
-        static MoveData Attack(string file, string name, Element element, int power, int accuracy, MoveAnimation animation, bool arc = false)
+        internal static MoveData Attack(string file, string name, Element element, int power, int accuracy, MoveAnimation animation, bool arc = false)
         {
             var m = Asset<MoveData>($"{MoveRoot}/{file}.asset");
             m.displayName = name;
@@ -52,9 +52,9 @@ namespace Diorama.EditorTools
             return s;
         }
 
-        static PartStyle Style(PaletteSlot slot, float spec = 0.25f, float outline = 0.022f) => new PartStyle { color = slot, spec = spec, outline = outline };
+        internal static PartStyle Style(PaletteSlot slot, float spec = 0.25f, float outline = 0.022f) => new PartStyle { color = slot, spec = spec, outline = outline };
 
-        static FaceSettings Face(float size, float spacing, float height, float stretch = 1.2f, bool smile = true, float smileY = float.NaN) => new FaceSettings
+        internal static FaceSettings Face(float size, float spacing, float height, float stretch = 1.2f, bool smile = true, float smileY = float.NaN) => new FaceSettings
         {
             eyeSize = size, eyeSpacing = spacing, eyeHeight = height, eyeStretch = stretch,
             decals = smile
@@ -62,7 +62,7 @@ namespace Diorama.EditorTools
                 : new List<FaceDecal>(),
         };
 
-        static BodyZones Patches(params (Vector3 c, float r, PaletteSlot slot)[] patches)
+        internal static BodyZones Patches(params (Vector3 c, float r, PaletteSlot slot)[] patches)
         {
             var z = new BodyZones { patches = new List<PatternPatch>() };
             foreach (var (c, r, slot) in patches) z.patches.Add(new PatternPatch { center = c, radius = r, color = slot });
@@ -96,7 +96,7 @@ namespace Diorama.EditorTools
             return p;
         }
 
-        static CreaturePart PegFoot(string name, float r, float length, PaletteSlot slot)
+        internal static CreaturePart PegFoot(string name, float r, float length, PaletteSlot slot)
         {
             var p = Part(name, PartMotion.None, Vector3.up, 0f, 0f, Style(slot, 0.2f),
                 Cone(Vector3.zero, new Vector3(0f, -length, 0f), r, r * 0.95f, 0f),
@@ -105,7 +105,7 @@ namespace Diorama.EditorTools
             return p;
         }
 
-        static CreaturePart RoundEar(string name, Vector3 size, PartMotion motion = PartMotion.Flick)
+        internal static CreaturePart RoundEar(string name, Vector3 size, PartMotion motion = PartMotion.Flick)
         {
             var p = Part(name, motion, Vector3.forward, 10f, 0.5f,
                 new PartStyle { color = PaletteSlot.Base, spec = 0.2f, outline = 0.02f, inner = true, innerColor = PaletteSlot.Belly, innerDirection = Vector3.forward, innerAt = 0.4f },
@@ -697,7 +697,7 @@ namespace Diorama.EditorTools
             return list.ToArray();
         }
 
-        static SdfPrimitive Box(Vector3 c, Vector3 half, float round, float k, Vector3 rotation = default) =>
+        internal static SdfPrimitive Box(Vector3 c, Vector3 half, float round, float k, Vector3 rotation = default) =>
             new SdfPrimitive { kind = SdfKind.RoundBox, a = c, size = half, b = new Vector3(round, 0f, 0f), rotation = rotation, k = k };
     }
 }

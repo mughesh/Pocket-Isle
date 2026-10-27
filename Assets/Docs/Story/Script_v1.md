@@ -297,6 +297,10 @@ Step 11b, the hand moments (lesson lines stay pinned as a chip until the moment 
 - `lm.scoop.more` · Spirit: One more!
 - `lm.scoop.done` · once (the waterfall runs, the lagoon rises)
   - Spirit: It's flowing! The whole lagoon is filling up!
+- `lm.meet.sailfold` · once (step 11c: the first wild Sailfold)
+  - Spirit: A Sailfold! Folded from an old map, I bet. It sails anywhere.
+- `lm.meet.bottlewhale` · once (step 11c: the rare Bottlewhale)
+  - Spirit: A Bottlewhale! Look, there's a tiny ship inside it!
 
 ## Objectives (step 11d)
 - `objective.more` (step 11d: an objective's object is outside the island window; a gold arrow points to it; once per moment a session)

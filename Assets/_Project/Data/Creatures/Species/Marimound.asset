@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8421308f89f57d498f601bfba37a8cf, type: 3}
+  m_Name: Marimound
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.IslingSpecies
+  displayName: Marimound
+  element: 2
+  recipe: {fileID: 11400000, guid: 91ea51095906ab4498f380d510b75697, type: 2}
+  evolvesTo: {fileID: 0}
+  evolveLevel: 0
+  baseStats:
+    hp: 66
+    attack: 13
+    defense: 17
+    speed: 9
+  moves:
+  - {fileID: 11400000, guid: 43df10a904ef8e043bac31164ce18e17, type: 2}
+  - {fileID: 11400000, guid: 5f9aecbf9b514934fab29e58f655a1b7, type: 2}
+  - {fileID: 11400000, guid: 3b67ad77c7d29084bb360e9edbd5f24c, type: 2}
+  keeper: 0
+  keeperBreaksWith: 2
