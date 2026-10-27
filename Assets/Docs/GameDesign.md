@@ -36,9 +36,22 @@ and restore the world. Each restored region docks onto your island.
   was frightened or corrupted by the shattering. They aren't evil. Beat one and it calms, giving up its shard.
 
 ## Controls (decided Oct 24)
-- **Walk, three ways, one path system:** (1) thumb swipe = auto-walk until tap / obstacle / new swipe, same swipe
-  again = run; (2) **touch a tile** with a fingertip (dip and lift) = walk there; (3) **look at a tile + pinch** =
-  walk there (reclined players). Thumb-hold walking dropped (accidental stops, tiring). Walk 0.4 s/tile, run 0.2.
+- **Walk, three ways, one path system:** (1) thumb swipe = **smart step** (step 12a, Oct 27 night; below); (2) **touch
+  a tile** with a fingertip (dip and lift) = walk there (Off by default since 11d); (3) **look at a tile + pinch** =
+  walk there (reclined players). Thumb-hold walking dropped (accidental stops, tiring).
+- **Smart steps (12a, replaces auto-walk):** one swipe walks the swipe way and follows the path's turns, stopping at the
+  first of: a junction, the tile that brings an unsolved hand moment within reach, the tile before a gate, the first
+  tall-grass tile, a blocked tile, or 5 tiles. Gold footprints show the walk the moment the swipe is read (they fade as
+  it is walked, a ring on the stop tile); a swipe that can't move bumps and turns. **Two quick swipes** (same way, within
+  0.45 s) = walk on, stopping only at junctions, interactables, blockers or a **tap**. No run. Smart step 0.53 s a tile,
+  walk on 0.4 s. A new direction while walking re-plans. AutoWalk / HoldToWalk stay selectable in code (Inspector).
+- **Guidance (12a):** objective lines (lessons, tasks, hand moments; `· objective` in the script) are bold in a
+  gold-bordered bubble behind a target icon and stay pinned as the chip; chatter is smaller, plain cream, and fades.
+  Poke the Spirit (or look + pinch it) = the current objective again, else "This way!" and the **Spirit's trail**: gold
+  tiles toward the next goal (next unsolved hand moment in the realm, then the Keeper door, then the return gate; in the
+  hub the statue with a shard, else the next realm gate). The trail also shows after the tutorial, on entering a realm
+  and after 12 s standing still with no objective; 20 s, or until arrival. A scene change drops queued chatter.
+  Controls card (game menu and Settings): swipe, swipe twice + tap, look + pinch, pinch / grab.
 - Tap: stop while walking, hop when standing, fish when facing water.
 - Battle runes: poke or look + pinch; the panel faces you at battle start, drifts at most ±15°.
 

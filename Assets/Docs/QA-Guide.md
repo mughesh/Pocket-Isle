@@ -41,7 +41,19 @@ clear storage): they turn red, press again within 3 seconds.
 Cheats (one-hit KO, invincible, wild battles off, rare x10, time and walk speed) last until the app closes. They are
 never saved.
 
-## 4. What's new in this build (step 11d: fixes from Mugesh's Oct 27 notes)
+## 4. What's new in this build (step 12a, Oct 27 night: walking and guidance)
+
+- **Walking works differently now.** One thumb swipe walks a few tiles (up to 5) along the path and stops on its own:
+  at a fork, near something to do, before a gate, at the edge of tall grass. Gold footprints show where it will go.
+  **Swipe twice quickly** to keep walking; **tap** your thumb to stop. Look + pinch a tile still walks there.
+- **New game**: three short walk lessons (a gold tile ahead, one round a corner, then swipe twice) replace the old stop lesson.
+- **Gold bubbles** are things to do (they stay as a small chip); plain cream ones are just chat.
+- **Lost?** Poke the Spirit (or look at it and pinch): it repeats what to do, or shows a gold trail to where to go next.
+  Standing still for ~12 s also shows the trail.
+- Game menu > **Controls**: a card with the four controls.
+- Note anything that feels slow, stops too early or too late, or walks somewhere you didn't mean.
+
+## Earlier (step 11d: fixes from Mugesh's Oct 27 notes)
 
 - **Every task now shows itself**: gold rings on what you can act on, a counter in the Spirit's chip (Kites 1/3,
   Clouds 2/3, Flicks 1/3, Knots 1/3, Pads 1/3, Lotus 4/5, Pours 1/2), and a gold arrow at the island's edge when one is
