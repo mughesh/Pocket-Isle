@@ -59,6 +59,9 @@ namespace Diorama
         [Range(0.3f, 2f)] public float speed = 1f;
         [Tooltip("Hold the last pose this long before looping (s).")]
         [Min(0f)] public float holdEnd = 0.3f;
+        [Tooltip("Step 12c: a carry without a pinch (cupped hands): from this point of the clip (0..1) it is pinned on the " +
+                 "source, from Carry To on the target, blended in between. -1 = none (pinch clips find their own grab).")]
+        [Range(-1f, 1f)] public float carryFrom = -1f, carryTo = -1f;
         public List<GhostFrame> frames = new List<GhostFrame>();
 
         public float StartTime => Mathf.Clamp(trimStart, 0f, RawDuration);

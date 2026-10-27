@@ -15,6 +15,12 @@ namespace Diorama
     /// then the lagoon rises in a wave out from the basin (the dry ring becomes water: <see cref="LilymereLagoon"/> reads
     /// this puzzle, id lm.lagoon) and the half-sunk temple's door surfaces with a gush. Saved (stage = pours).
     /// Look + pinch the water, then the basin: a ball floats over and pours by itself. A restored realm counts it done.
+    /// Step 12c (Oct 27 notes: "I couldn't grasp that I am pouring water for breaking ice"): with a <see cref="frozenRecipe"/>
+    /// the pour goes into a carved bowl on top of a rocky cliff (<see cref="bowl"/>, the cliff is the map prop at
+    /// <see cref="waterfallAnchor"/>), the frozen fall drops from the bowl's lip into the stone basin (now its catch pool);
+    /// the bowl fills half / full with a visible level, then spills over the lip and the cracks race down the fall. The
+    /// hands carry a water sheet across both palms (<see cref="PalmWater"/>) and pour a stream; the two-hand ghost carries
+    /// from the inlet to the bowl (clip cup_carry).
     /// </summary>
     [DefaultExecutionOrder(-20)]
     public class ScoopPour : HandPuzzle
@@ -28,6 +34,17 @@ namespace Diorama
         [Tooltip("Where look + pinch picks the water up (a lagoon tile near the basin) and the temple door (the gush).")]
         public Vector2 scoopSpot, templeDoor;
         public PropRecipe ballRecipe, basinWaterRecipe, runningRecipe;
+
+        [Header("Step 12c: the cliff bowl (empty = the old stone basin pour)")]
+        [Tooltip("The frozen fall from the bowl's lip, drawn by this piece (the cliff with its bowl is the map prop).")]
+        public PropRecipe frozenRecipe;
+        [Tooltip("The carved bowl's middle on the cliff top (map: column, row), its floor and rim heights (tiles), the bowl water's size.")]
+        public Vector2 bowl;
+        public float bowlFloor = 2.26f, bowlRim = 2.5f, bowlWaterScale = 0.52f;
+        [Tooltip("Diorama/Water Sheet (Materials/Props/WaterSheet): the water across the palms and the pouring stream.")]
+        public Material waterSheetMaterial;
+        [Tooltip("The sheet in one palm, and across two (half sizes past the palms, metres, real hands), its dome.")]
+        public float palmPool = 0.026f, pairWide = 0.034f, pairPast = 0.028f, sheetDome = 0.008f;
 
         [Header("Scoop (WaterScoop, metres at the placed island size)")]
         [Range(0f, 1f)] public float cupUp = 0.55f;
@@ -57,7 +74,11 @@ namespace Diorama
         [Range(0f, 1f)] public float volume = 0.7f;
 
         WaterScoop _scoop;
-        PropView _ball, _basinWater, _running;
+        PropView _ball, _basinWater, _running, _frozen, _bowlWater;
+        PalmWater _palmWater;
+        float _sheetAmount = 1f, _streamFlow;
+        Vector3 _streamTo;
+        bool _floating;
         AudioSource _audio;
         readonly HandState[] _hands = new HandState[2];
         // Step 11d: left, right, and both cupped together (index 2, tried first).
@@ -76,6 +97,10 @@ namespace Diorama
 
         public WaterScoop Scoop => _scoop;
         public bool Running => IsSolved || _running0;
+        /// <summary>Step 12c: pours go into the cliff's bowl (else the old stone basin).</summary>
+        bool UsesBowl => frozenRecipe != null;
+        Vector2 PourSpot => UsesBowl ? bowl : basin;
+        float PourBase => UsesBowl ? bowlRim : 0f;
         public override bool Busy => _scoop != null && _scoop.Holder >= 0 || _pouring || _breaking;
         protected override Vector2 HomeTile => basin;
         float Scale => grabGuard != null ? grabGuard.ScaleFactor : 1f;
@@ -85,12 +110,13 @@ namespace Diorama
             get
             {
                 if (!Here || IsSolved || _scoop == null) return null;
-                return _scoop.State == ScoopState.Held ? BasinWorld(0.6f) : MapToWorld(new Vector3(scoopSpot.x, 0.1f, scoopSpot.y));
+                return _scoop.State == ScoopState.Held ? PourWorld(0.6f) : MapToWorld(new Vector3(scoopSpot.x, 0.1f, scoopSpot.y));
             }
         }
 
-        // Step 11d: the two-hand cup ghost plays at the pool (scoop, lift, tip), not as a grab carried to the basin.
-        public override Vector3? GhostDropPoint => null;
+        // Step 12c: the two-hand cup ghost dips at the pool and carries all the way to the bowl, where it tips (cup_carry
+        // marks its carry). The old stone basin pour keeps the 11d ghost at the pool.
+        public override Vector3? GhostDropPoint => UsesBowl && Here && !IsSolved ? PourWorld(0.9f) : (Vector3?)null;
         public override float FocusRadius => 1f * TileWorld;
 
         // ---- step 11d: the objective (gold on the pool while scooping, on the basin while carrying; "Pours n/2") ----
@@ -110,6 +136,7 @@ namespace Diorama
         {
             into.Add(scoopSpot);
             into.Add(basin);
+            if (UsesBowl) into.Add(bowl);
         }
 
         protected override bool Mark(int i, out Vector3 world, out float tiles)
@@ -125,8 +152,8 @@ namespace Diorama
             }
             if (i == 1 && carrying)
             {
-                world = BasinWorld(0.35f);
-                tiles = 2.2f;
+                world = PourWorld(0.1f);
+                tiles = UsesBowl ? 1.6f : 2.2f;
                 return true;
             }
             return false;
@@ -143,6 +170,12 @@ namespace Diorama
                 _ball = new PropView("Water Ball", island, ballRecipe);
                 _basinWater = new PropView("Basin Water", island, basinWaterRecipe);
                 _running = new PropView("Waterfall Running", island, runningRecipe) { restoredSelf = 1f };
+                if (UsesBowl)
+                {
+                    _frozen = new PropView("Waterfall Frozen", island, frozenRecipe);
+                    _bowlWater = new PropView("Bowl Water", island, basinWaterRecipe);
+                }
+                _palmWater = new PalmWater("Palm Water", waterSheetMaterial, island.gameObject.layer);
             }
             if (map != null)
                 for (int r = 0; r < map.Rows; r++)
@@ -159,7 +192,10 @@ namespace Diorama
             _ball?.Destroy();
             _basinWater?.Destroy();
             _running?.Destroy();
-            if (map != null) map.SetPropHidden(waterfallAnchor, false);
+            _frozen?.Destroy();
+            _bowlWater?.Destroy();
+            _palmWater?.Destroy();
+            if (map != null && !UsesBowl) map.SetPropHidden(waterfallAnchor, false);
             base.OnDestroy();
         }
 
@@ -170,7 +206,7 @@ namespace Diorama
             _scoop.Restore(IsSolved ? poursNeeded : PuzzleState.Stage(id));
             _fill = _scoop.Pours / (float)Mathf.Max(1, poursNeeded);
             _running0 = IsSolved;
-            map.SetPropHidden(waterfallAnchor, IsSolved);
+            if (!UsesBowl) map.SetPropHidden(waterfallAnchor, IsSolved);
             SetProgressQuiet(_fill);
             Debug.Log($"[ScoopPour] {id}: basin {_scoop.Pours}/{poursNeeded}, waterfall {(IsSolved ? "running, the lagoon full" : "frozen")}.");
         }
@@ -263,7 +299,8 @@ namespace Diorama
             x.overWater = map.At(t) == IslandMap.Water && ((Vector2)t - basin).magnitude <= scoopReach;
             // The water sits 0.1 tiles under the cap (the island's water drop); metres in the room.
             x.aboveWater = (m.y + 0.1f) * tile;
-            x.overBasin = (new Vector2(m.x, m.z) - basin).magnitude <= basinRadius && m.y * tile >= -0.01f * s && m.y * tile <= basinAbove * s;
+            float above = (m.y - PourBase) * tile;
+            x.overBasin = (new Vector2(m.x, m.z) - PourSpot).magnitude <= basinRadius && above >= -0.01f * s && above <= basinAbove * s;
         }
 
         void Changed(ScoopState from, ScoopState to)
@@ -281,6 +318,7 @@ namespace Diorama
                     _ballWorld = PalmWorld();
                     _ballVel = Vector3.zero;
                     _bigBall = _scoop.Holder == WaterScoop.Both;
+                    _sheetAmount = 1f;
                     GameAudio.At(AudioIds.PondTap, _ballWorld);
                     break;
                 case ScoopState.Pouring:
@@ -311,10 +349,10 @@ namespace Diorama
             var pick = new HeadGaze.ConePick(ray, _gazed);
             float r = Mathf.Max(HeadGaze.MinRadius * island.transform.lossyScale.x, 0.8f * TileWorld);
             pick.Consider(0, MapToWorld(new Vector3(scoopSpot.x, 0f, scoopSpot.y)), r);
-            if (_pickedWater) pick.Consider(1, BasinWorld(0.3f), r);
+            if (_pickedWater) pick.Consider(1, PourWorld(0.1f), r);
             _gazed = pick.Best;
             if (_gazed < 0) return;
-            FocusHighlight.Hover(_gazed == 0 ? MapToWorld(new Vector3(scoopSpot.x, 0f, scoopSpot.y)) : BasinWorld(0.3f), FocusRadius);
+            FocusHighlight.Hover(_gazed == 0 ? MapToWorld(new Vector3(scoopSpot.x, 0f, scoopSpot.y)) : PourWorld(0.1f), FocusRadius);
             if (!GazePinch(_hands)) return;
             MarkInteracted();
             if (_gazed == 0)
@@ -339,8 +377,9 @@ namespace Diorama
         IEnumerator FloatThenPour()
         {
             _pouring = true;
+            _floating = true;
             var from = MapToWorld(new Vector3(scoopSpot.x, 0.2f, scoopSpot.y));
-            var to = BasinWorld(1.4f);
+            var to = PourWorld(1.4f);
             for (float t = 0f; t < 1f; t += Time.deltaTime)
             {
                 float u = Mathf.SmoothStep(0f, 1f, t);
@@ -352,9 +391,9 @@ namespace Diorama
 
         // ---- carrying ----
 
-        void Carry()
+        void Carry(bool pouring = false)
         {
-            if (_scoop == null || _scoop.State != ScoopState.Held || _pouring) return;
+            if (_scoop == null || !pouring && (_scoop.State != ScoopState.Held || _pouring)) return;
             var target = PalmWorld();
             // A jelly wobble: the ball lags the palm on a spring.
             var prev = _ballWorld;
@@ -366,7 +405,9 @@ namespace Diorama
             if (Time.time >= _dripAt && fx != null)
             {
                 _dripAt = Time.time + Random.Range(0.18f, 0.4f);
-                fx.Burst(_ballWorld - island.transform.up * ballSize * Scale * 0.45f, 1, new Color(0.7f, 0.92f, 1f, 0.9f), TileWorld * 0.03f, 0.5f, TileWorld * 0.025f,
+                // Step 12c: drips fall from the sheet's edge (the fingertips' side), not the ball's bottom.
+                var drip = _palmWater != null && _palmWater.Shown ? _palmWater.LowEdge : _ballWorld - island.transform.up * ballSize * Scale * 0.45f;
+                fx.Burst(drip, 1, new Color(0.7f, 0.92f, 1f, 0.9f), TileWorld * 0.03f, 0.5f, TileWorld * 0.025f,
                     -island.transform.up * TileWorld * 2f);
             }
         }
@@ -374,7 +415,8 @@ namespace Diorama
         IEnumerator Pour(Vector3 from, bool alreadyThere = false)
         {
             _pouring = true;
-            var to = BasinWorld(0.2f);
+            var to = PourWorld(UsesBowl ? bowlFloor - bowlRim + 0.1f : 0.2f);
+            _streamTo = to;
             float tile = TileWorld;
             GameAudio.At(AudioIds.PondSplash, to);
             GameAudio.Procedural(_audio, PuzzleSounds.Whoosh, volume * 0.5f);
@@ -382,13 +424,23 @@ namespace Diorama
             for (float t = 0f; t < 0.8f; t += Time.deltaTime)
             {
                 float u = t / 0.8f;
-                _ballWorld = Vector3.Lerp(from, to + island.transform.up * tile * 0.8f, Mathf.SmoothStep(0f, 1f, Mathf.Min(1f, u * 1.6f)));
+                if (_floating || _palmWater == null)
+                    _ballWorld = Vector3.Lerp(from, to + island.transform.up * tile * 0.8f, Mathf.SmoothStep(0f, 1f, Mathf.Min(1f, u * 1.6f)));
+                else
+                {
+                    // Step 12c: the water stays in the hands and pours out as a stream, the sheet thinning.
+                    Carry(true);
+                    _sheetAmount = 1f - Mathf.SmoothStep(0f, 1f, u);
+                    _streamFlow = Mathf.Clamp01(Mathf.Min(u * 6f, (1f - u) * 4f));
+                }
                 _fill = Mathf.Lerp(fillFrom, fillTo, Mathf.SmoothStep(0f, 1f, u));
                 if (fx != null && Here)
                     fx.Burst(Vector3.Lerp(_ballWorld, to, Random.value), 2, new Color(0.62f, 0.88f, 0.95f, 0.95f), tile * 0.05f, 0.35f, tile * 0.05f, -island.transform.up * tile * 1.5f);
                 yield return null;
             }
             _fill = fillTo;
+            _streamFlow = 0f;
+            _floating = false;
             if (fx != null && Here) fx.Burst(to, 16, new Color(0.75f, 0.95f, 1f), tile * 0.6f, 0.6f, tile * 0.05f, island.transform.up * tile * 0.6f);
             PuzzleState.SetStage(id, _scoop.Pours);
             SetProgress(_fill);
@@ -404,17 +456,25 @@ namespace Diorama
         {
             _breaking = true;
             float tile = TileWorld;
-            Debug.Log($"[ScoopPour] {id}: the basin is full: cracks run up the frozen waterfall.");
-            // The basin glows; cracks climb the ice as sparks.
+            Debug.Log(UsesBowl ? $"[ScoopPour] {id}: the bowl is full: water spills over its lip, cracks race down the frozen fall."
+                : $"[ScoopPour] {id}: the basin is full: cracks run up the frozen waterfall.");
+            // The basin glows; cracks climb the ice as sparks (12c: the bowl spills over its lip and they race down).
             for (float t = 0f; t < crackSeconds; t += Time.deltaTime)
             {
                 float u = t / crackSeconds;
                 if (fx != null && Here && Random.value < 0.5f)
                 {
-                    var at = MapToWorld(new Vector3(waterfallCenter.x + Random.Range(-0.5f, 0.5f), 0.3f + u * 2.1f, waterfallCenter.y + 0.2f));
+                    float h = UsesBowl ? bowlRim - 0.1f - u * (bowlRim - 0.3f) : 0.3f + u * 2.1f;
+                    var at = MapToWorld(new Vector3(waterfallCenter.x + Random.Range(UsesBowl ? -0.2f : -0.5f, UsesBowl ? 0.2f : 0.5f), h,
+                        waterfallCenter.y + (UsesBowl ? 0.45f : 0.2f)));
                     fx.Burst(at, 2, new Color(0.85f, 0.97f, 1f), tile * 0.15f, 0.4f, tile * 0.03f, Vector3.zero);
                 }
-                if (fx != null && Here && Random.value < 0.2f) fx.Burst(BasinWorld(0.3f), 2, new Color(0.7f, 0.95f, 1f), tile * 0.3f, 0.6f, tile * 0.04f, island.transform.up * tile * 0.4f);
+                if (fx != null && Here && Random.value < (UsesBowl ? 0.45f : 0.2f))
+                {
+                    // The spill: water over the lip (the bowl) or the basin's glow.
+                    var at = UsesBowl ? MapToWorld(new Vector3(waterfallCenter.x, bowlRim, waterfallCenter.y + 0.4f)) : BasinWorld(0.3f);
+                    fx.Burst(at, 2, new Color(0.7f, 0.95f, 1f), tile * 0.3f, 0.6f, tile * 0.04f, (UsesBowl ? island.transform.forward : island.transform.up) * tile * 0.4f);
+                }
                 yield return null;
             }
             // The ice shatters, the waterfall runs.
@@ -422,7 +482,7 @@ namespace Diorama
             if (fx != null && Here)
                 for (int k = 0; k < 4; k++)
                     fx.Burst(MapToWorld(new Vector3(waterfallCenter.x, 0.5f + k * 0.55f, waterfallCenter.y + 0.2f)), 16, new Color(0.9f, 0.98f, 1f), tile * 0.9f, 0.8f, tile * 0.05f, island.transform.up * tile * 0.3f);
-            map.SetPropHidden(waterfallAnchor, true);
+            if (!UsesBowl) map.SetPropHidden(waterfallAnchor, true);
             _running0 = true;
             yield return new WaitForSeconds(0.5f);
             // The lagoon rises: the dry ring floods (one island rebuild), a wave of splashes spreads out from the basin.
@@ -462,7 +522,7 @@ namespace Diorama
             _scoop.Restore(poursNeeded);
             _fill = 1f;
             _running0 = true;
-            map.SetPropHidden(waterfallAnchor, true);
+            if (!UsesBowl) map.SetPropHidden(waterfallAnchor, true);
             MarkSolved(poursNeeded);
         }
 
@@ -471,15 +531,24 @@ namespace Diorama
         void Draw()
         {
             bool here = Here;
+            bool hands = _palmWater != null && !_floating;
+            DrawPalmWater(here && hands && (_scoop.State == ScoopState.Held || _pouring && _scoop.Holder >= 0));
             if (_ball != null)
             {
-                bool show = here && (_scoop.State == ScoopState.Held || _pouring);
+                bool show = here && (_scoop.State == ScoopState.Held || _pouring) && !hands;
                 float jelly = 1f + 0.12f * _wobble * Mathf.Sin(Time.time * 22f);
                 var local = island.transform.InverseTransformPoint(_ballWorld);
                 float metres = ballSize * Scale / Mathf.Max(1e-4f, island.transform.lossyScale.x) * (_bigBall ? pairBall : 1f);
                 _ball.PlaceLocal(local - Vector3.up * metres * 0.5f, Quaternion.Euler(0f, Time.time * 30f, 0f), metres * jelly, show);
             }
-            _basinWater?.Place(basin, 0.1f + 0.2f * _fill, Quaternion.identity, here && _fill > 0.01f, 1f);
+            if (UsesBowl)
+            {
+                // The bowl shows its level (half, full); the stone basin below fills once the fall runs.
+                _bowlWater?.Place(bowl, bowlFloor + (bowlRim - bowlFloor - 0.05f) * _fill, Quaternion.identity, here && _fill > 0.01f, bowlWaterScale);
+                _basinWater?.Place(basin, 0.3f, Quaternion.identity, here && Running, 1f);
+                _frozen?.Place(waterfallCenter, 0f, Quaternion.identity, here && !Running, 1f);
+            }
+            else _basinWater?.Place(basin, 0.1f + 0.2f * _fill, Quaternion.identity, here && _fill > 0.01f, 1f);
             if (_running != null)
             {
                 _running.Place(waterfallCenter, 0f, Quaternion.identity, here && Running, 1f);
@@ -494,6 +563,45 @@ namespace Diorama
         }
 
         Vector3 BasinWorld(float height) => MapToWorld(new Vector3(basin.x, height, basin.y));
+
+        /// <summary>Over where the water goes: the bowl's rim (12c) or the stone basin's floor, plus <paramref name="above"/> tiles.</summary>
+        Vector3 PourWorld(float above) => MapToWorld(new Vector3(PourSpot.x, PourBase + above, PourSpot.y));
+
+        /// <summary>
+        /// Step 12c: the water sheet across both cupped palms (or a pool in one), following the spring-lagged centre, and
+        /// the stream while pouring.
+        /// </summary>
+        void DrawPalmWater(bool show)
+        {
+            if (!show)
+            {
+                _palmWater.Hide();
+                return;
+            }
+            var up = island.transform.up;
+            Vector3 axis, normal;
+            float halfLong, halfWide;
+            int holder = _scoop.Holder;
+            if (holder == WaterScoop.Both)
+            {
+                axis = _palmPos[1] - _palmPos[0];
+                normal = (_palmNormal[0] + _palmNormal[1]).sqrMagnitude > 1e-4f ? (_palmNormal[0] + _palmNormal[1]).normalized : up;
+                halfLong = axis.magnitude * 0.5f + pairPast;
+                halfWide = pairWide;
+            }
+            else
+            {
+                int h = Mathf.Clamp(holder, 0, 1);
+                normal = _palmNormal[h].sqrMagnitude > 1e-4f ? _palmNormal[h] : up;
+                axis = Vector3.Cross(normal, island.transform.forward);
+                halfLong = halfWide = palmPool;
+            }
+            // A cupped palm faces up; keep the sheet level-ish even as the hands roll, so it reads as water.
+            normal = Vector3.Slerp(up, normal, 0.35f);
+            var centre = _ballWorld;
+            _palmWater.Sheet(true, centre, axis, normal, halfLong, halfWide, sheetDome, _wobble, _sheetAmount, _streamTo - centre);
+            _palmWater.Stream(_pouring && _streamFlow > 0.01f, _palmWater.LowEdge, _streamTo, 0.012f, _streamFlow, Camera.main);
+        }
 
         void Splash(Vector3 at, int count)
         {

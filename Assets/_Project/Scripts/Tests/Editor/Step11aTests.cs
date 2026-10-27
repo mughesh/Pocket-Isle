@@ -46,7 +46,7 @@ namespace Diorama.Tests
                 Assert.IsTrue(map.TryGetLandmark(name, out var t) && map.CanWalk(GameState.NearestWalkable(map, t)), $"landmark {name}");
             Assert.AreEqual("LakeTemple", PropName(map, LilymereTools.TempleXY));
             Assert.AreEqual("StoneBasin", PropName(map, LilymereTools.BasinXY));
-            Assert.AreEqual("WaterfallFrozen", PropName(map, LilymereTools.WaterfallXY));
+            Assert.AreEqual("CliffBowl", PropName(map, LilymereTools.WaterfallXY)); // step 12c: the cliff with the bowl
             Assert.IsTrue(map.CanWalk(LilymereTools.TempleFront), "the temple door's front is walkable");
             Assert.IsTrue(map.CanWalk(LilymereTools.BasinFront), "the basin's front is walkable");
             for (int y = LilymereTools.ChannelY0; y <= LilymereTools.ChannelY1; y++)

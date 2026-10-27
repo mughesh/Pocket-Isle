@@ -284,7 +284,7 @@ MonoBehaviour:
     turned: 0
     yaw: 0
   - key: Q
-    recipe: {fileID: 11400000, guid: 14140dd1d184eed4c83870536d0f131c, type: 2}
+    recipe: {fileID: 11400000, guid: 1fa4d8c8bf608ea47b7926f0d169b532, type: 2}
     turned: 0
     yaw: 0
   - key: B

@@ -95,7 +95,7 @@ namespace Diorama.EditorTools
                         p.ghostClip = "pinch_drop";
                         break;
                     case "lm.lagoon":
-                        p.ghostClip = "cup_scoop";
+                        p.ghostClip = "cup_carry"; // step 12c: carried to the cliff bowl (was cup_scoop, played at the pool)
                         break;
                 }
                 if (p is WheelPiece wheel)

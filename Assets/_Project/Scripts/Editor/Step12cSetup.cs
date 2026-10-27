@@ -14,6 +14,7 @@ namespace Diorama.EditorTools
     {
         const string ScenePath = "Assets/_Project/Scenes/MR_Main.unity";
         const string NL = "\n";
+        public const string WaterSheetPath = "Assets/_Project/Materials/Props/WaterSheet.mat";
 
         [MenuItem("Tools/Pocket Isle/Setup/Walking + Guidance (12)/Set Up MR_Main (12c Oct 28 notes)", priority = 902)]
         public static void SetUp()
@@ -34,6 +35,7 @@ namespace Diorama.EditorTools
             Clouds(log);
             LilymerePalette(log);
             DevPanelSpot(log);
+            CliffBowl(log);
             EditorSceneManager.MarkSceneDirty(active);
             EditorSceneManager.SaveScene(active);
             AssetDatabase.SaveAssets();
@@ -71,6 +73,46 @@ namespace Diorama.EditorTools
             panel.besideGap = -0.12f;
             panel.besideBack = 0.08f;
             log.Append(NL + "  dev panel: 42 x 36 cm, beside the island (dominant hand), close rune, scroll");
+        }
+
+        /// <summary>
+        /// Lilymere's waterfall (12b D11-D13): the cliff with the carved bowl on the map (its map is rewritten), the frozen /
+        /// running fall from the bowl's lip, pours into the bowl, the water sheet across the palms, the two-hand ghost
+        /// carried from the inlet to the bowl.
+        /// </summary>
+        static void CliffBowl(StringBuilder log)
+        {
+            PropKit.WriteCliffBowl();
+            var map = LilymereTools.Write(log);
+            if (map != null)
+            {
+                var problems = LilymereTools.Check(map, log);
+                foreach (var p in problems) Debug.LogError($"[Step12c] Lilymere layout check: {p}");
+                log.Append(problems.Count == 0 ? NL + "  Lilymere layout checks: all passed" : NL + $"  Lilymere layout checks: {problems.Count} problem(s)");
+            }
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(WaterSheetPath);
+            if (mat == null)
+            {
+                var shader = Shader.Find("Diorama/Water Sheet");
+                if (shader == null) Debug.LogError("[Step12c] Shader Diorama/Water Sheet not found.");
+                else
+                {
+                    mat = new Material(shader) { name = "WaterSheet", enableInstancing = true };
+                    AssetDatabase.CreateAsset(mat, WaterSheetPath);
+                }
+            }
+            foreach (var scoop in Object.FindObjectsByType<ScoopPour>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                Undo.RecordObject(scoop, "Step 12c");
+                scoop.runningRecipe = PropKit.Load("BowlFallRunning");
+                scoop.frozenRecipe = PropKit.Load("BowlFallFrozen");
+                scoop.bowl = scoop.waterfallCenter;
+                scoop.waterSheetMaterial = mat;
+                scoop.basinRadius = 1f;
+                scoop.ghostClip = "cup_carry";
+                log.Append(NL + $"  {scoop.id}: pours into the cliff bowl at c{scoop.bowl.x:0.#} r{scoop.bowl.y:0.#} ({scoop.bowlRim} tiles up), " +
+                           $"fall {(scoop.frozenRecipe != null && scoop.runningRecipe != null ? "frozen + running" : "MISSING")}, water sheet {(mat != null ? "on" : "MISSING")}, ghost cup_carry");
+            }
         }
 
         /// <summary>The ridge: puffs on the road again (bob kept small), the road north to the tower open.</summary>

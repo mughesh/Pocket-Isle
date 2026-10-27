@@ -39,13 +39,14 @@ namespace Diorama.EditorTools
             Debug.Log(sb.ToString());
         }
 
-        /// <summary>arg "where,height,up[,pair]": the scoop's synthetic hand (where = spot or basin), both hands together when pair = 1.</summary>
+        /// <summary>arg "where,height,up[,pair]": the scoop's synthetic hand (where = spot, basin or bowl), both hands together when pair = 1.</summary>
         public static void Hand()
         {
             var s = Find<ScoopPour>();
             var parts = Arg.Split(',');
             if (s == null || parts.Length < 3) return;
-            var at = parts[0] == "basin" ? s.basin : s.scoopSpot;
+            // Step 12c: "bowl" = the cliff bowl (height in tiles above the cap, so over its rim is about 2.7).
+            var at = parts[0] == "basin" ? s.basin : parts[0] == "bowl" ? s.bowl : s.scoopSpot;
             s.DebugHand(new Vector3(at.x, F(parts[1]), at.y), F(parts[2]), parts.Length > 3 && parts[3] == "1");
             Debug.Log($"[Step11dDebug] Hand at {parts[0]} h {F(parts[1]):0.##} up {F(parts[2]):0.##}{(parts.Length > 3 && parts[3] == "1" ? ", both hands" : "")}: {s.Describe()}, holder {s.Scoop.Holder}.");
         }

@@ -197,7 +197,11 @@ namespace Diorama.EditorTools
             scoop.templeDoor = Map(t.x + 1f, t.y - 1f);
             scoop.ballRecipe = PropKit.Load("WaterBall");
             scoop.basinWaterRecipe = PropKit.Load("BasinWater");
-            scoop.runningRecipe = PropKit.Load("WaterfallRunning");
+            // Step 12c: the pour goes into the cliff's bowl; the fall from its lip is drawn by the piece.
+            scoop.runningRecipe = PropKit.Load("BowlFallRunning");
+            scoop.frozenRecipe = PropKit.Load("BowlFallFrozen");
+            scoop.bowl = scoop.waterfallCenter;
+            scoop.waterSheetMaterial = AssetDatabase.LoadAssetAtPath<Material>(Step12cSetup.WaterSheetPath);
             EditorUtility.SetDirty(scoop);
             log.Append($"\n  'Scoop And Pour' {Wired(scoop)}: basin c{scoop.basin.x:0.#} r{scoop.basin.y:0.#}, scoop spot c{best.x} r{best.y} ({bestD:0.0} tiles off), " +
                        $"cup up {scoop.cupUp}, keep {scoop.keepUp}, tip {scoop.tipUp}, dip {scoop.dipDepth * 100f:0} cm, lift {scoop.liftHeight * 100f:0} cm, {scoop.poursNeeded} pours");

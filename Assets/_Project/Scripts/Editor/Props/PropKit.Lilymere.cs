@@ -54,6 +54,10 @@ namespace Diorama.EditorTools
             Add(LotusStone());
             Add(WaterBall());
             Add(BasinWater());
+            // Step 12c: the cliff with the carved bowl and the fall from its lip.
+            Add(CliffBowl());
+            Add(BowlFall(false));
+            Add(BowlFall(true));
 
             WriteLilymereTheme(all["LagoonTree"], all["ReedClump"]);
             foreach (var r in all.Values) EditorUtility.SetDirty(r);
@@ -235,6 +239,90 @@ namespace Diorama.EditorTools
                     running ? PropMotion.Steam : PropMotion.None, running ? 0.06f : 0f),
             };
             return fall;
+        }
+
+        /// <summary>
+        /// Step 12c (Oct 27 notes: "mountains and an empty bowl kind of dent over it, and the waterfall on that is
+        /// frozen"): a rocky cliff, 2 x 1, about 2.5 tiles tall, with craggy shoulders and a carved empty bowl on top (a dry
+        /// cracked sand floor, a mossy rim) and a notch in its front lip where the fall leaves it. Front = +z (the player).
+        /// </summary>
+        static PropRecipe CliffBowl()
+        {
+            var cliff = Recipe("CliffBowl", new Vector2Int(2, 1), true, false, 2600);
+            cliff.palette = Palette(Sand, StiltWood, C("#8E9AA6"), LagoonMoss, LagoonWindow, C("#6F7B86"));
+            cliff.yawJitter = 0f;
+            cliff.scaleJitter = 0f;
+            cliff.resolution = 60;
+            cliff.pieces = new List<PropPiece>
+            {
+                Piece(PShape("CliffBowl_Rock",
+                    Box(new Vector3(0f, 1.25f, -0.05f), new Vector3(0.9f, 1.25f, 0.4f), 0.22f, 0f).Bumps(0.04f, 5f),
+                    Sphere(new Vector3(-0.78f, 1.95f, -0.05f), 0.42f, 0.15f),
+                    Sphere(new Vector3(0.8f, 1.7f, -0.1f), 0.46f, 0.15f),
+                    Sphere(new Vector3(0.66f, 0.55f, 0.18f), 0.38f, 0.12f),
+                    Sphere(new Vector3(-0.7f, 0.6f, 0.18f), 0.36f, 0.12f),
+                    // The carved bowl on top, and the notch in its front lip.
+                    Ell(new Vector3(0f, 2.56f, 0.02f), new Vector3(0.5f, 0.32f, 0.3f), 0.04f).Sub(),
+                    Box(new Vector3(0f, 2.42f, 0.36f), new Vector3(0.15f, 0.12f, 0.14f), 0.04f, 0.02f).Sub(),
+                    Floor(0f)), PropSlot.Stone),
+                Piece(PShape("CliffBowl_Floor",
+                    Ell(new Vector3(0f, 2.25f, 0.02f), new Vector3(0.42f, 0.035f, 0.24f), 0f).Bumps(0.012f, 16f)), PropSlot.Clay),
+                Piece(PShape("CliffBowl_Moss",
+                    Ell(new Vector3(-0.62f, 2.5f, -0.18f), new Vector3(0.28f, 0.06f, 0.18f), 0f),
+                    Ell(new Vector3(0.58f, 2.48f, -0.2f), new Vector3(0.3f, 0.05f, 0.16f), 0.03f),
+                    Ell(new Vector3(0.86f, 1.15f, 0.26f), new Vector3(0.14f, 0.24f, 0.1f), 0.03f)), PropSlot.Leaf),
+            };
+            return cliff;
+        }
+
+        /// <summary>
+        /// Step 12c: the fall from the cliff bowl's lip, 2 x 1 (drawn by ScoopPour over the cliff): a narrow sheet from the
+        /// notch down the cliff's front to a splash at its foot. Frozen = pale glassy ice with stopped droplets; running =
+        /// a teal sheet that sways, foam and mist at the foot.
+        /// </summary>
+        static PropRecipe BowlFall(bool running)
+        {
+            var fall = Recipe(running ? "BowlFallRunning" : "BowlFallFrozen", new Vector2Int(2, 1), false, false, 1600);
+            fall.palette = Palette(running ? LagoonTeal : Ice, StiltWood, TempleStone, LagoonMoss, C("#FFFFFF", 0.3f), running ? C("#F2FBFC") : C("#BFE6EC", 0.1f));
+            fall.yawJitter = 0f;
+            fall.scaleJitter = 0f;
+            fall.resolution = 56;
+            fall.spec = running ? 0.4f : 0.6f;
+            var sheet = new List<SdfPrimitive>
+            {
+                Ell(new Vector3(0f, 2.36f, 0.4f), new Vector3(0.17f, 0.07f, 0.1f), 0f),
+                Box(new Vector3(0f, 1.25f, 0.48f), new Vector3(0.16f, 1.1f, 0.05f), 0.05f, 0.04f).Bumps(running ? 0.01f : 0.02f, running ? 14f : 6f),
+                Ell(new Vector3(0f, 0.12f, 0.62f), new Vector3(0.34f, 0.12f, 0.22f), 0.08f),
+            };
+            var bits = new List<SdfPrimitive>();
+            if (running)
+            {
+                foreach (var x in new[] { -0.28f, 0f, 0.28f })
+                    bits.Add(Sphere(new Vector3(x, 0.2f, 0.7f), 0.12f, bits.Count == 0 ? 0f : 0.04f));
+            }
+            else
+            {
+                foreach (var (x, y, z) in new[] { (-0.26f, 1.7f, 0.56f), (0.24f, 1.25f, 0.58f), (-0.2f, 0.8f, 0.6f), (0.28f, 0.5f, 0.64f) })
+                    bits.Add(Ell(new Vector3(x, y, z), new Vector3(0.045f, 0.075f, 0.045f), bits.Count == 0 ? 0f : 0.005f));
+            }
+            fall.pieces = new List<PropPiece>
+            {
+                Piece(PShape(running ? "BowlFallRunning_Sheet" : "BowlFallFrozen_Sheet", sheet.ToArray()), PropSlot.Clay, running ? PropMotion.Sway : PropMotion.None, running ? 0.03f : 0f),
+                Piece(PShape(running ? "BowlFallRunning_Foam" : "BowlFallFrozen_Drops", bits.ToArray()), PropSlot.Accent,
+                    running ? PropMotion.Steam : PropMotion.None, running ? 0.06f : 0f),
+            };
+            return fall;
+        }
+
+        /// <summary>Step 12c: writes and bakes the cliff bowl and its two falls (the 12c setup; the full kit writes them too).</summary>
+        internal static void WriteCliffBowl()
+        {
+            foreach (var r in new[] { CliffBowl(), BowlFall(false), BowlFall(true) })
+            {
+                EditorUtility.SetDirty(r);
+                AssetDatabase.SaveAssets();
+                PropBaker.Bake(r);
+            }
         }
 
         /// <summary>Stone basin, 2 x 2: a round stone ring with a mossy lip and a dry cracked sand floor (11b fills it).</summary>

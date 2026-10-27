@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 374f6b77629fa034d93d2a7945ac7885, type: 3}
+  m_Name: BowlFallFrozen
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.PropRecipe
+  pieces:
+  - shape: {fileID: 11400000, guid: 700a6d83eeabf94479c0d5d4c25271da, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 0
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 0
+  - shape: {fileID: 11400000, guid: c8eb2d09b3ba5334e8f8ef16744961d5, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 5
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 0
+  palette:
+  - restored: {r: 0.8783607, g: 0.99426556, b: 1, a: 1}
+    unrestored: {r: 0.84705883, g: 0.94509804, b: 0.95686275, a: 1}
+    glow: 0.15
+  - restored: {r: 0.58325493, g: 0.43388155, b: 0.29414514, a: 1}
+    unrestored: {r: 0.54509807, g: 0.41568628, b: 0.2901961, a: 1}
+    glow: 0
+  - restored: {r: 0.7053609, g: 0.7720785, b: 0.73249274, a: 1}
+    unrestored: {r: 0.6627451, g: 0.72156864, b: 0.6901961, a: 1}
+    glow: 0
+  - restored: {r: 0.46650323, g: 0.6461961, b: 0.3793255, a: 1}
+    unrestored: {r: 0.43137255, g: 0.6039216, b: 0.36862746, a: 1}
+    glow: 0
+  - restored: {r: 1, g: 1, b: 1, a: 1}
+    unrestored: {r: 1, g: 1, b: 1, a: 1}
+    glow: 0.3
+  - restored: {r: 0.7901216, g: 0.97559667, b: 0.99027455, a: 1}
+    unrestored: {r: 0.7490196, g: 0.9019608, b: 0.9254902, a: 1}
+    glow: 0.1
+  tips:
+    on: 0
+    onSlot: 0
+    tipSlot: 0
+    at: 0
+    byHeight: 0
+  spec: 0.6
+  outline: 0.022
+  footprint: {x: 2, y: 1}
+  blocksWalking: 0
+  randomYaw: 0
+  yawJitter: 0
+  scaleJitter: 0
+  resolution: 56
+  triangleBudget: 1600
+  bakedMesh: {fileID: 4300000, guid: bf55a444cc9b3e348a3baf68a2776f76, type: 2}

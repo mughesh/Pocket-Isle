@@ -371,9 +371,13 @@ namespace Diorama
             else
             {
                 Vector3 side = frame * Vector3.right * ((_request.spread > 0f ? _request.spread : bothSpread) * 0.5f);
-                Pose(a, point + (b != null ? (a.left ? -side : side) : Vector3.zero), frame, t, scale, alpha, 0f,
-                    grab.has ? grab.grab : -1f, grab.release, release);
-                if (b != null) Pose(b, point + (b.left ? -side : side), frame, t, scale, alpha);
+                Vector3 sideA = b != null ? (a.left ? -side : side) : Vector3.zero;
+                Pose(a, point + sideA, frame, t, scale, alpha, 0f,
+                    grab.has ? grab.grab : -1f, grab.release, release.HasValue ? release.Value + sideA : (Vector3?)null);
+                // Step 12c: the second hand of a two-hand carry travels with the first (it used to stay at the source).
+                Vector3 sideB = b != null ? (b.left ? -side : side) : Vector3.zero;
+                if (b != null) Pose(b, point + sideB, frame, t, scale, alpha, 0f,
+                    grab.has ? grab.grab : -1f, grab.release, release.HasValue ? release.Value + sideB : (Vector3?)null);
                 else Hidden(a == _left ? _right : _left);
             }
 
@@ -551,7 +555,10 @@ namespace Diorama
             if (_grabs.TryGetValue(c, out var known)) return known;
             var g = _right ?? _left;
             var result = new Grab();
-            if (g != null && c.anchor == GhostAnchor.Island)
+            if (c.carryFrom >= 0f && c.carryTo > c.carryFrom)
+                // Step 12c: a cupped carry marks its own start and end (no thumb-index gap to read).
+                result = new Grab { has = true, grab = c.carryFrom * c.Duration, release = c.carryTo * c.Duration };
+            else if (g != null && c.anchor == GhostAnchor.Island)
             {
                 var gaps = new List<float>();
                 const float step = 1f / 30f;

@@ -113,7 +113,7 @@ namespace Diorama.EditorTools
         {
             (KGate, "ReturnGate", false), (KShrine, HearthShrines.RecipeName, false), (KHut, "StiltHut", false),
             (KPlank, "PlankBridge", false), (KReeds, "ReedClump", false), (KLily, "LilyPad", false), (KLotus, "Lotus", false),
-            (KWaterfall, "WaterfallFrozen", false), (KBasin, "StoneBasin", false), (KTemple, "LakeTemple", false),
+            (KWaterfall, "CliffBowl", false), (KBasin, "StoneBasin", false), (KTemple, "LakeTemple", false),
             (KStone, "SteppingStone", false), (KSign, "Signpost", false), (KFence, "Fence", false),
             (KChannelGap, "ChannelGap", false), (KBedGap, "BedGap", false),
         };

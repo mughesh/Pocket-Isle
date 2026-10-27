@@ -5780,7 +5780,7 @@ MonoBehaviour:
   fx: {fileID: 1078587927}
   reach: 6
   lessonLine: lm.scoop
-  ghostClip: cup_scoop
+  ghostClip: cup_carry
   ghostScale: 1
   lessonChip: Scoop!
   counterLabel: Pours
@@ -5794,14 +5794,24 @@ MonoBehaviour:
   templeDoor: {x: 17, y: 10}
   ballRecipe: {fileID: 11400000, guid: 395d1a92112a4324ba6bc3853dc51ea0, type: 2}
   basinWaterRecipe: {fileID: 11400000, guid: 68ed3de8379ca0d4ebb413025618c7ac, type: 2}
-  runningRecipe: {fileID: 11400000, guid: 0224f4199d164274db9fb10a4591bccb, type: 2}
+  runningRecipe: {fileID: 11400000, guid: 054ef21f32cfde8479628da738c2a0e2, type: 2}
+  frozenRecipe: {fileID: 11400000, guid: 49a4abb98b15fe64d81b1745d7de7e66, type: 2}
+  bowl: {x: 30.5, y: 7}
+  bowlFloor: 2.26
+  bowlRim: 2.5
+  bowlWaterScale: 0.52
+  waterSheetMaterial: {fileID: 2100000, guid: cb028ab75689499449db79890aa9ac31, type: 2}
+  palmPool: 0.026
+  pairWide: 0.034
+  pairPast: 0.028
+  sheetDome: 0.008
   cupUp: 0.55
   keepUp: 0.1
   tipUp: -0.35
   dipDepth: 0.01
   liftHeight: 0.02
   scoopReach: 14
-  basinRadius: 1.2
+  basinRadius: 1
   basinAbove: 0.3
   poursNeeded: 2
   ballSize: 0.03

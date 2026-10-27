@@ -39,7 +39,7 @@ namespace Diorama
         public static readonly string[] Names =
         {
             "poke", "grab_rim_slide", "grab_drop", "thumb_swipe_forward", "thumb_tap", "pinch", "grab_toss", "grab_flick", "palm_hover", "hands_up",
-            "finger_flick", "palm_sweep", "pinch_pull", "cup_hands", "palm_carry", "pinch_drop", "pinch_lift", "cup_scoop",
+            "finger_flick", "palm_sweep", "pinch_pull", "cup_hands", "palm_carry", "pinch_drop", "pinch_lift", "cup_scoop", "cup_carry",
         };
 
         /// <summary>Builds a placeholder clip from the right hand's rest pose (joint-local), or null for an unknown name.</summary>
@@ -59,6 +59,12 @@ namespace Diorama
             clip.holdEnd = 0.25f;
             // Step 11d: the pinch pick-ups put the pinch point (thumb + index) on the object.
             clip.keyPinch = name == "pinch_drop" || name == "pinch_lift";
+            // Step 12c: the cupped carry is pinned on the pool at the dip and on the bowl just before it tips.
+            if (name == "cup_carry")
+            {
+                clip.carryFrom = 0.3f;
+                clip.carryTo = 0.74f;
+            }
             int n = Mathf.CeilToInt(seconds * clip.fps) + 1;
             for (int f = 0; f < n; f++)
             {
@@ -401,6 +407,22 @@ namespace Diorama
                         Open(0.36f, new Vector3(0f, -0.012f, 0f), f, up, 0.36f), Open(0.58f, new Vector3(0f, 0.06f, 0.01f), f, up, 0.36f),
                         Open(0.7f, new Vector3(0f, 0.065f, 0.02f), f, up, 0.36f), Open(0.86f, new Vector3(0.01f, 0.06f, 0.02f), f, tip, 0.3f),
                         Open(1f, new Vector3(0f, 0.05f, -0.02f), f, up, 0.3f),
+                    };
+                }
+                case "cup_carry":
+                {
+                    // Step 12c: Lilymere's scoop carried to the cliff bowl. Both hands (mirrored, side by side), palms up
+                    // and cupped: they dip into the inlet, lift out together, carry (the ghost moves them from the inlet
+                    // to the bowl between 0.3 and 0.74), then tip over (rolling outward) to pour, and rise again.
+                    seconds = 4.4f;
+                    keyTime = 0.3f;
+                    Vector3 f = new Vector3(0f, 0.1f, 1f), up = Vector3.down, tip = new Vector3(1f, 0.35f, 0f);
+                    return new List<Key>
+                    {
+                        Open(0f, new Vector3(0f, 0.05f, -0.02f), f, up, 0.3f), Open(0.16f, new Vector3(0f, -0.012f, 0f), f, up, 0.34f),
+                        Open(0.3f, new Vector3(0f, -0.012f, 0f), f, up, 0.36f), Open(0.42f, new Vector3(0f, 0.05f, 0f), f, up, 0.36f),
+                        Open(0.74f, new Vector3(0f, 0.05f, 0f), f, up, 0.36f), Open(0.86f, new Vector3(0.01f, 0.045f, 0f), f, tip, 0.3f),
+                        Open(0.93f, new Vector3(0.01f, 0.045f, 0f), f, tip, 0.3f), Open(1f, new Vector3(0f, 0.06f, 0f), f, up, 0.3f),
                     };
                 }
                 case "hands_up":
