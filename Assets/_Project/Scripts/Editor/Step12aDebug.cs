@@ -80,6 +80,16 @@ namespace Diorama.EditorTools
             if (o != null) o.DebugFinish();
         }
 
+        /// <summary>Shows the Spirit's trail now and logs its goal.</summary>
+        public static void Trail()
+        {
+            var t = Object.FindFirstObjectByType<SpiritTrail>();
+            if (t == null) return;
+            Debug.Log($"[Step12aDebug] quick {QuickJourney.Active}, title {TitleScreen.Showing}, opening {Opening.InProgress}, tutorial {Onboarding.Running}, menu {GameMenu.IsOpen}, swap {SceneSwap.IsBusy}/{SceneSwap.IsInside}.");
+            bool on = t.Show("bridge");
+            Debug.Log($"[Step12aDebug] Trail {(on ? "on" : "off")}, goal {(t.Goal.HasValue ? $"c{t.Goal.Value.x} r{t.Goal.Value.y}" : "none")}.");
+        }
+
         public static void State()
         {
             var e = Explorer;

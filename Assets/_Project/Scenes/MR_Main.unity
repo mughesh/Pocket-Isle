@@ -1777,6 +1777,7 @@ GameObject:
   - component: {fileID: 374318554}
   - component: {fileID: 374318558}
   - component: {fileID: 374318559}
+  - component: {fileID: 374318560}
   m_Layer: 0
   m_Name: Step2 Gesture Test
   m_TagString: Untagged
@@ -1906,6 +1907,29 @@ MonoBehaviour:
   appearStagger: 0.04
   walkOnAhead: 6
   intensity: 1.4
+--- !u!114 &374318560
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 374318553}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 994acc426997ace4c983f20d0746deea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.SpiritTrail
+  explorer: {fileID: 374318554}
+  island: {fileID: 270959109}
+  encounters: {fileID: 1499891275}
+  gates: {fileID: 1858573327}
+  onboarding: {fileID: 1380201671}
+  material: {fileID: 2100000, guid: dc3915bdb04a1cb4eb4760821e23e7b7, type: 2}
+  stillSeconds: 12
+  showSeconds: 20
+  maxTiles: 14
+  tileSize: 0.78
+  intensity: 1.5
 --- !u!114 &374903275 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8702425413754196321, guid: 0a7d2469f24041c4284c66706f84c45e, type: 3}

@@ -96,6 +96,9 @@ namespace Diorama
 
         public bool Reachable => explorer != null && Mathf.Max(Mathf.Abs(explorer.Tile.x - HomeTile.x), Mathf.Abs(explorer.Tile.y - HomeTile.y)) <= reach + 0.5f;
 
+        /// <summary>Step 12a: the map tile it sits on (the Spirit's trail goes there).</summary>
+        public Vector2 Home => HomeTile;
+
         /// <summary>Step 12a: a tile is within this moment's reach (the explorer's smart step stops on entering it).</summary>
         public bool InReach(Vector2Int tile) => Mathf.Max(Mathf.Abs(tile.x - HomeTile.x), Mathf.Abs(tile.y - HomeTile.y)) <= reach + 0.5f;
 

@@ -75,6 +75,19 @@ namespace Diorama.EditorTools
                 log.Append("\n  Spirit: poke / look + pinch repeats the objective");
             }
             else log.Append("\n  Lantern Spirit: MISSING");
+            var explorer = Object.FindFirstObjectByType<GestureTestPiece>(FindObjectsInactive.Include);
+            if (explorer != null)
+            {
+                var trail = explorer.GetComponent<SpiritTrail>();
+                if (trail == null) trail = Undo.AddComponent<SpiritTrail>(explorer.gameObject);
+                trail.explorer = explorer;
+                trail.island = explorer.island;
+                trail.encounters = Object.FindFirstObjectByType<EncounterDirector>(FindObjectsInactive.Include);
+                trail.gates = Object.FindFirstObjectByType<ShardGates>(FindObjectsInactive.Include);
+                trail.onboarding = Object.FindFirstObjectByType<Onboarding>(FindObjectsInactive.Include);
+                trail.material = gold;
+                log.Append($"\n  Spirit's trail: {(trail.encounters != null && trail.gates != null && trail.onboarding != null ? "wired" : "SOMETHING MISSING")}");
+            }
             var settings = Object.FindFirstObjectByType<SettingsBoard>(FindObjectsInactive.Include);
             if (settings != null)
             {
