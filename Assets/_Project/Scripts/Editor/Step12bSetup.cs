@@ -31,11 +31,29 @@ namespace Diorama.EditorTools
             }
             var log = new StringBuilder("[Step12b] MR_Main set up:");
             ShardColours(log);
+            Focus(log);
             EditorSceneManager.MarkSceneDirty(active);
             EditorSceneManager.SaveScene(active);
             AssetDatabase.SaveAssets();
             IslandBuilder.RebuildAll();
             Debug.Log(log.ToString());
+        }
+
+        /// <summary>A1: one focus lock for every hand moment, next to the explorer.</summary>
+        static void Focus(StringBuilder log)
+        {
+            var explorer = Object.FindFirstObjectByType<GestureTestPiece>(FindObjectsInactive.Include);
+            if (explorer == null)
+            {
+                log.Append("\n  focus lock: no explorer (MISSING)");
+                return;
+            }
+            var fl = explorer.GetComponent<FocusLock>();
+            if (fl == null) fl = Undo.AddComponent<FocusLock>(explorer.gameObject);
+            fl.explorer = explorer;
+            fl.island = explorer.island;
+            fl.window = explorer.window;
+            log.Append($"\n  focus lock: {(fl.window != null ? "on" : "no window (MISSING)")}");
         }
 
         /// <summary>A6: the wind shard, its statue rim, its bursts go green.</summary>

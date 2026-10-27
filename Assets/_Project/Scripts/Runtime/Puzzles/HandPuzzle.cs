@@ -96,6 +96,34 @@ namespace Diorama
 
         public bool Reachable => explorer != null && Mathf.Max(Mathf.Abs(explorer.Tile.x - HomeTile.x), Mathf.Abs(explorer.Tile.y - HomeTile.y)) <= reach + 0.5f;
 
+        /// <summary>
+        /// Step 12b: the map points (column, row) the view should hold while this moment is active: its home and every
+        /// gold-marked object now, plus <see cref="ExtraFrame"/>.
+        /// </summary>
+        public void FramePoints(List<Vector2> into)
+        {
+            into.Add(HomeTile);
+            if (island == null || island.map == null || island.Content == null) return;
+            for (int i = 0; i < MarkCount; i++)
+                if (Mark(i, out var w, out _))
+                {
+                    var m = WorldToMap(w);
+                    into.Add(new Vector2(m.x, m.z));
+                }
+            ExtraFrame(into);
+        }
+
+        /// <summary>Step 12b: more points to frame (the scoop's pool and the basin both).</summary>
+        protected virtual void ExtraFrame(List<Vector2> into)
+        {
+        }
+
+        /// <summary>Step 12b: the shared focus lock frames this moment (false = it holds the view itself: the lotus garden).</summary>
+        public virtual bool FocusLockable => true;
+
+        /// <summary>Step 12b: workable now in principle (not solved, here, available, no battle).</summary>
+        public bool ActiveHere => !IsSolved && Here && Available && explorer != null && !explorer.Locked;
+
         /// <summary>Step 12a: the map tile it sits on (the Spirit's trail goes there).</summary>
         public Vector2 Home => HomeTile;
 

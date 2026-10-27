@@ -685,6 +685,10 @@ MonoBehaviour:
   island: {fileID: 270959109}
   fontSize: 0.14
   chatterScale: 0.86
+  drawOverProps: 1
+  maxFromSpirit: 0.14
+  deadband: 0.006
+  towardPlayer: 0.015
   objectiveGold: {r: 0.93, g: 0.66, b: 0.12, a: 1}
   maxWidth: 0.2
   padding: {x: 0.012, y: 0.009}
@@ -1778,6 +1782,7 @@ GameObject:
   - component: {fileID: 374318558}
   - component: {fileID: 374318559}
   - component: {fileID: 374318560}
+  - component: {fileID: 374318561}
   m_Layer: 0
   m_Name: Step2 Gesture Test
   m_TagString: Untagged
@@ -1930,6 +1935,23 @@ MonoBehaviour:
   maxTiles: 14
   tileSize: 0.78
   intensity: 1.5
+--- !u!114 &374318561
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 374318553}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: beb191e7288dc0340bb54e88dbb880ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.FocusLock
+  explorer: {fileID: 374318554}
+  island: {fileID: 270959109}
+  window: {fileID: 270959113}
+  margin: 2.5
+  moveAfter: 0.25
 --- !u!114 &374903275 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8702425413754196321, guid: 0a7d2469f24041c4284c66706f84c45e, type: 3}

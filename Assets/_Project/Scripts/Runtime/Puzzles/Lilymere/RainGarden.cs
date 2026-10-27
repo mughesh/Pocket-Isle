@@ -398,6 +398,9 @@ namespace Diorama
         Vector2 _focusAt;
         GuideRings _stand;
 
+        /// <summary>Step 12b: the garden keeps its own settle (with the stand-here tile); the shared focus lock skips it.</summary>
+        public override bool FocusLockable => false;
+
         /// <summary>The window holds the garden while the explorer is at it (step 11d).</summary>
         public bool Settled => _settled;
 

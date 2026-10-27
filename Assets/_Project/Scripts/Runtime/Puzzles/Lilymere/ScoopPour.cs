@@ -105,6 +105,13 @@ namespace Diorama
         protected override int MarkCount => 2;
         protected override bool MarksOn => base.MarksOn && !_pouring && !_breaking;
 
+        /// <summary>Step 12b: the focus lock holds both the pool and the basin.</summary>
+        protected override void ExtraFrame(System.Collections.Generic.List<Vector2> into)
+        {
+            into.Add(scoopSpot);
+            into.Add(basin);
+        }
+
         protected override bool Mark(int i, out Vector3 world, out float tiles)
         {
             world = default;
