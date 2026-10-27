@@ -1,0 +1,107 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8376f4ae30d857a45a9d450ac2b7be0f, type: 3}
+  m_Name: TowerHall
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.WorldMap
+  layout: 'PPPPPPPPPP
+
+    PPPPPPPPPP
+
+    PPPPPPPPPP
+
+    PPPPPPPPPP
+
+    PPPPPPPPPP
+
+    PPPPPPPPPP
+
+    PPPPPPPPPP
+
+    PPPPPPPPPP
+
+    PPPPPPPPPP
+
+    PPPPPPPPPP'
+  tileSize: 0.05
+  capHeight: 0.006
+  seed: 1234
+  startTile: {x: 4, y: 8}
+  props: 'qwwwwwW.wr
+
+    v.B.....Bv
+
+    v...p....v
+
+    v........v
+
+    v.......Kv
+
+    ..P....P..
+
+    K.........
+
+    ..........
+
+    ..........
+
+    ....D.....'
+  propLegend:
+  - key: w
+    recipe: {fileID: 11400000, guid: 469af439dc9844b43b49a2eb1228aae3, type: 2}
+    turned: 0
+    yaw: 0
+  - key: v
+    recipe: {fileID: 11400000, guid: 469af439dc9844b43b49a2eb1228aae3, type: 2}
+    turned: 1
+    yaw: 0
+  - key: q
+    recipe: {fileID: 11400000, guid: dd5ab2f8a383ae64abd705b834ce4a65, type: 2}
+    turned: 0
+    yaw: 0
+  - key: r
+    recipe: {fileID: 11400000, guid: 885025c25edf3e24a83a3e8ad388f0c7, type: 2}
+    turned: 0
+    yaw: 0
+  - key: W
+    recipe: {fileID: 11400000, guid: e66fa6e36bc72c04b93b360b66d27ffa, type: 2}
+    turned: 0
+    yaw: 0
+  - key: P
+    recipe: {fileID: 11400000, guid: 5fc848567c327fb4a953bf10a6c0eecb, type: 2}
+    turned: 0
+    yaw: 0
+  - key: B
+    recipe: {fileID: 11400000, guid: 4efb93be2e99e0e488545beda32eb932, type: 2}
+    turned: 0
+    yaw: 0
+  - key: K
+    recipe: {fileID: 11400000, guid: d74498248aebf544ebd00b5a9e27a0d6, type: 2}
+    turned: 0
+    yaw: 0
+  - key: p
+    recipe: {fileID: 11400000, guid: 084110b68c1368144a2f6b00b0fc5a23, type: 2}
+    turned: 0
+    yaw: 0
+  - key: D
+    recipe: {fileID: 11400000, guid: 97e5bf0c0f9d1544ab8936b213f11cd2, type: 2}
+    turned: 0
+    yaw: 0
+  viewZoom: 1.3
+  theme: {fileID: 11400000, guid: 9a6dc011c86f7164eb8ad1c735cdd8f7, type: 2}
+  grassTable: {fileID: 0}
+  waterTable: {fileID: 0}
+  zones: 
+  zoneLegend: []
+  realm: 
+  arrivalLine: 
+  gates: []
+  landmarks: []

@@ -221,7 +221,7 @@ Step 10b, the hand moments (lesson lines stay pinned as a chip until the moment 
 - `gw.meet.zeppelope` · once (step 10c: the rare Zeppelope)
   - Spirit: A Zeppelope! It's drifting... it never lands!
 
-Step 10d (lines written; the tower hall that says them comes in part two):
+Step 10d / 10e, the tower hall:
 - `gw.keeper.knots` · → galeowl (lesson in the tower hall; chip "Pull apart!")
   - Spirit: It's all tangled up! Pull the knots apart.
 - `gw.keeper.meet` · once · → galeowl (all three knots undone: it shakes free and flares up)
@@ -235,6 +235,8 @@ Step 10d (lines written; the tower hall that says them comes in part two):
   - Galeowl: I held the wind so nothing else would fly away.
   - Galeowl: But a still world is a stuck world.
   - Galeowl: Thank you, guardian. Let it blow.
+- `gw.shard.take` · once · → windShard (step 10e: the wind shard floats out of the window to the player)
+  - Spirit: The wind shard! Grab it.
 - `gw.restored` · once (the restoration wave from the tower)
   - Spirit: Feel that? Galewick is breathing again!
 
@@ -243,6 +245,8 @@ Step 10d (lines written; the tower hall that says them comes in part two):
   - Spirit: Put the shard in the statue. Something's calling it.
 - `hub.shard.placed` · once (the shard locks in): Spirit: I... feel warmer. Strange.
 - `hub.shard.more` · once: Spirit: Two more shards are out there.
+- `statue.two` · once (step 10e: the second shard locks into the statue)
+  - Spirit: Two pieces home. It's almost awake...
 - `statue.shard.1`
   - Spirit: The statue's warmer. And I feel... brighter?
 - `statue.shard.2`

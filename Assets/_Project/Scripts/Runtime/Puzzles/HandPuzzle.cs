@@ -78,7 +78,7 @@ namespace Diorama
         // ---- where ----
 
         /// <summary>Its map shows outside (not inside an interior, not mid swap).</summary>
-        public bool Here => island != null && map != null && island.world == map && !SceneSwap.IsInside && !SceneSwap.IsBusy;
+        public virtual bool Here => island != null && map != null && island.world == map && !SceneSwap.IsInside && !SceneSwap.IsBusy;
 
         public bool InView => Here && (window == null || !window.IsZoomed) && island.FootprintContains(island.TileToLocal(HomeTile, island.Content.capHeight));
 
@@ -166,6 +166,10 @@ namespace Diorama
         /// <summary>Step 9h: where the lesson's grab ghost lets go (a carry's spot); null = the ghost plays at the piece as before.</summary>
         public virtual Vector3? GhostDropPoint => null;
 
+        /// <summary>Step 10e: the ghost shows both hands (mirrored), this far apart (world metres; 0 = the ghost's default).</summary>
+        protected virtual bool GhostBothHands => false;
+        protected virtual float GhostSpread => 0f;
+
         /// <summary>Whether it can be worked at all right now (the statue socket: only while a shard is held).</summary>
         protected virtual bool Available => true;
 
@@ -212,7 +216,7 @@ namespace Diorama
                 // A piece you carry: the ghost grabs it and lets go over its spot (step 9h); others play at the piece.
                 if (GhostDropPoint.HasValue)
                     ghosts.Show(ghostClip, GhostPlace.AtTarget, "puzzleTo:" + id, ghostScale, DominantHand.Left, false, 0f, "puzzle:" + id);
-                else ghosts.Show(ghostClip, GhostPlace.AtTarget, "puzzle:" + id, ghostScale, DominantHand.Left, false);
+                else ghosts.Show(ghostClip, GhostPlace.AtTarget, "puzzle:" + id, ghostScale, DominantHand.Left, GhostBothHands, GhostSpread);
             }
             Debug.Log($"[{GetType().Name}] {id}: lesson ({lessonLine}, ghost {(string.IsNullOrEmpty(ghostClip) ? "none" : ghostClip)}).");
         }

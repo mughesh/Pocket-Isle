@@ -17,6 +17,31 @@ namespace Diorama.EditorTools
         /// <summary>The holder's cups (shape units, holder origin), left to right as the player sees them: fire, water, wind.</summary>
         public static readonly Vector3[] HolderCups = { new Vector3(0.62f, 0.16f, 0f), new Vector3(0f, 0.16f, 0f), new Vector3(-0.62f, 0.16f, 0f) };
 
+        /// <summary>Step 10e: the wind shard, a slim teal crystal with a swirl of wind round it (drawn like the fire shard).</summary>
+        public static PropRecipe WriteWindShardProp()
+        {
+            DioramaSceneSetup.EnsureFolder(Root);
+            DioramaSceneSetup.EnsureFolder($"{Root}/Shapes");
+            var shard = Recipe("WindShard", new Vector2Int(1, 1), false, false, 1000);
+            shard.palette = Palette(Clay, Wood, Stone, Leaf, new PropColor(Hex("#4FD8C0"), Hex("#4FD8C0"), 1.2f), new PropColor(Hex("#D2FFF2"), Hex("#D2FFF2"), 0.9f));
+            shard.yawJitter = shard.scaleJitter = 0f;
+            shard.resolution = 26;
+            shard.outline = 0.03f;
+            shard.pieces = new List<PropPiece>
+            {
+                Piece(PShape("WindShard_Core",
+                    Cone(new Vector3(0f, 0f, 0f), new Vector3(0f, 0.62f, 0f), 0.16f, 0.12f, 0f),
+                    Cone(new Vector3(0f, 0.62f, 0f), new Vector3(0f, 1.05f, 0f), 0.12f, 0.01f, 0.02f),
+                    Cone(new Vector3(0f, 0f, 0f), new Vector3(0f, -0.34f, 0f), 0.16f, 0.02f, 0.02f)), PropSlot.Glow, PropMotion.Flicker, 0.003f),
+                Piece(PShape("WindShard_Swirl",
+                    Torus(new Vector3(0f, 0.3f, 0f), 0.26f, 0.028f, new Vector3(72f, 0f, 18f), 0f),
+                    Plane(new Vector3(0.05f, 0f, 0f), Vector3.left, 0.02f),
+                    Torus(new Vector3(0f, 0.55f, 0f), 0.2f, 0.024f, new Vector3(68f, 0f, -22f), 0f)), PropSlot.Accent),
+            };
+            EditorUtility.SetDirty(shard);
+            return shard;
+        }
+
         public static Dictionary<string, PropRecipe> WriteShardProps()
         {
             DioramaSceneSetup.EnsureFolder(Root);

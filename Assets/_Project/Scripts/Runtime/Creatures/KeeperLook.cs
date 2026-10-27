@@ -16,9 +16,9 @@ namespace Diorama
         [Range(0f, 1f)] public float calm;
         [Tooltip("Whole crown brightness (phase 2 > 1).")]
         public float crownBoost = 1f;
-
-        static readonly Color AshFur = new Color(0.55f, 0.52f, 0.5f);
-        static readonly Color AshBelly = new Color(0.8f, 0.78f, 0.74f);
+        [Tooltip("Step 10e: the frightened body and belly colours (Hearthstag: ash; Galeowl: storm grey).")]
+        public Color frightenedFur = new Color(0.55f, 0.52f, 0.5f);
+        public Color frightenedBelly = new Color(0.8f, 0.78f, 0.74f);
         static readonly Color DullCrystal = new Color(0.55f, 0.2f, 0.14f);
 
         CreatureView _view;
@@ -93,19 +93,19 @@ namespace Diorama
                 }
                 else if (i == 0)
                 {
-                    s.baseColor = Color.Lerp(AshFur, c.baseColor, calm);
-                    s.top = Color.Lerp(AshFur, c.top, calm);
+                    s.baseColor = Color.Lerp(frightenedFur, c.baseColor, calm);
+                    s.top = Color.Lerp(frightenedFur, c.top, calm);
                     if (c.patchColors != null)
                     {
                         s.patchColors = (Color[])c.patchColors.Clone();
-                        for (int p = 0; p < s.patchColors.Length; p++) s.patchColors[p] = Color.Lerp(AshBelly, c.patchColors[p], calm);
+                        for (int p = 0; p < s.patchColors.Length; p++) s.patchColors[p] = Color.Lerp(frightenedBelly, c.patchColors[p], calm);
                     }
                 }
                 else if (_view.pieces[i].renderer != null && _view.pieces[i].renderer.name.StartsWith("Part_"))
                 {
-                    s.baseColor = s.top = Color.Lerp(AshFur, c.baseColor, calm);
-                    s.tipColor = Color.Lerp(AshBelly, c.tipColor, calm);
-                    s.bellyColor = Color.Lerp(AshBelly, c.bellyColor, calm);
+                    s.baseColor = s.top = Color.Lerp(frightenedFur, c.baseColor, calm);
+                    s.tipColor = Color.Lerp(frightenedBelly, c.tipColor, calm);
+                    s.bellyColor = Color.Lerp(frightenedBelly, c.bellyColor, calm);
                 }
                 _view.pieces[i].style = s;
             }

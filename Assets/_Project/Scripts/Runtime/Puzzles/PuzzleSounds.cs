@@ -6,7 +6,7 @@ namespace Diorama
     public static class PuzzleSounds
     {
         const int Rate = 44100;
-        static AudioClip _thud, _puff, _whoosh, _rumble, _breeze;
+        static AudioClip _thud, _puff, _whoosh, _rumble, _breeze, _twang, _hoot;
 
         /// <summary>A heavy wooden thud: low knock plus a short noisy body.</summary>
         public static AudioClip Thud => _thud != null ? _thud : _thud = Make("Puzzle Thud", 0.55f, (t, n) =>
@@ -40,6 +40,28 @@ namespace Diorama
             return env * (n * 0.5f + whistle);
         });
 
+        /// <summary>Step 10e: a knot snapping on Galeowl, a plucked string that bends down and rings out.</summary>
+        public static AudioClip Twang => _twang != null ? _twang : _twang = Make("Puzzle Twang", 0.9f, (t, n) =>
+        {
+            float f0 = 196f * (1f + 0.35f * Mathf.Exp(-t * 30f));
+            float ph = 2f * Mathf.PI * f0 * t;
+            float body = Mathf.Sin(ph) + 0.5f * Mathf.Sin(2f * ph) + 0.25f * Mathf.Sin(3f * ph);
+            float pluck = n * Mathf.Exp(-t * 60f);
+            return Mathf.Exp(-t * 5f) * body * 0.55f + pluck * 0.6f;
+        });
+
+        /// <summary>Step 10e: a calmed Galeowl poked, a soft two-note "hoo-hoo".</summary>
+        public static AudioClip Hoot => _hoot != null ? _hoot : _hoot = Make("Puzzle Hoot", 0.85f, (t, n) =>
+        {
+            float a = Mathf.Clamp01(t / 0.32f), b = Mathf.Clamp01((t - 0.4f) / 0.42f);
+            float env1 = t < 0.32f ? Mathf.Sin(Mathf.PI * a) : 0f;
+            float env2 = t >= 0.4f ? Mathf.Sin(Mathf.PI * b) : 0f;
+            float f1 = 420f * (1f - 0.06f * a), f2 = 380f * (1f - 0.1f * b);
+            float s1 = Mathf.Sin(2f * Mathf.PI * f1 * t) + 0.2f * Mathf.Sin(4f * Mathf.PI * f1 * t);
+            float s2 = Mathf.Sin(2f * Mathf.PI * f2 * t) + 0.2f * Mathf.Sin(4f * Mathf.PI * f2 * t);
+            return 0.6f * (env1 * s1 + env2 * s2) + 0.04f * n * (env1 + env2);
+        });
+
         static AudioClip Make(string name, float seconds, System.Func<float, float, float> f)
         {
             int count = (int)(Rate * seconds);
@@ -58,6 +80,6 @@ namespace Diorama
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void ResetStatics() => _thud = _puff = _whoosh = _rumble = _breeze = null;
+        static void ResetStatics() => _thud = _puff = _whoosh = _rumble = _breeze = _twang = _hoot = null;
     }
 }

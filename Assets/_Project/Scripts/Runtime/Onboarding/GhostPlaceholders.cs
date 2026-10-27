@@ -39,7 +39,7 @@ namespace Diorama
         public static readonly string[] Names =
         {
             "poke", "grab_rim_slide", "grab_drop", "thumb_swipe_forward", "thumb_tap", "pinch", "grab_toss", "grab_flick", "palm_hover", "hands_up",
-            "finger_flick", "palm_sweep",
+            "finger_flick", "palm_sweep", "pinch_pull",
         };
 
         /// <summary>Builds a placeholder clip from the right hand's rest pose (joint-local), or null for an unknown name.</summary>
@@ -279,6 +279,27 @@ namespace Diorama
                         Point(0f, new Vector3(0.045f, 0.03f, -0.02f)), Point(0.3f, new Vector3(0.045f, 0.03f, 0f)),
                         Point(0.42f, new Vector3(-0.045f, 0.03f, 0f)), Point(0.55f, new Vector3(-0.05f, 0.03f, -0.01f)),
                         Point(0.8f, new Vector3(0f, 0.04f, -0.06f)), Point(1f, new Vector3(0.045f, 0.03f, -0.02f)),
+                    };
+                }
+                case "pinch_pull":
+                {
+                    // Step 10e: a knot on Galeowl. Shown with both hands (mirrored): each pinches a loose end beside the
+                    // knot, then they pull apart (~7 cm each, more than the 12 cm that snaps it) and let go.
+                    seconds = 2.4f;
+                    keyJoint = HandJointId.HandIndexTip;
+                    keyTime = 0.36f;
+                    Vector3 f = new Vector3(-0.45f, -0.35f, 1f), d = new Vector3(0f, 1f, 0.3f);
+                    Key P(float t, Vector3 p, float k) => new Key
+                    {
+                        t = t, pos = p, fingers = f, dorsal = d,
+                        thumb = Mathf.Lerp(0.1f, 0.6f, k), index = Mathf.Lerp(0.22f, 0.55f, k), middle = 0.45f, ring = 0.55f, pinky = 0.6f,
+                        swing = Mathf.Lerp(0.6f, -0.2f, k),
+                    };
+                    return new List<Key>
+                    {
+                        P(0f, new Vector3(0.01f, 0.025f, -0.02f), 0f), P(0.24f, new Vector3(0f, 0f, 0f), 0f), P(0.36f, Vector3.zero, 1f),
+                        P(0.68f, new Vector3(0.075f, 0.01f, -0.02f), 1f), P(0.8f, new Vector3(0.08f, 0.012f, -0.02f), 0f),
+                        P(1f, new Vector3(0.01f, 0.025f, -0.02f), 0f),
                     };
                 }
                 case "palm_sweep":

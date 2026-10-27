@@ -326,6 +326,21 @@ namespace Diorama
                         () => Edit(state.SetPuzzle(GameState.ShardId, false, GameState.ShardHeld ? 0 : 1)), () => GameState.ShardHeld);
                     Add(() => $"Shard in statue: {OnOff(GameState.Solved(GameState.ShardId))}",
                         () => Edit(state.SetPuzzle(GameState.ShardId, !GameState.Solved(GameState.ShardId), 1)), () => GameState.Solved(GameState.ShardId));
+                    if (state.galewick != null)
+                    {
+                        // Step 10e: Galewick's beats, in story order.
+                        Flag("GW mill", "gw.mill", 1);
+                        Flag("GW kites", "gw.kites", 7);
+                        Flag("GW clouds", "gw.clouds", 7);
+                        Flag("GW tower", TowerDoor.TowerId, 1);
+                        Flag("GW knots", "gw.knots", KeeperUntangle.AllKnots);
+                        Add(() => $"Galeowl: {(GameState.Solved("gw.keeper") ? "calm" : "frightened")}",
+                            () => Edit(state.SetPuzzle("gw.keeper", !GameState.Solved("gw.keeper"), GameState.Solved("gw.keeper") ? 0 : 1)), () => GameState.Solved("gw.keeper"));
+                        Add(() => $"Wind shard: {(GameState.Solved(ShardHolder.WindId) ? "in statue" : ShardHolder.Holds(ShardHolder.WindId) ? "held" : "none")}",
+                            () => Edit(GameState.Solved(ShardHolder.WindId) ? state.SetPuzzle(ShardHolder.WindId, false, 0)
+                                : ShardHolder.Holds(ShardHolder.WindId) ? state.SetPuzzle(ShardHolder.WindId, true, 2) : state.SetPuzzle(ShardHolder.WindId, false, 1)),
+                            () => PuzzleState.Stage(ShardHolder.WindId) > 0 || GameState.Solved(ShardHolder.WindId));
+                    }
                     Add("Reset all story", () => Edit(state.ResetStory()), null, true);
                     break;
                 case Tab.Save:
@@ -383,6 +398,11 @@ namespace Diorama
         }
 
         static string OnOff(bool on) => on ? "on" : "off";
+
+        /// <summary>A story beat toggled solved (at <paramref name="stage"/>) or not done.</summary>
+        void Flag(string label, string id, int stage) =>
+            Add(() => $"{label}: {(GameState.Solved(id) ? "done" : "not yet")}", () => Edit(state.SetPuzzle(id, !GameState.Solved(id), GameState.Solved(id) ? 0 : stage)),
+                () => GameState.Solved(id));
 
         void Edit(bool ok)
         {

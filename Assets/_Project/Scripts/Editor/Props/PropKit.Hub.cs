@@ -133,6 +133,9 @@ namespace Diorama.EditorTools
 
         // ---- statue ----
 
+        /// <summary>Step 10e: the statue's wind socket rim (the Accent slot), green-teal like the wind shard.</summary>
+        public static PropColor StatueWindRim => H("#5CC8B4", 0.3f);
+
         /// <summary>Where the statue's chest sockets sit (shape units, statue origin), left to right: fire, water, wind.</summary>
         public static readonly Vector3[] StatueSockets =
         {
@@ -148,7 +151,7 @@ namespace Diorama.EditorTools
         static PropRecipe Statue()
         {
             var statue = Recipe("Statue", new Vector2Int(3, 3), true, false, 6000);
-            statue.palette = Palette(H("#C8533E", 0.25f), H("#4F86C6", 0.25f), H("#BDB5A5"), HubMoss, H("#FFCB6B", 0.65f), H("#F2EEE6", 0.3f));
+            statue.palette = Palette(H("#C8533E", 0.25f), H("#4F86C6", 0.25f), H("#BDB5A5"), HubMoss, H("#FFCB6B", 0.65f), StatueWindRim);
             statue.yawJitter = 0f;
             statue.scaleJitter = 0f;
             statue.resolution = 48;

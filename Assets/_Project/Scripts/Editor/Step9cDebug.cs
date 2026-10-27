@@ -12,6 +12,21 @@ namespace Diorama.EditorTools
     {
         static T Find<T>() where T : Object => Object.FindFirstObjectByType<T>(FindObjectsInactive.Include);
 
+        /// <summary>Step 10e: Hearthstag's hall and the fire socket (Galeowl's hall and the wind socket exist too).</summary>
+        static KeeperHall Hearthstag()
+        {
+            foreach (var k in Object.FindObjectsByType<KeeperHall>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                if (k.keeperId == KeeperHall.KeeperId) return k;
+            return null;
+        }
+
+        static StatueSocket FireSocket()
+        {
+            foreach (var s in Object.FindObjectsByType<StatueSocket>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                if (s.id == ShardHolder.FireId) return s;
+            return null;
+        }
+
         /// <summary>Party to Lv 14 and healed; log and forge solved; Cinderwood in front of the forge door; into the hall.</summary>
         public static void ToHall()
         {
@@ -55,7 +70,7 @@ namespace Diorama.EditorTools
 
         public static void TakeShard()
         {
-            var k = Find<KeeperHall>();
+            var k = Hearthstag();
             if (k != null) k.CollectShard("bridge");
         }
 
@@ -64,7 +79,7 @@ namespace Diorama.EditorTools
         {
             if (!EditorApplication.isPlaying) return;
             PuzzleState.SetStage(ShardHolder.FireId, 1);
-            var socket = Find<StatueSocket>();
+            var socket = FireSocket();
             var swap = Find<SceneSwap>();
             var hub = AssetDatabase.LoadAssetAtPath<WorldMap>(StillIsleTools.MapPath);
             if (socket == null || swap == null || hub == null) return;
@@ -76,13 +91,13 @@ namespace Diorama.EditorTools
 
         public static void PlaceShard()
         {
-            var s = Find<StatueSocket>();
+            var s = FireSocket();
             if (s != null) s.DebugPlace();
         }
 
         public static void Snort()
         {
-            var k = Find<KeeperHall>();
+            var k = Hearthstag();
             if (k != null) k.Snort();
         }
 

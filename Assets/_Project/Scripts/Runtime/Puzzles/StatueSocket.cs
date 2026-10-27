@@ -68,6 +68,14 @@ namespace Diorama
 
         static readonly List<StatueSocket> All = new List<StatueSocket>();
 
+        /// <summary>The scene's socket for shard <paramref name="id"/>, inactive ones too (editor tools, the bridge).</summary>
+        public static StatueSocket FindById(string id)
+        {
+            foreach (var s in FindObjectsByType<StatueSocket>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                if (s.id == id) return s;
+            return null;
+        }
+
         /// <summary>Shards placed in the statue (every socket in the scene).</summary>
         public static int PlacedCount
         {
@@ -101,6 +109,18 @@ namespace Diorama
 
         public Vector3 SocketWorld => MapToWorld(SocketMap);
 
+        /// <summary>The statue's line points at the socket for the shard the Spirit carries (the wind one if only that is held).</summary>
+        Vector3 LessonSocketWorld
+        {
+            get
+            {
+                if (drawsStatue && !ShardHolder.Holds(id))
+                    foreach (var s in All)
+                        if (s != null && s != this && ShardHolder.Holds(s.id)) return s.SocketWorld;
+                return SocketWorld;
+            }
+        }
+
         protected override void Start()
         {
             _block = new MaterialPropertyBlock();
@@ -120,7 +140,7 @@ namespace Diorama
                 _ring = go.transform;
                 go.SetActive(false);
             }
-            Dialogue.RegisterTarget(targetName, () => Here ? SocketWorld : (Vector3?)null, k => { }, () => 0.5f * TileWorld);
+            Dialogue.RegisterTarget(targetName, () => Here ? LessonSocketWorld : (Vector3?)null, k => { }, () => 0.5f * TileWorld);
             base.Start();
         }
 

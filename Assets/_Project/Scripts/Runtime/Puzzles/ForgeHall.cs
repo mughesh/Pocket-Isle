@@ -74,7 +74,7 @@ namespace Diorama
         void OnFinished(bool inside)
         {
             if (!inside || !Active) return;
-            Debug.Log("[ForgeHall] Inside the Forge Hall (the Keeper's spot waits for 9c).");
+            Debug.Log($"[ForgeHall] Inside {hall.name}.");
             if (!string.IsNullOrEmpty(firstLine)) Dialogue.Say(firstLine);
         }
 
@@ -84,7 +84,7 @@ namespace Diorama
             foreach (var d in doorTiles)
                 if (Vector2Int.RoundToInt(d) == tile)
                 {
-                    Debug.Log("[ForgeHall] Out the door.");
+                    Debug.Log($"[ForgeHall] Out of {hall.name}.");
                     swap.Return();
                     return;
                 }

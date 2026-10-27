@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Oculus.Interaction.Input;
 using UnityEngine;
@@ -39,6 +40,37 @@ namespace Diorama
         public string captionFormat = "{0} blocks the way, crown ablaze!";
         [Tooltip("Sparks as the shard reaches the Spirit.")]
         public Color shardColor = new Color(1f, 0.7f, 0.3f);
+        [Tooltip("Step 10e: a hand puzzle to solve before the meeting (Galeowl's knots); empty = it meets you on the way in.")]
+        public KeeperUntangle untangle;
+        [Tooltip("Its hall has a forge that lights on victory (Hearthstag).")]
+        public bool forgeFlame = true;
+        [Tooltip("It stomps (rears and slams down, lava cracks); off = it flaps up instead.")]
+        public bool stomps = true;
+        [Tooltip("Sits this many tiles above the floor (Galeowl on its perch).")]
+        public float keeperLift;
+        [Tooltip("Calmed, it rests (lies down); off = it stays up and preens now and then.")]
+        public bool restsWhenCalm = true;
+        [Tooltip("Poked while calm: a hoot (an owl) instead of a snort.")]
+        public bool hoots;
+        [Tooltip("After a lost or fled battle, walking up to it (this many tiles) or poking it starts the battle again; 0 = only on the way in.")]
+        public float approachRestart;
+        [Tooltip("Fury while it's still tangled (the aura flares to full when it breaks free).")]
+        [Range(0f, 1f)] public float tangledFury = 0.35f;
+
+        [Header("Look (defaults: Hearthstag)")]
+        public Color frightenedFur = new Color(0.55f, 0.52f, 0.5f);
+        public Color frightenedBelly = new Color(0.8f, 0.78f, 0.74f);
+        public Color smokeLight = new Color(0.36f, 0.31f, 0.42f, 0.62f);
+        public Color smokeDark = new Color(0.15f, 0.13f, 0.19f, 0.8f);
+        public Color sparks = new Color(1f, 0.45f, 0.12f);
+        public Color eyeFrightened = new Color(1f, 0.22f, 0.05f, 0.9f);
+        [Tooltip("Crown flares, cracks and the shield's bursts.")]
+        public Color glowColor = new Color(1f, 0.6f, 0.25f);
+        public Color shellCore = new Color(1f, 0.75f, 0.35f);
+        public Color shellEdge = new Color(1f, 0.45f, 0.15f);
+
+        /// <summary>Step 10e: the hall lights up on victory (Hearthstag's forge; Galeowl's window clears).</summary>
+        public event Action HallLit;
 
         public SceneSwap swap;
         public WorldMap hall;
@@ -111,8 +143,22 @@ namespace Diorama
         readonly bool[] _wasPinching = { true, true };
         float _snortAt;
 
+        /// <summary>The scene's Keeper hall for <paramref name="id"/>, inactive ones too (editor tools, the bridge).</summary>
+        public static KeeperHall FindById(string id)
+        {
+            foreach (var k in FindObjectsByType<KeeperHall>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                if (k.keeperId == id) return k;
+            return null;
+        }
+
         public bool Calmed => PuzzleState.IsSolved(keeperId);
         string KeeperName => keeperSpecies != null ? keeperSpecies.displayName : keeperId;
+        /// <summary>Its model in the hall (null until the hall first shows).</summary>
+        public StageActor Model => _model;
+        /// <summary>Not meeting, fighting or in its victory.</summary>
+        public bool Idle => _phase == Phase.Idle;
+        bool Tangled => untangle != null && !untangle.IsSolved;
+        float _preenAt, _restartAt;
         bool Active => swap != null && swap.Inside && swap.Interior == hall;
         float TileWorld => island.map.tileSize * island.Zoom * island.transform.lossyScale.x;
 
@@ -141,6 +187,7 @@ namespace Diorama
             if (shardRecipe != null) _shard = new PropView($"{ownShard} (flying)", island, shardRecipe) { restoredSelf = 1f };
             swap.Finished += OnSwapFinished;
             swap.Returned += OnReturned;
+            if (untangle != null) untangle.Solved += OnUntangled;
             encounters.BattleEnded += OnBattleEnded;
             stage.Presented += OnPresented;
             PuzzleState.Restored += ApplyState;
@@ -150,7 +197,11 @@ namespace Diorama
                 () => 0.05f * island.transform.lossyScale.x);
             ApplyState();
             StartCoroutine(EnforceRestoredAfterLoad());
-            if (Active && !Calmed) StartCoroutine(Meet());
+            if (Active && !Calmed)
+            {
+                if (Tangled) ShowTangled();
+                else StartCoroutine(Meet());
+            }
         }
 
         void OnDestroy()
@@ -161,6 +212,7 @@ namespace Diorama
                 swap.Returned -= OnReturned;
             }
             if (encounters != null) encounters.BattleEnded -= OnBattleEnded;
+            if (untangle != null) untangle.Solved -= OnUntangled;
             if (stage != null) stage.Presented -= OnPresented;
             PuzzleState.Restored -= ApplyState;
             if (_model != null) Destroy(_model.gameObject);
@@ -194,7 +246,20 @@ namespace Diorama
             f.fx = fx;
             f.smokeMaterial = smokeMaterial;
             f.beaconMaterial = beaconMaterial;
+            f.smokeLight = smokeLight;
+            f.smokeDark = smokeDark;
+            f.ember = sparks;
+            f.eyeFrightened = eyeFrightened;
             return f;
+        }
+
+        KeeperLook AddLook(GameObject go)
+        {
+            var l = go.GetComponent<KeeperLook>();
+            if (l == null) l = go.AddComponent<KeeperLook>();
+            l.frightenedFur = frightenedFur;
+            l.frightenedBelly = frightenedBelly;
+            return l;
         }
 
         /// <summary>A save from mid-wave: once calmed, the realm is fully restored (after GameSave applied its value).</summary>
@@ -217,7 +282,8 @@ namespace Diorama
             _model.island = island;
             _model.tile = keeperSpot;
             _model.yaw = 0f;
-            _look = go.AddComponent<KeeperLook>();
+            _model.baseLift = keeperLift * island.map.tileSize;
+            _look = AddLook(go);
             _look.calm = Calmed ? 1f : 0f;
             _fury = AddFury(go);
             _fury.fury = Calmed ? 0f : 1f;
@@ -230,11 +296,73 @@ namespace Diorama
             if (active) EnsureModel();
             bool show = active && _phase != Phase.Fighting && !encounters.InBattle;
             if (_model != null) _model.gameObject.SetActive(show);
-            UpdateFlame(active && (Calmed || _phase == Phase.Victory || _phase == Phase.Shard));
+            UpdateFlame(forgeFlame && active && (Calmed || _phase == Phase.Victory || _phase == Phase.Shard));
             if (_phase == Phase.Fighting) UpdateBattleLook();
             if (_phase == Phase.Shard) UpdateShardPickup();
             else if (_shard != null && !_shardHovering) _shard.Hide();
-            if (show && Calmed && _phase == Phase.Idle) UpdatePoke();
+            if (show && Calmed && _phase == Phase.Idle)
+            {
+                UpdatePoke();
+                if (!restsWhenCalm) Preen();
+            }
+            if (show && !Calmed && _phase == Phase.Idle && approachRestart > 0f && !Tangled && !encounters.InBattle && Time.time > _restartAt) Approach();
+        }
+
+        /// <summary>Calmed and awake: it ruffles and bobs now and then.</summary>
+        void Preen()
+        {
+            if (_model == null || Time.time < _preenAt) return;
+            _preenAt = Time.time + UnityEngine.Random.Range(4f, 8f);
+            StartCoroutine(PreenOnce());
+        }
+
+        IEnumerator PreenOnce()
+        {
+            for (float t = 0f; t < 0.9f && _model != null; t += Time.deltaTime)
+            {
+                _model.pitch = 12f * Mathf.Sin(t / 0.9f * Mathf.PI) * Mathf.Sin(t * 14f) * 0.5f + 6f * Mathf.Sin(t / 0.9f * Mathf.PI);
+                yield return null;
+            }
+            if (_model != null) _model.pitch = 0f;
+        }
+
+        /// <summary>Free but frightened after a lost or fled fight: walking up to it or poking it starts the battle again.</summary>
+        void Approach()
+        {
+            if (_model == null) return;
+            bool near = (explorer.Tile - keeperSpot).magnitude <= approachRestart;
+            if (!near)
+            {
+                Vector3 c = _model.WorldCenter;
+                float r = _model.View.height * 0.6f * island.Zoom * island.transform.lossyScale.x;
+                for (int h = 0; h < 2 && !near; h++)
+                {
+                    var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
+                    near = HandLookup.TryGetJoint(hand, HandJointId.HandIndexTip, out var tip) && (tip - c).magnitude <= r;
+                }
+            }
+            if (!near) return;
+            Debug.Log($"[KeeperHall] Walked up to (or poked) {KeeperName}: the battle again.");
+            StartCoroutine(Meet());
+        }
+
+        /// <summary>Still wrapped in strings (the untangle piece runs): it sits dazed and trembling, the aura low.</summary>
+        void ShowTangled()
+        {
+            EnsureModel();
+            if (_model == null) return;
+            _look.calm = 0f;
+            _model.View.Daze();
+            _fury.fury = tangledFury;
+            _fury.idleStomps = false;
+            Debug.Log($"[KeeperHall] {KeeperName} sits wrapped in strings ({untangle.Undone} / {untangle.knots.Length} knots undone).");
+        }
+
+        void OnUntangled(HandPuzzle p)
+        {
+            if (!Active || Calmed) return;
+            Debug.Log($"[KeeperHall] {KeeperName} is free of the strings.");
+            StartCoroutine(Meet());
         }
 
         void UpdateFlame(bool on)
@@ -276,8 +404,14 @@ namespace Diorama
             _fury.idleStomps = false;
             if (Calmed)
             {
-                _model.View.Daze(); // resting by its forge
-                Debug.Log($"[KeeperHall] {KeeperName} rests in its hall (calmed).");
+                if (restsWhenCalm) _model.View.Daze(); // resting by its forge
+                else _model.View.Revive();
+                Debug.Log($"[KeeperHall] {KeeperName} {(restsWhenCalm ? "rests" : "preens")} in its hall (calmed).");
+                return;
+            }
+            if (Tangled)
+            {
+                ShowTangled();
                 return;
             }
             StartCoroutine(Meet());
@@ -290,9 +424,21 @@ namespace Diorama
             EnsureModel();
             _look.calm = 0f;
             _look.SetAllCrystals(0.6f);
-            _model.View.Daze();
             explorer.Locked = true;
-            Debug.Log($"[KeeperHall] {KeeperName} lies in its hall, frightened.");
+            if (untangle != null)
+            {
+                // Just untangled: it shakes free, flaps and the aura flares before it speaks.
+                _model.View.Revive();
+                _model.View.Hop();
+                _fury.fury = 1f;
+                if (fx != null) fx.Burst(_model.WorldCenter, 36, sparks, TileWorld * 1.2f, 0.8f, TileWorld * 0.05f, Vector3.up * TileWorld * 0.4f);
+                Debug.Log($"[KeeperHall] {KeeperName} shakes free and flares up.");
+            }
+            else
+            {
+                _model.View.Daze();
+                Debug.Log($"[KeeperHall] {KeeperName} lies in its hall, frightened.");
+            }
             yield return new WaitForSeconds(0.6f);
             if (!string.IsNullOrEmpty(meetLine)) Dialogue.Say(meetLine);
             for (float t = 0f; t < 9f && Dialogue.IsPending(meetLine); t += Time.deltaTime) yield return null;
@@ -307,7 +453,7 @@ namespace Diorama
             }
             _look.crownBoost = 1f;
             _fury.fury = 1f;
-            _fury.idleStomps = true;
+            _fury.idleStomps = stomps;
             if (!Active)
             {
                 // Left during the meeting (the dev panel's teleport): no battle outside the hall.
@@ -316,7 +462,7 @@ namespace Diorama
                 Debug.Log("[KeeperHall] Left the hall during the meeting: no battle.");
                 yield break;
             }
-            if (fx != null) fx.Burst(_look.CrownWorld, 30, new Color(1f, 0.55f, 0.2f), TileWorld * 0.8f, 0.8f, TileWorld * 0.05f, Vector3.up * TileWorld * 0.6f);
+            if (fx != null) fx.Burst(_look.CrystalCount > 0 ? _look.CrownWorld : _model.WorldCenter, 30, glowColor, TileWorld * 0.8f, 0.8f, TileWorld * 0.05f, Vector3.up * TileWorld * 0.6f);
             explorer.Locked = false;
             // Step 10a: Keepers grow with the other realms' shards the player holds.
             int level = ShardScaling.KeeperLevel(keeperLevel, ownShard);
@@ -346,8 +492,7 @@ namespace Diorama
             if (wild == null || encounters.Keeper == null) return;
             if (_battleLook == null || _battleLook.gameObject != wild.gameObject)
             {
-                _battleLook = wild.GetComponent<KeeperLook>();
-                if (_battleLook == null) _battleLook = wild.gameObject.AddComponent<KeeperLook>();
+                _battleLook = AddLook(wild.gameObject);
                 _battleLook.calm = 0f;
                 _battleFury = AddFury(wild.gameObject);
                 _battleFury.fury = 1f;
@@ -370,6 +515,18 @@ namespace Diorama
         {
             yield return new WaitForSeconds(0.9f);
             if (fury == null || _phase != Phase.Fighting) yield break;
+            if (!stomps)
+            {
+                // It flaps up with a gust; the Spirit flinches back.
+                var view = fury.GetComponent<CreatureView>();
+                if (view != null) view.Hop();
+                var actor = fury.GetComponent<StageActor>();
+                Vector3 at = actor != null ? actor.WorldCenter : fury.transform.position;
+                if (fx != null) fx.Burst(at, 30, sparks, TileWorld * 1.2f, 0.8f, TileWorld * 0.05f, Vector3.up * TileWorld * 0.3f);
+                if (spirit != null) spirit.Flinch(at);
+                Debug.Log($"[KeeperHall] Battle intro: {KeeperName} flaps up in a gust.");
+                yield break;
+            }
             fury.Stomped += OnBattleStomp;
             fury.Stomp(26f);
             Debug.Log($"[KeeperHall] Battle intro: {KeeperName} rears up and stomps.");
@@ -389,7 +546,7 @@ namespace Diorama
             if (on && _shell == null)
             {
                 _shell = fx.Get(BattleFx.Shape.Orb);
-                if (_shell != null) _shell.Set(new Color(1f, 0.75f, 0.35f), new Color(1f, 0.45f, 0.15f), 0.35f, 2.5f, 0.15f, 0.5f, 0.3f);
+                if (_shell != null) _shell.Set(shellCore, shellEdge, 0.35f, 2.5f, 0.15f, 0.5f, 0.3f);
             }
             else if (!on && _shell != null)
             {
@@ -407,11 +564,12 @@ namespace Diorama
                 case BattleEventKind.Damage when e.side == BattleSide.Wild && e.blocked:
                     int crystal = CrackOrder(e.cracks - 1);
                     _battleLook.SetCrystal(crystal, 0.15f);
-                    if (fx != null) fx.Burst(_battleLook.CrystalWorld(crystal), 10, new Color(1f, 0.6f, 0.25f), tile * 0.5f, 0.5f, tile * 0.04f);
+                    if (fx != null) fx.Burst(_battleLook.CrystalCount > 0 ? _battleLook.CrystalWorld(crystal) : _shell != null ? _shell.transform.position : stage.Wild.WorldCenter,
+                        10, glowColor, tile * 0.5f, 0.5f, tile * 0.04f);
                     if (!string.IsNullOrEmpty(shieldLine)) Dialogue.Say(shieldLine);
                     break;
                 case BattleEventKind.ShieldBroken:
-                    if (fx != null && _shell != null) fx.Burst(_shell.transform.position, 40, new Color(1f, 0.75f, 0.4f), tile * 1.2f, 0.7f, tile * 0.05f);
+                    if (fx != null && _shell != null) fx.Burst(_shell.transform.position, 40, shellCore, tile * 1.2f, 0.7f, tile * 0.05f);
                     SetShell(false);
                     _battleLook.SetAllCrystals(0.2f);
                     if (!string.IsNullOrEmpty(brokenLine)) Dialogue.Say(brokenLine);
@@ -419,7 +577,7 @@ namespace Diorama
                 case BattleEventKind.ShieldRaised:
                     SetShell(true);
                     _battleLook.SetAllCrystals(1f);
-                    if (fx != null) fx.Burst(_battleLook.CrownWorld, 24, new Color(1f, 0.6f, 0.2f), tile * 0.7f, 0.6f, tile * 0.05f, Vector3.up * tile * 0.5f);
+                    if (fx != null) fx.Burst(_battleLook.CrystalCount > 0 ? _battleLook.CrownWorld : stage.Wild.WorldCenter, 24, glowColor, tile * 0.7f, 0.6f, tile * 0.05f, Vector3.up * tile * 0.5f);
                     break;
                 case BattleEventKind.KeeperPhase2:
                     _battleLook.crownBoost = 1.7f;
@@ -446,6 +604,7 @@ namespace Diorama
                     break;
                 case BattleResult.Fled:
                     _phase = Phase.Idle;
+                    _restartAt = Time.time + 3f;
                     explorer.Teleport(hallEntry, new Vector2Int(0, -1));
                     Debug.Log("[KeeperHall] Ran from the Keeper: back at the hall door; it lies down again.");
                     if (_model != null) _model.View.Daze();
@@ -453,6 +612,7 @@ namespace Diorama
                     break;
                 default:
                     _phase = Phase.Idle;
+                    _restartAt = Time.time + 3f;
                     Debug.Log($"[KeeperHall] Keeper battle {result}: it resets.");
                     break;
             }
@@ -500,10 +660,11 @@ namespace Diorama
             _model.pitch = 0f;
             if (!string.IsNullOrEmpty(winLine)) Dialogue.Say(winLine);
             for (float t = 0f; t < 6f && Dialogue.IsPending(winLine); t += Time.deltaTime) yield return null;
-            // The forge ignites.
+            // The forge ignites (Galeowl: the window clears).
             Vector3 mouth = island.transform.TransformPoint(island.TileToLocal(forgeMouth, island.Content.capHeight + forgeMouthHeight * island.map.tileSize));
-            if (fx != null) fx.Burst(mouth, 50, new Color(1f, 0.6f, 0.2f), TileWorld * 1.4f, 1f, TileWorld * 0.07f, Vector3.up * TileWorld);
-            Debug.Log($"[KeeperHall] The forge ignites; {ownShard} rises.");
+            if (fx != null) fx.Burst(mouth, 50, glowColor, TileWorld * 1.4f, 1f, TileWorld * 0.07f, Vector3.up * TileWorld);
+            HallLit?.Invoke();
+            Debug.Log($"[KeeperHall] The {(forgeFlame ? "forge ignites" : "hall lights up")}; {ownShard} rises.");
             yield return new WaitForSeconds(0.6f);
             yield return ShardRise();
         }
@@ -531,7 +692,7 @@ namespace Diorama
             }
             _shardHome = hover;
             if (!string.IsNullOrEmpty(shardLine)) Dialogue.Say(shardLine);
-            if (ghosts != null) ghosts.Show("grab_drop", GhostPlace.AtTarget, "fireShard", 1f, DominantHand.Left, false);
+            if (ghosts != null) ghosts.Show("grab_drop", GhostPlace.AtTarget, shardTarget, 1f, DominantHand.Left, false);
             FocusHighlight.SetPending(() => _shardHovering ? island.transform.TransformPoint(_shardLocal) : (Vector3?)null, 0.05f * island.transform.lossyScale.x);
             explorer.Locked = false;
             Debug.Log($"[KeeperHall] {ownShard} floats in front of the player: grab it (pinch, or look + pinch).");
@@ -673,11 +834,23 @@ namespace Diorama
             _snortAt = Time.time + 1.5f;
             _model.View.Revive();
             _model.View.Hop();
+            if (hoots)
+            {
+                if (_audio == null)
+                {
+                    _audio = gameObject.AddComponent<AudioSource>();
+                    _audio.playOnAwake = false;
+                    _audio.spatialBlend = 0f;
+                }
+                _audio.PlayOneShot(PuzzleSounds.Hoot, 0.8f);
+            }
             if (fx != null) fx.Burst(_model.WorldCenter + island.transform.forward * (_model.View.height * 0.4f * island.Zoom * island.transform.lossyScale.x),
                 12, new Color(1f, 0.9f, 0.75f, 0.8f), TileWorld * 0.3f, 0.6f, TileWorld * 0.05f, Vector3.up * TileWorld * 0.3f);
-            Debug.Log($"[KeeperHall] {KeeperName} snorts happily.");
-            StartCoroutine(BackToRest());
+            Debug.Log($"[KeeperHall] {KeeperName} {(hoots ? "hoots" : "snorts")} happily.");
+            if (restsWhenCalm) StartCoroutine(BackToRest());
         }
+
+        AudioSource _audio;
 
         IEnumerator BackToRest()
         {

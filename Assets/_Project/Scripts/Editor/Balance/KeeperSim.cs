@@ -383,7 +383,7 @@ namespace Diorama.EditorTools
         {
             get
             {
-                var hall = Object.FindFirstObjectByType<KeeperHall>(FindObjectsInactive.Include);
+                var hall = KeeperHall.FindById(KeeperHall.KeeperId);
                 return hall != null ? hall.keeperLevel : 10;
             }
         }

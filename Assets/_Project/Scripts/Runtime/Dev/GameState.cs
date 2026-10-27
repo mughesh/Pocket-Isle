@@ -35,6 +35,9 @@ namespace Diorama
         [Tooltip("Step 10a: the wind realm (Go to works even while its gate is sealed in builds).")]
         public WorldMap galewick;
         public Vector2Int hallEntry = new Vector2Int(4, 8);
+        [Tooltip("Step 10e: Galewick's tower hall (Go to, entered from the tower door).")]
+        public WorldMap towerHall;
+        public Vector2Int towerHallEntry = new Vector2Int(4, 8);
         [Tooltip("Lesson the tutorial restarts at (the first one after the opening).")]
         public string firstWalkLesson = "walk";
         [Tooltip("Who a preset team gets after the lead (species asset names). Step 9f: Steambara (the Keeper is tuned for a Water Isling in the party) and a fire common.")]
@@ -50,6 +53,9 @@ namespace Diorama
             public Vector2Int tile;
             public Vector2Int facing;
             public bool interior;
+            /// <summary>An interior's outdoor map and the landmark at its door.</summary>
+            public WorldMap outdoor;
+            public string door;
         }
 
         readonly List<Spot> _spots = new List<Spot>();
@@ -105,7 +111,8 @@ namespace Diorama
                 AddMark(cinderwood, "CW: log", "log");
                 AddMark(cinderwood, "CW: forge door", "temple");
             }
-            if (forgeHall != null) _spots.Add(new Spot { label = "Forge Hall", map = forgeHall, tile = hallEntry, facing = north, interior = true });
+            if (forgeHall != null)
+                _spots.Add(new Spot { label = "Forge Hall", map = forgeHall, tile = hallEntry, facing = north, interior = true, outdoor = cinderwood, door = "temple" });
             if (galewick != null)
             {
                 AddMark(galewick, "GW: arrival", "start");
@@ -117,6 +124,8 @@ namespace Diorama
                 AddMark(galewick, "GW: tower", "tower");
                 AddMark(galewick, "GW: rare grass", "rare");
                 AddMark(galewick, "GW: fire patch", "fire");
+                if (towerHall != null)
+                    _spots.Add(new Spot { label = "GW: tower hall", map = towerHall, tile = towerHallEntry, facing = north, interior = true, outdoor = galewick, door = "tower" });
             }
         }
 
@@ -162,10 +171,11 @@ namespace Diorama
             if (swap == null || explorer == null || SceneSwap.IsBusy || encounters != null && encounters.InBattle) return false;
             if (spot.interior)
             {
-                if (cinderwood == null || !cinderwood.TryGetLandmark("temple", out var door)) return false;
-                var front = NearestWalkable(cinderwood, door + new Vector2Int(0, 1));
+                var outdoor = spot.outdoor;
+                if (outdoor == null || !outdoor.TryGetLandmark(spot.door, out var door)) return false;
+                var front = NearestWalkable(outdoor, door + new Vector2Int(0, 1));
                 if (swap.Inside) swap.ReturnNow();
-                if (explorer.island.world != cinderwood) swap.TravelNow(cinderwood, front, new Vector2Int(0, -1));
+                if (explorer.island.world != outdoor) swap.TravelNow(outdoor, front, new Vector2Int(0, -1));
                 else explorer.Teleport(front, new Vector2Int(0, -1));
                 swap.Enter(spot.map, spot.tile, spot.facing, front, new Vector2Int(0, 1));
             }

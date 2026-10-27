@@ -171,6 +171,79 @@ MonoBehaviour:
   save: {fileID: 1541842443}
   riseSeconds: 1
   leaveSeconds: 1.2
+--- !u!1 &66748611
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 66748612}
+  - component: {fileID: 66748613}
+  m_Layer: 0
+  m_Name: Statue Socket (wind)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &66748612
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 66748611}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1553131432}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &66748613
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 66748611}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1437310275e9d804fb27460ded232a52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.StatueSocket
+  id: shard.wind
+  map: {fileID: 11400000, guid: ab0469af29722704f949fec768f94b68, type: 2}
+  island: {fileID: 270959109}
+  window: {fileID: 270959113}
+  explorer: {fileID: 374318554}
+  grabGuard: {fileID: 270959111}
+  ghosts: {fileID: 1421177268}
+  fx: {fileID: 1078587927}
+  reach: 6
+  lessonLine: hub.shard.first
+  ghostClip: grab_drop
+  ghostScale: 1
+  lessonChip: 
+  holder: {fileID: 570826975}
+  shardRecipe: {fileID: 11400000, guid: 0d00935bd93bf4d44ba91c69122fee75, type: 2}
+  statueRecipe: {fileID: 11400000, guid: 4e524cd358b9b874f9c8ac964bd660a2, type: 2}
+  statueAnchor: {x: 14, y: 16}
+  statueYaw: 0
+  socket: {x: -0.24, y: 1.03, z: 0.52}
+  ringMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  rimSlot: 5
+  shardColor: {r: 0.45, g: 0.9, b: 0.8, a: 1}
+  drawsStatue: 0
+  targetName: statueSocketWind
+  grabRadius: 0.07
+  snapRadius: 0.06
+  placedLine: hub.shard.placed
+  moreLine: hub.shard.more
+  twoLine: statue.two
 --- !u!1 &78739057
 GameObject:
   m_ObjectHideFlags: 0
@@ -1142,6 +1215,86 @@ Transform:
   - {fileID: 2032557510}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &307860327
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 307860328}
+  - component: {fileID: 307860330}
+  - component: {fileID: 307860329}
+  m_Layer: 0
+  m_Name: Tower Hall
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &307860328
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 307860327}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1542799535}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &307860329
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 307860327}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7d008e1ada0b8048ba48ae030155135, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.TowerHall
+  swap: {fileID: 221433162}
+  hall: {fileID: 11400000, guid: 578ca2940d06cb3459ed047d2fb89378, type: 2}
+  island: {fileID: 270959109}
+  skyRecipe: {fileID: 11400000, guid: 74e22d65543c79e4faa4ccdc5383a165, type: 2}
+  wispRecipe: {fileID: 11400000, guid: 645eaeaf7c314cf469b48e86fbc9b506, type: 2}
+  windowAnchor: {x: 6, y: 0}
+  keeperId: gw.keeper
+  keeper: {fileID: 388614567}
+  clearSeconds: 2.5
+  clear: 0
+  wisps: 3
+  crossSeconds: 9
+--- !u!114 &307860330
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 307860327}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed0c46d1e7631a24db4a1b75749f7f3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.ForgeHall
+  swap: {fileID: 221433162}
+  hall: {fileID: 11400000, guid: 578ca2940d06cb3459ed047d2fb89378, type: 2}
+  island: {fileID: 270959109}
+  explorer: {fileID: 374318554}
+  ringMaterial: {fileID: 0}
+  doorTiles:
+  - {x: 4, y: 9}
+  - {x: 5, y: 9}
+  keeperSpot: {x: 4.5, y: 2.6}
+  ringSize: 2.4
+  firstLine: 
 --- !u!1 &367221214
 GameObject:
   m_ObjectHideFlags: 0
@@ -1455,6 +1608,108 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 270959110}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &388614566
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 388614568}
+  - component: {fileID: 388614567}
+  m_Layer: 0
+  m_Name: Keeper Hall (Galeowl)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &388614567
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 388614566}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8940da4ed106e64880d1edb2b9bebac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.KeeperHall
+  keeperId: gw.keeper
+  realmName: Galewick
+  keeperTarget: galeowl
+  shardTarget: windShard
+  captionFormat: '{0} whips up a storm!'
+  shardColor: {r: 0.5, g: 0.95, b: 0.85, a: 1}
+  untangle: {fileID: 1824753089}
+  forgeFlame: 0
+  stomps: 0
+  keeperLift: 0.5
+  restsWhenCalm: 0
+  hoots: 1
+  approachRestart: 2.5
+  tangledFury: 0.35
+  frightenedFur: {r: 0.42, g: 0.46, b: 0.52, a: 1}
+  frightenedBelly: {r: 0.7, g: 0.73, b: 0.77, a: 1}
+  smokeLight: {r: 0.66, g: 0.7, b: 0.76, a: 0.5}
+  smokeDark: {r: 0.34, g: 0.37, b: 0.43, a: 0.72}
+  sparks: {r: 0.86, g: 0.94, b: 1, a: 1}
+  eyeFrightened: {r: 1, g: 0.36, b: 0.08, a: 0.9}
+  glowColor: {r: 0.62, g: 0.9, b: 1, a: 1}
+  shellCore: {r: 0.82, g: 0.96, b: 1, a: 1}
+  shellEdge: {r: 0.45, g: 0.76, b: 0.95, a: 1}
+  swap: {fileID: 221433162}
+  hall: {fileID: 11400000, guid: 578ca2940d06cb3459ed047d2fb89378, type: 2}
+  realmMap: {fileID: 11400000, guid: 1c0f5df7c1c50ad4789ffbf83b2addd2, type: 2}
+  island: {fileID: 270959109}
+  explorer: {fileID: 374318554}
+  encounters: {fileID: 1499891275}
+  stage: {fileID: 1078587928}
+  fx: {fileID: 1078587927}
+  realm: {fileID: 270959114}
+  holder: {fileID: 570826975}
+  save: {fileID: 1541842443}
+  ghosts: {fileID: 1421177268}
+  keeperSpecies: {fileID: 11400000, guid: facba5a2220f6ac4d8f8ec7afc3d435c, type: 2}
+  keeperLevel: 9
+  ownShard: shard.wind
+  beaconMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  shardRecipe: {fileID: 11400000, guid: 0d00935bd93bf4d44ba91c69122fee75, type: 2}
+  smokeMaterial: {fileID: 2100000, guid: 63c5a847d0fbf454882a87650c5454fc, type: 2}
+  spirit: {fileID: 1847074513}
+  keeperSpot: {x: 4.5, y: 2.6}
+  keeperPad: {x: 4, y: 3}
+  partyPad: {x: 4, y: 6}
+  hallEntry: {x: 4, y: 8}
+  forgeMouth: {x: 6.5, y: 0.15}
+  forgeMouthHeight: 1
+  waveOrigin: {x: 17.5, y: 3.5}
+  waveSeconds: 5
+  templeGate: {x: 23, y: 6}
+  meetLine: gw.keeper.meet
+  shieldLine: gw.keeper.shield
+  brokenLine: gw.keeper.shield.break
+  phase2Line: keeper.phase2
+  winLine: gw.keeper.win
+  shardLine: gw.shard.take
+  restoredLine: gw.restored
+--- !u!4 &388614568
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 388614566}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1542799535}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &423146276
 GameObject:
@@ -1958,10 +2213,15 @@ MonoBehaviour:
   statueYaw: 0
   socket: {x: 0.24, y: 1.03, z: 0.52}
   ringMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  rimSlot: 0
+  shardColor: {r: 1, g: 0.6, b: 0.3, a: 1}
+  drawsStatue: 1
+  targetName: statueSocket
   grabRadius: 0.07
   snapRadius: 0.06
   placedLine: hub.shard.placed
   moreLine: hub.shard.more
+  twoLine: statue.two
 --- !u!1 &570826974
 GameObject:
   m_ObjectHideFlags: 0
@@ -1994,11 +2254,15 @@ MonoBehaviour:
   island: {fileID: 270959109}
   spirit: {fileID: 1847074513}
   fireShardRecipe: {fileID: 11400000, guid: 243f873e41708f049b1a176b344ec7c1, type: 2}
+  otherShards:
+  - id: shard.wind
+    recipe: {fileID: 11400000, guid: 0d00935bd93bf4d44ba91c69122fee75, type: 2}
   carryMetres: 0.022
   offerMetres: 0.05
   orbitRadius: 0.035
   orbitHeight: 0.03
   offerSpot: {x: 0.15, y: 0.12, z: 0.6}
+  offerSpread: 0.3
 --- !u!4 &570826976
 Transform:
   m_ObjectHideFlags: 0
@@ -3374,6 +3638,8 @@ MonoBehaviour:
   forgeHall: {fileID: 11400000, guid: 826b78d0c19f2014a9858fa40dff5037, type: 2}
   galewick: {fileID: 11400000, guid: 1c0f5df7c1c50ad4789ffbf83b2addd2, type: 2}
   hallEntry: {x: 4, y: 8}
+  towerHall: {fileID: 11400000, guid: 578ca2940d06cb3459ed047d2fb89378, type: 2}
+  towerHallEntry: {x: 4, y: 8}
   firstWalkLesson: walk
   presetCommons:
   - Steambara
@@ -4206,6 +4472,9 @@ Transform:
   - {fileID: 1589595548}
   - {fileID: 515057620}
   - {fileID: 2031303959}
+  - {fileID: 307860328}
+  - {fileID: 388614568}
+  - {fileID: 1824753088}
   m_Father: {fileID: 1553131432}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1553131431
@@ -4244,6 +4513,7 @@ Transform:
   - {fileID: 2121894497}
   - {fileID: 569611148}
   - {fileID: 1542799535}
+  - {fileID: 66748612}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1583412946
@@ -4830,6 +5100,80 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1824753087
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1824753088}
+  - component: {fileID: 1824753089}
+  m_Layer: 0
+  m_Name: Keeper Untangle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1824753088
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1824753087}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1542799535}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1824753089
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1824753087}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5371cb68a2e4a884f9c4e6d80d9c0ef2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.KeeperUntangle
+  id: gw.knots
+  map: {fileID: 11400000, guid: 578ca2940d06cb3459ed047d2fb89378, type: 2}
+  island: {fileID: 270959109}
+  window: {fileID: 270959113}
+  explorer: {fileID: 374318554}
+  grabGuard: {fileID: 270959111}
+  ghosts: {fileID: 1421177268}
+  fx: {fileID: 1078587927}
+  reach: 12
+  lessonLine: gw.keeper.knots
+  ghostClip: pinch_pull
+  ghostScale: 0.85
+  lessonChip: Pull apart!
+  keeper: {fileID: 388614567}
+  swap: {fileID: 221433162}
+  stringMaterial: {fileID: 2100000, guid: eca8edd0ce339e444b04540e378ffbf3, type: 2}
+  knots:
+  - {x: 0, y: -0.1, z: 1}
+  - {x: -0.85, y: 0.35, z: 0.55}
+  - {x: 0.85, y: -0.25, z: 0.6}
+  bodyRadius: 0.36
+  endSpread: 0.035
+  grabRadius: 0.035
+  twoHandPull: 0.12
+  oneHandPull: 0.15
+  loosenSeconds: 2
+  touchGuard: 0.9
+  volume: 0.8
+  knotGlow: {r: 1, g: 0.8, b: 0.35, a: 1}
+  endDot: {r: 1, g: 0.85, b: 0.3, a: 1}
 --- !u!1 &1847074511
 GameObject:
   m_ObjectHideFlags: 0
@@ -5447,7 +5791,7 @@ MonoBehaviour:
   needKitesLine: gw.tower.kites
   openLine: gw.tower.open
   volume: 0.7
-  hall: {fileID: 0}
+  hall: {fileID: 11400000, guid: 578ca2940d06cb3459ed047d2fb89378, type: 2}
   hallEntry: {x: 4, y: 8}
 --- !u!1001 &2032557509
 PrefabInstance:
@@ -5629,6 +5973,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8940da4ed106e64880d1edb2b9bebac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.KeeperHall
+  keeperId: cinder.keeper
+  realmName: Cinderwood
+  keeperTarget: hearthstag
+  shardTarget: fireShard
+  captionFormat: '{0} blocks the way, crown ablaze!'
+  shardColor: {r: 1, g: 0.7, b: 0.3, a: 1}
+  untangle: {fileID: 0}
+  forgeFlame: 1
+  stomps: 1
+  keeperLift: 0
+  restsWhenCalm: 1
+  hoots: 0
+  approachRestart: 0
+  tangledFury: 0.35
+  frightenedFur: {r: 0.55, g: 0.52, b: 0.5, a: 1}
+  frightenedBelly: {r: 0.8, g: 0.78, b: 0.74, a: 1}
+  smokeLight: {r: 0.36, g: 0.31, b: 0.42, a: 0.62}
+  smokeDark: {r: 0.15, g: 0.13, b: 0.19, a: 0.8}
+  sparks: {r: 1, g: 0.45, b: 0.12, a: 1}
+  eyeFrightened: {r: 1, g: 0.22, b: 0.05, a: 0.9}
+  glowColor: {r: 1, g: 0.6, b: 0.25, a: 1}
+  shellCore: {r: 1, g: 0.75, b: 0.35, a: 1}
+  shellEdge: {r: 1, g: 0.45, b: 0.15, a: 1}
   swap: {fileID: 221433162}
   hall: {fileID: 11400000, guid: 826b78d0c19f2014a9858fa40dff5037, type: 2}
   realmMap: {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}

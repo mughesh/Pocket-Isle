@@ -1120,6 +1120,16 @@ MonoBehaviour:
     - speaker: 1
       speakerName: Galeowl
       text: Thank you, guardian. Let it blow.
+  - id: gw.shard.take
+    once: 1
+    priority: 2
+    note: 'step 10e: the wind shard floats out of the window to the player'
+    target: windShard
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The wind shard! Grab it.
   - id: gw.restored
     once: 1
     priority: 2
@@ -1160,6 +1170,16 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: Two more shards are out there.
+  - id: statue.two
+    once: 1
+    priority: 2
+    note: 'step 10e: the second shard locks into the statue'
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Two pieces home. It's almost awake...
   - id: statue.shard.1
     once: 0
     priority: 2

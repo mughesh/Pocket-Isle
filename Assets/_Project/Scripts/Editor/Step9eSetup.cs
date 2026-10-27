@@ -40,7 +40,7 @@ namespace Diorama.EditorTools
             keeper.baseStats.attack = KeeperKit.KeeperAttack;
             keeper.baseStats.defense = KeeperKit.KeeperDefense;
             EditorUtility.SetDirty(keeper);
-            var hall = Object.FindFirstObjectByType<KeeperHall>(FindObjectsInactive.Include);
+            var hall = KeeperHall.FindById(KeeperHall.KeeperId);
             if (hall != null)
             {
                 Undo.RecordObject(hall, "Step 9e");
@@ -130,7 +130,7 @@ namespace Diorama.EditorTools
                 holder.orbitRadius = 0.035f;
                 EditorUtility.SetDirty(holder);
             }
-            var socket = Object.FindFirstObjectByType<StatueSocket>(FindObjectsInactive.Include);
+            var socket = StatueSocket.FindById(ShardHolder.FireId);
             if (socket != null)
             {
                 Undo.RecordObject(socket, "Step 9e");
@@ -170,7 +170,7 @@ namespace Diorama.EditorTools
                 smoke = new Material(shader) { name = "KeeperSmoke" };
                 AssetDatabase.CreateAsset(smoke, SmokeMaterialPath);
             }
-            var hall = Object.FindFirstObjectByType<KeeperHall>(FindObjectsInactive.Include);
+            var hall = KeeperHall.FindById(KeeperHall.KeeperId);
             if (hall == null)
             {
                 log.Append("\n  Fury: NO Keeper Hall in the open scene");
