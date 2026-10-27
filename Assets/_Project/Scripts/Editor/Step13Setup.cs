@@ -30,10 +30,50 @@ namespace Diorama.EditorTools
             }
             var log = new StringBuilder("[Step13] MR_Main set up:");
             Whispers(log);
+            Heart(log);
             EditorSceneManager.MarkSceneDirty(active);
             EditorSceneManager.SaveScene(active);
             AssetDatabase.SaveAssets();
             Debug.Log(log.ToString());
+        }
+
+        /// <summary>B: bakes the Heart's four props and puts the Heart of the World on the statue's spot (hub).</summary>
+        static void Heart(StringBuilder log)
+        {
+            PropKit.WriteHeart();
+            var statue = StatueSocket.FindById(ShardHolder.FireId);
+            var island = Object.FindFirstObjectByType<IslandBuilder>(FindObjectsInactive.Include);
+            var hub = AssetDatabase.LoadAssetAtPath<WorldMap>(StillIsleTools.MapPath);
+            if (statue == null || island == null || hub == null)
+            {
+                log.Append(NL + "  heart: needs the fire statue socket, the island and the hub map (MISSING)");
+                return;
+            }
+            var heart = Object.FindFirstObjectByType<HeartOfWorld>(FindObjectsInactive.Include);
+            if (heart == null)
+            {
+                var go = new GameObject("Heart of the World");
+                go.transform.SetParent(statue.transform.parent, false);
+                Undo.RegisterCreatedObjectUndo(go, "Step 13");
+                heart = go.AddComponent<HeartOfWorld>();
+            }
+            Undo.RecordObject(heart, "Step 13");
+            heart.island = island;
+            heart.map = hub;
+            heart.statue = statue;
+            heart.bodyRecipe = PropKit.Load(PropKit.HeartBodyName);
+            heart.headRecipe = PropKit.Load(PropKit.HeartHeadName);
+            heart.headOpenRecipe = PropKit.Load(PropKit.HeartHeadOpenName);
+            heart.wingRecipe = PropKit.Load(PropKit.HeartWingName);
+            heart.headPivot = PropKit.HeadPivot;
+            heart.wingHinge = PropKit.WingHinge;
+            heart.foreheadSocket = PropKit.ForeheadSocket;
+            heart.wingFolded = new Vector3(0f, 70f, -62f);
+            heart.wingOpen = new Vector3(0f, 12f, 28f);
+            int tris = 0;
+            foreach (var r in new[] { heart.bodyRecipe, heart.headOpenRecipe, heart.wingRecipe, heart.wingRecipe })
+                if (r != null && r.bakedMesh != null) tris += r.bakedMesh.triangles.Length / 3;
+            log.Append(NL + $"  heart: on the statue's spot, {tris} tris shown (body + open head + 2 wings), 8 draws");
         }
 
         /// <summary>A: the script's whisper and finale lines, the Heart's bubble colours, the statue's wake stages.</summary>

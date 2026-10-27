@@ -5465,6 +5465,7 @@ Transform:
   - {fileID: 359768277}
   - {fileID: 93667893}
   - {fileID: 1291464262}
+  - {fileID: 1908534644}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1583412946
@@ -6526,6 +6527,71 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1908534643
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1908534644}
+  - component: {fileID: 1908534645}
+  m_Layer: 0
+  m_Name: Heart of the World
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1908534644
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1908534643}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1553131432}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1908534645
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1908534643}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b3367e7fd3d4964586340eeb9db1a5f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.HeartOfWorld
+  island: {fileID: 270959109}
+  map: {fileID: 11400000, guid: ab0469af29722704f949fec768f94b68, type: 2}
+  statue: {fileID: 569611149}
+  bodyRecipe: {fileID: 11400000, guid: 782d8021e079cee41be40a6b832dae7f, type: 2}
+  headRecipe: {fileID: 11400000, guid: 1bfecbfb573a99142903576e06e09850, type: 2}
+  headOpenRecipe: {fileID: 11400000, guid: a139e0fc58a2888419c1e09044ec9f83, type: 2}
+  wingRecipe: {fileID: 11400000, guid: 6ba7a60f9a6d4d0468058e25c2f6956d, type: 2}
+  headPivot: {x: 0, y: 1.86, z: 0.1}
+  wingHinge: {x: 0.34, y: 1.62, z: -0.3}
+  foreheadSocket: {x: 0, y: 2.37, z: 0.57}
+  chestCore: {x: 0, y: 1, z: 0.5}
+  wingFolded: {x: 0, y: 70, z: -62}
+  wingOpen: {x: 0, y: 12, z: 28}
+  breathe: 0.012
+  breathSeconds: 4.2
+  blinkEvery: {x: 3.5, y: 6.5}
+  blinkSeconds: 0.14
+  maxYaw: 28
+  maxPitch: 16
+  beatRate: 0.9
+  beatGlow: 0.9
 --- !u!1 &1916101686
 GameObject:
   m_ObjectHideFlags: 0

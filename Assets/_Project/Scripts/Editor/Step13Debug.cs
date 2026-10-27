@@ -89,6 +89,51 @@ namespace Diorama.EditorTools
             Debug.Log($"[Step13Debug] Shot {name}.png ({view}).");
         }
 
+        /// <summary>
+        /// The Heart in a pose: arg "appear,eyes,wings,look,lift,blaze" (0..1, lift in degrees); the statue hidden while it
+        /// shows. "0" = asleep again (the statue back).
+        /// </summary>
+        public static void Heart()
+        {
+            var h = Find<HeartOfWorld>();
+            if (h == null) return;
+            var v = Arg.Split(',');
+            float F(int i, float d) => i < v.Length && float.TryParse(v[i], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float x) ? x : d;
+            h.appear = F(0, 1f);
+            h.eyes = F(1, 0f);
+            h.wings = F(2, 0f);
+            h.look = F(3, 0f);
+            h.lift = F(4, 0f);
+            h.blaze = F(5, 0f);
+            h.veins = h.appear > 0f ? 1f : 0f;
+            h.crown = h.gems = Vector3.one * (h.appear > 0f ? 1f : 0f);
+            StatueSocket.HideStatue = h.appear > 0f;
+            Debug.Log($"[Step13Debug] Heart: appear {h.appear}, eyes {h.eyes}, wings {h.wings}, look {h.look}, lift {h.lift}, blaze {h.blaze}; showing {h.Showing}.");
+        }
+
+        /// <summary>Per-piece triangle counts of a Heart prop (arg recipe name): raw marching cubes and after simplifying.</summary>
+        public static void Pieces()
+        {
+            var r = PropKit.Load(string.IsNullOrEmpty(Arg) ? PropKit.HeartBodyName : Arg);
+            if (r == null) return;
+            float total = 0f;
+            foreach (var p in r.pieces) if (p.shape != null) { var b = new SdfEvaluator(p.shape).Bounds.size; float l = Mathf.Max(b.x, Mathf.Max(b.y, b.z)); total += l * l; }
+            foreach (var p in r.pieces)
+            {
+                if (p.shape == null) continue;
+                var eval = new SdfEvaluator(p.shape);
+                var b = eval.Bounds.size;
+                float l = Mathf.Max(b.x, Mathf.Max(b.y, b.z));
+                int budget = Mathf.Max(64, Mathf.RoundToInt(r.triangleBudget * l * l / total));
+                var mesh = CreatureBaker.BakeShape(eval, r.resolution, budget, Vector3.zero, "probe", out int raw, out int open);
+                Debug.Log($"[Step13Debug] {r.name} / {p.shape.name}: raw {raw}, budget {budget}, got {mesh.triangles.Length / 3}, open edges {open}, bounds {b}");
+                Object.DestroyImmediate(mesh);
+            }
+        }
+
+        /// <summary>Re-bakes the Heart's four props (edit mode).</summary>
+        public static void BakeHeart() => PropKit.WriteHeart();
+
         public static void State()
         {
             var ids = new List<string>();
