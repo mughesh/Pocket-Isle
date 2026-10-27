@@ -319,6 +319,7 @@ namespace Diorama
                     if (state.galewick != null)
                         Add(() => $"Galewick restored: {OnOff(state.Restored(state.galewick))}", () => Edit(state.SetRestored(state.galewick, !state.Restored(state.galewick))),
                             () => state.Restored(state.galewick));
+                    Flag("CW flame", "cw.flame", 1); // step 10f
                     Add(() => $"Log: {(GameState.Solved(GameState.LogId) ? "placed" : "fallen")}",
                         () => Edit(state.SetPuzzle(GameState.LogId, !GameState.Solved(GameState.LogId), GameState.Solved(GameState.LogId) ? 0 : 2)), () => GameState.Solved(GameState.LogId));
                     Add(() => $"Forge + door: {(GameState.Solved(GameState.BellowsId) ? "lit, open" : "cold")}",

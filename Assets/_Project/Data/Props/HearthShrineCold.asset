@@ -1,0 +1,80 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 374f6b77629fa034d93d2a7945ac7885, type: 3}
+  m_Name: HearthShrineCold
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.PropRecipe
+  pieces:
+  - shape: {fileID: 11400000, guid: 395cd7b113e0df642a76be122e2bacc4, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 2
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 0
+  - shape: {fileID: 11400000, guid: e2814b8752677f74b8e858b3cdeb3834, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 3
+    motion: 1
+    motionAmount: 0.008
+    budgetWeight: 0
+  - shape: {fileID: 11400000, guid: f244fe6d5c9144d4eaf584874db8c090, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 4
+    motion: 2
+    motionAmount: 0.003
+    budgetWeight: 0
+  palette:
+  - restored: {r: 0.8140393, g: 0.50571483, b: 0.24471544, a: 1}
+    unrestored: {r: 0.7607843, g: 0.45882353, b: 0.25882354, a: 1}
+    glow: 0
+  - restored: {r: 0.44898042, g: 0.31714636, b: 0.19990121, a: 1}
+    unrestored: {r: 0.41960785, g: 0.2901961, b: 0.2, a: 1}
+    glow: 0
+  - restored: {r: 0.68396086, g: 0.638326, b: 0.59055614, a: 1}
+    unrestored: {r: 0.6392157, g: 0.6039216, b: 0.5568628, a: 1}
+    glow: 0
+  - restored: {r: 0.53490937, g: 0.62101966, b: 0.42531455, a: 1}
+    unrestored: {r: 0.49411765, g: 0.5803922, b: 0.40784314, a: 1}
+    glow: 0
+  - restored: {r: 1, g: 0.62646437, b: 0.24760789, a: 1}
+    unrestored: {r: 1, g: 0.6901961, b: 0.2901961, a: 1}
+    glow: 1.2
+  - restored: {r: 0.99447066, g: 0.9532836, b: 0.90106595, a: 1}
+    unrestored: {r: 0.92941177, g: 0.8980392, b: 0.84705883, a: 1}
+    glow: 0.2
+  tips:
+    on: 0
+    onSlot: 0
+    tipSlot: 0
+    at: 0
+    byHeight: 0
+  spec: 0.15
+  outline: 0.022
+  footprint: {x: 2, y: 2}
+  blocksWalking: 1
+  randomYaw: 0
+  yawJitter: 0
+  scaleJitter: 0
+  resolution: 40
+  triangleBudget: 2600
+  bakedMesh: {fileID: 4300000, guid: 4da9dd50b39899d4a8ac54b3111416bd, type: 2}

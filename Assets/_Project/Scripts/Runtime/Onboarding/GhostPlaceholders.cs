@@ -39,7 +39,7 @@ namespace Diorama
         public static readonly string[] Names =
         {
             "poke", "grab_rim_slide", "grab_drop", "thumb_swipe_forward", "thumb_tap", "pinch", "grab_toss", "grab_flick", "palm_hover", "hands_up",
-            "finger_flick", "palm_sweep", "pinch_pull",
+            "finger_flick", "palm_sweep", "pinch_pull", "cup_hands",
         };
 
         /// <summary>Builds a placeholder clip from the right hand's rest pose (joint-local), or null for an unknown name.</summary>
@@ -313,6 +313,20 @@ namespace Diorama
                         Open(0f, new Vector3(0.14f, 0.07f, 0f), f, d, 0.08f), Open(0.22f, new Vector3(0.14f, 0.04f, 0f), f, d, 0.08f),
                         Open(0.45f, new Vector3(-0.14f, 0.04f, 0f), f, d, 0.08f), Open(0.55f, new Vector3(-0.16f, 0.06f, 0f), f, d, 0.08f),
                         Open(1f, new Vector3(0.14f, 0.07f, 0f), f, d, 0.08f),
+                    };
+                }
+                case "cup_hands":
+                {
+                    // Step 10f: the village flame. Shown with both hands (mirrored): each comes in from its side, palm
+                    // turned toward the flame and fingers softly curled round it, holds there warming it, then lifts away.
+                    seconds = 3f;
+                    keyTime = 0.3f;
+                    Vector3 f = new Vector3(-0.15f, 0.45f, 1f), d = new Vector3(1f, 0.1f, 0.15f);
+                    return new List<Key>
+                    {
+                        Open(0f, new Vector3(0.05f, 0.025f, -0.01f), f, d, 0.2f), Open(0.25f, Vector3.zero, f, d, 0.38f),
+                        Open(0.5f, new Vector3(-0.003f, 0.002f, 0f), f, d, 0.42f), Open(0.75f, Vector3.zero, f, d, 0.38f),
+                        Open(1f, new Vector3(0.05f, 0.025f, -0.01f), f, d, 0.2f),
                     };
                 }
                 case "hands_up":

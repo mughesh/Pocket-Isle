@@ -1,6 +1,7 @@
 // Environment props (PropRecipe, baked by Tools > Pocket Isle > Props): banded toon lighting like Diorama/Toon, with
 // the colour picked per vertex from a 6-slot palette (uv0.x) that blends from the unrestored to the restored colours
 // by the global _RealmRestored. Glow-slot lights sputter dim at 0 and burn steady at 1; other glows scale with it.
+// Step 10f: warm spots (_WarmSpots, WarmSpots.cs) light and smoke the props inside them while the realm is cold.
 // Motion per piece (uv0.y):
 // sway, flicker (glow + wobble), steam (puffs in a loop around the piece centre, uv1), spin (step 10a: windmill
 // sails turning round the piece centre about +Z with the realm's wind) or fly (step 10a: kites on posts, only there and
@@ -69,6 +70,25 @@ Shader "Diorama/Prop"
     // grows only while the realm's wind blows) for spinning pieces.
     float _RealmStill;
     float _WindSpin;
+    // Step 10f (WarmSpots): up to 8 rekindled places on the showing map (a village flame, a lantern, the forge): props
+    // inside one burn and smoke as if restored while the realm is still cold. xy = map xz, z = radius (<= 0 = off), w = edge.
+    float4 _WarmSpots[8];
+    // Per vertex / fragment: how warm this prop is from the spots (set at the top of each stage, 0 = none).
+    static float sPropWarm;
+
+    // Spots are per instance (its origin), so the vertex stage works it out once and hands it to the fragment.
+    float PropWarm()
+    {
+        if (_RestoredSelf >= 0.0 || _WindowClip < 0.5) return 0.0;
+        float2 m = DioramaMapPoint(UNITY_MATRIX_M._m03_m13_m23, _WindowClip).xz;
+        float w = 0.0;
+        [unroll] for (int i = 0; i < 8; i++)
+        {
+            float4 s = _WarmSpots[i];
+            if (s.z > 0.0) w = max(w, saturate((s.z - distance(m, s.xy)) / max(1e-4, s.w)));
+        }
+        return w;
+    }
 
     struct PropAttributes
     {
@@ -92,6 +112,9 @@ Shader "Diorama/Prop"
         }
         return r;
     }
+
+    // Lights, glows and smoke: the restoration, or a warm spot over it (step 10f).
+    float PropLit() { return max(PropRestored(), sPropWarm); }
 
     float3 PropOrigin() { return UNITY_MATRIX_M._m03_m13_m23; }
 
@@ -125,7 +148,7 @@ Shader "Diorama/Prop"
         else if (m == 3) // steam: grows, rises, drifts and shrinks away, then starts again
         {
             float cyc = frac(t * 0.22 + hash);
-            size = sin(cyc * 3.14159) * PropRestored();
+            size = sin(cyc * 3.14159) * PropLit();
             float3 d = p - centre;
             d.x += sin(t * 2.0 + p.y * 10.0 + hash * 6.0) * amt * 0.5;
             p = centre + d * size + float3(sin(t * 0.7 + hash * 4.0) * amt, cyc * amt * 6.0, 0.0);
@@ -174,7 +197,8 @@ Shader "Diorama/Prop"
     {
         float3 rest = PropPick(s, _Slot0, _Slot1, _Slot2, _Slot3, _Slot4, _Slot5).rgb;
         float3 ash = PropPick(s, _Ash0, _Ash1, _Ash2, _Ash3, _Ash4, _Ash5).rgb;
-        return lerp(ash, rest, PropRestored());
+        // A warm spot brings most of the colour back too (step 10f), the realm's own restoration all of it.
+        return lerp(ash, rest, max(PropRestored(), sPropWarm * 0.7));
     }
 
     // Colour and glow of a fragment: the slot, or the tip slot on up-facing faces of the tips slot (tip = that mask),
@@ -183,6 +207,8 @@ Shader "Diorama/Prop"
     {
         slot = round(slot);
         c = PropSlotColor(slot);
+        // Step 10f: an unlit light (a cold kiln mouth, a dark window or lantern) is a dull ember, not the lit colour.
+        if (abs(slot - 4.0) < 0.5) c *= lerp(0.5, 1.0, PropLit());
         glow = PropGlow(slot);
         tip = 0.0;
         if (_Tips.w > 0.5 && abs(slot - _Tips.x) < 0.5)
@@ -208,7 +234,7 @@ Shader "Diorama/Prop"
     // glowing leaf tips pulse gently only when restored, everything else simply scales with the restoration.
     float PropGlowLevel(float slot, float tip, float hash, float flicker)
     {
-        float r = PropRestored();
+        float r = PropLit();
         if (abs(round(slot) - 4.0) < 0.5) return lerp(0.3 * PropSputter(hash), 1.0, r) * flicker;
         float pulse = 0.8 + 0.2 * sin(_Time.y * 1.7 + hash * 6.283);
         return r * lerp(flicker, pulse, tip);
@@ -242,6 +268,7 @@ Shader "Diorama/Prop"
                 float3 islandPos  : TEXCOORD3;
                 float4 paint      : TEXCOORD4; // slot, flicker, instance shade, -
                 float  height     : TEXCOORD5; // height within the piece 0..1
+                float  warm       : TEXCOORD6; // step 10f: warm spots
                 UNITY_VERTEX_INPUT_INSTANCE_ID
                 UNITY_VERTEX_OUTPUT_STEREO
             };
@@ -252,6 +279,8 @@ Shader "Diorama/Prop"
                 UNITY_SETUP_INSTANCE_ID(v);
                 UNITY_TRANSFER_INSTANCE_ID(v, o);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+                sPropWarm = PropWarm();
+                o.warm = sPropWarm;
                 float hash = PropHash();
                 float flicker, size;
                 float3 nOS = v.normalOS;
@@ -270,6 +299,7 @@ Shader "Diorama/Prop"
                 UNITY_SETUP_INSTANCE_ID(i);
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
                 DioramaWindowClip(i.islandPos, _WindowClip);
+                sPropWarm = i.warm;
 
                 float3 c;
                 float glow, tip;
@@ -290,7 +320,7 @@ Shader "Diorama/Prop"
                 float level = PropGlowLevel(i.paint.x, tip, i.paint.w, i.paint.y);
                 col += c * glow * level;
                 // Burning lights get a soft halo at their silhouette when restored.
-                col += c * glow * rim * 0.9 * PropRestored() * step(abs(round(i.paint.x) - 4.0), 0.5);
+                col += c * glow * rim * 0.9 * PropLit() * step(abs(round(i.paint.x) - 4.0), 0.5);
                 if (_WindowClip > 0.5) col = DioramaFocus(col, DioramaMapPoint(i.positionWS, _WindowClip).xz);
                 return float4(col, 1.0);
             }
@@ -318,6 +348,7 @@ Shader "Diorama/Prop"
                 float3 positionWS : TEXCOORD3;
                 float3 focus      : TEXCOORD4; // x gold, y white hover
                 float  height     : TEXCOORD5;
+                float  warm       : TEXCOORD6;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
                 UNITY_VERTEX_OUTPUT_STEREO
             };
@@ -328,6 +359,8 @@ Shader "Diorama/Prop"
                 UNITY_SETUP_INSTANCE_ID(v);
                 UNITY_TRANSFER_INSTANCE_ID(v, o);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+                sPropWarm = PropWarm();
+                o.warm = sPropWarm;
                 float flicker, size;
                 float3 nOS = v.normalOS;
                 float3 p = PropMotion(v.positionOS.xyz, nOS, v.uv0, v.uv1, PropHash(), flicker, size);
@@ -346,6 +379,7 @@ Shader "Diorama/Prop"
             {
                 UNITY_SETUP_INSTANCE_ID(i);
                 DioramaWindowClip(i.islandPos, _WindowClip);
+                sPropWarm = i.warm;
                 float3 c;
                 float glow;
                 float tip;
@@ -387,6 +421,7 @@ Shader "Diorama/Prop"
                 UNITY_SETUP_INSTANCE_ID(v);
                 UNITY_TRANSFER_INSTANCE_ID(v, o);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+                sPropWarm = PropWarm();
                 float flicker, size;
                 float3 nOS = v.normalOS;
                 float3 p = PropMotion(v.positionOS.xyz, nOS, v.uv0, v.uv1, PropHash(), flicker, size);

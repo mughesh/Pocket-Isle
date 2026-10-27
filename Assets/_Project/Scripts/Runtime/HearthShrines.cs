@@ -97,6 +97,31 @@ namespace Diorama
 
         public IReadOnlyList<Vector2Int> Shrines => _shrines;
 
+        // ---- step 10f: a dying flame ----
+
+        static readonly HashSet<(string, Vector2Int)> _dormant = new HashSet<(string, Vector2Int)>();
+
+        /// <summary>
+        /// Step 10f: a shrine whose flame is nearly out (Cinderwood's village, <see cref="FlameCupPiece"/>): no beacon, no
+        /// ring, no ghost palm; it can't be rested at (heal, save, lodge) until it's rekindled. Keyed by map name + anchor.
+        /// </summary>
+        public static void SetDormant(string map, Vector2Int anchor, bool dormant)
+        {
+            if (string.IsNullOrEmpty(map)) return;
+            if (dormant) _dormant.Add((map, anchor));
+            else _dormant.Remove((map, anchor));
+        }
+
+        public static bool IsDormant(string map, Vector2Int anchor) => map != null && _dormant.Contains((map, anchor));
+
+        [Tooltip("Step 10f: said once when someone tries to rest at a dormant shrine.")]
+        public string dormantLine = "cw.flame.cold";
+
+        bool Dormant(int i) => i >= 0 && i < _shrines.Count && _scanned != null && IsDormant(_scanned.name, _shrines[i]);
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetDormant() => _dormant.Clear();
+
         class Beacon
         {
             public Transform column, ring;
@@ -261,9 +286,24 @@ namespace Diorama
             var s = _shrines[i];
             var b = _beacons[i];
             Vector3 local = island.TileToLocal(Center(s), island.Content.capHeight + bowlHeight * island.map.tileSize);
+            bool dormant = Dormant(i);
             bool visible = outside && !window.IsZoomed && island.FootprintContains(local);
-            if (visible && !explorer.Locked) Dialogue.Say("shrine.first");
+            if (visible && !explorer.Locked && !dormant) Dialogue.Say("shrine.first");
             bool usable = visible && !_entering && !explorer.Locked;
+            if (dormant)
+            {
+                // Step 10f: the flame is nearly out (FlameCupPiece draws it). Trying to rest only gets the Spirit's line.
+                b.near = 0f;
+                bool resting = usable && palm.IsOver(island.transform.TransformPoint(local), island.transform.up, grabGuard, null);
+                b.hold = resting ? b.hold + Time.deltaTime : 0f;
+                if (b.hold >= holdSeconds * 2f && !string.IsNullOrEmpty(dormantLine)) Dialogue.Say(dormantLine);
+                if (b.column != null)
+                {
+                    b.column.gameObject.SetActive(false);
+                    b.ring.gameObject.SetActive(false);
+                }
+                return;
+            }
             bool near = usable && IsTouching(s, explorer.Tile);
             b.near = Mathf.MoveTowards(b.near, near ? 1f : 0f, Time.deltaTime * 3f);
             if (near) Dialogue.Say("shrine.near");
@@ -331,6 +371,7 @@ namespace Diorama
             var pick = new HeadGaze.ConePick(ray, _gazed);
             for (int i = 0; i < _shrines.Count; i++)
             {
+                if (Dormant(i)) continue;
                 Vector3 local = island.TileToLocal(Center(_shrines[i]), island.Content.capHeight + 0.8f * island.map.tileSize);
                 if (!island.FootprintContains(local)) continue;
                 pick.Consider(i, island.transform.TransformPoint(local), Mathf.Max(HeadGaze.MinRadius * island.transform.lossyScale.x, 0.9f * tile));
@@ -356,6 +397,12 @@ namespace Diorama
         {
             if (index < 0 || index >= _shrines.Count || _entering || !Outside) return;
             var s = _shrines[index];
+            if (Dormant(index))
+            {
+                Debug.Log($"[HearthShrines] {how} on the shrine c{s.x} r{s.y}: its flame is nearly out (rekindle it first).");
+                if (!string.IsNullOrEmpty(dormantLine)) Dialogue.Say(dormantLine);
+                return;
+            }
             if (IsTouching(s, explorer.Tile))
             {
                 Debug.Log($"[HearthShrines] {how} on the shrine c{s.x} r{s.y}.");
@@ -379,8 +426,9 @@ namespace Diorama
             if (_pending < 0 || _pending >= _shrines.Count) return;
             if (explorer.Destination.HasValue && explorer.Destination.Value != tile) return;
             var s = _shrines[_pending];
+            int pending = _pending;
             _pending = -1;
-            if (IsTouching(s, tile)) StartCoroutine(Enter(s));
+            if (IsTouching(s, tile) && !Dormant(pending)) StartCoroutine(Enter(s));
         }
 
         /// <summary>Flame flare, heal wave, save (Rested), then the swap into the lodge.</summary>

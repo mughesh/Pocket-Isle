@@ -179,6 +179,14 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
 - `cinder.restored` · once (the restoration wave outside)
   - Spirit: Cinderwood is warm again!
 
+Step 10f, Cinderwood's new hand moments (lesson lines stay pinned as a chip until the moment works once):
+- `cw.flame` · → puzzle:cw.flame (lesson at the kiln village's shrine, its flame nearly out; chip "Cup it!")
+  - Spirit: The village flame is fading! Keep it warm with your hands.
+- `cw.flame.cold` · once · → shrine (trying to rest at the shrine before it's rekindled)
+  - Spirit: It's too weak to rest by. Warm it up first!
+- `cw.flame.done` · once (the flame rekindled: the warmth rolls over the plaza)
+  - Spirit: It's burning! Look, the whole village is waking up.
+
 ## Galewick (wind, step 10a)
 - `gate.wind.first` · once · → gate:wind (first time the wind gate comes into the window, once it leads somewhere)
   - Spirit: Listen... no wind through this tunnel at all.

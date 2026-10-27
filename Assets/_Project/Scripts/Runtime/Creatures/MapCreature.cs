@@ -39,6 +39,23 @@ namespace Diorama
 
         public Vector2Int Tile => _tile;
 
+        /// <summary>
+        /// Step 10f: every map creature on <paramref name="map"/> within <paramref name="radius"/> tiles of
+        /// <paramref name="tile"/> hops on the spot (a cheer when the world wakes up). Returns how many.
+        /// </summary>
+        public static int HopNear(WorldMap map, Vector2 tile, float radius)
+        {
+            int n = 0;
+            foreach (var c in All)
+            {
+                if (c == null || c._view == null || c.map != null && c.map != map) continue;
+                if (((Vector2)c._tile - tile).magnitude > radius) continue;
+                c._view.Hop();
+                n++;
+            }
+            return n;
+        }
+
         /// <summary>Hides every map creature (battles: only the two fighters stand on the stage).</summary>
         public static bool HideAll { get; set; }
 

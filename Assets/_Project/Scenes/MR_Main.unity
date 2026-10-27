@@ -777,6 +777,7 @@ MonoBehaviour:
   holdSeconds: 0.8
   ghosts: {fileID: 1421177268}
   ghostClip: palm_hover
+  dormantLine: cw.flame.cold
 --- !u!4 &261742742
 Transform:
   m_ObjectHideFlags: 0
@@ -826,7 +827,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.IslandBuilder
   map: {fileID: 11400000, guid: 02a8766f02fce1f41867418f88b1c36b, type: 2}
-  world: {fileID: 11400000, guid: ab0469af29722704f949fec768f94b68, type: 2}
+  world: {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
   seed: 7
   column: {fileID: 2100000, guid: 9713c6c0478a20d42ad0c527671d1d01, type: 2}
   underside: {fileID: 2100000, guid: 93dba253338bffb44acaff7f568fcf55, type: 2}
@@ -1295,6 +1296,38 @@ MonoBehaviour:
   keeperSpot: {x: 4.5, y: 2.6}
   ringSize: 2.4
   firstLine: 
+--- !u!1 &359768276
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 359768277}
+  m_Layer: 0
+  m_Name: Cinderwood
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &359768277
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 359768276}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 694551495}
+  m_Father: {fileID: 1553131432}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &367221214
 GameObject:
   m_ObjectHideFlags: 0
@@ -2363,6 +2396,85 @@ Transform:
   m_Children: []
   m_Father: {fileID: 200327675}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &694551494
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 694551495}
+  - component: {fileID: 694551496}
+  m_Layer: 0
+  m_Name: Village Flame
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &694551495
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 694551494}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 359768277}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &694551496
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 694551494}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd2b1d9bbf4744a4dbedb76a5248c585, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.FlameCupPiece
+  id: cw.flame
+  map: {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
+  island: {fileID: 270959109}
+  window: {fileID: 270959113}
+  explorer: {fileID: 374318554}
+  grabGuard: {fileID: 270959111}
+  ghosts: {fileID: 1421177268}
+  fx: {fileID: 1078587927}
+  reach: 4
+  lessonLine: cw.flame
+  ghostClip: cup_hands
+  ghostScale: 1
+  lessonChip: Cup it!
+  shrine: {x: 24, y: 26}
+  flameHeight: 1.58
+  wispBase: 1.36
+  coldShrine: {fileID: 11400000, guid: a34b184df42d1c84cb306c917d5baf54, type: 2}
+  wisp: {fileID: 11400000, guid: 39d56a958cae75547b254abb9dd4500f, type: 2}
+  wispSize: {x: 0.75, y: 1.4}
+  radius: 0.1
+  facingAngle: 60
+  twoHandSeconds: 2
+  oneHandSeconds: 3
+  lookSeconds: 3
+  warmSlot: 0
+  villageCentre: {x: 15.5, y: 26.5}
+  villageRadius: 10
+  villageEdge: 1.5
+  pulseSeconds: 3
+  catchers:
+  - Kiln
+  - LanternPost
+  - ClayHut
+  doneLine: cw.flame.done
+  volume: 0.7
 --- !u!1 &733261508
 GameObject:
   m_ObjectHideFlags: 0
@@ -4515,6 +4627,7 @@ Transform:
   - {fileID: 569611148}
   - {fileID: 1542799535}
   - {fileID: 66748612}
+  - {fileID: 359768277}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1583412946

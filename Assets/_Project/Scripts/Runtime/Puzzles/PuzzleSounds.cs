@@ -6,7 +6,7 @@ namespace Diorama
     public static class PuzzleSounds
     {
         const int Rate = 44100;
-        static AudioClip _thud, _puff, _whoosh, _rumble, _breeze, _twang, _hoot;
+        static AudioClip _thud, _puff, _whoosh, _rumble, _breeze, _twang, _hoot, _crackle, _catch;
 
         /// <summary>A heavy wooden thud: low knock plus a short noisy body.</summary>
         public static AudioClip Thud => _thud != null ? _thud : _thud = Make("Puzzle Thud", 0.55f, (t, n) =>
@@ -62,6 +62,25 @@ namespace Diorama
             return 0.6f * (env1 * s1 + env2 * s2) + 0.04f * n * (env1 + env2);
         });
 
+        /// <summary>Step 10f: a fire crackling (a flame held in cupped hands, the forge roaring): soft roar with random pops.</summary>
+        public static AudioClip Crackle => _crackle != null ? _crackle : _crackle = Make("Puzzle Crackle", 1.2f, (t, n) =>
+        {
+            float env = Mathf.Min(1f, t / 0.1f) * Mathf.Clamp01((1.2f - t) / 0.3f);
+            // Pops: short noisy clicks on a hashed beat.
+            float beat = Mathf.Floor(t * 23f);
+            float hash = Mathf.Abs(Mathf.Sin(beat * 12.9898f) * 43758.5453f) % 1f;
+            float pop = hash > 0.72f ? Mathf.Exp(-(t * 23f - beat) * 14f) * n * 1.4f : 0f;
+            return env * (n * 0.22f + Mathf.Sin(2f * Mathf.PI * 55f * t) * 0.12f + pop);
+        });
+
+        /// <summary>Step 10f: a stone lantern catching: a short bright tick and a small flame puff.</summary>
+        public static AudioClip Catch => _catch != null ? _catch : _catch = Make("Puzzle Catch", 0.45f, (t, n) =>
+        {
+            float tick = Mathf.Exp(-t * 45f) * Mathf.Sin(2f * Mathf.PI * 1250f * t) * 0.35f;
+            float puff = Mathf.Min(1f, t / 0.03f) * Mathf.Exp(-t * 9f) * n * 0.55f;
+            return tick + puff;
+        });
+
         static AudioClip Make(string name, float seconds, System.Func<float, float, float> f)
         {
             int count = (int)(Rate * seconds);
@@ -80,6 +99,6 @@ namespace Diorama
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void ResetStatics() => _thud = _puff = _whoosh = _rumble = _breeze = _twang = _hoot = null;
+        static void ResetStatics() => _thud = _puff = _whoosh = _rumble = _breeze = _twang = _hoot = _crackle = _catch = null;
     }
 }

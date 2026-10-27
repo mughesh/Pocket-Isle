@@ -858,6 +858,36 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: Cinderwood is warm again!
+  - id: cw.flame
+    once: 0
+    priority: 2
+    note: lesson at the kiln village's shrine, its flame nearly out; chip "Cup it!"
+    target: puzzle:cw.flame
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The village flame is fading! Keep it warm with your hands.
+  - id: cw.flame.cold
+    once: 1
+    priority: 2
+    note: trying to rest at the shrine before it's rekindled
+    target: shrine
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: It's too weak to rest by. Warm it up first!
+  - id: cw.flame.done
+    once: 1
+    priority: 2
+    note: 'the flame rekindled: the warmth rolls over the plaza'
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: It's burning! Look, the whole village is waking up.
   - id: gate.wind.first
     once: 1
     priority: 2
