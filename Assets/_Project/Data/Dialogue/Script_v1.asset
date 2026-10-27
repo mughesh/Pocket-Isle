@@ -1819,51 +1819,237 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: Three! Something's waking up...
+  - id: heart.dream.fire
+    once: 1
+    objective: 0
+    priority: 2
+    note: the fire shard locks in
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 2
+      speakerName: Heart
+      text: ...I remember warmth. Kilns glowing all night long...
+  - id: heart.dream.wind
+    once: 1
+    objective: 0
+    priority: 2
+    note: the wind shard locks in
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 2
+      speakerName: Heart
+      text: ...I remember the wind. Kites so high they touched the clouds...
+  - id: heart.dream.water
+    once: 1
+    objective: 0
+    priority: 2
+    note: the water shard locks in
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 2
+      speakerName: Heart
+      text: ...I remember rain. Every pond full of lotus...
+  - id: spirit.dream.1
+    once: 1
+    objective: 0
+    priority: 2
+    note: after the first whisper
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Did the statue just... speak?
+  - id: spirit.dream.2
+    once: 1
+    objective: 0
+    priority: 2
+    note: after the second whisper
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: That voice... why does it feel like mine?
   - id: heart.wake
     once: 0
     objective: 0
     priority: 2
-    note: 
+    note: the Heart lifts its head
     target: 
     validWhile: 
     lines:
     - speaker: 2
       speakerName: Heart
-      text: ...Little light. You found your way back.
-    - speaker: 0
-      speakerName: Spirit
-      text: You... I know you. I'm part of you, aren't I?
-    - speaker: 2
-      speakerName: Heart
-      text: The world broke, and so did I. Show me it can be whole.
-  - id: heart.win
+      text: ...little light. You found your way home.
+  - id: spirit.finale.1
     once: 0
     objective: 0
     priority: 2
-    note: 
+    note: the Spirit floats before the Heart's empty forehead
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: I think... I'm a piece of it. Its light.
+  - id: spirit.finale.2
+    once: 0
+    objective: 1
+    priority: 2
+    note: pinned; chip "Hold out your hand"
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: I have to go back. Will you take me?
+  - id: spirit.finale.hand
+    once: 0
+    objective: 1
+    priority: 2
+    note: the Spirit sits on your palm; chip "Lift it to the Heart"
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Lift me up to the Heart. Gently.
+  - id: spirit.finale.wait
+    once: 0
+    objective: 0
+    priority: 2
+    note: '30 s and nothing happened: it never forces it'
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: It's okay. Whenever you're ready.
+  - id: spirit.finale.3
+    once: 0
+    objective: 0
+    priority: 2
+    note: as it leaves your palm
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Thank you, big one. For everything.
+  - id: heart.thanks
+    once: 0
+    objective: 0
+    priority: 2
+    note: its eyes open, the hub answers
     target: 
     validWhile: 
     lines:
     - speaker: 2
       speakerName: Heart
-      text: You've grown strong, little light. And you, guardian.
-    - speaker: 0
-      speakerName: Spirit
-      text: I'll miss you, big one. Come and visit, okay?
-    - speaker: 0
-      speakerName: Spirit
-      text: I'll be right here. In the middle of everything.
-  - id: end
+      text: Guardian. You carried the world in your hands.
+  - id: heart.friends
     once: 0
     objective: 0
     priority: 2
-    note: 
+    note: 'the Hall of Fame: your party comes out'
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 2
+      speakerName: Heart
+      text: And these are the friends who carried it with you.
+  - id: spark.hello
+    once: 0
+    objective: 0
+    priority: 2
+    note: a new spark hops out of your explorer's lantern
     target: 
     validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: (glows, slots into the Heart's forehead)
+      text: ...hello again. I'll always be in your light.
+  - id: heart.collection
+    once: 0
+    objective: 0
+    priority: 2
+    note: 'poke the Heart or look at it + pinch: the collection card shows'
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 2
+      speakerName: Heart
+      text: Every friend you make warms the world a little more.
+  - id: heart.collection.full
+    once: 0
+    objective: 0
+    priority: 2
+    note: every realm's roster complete
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 2
+      speakerName: Heart
+      text: Every Isling of every realm. The world is whole, guardian.
+  - id: spark.rare.cinder
+    once: 0
+    objective: 0
+    priority: 2
+    note: 'the Spark''s idle hint: Cinderwood still has Islings to meet'
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: I heard something rare by the kiln ruins...
+  - id: spark.rare.gale
+    once: 0
+    objective: 0
+    priority: 2
+    note: Galewick still has Islings to meet
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Something's fluttering in the high grass of Galewick...
+  - id: spark.rare.lily
+    once: 0
+    objective: 0
+    priority: 2
+    note: Lilymere still has Islings to meet
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: I saw ripples in the Lilymere reeds. Someone's hiding!
+  - id: keeper.spar
+    once: 0
+    objective: 0
+    priority: 2
+    note: 'poke a calm Keeper: Spar? / Not now'
+    target: hallKeeper
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: It wants a friendly match! Spar?
+  - id: keeper.spar.bow
+    once: 0
+    objective: 0
+    priority: 2
+    note: after the friendly match, win or lose
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: What a match! It bows to you.
   - id: quick.gift
     once: 1
     objective: 0

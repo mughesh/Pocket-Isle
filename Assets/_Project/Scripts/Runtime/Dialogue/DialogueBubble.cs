@@ -56,8 +56,19 @@ namespace Diorama
         public float heightAbove = 0.045f;
         public Color spiritColor = new Color(1f, 0.965f, 0.89f, 0.97f);
         public Color keeperColor = new Color(0.97f, 0.85f, 0.71f, 0.97f);
-        public Color heartColor = new Color(0.86f, 0.92f, 0.84f, 0.97f);
+        public Color heartColor = new Color(1f, 0.97f, 0.86f, 0.94f);
         public Color outlineColor = new Color(0.23f, 0.16f, 0.12f, 1f);
+
+        [Header("Step 13: the Heart's voice (no tail, soft gold-white, letters fade in slowly, no typing ticks)")]
+        [Tooltip("The Heart's soft gold edge and text.")]
+        public Color heartGlow = new Color(0.98f, 0.82f, 0.45f, 1f);
+        public Color heartText = new Color(0.42f, 0.3f, 0.12f, 1f);
+        [Tooltip("Text size as a share of the font size.")]
+        public float heartFontScale = 1.12f;
+        [Tooltip("Letters per second (slow: it whispers).")]
+        public float heartCharsPerSecond = 16f;
+        [Tooltip("Each letter fades in over this many letters' time.")]
+        public float heartFadeChars = 7f;
 
         [Header("Pointing at a target")]
         [Tooltip("Width share of the bubble while the line points at something.")]
@@ -116,6 +127,7 @@ namespace Diorama
         Vector3 _resolved;
         bool _hasResolved;
         bool _objective;
+        bool _heart;
         Mesh _targetMesh;
         BoundsClipper _clipper;
         PokeInteractable _poke;
@@ -344,6 +356,7 @@ namespace Diorama
             _objective = objective;
             _anchor = anchor;
             _line = line;
+            _heart = line.speaker == DialogueSpeaker.Heart;
             _chipText = string.IsNullOrEmpty(chip) ? null : chip;
             _popStart = -1f;
             _root.gameObject.SetActive(true);
@@ -351,7 +364,7 @@ namespace Diorama
 
             _chars = line.text.Length;
             _text.maxVisibleCharacters = 0;
-            _typeSeconds = _chars / Mathf.Max(1f, charsPerSecond);
+            _typeSeconds = _chars / Mathf.Max(1f, CharsPerSecond);
             _holdSeconds = HoldSeconds(_chars, holdBase, holdPerChar);
             _shownAt = Time.time;
             _blipAt = 0;
@@ -360,6 +373,8 @@ namespace Diorama
             for (int i = 0; i < 2; i++) _wasPinching[i] = true; // a pinch already held doesn't skip
             Place(true);
         }
+
+        float CharsPerSecond => _heart ? heartCharsPerSecond : charsPerSecond;
 
         /// <summary>Step 11d: the pinned line's chip text changes (a counter); a chip already showing is laid out again.</summary>
         public void SetChip(string chip)
@@ -384,6 +399,9 @@ namespace Diorama
             // Step 12a: objectives read bold behind a target icon; chatter is a little smaller and plain.
             _text.fontSize = chip ? fontSize * chipFontScale : _objective ? fontSize : fontSize * chatterScale;
             _text.fontStyle = _objective ? FontStyles.Bold : FontStyles.Normal;
+            // Step 13: the Heart speaks a little larger, in warm brown-gold.
+            if (_heart && !chip) _text.fontSize = fontSize * heartFontScale;
+            _text.color = _heart ? heartText : outlineColor;
             bool target = _objective && !chip;
             if (target) width -= iconSize + padding.x * 0.6f;
             var pref = _text.GetPreferredValues(text, width, 1f);
@@ -417,12 +435,13 @@ namespace Diorama
             _panel.localScale = new Vector3(_size.x, _size.y, 1f);
             float tail = 0.016f;
             _tail.localScale = new Vector3(tail, tail, 1f);
+            _tail.gameObject.SetActive(!_heart);
             PlaceTail();
             _clipper.Size = new Vector3(_size.x, _size.y, 0.02f);
 
             var back = _line.speaker == DialogueSpeaker.Keeper ? keeperColor : _line.speaker == DialogueSpeaker.Heart ? heartColor : spiritColor;
             // Objectives: a gold border (thinner and rounder since the Oct 28 notes: "feels blocky"); chatter: plain cream.
-            Color edge = _objective ? objectiveGold : outlineColor;
+            Color edge = _heart ? heartGlow : _objective ? objectiveGold : outlineColor;
             Paint(_panelRenderer, back, _size.x / _size.y, Mathf.Min(0.45f, (chip ? 0.5f * _size.y : _objective ? 0.02f : 0.012f) / _size.y), (_objective ? 0.0026f : 0.0018f) / _size.y, edge);
             Paint(_tailRenderer, back, 1f, 0.1f, 0.12f, edge);
         }
@@ -506,7 +525,7 @@ namespace Diorama
         /// <summary>Audio hookup: a wordless voice blip every 3 typed characters (Spirit, Keeper, Heart each their own).</summary>
         void Blip(int shown)
         {
-            if (_chip || shown < _blipAt + 3 || shown >= _chars) return;
+            if (_chip || _heart || shown < _blipAt + 3 || shown >= _chars) return;
             _blipAt = shown;
             string id = _line.speaker == DialogueSpeaker.Keeper ? Diorama.Audio.AudioIds.VoiceKeeper
                 : _line.speaker == DialogueSpeaker.Heart ? Diorama.Audio.AudioIds.VoiceHeart : Diorama.Audio.AudioIds.SpiritBlip;
@@ -531,7 +550,8 @@ namespace Diorama
                 return;
             }
             float t = Time.time - _shownAt;
-            _text.maxVisibleCharacters = _chip ? 99999 : Mathf.Min(_chars, Mathf.CeilToInt(t * charsPerSecond));
+            _text.maxVisibleCharacters = _chip ? 99999 : Mathf.Min(_chars, Mathf.CeilToInt(t * CharsPerSecond));
+            if (_heart && !_chip) FadeLetters(t);
             Blip(_text.maxVisibleCharacters);
             _appear = Mathf.Min(1f, t / 0.15f);
             Place(false);
@@ -543,6 +563,26 @@ namespace Diorama
             }
             GazePinch();
             if (_chipText != null) UpdateChip(t);
+        }
+
+        /// <summary>Step 13: the Heart's letters fade in one after another instead of popping in.</summary>
+        void FadeLetters(float t)
+        {
+            _text.maxVisibleCharacters = 99999;
+            _text.ForceMeshUpdate();
+            var info = _text.textInfo;
+            float at = t * heartCharsPerSecond;
+            bool changed = false;
+            for (int i = 0; i < info.characterCount; i++)
+            {
+                var c = info.characterInfo[i];
+                if (!c.isVisible) continue;
+                byte a = (byte)(255f * Mathf.Clamp01((at - i) / Mathf.Max(1f, heartFadeChars)));
+                var colors = info.meshInfo[c.materialReferenceIndex].colors32;
+                for (int v = 0; v < 4; v++) colors[c.vertexIndex + v].a = a;
+                changed = true;
+            }
+            if (changed) _text.UpdateVertexData(TMP_VertexDataUpdateFlags.Colors32);
         }
 
         /// <summary>Pinned: the full line for <see cref="chipAfter"/>, then the chip; looking at it or the Spirit reopens it.</summary>

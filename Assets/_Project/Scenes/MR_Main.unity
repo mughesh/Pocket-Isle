@@ -243,6 +243,11 @@ MonoBehaviour:
   shardColor: {r: 0.42, g: 0.88, b: 0.32, a: 1}
   drawsStatue: 0
   targetName: statueSocketWind
+  statueLitRecipe: {fileID: 0}
+  statueAwakeRecipe: {fileID: 0}
+  breathe: 0.014
+  breathSeconds: 4.5
+  voiceHeight: 2.6
   grabRadius: 0.07
   snapRadius: 0.06
   placedLine: hub.shard.placed
@@ -715,8 +720,13 @@ MonoBehaviour:
   heightAbove: 0.045
   spiritColor: {r: 1, g: 0.965, b: 0.89, a: 0.97}
   keeperColor: {r: 0.97, g: 0.85, b: 0.71, a: 0.97}
-  heartColor: {r: 0.86, g: 0.92, b: 0.84, a: 0.97}
+  heartColor: {r: 1, g: 0.97, b: 0.86, a: 0.94}
   outlineColor: {r: 0.23, g: 0.16, b: 0.12, a: 1}
+  heartGlow: {r: 0.98, g: 0.82, b: 0.45, a: 1}
+  heartText: {r: 0.42, g: 0.3, b: 0.12, a: 1}
+  heartFontScale: 1.12
+  heartCharsPerSecond: 16
+  heartFadeChars: 7
   sideWidth: 0.6
   sideMaxLines: 2
   sideGap: 0.012
@@ -2674,6 +2684,11 @@ MonoBehaviour:
   shardColor: {r: 1, g: 0.6, b: 0.3, a: 1}
   drawsStatue: 1
   targetName: statueSocket
+  statueLitRecipe: {fileID: 11400000, guid: 6783c879f9ec75c4a94338b01963eda7, type: 2}
+  statueAwakeRecipe: {fileID: 11400000, guid: 55a9e7827163364479df02381a92c49a, type: 2}
+  breathe: 0.014
+  breathSeconds: 4.5
+  voiceHeight: 2.6
   grabRadius: 0.07
   snapRadius: 0.06
   placedLine: hub.shard.placed
@@ -4639,6 +4654,11 @@ MonoBehaviour:
   shardColor: {r: 0.4, g: 0.65, b: 1, a: 1}
   drawsStatue: 0
   targetName: statueSocketWater
+  statueLitRecipe: {fileID: 0}
+  statueAwakeRecipe: {fileID: 0}
+  breathe: 0.014
+  breathSeconds: 4.5
+  voiceHeight: 2.6
   grabRadius: 0.07
   snapRadius: 0.06
   placedLine: hub.shard.placed

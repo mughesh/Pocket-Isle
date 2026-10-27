@@ -351,15 +351,55 @@ Step 11b, the hand moments (lesson lines stay pinned as a chip until the moment 
   - Spirit: Two shards. I can almost remember something.
 - `statue.shard.3`
   - Spirit: Three! Something's waking up...
-- `heart.wake`
-  - Heart: ...Little light. You found your way back.
-  - Spirit: You... I know you. I'm part of you, aren't I?
-  - Heart: The world broke, and so did I. Show me it can be whole.
-- `heart.win`
-  - Heart: You've grown strong, little light. And you, guardian.
-  - Spirit: I'll miss you, big one. Come and visit, okay?
-  - Spirit: I'll be right here. In the middle of everything.
-- `end` · Spirit: (glows, slots into the Heart's forehead)
+Step 13: each shard that locks in makes the statue whisper a memory in the Heart's voice (its own bubble: no tail, soft
+gold-white, letters fading in), then the Spirit answers. The third starts the finale (FinaleDirector).
+- `heart.dream.fire` · once (the fire shard locks in)
+  - Heart: ...I remember warmth. Kilns glowing all night long...
+- `heart.dream.wind` · once (the wind shard locks in)
+  - Heart: ...I remember the wind. Kites so high they touched the clouds...
+- `heart.dream.water` · once (the water shard locks in)
+  - Heart: ...I remember rain. Every pond full of lotus...
+- `spirit.dream.1` · once (after the first whisper)
+  - Spirit: Did the statue just... speak?
+- `spirit.dream.2` · once (after the second whisper)
+  - Spirit: That voice... why does it feel like mine?
+
+## Finale (step 13)
+The third shard wakes the statue: it becomes the Heart of the World. Walking, wild battles and the menu's Title wait.
+- `heart.wake` (the Heart lifts its head)
+  - Heart: ...little light. You found your way home.
+- `spirit.finale.1` (the Spirit floats before the Heart's empty forehead)
+  - Spirit: I think... I'm a piece of it. Its light.
+- `spirit.finale.2` · objective (pinned; chip "Hold out your hand")
+  - Spirit: I have to go back. Will you take me?
+- `spirit.finale.hand` · objective (the Spirit sits on your palm; chip "Lift it to the Heart")
+  - Spirit: Lift me up to the Heart. Gently.
+- `spirit.finale.wait` (30 s and nothing happened: it never forces it)
+  - Spirit: It's okay. Whenever you're ready.
+- `spirit.finale.3` (as it leaves your palm)
+  - Spirit: Thank you, big one. For everything.
+- `heart.thanks` (its eyes open, the hub answers)
+  - Heart: Guardian. You carried the world in your hands.
+- `heart.friends` (the Hall of Fame: your party comes out)
+  - Heart: And these are the friends who carried it with you.
+- `spark.hello` (a new spark hops out of your explorer's lantern)
+  - Spirit: ...hello again. I'll always be in your light.
+
+## Post-game (step 13)
+- `heart.collection` (poke the Heart or look at it + pinch: the collection card shows)
+  - Heart: Every friend you make warms the world a little more.
+- `heart.collection.full` (every realm's roster complete)
+  - Heart: Every Isling of every realm. The world is whole, guardian.
+- `spark.rare.cinder` (the Spark's idle hint: Cinderwood still has Islings to meet)
+  - Spirit: I heard something rare by the kiln ruins...
+- `spark.rare.gale` (Galewick still has Islings to meet)
+  - Spirit: Something's fluttering in the high grass of Galewick...
+- `spark.rare.lily` (Lilymere still has Islings to meet)
+  - Spirit: I saw ripples in the Lilymere reeds. Someone's hiding!
+- `keeper.spar` · → hallKeeper (poke a calm Keeper: Spar? / Not now)
+  - Spirit: It wants a friendly match! Spar?
+- `keeper.spar.bow` (after the friendly match, win or lose)
+  - Spirit: What a match! It bows to you.
 
 ## Quick Journey (step 9g, the quick save slot only)
 - `quick.gift` · once (after the capture lesson, in the hub; two pods fly from the Spirit to the rim)

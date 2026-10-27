@@ -33,6 +33,9 @@ namespace Diorama.EditorTools
             void Add(PropRecipe r) => all[r.name] = r;
 
             Add(Statue());
+            // Step 13: the statue wakes a little with each shard (drawn by the statue socket once one is placed).
+            Add(Statue(StatueLitName, 1));
+            Add(Statue(StatueAwakeName, 2));
             var archShapes = ArchShapes();
             Add(FireGate(archShapes));
             Add(WaterGate());
@@ -149,9 +152,18 @@ namespace Diorama.EditorTools
         /// round its side, a mossy shawl over the shoulders, faint gold light in a few cracks, and three empty round
         /// sockets on its chest with dim red / blue / white rims.
         /// </summary>
-        static PropRecipe Statue()
+        /// <summary>Step 13: the statue with one shard placed (its closed eyes glow faintly) and with two (moss sways too).</summary>
+        public const string StatueLitName = "StatueLit", StatueAwakeName = "StatueAwake";
+
+        static PropRecipe Statue() => Statue("Statue", 0);
+
+        /// <summary>
+        /// Step 13: <paramref name="stage"/> 1 adds faint gold light in the closed eyes (Glow slot, lit with the cracks
+        /// once a shard is in), 2 also lets the moss sway (the socket adds the slow breathing).
+        /// </summary>
+        static PropRecipe Statue(string name, int stage)
         {
-            var statue = Recipe("Statue", new Vector2Int(3, 3), true, false, 6000);
+            var statue = Recipe(name, new Vector2Int(3, 3), true, false, 6000);
             statue.palette = Palette(H("#C8533E", 0.25f), H("#4F86C6", 0.25f), H("#BDB5A5"), HubMoss, H("#FFCB6B", 0.65f), StatueWindRim);
             statue.yawJitter = 0f;
             statue.scaleJitter = 0f;
@@ -190,7 +202,8 @@ namespace Diorama.EditorTools
                     Ell(new Vector3(0f, 2.3f, 0.12f), new Vector3(0.24f, 0.08f, 0.24f)).Bumps(0.012f, 18f),
                     Ell(new Vector3(0.45f, 0.72f, -0.3f), new Vector3(0.2f, 0.08f, 0.3f), 0.06f).Bumps(0.012f, 18f),
                     Ell(new Vector3(0.85f, 0.13f, 0.75f), new Vector3(0.32f, 0.05f, 0.22f), 0.05f).Bumps(0.012f, 20f),
-                    Ell(new Vector3(-0.7f, 0.13f, -0.85f), new Vector3(0.36f, 0.05f, 0.22f), 0.05f).Bumps(0.012f, 20f)), PropSlot.Leaf),
+                    Ell(new Vector3(-0.7f, 0.13f, -0.85f), new Vector3(0.36f, 0.05f, 0.22f), 0.05f).Bumps(0.012f, 20f)), PropSlot.Leaf,
+                    stage >= 2 ? PropMotion.Sway : PropMotion.None, stage >= 2 ? 0.035f : 0f),
                 Piece(PShape("Statue_Cracks",
                     Ell(new Vector3(-0.12f, 2.24f, 0.4f), new Vector3(0.02f, 0.11f, 0.04f), 0f, new Vector3(-30f, 0f, 22f)),
                     Ell(new Vector3(0.42f, 1.05f, 0.25f), new Vector3(0.022f, 0.17f, 0.05f), 0f, new Vector3(0f, -50f, -20f)),
@@ -201,8 +214,23 @@ namespace Diorama.EditorTools
                 Piece(PShape("Statue_RimWater", Torus(StatueSockets[1] + new Vector3(0f, 0f, 0.02f), 0.085f, 0.018f, new Vector3(90f, 0f, 0f), 0f)), PropSlot.Wood),
                 Piece(PShape("Statue_RimWind", Torus(StatueSockets[2] + new Vector3(0f, 0f, 0.02f), 0.085f, 0.018f, new Vector3(90f, 0f, 0f), 0f)), PropSlot.Accent),
             };
+            if (stage >= 1)
+                // The closed eyes: a thin gold line inside each carved lid.
+                statue.pieces.Add(Piece(PShape("Statue_Eyes",
+                    Ell(new Vector3(0.17f, 2.045f, 0.5f), new Vector3(0.075f, 0.014f, 0.05f), 0f, new Vector3(0f, 0f, -15f)).Mirror()), PropSlot.Glow, PropMotion.Flicker, 0.001f));
             EditorUtility.SetDirty(statue);
             return statue;
+        }
+
+        /// <summary>Step 13: writes and bakes the statue's wake stages (the finale setup; the hub writer writes them too).</summary>
+        internal static void WriteStatueStages()
+        {
+            foreach (var r in new[] { Statue(StatueLitName, 1), Statue(StatueAwakeName, 2) })
+            {
+                EditorUtility.SetDirty(r);
+                AssetDatabase.SaveAssets();
+                PropBaker.Bake(r);
+            }
         }
 
         // ---- gates (2 x 1, +Z faces the player; the opening is x -0.52..0.52, up to y ~1.45) ----

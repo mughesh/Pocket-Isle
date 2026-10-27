@@ -15,6 +15,11 @@ namespace Diorama
     /// statue then and this draws it (glowing) with the shard in its socket.
     /// Step 10e: one socket per shard (<see cref="HandPuzzle.id"/> = the shard's id: fire, wind). The statue is drawn
     /// once, by the socket with <see cref="drawsStatue"/>, with every placed socket's rim lit.
+    /// Step 13: a shard locking in makes the statue whisper a memory in the Heart's voice (<see cref="FinaleLogic.WhisperLines"/>,
+    /// its own bubble rising from the statue's head: <see cref="HeartVoice"/>), then the Spirit answers. The statue wakes a
+    /// little with each: one placed = its closed eyes glow faintly (<see cref="statueLitRecipe"/>), two = it breathes
+    /// slowly and its moss sways (<see cref="statueAwakeRecipe"/>), three = the finale (<see cref="FinaleDirector"/>, which
+    /// hides it with <see cref="HideStatue"/> once the Heart stands there).
     /// </summary>
     [DefaultExecutionOrder(-20)]
     public class StatueSocket : HandPuzzle
@@ -37,6 +42,16 @@ namespace Diorama
         public bool drawsStatue = true;
         [Tooltip("Dialogue target name (one per socket).")]
         public string targetName = "statueSocket";
+
+        [Header("Step 13: the statue wakes (drawing socket only)")]
+        [Tooltip("One shard placed: the closed eyes glow faintly. Empty = Statue Recipe.")]
+        public PropRecipe statueLitRecipe;
+        [Tooltip("Two placed: the moss sways (and the statue breathes). Empty = the lit one.")]
+        public PropRecipe statueAwakeRecipe;
+        [Tooltip("Breathing with two placed: height pulse (share) and seconds per breath.")]
+        public float breathe = 0.014f, breathSeconds = 4.5f;
+        [Tooltip("The Heart's voice: its bubble rises from this high above the statue's base (tiles).")]
+        public float voiceHeight = 2.6f;
 
         [Header("Grab")]
         [Tooltip("World metres round the shard.")]
@@ -69,6 +84,19 @@ namespace Diorama
         bool _statueHidden;
 
         static readonly List<StatueSocket> All = new List<StatueSocket>();
+
+        /// <summary>Step 13: the finale's Heart stands in the statue's place (the statue isn't drawn; the shards ride the Heart).</summary>
+        public static bool HideStatue;
+        /// <summary>Step 13: the statue shakes this much while it wakes (tiles).</summary>
+        public static float Shake;
+        /// <summary>Step 13: a shard locked in (the socket, shards placed now).</summary>
+        public static event System.Action<StatueSocket, int> Placed;
+        /// <summary>Step 13: where the Heart's voice comes from (above the statue's head; the Heart moves it to its own).</summary>
+        public static Transform HeartVoice { get; private set; }
+
+        /// <summary>Step 13: the statue's middle on the map (column, row) and its turn (the Heart stands there too).</summary>
+        public Vector2 Center => StatueCenter;
+        public float Yaw => statueYaw;
 
         /// <summary>The scene's socket for shard <paramref name="id"/>, inactive ones too (editor tools, the bridge).</summary>
         public static StatueSocket FindById(string id)
@@ -143,6 +171,12 @@ namespace Diorama
                 go.SetActive(false);
             }
             Dialogue.RegisterTarget(targetName, () => Here ? LessonSocketWorld : (Vector3?)null, k => { }, () => 0.5f * TileWorld);
+            if (drawsStatue && HeartVoice == null)
+            {
+                HeartVoice = new GameObject("Heart Voice").transform;
+                HeartVoice.SetParent(island.transform, false);
+                Dialogue.RegisterSpeaker(DialogueSpeaker.Heart, HeartVoice);
+            }
             base.Start();
         }
 
@@ -154,6 +188,11 @@ namespace Diorama
             _statue?.Destroy();
             if (_ring != null) Destroy(_ring.gameObject);
             if (_quad != null) Destroy(_quad);
+            if (drawsStatue && HeartVoice != null)
+            {
+                Destroy(HeartVoice.gameObject);
+                HeartVoice = null;
+            }
             if (map != null && drawsStatue) map.SetPropHidden(statueAnchor, false);
         }
 
@@ -170,7 +209,7 @@ namespace Diorama
         void SyncStatue(bool force)
         {
             if (!drawsStatue || map == null) return;
-            bool hide = PlacedCount > 0;
+            bool hide = PlacedCount > 0 || HideStatue;
             if (!force && hide == _statueHidden) return;
             _statueHidden = hide;
             map.SetPropHidden(statueAnchor, hide);
@@ -279,10 +318,11 @@ namespace Diorama
             int placed = PlacedCount;
             Debug.Log($"[StatueSocket] {id} locks into the statue: {placed} / 3 placed.");
             yield return new WaitForSeconds(0.8f);
-            if (!string.IsNullOrEmpty(placedLine)) Dialogue.Say(placedLine);
-            string next = placed >= 3 && !string.IsNullOrEmpty(threeLine) ? threeLine
-                : placed == 2 && !string.IsNullOrEmpty(twoLine) ? twoLine : moreLine;
-            if (!string.IsNullOrEmpty(next)) Dialogue.Say(next);
+            // Step 13: the statue whispers a memory (the Heart's voice), the Spirit answers; the third starts the finale.
+            var lines = FinaleLogic.WhisperLines(id, placed);
+            foreach (var line in lines) Dialogue.Say(line);
+            Debug.Log($"[StatueSocket] Whisper: {string.Join(", ", lines)}.");
+            Placed?.Invoke(this, placed);
         }
 
         void Draw(bool here)
@@ -309,11 +349,19 @@ namespace Diorama
                 b.x += 0.6f + 0.8f * pulse;
                 _statue.glowBoostA = a;
                 _statue.glowBoostB = b;
-                _statue.Place(StatueCenter, 0f, rot, here && PlacedCount > 0);
+                // Step 13: it wakes a little with each shard; it breathes with two; it shakes while the finale wakes it.
+                int stage = FinaleLogic.StatueStage(PlacedCount);
+                var look = stage >= 2 && statueAwakeRecipe != null ? statueAwakeRecipe : stage >= 1 && statueLitRecipe != null ? statueLitRecipe : statueRecipe;
+                if (look != null) _statue.SetRecipe(look);
+                float breath = stage >= 2 ? 1f + breathe * Mathf.Sin(Time.time * Mathf.PI * 2f / Mathf.Max(0.5f, breathSeconds)) : 1f;
+                Vector2 shake = Shake > 0f ? new Vector2(Mathf.Sin(Time.time * 47f), Mathf.Sin(Time.time * 39f + 1f)) * Shake : Vector2.zero;
+                _statue.Place(StatueCenter + shake, 0f, rot, here && PlacedCount > 0 && !HideStatue, new Vector3(1f, breath, 1f));
             }
+            if (drawsStatue && HeartVoice != null && island.Content != null)
+                HeartVoice.position = MapToWorld(new Vector3(StatueCenter.x, voiceHeight, StatueCenter.y));
             if (_shard != null)
             {
-                bool show = here && (_hand >= 0 || _flying || solved);
+                bool show = here && (_hand >= 0 || _flying || solved && !HideStatue);
                 Vector3 world = solved && !_flying ? SocketWorld : _shardWorld;
                 // Big in the hand, socket size as it nears the socket.
                 float big = holder != null ? holder.offerMetres : 0.026f * 0.8f;
@@ -339,6 +387,15 @@ namespace Diorama
                     _ringRenderer.SetPropertyBlock(_block);
                 }
             }
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStatics()
+        {
+            HideStatue = false;
+            Shake = 0f;
+            Placed = null;
+            HeartVoice = null;
         }
 
         /// <summary>Debug (bridge): the shard goes into the socket as if carried there.</summary>
