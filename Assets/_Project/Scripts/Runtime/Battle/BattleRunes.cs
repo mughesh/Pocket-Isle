@@ -140,6 +140,21 @@ namespace Diorama
 
         void OnDestroy() => Destroy(_quad);
 
+        // Step 12c (Oct 28 notes: the bubble sat over a rune and ate the press): the Spirit's bubble keeps off shown runes.
+        void OnEnable() => DialogueBubble.KeepClear += KeepClear;
+
+        void OnDisable() => DialogueBubble.KeepClear -= KeepClear;
+
+        void KeepClear(System.Collections.Generic.List<Vector4> keep)
+        {
+            foreach (var r in _runes)
+            {
+                if (r == null || !r.shown || r.root == null) continue;
+                var p = r.root.position;
+                keep.Add(new Vector4(p.x, p.y, p.z, runeSize.x * 0.55f * r.root.lossyScale.x));
+            }
+        }
+
         void Build()
         {
             _row = new GameObject("Rune Row").transform;

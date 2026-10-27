@@ -5,8 +5,8 @@ namespace Diorama
     /// <summary>
     /// Step 12b (Note: "out door of temple doesn't look like a door"): inside any interior (the Keeper halls, the lodge)
     /// the way out reads as a door: the 11d door glow (a warm portal swirl and a gold ring on the threshold) on the exit
-    /// tiles, and a gold arrow on the floor pointing out. Calm while the room still has something to do; bright gold once
-    /// its Keeper is calmed (the lodge's is always on).
+    /// tiles, and a gold arrow on the floor pointing out, once its Keeper is calmed (the lodge's is always on). Oct 28 notes:
+    /// while the Keeper still needs you it stays dark (a bright arch on arrival hid the explorer and pointed the wrong way).
     /// </summary>
     public class ExitDoorGuide : MonoBehaviour
     {
@@ -87,7 +87,7 @@ namespace Diorama
         void LateUpdate()
         {
             if (_glow == null) return;
-            bool on = Exit(out var a, out var b, out bool done);
+            bool on = Exit(out var a, out var b, out bool done) && done;
             var map = island.Content;
             Vector2 mid = (a + b) * 0.5f;
             // Out = toward the nearer edge row (the halls' door is on the near edge, the lodge's on the far one).

@@ -421,10 +421,33 @@ namespace Diorama.EditorTools
             var tree = Recipe("LagoonTree", new Vector2Int(1, 1), true, true, 900);
             if (calm != null) tree.pieces = new List<PropPiece>(calm.pieces);
             else Debug.LogError("[PropKit] CalmTree missing (hub props): LagoonTree has no shape.");
-            tree.palette = Palette(TempleStone, C("#6A5844"), TempleStone, C("#5FA06A"), Sand, C("#A6D49A"));
+            tree.palette = LagoonTreePalette();
             tree.tips = new PropTips { on = true, onSlot = PropSlot.Leaf, tipSlot = PropSlot.Accent, at = 0.55f, byHeight = 0.8f };
             tree.scaleJitter = 0.14f;
             return tree;
+        }
+
+        /// <summary>Step 12c: willow teal leaves with pale aqua tips, a cool grey-brown trunk (was Galewick's meadow green).</summary>
+        static PropColor[] LagoonTreePalette() => Palette(TempleStone, C("#5E5650"), TempleStone, C("#3F8F8A"), Sand, C("#8FD0C4"));
+
+        /// <summary>
+        /// Step 12c (Oct 28 notes: Lilymere and Galewick shared one palette): the Lilymere theme and its willow trees in
+        /// the wetland look, rebaked. Run by the 12c setup; the full Lilymere prop kit writes the same.
+        /// </summary>
+        internal static void WriteLilymereLook()
+        {
+            var tree = Load("LagoonTree");
+            var reeds = Load("ReedClump");
+            if (tree == null || reeds == null)
+            {
+                Debug.LogError("[PropKit] LagoonTree / ReedClump missing (run the Lilymere prop kit first).");
+                return;
+            }
+            tree.palette = LagoonTreePalette();
+            EditorUtility.SetDirty(tree);
+            WriteLilymereTheme(tree, reeds);
+            AssetDatabase.SaveAssets();
+            PropBaker.Bake(tree);
         }
 
         static void WriteLilymereTheme(PropRecipe tree, PropRecipe reeds)
@@ -432,21 +455,22 @@ namespace Diorama.EditorTools
             var theme = Asset<RealmTheme>($"{Root}/Themes/Lilymere.asset");
             var baseLook = new ThemeColors
             {
-                // The path is a warm tan, the dry lagoon bed drought mud (step 12b: ochre-brown, was near-white; sunk), so
-                // walkable reads apart and a cream rain cloud stands out against it.
-                grass = Hex("#8FC77A"), tallGrass = Hex("#B7B26A"), path = Hex("#D6B987"),
-                water = Hex("#5FB8C4"), hotSpring = Hex("#7FD0E0"), dryBed = DroughtMud,
-                shortBase = Hex("#5E9A5A"), shortTip = Hex("#A8D58E"), tallBase = Hex("#8E8A48"), tallTip = Hex("#D2CC80"),
-                dirt = Hex("#C9C0A8"), underside = Hex("#8E9E9A"),
-                trunk = Hex("#6A5844"), leavesLow = Hex("#5FA06A"), leavesHigh = Hex("#8CC48A"), rock = Hex("#A9B8B0"),
+                // Step 12c: a wetland, not Galewick's meadow: teal-green grass and willows, blue-grey stones and reeds,
+                // pale stone paths and deeper blue water so the lake reads apart from the grass. The dry lagoon bed is
+                // drought mud (12b), so walkable reads apart and a cream rain cloud stands out against it.
+                grass = Hex("#73C2A8"), tallGrass = Hex("#80B3A8"), path = Hex("#D9CFB5"),
+                water = Hex("#4A93D6"), hotSpring = Hex("#7FD0E0"), dryBed = DroughtMud,
+                shortBase = Hex("#428C82"), shortTip = Hex("#94DBC9"), tallBase = Hex("#4D7D80"), tallTip = Hex("#A8D4D1"),
+                dirt = Hex("#B5B8B0"), underside = Hex("#7891A3"),
+                trunk = Hex("#5C5A55"), leavesLow = Hex("#3D8A8C"), leavesHigh = Hex("#73C2BA"), rock = Hex("#9EB0C4"),
                 leafGlow = 0f, outlineTint = Color.white,
             };
             // Unrestored: the lagoon is still and a little grey (the shader's ripples are off too).
             var still = baseLook;
-            still.water = Color.Lerp(Hex("#5FB8C4"), Hex("#9AA9AC"), 0.4f);
+            still.water = Color.Lerp(Hex("#4A93D6"), Hex("#9AA9AC"), 0.4f);
             theme.unrestored = still;
             theme.restored = Map(baseLook, Warmer, 0.1f);
-            theme.restored.water = Hex("#5FB8C4");
+            theme.restored.water = Hex("#4A93D6");
             theme.restored.dryBed = baseLook.dryBed;
             theme.startRestored = 0f;
             theme.treeProp = tree;

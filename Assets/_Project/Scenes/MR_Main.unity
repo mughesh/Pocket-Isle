@@ -1836,7 +1836,7 @@ MonoBehaviour:
   cubeSize: 0.018
   walkSeconds: 0.4
   runSeconds: 0.2
-  smartSeconds: 0.53
+  smartSeconds: 0.4
   continuousSeconds: 0.4
   smartTiles: 5
   doubleSwipeSeconds: 0.45
@@ -2413,8 +2413,8 @@ MonoBehaviour:
   gusts: {fileID: 1589595547}
   corridor: 0.2
   puffScale: 2.7
-  puffHeight: 2.5
-  bob: 0.18
+  puffHeight: 0.6
+  bob: 0.1
   sway: 0.3
   spin: 9
   billow: 0.07

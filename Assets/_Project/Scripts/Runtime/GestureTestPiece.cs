@@ -58,7 +58,7 @@ namespace Diorama
 
         [Header("Smart steps (step 12a)")]
         [Tooltip("Seconds per tile on a smart step (one swipe).")]
-        public float smartSeconds = 0.53f;
+        public float smartSeconds = 0.4f;
         [Tooltip("Seconds per tile when walking on (two quick swipes).")]
         public float continuousSeconds = 0.4f;
         [Tooltip("Most tiles one swipe walks.")]

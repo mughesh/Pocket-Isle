@@ -16,6 +16,7 @@ namespace Diorama
         // Reused between searches (main thread only).
         static readonly Dictionary<Vector2Int, Vector2Int> CameFrom = new Dictionary<Vector2Int, Vector2Int>();
         static readonly Dictionary<Vector2Int, int> Cost = new Dictionary<Vector2Int, int>();
+        static readonly Dictionary<Vector2Int, int> StepsTo = new Dictionary<Vector2Int, int>();
         static readonly List<(int f, int h, Vector2Int tile)> Open = new List<(int, int, Vector2Int)>();
 
         /// <summary>
@@ -23,29 +24,43 @@ namespace Diorama
         /// (excluding the start, including the goal). False when the goal is blocked, unreachable or more than
         /// <paramref name="maxSteps"/> steps away; <paramref name="path"/> is then empty.
         /// </summary>
-        public static bool Find(IslandMap map, Vector2Int from, Vector2Int to, List<Vector2Int> path, int maxSteps = DefaultMaxSteps)
+        public static bool Find(IslandMap map, Vector2Int from, Vector2Int to, List<Vector2Int> path, int maxSteps = DefaultMaxSteps) =>
+            Find(map, from, to, path, maxSteps, 1);
+
+        /// <summary>
+        /// Like <see cref="Find(IslandMap, Vector2Int, Vector2Int, List{Vector2Int}, int)"/>, but a step onto a tile that
+        /// isn't road costs <paramref name="offRoadCost"/>, so the path keeps to the roads (the Spirit's trail).
+        /// </summary>
+        public static bool FindAlongRoads(IslandMap map, Vector2Int from, Vector2Int to, List<Vector2Int> path, int maxSteps, int offRoadCost = 4) =>
+            Find(map, from, to, path, maxSteps, Mathf.Max(1, offRoadCost));
+
+        static bool Find(IslandMap map, Vector2Int from, Vector2Int to, List<Vector2Int> path, int maxSteps, int offRoadCost)
         {
             path.Clear();
             if (map == null || from == to || !map.CanWalk(to) || Manhattan(from, to) > maxSteps) return false;
             CameFrom.Clear();
             Cost.Clear();
+            StepsTo.Clear();
             Open.Clear();
             Cost[from] = 0;
+            StepsTo[from] = 0;
             Push(Manhattan(from, to), Manhattan(from, to), from);
             while (Open.Count > 0)
             {
                 var tile = Pop();
                 if (tile == to) break;
-                int g = Cost[tile] + 1;
-                if (g > maxSteps) continue;
+                int steps = StepsTo[tile] + 1;
+                if (steps > maxSteps) continue;
                 foreach (var s in Steps)
                 {
                     var n = tile + s;
+                    int g = Cost[tile] + (offRoadCost > 1 && map.At(n.y, n.x) != IslandMap.Path ? offRoadCost : 1);
                     if (Cost.TryGetValue(n, out int old) && old <= g) continue;
                     // Don't wander further than the step budget allows (keeps the search small on a big map).
                     int h = Manhattan(n, to);
-                    if (g + h > maxSteps || !map.CanWalk(n)) continue;
+                    if (steps + h > maxSteps || !map.CanWalk(n)) continue;
                     Cost[n] = g;
+                    StepsTo[n] = steps;
                     CameFrom[n] = tile;
                     Push(g + h, h, n);
                 }

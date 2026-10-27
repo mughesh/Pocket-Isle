@@ -27,7 +27,7 @@ namespace Diorama
         public float puffHeight = 0.6f;
         [Header("Step 12b: clouds in the air")]
         [Tooltip("Gentle bob up and down (tiles), side-to-side drift (tiles), slow turn (degrees a second), billow (share of size).")]
-        public float bob = 0.18f;
+        public float bob = 0.1f;
         public float sway = 0.3f;
         public float spin = 9f;
         public float billow = 0.07f;
@@ -232,7 +232,8 @@ namespace Diorama
             float size = puffScale * (0.45f + 0.55f * Mathf.Max(thick, 0.2f)) * fade * (1f + billow * Mathf.Sin(t * 1.3f));
             var tile = Centre(i) + new Vector2(-_drift[i].x, _drift[i].y) * 2f + new Vector2(sway * Mathf.Sin(t * 0.45f), 0f);
             float h = puffHeight + 0.15f * (1f - fade) + bob * Mathf.Sin(t * 0.9f);
-            bool show = Here && size > 0.02f;
+            // Oct 28: not in a battle (the battle's zoomed stage blew the puffs up across it).
+            bool show = Here && size > 0.02f && (gusts == null || gusts.encounters == null || !gusts.encounters.InBattle);
             v.Place(tile, h, Quaternion.Euler(0f, 37f * i + spin * Time.time, 0f), show, size);
             Shadow(i, show, tile, size, fade);
         }

@@ -81,12 +81,15 @@ Shader "Diorama/GoldMark"
                 return (length(q) - 1.0) * min(r.x, r.y);
             }
 
-            // One foot: a sole and a smaller toe pad, as a distance (negative inside).
+            // One foot pointing +v, as a distance (negative inside): a small heel behind, a broad forefoot and three toes
+            // ahead (Oct 28 notes: the old sole + one pad read as a heel in front, "reversed").
             float Foot(float2 p, float2 c)
             {
-                float sole = Ellipse(p, c, float2(0.2, 0.34));
-                float toe = Ellipse(p, c + float2(0.0, 0.46), float2(0.15, 0.12));
-                return min(sole, toe);
+                float heel = Ellipse(p, c + float2(0.0, -0.26), float2(0.12, 0.14));
+                float ball = Ellipse(p, c + float2(0.0, 0.08), float2(0.17, 0.22));
+                float toes = min(Ellipse(p, c + float2(-0.11, 0.39), float2(0.055, 0.06)),
+                             min(Ellipse(p, c + float2(0.0, 0.43), float2(0.06, 0.065)), Ellipse(p, c + float2(0.11, 0.39), float2(0.055, 0.06))));
+                return min(min(heel, ball), toes);
             }
 
             half4 frag(Varyings i) : SV_Target
@@ -104,8 +107,8 @@ Shader "Diorama/GoldMark"
                 }
                 else if (_Mode > 0.5)
                 {
-                    // Footprints: left foot behind, right foot ahead.
-                    d = min(Foot(p, float2(-0.3, -0.45)), Foot(p, float2(0.3, 0.05)));
+                    // Footprints: left foot behind, right foot ahead, toes toward the walk (+v).
+                    d = min(Foot(p, float2(-0.3, -0.4)), Foot(p, float2(0.3, 0.1)));
                     glow = 0.0;
                 }
                 else

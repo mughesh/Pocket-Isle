@@ -421,9 +421,9 @@ namespace Diorama
             _clipper.Size = new Vector3(_size.x, _size.y, 0.02f);
 
             var back = _line.speaker == DialogueSpeaker.Keeper ? keeperColor : _line.speaker == DialogueSpeaker.Heart ? heartColor : spiritColor;
-            // Objectives: a gold border twice as thick; chatter: the plain cream bubble.
+            // Objectives: a gold border (thinner and rounder since the Oct 28 notes: "feels blocky"); chatter: plain cream.
             Color edge = _objective ? objectiveGold : outlineColor;
-            Paint(_panelRenderer, back, _size.x / _size.y, Mathf.Min(0.45f, (chip ? 0.5f * _size.y : 0.012f) / _size.y), (_objective ? 0.0036f : 0.0018f) / _size.y, edge);
+            Paint(_panelRenderer, back, _size.x / _size.y, Mathf.Min(0.45f, (chip ? 0.5f * _size.y : _objective ? 0.02f : 0.012f) / _size.y), (_objective ? 0.0026f : 0.0018f) / _size.y, edge);
             Paint(_tailRenderer, back, 1f, 0.1f, 0.12f, edge);
         }
 
@@ -737,7 +737,8 @@ namespace Diorama
             if (d.z > 1e-4f)
             {
                 Vector3 hit = o + d * (-o.z / d.z);
-                looking = Mathf.Abs(hit.x) < _size.x * 0.6f && Mathf.Abs(hit.y) < _size.y * 0.8f;
+                // Step 12c: only the panel itself (it used to reach past its edges and take pinches meant for runes or tiles).
+                looking = Mathf.Abs(hit.x) < _size.x * 0.5f && Mathf.Abs(hit.y) < _size.y * 0.5f;
             }
             IsGazed = looking;
             for (int h = 0; h < 2; h++)

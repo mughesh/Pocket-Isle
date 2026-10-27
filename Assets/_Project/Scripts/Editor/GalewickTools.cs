@@ -460,7 +460,8 @@ namespace Diorama.EditorTools
                 Ground(x, 47, IslandMap.Path);
                 Ground(x, 48, IslandMap.Path);
                 Ground(x, 46, IslandMap.Rock);
-                Ground(x, 49, IslandMap.Tree);
+                // Oct 28 notes ("looks like it blocked the road"): never over the road north to the tower (columns 19-20).
+                Ground(x, 49, x > 20 ? IslandMap.Tree : IslandMap.Path);
             }
             // Clouds parked on the hills either side (the bank on the path comes in 10b).
             foreach (var (x, y) in new[] { (27, 44), (16, 46), (30, 42), (13, 49) }) Prop(x, y, KCloud);

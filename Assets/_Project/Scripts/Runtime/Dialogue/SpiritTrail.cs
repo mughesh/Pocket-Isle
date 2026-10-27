@@ -93,7 +93,7 @@ namespace Diorama
         {
             if (!Active) return false;
             var goal = NextGoal(island.world);
-            if (!goal.HasValue || !ExplorerPath.Find(island.world, explorer.Tile, goal.Value, _path, 400) || _path.Count <= 1)
+            if (!goal.HasValue || !ExplorerPath.FindAlongRoads(island.world, explorer.Tile, goal.Value, _path, 400) || _path.Count <= 1)
             {
                 Debug.Log($"[SpiritTrail] {why}: no goal to show{(goal.HasValue ? $" (c{goal.Value.x} r{goal.Value.y} not reachable or here)" : "")}.");
                 _goal = null;
@@ -185,7 +185,7 @@ namespace Diorama
             if (Time.time - _pathAt > 0.5f)
             {
                 _pathAt = Time.time;
-                if (!ExplorerPath.Find(island.world, explorer.Tile, _goal.Value, _path, 400)) _path.Clear();
+                if (!ExplorerPath.FindAlongRoads(island.world, explorer.Tile, _goal.Value, _path, 400)) _path.Clear();
             }
         }
 
