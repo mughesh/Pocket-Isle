@@ -19,9 +19,10 @@ The app appears in the library under **Unknown Sources**.
 - **Controllers:** the left controller's menu button, then **Dev**.
 - **Unity Editor:** F2 opens the panel directly (Esc opens the game menu).
 
-The panel opens about an arm's length in front of you, a little toward your main hand. It stays where it is; turn well
-away and it comes back in front. **To move it**, pinch its edge, any side, like the island's rim (or point at the frame just outside it and pinch) and drag;
-it opens at that spot from then on, until the app closes. Close it with **Tools > Close** (or F2).
+The panel opens above the island's far corner on your main hand's side, facing you, and follows only when the island
+moves. **To move it**, pinch its edge, any side, like the island's rim (or point at the frame just outside it and pinch) and drag;
+it opens at that spot from then on, until the app closes. Close it with the **X** in its top-right corner (or F2).
+Long tabs have **Up / Down** buttons on the right.
 
 Press a button by **poking it** with a fingertip, or by **pointing at it** (a thin line from your hand shows up when it
 points at the panel) **and pinching**. Some buttons ask for a second press to confirm (new game, reset story, load,
@@ -29,19 +30,33 @@ clear storage): they turn red, press again within 3 seconds.
 
 ## 3. What each tab does
 
+Each tab is split into groups under gold headings.
+
 | Tab | Buttons |
 |---|---|
-| **Go to** | Teleports the explorer. Hub: start, shrine, statue, first grass, the three gates. Cinderwood (CW): arrival, village, shrine, springs, ruins, log, forge door. **Forge Hall** goes inside (the Keeper meets you there). Not during a battle. |
-| **Party** | Heal all. Lead level -1 / +1 / +5. All to Lv 5 / 10 / 15. **Team of 3** at Lv 8 or 10 (your starter + Steambara, the Water Isling, + a fire Isling; the others go to storage). Lv 8 is the Keeper fight as tuned (about 2 in 3 wins), Lv 10 is easy. Clear storage. **One-hit KO** (your hits knock anything out). **Invincible** (your Islings take no damage). Species picker: `< Species >`, `Lv -1 / +1`, **Add to party**. |
-| **Encounter** | Same species picker, then **Fight now** for a wild battle on the spot. Wild battles on / off. Rare x10. |
+| **Travel** (was Go to) | Teleports the explorer. Hub: start, shrine, statue, first grass, the three gates. Cinderwood (CW): arrival, village, shrine, springs, ruins, log, forge door. **Forge Hall** goes inside (the Keeper meets you there). Not during a battle. |
+| **Team** (was Party) | Heal all. Lead level -1 / +1 / +5. All to Lv 5 / 10 / 15. **Team of 3** at Lv 8 or 10 (your starter + Steambara, the Water Isling, + a fire Isling; the others go to storage). Lv 8 is the Keeper fight as tuned (about 2 in 3 wins), Lv 10 is easy. Clear storage. Species picker: `< Species >`, `Lv -1 / +1`, **Add to party**. |
+| **Battle** (was Encounter) | Same species picker, then **Fight now** for a wild battle on the spot. **One-hit KO** (your hits knock anything out). **Invincible** (your Islings take no damage). Wild battles on / off. Rare x10. |
 | **Story** | Skip / reset the tutorial. **Replay opening** (a new game). Cinderwood restored on / off. Log placed / fallen. Forge + door lit / cold. Keeper calm / frightened. Fire shard held / none. Shard in the statue on / off. Reset all story. *Story buttons save, change the save and reload the game: wait 2-3 seconds.* |
 | **Save** | **Save 1-3** keep a snapshot; **Load 1-3** go back to one (reloads). **Load auto** = the snapshot taken automatically before the last new game. **New game** (in the slot you are playing). Show save path. **Quick: start / at gift / at gate / at temple** jump into the Quick Journey slot: the opening, the hub right before the gift, the fire gate after the gift, the forge door with the log placed. The line at the bottom shows which slot you play and the Quick Journey timer. |
-| **Tools** | FPS counter. Debug readouts (lines and numbers for us, off at start). Time x1 / x2 / x4. Walk x2. Debug labels. Record ghost (the next missing ghost-hand clip, for Mugesh). **Report bug**. Close. |
+| **Tools** | FPS counter. Debug readouts (lines and numbers for us, off at start). Time x1 / x2 / x4. Walk x2. Debug labels. Record ghost (the next missing ghost-hand clip, for Mugesh). **Report bug**. (Close is now the X.) |
 
 Cheats (one-hit KO, invincible, wild battles off, rare x10, time and walk speed) last until the app closes. They are
 never saved.
 
-## 4. What's new in this build (step 12a, Oct 27 night: walking and guidance)
+## 4. What's new in this build (step 12c, Oct 28)
+
+- Walking is a little faster (same speed as look + pinch). Footprints now point the way you walk.
+- The gold trail follows the roads.
+- In battle the Spirit's bubble keeps off the attack runes.
+- Inside the Keeper halls the way out only glows once the Keeper is calm.
+- Galewick: the ridge clouds sit on the road again; the road up to the tower is clear.
+- Lilymere has its own colours (teal and blue).
+- **Lilymere's waterfall:** the falls come from a bowl on top of a rocky cliff. Scoop water from the inlet with **one
+  cupped hand**, carry it over the cliff and tip your hand: two pours melt the falls.
+- The dev panel is reorganised (see above).
+
+## Earlier (step 12a, Oct 27 night: walking and guidance)
 
 - **Walking works differently now.** One thumb swipe walks a few tiles (up to 5) along the path and stops on its own:
   at a fork, near something to do, before a gate, at the edge of tall grass. Gold footprints show where it will go.

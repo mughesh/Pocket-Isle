@@ -3,7 +3,38 @@
 Prompt: `Prompts/run-oct27-night.md`. Flat Editor Play through the bridge plus EditMode tests (222/222). **Nothing tested
 with real hands or on the headset.** No pushes. **No APK** (Mugesh, mid-run: "dont make a build").
 
-## Done / partly / not started
+## Update, Oct 28 after midnight: step 12c (Mugesh's midnight test notes + the 12b left-overs)
+Notes: `Assets/Docs/Notes copy.md` + 7 screenshots. Flat Editor Play + synthetic hands only; tests 222/222. No APK.
+
+| Commit | What | State |
+|---|---|---|
+| `3a8f4ac` | Smart steps at the pinch-walk speed (0.4 s a tile); footprints redrawn (heel behind, toes ahead); the Spirit's trail keeps to roads; battle runes keep the bubble off them, the bubble only takes gaze on the panel; objective border thinner / rounder; hall exit glow + arrow only once the Keeper is calmed; ridge clouds back on the road (0.6 tiles, bob 0.1) and hidden in battles; the road north of the ridge open again (two trees on it); Lilymere wetland palette (teal grass + willows, blue-grey stones, deeper blue water) | done, flat-checked |
+| `cfe7470` | Dev panel rework: higher, beside the island (dominant hand), X to close, tabs Travel / Team / Battle / Story / Save / Tools with gold headings, full names, Up / Down scroll | done, flat-checked |
+| `2370a1b` | 12b D11-D13: cliff with a carved bowl, the frozen fall from its lip into the stone basin (now the catch pool), pours fill the bowl (half / full), spill, cracks race down; water sheet across the palms + pouring stream; ghost `cup_carry` carries from the inlet to the bowl | done, flat-checked |
+| `210d80f` | After Mugesh's test ("two hands bad, one hand kind of worked"): **one hand only**, bigger palm pool, easier tip (-0.25), pouring anywhere over the bowl / fall / pool counts; one-hand ghost. Two hands stay behind **Two Hands** on Scoop And Pour | done, flat-checked |
+| | D10 drought details (wet tint, puddles, salt rims, garden shallow water) | **skipped** (Mugesh) |
+
+Decisions:
+- "Keep the door on the right" read as "glow only at the right time" (after the Keeper). If it meant moving the hall
+  door to the right side, that's still open.
+- The footprint "reversed" note was the shape: the old sole + one pad read as a heel in front. New prints point +v.
+- Trail: A* with off-road steps costing 4, so it keeps to roads but still cuts across when there's no road.
+- The bubble in battle wasn't visible in my flat shots, so its keep-off-the-runes move is **untested**.
+
+Headset test (12c):
+1. Walking speed; footprints point the way you walk.
+2. Gold trail follows the road.
+3. Battle: the Spirit's bubble never covers a rune; pokes on runes always land.
+4. Forge Hall / tower hall: no bright arch on arrival; the exit glows once the Keeper is calm.
+5. Galewick ridge: clouds sit on the road and drift; the road north to the tower is clear.
+6. Lilymere: new colours; at the basin, scoop with **one** cupped hand, tip anywhere near the cliff: two pours run the falls.
+7. Dev panel: opens above the island's right corner, X closes, Up / Down scroll a long tab.
+
+New feel numbers: Scoop And Pour > Tip Up -0.25, Basin Radius 1.8, Basin Above 0.35, Palm Pool 0.036 m, Sheet Dome
+0.012; Dev Panel > Beside Height 0.08, Beside Gap -0.12, Beside Back 0.08, size 42 x 36 cm; Cloud Bank > Puff Height
+0.6, Bob 0.1; Explorer > Smart Seconds 0.4.
+
+## Done / partly / not started (12a + 12b, before the update)
 
 | Step | Section | State | Commit |
 |---|---|---|---|
