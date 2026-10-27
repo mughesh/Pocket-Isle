@@ -68,6 +68,13 @@ namespace Diorama
         [Tooltip("Credits: each tablet's seconds (rise, read, sink), and how high it rises over the far rim (island metres, from / to).")]
         public float tabletSeconds = 5.2f;
         public Vector2 tabletRise = new Vector2(0.1f, 0.27f);
+        [Header("Post-game (step 13 D)")]
+        [Tooltip("The Spar? / Not now runes for the Keeper rematch (the Quick Journey's end board).")]
+        public RuneBoard runes;
+        [Tooltip("The collection card stays this long after a poke (s).")]
+        public float collectionSeconds = 7f;
+        [Tooltip("The Spark's hint comes this long after arriving in a realm with Islings still to meet (s), once a session.")]
+        public float hintAfter = 15f;
         [TextArea(1, 3)] public string[] credits =
         {
             "Pocket Isle", "Made by Mugesh\n(Heisenberg: The XR Guy)", "Islings, realms and Keepers:\noriginal designs",
@@ -121,6 +128,15 @@ namespace Diorama
 
         void Start()
         {
+            // Step 13 D: every Keeper hall gets the friendly rematch.
+            foreach (var hall in FindObjectsByType<KeeperHall>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                if (hall.GetComponent<KeeperRematch>() == null)
+                {
+                    var r = hall.gameObject.AddComponent<KeeperRematch>();
+                    r.hall = hall;
+                    r.encounters = encounters;
+                    r.runes = runes;
+                }
             if (island == null || window == null || explorer == null || heart == null || spirit == null || party == null || hub == null)
             {
                 Debug.LogError("[FinaleDirector] Needs the island, window, explorer, Heart, Spirit, party and the hub (Set Up MR_Main (13 finale)).", this);
@@ -189,6 +205,135 @@ namespace Diorama
             if (_readySince < 0f) _readySince = Time.time;
             if (Time.time - _readySince < 1.2f) return;
             StartCoroutine(Run(step));
+        }
+
+        void LateUpdate()
+        {
+            if (!Running && Done) PostGame();
+            else if (_collection != null) _collection.Hide();
+        }
+
+        // ---- post-game (step 13 D) ----
+
+        StoneTablet _collection;
+        float _collectionUntil = -1f, _rosterAt, _sparkleAt, _arrivedAt;
+        readonly bool[] _complete = new bool[3];
+        readonly int[] _caught = new int[3], _total = new int[3];
+        readonly HashSet<string> _hinted = new HashSet<string>();
+        WorldMap _world;
+
+        /// <summary>Realm index (Cinderwood, Galewick, Lilymere) -> the crown piece / gate element.</summary>
+        static readonly string[] GateIds = { "fire", "wind", "water" };
+        static readonly string[] HintIds = { "spark.rare.cinder", "spark.rare.gale", "spark.rare.lily" };
+
+        void PostGame()
+        {
+            if (Time.time >= _rosterAt) Rosters(out _);
+            bool onHub = heart.Showing;
+            if (onHub && PokedHeart()) ShowCollection();
+            // The card floats over the Heart's crown while it shows.
+            if (_collection != null)
+            {
+                float a = Mathf.Clamp01((_collectionUntil - Time.time) / 0.6f);
+                if (onHub && a > 0f) _collection.Place(heart.HeadPointWorld(new Vector3(0f, 3.3f, 0.3f)), IslandScale, a);
+                else _collection.Hide();
+            }
+            // A completed roster: its crown piece wears a halo, its gate sparkles gold.
+            var crown = Vector3.one;
+            for (int i = 0; i < 3; i++)
+                if (_complete[i]) crown[i == 0 ? 0 : i == 1 ? 2 : 1] = 1.6f + 0.6f * Mathf.Sin(Time.time * 2.4f + i);
+            heart.crown = crown;
+            if (onHub && fx != null && Time.time >= _sparkleAt)
+            {
+                _sparkleAt = Time.time + 0.45f;
+                for (int i = 0; i < 3; i++)
+                {
+                    if (!_complete[i]) continue;
+                    foreach (var g in hub.gates)
+                        if (g.id == GateIds[i]) fx.Burst(MapWorld(InWindow(new Vector2(g.tile.x + 0.5f, g.tile.y)), Random.Range(0.3f, 1.6f)), 4, Gold, Unit * 0.8f, 0.9f, Unit * 0.05f, Vector3.up, -Unit);
+                }
+            }
+            SparkHint();
+        }
+
+        /// <summary>Caught of each realm's roster (cached a couple of seconds); true when all three are complete.</summary>
+        bool Rosters(out string line)
+        {
+            _rosterAt = Time.time + 2f;
+            var caught = new HashSet<string>(save != null ? save.Caught : (IEnumerable<string>)new string[0]);
+            var parts = new List<(string, int, int)>();
+            bool all = true;
+            for (int i = 0; i < 3; i++)
+            {
+                var map = realms != null && i < realms.Length ? realms[i] : null;
+                var roster = FinaleLogic.Roster(map);
+                _total[i] = roster.Count;
+                _caught[i] = FinaleLogic.CaughtOf(roster, caught);
+                _complete[i] = _total[i] > 0 && _caught[i] >= _total[i];
+                all &= _complete[i];
+                if (map != null) parts.Add((FinaleLogic.RealmName(map.realm), _caught[i], _total[i]));
+            }
+            line = FinaleLogic.CollectionLine(parts);
+            return all;
+        }
+
+        /// <summary>A fingertip on the Heart's head or chest, or look + pinch on it.</summary>
+        bool PokedHeart()
+        {
+            if (Time.time < _pokeAt) return false;
+            bool poked = GazeOnHeart();
+            for (int h = 0; h < 2 && !poked; h++)
+            {
+                var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
+                if (!HandLookup.TryGetJoint(hand, HandJointId.HandIndexTip, out var tip)) continue;
+                poked = (tip - heart.HeadPointWorld(new Vector3(0f, 2.1f, 0.4f))).magnitude < 0.7f * Unit ||
+                        (tip - heart.ChestWorld).magnitude < 0.6f * Unit;
+            }
+            if (poked) _pokeAt = Time.time + 2f;
+            return poked;
+        }
+
+        float _pokeAt;
+
+        /// <summary>The Isling collection per realm over the Heart, and a warm line.</summary>
+        public void ShowCollection()
+        {
+            bool all = Rosters(out var line);
+            if (_collection == null) _collection = new StoneTablet("Collection card", island.transform, hudMaterial, island.gameObject.layer);
+            _collection.Set("Isling collection\n" + line, 0.15f, 0.5f, new Vector2(0.02f, 0.014f));
+            _collectionUntil = Time.time + collectionSeconds;
+            heart.nod = 0f;
+            StartCoroutine(Nod());
+            Dialogue.Say(all ? "heart.collection.full" : "heart.collection");
+            Debug.Log($"[FinaleDirector] Collection: {line}{(all ? " (complete)" : "")}.");
+        }
+
+        IEnumerator Nod()
+        {
+            for (float t = 0f; t < 1.4f; t += Time.deltaTime)
+            {
+                heart.nod = 9f * Mathf.Sin(t / 1.4f * Mathf.PI);
+                yield return null;
+            }
+            heart.nod = 0f;
+        }
+
+        /// <summary>The Spark's hint: in a realm with Islings still to meet, a little while after arriving (once a session).</summary>
+        void SparkHint()
+        {
+            var world = island.world;
+            if (world != _world)
+            {
+                _world = world;
+                _arrivedAt = Time.time;
+            }
+            if (realms == null || SceneSwap.IsInside || Dialogue.IsTalking || Time.time - _arrivedAt < hintAfter) return;
+            for (int i = 0; i < realms.Length && i < 3; i++)
+            {
+                if (realms[i] != world || _complete[i] || !_hinted.Add(HintIds[i])) continue;
+                Dialogue.Say(HintIds[i]);
+                Debug.Log($"[FinaleDirector] The Spark's hint in {world.name}: {_caught[i]}/{_total[i]} met.");
+            }
         }
 
         // ---- the sequence ----
@@ -642,6 +787,7 @@ namespace Diorama
             _guests.Clear();
             foreach (var c in _cards) c.Destroy();
             _cards.Clear();
+            if (_collection != null) _collection.Destroy();
             _labels.Clear();
             if (_ring != null) Destroy(_ring.gameObject);
         }

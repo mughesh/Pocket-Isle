@@ -223,6 +223,48 @@ namespace Diorama.EditorTools
             Debug.Log($"[Step13Debug] Shot {name} armed for {moment}.");
         }
 
+        /// <summary>Post-game: poke the Heart (the collection card).</summary>
+        public static void Collection()
+        {
+            var f = Finale;
+            if (f != null) f.ShowCollection();
+        }
+
+        /// <summary>Post-game: every species of the realm in arg (cinderwood / galewick / lilymere) caught (the gate sparkles).</summary>
+        public static void CatchAll()
+        {
+            var f = Finale;
+            var save = Find<GameSave>();
+            if (f == null || save == null) return;
+            var caught = (HashSet<string>)typeof(GameSave).GetField("_caught", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(save);
+            foreach (var m in f.realms)
+                if (m != null && m.realm == Arg)
+                    foreach (var s in FinaleLogic.Roster(m)) caught.Add(SpeciesRegistry.IdOf(s));
+            Debug.Log($"[Step13Debug] Caught every {Arg} species: {caught.Count} caught.");
+        }
+
+        /// <summary>Every realm's Keeper calmed (the halls' Keepers rest; the rematch can be asked).</summary>
+        public static void CalmKeepers()
+        {
+            foreach (var h in Object.FindObjectsByType<KeeperHall>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                PuzzleState.Solve(h.keeperId, 2);
+            Debug.Log("[Step13Debug] Every Keeper calmed.");
+        }
+
+        /// <summary>The rematch's Spar? (as if picked).</summary>
+        public static void Spar()
+        {
+            foreach (var r in Object.FindObjectsByType<KeeperRematch>(FindObjectsSortMode.None))
+                if (r.hall != null && r.hall.Calmed && SceneSwap.IsInside && SceneSwap.Current != null && SceneSwap.Current.Interior == r.hall.hall) r.Spar();
+        }
+
+        /// <summary>Pokes the calm Keeper in the hall that is showing (the rematch asks Spar?).</summary>
+        public static void PokeKeeper()
+        {
+            // Only the hall that shows has its Keeper's model (Snort does nothing in the others).
+            foreach (var h in Object.FindObjectsByType<KeeperHall>(FindObjectsSortMode.None)) h.Snort();
+        }
+
         /// <summary>Time scale for checks (arg, 1 = normal).</summary>
         public static void Speed() => Time.timeScale = float.Parse(Arg, System.Globalization.CultureInfo.InvariantCulture);
 

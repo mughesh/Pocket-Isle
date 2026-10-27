@@ -123,6 +123,8 @@ namespace Diorama
             public string caption;
             [Tooltip("A Keeper is ~2.5x an Isling: the battle zoom stays below this so it fits.")]
             public float maxZoom = 1.8f;
+            [Tooltip("Step 13: a friendly rematch after the finale: losing it doesn't send you to the shrine (the party is healed where you stand).")]
+            public bool friendly;
         }
 
         /// <summary>The Keeper battle being played, or null.</summary>
@@ -861,6 +863,13 @@ namespace Diorama
 
         IEnumerator Finish(bool lost)
         {
+            // Step 13: a friendly match is never a real loss.
+            if (lost && Keeper != null && Keeper.friendly)
+            {
+                lost = false;
+                party.HealAll();
+                Debug.Log("[EncounterDirector] Lost the friendly match: the party is healed, no trip to the shrine.");
+            }
             CurrentBattle = null;
             Keeper = null;
             runes.Hide();

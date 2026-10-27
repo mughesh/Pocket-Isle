@@ -122,6 +122,8 @@ namespace Diorama.EditorTools
                 AssetDatabase.LoadAssetAtPath<WorldMap>("Assets/_Project/Data/WorldMap_Lilymere.asset"),
             };
             f.credits = Credits();
+            var quick = Find<QuickJourneyDirector>();
+            f.runes = quick != null ? quick.runes : null;
             // Two Lodge guests (with six in the party the Hall of Fame peaks near 220 batches in the Editor; three pushed it past 250).
             f.lodgeGuests = 2;
             f.starters = new[]

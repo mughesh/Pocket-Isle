@@ -7251,6 +7251,9 @@ MonoBehaviour:
   cardHeight: {x: 1.8, y: 2.9}
   tabletSeconds: 5.2
   tabletRise: {x: 0.1, y: 0.27}
+  runes: {fileID: 622588089}
+  collectionSeconds: 7
+  hintAfter: 15
   credits:
   - Pocket Isle
   - 'Made by Mugesh

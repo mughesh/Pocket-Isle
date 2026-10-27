@@ -886,10 +886,14 @@ namespace Diorama
             }
         }
 
+        /// <summary>Step 13: the calm Keeper was poked (the post-game rematch asks "Spar?").</summary>
+        public event Action Snorted;
+
         /// <summary>A happy snort (poked while calm; also the bridge).</summary>
         public void Snort()
         {
             if (_model == null) return;
+            Snorted?.Invoke();
             _snortAt = Time.time + 1.5f;
             _model.View.Revive();
             _model.View.Hop();
