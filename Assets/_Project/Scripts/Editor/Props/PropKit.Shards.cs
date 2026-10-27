@@ -17,13 +17,13 @@ namespace Diorama.EditorTools
         /// <summary>The holder's cups (shape units, holder origin), left to right as the player sees them: fire, water, wind.</summary>
         public static readonly Vector3[] HolderCups = { new Vector3(0.62f, 0.16f, 0f), new Vector3(0f, 0.16f, 0f), new Vector3(-0.62f, 0.16f, 0f) };
 
-        /// <summary>Step 10e: the wind shard, a slim teal crystal with a swirl of wind round it (drawn like the fire shard).</summary>
+        /// <summary>Step 10e: the wind shard, a slim crystal with a swirl of wind round it (drawn like the fire shard); step 12b: green.</summary>
         public static PropRecipe WriteWindShardProp()
         {
             DioramaSceneSetup.EnsureFolder(Root);
             DioramaSceneSetup.EnsureFolder($"{Root}/Shapes");
             var shard = Recipe("WindShard", new Vector2Int(1, 1), false, false, 1000);
-            shard.palette = Palette(Clay, Wood, Stone, Leaf, new PropColor(Hex("#4FD8C0"), Hex("#4FD8C0"), 1.2f), new PropColor(Hex("#D2FFF2"), Hex("#D2FFF2"), 0.9f));
+            shard.palette = Palette(Clay, Wood, Stone, Leaf, new PropColor(Hex("#5ED64A"), Hex("#5ED64A"), 1.2f), new PropColor(Hex("#E2FFD2"), Hex("#E2FFD2"), 0.9f));
             shard.yawJitter = shard.scaleJitter = 0f;
             shard.resolution = 26;
             shard.outline = 0.03f;

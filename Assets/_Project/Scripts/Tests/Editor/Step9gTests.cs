@@ -98,6 +98,15 @@ namespace Diorama.Tests
         }
 
         [Test]
+        public void Gift_OnlyInTheQuickSlot_Once_BeforeAnyRealm()
+        {
+            Assert.IsTrue(QuickJourney.GiftAllowed(true, false, false), "quick slot, first time in the hub");
+            Assert.IsFalse(QuickJourney.GiftAllowed(false, false, false), "never in the full adventure");
+            Assert.IsFalse(QuickJourney.GiftAllowed(true, true, false), "only once");
+            Assert.IsFalse(QuickJourney.GiftAllowed(true, false, true), "not late, after a realm (Mugesh: wind realm first, then 2 more Islings)");
+        }
+
+        [Test]
         public void Quick_DialsApplyOnlyInTheQuickSlot()
         {
             var c = ScriptableObject.CreateInstance<QuickJourneyConfig>();

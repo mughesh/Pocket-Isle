@@ -134,7 +134,8 @@ namespace Diorama.EditorTools
         // ---- statue ----
 
         /// <summary>Step 10e: the statue's wind socket rim (the Accent slot), green-teal like the wind shard.</summary>
-        public static PropColor StatueWindRim => H("#5CC8B4", 0.3f);
+        // Step 12b: wind is green (was teal, which read as blue next to the water shard).
+        public static PropColor StatueWindRim => H("#6CCB4E", 0.3f);
 
         /// <summary>Where the statue's chest sockets sit (shape units, statue origin), left to right: fire, water, wind.</summary>
         public static readonly Vector3[] StatueSockets =

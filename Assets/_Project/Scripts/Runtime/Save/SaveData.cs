@@ -26,6 +26,13 @@ namespace Diorama
 
     /// <summary>A hand puzzle's state (step 9b): solved, and how far it got (lit braziers, the spot a log lies on).</summary>
     [Serializable]
+    public class SavedShrine
+    {
+        public string map;
+        public int x, y;
+    }
+
+    [Serializable]
     public class SavedPuzzle
     {
         public string id;
@@ -51,6 +58,8 @@ namespace Diorama
         public int shrineX, shrineY;
         /// <summary>The map the last shrine is on (losing everything returns there).</summary>
         public string shrineMap;
+        /// <summary>Step 12b: the last shrine used on each map (losing returns to the one in the realm you're in).</summary>
+        public List<SavedShrine> shrines = new List<SavedShrine>();
         /// <summary>The scripted first encounter (step 8) has happened.</summary>
         public bool firstEncounterDone;
         /// <summary>The tutorial lesson the player is on (step 8b; <see cref="LessonData.id"/>), empty once finished.</summary>

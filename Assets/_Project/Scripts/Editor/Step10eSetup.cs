@@ -130,7 +130,7 @@ namespace Diorama.EditorTools
             kh.keeperTarget = "galeowl";
             kh.shardTarget = "windShard";
             kh.captionFormat = "{0} whips up a storm!";
-            kh.shardColor = new Color(0.5f, 0.95f, 0.85f);
+            kh.shardColor = Step12bSetup.WindGreen;
             kh.ownShard = ShardHolder.WindId;
             kh.keeperSpecies = species;
             kh.keeperLevel = GaleowlKit.Level;
@@ -223,7 +223,7 @@ namespace Diorama.EditorTools
                 wind.ringMaterial = fireSocket.ringMaterial;
                 wind.socket = PropKit.StatueSockets[2] + new Vector3(0f, 0f, 0.03f);
                 wind.rimSlot = PropSlot.Accent;
-                wind.shardColor = new Color(0.45f, 0.9f, 0.8f);
+                wind.shardColor = Step12bSetup.WindGreen;
                 wind.drawsStatue = false;
                 wind.targetName = "statueSocketWind";
                 EditorUtility.SetDirty(wind);
@@ -232,7 +232,7 @@ namespace Diorama.EditorTools
                     fireSocket.statueRecipe.palette[(int)PropSlot.Accent] = PropKit.StatueWindRim;
                     EditorUtility.SetDirty(fireSocket.statueRecipe);
                 }
-                log.Append($"\n  'Statue Socket (wind)': teal rim, at the statue c{wind.statueAnchor.x} r{wind.statueAnchor.y}");
+                log.Append($"\n  'Statue Socket (wind)': green rim, at the statue c{wind.statueAnchor.x} r{wind.statueAnchor.y}");
             }
             else log.Append("\n  MISSING the fire statue socket (Set Up MR_Main (9c keeper))");
 

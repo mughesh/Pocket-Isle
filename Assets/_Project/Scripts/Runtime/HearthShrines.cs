@@ -64,14 +64,20 @@ namespace Diorama
         /// <summary>The map the last shrine is on (world map name). Saved and loaded with the game.</summary>
         public string LastShrineMap { get; set; }
 
+        /// <summary>Step 12b: the last shrine used on each map (map name to anchor tile). Saved and loaded with the game.</summary>
+        public readonly Dictionary<string, Vector2Int> ShrineByMap = new Dictionary<string, Vector2Int>();
+
         /// <summary>Where the explorer goes after losing on this map: in front of its last shrine, or the world's start tile.</summary>
         public Vector2Int RespawnTile => RespawnOn(OutdoorMap as WorldMap) ?? explorer.SpawnTile;
 
-        /// <summary>The walkable tile in front of the last shrine if it is on <paramref name="map"/>, else null.</summary>
+        /// <summary>The walkable tile in front of the last shrine used on <paramref name="map"/>, else null.</summary>
         Vector2Int? RespawnOn(WorldMap map)
         {
-            if (!LastShrine.HasValue || map == null || map.name != LastShrineMap) return null;
-            var s = LastShrine.Value;
+            if (map == null) return null;
+            Vector2Int s;
+            if (ShrineByMap.TryGetValue(map.name, out var used)) s = used;
+            else if (LastShrine.HasValue && map.name == LastShrineMap) s = LastShrine.Value;
+            else return null;
             if (!map.TryGetProp(map.PropAt(s.y, s.x), out var e) || e.recipe == null || e.recipe.name != RecipeName) return null;
             var front = s + new Vector2Int(0, 2);
             if (map.CanWalk(front)) return front;
@@ -81,22 +87,15 @@ namespace Diorama
         }
 
         /// <summary>
-        /// Losing everything: back in front of the last shrine, on its own map (travelling there at once if needed), or
-        /// the current map's start tile without one.
+        /// Step 12b: losing everything puts the explorer in front of the Hearth Shrine of the realm it's in (the last one
+        /// used there), or at that realm's arrival (its start tile) when none was used there yet. Never another realm.
         /// </summary>
         public void Respawn()
         {
             var here = OutdoorMap as WorldMap;
-            var shrineMap = swap != null && !string.IsNullOrEmpty(LastShrineMap) ? swap.FindWorld(LastShrineMap) : null;
-            if (shrineMap != null && shrineMap != here && RespawnOn(shrineMap) is Vector2Int there)
-            {
-                swap.TravelNow(shrineMap, there, new Vector2Int(0, -1));
-                Debug.Log($"[HearthShrines] Respawn at the shrine on {shrineMap.name} c{there.x} r{there.y}.");
-                return;
-            }
-            if (!string.IsNullOrEmpty(LastShrineMap) && shrineMap == null)
-                Debug.LogError($"[HearthShrines] The last shrine's map '{LastShrineMap}' isn't in the scene swap's worlds: respawning here.", this);
-            explorer.Teleport(RespawnTile);
+            var at = RespawnOn(here);
+            explorer.Teleport(at ?? explorer.SpawnTile);
+            Debug.Log($"[HearthShrines] Respawn on {(here != null ? here.name : "?")}: {(at.HasValue ? "its last shrine" : "its arrival (no shrine used here yet)")}.");
         }
 
         public IReadOnlyList<Vector2Int> Shrines => _shrines;
@@ -486,6 +485,7 @@ namespace Diorama
             explorer.Locked = true;
             LastShrine = shrine;
             LastShrineMap = OutdoorMap != null ? OutdoorMap.name : null;
+            if (LastShrineMap != null) ShrineByMap[LastShrineMap] = shrine;
             party.HealEveryone();
             pods.WarmWave();
             GameAudio.At(AudioIds.ShrineFlare, FlameWorld(shrine));

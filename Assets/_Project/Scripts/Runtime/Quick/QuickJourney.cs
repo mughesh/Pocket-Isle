@@ -47,6 +47,15 @@ namespace Diorama
 
         public static float RareScaleFor(bool quick, QuickJourneyConfig c) => quick && c != null ? c.rareWeight : 1f;
 
+        /// <summary>
+        /// Step 12b (Mugesh's Oct 27 night note): the gift fires only in the quick slot, once, and only before the first realm
+        /// is visited; a player who leaves the hub first never gets it late (stage 2 = skipped).
+        /// </summary>
+        public static bool GiftAllowed(bool quickSlot, bool giftDone, bool realmVisited) => quickSlot && !giftDone && !realmVisited;
+
+        /// <summary>The gift's puzzle stage when it was skipped (a realm visited first).</summary>
+        public const int GiftSkipped = 2;
+
         public static bool SkipsLesson(string id, bool quick, QuickJourneyConfig c) =>
             quick && c != null && c.cutLessons != null && Array.IndexOf(c.cutLessons, id) >= 0;
 

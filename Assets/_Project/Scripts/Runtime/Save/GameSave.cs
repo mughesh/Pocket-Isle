@@ -200,6 +200,13 @@ namespace Diorama
             {
                 shrines.LastShrine = data.hasShrine ? new Vector2Int(data.shrineX, data.shrineY) : (Vector2Int?)null;
                 shrines.LastShrineMap = data.hasShrine ? data.shrineMap : null;
+                shrines.ShrineByMap.Clear();
+                if (data.shrines != null)
+                    foreach (var s in data.shrines)
+                        if (!string.IsNullOrEmpty(s.map)) shrines.ShrineByMap[s.map] = new Vector2Int(s.x, s.y);
+                // Saves from before step 12b: the one last shrine counts for its own map.
+                if (data.hasShrine && !string.IsNullOrEmpty(data.shrineMap) && !shrines.ShrineByMap.ContainsKey(data.shrineMap))
+                    shrines.ShrineByMap[data.shrineMap] = new Vector2Int(data.shrineX, data.shrineY);
             }
             if (encounters != null) encounters.FirstEncounterDone = data.firstEncounterDone;
             if (onboarding != null) onboarding.Restore(data.lesson, data.tutorialDone);
@@ -294,6 +301,9 @@ namespace Diorama
                     data.shrineX = shrines.LastShrine.Value.x;
                     data.shrineY = shrines.LastShrine.Value.y;
                 }
+                if (shrines != null)
+                    foreach (var kv in shrines.ShrineByMap)
+                        data.shrines.Add(new SavedShrine { map = kv.Key, x = kv.Value.x, y = kv.Value.y });
                 if (realm != null)
                     foreach (var r in realm.Remembered) data.SetRestored(r.Key, r.Value);
                 data.SetRestored(RealmId, swap != null ? swap.OutdoorRestored : RealmState.Restored);

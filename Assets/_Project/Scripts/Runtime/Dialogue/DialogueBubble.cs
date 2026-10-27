@@ -39,6 +39,15 @@ namespace Diorama
         public float fontSize = 0.14f;
         [Tooltip("Step 12a: chatter (story, praise, flavour) text size as a share of the font size; objectives use the full size.")]
         public float chatterScale = 0.86f;
+        [Header("Step 12b: never hidden, never wandering")]
+        [Tooltip("Draws over the island's props (forge, cliffs): its own material copies with depth test Always.")]
+        public bool drawOverProps = true;
+        [Tooltip("The bubble's middle never ends up further than this from the Spirit (m).")]
+        public float maxFromSpirit = 0.14f;
+        [Tooltip("The resolved spot only moves when it changes by more than this (m): no frame-to-frame wobble.")]
+        public float deadband = 0.006f;
+        [Tooltip("Nudged this far toward the player from its anchor (m), so it sits on the player's side.")]
+        public float towardPlayer = 0.015f;
         [Tooltip("Step 12a: the objective bubble's border and target icon.")]
         public Color objectiveGold = new Color(0.93f, 0.66f, 0.12f);
         [Tooltip("Text wraps at this width (metres).")]
@@ -103,6 +112,9 @@ namespace Diorama
         Transform _root, _panel, _tail, _visual;
         MeshRenderer _panelRenderer, _tailRenderer;
         TextMeshPro _text;
+        Material _overMaterial;
+        Vector3 _resolved;
+        bool _hasResolved;
         bool _objective;
         Mesh _targetMesh;
         BoundsClipper _clipper;
@@ -148,6 +160,7 @@ namespace Diorama
         {
             Destroy(_quad);
             if (_iconMesh != null) Destroy(_iconMesh);
+            if (_overMaterial != null) Destroy(_overMaterial);
         }
 
         void Build()
@@ -203,6 +216,18 @@ namespace Diorama
             _iconRenderer.sortingOrder = 2;
             _icon = iconGo.transform;
             iconGo.SetActive(false);
+
+            if (drawOverProps && hudMaterial != null)
+            {
+                // Step 12b: the bubble draws over the island's props (it was hidden inside the forge): copies of the HUD
+                // and text materials with depth test Always, for the bubble only.
+                _overMaterial = new Material(hudMaterial) { name = "Bubble HUD (over props)" };
+                _overMaterial.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.Always);
+                _panelRenderer.sharedMaterial = _tailRenderer.sharedMaterial = _iconRenderer.sharedMaterial = _overMaterial;
+                var textMat = _text.fontMaterial;
+                textMat.SetFloat("unity_GUIZTestMode", (float)UnityEngine.Rendering.CompareFunction.Always);
+                textMat.SetFloat("_ZTestMode", (float)UnityEngine.Rendering.CompareFunction.Always);
+            }
         }
 
         /// <summary>Step 12a: the objective's target icon (a ring round a dot) as one flat mesh, uvs at the middle like the hand.</summary>
@@ -598,7 +623,14 @@ namespace Diorama
                 target = SidePosition(cam, _anchor.parent != null ? _anchor.parent.position + Vector3.up * 0.01f : _anchor.position, focus, Mathf.Max(radius, 0.02f));
                 if (before != _sideSign) PlaceTail();
             }
-            if (cam != null) target = ClearOfKeeps(cam, target);
+            // Step 12b: the open game menu / dev panel no longer push it around (they wobbled it).
+            if (cam != null && !GameMenu.IsOpen) target = ClearOfKeeps(cam, target);
+            if (cam != null && _anchor != null)
+            {
+                Vector3 toHead = cam.transform.position - _anchor.position;
+                toHead.y = 0f;
+                if (toHead.sqrMagnitude > 1e-6f) target += toHead.normalized * towardPlayer;
+            }
             if (cam != null)
             {
                 Vector3 head = cam.transform.position, fwd = cam.transform.forward, dir = target - head;
@@ -610,6 +642,16 @@ namespace Diorama
             if (island != null && island.map != null)
                 target = island.PushOutWorld(target, new Vector3(_size.x * 0.5f + 0.005f, _size.y * 0.5f + 0.008f, _size.x * 0.5f + 0.005f));
             if (island != null && island.map != null && cam != null) target = KeepAboveIsland(cam.transform.position, target);
+            // One last clamp: never far from the Spirit (the backlog's bubble hanging high top-left), then a deadband.
+            if (_anchor != null)
+            {
+                Vector3 from = _anchor.position;
+                Vector3 off = target - from;
+                if (off.magnitude > maxFromSpirit) target = from + off.normalized * maxFromSpirit;
+            }
+            if (!snap && _hasResolved && (target - _resolved).magnitude < deadband) target = _resolved;
+            _resolved = target;
+            _hasResolved = true;
             _root.position = snap ? target : Vector3.Lerp(_root.position, target, 1f - Mathf.Exp(-Time.deltaTime * 10f));
             _root.localScale = Vector3.one * Mathf.SmoothStep(0.6f, 1f, _appear);
             if (cam == null) return;

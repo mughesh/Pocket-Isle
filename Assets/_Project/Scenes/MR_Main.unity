@@ -239,7 +239,7 @@ MonoBehaviour:
   socket: {x: -0.24, y: 1.03, z: 0.52}
   ringMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
   rimSlot: 5
-  shardColor: {r: 0.45, g: 0.9, b: 0.8, a: 1}
+  shardColor: {r: 0.42, g: 0.88, b: 0.32, a: 1}
   drawsStatue: 0
   targetName: statueSocketWind
   grabRadius: 0.07
@@ -2034,7 +2034,7 @@ MonoBehaviour:
   keeperTarget: galeowl
   shardTarget: windShard
   captionFormat: '{0} whips up a storm!'
-  shardColor: {r: 0.5, g: 0.95, b: 0.85, a: 1}
+  shardColor: {r: 0.42, g: 0.88, b: 0.32, a: 1}
   untangle: {fileID: 1824753089}
   forgeFlame: 0
   stomps: 0

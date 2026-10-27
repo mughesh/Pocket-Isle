@@ -50,11 +50,16 @@ namespace Diorama
             GameMenu.HoldHint = () => QuickJourney.Active && !PuzzleState.IsSolved(QuickJourney.GiftId);
         }
 
-        void OnEnable() => PuzzleState.Changed += OnPuzzle;
+        void OnEnable()
+        {
+            PuzzleState.Changed += OnPuzzle;
+            if (swap != null) swap.TravelFinished += OnTravelled;
+        }
 
         void OnDisable()
         {
             PuzzleState.Changed -= OnPuzzle;
+            if (swap != null) swap.TravelFinished -= OnTravelled;
             SaveTimer();
         }
 
@@ -108,9 +113,18 @@ namespace Diorama
 
         // ---- the gift ----
 
+        /// <summary>Step 12b: into a realm before the gift came: it's skipped for good (no two Islings arriving later).</summary>
+        void OnTravelled(WorldMap to)
+        {
+            if (!QuickJourney.Active || _gifting || PuzzleState.IsSolved(QuickJourney.GiftId) || to == null || to == hub) return;
+            PuzzleState.Solve(QuickJourney.GiftId, QuickJourney.GiftSkipped);
+            Debug.Log($"[QuickJourney] Into {to.name} before the gift: the gift is skipped.");
+        }
+
         void TryGift()
         {
-            bool ready = !_gifting && !PuzzleState.IsSolved(QuickJourney.GiftId) && onboarding != null && onboarding.IsFinished &&
+            bool ready = !_gifting && QuickJourney.GiftAllowed(QuickJourney.Active, PuzzleState.IsSolved(QuickJourney.GiftId), false) &&
+                         onboarding != null && onboarding.IsFinished &&
                          island.world == hub && (swap == null || !swap.Inside) && !SceneSwap.IsBusy && !Opening.InProgress &&
                          !TitleScreen.Showing && !GameMenu.IsOpen && (encounters == null || !encounters.InBattle) &&
                          !explorer.Locked && !Dialogue.IsTalking && party.members.Count > 0;
