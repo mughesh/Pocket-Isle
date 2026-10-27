@@ -15,6 +15,8 @@ namespace Diorama
     {
         [Header("Puffs (map props grid: column, row)")]
         public Vector2Int[] puffs = new Vector2Int[3];
+        [Tooltip("Step 12b: the 2-wide ridge path: each puff also blocks this tile (the row beside it); empty = 1-wide.")]
+        public Vector2Int[] puffTwins = new Vector2Int[0];
         public PropRecipe recipe;
         public GustField gusts;
         [Tooltip("A gust hits a puff within this far of its sweep line (island-local metres).")]
@@ -23,6 +25,17 @@ namespace Diorama
         public float puffScale = 2.7f;
         [Tooltip("Step 11d: the puffs float this many tiles over the path, clear of the plants.")]
         public float puffHeight = 0.6f;
+        [Header("Step 12b: clouds in the air")]
+        [Tooltip("Gentle bob up and down (tiles), side-to-side drift (tiles), slow turn (degrees a second), billow (share of size).")]
+        public float bob = 0.18f;
+        public float sway = 0.3f;
+        public float spin = 9f;
+        public float billow = 0.07f;
+        [Tooltip("Diorama/Glyph (Materials/Glyph) for the soft round shadow under each puff; empty = none.")]
+        public Material shadowMaterial;
+        [Tooltip("Shadow size (share of the puff size) and darkness.")]
+        public float shadowSize = 0.85f;
+        [Range(0f, 1f)] public float shadowAlpha = 0.32f;
 
         [Header("Thinning (CloudBank)")]
         public float perGust = 0.36f;
@@ -84,6 +97,7 @@ namespace Diorama
             _gone = new float[puffs.Length];
             if (island != null)
                 for (int i = 0; i < puffs.Length; i++) _views[i] = new PropView($"Cloud Bank {i}", island, recipe);
+            MakeShadows();
             if (gusts != null) gusts.Gusted += OnGust;
             base.Start();
         }
@@ -94,11 +108,15 @@ namespace Diorama
             if (_views != null)
                 foreach (var v in _views) v?.Destroy();
             if (map != null)
-                foreach (var p in puffs)
-                {
-                    map.SetPropHidden(p, false);
-                    map.SetPropOpen(p, false);
-                }
+                for (int i = 0; i < puffs.Length; i++)
+                    foreach (var p in Blocks(i))
+                    {
+                        map.SetPropHidden(p, false);
+                        map.SetPropOpen(p, false);
+                    }
+            if (_shadows != null)
+                foreach (var s in _shadows)
+                    if (s != null) Destroy(s.gameObject);
             base.OnDestroy();
         }
 
@@ -111,10 +129,11 @@ namespace Diorama
                 _drift[i] = Vector2.zero;
                 _gone[i] = _bank.Gone(i) ? 99f : -1f;
                 if (map != null)
-                {
-                    map.SetPropHidden(puffs[i], true);
-                    map.SetPropOpen(puffs[i], _bank.Gone(i));
-                }
+                    foreach (var p in Blocks(i))
+                    {
+                        map.SetPropHidden(p, true);
+                        map.SetPropOpen(p, _bank.Gone(i));
+                    }
             }
             SetProgressQuiet(KiteRules.Count(mask) / 3f);
         }
@@ -156,7 +175,7 @@ namespace Diorama
         void Gone(int i)
         {
             _gone[i] = 0f;
-            map.SetPropOpen(puffs[i], true);
+            foreach (var p in Blocks(i)) map.SetPropOpen(p, true);
             int mask = _bank.Mask;
             Debug.Log($"[CloudBankPiece] Puff {i} blown away ({KiteRules.Count(mask)}/3).");
             if (_bank.AllGone)
@@ -208,12 +227,89 @@ namespace Diorama
                 fade = Mathf.Clamp01(1f - _gone[i] / 1.2f);
                 _drift[i] += _drift[i].sqrMagnitude > 1e-6f ? _drift[i].normalized * Time.deltaTime * 1.5f : Vector2.zero;
             }
-            float size = puffScale * (0.45f + 0.55f * Mathf.Max(thick, 0.2f)) * fade;
-            var tile = (Vector2)puffs[i] + new Vector2(-_drift[i].x, _drift[i].y) * 2f;
-            v.Place(tile, puffHeight + 0.15f * (1f - fade), Quaternion.Euler(0f, 37f * i, 0f), Here && size > 0.02f, size);
+            // Step 12b: a cloud in the air: it bobs, sways side to side, turns slowly and billows.
+            float t = Time.time + i * 1.7f;
+            float size = puffScale * (0.45f + 0.55f * Mathf.Max(thick, 0.2f)) * fade * (1f + billow * Mathf.Sin(t * 1.3f));
+            var tile = Centre(i) + new Vector2(-_drift[i].x, _drift[i].y) * 2f + new Vector2(sway * Mathf.Sin(t * 0.45f), 0f);
+            float h = puffHeight + 0.15f * (1f - fade) + bob * Mathf.Sin(t * 0.9f);
+            bool show = Here && size > 0.02f;
+            v.Place(tile, h, Quaternion.Euler(0f, 37f * i + spin * Time.time, 0f), show, size);
+            Shadow(i, show, tile, size, fade);
         }
 
-        Vector3 PuffWorld(int i, float height) => MapToWorld(new Vector3(puffs[i].x - _drift[i].x * 2f, height, puffs[i].y + _drift[i].y * 2f));
+        /// <summary>A puff's middle: between its tile and its twin on the 2-wide path.</summary>
+        Vector2 Centre(int i) => i < puffTwins.Length ? ((Vector2)puffs[i] + puffTwins[i]) * 0.5f : puffs[i];
+
+        System.Collections.Generic.IEnumerable<Vector2Int> Blocks(int i)
+        {
+            yield return puffs[i];
+            if (i < puffTwins.Length) yield return puffTwins[i];
+        }
+
+        Vector3 PuffWorld(int i, float height)
+        {
+            var c = Centre(i);
+            return MapToWorld(new Vector3(c.x - _drift[i].x * 2f, height, c.y + _drift[i].y * 2f));
+        }
+
+        // ---- step 12b: soft round shadows on the path ----
+
+        MeshRenderer[] _shadows;
+        static Texture2D _shadowTex;
+        MaterialPropertyBlock _shadowBlock;
+
+        void MakeShadows()
+        {
+            if (shadowMaterial == null || island == null) return;
+            if (_shadowTex == null)
+            {
+                const int n = 64;
+                _shadowTex = new Texture2D(n, n, TextureFormat.RGBA32, false) { name = "Cloud Shadow", wrapMode = TextureWrapMode.Clamp };
+                var px = new Color[n * n];
+                for (int y = 0; y < n; y++)
+                    for (int x = 0; x < n; x++)
+                    {
+                        float r = new Vector2((x + 0.5f) / n * 2f - 1f, (y + 0.5f) / n * 2f - 1f).magnitude;
+                        float a = Mathf.Clamp01(1f - r);
+                        px[y * n + x] = new Color(0.08f, 0.1f, 0.14f, a * a * (3f - 2f * a));
+                    }
+                _shadowTex.SetPixels(px);
+                _shadowTex.Apply(false, true);
+            }
+            var quad = BattleHud.VerticalQuad();
+            _shadows = new MeshRenderer[puffs.Length];
+            for (int i = 0; i < puffs.Length; i++)
+            {
+                var go = new GameObject($"Cloud Shadow {i}");
+                go.layer = island.gameObject.layer;
+                go.transform.SetParent(island.transform, false);
+                go.AddComponent<MeshFilter>().sharedMesh = quad;
+                var r = go.AddComponent<MeshRenderer>();
+                r.sharedMaterial = shadowMaterial;
+                r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                r.receiveShadows = false;
+                go.SetActive(false);
+                _shadows[i] = r;
+            }
+        }
+
+        void Shadow(int i, bool show, Vector2 tile, float size, float fade)
+        {
+            if (_shadows == null || _shadows[i] == null) return;
+            var local = island.TileToLocal(tile, island.Content.capHeight + 0.02f * island.map.tileSize);
+            show = show && island.FootprintContains(local);
+            var go = _shadows[i].gameObject;
+            if (go.activeSelf != show) go.SetActive(show);
+            if (!show) return;
+            go.transform.localPosition = local;
+            go.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+            go.transform.localScale = Vector3.one * (island.map.tileSize * island.Zoom * size * shadowSize);
+            if (_shadowBlock == null) _shadowBlock = new MaterialPropertyBlock();
+            _shadowBlock.Clear();
+            _shadowBlock.SetTexture("_MainTex", _shadowTex);
+            _shadowBlock.SetColor("_Tint", new Color(1f, 1f, 1f, shadowAlpha * fade));
+            _shadows[i].SetPropertyBlock(_shadowBlock);
+        }
 
         /// <summary>Debug (bridge): a gust across the bank toward east (+column).</summary>
         public void DebugGust(float strength = 0.9f)

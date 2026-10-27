@@ -32,6 +32,7 @@ namespace Diorama.EditorTools
             var log = new StringBuilder("[Step12b] MR_Main set up:");
             ShardColours(log);
             Focus(log);
+            Clouds(log);
             DialogueTools.Import();
             log.Append("\n  Script_v1 reimported (cw.ember.tip)");
             EditorSceneManager.MarkSceneDirty(active);
@@ -39,6 +40,21 @@ namespace Diorama.EditorTools
             AssetDatabase.SaveAssets();
             IslandBuilder.RebuildAll();
             Debug.Log(log.ToString());
+        }
+
+        /// <summary>C: Galewick's ridge path 2 wide (the map is rewritten), the cloud bank floating in the air with shadows.</summary>
+        static void Clouds(StringBuilder log)
+        {
+            if (!Step11dSetup.GalewickMap(log)) log.Append("\n  Galewick map: NOT rewritten");
+            foreach (var bank in Object.FindObjectsByType<CloudBankPiece>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                Undo.RecordObject(bank, "Step 12b");
+                bank.puffTwins = new Vector2Int[GalewickTools.CloudTwinXY.Length];
+                for (int i = 0; i < bank.puffTwins.Length; i++) bank.puffTwins[i] = GalewickTools.Tile(GalewickTools.CloudTwinXY[i]);
+                bank.puffHeight = 2.5f;
+                bank.shadowMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Glyph.mat");
+                log.Append($"\n  cloud bank: 2 rows, {bank.puffHeight} tiles up, shadows {(bank.shadowMaterial != null ? "on" : "MISSING (run 12a setup)")}");
+            }
         }
 
         /// <summary>A1: one focus lock for every hand moment, next to the explorer.</summary>

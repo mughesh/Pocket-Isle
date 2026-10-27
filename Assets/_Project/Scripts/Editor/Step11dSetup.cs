@@ -51,7 +51,7 @@ namespace Diorama.EditorTools
         }
 
         /// <summary>C: Galewick's map rewritten (same seed) with the tower's return gate and low rocks by the cloud bank; its gates linked.</summary>
-        static bool GalewickMap(StringBuilder log)
+        internal static bool GalewickMap(StringBuilder log)
         {
             var map = GalewickTools.Write(log);
             if (map == null) return false;

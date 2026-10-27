@@ -2387,11 +2387,22 @@ MonoBehaviour:
   - {x: 21, y: 12}
   - {x: 22, y: 12}
   - {x: 23, y: 12}
+  puffTwins:
+  - {x: 21, y: 11}
+  - {x: 22, y: 11}
+  - {x: 23, y: 11}
   recipe: {fileID: 11400000, guid: 257f22ee3e426244c8b7611f0b678d54, type: 2}
   gusts: {fileID: 1589595547}
   corridor: 0.2
   puffScale: 2.7
-  puffHeight: 0.6
+  puffHeight: 2.5
+  bob: 0.18
+  sway: 0.3
+  spin: 9
+  billow: 0.07
+  shadowMaterial: {fileID: 2100000, guid: cc8ec5f70f1d0b542924a207dfb808ba, type: 2}
+  shadowSize: 0.85
+  shadowAlpha: 0.32
   perGust: 0.36
   holdRate: 0.4
   doneLine: gw.gust.done

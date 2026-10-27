@@ -40,6 +40,8 @@ namespace Diorama.EditorTools
         public static readonly Vector2Int[] KiteXY = { new Vector2Int(35, 37), new Vector2Int(43, 39), new Vector2Int(44, 34) };
         /// <summary>The narrow ridge path's cloud bank tiles (10b: three puffs block it, west to east).</summary>
         public static readonly Vector2Int[] CloudXY = { new Vector2Int(21, 47), new Vector2Int(22, 47), new Vector2Int(23, 47) };
+        /// <summary>Step 12b: the ridge path is 2 wide (rows 47-48); each puff also blocks the tile beside it on row 48.</summary>
+        public static readonly Vector2Int[] CloudTwinXY = { new Vector2Int(21, 48), new Vector2Int(22, 48), new Vector2Int(23, 48) };
         public static readonly Vector2Int TowerXY = new Vector2Int(17, 56);   // 2 x 2, door front y 54
         /// <summary>Step 10d: the tower's return gate (2 x 1), hidden until the Keeper is calmed.</summary>
         public static readonly Vector2Int TowerGateXY = new Vector2Int(23, 53);
@@ -450,18 +452,15 @@ namespace Diorama.EditorTools
         {
             // Step 10b: the cloud bank (three puffs on the narrow path) and the drawbridge (raised) are puzzle gates.
             foreach (var c in CloudXY) Ground(c.x, c.y, IslandMap.Path);
-            // The narrow 1-wide ridge path through the hill band (y 47), the cloud bank's tiles on it.
-            for (int x = 19; x <= 26; x++) Ground(x, 47, IslandMap.Path);
+            // Step 12b (Oct 27 night notes): the ridge path is 2 wide (rows 47 and 48) through the hill band; the cloud
+            // bank's puffs block both rows. Grid row 46 is the side nearest the player: low rocks only along the whole path
+            // (its trees were the corner bush that hid half the road); the far side (row 49) stays hills.
             for (int x = 19; x <= 26; x++)
             {
-                Ground(x, 46, IslandMap.Tree);
-                if (x >= 21) Ground(x, 48, IslandMap.Tree);
-            }
-            // Step 11d (Note 7): low rocks, not hillocks, right beside the cloud bank, so its puffs aren't hidden.
-            for (int x = CloudXY[0].x - 1; x <= CloudXY[CloudXY.Length - 1].x + 1; x++)
-            {
+                Ground(x, 47, IslandMap.Path);
+                Ground(x, 48, IslandMap.Path);
                 Ground(x, 46, IslandMap.Rock);
-                Ground(x, 48, IslandMap.Rock);
+                Ground(x, 49, IslandMap.Tree);
             }
             // Clouds parked on the hills either side (the bank on the path comes in 10b).
             foreach (var (x, y) in new[] { (27, 44), (16, 46), (30, 42), (13, 49) }) Prop(x, y, KCloud);
@@ -469,6 +468,7 @@ namespace Diorama.EditorTools
             Patch(25f, 43.5f, 1.4f, 0.9f);
             Prop(28, 47, KSign);
             foreach (var c in CloudXY) Prop(c, KBank);
+            foreach (var c in CloudTwinXY) Prop(c, KBank);
             Prop(CrossingXY, KBridge);
         }
 
@@ -584,6 +584,8 @@ namespace Diorama.EditorTools
         {
             if (x >= CrossingXY.x && x <= CrossingXY.x + 1 && y >= DitchY0 && y <= DitchY1) return true;
             foreach (var c in CloudXY)
+                if (c.x == x && c.y == y) return true;
+            foreach (var c in CloudTwinXY)
                 if (c.x == x && c.y == y) return true;
             return false;
         }
@@ -866,7 +868,7 @@ namespace Diorama.EditorTools
             for (int x = CrossingXY.x; x <= CrossingXY.x + 1; x++)
                 for (int y = DitchY0; y <= DitchY1; y++) noCrossing.Add(new Vector2Int(x, y));
             if (Flood(noCrossing).Contains(Tile(KiteXY[0]))) problems.Add("the kite field is reachable without the crossing (the ditch leaks)");
-            var noRidge = new HashSet<Vector2Int>(CloudXY);
+            var noRidge = new HashSet<Vector2Int>(CloudXY.Concat(CloudTwinXY));
             if (Flood(noRidge).Contains(Tile(TowerXY + new Vector2Int(0, -2)))) problems.Add("the tower is reachable without the ridge path (the hill band leaks)");
             if (blocked != null && Flood(blocked).Contains(Tile(TowerXY + new Vector2Int(0, -2)))) problems.Add("the tower is reachable past the blocked tiles");
 

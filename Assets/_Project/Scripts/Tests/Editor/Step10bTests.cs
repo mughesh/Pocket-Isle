@@ -1,3 +1,4 @@
+using System.Linq;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
@@ -183,7 +184,7 @@ namespace Diorama.Tests
             var bridge = GalewickTools.Tile(GalewickTools.CrossingXY);
             Assert.IsTrue(map.TryGetProp(map.PropAt(bridge.y, bridge.x), out var e) && e.recipe.name == "Drawbridge");
             Assert.IsFalse(map.CanWalk(bridge), "the raised drawbridge blocks the crossing");
-            foreach (var c in GalewickTools.CloudXY) Assert.IsFalse(map.CanWalk(GalewickTools.Tile(c)), "a cloud puff blocks the ridge path");
+            foreach (var c in GalewickTools.CloudXY.Concat(GalewickTools.CloudTwinXY)) Assert.IsFalse(map.CanWalk(GalewickTools.Tile(c)), "a cloud puff blocks the 2-wide ridge path (step 12b)");
             try
             {
                 map.SetPropOpen(bridge, true);
