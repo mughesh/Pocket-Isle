@@ -18,7 +18,9 @@ namespace Diorama
     /// panel only); in the Editor also with a mouse click. No look + pinch (step 9e: it fought the game's own gaze).
     /// Destructive ones (new game, reset story, load) ask for a second press. Everything goes through
     /// <see cref="GameState"/> (Quick Journey reuses it).
-    /// Tabs: Go to, Party, Encounter, Story, Save, Tools (see Assets/Docs/QA-Guide.md).
+    /// Tabs (step 12c): Travel, Team, Battle, Story, Save, Tools, each in headed groups, with up / down runes when a tab
+    /// has more rows than fit and a close (X) rune in the corner; opens beside the island on the dominant-hand side
+    /// (<see cref="besideIsland"/>). See Assets/Docs/QA-Guide.md.
     /// </summary>
     public class DevPanel : MonoBehaviour
     {
@@ -29,7 +31,7 @@ namespace Diorama
         [Tooltip("Diorama/Hud material (panel and buttons).")]
         public Material hudMaterial;
         [Tooltip("Panel size (m).")]
-        public Vector2 size = new Vector2(0.36f, 0.32f);
+        public Vector2 size = new Vector2(0.42f, 0.36f);
         [Tooltip("Distance from the head (m): an easy reach for pokes, not in the face.")]
         public float distance = 0.55f;
         [Tooltip("Degrees toward the dominant hand, and below the eyes.")]
@@ -42,6 +44,12 @@ namespace Diorama
                  "the island and this far past its edge (m). Off = the old spot beside the head.")]
         public bool behindIsland = true;
         public float behindHeight = 0.05f, behindGap = 0.1f;
+        [Tooltip("Step 12c (Oct 28 notes): opens beside the island on the dominant-hand side, its lower edge this high above " +
+                 "the island's top and this far past its side (m; negative = over the island's edge). Wins over Behind Island.")]
+        public bool besideIsland = true;
+        public float besideHeight = 0.08f, besideGap = -0.12f;
+        [Tooltip("Step 12c: and this far behind the island's middle (m), so it hangs over the island's far corner, inside the view.")]
+        public float besideBack = 0.08f;
         [Tooltip("Hand rays reach this far (m).")]
         public float rayLength = 2f;
         [Tooltip("The grab frame round the panel (m): visible width; a pinch from this far outside to this far inside the edge grabs it. " +
@@ -52,7 +60,7 @@ namespace Diorama
         public float grabDepth = 0.08f;
 
 #if UNITY_EDITOR || POCKET_DEV
-        enum Tab { GoTo, Party, Encounter, Story, Save, Tools }
+        enum Tab { Travel, Team, Battle, Story, Save, Tools }
 
         class Button
         {
@@ -63,6 +71,9 @@ namespace Diorama
             public Vector2 center, size;
             public MeshRenderer quad;
             public TextMeshPro text;
+            public int row = -1;      // content rows (scrolled); -1 = the fixed tabs, close and scroll runes
+            public bool heading;      // a group title, not a button
+            public bool shown = true; // scrolled into view
         }
 
         static DevPanel _instance;
@@ -89,6 +100,8 @@ namespace Diorama
         readonly List<Button> _content = new List<Button>();
         Tab _tab;
         bool _open;
+        int _rows, _scroll;
+        Button _close, _up, _down;
         Button _hover, _confirming;
         float _confirmUntil, _statusUntil;
         string _statusText;
@@ -168,7 +181,7 @@ namespace Diorama
             _back.sortingOrder = -1;
             _back.transform.localScale = new Vector3(size.x, size.y, 1f);
             Paint(_back, PanelColor, new Color(1f, 1f, 1f, 0.25f), size.x / size.y, 0.06f, 0.02f);
-            _title = Text(_root, "Title", new Vector2(0f, size.y * 0.5f - 0.016f), new Vector2(size.x - 0.02f, 0.02f), fontSize * 0.85f);
+            _title = Text(_root, "Title", new Vector2(-0.02f, size.y * 0.5f - 0.016f), new Vector2(size.x - 0.06f, 0.02f), fontSize * 0.85f);
             _title.alignment = TextAlignmentOptions.Left;
             _status = Text(_root, "Status", new Vector2(0f, -size.y * 0.5f + 0.028f), new Vector2(size.x - 0.02f, 0.045f), fontSize * 0.8f);
             _status.alignment = TextAlignmentOptions.TopLeft;
@@ -176,7 +189,7 @@ namespace Diorama
             _frame.sortingOrder = -2;
             _frame.transform.localPosition = new Vector3(0f, 0f, 0.001f);
             _frame.transform.localScale = new Vector3(size.x + frame * 2f, size.y + frame * 2f, 1f);
-            string[] names = { "Go to", "Party", "Encounter", "Story", "Save", "Tools" };
+            string[] names = { "Travel", "Team", "Battle", "Story", "Save", "Tools" };
             float w = (size.x - 0.02f) / names.Length;
             for (int i = 0; i < names.Length; i++)
             {
@@ -185,6 +198,15 @@ namespace Diorama
                 _tabs.Add(MakeButton(() => n, () => ShowTab(tab), () => _tab == tab, false,
                     new Vector2(-size.x * 0.5f + 0.01f + w * (i + 0.5f), size.y * 0.5f - 0.044f), new Vector2(w - 0.004f, 0.026f)));
             }
+            // Step 12c: a close rune in the top-right corner, and up / down runes when a tab has more rows than fit.
+            _close = MakeButton(() => "X", () => SetOpen(false), null, false, new Vector2(size.x * 0.5f - 0.022f, size.y * 0.5f - 0.016f), new Vector2(0.03f, 0.022f));
+            _tabs.Add(_close);
+            float sx = size.x * 0.5f - 0.01f - ScrollWidth * 0.5f;
+            _up = MakeButton(() => "Up", () => ScrollBy(-2), null, false, new Vector2(sx, RowY(0)), new Vector2(ScrollWidth - 0.004f, RowHeight - 0.005f));
+            _down = MakeButton(() => "Down", () => ScrollBy(2), null, false, new Vector2(sx, RowY(VisibleRows - 1)), new Vector2(ScrollWidth - 0.004f, RowHeight - 0.005f));
+            _up.text.fontSize = _down.text.fontSize = fontSize * 0.85f;
+            _tabs.Add(_up);
+            _tabs.Add(_down);
             for (int h = 0; h < 2; h++)
             {
                 _ray[h] = Quad(transform, h == 0 ? "Left Ray" : "Right Ray");
@@ -196,7 +218,7 @@ namespace Diorama
             _fps = Text(transform, "FPS Overlay", Vector2.zero, new Vector2(0.12f, 0.02f), fontSize * 0.9f);
             _fps.alignment = TextAlignmentOptions.Left;
             _fps.gameObject.SetActive(false);
-            ShowTab(Tab.GoTo);
+            ShowTab(Tab.Travel);
         }
 
         MeshRenderer Quad(Transform parent, string name)
@@ -252,20 +274,80 @@ namespace Diorama
             _confirming = null;
         }
 
-        // Grid layout: three columns below the tabs.
+        // Grid layout: three columns below the tabs, a scroll strip on the right (step 12c), rows scrolled by _scroll.
         int _cell;
         const int Columns = 3;
         const float RowHeight = 0.034f;
+        const float ScrollWidth = 0.044f;
+
+        float ContentWidth => size.x - 0.02f - ScrollWidth;
+
+        /// <summary>Rows that fit between the tabs and the status line.</summary>
+        int VisibleRows => Mathf.Max(1, Mathf.FloorToInt((size.y - 0.134f - RowHeight * 0.5f) / RowHeight) + 1);
+
+        float RowY(int visibleRow) => size.y * 0.5f - 0.082f - visibleRow * RowHeight;
 
         void Add(string label, Action action, Func<bool> on = null, bool confirm = false) => Add(() => label, action, on, confirm);
 
         void Add(Func<string> label, Action action, Func<bool> on = null, bool confirm = false)
         {
-            float cw = (size.x - 0.02f) / Columns;
+            float cw = ContentWidth / Columns;
             int col = _cell % Columns, row = _cell / Columns;
             _cell++;
-            var center = new Vector2(-size.x * 0.5f + 0.01f + cw * (col + 0.5f), size.y * 0.5f - 0.082f - row * RowHeight);
-            _content.Add(MakeButton(label, action, on, confirm, center, new Vector2(cw - 0.005f, RowHeight - 0.005f)));
+            var center = new Vector2(-size.x * 0.5f + 0.01f + cw * (col + 0.5f), RowY(row));
+            var b = MakeButton(label, action, on, confirm, center, new Vector2(cw - 0.005f, RowHeight - 0.005f));
+            b.row = row;
+            _content.Add(b);
+        }
+
+        /// <summary>Step 12c: a group title across a whole row (gold, left-aligned, not a button).</summary>
+        void Heading(string title)
+        {
+            NextRow();
+            int row = _cell / Columns;
+            _cell += Columns;
+            var center = new Vector2(-size.x * 0.5f + 0.01f + ContentWidth * 0.5f, RowY(row));
+            var b = MakeButton(() => title, null, null, false, center, new Vector2(ContentWidth - 0.005f, RowHeight - 0.005f));
+            b.row = row;
+            b.heading = true;
+            b.text.alignment = TextAlignmentOptions.BottomLeft;
+            b.text.color = new Color(1f, 0.84f, 0.45f);
+            b.text.fontStyle = FontStyles.Bold;
+            b.text.fontSize = fontSize * 0.9f;
+            _content.Add(b);
+        }
+
+        void ScrollBy(int rows)
+        {
+            _scroll += rows;
+            Layout();
+        }
+
+        /// <summary>Places the content rows for the scroll position; rows out of view hide (and can't be pressed).</summary>
+        void Layout()
+        {
+            _rows = (_cell + Columns - 1) / Columns;
+            int vis = VisibleRows;
+            _scroll = Mathf.Clamp(_scroll, 0, Mathf.Max(0, _rows - vis));
+            foreach (var b in _content)
+            {
+                int r = b.row - _scroll;
+                b.shown = r >= 0 && r < vis;
+                b.quad.gameObject.SetActive(b.shown);
+                b.text.gameObject.SetActive(b.shown);
+                if (!b.shown) continue;
+                b.center.y = RowY(r);
+                b.quad.transform.localPosition = new Vector3(b.center.x, b.center.y, -0.001f);
+                b.text.rectTransform.localPosition = new Vector3(b.center.x, b.center.y, -0.002f);
+            }
+            bool scroll = _rows > vis;
+            foreach (var b in new[] { _up, _down })
+            {
+                if (b == null) continue;
+                b.shown = scroll;
+                b.quad.gameObject.SetActive(scroll);
+                b.text.gameObject.SetActive(scroll);
+            }
         }
 
         void NextRow()
@@ -275,24 +357,43 @@ namespace Diorama
 
         void ShowTab(Tab tab)
         {
+            if (tab != _tab) _scroll = 0;
             _tab = tab;
             ClearContent();
             _cell = 0;
             if (state == null)
             {
                 Status("No GameState in the scene (Set Up MR_Main (9e dev panel and fury)).");
+                Layout();
                 return;
             }
             switch (tab)
             {
-                case Tab.GoTo:
+                case Tab.Travel:
+                    // Step 12c: one heading per place (outdoors in story order, then the interiors), full names.
+                    var groups = new List<string>();
                     foreach (var s in state.Spots)
                     {
-                        var spot = s;
-                        Add(spot.label, () => Status(state.GoTo(spot) ? $"Going to {spot.label}." : "Busy (a battle or a swap): try again."));
+                        string g = SpotGroup(s, out _);
+                        if (!groups.Contains(g) && g != Interiors) groups.Add(g);
+                    }
+                    groups.Add(Interiors);
+                    foreach (var g in groups)
+                    {
+                        bool any = false;
+                        foreach (var s in state.Spots)
+                        {
+                            if (SpotGroup(s, out string name) != g) continue;
+                            if (!any) Heading(g);
+                            any = true;
+                            var spot = s;
+                            string full = g == Interiors ? name : $"{g}: {name}";
+                            Add(name, () => Status(state.GoTo(spot) ? $"Going to {full}." : "Busy (a battle or a swap): try again."));
+                        }
                     }
                     break;
-                case Tab.Party:
+                case Tab.Team:
+                    Heading("Health and levels");
                     Add("Heal all", () => { state.HealAll(); Status("Healed."); });
                     Add("Lead Lv -1", () => state.LeadLevel(-1));
                     Add("Lead Lv +1", () => state.LeadLevel(1));
@@ -300,37 +401,43 @@ namespace Diorama
                     Add("All Lv 5", () => state.AllLevels(5));
                     Add("All Lv 10", () => state.AllLevels(10));
                     Add("All Lv 15", () => state.AllLevels(15));
+                    Heading("Ready-made team");
                     Add("Team of 3, Lv 8", () => state.PresetTeam(8));
                     Add("Team of 3, Lv 10", () => state.PresetTeam(10));
                     Add("Clear storage", () => state.ClearStorage(), null, true);
-                    Add(() => $"One-hit KO: {OnOff(DevCheats.OneHitKo)}", () => DevCheats.OneHitKo = !DevCheats.OneHitKo, () => DevCheats.OneHitKo);
-                    Add(() => $"Invincible: {OnOff(DevCheats.Invincible)}", () => DevCheats.Invincible = !DevCheats.Invincible, () => DevCheats.Invincible);
-                    NextRow();
+                    Heading("Add an Isling to the party");
                     Picker();
                     Add("Add to party", () => state.AddSpecies(Picked, _level));
                     break;
-                case Tab.Encounter:
+                case Tab.Battle:
+                    Heading("Start a battle here");
                     Picker();
                     Add("Fight now", () => Status(state.Fight(Picked, _level) ? $"A wild {Picked.displayName} Lv {_level}!" : "Can't start one here (a battle on, inside, or zoomed)."));
-                    NextRow();
+                    Heading("Battle cheats");
+                    Add(() => $"One-hit KO: {OnOff(DevCheats.OneHitKo)}", () => DevCheats.OneHitKo = !DevCheats.OneHitKo, () => DevCheats.OneHitKo);
+                    Add(() => $"Invincible: {OnOff(DevCheats.Invincible)}", () => DevCheats.Invincible = !DevCheats.Invincible, () => DevCheats.Invincible);
+                    Heading("Wild Islings in tall grass");
                     Add(() => $"Wild battles: {OnOff(!DevCheats.WildOff)}", () => DevCheats.WildOff = !DevCheats.WildOff, () => !DevCheats.WildOff);
                     Add(() => $"Rare x10: {OnOff(DevCheats.RareBoost > 1f)}", () => DevCheats.RareBoost = DevCheats.RareBoost > 1f ? 1f : 10f, () => DevCheats.RareBoost > 1f);
                     break;
                 case Tab.Story:
+                    Heading("Tutorial");
                     Add("Skip tutorial", () => Edit(state.SkipTutorial()), () => state.TutorialDone);
                     Add("Reset tutorial", () => Edit(state.ResetTutorial()), null, true);
                     Add("Replay opening", () => state.NewGame(), null, true);
-                    Add(() => $"Cinderwood restored: {OnOff(state.Restored(state.cinderwood))}", () => Edit(state.SetRestored(state.cinderwood, !state.Restored(state.cinderwood))),
+                    Heading("Realm healed look (also quiet-solves its puzzles)");
+                    Add(() => $"Cinderwood: {OnOff(state.Restored(state.cinderwood))}", () => Edit(state.SetRestored(state.cinderwood, !state.Restored(state.cinderwood))),
                         () => state.Restored(state.cinderwood));
                     if (state.galewick != null)
-                        Add(() => $"Galewick restored: {OnOff(state.Restored(state.galewick))}", () => Edit(state.SetRestored(state.galewick, !state.Restored(state.galewick))),
+                        Add(() => $"Galewick: {OnOff(state.Restored(state.galewick))}", () => Edit(state.SetRestored(state.galewick, !state.Restored(state.galewick))),
                             () => state.Restored(state.galewick));
                     if (state.lilymere != null)
-                        Add(() => $"Lilymere restored: {OnOff(state.Restored(state.lilymere))}", () => Edit(state.SetRestored(state.lilymere, !state.Restored(state.lilymere))),
+                        Add(() => $"Lilymere: {OnOff(state.Restored(state.lilymere))}", () => Edit(state.SetRestored(state.lilymere, !state.Restored(state.lilymere))),
                             () => state.Restored(state.lilymere));
-                    Flag("CW flame", "cw.flame", 1); // step 10f
-                    Flag("CW hollow", "cw.hollow", 63);
-                    Flag("CW firebox", "cw.ember", 1);
+                    Heading("Cinderwood, in story order");
+                    Flag("Flame", "cw.flame", 1); // step 10f
+                    Flag("Hollow", "cw.hollow", 63);
+                    Flag("Firebox", "cw.ember", 1);
                     Add(() => $"Log: {(GameState.Solved(GameState.LogId) ? "placed" : "fallen")}",
                         () => Edit(state.SetPuzzle(GameState.LogId, !GameState.Solved(GameState.LogId), GameState.Solved(GameState.LogId) ? 0 : 2)), () => GameState.Solved(GameState.LogId));
                     Add(() => $"Forge + door: {(GameState.Solved(GameState.BellowsId) ? "lit, open" : "cold")}",
@@ -339,16 +446,17 @@ namespace Diorama
                         () => Edit(state.SetPuzzle(GameState.KeeperId, !GameState.Solved(GameState.KeeperId), GameState.Solved(GameState.KeeperId) ? 0 : 1)), () => GameState.Solved(GameState.KeeperId));
                     Add(() => $"Fire shard: {(GameState.ShardHeld ? "held" : "none")}",
                         () => Edit(state.SetPuzzle(GameState.ShardId, false, GameState.ShardHeld ? 0 : 1)), () => GameState.ShardHeld);
-                    Add(() => $"Shard in statue: {OnOff(GameState.Solved(GameState.ShardId))}",
+                    Add(() => $"In statue: {OnOff(GameState.Solved(GameState.ShardId))}",
                         () => Edit(state.SetPuzzle(GameState.ShardId, !GameState.Solved(GameState.ShardId), 1)), () => GameState.Solved(GameState.ShardId));
                     if (state.galewick != null)
                     {
                         // Step 10e: Galewick's beats, in story order.
-                        Flag("GW mill", "gw.mill", 1);
-                        Flag("GW kites", "gw.kites", 7);
-                        Flag("GW clouds", "gw.clouds", 7);
-                        Flag("GW tower", TowerDoor.TowerId, 1);
-                        Flag("GW knots", "gw.knots", KeeperUntangle.AllKnots);
+                        Heading("Galewick, in story order");
+                        Flag("Big mill", "gw.mill", 1);
+                        Flag("Kites", "gw.kites", 7);
+                        Flag("Clouds", "gw.clouds", 7);
+                        Flag("Tower", TowerDoor.TowerId, 1);
+                        Flag("Knots", "gw.knots", KeeperUntangle.AllKnots);
                         Add(() => $"Galeowl: {(GameState.Solved("gw.keeper") ? "calm" : "frightened")}",
                             () => Edit(state.SetPuzzle("gw.keeper", !GameState.Solved("gw.keeper"), GameState.Solved("gw.keeper") ? 0 : 1)), () => GameState.Solved("gw.keeper"));
                         Add(() => $"Wind shard: {(GameState.Solved(ShardHolder.WindId) ? "in statue" : ShardHolder.Holds(ShardHolder.WindId) ? "held" : "none")}",
@@ -359,9 +467,10 @@ namespace Diorama
                     if (state.lilymere != null)
                     {
                         // Step 11b: Lilymere's beats, in story order (basin = the lagoon risen).
-                        Flag("LM pads", "lm.pads", 7);
-                        Flag("LM rain", "lm.rain", 31);
-                        Flag("LM basin + rise", LilymereLagoon.RisenId, 2);
+                        Heading("Lilymere, in story order");
+                        Flag("Lily pads", "lm.pads", 7);
+                        Flag("Rain", "lm.rain", 31);
+                        Flag("Basin + rise", LilymereLagoon.RisenId, 2);
                         // Step 11c: Tidemother and the water shard.
                         Add(() => $"Tidemother: {(GameState.Solved("lm.keeper") ? "calm" : "frightened")}",
                             () => Edit(state.SetPuzzle("lm.keeper", !GameState.Solved("lm.keeper"), GameState.Solved("lm.keeper") ? 0 : 1)), () => GameState.Solved("lm.keeper"));
@@ -370,40 +479,73 @@ namespace Diorama
                                 : ShardHolder.Holds(ShardHolder.WaterId) ? state.SetPuzzle(ShardHolder.WaterId, true, 2) : state.SetPuzzle(ShardHolder.WaterId, false, 1)),
                             () => PuzzleState.Stage(ShardHolder.WaterId) > 0 || GameState.Solved(ShardHolder.WaterId));
                     }
+                    Heading("Everything");
                     Add("Reset all story", () => Edit(state.ResetStory()), null, true);
                     break;
                 case Tab.Save:
+                    Heading("Save to a slot");
                     for (int i = 1; i <= 3; i++)
                     {
                         int slot = i;
                         Add($"Save {slot}", () => Status(state.SaveSlot(slot) ? $"Saved to slot {slot}." : "Nothing to save yet."));
                     }
+                    Heading("Load a slot (press twice)");
                     for (int i = 1; i <= 3; i++)
                     {
                         int slot = i;
                         Add($"Load {slot}", () => Status(state.LoadSlot(slot) ? $"Loading slot {slot}..." : $"Slot {slot} is empty."), null, true);
                     }
                     Add("Load auto", () => Status(state.LoadSlot(0) ? "Loading the auto slot..." : "The auto slot is empty."), null, true);
+                    Heading("Start over");
                     Add("New game", () => state.NewGame(), null, true);
                     Add("Show save path", () => Status(GameSave.SavePath, 12f));
-                    NextRow();
                     // Step 9g: the Quick Journey (its own save slot).
+                    Heading("Quick Journey: jump to a point");
                     Add("Quick: start", () => state.QuickPreset(GameState.QuickStage.Start), null, true);
                     Add("Quick: at gift", () => state.QuickPreset(GameState.QuickStage.Gift), null, true);
                     Add("Quick: at gate", () => state.QuickPreset(GameState.QuickStage.Gate), null, true);
                     Add("Quick: at temple", () => state.QuickPreset(GameState.QuickStage.Temple), null, true);
                     break;
                 case Tab.Tools:
+                    Heading("Show");
                     Add(() => $"FPS: {OnOff(_fpsOn)}", () => _fpsOn = !_fpsOn, () => _fpsOn);
                     Add(() => $"Readouts: {OnOff(DevReadout.Shown)}", () => DevReadout.Shown = !DevReadout.Shown, () => DevReadout.Shown);
+                    Add(() => $"Labels: {OnOff(DebugLabels.Visible)}", () => DebugLabels.Visible = !DebugLabels.Visible, () => DebugLabels.Visible);
+                    Heading("Speed");
                     Add(() => $"Time x{Time.timeScale:0}", () => Time.timeScale = Time.timeScale >= 4f ? 1f : Time.timeScale * 2f, () => Time.timeScale > 1f);
                     Add(() => $"Walk x2: {OnOff(_walkFast)}", ToggleWalk, () => _walkFast);
-                    Add(() => $"Labels: {OnOff(DebugLabels.Visible)}", () => DebugLabels.Visible = !DebugLabels.Visible, () => DebugLabels.Visible);
+                    Heading("Record");
                     Add("Record ghost", RecordGhost);
                     Add("Report bug", ReportBug);
-                    Add("Close", () => SetOpen(false));
                     break;
             }
+            Layout();
+        }
+
+        const string Interiors = "Interiors";
+
+        /// <summary>Step 12c: a Travel spot's heading and its readable name ("CW: forge door" = Cinderwood / Forge door).</summary>
+        static string SpotGroup(GameState.Spot spot, out string name)
+        {
+            string label = spot.label ?? "";
+            int colon = label.IndexOf(':');
+            string prefix = colon > 0 ? label.Substring(0, colon).Trim() : "";
+            string rest = colon > 0 ? label.Substring(colon + 1).Trim() : label;
+            string place = prefix switch
+            {
+                "CW" => "Cinderwood",
+                "GW" => "Galewick",
+                "LM" => "Lilymere",
+                _ => prefix,
+            };
+            if (rest.Length > 0) rest = char.ToUpperInvariant(rest[0]) + rest.Substring(1);
+            if (spot.interior)
+            {
+                name = place.Length > 0 ? $"{place}: {rest}" : rest;
+                return Interiors;
+            }
+            name = rest;
+            return place.Length > 0 ? place : "Other";
         }
 
         void Picker()
@@ -477,7 +619,7 @@ namespace Diorama
                            $"Playing {SaveSlots.Label(SaveSlots.Active)}; quick timer {QuickJourney.Format(QuickJourney.Seconds)}{(QuickJourney.TimerDone ? " (done)" : "")}";
                 case Tab.Story:
                     return "Story changes save, edit the save and reload the game.";
-                case Tab.Party:
+                case Tab.Team:
                     var lead = state.party != null ? state.party.Lead : null;
                     return lead != null ? $"Lead: {lead.Name} Lv {lead.level}, {state.party.members.Count} in pods, {state.party.storage.Count} stored" : "No party yet.";
                 default:
@@ -514,6 +656,24 @@ namespace Diorama
         void Place(bool snap)
         {
             if (_dragHand >= 0 || !TryHeadYaw(out var head, out var fwd)) return;
+            if (!_moved && besideIsland && island != null)
+            {
+                // Step 12c (Oct 28 notes): higher, and beside the island on the dominant-hand side, facing the head;
+                // follows only when the island moves.
+                Vector3 at = island.transform.position;
+                if (!snap && (at - _islandAt).sqrMagnitude < 0.05f * 0.05f) return;
+                _islandAt = at;
+                Vector3 away = at - head;
+                away.y = 0f;
+                away = away.sqrMagnitude > 1e-4f ? away.normalized : fwd;
+                Vector3 right = Vector3.Cross(Vector3.up, away) * (DominantHand.Left ? -1f : 1f);
+                Vector2 half = island.FootprintHalfSize * island.transform.lossyScale.x;
+                float r = Mathf.Max(half.x, half.y) + besideGap + size.x * 0.5f;
+                float top = island.transform.TransformPoint(new Vector3(0f, island.CapTopLocal, 0f)).y;
+                _root.position = new Vector3(at.x, top + besideHeight + size.y * 0.5f, at.z) + right * r + away * besideBack;
+                Face(head);
+                return;
+            }
             if (!_moved && behindIsland && island != null)
             {
                 // Oct 27 (Mugesh): behind the island, a ray's reach away, instead of beside the head; stays there and
@@ -675,9 +835,9 @@ namespace Diorama
         Button ButtonAt(Vector2 p)
         {
             foreach (var b in _tabs)
-                if (Inside(b, p)) return b;
+                if (b.shown && Inside(b, p)) return b;
             foreach (var b in _content)
-                if (Inside(b, p)) return b;
+                if (b.shown && b.action != null && Inside(b, p)) return b;
             return null;
         }
 
@@ -776,7 +936,10 @@ namespace Diorama
             if (!Application.isEditor) return;
             var m = UnityEngine.InputSystem.Mouse.current;
             var cam = Camera.main;
-            if (m == null || cam == null || !m.leftButton.wasPressedThisFrame) return;
+            if (m == null || cam == null) return;
+            float wheel = m.scroll.ReadValue().y;
+            if (Mathf.Abs(wheel) > 0.01f && Hit(cam.ScreenPointToRay(m.position.ReadValue()), out _)) ScrollBy(wheel > 0f ? -1 : 1);
+            if (!m.leftButton.wasPressedThisFrame) return;
             if (Hit(cam.ScreenPointToRay(m.position.ReadValue()), out var p))
             {
                 var b = ButtonAt(p);
@@ -820,10 +983,11 @@ namespace Diorama
 
         void PaintButton(Button b, bool tab)
         {
+            if (!b.shown) return;
             string text = b.label();
             if (b.text.text != text) b.text.text = text;
             bool on = b.on != null && b.on();
-            Color back = b == _confirming ? ConfirmColor : tab ? on ? TabOnColor : TabColor : on ? OnColor : b.action == null ? PanelColor : ButtonColor;
+            Color back = b == _confirming ? ConfirmColor : tab ? on ? TabOnColor : TabColor : on ? OnColor : b.heading ? Color.clear : b.action == null ? PanelColor : ButtonColor;
             bool lit = b == _hover || b == _rayHover[0] || b == _rayHover[1];
             Color border = lit ? new Color(1f, 0.9f, 0.55f, 1f) : new Color(1f, 1f, 1f, b.action == null ? 0f : 0.18f);
             Paint(b.quad, back, border, b.size.x / b.size.y, 0.3f, lit ? 0.12f : 0.06f);
@@ -874,7 +1038,7 @@ namespace Diorama
             if (_instance == null) return false;
             foreach (var list in new[] { _instance._tabs, _instance._content })
                 foreach (var b in list)
-                    if (b.action != null && b.label().StartsWith(label, StringComparison.OrdinalIgnoreCase))
+                    if (b.action != null && !b.heading && b.label().StartsWith(label, StringComparison.OrdinalIgnoreCase))
                     {
                         _instance._confirming = b;
                         _instance.Press(b, "bridge");

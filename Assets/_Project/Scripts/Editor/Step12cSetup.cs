@@ -33,6 +33,7 @@ namespace Diorama.EditorTools
             Walking(log);
             Clouds(log);
             LilymerePalette(log);
+            DevPanelSpot(log);
             EditorSceneManager.MarkSceneDirty(active);
             EditorSceneManager.SaveScene(active);
             AssetDatabase.SaveAssets();
@@ -52,6 +53,24 @@ namespace Diorama.EditorTools
             Undo.RecordObject(explorer, "Step 12c");
             explorer.smartSeconds = explorer.walkSeconds;
             log.Append(NL + $"  smart step: {explorer.smartSeconds} s a tile (= pinch walk)");
+        }
+
+        /// <summary>The dev panel rework (QA builds): bigger for the headed groups, beside the island on the dominant-hand side.</summary>
+        static void DevPanelSpot(StringBuilder log)
+        {
+            var panel = Object.FindFirstObjectByType<DevPanel>(FindObjectsInactive.Include);
+            if (panel == null)
+            {
+                log.Append(NL + "  dev panel: none in MR_Main (MISSING)");
+                return;
+            }
+            Undo.RecordObject(panel, "Step 12c");
+            panel.size = new Vector2(0.42f, 0.36f);
+            panel.besideIsland = true;
+            panel.besideHeight = 0.08f;
+            panel.besideGap = -0.12f;
+            panel.besideBack = 0.08f;
+            log.Append(NL + "  dev panel: 42 x 36 cm, beside the island (dominant hand), close rune, scroll");
         }
 
         /// <summary>The ridge: puffs on the road again (bob kept small), the road north to the tower open.</summary>

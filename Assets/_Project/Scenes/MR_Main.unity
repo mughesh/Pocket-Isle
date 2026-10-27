@@ -4441,7 +4441,7 @@ MonoBehaviour:
   island: {fileID: 270959109}
   grabGuard: {fileID: 270959111}
   hudMaterial: {fileID: 2100000, guid: 0656b6c4f92798e49a14cf09a2c6800e, type: 2}
-  size: {x: 0.36, y: 0.32}
+  size: {x: 0.42, y: 0.36}
   distance: 0.55
   sideAngle: 14
   downAngle: 22
@@ -4450,6 +4450,10 @@ MonoBehaviour:
   behindIsland: 1
   behindHeight: 0.05
   behindGap: 0.1
+  besideIsland: 1
+  besideHeight: 0.08
+  besideGap: -0.12
+  besideBack: 0.08
   rayLength: 2
   frame: 0.018
   grabOut: 0.05
