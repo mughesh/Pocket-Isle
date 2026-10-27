@@ -86,6 +86,12 @@ namespace Diorama
         Vector3 HoverWorld => MapToWorld(new Vector3(vent.x, ventHeight + 0.9f + 0.08f * Mathf.Sin(Time.time * 3f), vent.y));
         public Vector3 MouthWorld => MapToWorld(new Vector3(firebox.x, mouthHeight, firebox.y + mouthFront));
 
+        [Tooltip("Step 12b: said (the Spirit points at the firebox) when the ember is picked up, at most every 12 s.")]
+        public string tipLine = "cw.ember.tip";
+        [Tooltip("Step 12b: the pinned chip while the ember is carried.")]
+        public string tipChip = "Tip it in!";
+        float _tipSaidAt = -99f;
+
         protected override void Start()
         {
             _audio = gameObject.AddComponent<AudioSource>();
@@ -93,6 +99,8 @@ namespace Diorama
             _audio.spatialBlend = 0f;
             if (island != null) _ember = new PropView("Forge Ember", island, emberRecipe);
             _rings = new GuideRings("Ember Guide", island, guideMaterial, 2, fx);
+            // Step 12b: the Spirit can point at the firebox's mouth while the ember is carried.
+            Dialogue.RegisterTarget("firebox", () => Here && !IsSolved ? MouthWorld : (Vector3?)null, null, () => 0.6f * TileWorld);
             if (guideMaterial == null) Debug.LogError($"[ForgeEmberPiece] {name}: no guide material, so no gold rings (Set Up MR_Main (10f Cinderwood hands)).", this);
             if (bellows == null) Debug.LogError($"[ForgeEmberPiece] {name}: no bellows to wake (Set Up MR_Main (10f Cinderwood hands)).", this);
             base.Start();
@@ -179,6 +187,13 @@ namespace Diorama
             {
                 case EmberState.Held:
                     MarkInteracted();
+                    // Step 12b: where it goes is obvious: the chip says it, the Spirit points at the firebox.
+                    Dialogue.SetChip(tipChip);
+                    if (Time.time - _tipSaidAt > 12f && !string.IsNullOrEmpty(tipLine))
+                    {
+                        _tipSaidAt = Time.time;
+                        Dialogue.Repeat(tipLine);
+                    }
                     Debug.Log($"[ForgeEmberPiece] {id}: picked up ({(_carry.Holder == 0 ? "left" : "right")} hand, {(_hands[_carry.Holder].pinch ? "pinch" : "grab")}).");
                     GameAudio.Procedural(_audio, PuzzleSounds.Catch, volume * 0.5f);
                     if (fx != null) fx.Burst(_emberWorld, 10, new Color(1f, 0.6f, 0.25f), TileWorld * 0.4f, 0.6f, TileWorld * 0.04f, island.transform.up * TileWorld * 0.8f);

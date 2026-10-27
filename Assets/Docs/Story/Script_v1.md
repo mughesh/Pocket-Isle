@@ -200,6 +200,8 @@ Step 10f, Cinderwood's new hand moments (lesson lines stay pinned as a chip unti
   - Spirit: The smoke's burning away! The path is clear.
 - `cw.ember` · objective · → puzzle:cw.ember (lesson at the forge's ember vent, before the bellows; chip "Pick it up!")
   - Spirit: Pick up the ember and drop it in the forge's mouth!
+- `cw.ember.tip` · objective · → firebox (step 12b: the ember picked up; the Spirit points at the firebox, chip "Tip it in!")
+  - Spirit: Now tip it into the forge's mouth!
 - `cw.forge.cold` · (the bellows pumped while the firebox is cold; at most every 8 s)
   - Spirit: The forge is stone cold. It needs a spark first.
 - `cw.ember.done` · once (the ember dropped into the firebox: it roars)

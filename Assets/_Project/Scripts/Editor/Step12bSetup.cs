@@ -32,6 +32,8 @@ namespace Diorama.EditorTools
             var log = new StringBuilder("[Step12b] MR_Main set up:");
             ShardColours(log);
             Focus(log);
+            DialogueTools.Import();
+            log.Append("\n  Script_v1 reimported (cw.ember.tip)");
             EditorSceneManager.MarkSceneDirty(active);
             EditorSceneManager.SaveScene(active);
             AssetDatabase.SaveAssets();

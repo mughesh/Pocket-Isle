@@ -231,6 +231,7 @@ MonoBehaviour:
   counterLabel: 
   focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
   markIntensity: 1.3
+  grabAssist: 0.08
   holder: {fileID: 570826975}
   shardRecipe: {fileID: 11400000, guid: 0d00935bd93bf4d44ba91c69122fee75, type: 2}
   statueRecipe: {fileID: 11400000, guid: 4e524cd358b9b874f9c8ac964bd660a2, type: 2}
@@ -566,6 +567,7 @@ MonoBehaviour:
   counterLabel: 
   focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
   markIntensity: 1.3
+  grabAssist: 0.08
   recipe: {fileID: 11400000, guid: 782c07a7a06cda744b18f4eed5f22284, type: 2}
   home: {x: 20.5, y: 14}
   homeHeight: 0
@@ -785,6 +787,7 @@ MonoBehaviour:
   counterLabel: Pads
   focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
   markIntensity: 1.3
+  grabAssist: 0.08
   padStart:
   - {x: 29.5, y: 34}
   - {x: 37.5, y: 35}
@@ -1597,6 +1600,7 @@ MonoBehaviour:
   counterLabel: Lotus
   focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
   markIntensity: 1.3
+  grabAssist: 0.08
   buds:
   - {x: 40.5, y: 26}
   - {x: 40.5, y: 24.5}
@@ -2378,6 +2382,7 @@ MonoBehaviour:
   counterLabel: Clouds
   focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
   markIntensity: 1.3
+  grabAssist: 0.08
   puffs:
   - {x: 21, y: 12}
   - {x: 22, y: 12}
@@ -2628,6 +2633,7 @@ MonoBehaviour:
   counterLabel: 
   focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
   markIntensity: 1.3
+  grabAssist: 0.08
   holder: {fileID: 570826975}
   shardRecipe: {fileID: 11400000, guid: 243f873e41708f049b1a176b344ec7c1, type: 2}
   statueRecipe: {fileID: 11400000, guid: 4e524cd358b9b874f9c8ac964bd660a2, type: 2}
@@ -2927,6 +2933,7 @@ MonoBehaviour:
   counterLabel: 
   focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
   markIntensity: 1.3
+  grabAssist: 0.08
   shrine: {x: 24, y: 26}
   flameHeight: 1.58
   wispBase: 1.36
@@ -3568,6 +3575,7 @@ MonoBehaviour:
   counterLabel: 
   focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
   markIntensity: 1.3
+  grabAssist: 0.08
   anchor: {x: 31, y: 39}
   footprint: {x: 1, y: 1}
   recipe: {fileID: 11400000, guid: 94f3ed9fca8fe024fa525b334e4d5c26, type: 2}
@@ -3742,6 +3750,7 @@ MonoBehaviour:
   counterLabel: 
   focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
   markIntensity: 1.3
+  grabAssist: 0.08
   lanterns:
   - {x: 30, y: 26}
   - {x: 28, y: 25}
@@ -4143,6 +4152,7 @@ MonoBehaviour:
   counterLabel: 
   focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
   markIntensity: 1.3
+  grabAssist: 0.08
   pad: {x: 23, y: 4}
   padHeight: 0.57
   pressTravel: 0.3
@@ -4291,6 +4301,7 @@ MonoBehaviour:
   counterLabel: Kites
   focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
   markIntensity: 1.3
+  grabAssist: 0.08
   kites:
   - {x: 35, y: 22}
   - {x: 43, y: 20}
@@ -4583,6 +4594,7 @@ MonoBehaviour:
   counterLabel: 
   focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
   markIntensity: 1.3
+  grabAssist: 0.08
   holder: {fileID: 570826975}
   shardRecipe: {fileID: 11400000, guid: d4841e0bb04882b43a2477d94a098d44, type: 2}
   statueRecipe: {fileID: 11400000, guid: 4e524cd358b9b874f9c8ac964bd660a2, type: 2}
@@ -5657,6 +5669,7 @@ MonoBehaviour:
   counterLabel: 
   focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
   markIntensity: 1.3
+  grabAssist: 0.08
   vent: {x: 26, y: 5}
   firebox: {x: 24, y: 3}
   bellows: {fileID: 1127440542}
@@ -5678,6 +5691,8 @@ MonoBehaviour:
   roarSeconds: 2.5
   doneLine: cw.ember.done
   volume: 0.7
+  tipLine: cw.ember.tip
+  tipChip: Tip it in!
 --- !u!1 &1612879608
 GameObject:
   m_ObjectHideFlags: 0
@@ -5738,6 +5753,7 @@ MonoBehaviour:
   counterLabel: Pours
   focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
   markIntensity: 1.3
+  grabAssist: 0.08
   basin: {x: 30.5, y: 9.5}
   waterfallAnchor: {x: 30, y: 7}
   waterfallCenter: {x: 30.5, y: 7}
@@ -6214,6 +6230,7 @@ MonoBehaviour:
   counterLabel: Knots
   focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
   markIntensity: 1.3
+  grabAssist: 0.08
   keeper: {fileID: 388614567}
   swap: {fileID: 221433162}
   stringMaterial: {fileID: 2100000, guid: eca8edd0ce339e444b04540e378ffbf3, type: 2}
@@ -6795,6 +6812,7 @@ MonoBehaviour:
   counterLabel: 
   focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
   markIntensity: 1.3
+  grabAssist: 0.08
   anchor: {x: 17, y: 38}
   footprint: {x: 1, y: 1}
   recipe: {fileID: 11400000, guid: 94f3ed9fca8fe024fa525b334e4d5c26, type: 2}
@@ -7251,6 +7269,7 @@ MonoBehaviour:
   counterLabel: Flicks
   focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
   markIntensity: 1.3
+  grabAssist: 0.08
   anchor: {x: 28, y: 34}
   footprint: {x: 2, y: 2}
   recipe: {fileID: 11400000, guid: af760acb3feb8ac408d0da79d027cfd9, type: 2}
