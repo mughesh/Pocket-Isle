@@ -1,6 +1,6 @@
 # Run, Oct 27 night: smart-step walking + guidance (12a), then the night notes (12b)
 
-Prompt: `Prompts/run-oct27-night.md`. Flat Editor Play through the bridge plus EditMode tests (221/221). **Nothing tested
+Prompt: `Prompts/run-oct27-night.md`. Flat Editor Play through the bridge plus EditMode tests (222/222). **Nothing tested
 with real hands or on the headset.** No pushes. **No APK** (Mugesh, mid-run: "dont make a build").
 
 ## Done / partly / not started
@@ -11,13 +11,24 @@ with real hands or on the headset.** No pushes. **No APK** (Mugesh, mid-run: "do
 | 12a | B walk lessons (walk / turn / far), Controls card | done, flat-checked (new game, all three lessons) | 4508fab |
 | 12a | C objective vs chatter bubbles, poke the Spirit, line flushing | done, flat-checked | 713e68c |
 | 12a | D Spirit's trail, gold that reads on every ground | done, flat-checked (hub, Galewick, Lilymere) | fce4984 |
-| 12b | A-D | see the update at the end | |
+| 12b | A1 focus lock for every hand moment | done, flat-checked (kites, mill, basin) | 2977431 |
+| 12b | A2 grab assist (8 cm, pinch or fist) + white hover | done (kites, ember, knot ends, log; no real hands) | 0a5e693 |
+| 12b | A3 bubble over props + the wavering fix | done, flat-checked | edd16d0 |
+| 12b | A4 exit doors (glow + floor arrow) | done, flat-checked (tower hall) | 037f0d9 |
+| 12b | A5 respawn at the current realm's shrine | done (tests; not lost a battle on purpose) | edd16d0 |
+| 12b | A6 wind shard green | done | edd16d0 |
+| 12b | A7 gift bug | done + test | edd16d0 |
+| 12b | 8b dev panel rework | **not started** | |
+| 12b | B firebox: chip, the Spirit points, bubble over the forge | done | 93fa481 |
+| 12b | C clouds in the air (shadows, motion), ridge 2 wide, bush gone | done, flat-checked | b8a5339 |
+| 12b | D10 drought mud colour | **partly**: colour only (no wet tint, puddles, salt rims, garden flooding look) | af39102 |
+| 12b | D11 cliff bowl waterfall, D12 two-palm water sheet, D13 two-hand ghost | **not started** | |
 
 ## Headset: switch XR back on first
 Standalone **Initialize XR on Startup** was **on** when I started. Flat Play needs it off (the XR guard stops Play after
-20 s without a headset), so I turned it off through Unity's settings object while working and **turn it back on at
-the end** (check: Edit > Project Settings > XR Plug-in Management > PC tab > Initialize XR on Startup ticked). If it's
-off when you sit down, tick it there; `Assets/XR/XRGeneralSettingsPerBuildTarget.asset` then shows no change in git.
+20 s without a headset), so I turned it off through Unity's settings object while working and **turned it back on at
+23:15** (the asset matches git again). To check: Edit > Project Settings > XR Plug-in Management > PC tab > Initialize
+XR on Startup ticked. Unity may want a restart before Link takes the session, as usual.
 
 ## Test first on the headset (walking first)
 New game in the **quick slot** (title > New journey > Quick journey), then:
@@ -41,6 +52,20 @@ New game in the **quick slot** (title > New journey > Quick journey), then:
    Enter a realm: the trail points at the nearest unsolved hand moment. Check it reads on sand, wheat, grass.
 9. Game menu (Pause) > **Controls**: a stone card with four drawn rows. Also in title Settings > Controls.
 
+Then the night notes (12b):
+10. Walk up to any hand moment (Go to GW: kite field, GW: big mill, CW: forge door, LM: basin...): the island glides to
+    frame all its pieces and holds while you're there; walking out lets go.
+11. Kites, the ember, Galeowl's knot ends, the log: bring a hand close (within ~8 cm): the object turns white; a pinch
+    or a fist there grabs it.
+12. Forge: pick up the ember: chip "Tip it in!", the Spirit says so pointing at the firebox (gold ring brightens). The
+    bubble is never inside the forge or the cliff now; it stays close to the Spirit and doesn't wobble.
+13. Keeper halls / lodge: the way out glows (swirl in the arch, ring on the step) with a gold arrow on the floor.
+14. Lose a battle in Galewick: you're back at Galewick's shrine (or its arrival), not the hub's.
+15. Wind shard is green (holder, Spirit's circle, statue rim).
+16. Quick slot: the two-Isling gift comes only in the hub right after the tutorial; going into a realm first skips it.
+17. GW: ridge: the clouds float up in the air with soft shadows, bob and sway; the path is two tiles wide, no bush.
+18. LM: garden / the lagoon's dry ring: ochre drought mud, not white.
+
 ## Feel numbers to tune (Inspector)
 
 | What | Value | Where |
@@ -55,6 +80,10 @@ New game in the **quick slot** (title > New journey > Quick journey), then:
 | Trail | after 12 s still, up 20 s, 14 tiles shown | Explorer > Spirit Trail |
 | Chatter text size | 0.86 of objectives | Dialogue Bubble > Chatter Scale |
 | Spirit poke | 2.5 cm fingertip, 1.2 s cooldown | Lantern Spirit > Spirit Poke |
+| Grab assist | 8 cm (real world) | each hand moment > Grab Assist |
+| Focus lock | 2.5 tiles margin, moves after 0.25 tiles | Explorer > Focus Lock |
+| Bubble | max 14 cm from the Spirit, 6 mm deadband, 1.5 cm toward you | Dialogue Bubble |
+| Clouds | 2.5 tiles up, bob 0.18, sway 0.3, spin 9 deg/s, billow 7%, shadow 0.32 | Cloud Bank |
 
 ## Decisions I made (without asking)
 - **SmartStep took AutoWalk's enum slot (0)**, so the scene and every save move to smart steps without a migration;
@@ -77,7 +106,25 @@ New game in the **quick slot** (title > New journey > Quick journey), then:
 - The Spirit's trail is for the **full adventure**; the quick slot keeps its own gold path (still the old tile flash).
 - Gold marks are a new premultiplied shader (`Diorama/GoldMark`) so the thin dark outline can darken pale ground.
 
+## Decisions I made in 12b
+- **Gift bug**: the gift only ever checks the quick slot, so the Islings came from the **quick slot**, late. If you
+  leave the hub before it lands (wind gate first), it used to arrive whenever you came back. Now: quick slot only,
+  once, and going into any realm first skips it for good (puzzle `quick.gift` stage 2). Test added.
+- **Respawn**: the shrine used last **on the map you're on**, else that map's arrival (start tile); no more travelling
+  to another realm's shrine. Shrines are saved per map (old saves: their one shrine counts for its map).
+- Focus lock skips a moment whose pieces + the explorer don't fit one window; the lotus garden keeps its own settle.
+- Grab assist: white hover on kites, the ember and knot ends; the log and the Keeper shard only got the reach (the
+  shard already had 9 cm + hover).
+- Ridge: 2 wide; each puff blocks both rows (three extra blocking tiles), the near side is low rocks only.
+- The bubble draws over everything on the island (depth test Always on its own material copies). If it ever shows
+  through something it shouldn't (a menu), say so.
+
 ## Left / known
+- **Not done from 12b**: the dev panel rework (8b); D10 beyond the colour (wet tint under the rain, puddles, salt rims,
+  dried reeds, shallow water between the lotus stones after the rise); D11 the cliff with the carved bowl and the
+  waterfall falling from its lip; D12 the water sheet across both palms with a pouring stream; D13 the two-hand ghost
+  that animates to the drop point. These need modelling and a new interaction each; I stopped at a clean state for
+  your midnight test instead of rushing them.
 - Quick Journey's own gold path still uses the old tile flash, not the new gold mark.
 - Shots: `12a_footprints` (an early, small-footprint frame; sizes were raised after), `12a_lesson_walk`,
   `12a_lesson_turn`, `12a_controls_card`, `12a_bubble_poke`, `12a_bubble_chatter`, `12a_trail_hub`,
@@ -86,5 +133,7 @@ New game in the **quick slot** (title > New journey > Quick journey), then:
   uncommitted, as before). The 37d054c values are right; re-apply with `AudioHookupDebug.ApplyProjectAudio` before a build.
 
 ## Save
-- The full-adventure slot had no save; the quick slot's `quick.json` is backed up. Checks ran a new game in the
-  adventure slot. At the end both go back as they were (report updated then).
+- Checks ran a new game in the adventure slot, which also deleted the quick slot's save. **Put back**: `quick.json`
+  restored byte for byte from my backup, the test adventure save moved out (there was none before), the last played
+  slot set back to Quick (the title's Continue). `mruk_config.dat` is rewritten by every Play (Editor MRUK config;
+  can't be restored, regenerates).

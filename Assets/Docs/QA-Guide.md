@@ -52,6 +52,12 @@ never saved.
   Standing still for ~12 s also shows the trail.
 - Game menu > **Controls**: a card with the four controls.
 - Note anything that feels slow, stops too early or too late, or walks somewhere you didn't mean.
+- Near any hand puzzle the island view now **settles** to show the whole puzzle.
+- Kites, the ember, knot ends and the log glow white when your hand is close enough to grab (pinch or fist).
+- Inside halls and the lodge, the **way out glows** with a gold arrow.
+- Losing a battle puts you back at the shrine of the realm you're in.
+- The wind shard is **green**. In Galewick the clouds float in the air and the ridge path is wider.
+- Lilymere's dry areas are brown mud now (not white).
 
 ## Earlier (step 11d: fixes from Mugesh's Oct 27 notes)
 

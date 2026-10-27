@@ -90,6 +90,14 @@ namespace Diorama.EditorTools
             Debug.Log($"[Step12aDebug] Trail {(on ? "on" : "off")}, goal {(t.Goal.HasValue ? $"c{t.Goal.Value.x} r{t.Goal.Value.y}" : "none")}.");
         }
 
+        /// <summary>The last played slot (arg 0 = adventure, 1 = quick), as the title's Continue reads it.</summary>
+        public static void LastSlot()
+        {
+            if (int.TryParse(Arg, out int v)) PlayerPrefs.SetInt("pocketisle.lastSlot", v);
+            PlayerPrefs.Save();
+            Debug.Log($"[Step12aDebug] Last played slot: {PlayerPrefs.GetInt("pocketisle.lastSlot", -1)} (0 adventure, 1 quick).");
+        }
+
         public static void State()
         {
             var e = Explorer;
