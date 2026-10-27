@@ -16,6 +16,8 @@ namespace Diorama
         public int currentHp;
         [Min(0)] public int xp;
         public string nickname;
+        [Tooltip("Step 13: where it was met (\"Cinderwood\", \"the Still Isle\"); empty = an old save (guessed for the Hall of Fame).")]
+        public string metIn;
 
         public IslingInstance() { }
 

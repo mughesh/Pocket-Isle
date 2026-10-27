@@ -164,6 +164,15 @@ namespace Diorama.Audio
         public const string UiPebble = "ui.pebble";
         public const string UiSaved = "ui.saved";
         public const string VoiceHeart = "voice.heart";
+
+        // Step 13: the finale (cues without clips yet fall back to existing ones; see PhaseB-Hooks.md).
+        public const string MusicFinale = "music.finale";
+        public const string HeartCrack = "heart.crack";
+        public const string HeartBeat = "heart.beat";
+        public const string HeartWings = "heart.wings";
+        public const string SparkChime = "spark.chime";
+        public const string GatesBloom = "gates.bloom";
+        public const string CreditsTablet = "credits.tablet";
         public const string VoiceKeeper = "voice.keeper";
         public const string WalkBump = "walk.bump";
         public const string WalkHop = "walk.hop";

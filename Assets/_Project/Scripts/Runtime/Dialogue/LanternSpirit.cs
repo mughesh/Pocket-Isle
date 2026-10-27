@@ -69,6 +69,31 @@ namespace Diorama
         /// <summary>0 = hidden (before the opening's spark arrives), 1 = shown. Scales the model.</summary>
         public float Appear { get; set; } = 1f;
 
+        /// <summary>
+        /// Step 13: the finale holds the Spirit at a world point instead (before the Heart's forehead, on the player's
+        /// palm, in the Heart's socket, at the explorer's lantern); null = its own flight as before.
+        /// </summary>
+        [System.NonSerialized] public System.Func<Vector3?> hold;
+        [Tooltip("Step 13: how quickly it follows a held point (1/s).")]
+        public float holdSharpness = 7f;
+        [Tooltip("Step 13: the Spark after the finale (smaller, warmer, no acorn cap): its size and glow.")]
+        public float sparkScale = 0.72f, sparkGlow = 0.35f;
+
+        /// <summary>Step 13: the Spark (after the finale): smaller, warmer, no stone cap.</summary>
+        public bool Spark { get; private set; }
+
+        public void SetSpark(bool on)
+        {
+            Spark = on;
+            if (_model == null) return;
+            var cap = _model.Find("Rig/Model/Part_AcornCap");
+            if (cap == null)
+                foreach (var t in _model.GetComponentsInChildren<Transform>(true))
+                    if (t.name.StartsWith("Part_AcornCap")) cap = t;
+            if (cap != null) cap.gameObject.SetActive(!on);
+            Debug.Log($"[LanternSpirit] {(on ? "The Spark: smaller, warmer, no cap" : "The Lantern Spirit again")}.");
+        }
+
         /// <summary>Where the Spirit rests (world), above the near-left corner of the rim.</summary>
         public Vector3 HomeWorld => island != null && island.map != null ? island.transform.TransformPoint(HomeLocal()) : transform.position;
 
@@ -113,7 +138,7 @@ namespace Diorama
         {
             if (_model == null || island == null || island.map == null) return;
             float appear = Mathf.Clamp01(Appear);
-            _model.localScale = Vector3.one * appear;
+            _model.localScale = Vector3.one * (appear * (Spark ? sparkScale : 1f));
             if (_model.gameObject.activeSelf != appear > 0.001f) _model.gameObject.SetActive(appear > 0.001f);
             _speak = Mathf.MoveTowards(_speak, _speakTarget, Time.deltaTime * 3f);
             UpdateTarget();
@@ -128,8 +153,25 @@ namespace Diorama
                 }
                 Debug.Log(battle ? $"[LanternSpirit] Battle: waiting beside the near rim ({(DominantHand.Left ? "right" : "left")} side, the non-dominant one)." : "[LanternSpirit] Battle over: back to the corner.");
             }
-            Place(Time.time);
-            if (_view != null) _view.SetFlash(Mathf.Max(speakBrighten * Mathf.SmoothStep(0f, 1f, _speak), shineBrighten * FocusHighlight.Shine));
+            var held = hold != null ? hold() : null;
+            if (held.HasValue) Hold(held.Value);
+            else Place(Time.time);
+            if (_view != null) _view.SetFlash(Mathf.Max(Mathf.Max(speakBrighten * Mathf.SmoothStep(0f, 1f, _speak), shineBrighten * FocusHighlight.Shine), Spark ? sparkGlow : 0f));
+        }
+
+        /// <summary>Step 13: follows a held point (eased), bobbing a little, facing the head; flies home from there when let go.</summary>
+        void Hold(Vector3 world)
+        {
+            float k = 1f - Mathf.Exp(-Time.deltaTime * holdSharpness);
+            transform.position = Vector3.Lerp(transform.position, world, k);
+            _flyFrom = transform.localPosition;
+            _flyStart = Time.time;
+            _away = false;
+            var cam = Camera.main;
+            if (cam == null) return;
+            Vector3 look = cam.transform.position - transform.position;
+            look.y = 0f;
+            if (look.sqrMagnitude > 1e-6f) transform.rotation = Quaternion.LookRotation(look, Vector3.up);
         }
 
         /// <summary>Active target: go (and keep the linger timer fresh). Lost: home now. None: home after the linger.</summary>

@@ -131,6 +131,110 @@ namespace Diorama.EditorTools
             }
         }
 
+        static FinaleDirector Finale => Find<FinaleDirector>();
+
+        /// <summary>The dev panel's finale buttons: arg "wake" or "goodbye".</summary>
+        public static void Play() => Debug.Log($"[Step13Debug] Finale: {FinaleDirector.DevPlay(Arg == "goodbye")}.");
+
+        /// <summary>
+        /// A synthetic palm for the goodbye: arg "c,h,r,up" (map column, height in tiles, row, palm-up dot), "socket" = just
+        /// under the Heart's forehead socket (it floats in), "front" = in front of the Heart (it lands), "off" = none.
+        /// </summary>
+        public static void Palm()
+        {
+            var f = Finale;
+            if (f == null) return;
+            var island = f.island;
+            if (Arg == "off")
+            {
+                f.debugPalm = null;
+                Debug.Log("[Step13Debug] Palm off.");
+                return;
+            }
+            Vector3 MapOf(Vector3 world)
+            {
+                var local = island.transform.InverseTransformPoint(world);
+                var tile = island.LocalToTile(local);
+                return new Vector3(tile.x, (local.y - island.Content.capHeight) / island.map.tileSize, tile.y);
+            }
+            if (Arg == "socket")
+            {
+                f.debugPalm = MapOf(f.heart.SocketWorld) + new Vector3(0f, -0.4f, 0.3f);
+                f.debugPalmUp = 1f;
+            }
+            else if (Arg == "front")
+            {
+                f.debugPalm = MapOf(f.heart.SocketWorld) + new Vector3(0f, -0.6f, 3.5f);
+                f.debugPalmUp = 1f;
+            }
+            else
+            {
+                var v = Arg.Split(',');
+                float F(int i) => float.Parse(v[i], System.Globalization.CultureInfo.InvariantCulture);
+                f.debugPalm = new Vector3(F(0), F(1), F(2));
+                f.debugPalmUp = v.Length > 3 ? F(3) : 1f;
+            }
+            Debug.Log($"[Step13Debug] Palm at {f.debugPalm} up {f.debugPalmUp}: {f.Describe()}");
+        }
+
+        /// <summary>A full party of six (one per family, Lv 14-22, no "met in": the old-save guess) and three in the Lodge.</summary>
+        public static void Team()
+        {
+            var party = Find<Party>();
+            var save = Find<GameSave>();
+            if (party == null || save == null || save.registry == null) return;
+            IslingInstance Make(string id, int lv)
+            {
+                var s = save.registry.Find(id);
+                return s != null ? new IslingInstance(s, lv) : null;
+            }
+            var pods = new List<IslingInstance>();
+            foreach (var (id, lv) in new[] { ("Kilnpot", 18), ("Kitelet", 16), ("Lilyvole", 15), ("Coalbeetle", 17), ("Whirlby", 14), ("Marimoss", 22) })
+            {
+                var c = Make(id, lv);
+                if (c != null) pods.Add(c);
+            }
+            var stored = new List<IslingInstance>();
+            foreach (var (id, lv) in new[] { ("Toastling", 9), ("Samarling", 10), ("Drizzcan", 8) })
+            {
+                var c = Make(id, lv);
+                if (c != null) stored.Add(c);
+            }
+            party.Restore(pods, stored);
+            party.NotifyChanged();
+            Debug.Log($"[Step13Debug] Team: {pods.Count} in the pods, {stored.Count} in the Lodge.");
+        }
+
+        /// <summary>arg "moment,shotName,view": takes the shot when the finale reaches that moment (once).</summary>
+        public static void ShotAt()
+        {
+            var v = Arg.Split(',');
+            if (v.Length < 2) return;
+            string moment = v[0], name = v[1], view = v.Length > 2 ? v[2] : "close";
+            System.Action<string> once = null;
+            once = m =>
+            {
+                if (m != moment) return;
+                FinaleDirector.Moment -= once;
+                System.IO.File.WriteAllText(ArgFile, name + "," + view);
+                Shot();
+            };
+            FinaleDirector.Moment += once;
+            Debug.Log($"[Step13Debug] Shot {name} armed for {moment}.");
+        }
+
+        /// <summary>Time scale for checks (arg, 1 = normal).</summary>
+        public static void Speed() => Time.timeScale = float.Parse(Arg, System.Globalization.CultureInfo.InvariantCulture);
+
+        /// <summary>Look + pinch the Heart once (the Spirit goes by itself).</summary>
+        public static void Gaze()
+        {
+            var f = Finale;
+            if (f != null) f.DebugGazePinch();
+        }
+
+        public static void Finale_() => Debug.Log($"[Step13Debug] {(Finale != null ? Finale.Describe() : "no finale")}");
+
         /// <summary>Re-bakes the Heart's four props (edit mode).</summary>
         public static void BakeHeart() => PropKit.WriteHeart();
 

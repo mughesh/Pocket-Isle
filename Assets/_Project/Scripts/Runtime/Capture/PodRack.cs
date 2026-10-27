@@ -196,6 +196,9 @@ namespace Diorama
             Dialogue.RegisterTarget("cradle", () => CradleVisible ? HomeWorld(CradleSlot) : (Vector3?)null, k => PulseOf(CradleSlot, k), () => FocusRadius(CradleSlot));
         }
 
+        /// <summary>Step 13: pod <paramref name="slot"/>'s world point, or null while it isn't shown.</summary>
+        public Vector3? SlotWorld(int slot) => PointOf(slot);
+
         Vector3? PointOf(int slot)
         {
             if (this == null) return null;

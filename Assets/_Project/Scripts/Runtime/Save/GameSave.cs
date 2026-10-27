@@ -47,6 +47,16 @@ namespace Diorama
         /// <summary>Species ids caught so far (for the future "Caught 10 / 30" counter).</summary>
         public IReadOnlyCollection<string> Caught => _caught;
 
+        /// <summary>Step 13: the Hall of Fame records (saved with the game).</summary>
+        public List<SavedHallOfFame> HallOfFame { get; } = new List<SavedHallOfFame>();
+
+        /// <summary>Step 13: the party as it is now goes into the Hall of Fame (saved).</summary>
+        public void AddHallOfFame()
+        {
+            HallOfFame.Add(new SavedHallOfFame { date = DateTime.UtcNow.ToString("o"), party = SaveGame.ToSaved(party.members) });
+            Save("hall of fame");
+        }
+
         /// <summary>The outdoor realm (its world map's name), also while an interior shows.</summary>
         string RealmId
         {
@@ -109,6 +119,9 @@ namespace Diorama
 
         void OnCaught(IslingInstance c)
         {
+            // Step 13: where it was met, for the Hall of Fame cards.
+            var world = swap != null ? swap.Outdoor : explorer != null && explorer.island != null ? explorer.island.world : null;
+            if (c != null && string.IsNullOrEmpty(c.metIn)) c.metIn = FinaleLogic.RealmName(world != null ? world.realm : null);
             _caught.Add(SpeciesRegistry.IdOf(c.species));
             Save("catch");
         }
@@ -212,6 +225,8 @@ namespace Diorama
             if (onboarding != null) onboarding.Restore(data.lesson, data.tutorialDone);
             if (realm != null) realm.SetNow(data.RestoredFor(RealmId, realm.Recall(swap != null ? swap.Outdoor : explorer.island.world)));
             Dialogue.RestoreSaid(data.said);
+            HallOfFame.Clear();
+            if (data.hallOfFame != null) HallOfFame.AddRange(data.hallOfFame);
             _caught.Clear();
             foreach (var id in data.caught) _caught.Add(id);
             if (encounters != null && data.seen != null)
@@ -295,6 +310,7 @@ namespace Diorama
                     walkMode = explorer.moveMode.ToString(),
                     dominantHand = DominantHand.Saved,
                     puzzles = PuzzleState.ToSaved(),
+                    hallOfFame = new List<SavedHallOfFame>(HallOfFame),
                 };
                 if (data.hasShrine)
                 {

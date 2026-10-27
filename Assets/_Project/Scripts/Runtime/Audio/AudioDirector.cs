@@ -16,6 +16,7 @@ namespace Diorama
         const float RestoredAt = 0.99f;
 
         static AudioDirector _instance;
+        bool _finale;
 
         readonly Dictionary<string, AmbienceProfile> _profiles = new Dictionary<string, AmbienceProfile>();
         IslandBuilder _island;
@@ -53,7 +54,19 @@ namespace Diorama
             _wasRestored = restored;
             bool battle = _encounters != null && _encounters.InBattle;
             if (battle) music = _encounters.Keeper != null ? MusicState.BattleKeeper : MusicState.BattleWild;
-            MusicDirector.SetState(music);
+            // Step 13: the finale has its own cue (silent until a track lands); the area music comes back after.
+            bool finale = FinaleDirector.Running;
+            if (finale != _finale)
+            {
+                _finale = finale;
+                if (finale)
+                {
+                    MusicDirector.SetState(MusicState.None, 2f);
+                    if (AudioService.Has(Diorama.Audio.AudioIds.MusicFinale)) AudioService.SetMusic(Diorama.Audio.AudioIds.MusicFinale, 2f);
+                    Debug.Log("[AudioDirector] Finale music (music.finale).");
+                }
+            }
+            if (!finale) MusicDirector.SetState(music);
             MusicDirector.SetRestored(restored && realm == "Cinderwood");
             bool talking = Dialogue.IsTalking;
             MusicDirector.SetDialogue(talking);

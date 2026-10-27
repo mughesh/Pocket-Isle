@@ -479,6 +479,10 @@ namespace Diorama
                                 : ShardHolder.Holds(ShardHolder.WaterId) ? state.SetPuzzle(ShardHolder.WaterId, true, 2) : state.SetPuzzle(ShardHolder.WaterId, false, 1)),
                             () => PuzzleState.Stage(ShardHolder.WaterId) > 0 || GameState.Solved(ShardHolder.WaterId));
                     }
+                    // Step 13: replay the finale (the save edited to all three shards in the statue, the finale not done).
+                    Heading("Finale");
+                    Add("Finale: play from wake", () => Debug.Log($"[DevPanel] Finale: {FinaleDirector.DevPlay(false)}."));
+                    Add("Finale: from the goodbye", () => Debug.Log($"[DevPanel] Finale: {FinaleDirector.DevPlay(true)}."));
                     Heading("Everything");
                     Add("Reset all story", () => Edit(state.ResetStory()), null, true);
                     break;

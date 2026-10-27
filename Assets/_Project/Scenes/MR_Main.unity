@@ -5081,6 +5081,7 @@ MonoBehaviour:
     currentHp: 40
     xp: 0
     nickname: 
+    metIn: 
   storage: []
 --- !u!4 &1499891277
 Transform:
@@ -5466,6 +5467,7 @@ Transform:
   - {fileID: 93667893}
   - {fileID: 1291464262}
   - {fileID: 1908534644}
+  - {fileID: 2066182156}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1583412946
@@ -6373,6 +6375,9 @@ MonoBehaviour:
   fovHalfAngle: 35
   keepOut: {x: 0.025, y: 0.012}
   battleOffset: {x: 0.035, y: 0.06, z: 0.05}
+  holdSharpness: 7
+  sparkScale: 0.72
+  sparkGlow: 0.35
 --- !u!114 &1847074514
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7161,6 +7166,107 @@ MonoBehaviour:
   installationRoutineCheckpoint:
     _installationRoutineId: 2063f481-1b63-4eda-9ee8-a00df98536bc
     _installationVariants: []
+--- !u!1 &2066182155
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2066182156}
+  - component: {fileID: 2066182157}
+  m_Layer: 0
+  m_Name: Finale
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2066182156
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2066182155}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1553131432}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2066182157
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2066182155}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 120805ee91a02304d8e46feab8686e64, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.FinaleDirector
+  island: {fileID: 270959109}
+  window: {fileID: 270959113}
+  explorer: {fileID: 374318554}
+  heart: {fileID: 1908534645}
+  spirit: {fileID: 1847074513}
+  party: {fileID: 1499891276}
+  save: {fileID: 1541842443}
+  encounters: {fileID: 1499891275}
+  pods: {fileID: 78739058}
+  fx: {fileID: 1078587927}
+  ghosts: {fileID: 1421177268}
+  grabGuard: {fileID: 270959111}
+  hudMaterial: {fileID: 2100000, guid: 0656b6c4f92798e49a14cf09a2c6800e, type: 2}
+  ringMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  hub: {fileID: 11400000, guid: ab0469af29722704f949fec768f94b68, type: 2}
+  realms:
+  - {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
+  - {fileID: 11400000, guid: 1c0f5df7c1c50ad4789ffbf83b2addd2, type: 2}
+  - {fileID: 11400000, guid: 62a4d08fb1efa974aa00c824d650dab0, type: 2}
+  starters:
+  - {fileID: 11400000, guid: 4e0827bf455d6eb4c853967a75296d1d, type: 2}
+  - {fileID: 11400000, guid: 3e6a8bbe90a2d0447b3543119e52c28a, type: 2}
+  - {fileID: 11400000, guid: 11737ef7d2b67d84b8a98e2c3f8eeb9d, type: 2}
+  handoff:
+    upDot: 0.55
+    landSeconds: 0.35
+    socketRadius: 0.06
+    loseSeconds: 0.6
+    waitSeconds: 30
+    gazeDelay: 1.5
+  frameAhead: 1.2
+  zoom: 1.15
+  waitInFront: 2.2
+  inSocketSize: 0.42
+  inSocketDrop: 0.32
+  ghostClip: palm_carry
+  hallGap: 2.6
+  lodgeGuests: 2
+  cardHeight: {x: 1.8, y: 2.9}
+  tabletSeconds: 5.2
+  tabletRise: {x: 0.1, y: 0.27}
+  credits:
+  - Pocket Isle
+  - 'Made by Mugesh
+
+    (Heisenberg: The XR Guy)'
+  - 'Islings, realms and Keepers:
+
+    original designs'
+  - 'Built with Unity
+
+    and the Meta XR SDK'
+  - 'Sounds: ElevenLabs, Kenney (CC0)
+
+    and synthesised'
+  - 'Music: to come'
+  - Thank you for playing.
 --- !u!1 &2107210735
 GameObject:
   m_ObjectHideFlags: 0

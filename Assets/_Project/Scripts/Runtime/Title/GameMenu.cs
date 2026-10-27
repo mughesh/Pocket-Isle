@@ -124,7 +124,8 @@ namespace Diorama
             var resume = runes.Add("Resume", new Vector2(x0, 0f), size, () => Close("Resume"));
             runes.Add("Settings", new Vector2(x0 + 0.08f, 0f), size, OpenSettings);
             runes.Add("Controls", new Vector2(x0 + 0.16f, 0f), size, OpenControls);
-            runes.Add("Title", new Vector2(x0 + 0.24f, 0f), size, ToTitle);
+            // Step 13: the finale plays through; Title waits until it's done.
+            if (!FinaleDirector.Running) runes.Add("Title", new Vector2(x0 + 0.24f, 0f), size, ToTitle);
 #if UNITY_EDITOR || POCKET_DEV
             var dev = runes.Add("Dev", new Vector2(x0 + 0.32f, 0f), size, OpenDev);
             dev.tint = new Color(0.45f, 0.5f, 0.62f);

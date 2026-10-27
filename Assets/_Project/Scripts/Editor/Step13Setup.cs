@@ -31,6 +31,7 @@ namespace Diorama.EditorTools
             var log = new StringBuilder("[Step13] MR_Main set up:");
             Whispers(log);
             Heart(log);
+            Finale(log);
             EditorSceneManager.MarkSceneDirty(active);
             EditorSceneManager.SaveScene(active);
             AssetDatabase.SaveAssets();
@@ -74,6 +75,79 @@ namespace Diorama.EditorTools
             foreach (var r in new[] { heart.bodyRecipe, heart.headOpenRecipe, heart.wingRecipe, heart.wingRecipe })
                 if (r != null && r.bakedMesh != null) tris += r.bakedMesh.triangles.Length / 3;
             log.Append(NL + $"  heart: on the statue's spot, {tris} tris shown (body + open head + 2 wings), 8 draws");
+        }
+
+        const string CreditsPath = "Assets/Docs/Audio/AudioCredits.md";
+
+        /// <summary>C: the finale director on the hub, wired to everything it plays with; the credits from AudioCredits.md.</summary>
+        static void Finale(StringBuilder log)
+        {
+            var heart = Object.FindFirstObjectByType<HeartOfWorld>(FindObjectsInactive.Include);
+            var statue = StatueSocket.FindById(ShardHolder.FireId);
+            if (heart == null || statue == null)
+            {
+                log.Append(NL + "  finale: needs the Heart and the statue socket (MISSING)");
+                return;
+            }
+            var f = Object.FindFirstObjectByType<FinaleDirector>(FindObjectsInactive.Include);
+            if (f == null)
+            {
+                var go = new GameObject("Finale");
+                go.transform.SetParent(heart.transform.parent, false);
+                Undo.RegisterCreatedObjectUndo(go, "Step 13");
+                f = go.AddComponent<FinaleDirector>();
+            }
+            Undo.RecordObject(f, "Step 13");
+            T Find<T>() where T : Object => Object.FindFirstObjectByType<T>(FindObjectsInactive.Include);
+            f.island = heart.island;
+            f.window = Find<WorldWindow>();
+            f.explorer = Find<GestureTestPiece>();
+            f.heart = heart;
+            f.spirit = Find<LanternSpirit>();
+            f.party = Find<Party>();
+            f.save = Find<GameSave>();
+            f.encounters = Find<EncounterDirector>();
+            f.pods = Find<PodRack>();
+            f.fx = statue.fx;
+            f.ghosts = statue.ghosts;
+            f.grabGuard = statue.grabGuard;
+            f.ringMaterial = statue.ringMaterial;
+            var bubble = Find<DialogueBubble>();
+            f.hudMaterial = bubble != null ? bubble.hudMaterial : null;
+            f.hub = heart.map;
+            f.realms = new[]
+            {
+                AssetDatabase.LoadAssetAtPath<WorldMap>("Assets/_Project/Data/WorldMap_Cinderwood.asset"),
+                AssetDatabase.LoadAssetAtPath<WorldMap>("Assets/_Project/Data/WorldMap_Galewick.asset"),
+                AssetDatabase.LoadAssetAtPath<WorldMap>("Assets/_Project/Data/WorldMap_Lilymere.asset"),
+            };
+            f.credits = Credits();
+            // Two Lodge guests (with six in the party the Hall of Fame peaks near 220 batches in the Editor; three pushed it past 250).
+            f.lodgeGuests = 2;
+            f.starters = new[]
+            {
+                AssetDatabase.LoadAssetAtPath<IslingSpecies>("Assets/_Project/Data/Creatures/Species/Kilnpot.asset"),
+                AssetDatabase.LoadAssetAtPath<IslingSpecies>("Assets/_Project/Data/Creatures/Species/Pebbloop.asset"),
+                AssetDatabase.LoadAssetAtPath<IslingSpecies>("Assets/_Project/Data/Creatures/Species/Pufflet.asset"),
+            };
+            int missing = 0;
+            foreach (var o in new Object[] { f.window, f.explorer, f.spirit, f.party, f.save, f.encounters, f.pods, f.fx, f.ghosts, f.hudMaterial, f.ringMaterial })
+                if (o == null) missing++;
+            log.Append(NL + $"  finale: wired ({missing} missing), {f.credits.Length} credits tablets");
+        }
+
+        /// <summary>The credits tablets (at most 8); the sounds line from AudioCredits.md's sections.</summary>
+        static string[] Credits()
+        {
+            string text = System.IO.File.Exists(CreditsPath) ? System.IO.File.ReadAllText(CreditsPath) : "";
+            bool kenney = text.Contains("## Kenney"), eleven = text.Contains("## ElevenLabs");
+            string sounds = eleven && kenney ? "Sounds: ElevenLabs, Kenney (CC0)\nand synthesised" : eleven ? "Sounds: ElevenLabs\nand synthesised" : "Sounds: synthesised";
+            if (string.IsNullOrEmpty(text)) Debug.LogWarning($"[Step13] {CreditsPath} not found: the sounds tablet says synthesised only.");
+            return new[]
+            {
+                "Pocket Isle", "Made by Mugesh\n(Heisenberg: The XR Guy)", "Islings, realms and Keepers:\noriginal designs",
+                "Built with Unity\nand the Meta XR SDK", sounds, "Music: to come", "Thank you for playing.",
+            };
         }
 
         /// <summary>A: the script's whisper and finale lines, the Heart's bubble colours, the statue's wake stages.</summary>

@@ -14,6 +14,16 @@ namespace Diorama
         public int xp;
         public int hp;
         public string nickname;
+        /// <summary>Step 13: where it was met (empty in older saves).</summary>
+        public string metIn;
+    }
+
+    /// <summary>Step 13: the party when the Heart woke (the Hall of Fame), with the date.</summary>
+    [Serializable]
+    public class SavedHallOfFame
+    {
+        public string date;
+        public List<SavedIsling> party = new List<SavedIsling>();
     }
 
     /// <summary>How restored one realm is (realm id = its world map asset name).</summary>
@@ -76,6 +86,8 @@ namespace Diorama
         public string dominantHand;
         /// <summary>Hand puzzles (step 9b). Older saves have none: nothing solved.</summary>
         public List<SavedPuzzle> puzzles = new List<SavedPuzzle>();
+        /// <summary>Step 13: one record per finale played (the newest last).</summary>
+        public List<SavedHallOfFame> hallOfFame = new List<SavedHallOfFame>();
 
         [Header("Inside an interior (the explorer fields above are then the outdoor return tile)")]
         public bool inside;
@@ -187,7 +199,7 @@ namespace Diorama
 
         public static SavedIsling ToSaved(IslingInstance c) => new SavedIsling
         {
-            species = SpeciesRegistry.IdOf(c.species), level = c.level, xp = c.xp, hp = c.currentHp, nickname = c.nickname,
+            species = SpeciesRegistry.IdOf(c.species), level = c.level, xp = c.xp, hp = c.currentHp, nickname = c.nickname, metIn = c.metIn,
         };
 
         /// <summary>Back to a creature; null (with the reason) for a species the registry doesn't know.</summary>
@@ -200,7 +212,7 @@ namespace Diorama
                 problem = $"unknown species '{(s != null ? s.species : "null")}'";
                 return null;
             }
-            var c = new IslingInstance(species, Mathf.Max(1, s.level)) { xp = Mathf.Max(0, s.xp), nickname = s.nickname };
+            var c = new IslingInstance(species, Mathf.Max(1, s.level)) { xp = Mathf.Max(0, s.xp), nickname = s.nickname, metIn = s.metIn };
             c.currentHp = Mathf.Clamp(s.hp, 0, c.MaxHp);
             return c;
         }
