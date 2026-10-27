@@ -315,6 +315,40 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1499891277}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &93667892
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 93667893}
+  m_Layer: 0
+  m_Name: Lilymere
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &93667893
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 93667892}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 254543052}
+  - {fileID: 366644025}
+  - {fileID: 1612879609}
+  m_Father: {fileID: 1553131432}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &155307357
 GameObject:
   m_ObjectHideFlags: 0
@@ -675,6 +709,98 @@ Transform:
   m_Children: []
   m_Father: {fileID: 733261510}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &254543051
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 254543052}
+  - component: {fileID: 254543053}
+  m_Layer: 0
+  m_Name: Lily Pad Bridge
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &254543052
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 254543051}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 93667893}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &254543053
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 254543051}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e73b3ca5449c6214aa3f50526ecebf2b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.LilyPadBridge
+  id: lm.pads
+  map: {fileID: 11400000, guid: 62a4d08fb1efa974aa00c824d650dab0, type: 2}
+  island: {fileID: 270959109}
+  window: {fileID: 270959113}
+  explorer: {fileID: 374318554}
+  grabGuard: {fileID: 270959111}
+  ghosts: {fileID: 1421177268}
+  fx: {fileID: 1078587927}
+  reach: 4
+  lessonLine: lm.pads
+  ghostClip: poke
+  ghostScale: 1
+  lessonChip: Push!
+  padStart:
+  - {x: 29.5, y: 34}
+  - {x: 37.5, y: 35}
+  - {x: 39, y: 33}
+  slots:
+  - {x: 33.5, y: 35}
+  - {x: 33.5, y: 34}
+  - {x: 33.5, y: 33}
+  channel:
+    serializedVersion: 2
+    x: 23.5
+    y: 32.5
+    width: 20
+    height: 3
+  gapTiles:
+  - {x: 33, y: 35}
+  - {x: 34, y: 35}
+  - {x: 33, y: 34}
+  - {x: 34, y: 34}
+  - {x: 33, y: 33}
+  - {x: 34, y: 33}
+  padRecipe: {fileID: 11400000, guid: d06190610a847584da6ea1e2a7d9d8af, type: 2}
+  padScale: 1.5
+  slotScale: 2.1
+  touchRadius: 0.035
+  touchHeight: 0.03
+  pushShare: 0.8
+  drag: 1.2
+  bounce: 0.5
+  snapRadius: 0.6
+  guideMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  ringSize: 1.6
+  orbSize: 0.3
+  doneLine: lm.pads.done
+  volume: 0.7
 --- !u!1 &259397458
 GameObject:
   m_ObjectHideFlags: 0
@@ -1331,6 +1457,104 @@ Transform:
   - {fileID: 1605616301}
   m_Father: {fileID: 1553131432}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &366644024
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 366644025}
+  - component: {fileID: 366644026}
+  m_Layer: 0
+  m_Name: Rain Garden
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &366644025
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 366644024}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 93667893}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &366644026
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 366644024}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 450318bdb245d56498dc48fbdf90d9f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.RainGarden
+  id: lm.rain
+  map: {fileID: 11400000, guid: 62a4d08fb1efa974aa00c824d650dab0, type: 2}
+  island: {fileID: 270959109}
+  window: {fileID: 270959113}
+  explorer: {fileID: 374318554}
+  grabGuard: {fileID: 270959111}
+  ghosts: {fileID: 1421177268}
+  fx: {fileID: 1078587927}
+  reach: 5
+  lessonLine: lm.rain
+  ghostClip: palm_sweep
+  ghostScale: 1
+  lessonChip: Palm down!
+  buds:
+  - {x: 40.5, y: 26}
+  - {x: 40.5, y: 24.5}
+  - {x: 40.5, y: 23}
+  - {x: 40.5, y: 21.5}
+  - {x: 40.5, y: 20}
+  gardenCenter: {x: 40.5, y: 23}
+  gardenRadius: {x: 6.7, y: 4.9}
+  gapTiles:
+  - {x: 40, y: 26}
+  - {x: 41, y: 26}
+  - {x: 40, y: 25}
+  - {x: 41, y: 25}
+  - {x: 40, y: 24}
+  - {x: 41, y: 24}
+  - {x: 40, y: 23}
+  - {x: 41, y: 23}
+  - {x: 40, y: 22}
+  - {x: 41, y: 22}
+  - {x: 40, y: 21}
+  - {x: 41, y: 21}
+  - {x: 40, y: 20}
+  - {x: 41, y: 20}
+  budRecipe: {fileID: 11400000, guid: 6f3a3c70d35c5654b9676eaf7ddd6165, type: 2}
+  stoneRecipe: {fileID: 11400000, guid: c56ce9ceda05d5d42882043f09c1dbb6, type: 2}
+  cloudRecipe: {fileID: 11400000, guid: 257f22ee3e426244c8b7611f0b678d54, type: 2}
+  budScale: 1.2
+  stoneScale: 1.6
+  maxAngle: 40
+  minHeight: 0.05
+  maxHeight: 0.25
+  formSeconds: 0.6
+  wiggleSpeed: 0.6
+  rainRadius: 1.3
+  cloudScale: 0.55
+  cloudBelow: 0.025
+  softSeconds: 2
+  hardSeconds: 1
+  lookSeconds: 2.5
+  doneLine: lm.rain.done
+  volume: 0.7
 --- !u!1 &367221214
 GameObject:
   m_ObjectHideFlags: 0
@@ -4727,6 +4951,7 @@ Transform:
   - {fileID: 1542799535}
   - {fileID: 66748612}
   - {fileID: 359768277}
+  - {fileID: 93667893}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1583412946
@@ -5001,6 +5226,87 @@ MonoBehaviour:
   forgeEdge: 1.5
   roarSeconds: 2.5
   doneLine: cw.ember.done
+  volume: 0.7
+--- !u!1 &1612879608
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1612879609}
+  - component: {fileID: 1612879610}
+  m_Layer: 0
+  m_Name: Scoop And Pour
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1612879609
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1612879608}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 93667893}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1612879610
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1612879608}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e147b94325370d1469bfef58a8b03f17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.ScoopPour
+  id: lm.lagoon
+  map: {fileID: 11400000, guid: 62a4d08fb1efa974aa00c824d650dab0, type: 2}
+  island: {fileID: 270959109}
+  window: {fileID: 270959113}
+  explorer: {fileID: 374318554}
+  grabGuard: {fileID: 270959111}
+  ghosts: {fileID: 1421177268}
+  fx: {fileID: 1078587927}
+  reach: 6
+  lessonLine: lm.scoop
+  ghostClip: grab_drop
+  ghostScale: 1
+  lessonChip: Scoop!
+  basin: {x: 30.5, y: 9.5}
+  waterfallAnchor: {x: 30, y: 7}
+  waterfallCenter: {x: 30.5, y: 7}
+  scoopSpot: {x: 27, y: 13}
+  templeDoor: {x: 17, y: 10}
+  ballRecipe: {fileID: 11400000, guid: 395d1a92112a4324ba6bc3853dc51ea0, type: 2}
+  basinWaterRecipe: {fileID: 11400000, guid: 68ed3de8379ca0d4ebb413025618c7ac, type: 2}
+  runningRecipe: {fileID: 11400000, guid: 0224f4199d164274db9fb10a4591bccb, type: 2}
+  cupUp: 0.55
+  keepUp: 0.1
+  tipUp: -0.35
+  dipDepth: 0.01
+  liftHeight: 0.02
+  scoopReach: 14
+  basinRadius: 1.2
+  basinAbove: 0.3
+  poursNeeded: 2
+  ballSize: 0.03
+  ballLift: 0.012
+  crackSeconds: 1.2
+  riseSeconds: 3
+  moreLine: lm.scoop.more
+  doneLine: lm.scoop.done
   volume: 0.7
 --- !u!1 &1736066349
 GameObject:

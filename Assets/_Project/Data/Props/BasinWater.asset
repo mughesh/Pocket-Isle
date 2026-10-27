@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 374f6b77629fa034d93d2a7945ac7885, type: 3}
+  m_Name: BasinWater
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.PropRecipe
+  pieces:
+  - shape: {fileID: 11400000, guid: 2d3d45c6b5e28084a9a6e3533330aacc, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 0
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 0
+  palette:
+  - restored: {r: 0.37319925, g: 0.79601127, b: 0.82243145, a: 1}
+    unrestored: {r: 0.37254903, g: 0.72156864, b: 0.76862746, a: 1}
+    glow: 0
+  - restored: {r: 0.58325493, g: 0.43388155, b: 0.29414514, a: 1}
+    unrestored: {r: 0.54509807, g: 0.41568628, b: 0.2901961, a: 1}
+    glow: 0
+  - restored: {r: 0.7053609, g: 0.7720785, b: 0.73249274, a: 1}
+    unrestored: {r: 0.6627451, g: 0.72156864, b: 0.6901961, a: 1}
+    glow: 0
+  - restored: {r: 0.35800943, g: 0.7049412, b: 0.39946336, a: 1}
+    unrestored: {r: 0.3529412, g: 0.65882355, b: 0.40784314, a: 1}
+    glow: 0
+  - restored: {r: 0.9043922, g: 0.98910904, b: 1, a: 1}
+    unrestored: {r: 0.9098039, g: 0.9843137, b: 1, a: 1}
+    glow: 0.5
+  - restored: {r: 0.17153569, g: 0.55458397, b: 0.62521577, a: 1}
+    unrestored: {r: 0.18431373, g: 0.49803922, b: 0.58431375, a: 1}
+    glow: 0
+  tips:
+    on: 0
+    onSlot: 0
+    tipSlot: 0
+    at: 0
+    byHeight: 0
+  spec: 0.7
+  outline: 0
+  footprint: {x: 2, y: 2}
+  blocksWalking: 0
+  randomYaw: 0
+  yawJitter: 0
+  scaleJitter: 0
+  resolution: 32
+  triangleBudget: 300
+  bakedMesh: {fileID: 4300000, guid: 5aa2e08d797c684418c6bfdd2cd6b823, type: 2}

@@ -279,6 +279,21 @@ Step 10d / 10e, the tower hall:
 - `lm.pond.first` · once · → landmark:pond (first time at the rare pond)
   - Spirit: This little pond feels deep. Something big could live in it.
 
+Step 11b, the hand moments (lesson lines stay pinned as a chip until the moment works once):
+- `lm.pads` · → puzzle:lm.pads (lesson at the lily channel; chip "Push!")
+  - Spirit: The channel's too wide. Nudge the lily pads together!
+- `lm.pads.done` · once (all three pads locked into a path)
+  - Spirit: A lily pad bridge! Hop across.
+- `lm.rain` · → puzzle:lm.rain (lesson at the lotus garden; chip "Palm down!")
+  - Spirit: So dry... Hold your hand over it like a little cloud.
+- `lm.rain.done` · once (every bud bloomed into a stepping stone)
+  - Spirit: Look at them bloom! A path of lotus.
+- `lm.scoop` · → puzzle:lm.lagoon (lesson at the waterfall basin; chip "Scoop!")
+  - Spirit: The falls are frozen. Bring them some water!
+- `lm.scoop.more` · Spirit: One more!
+- `lm.scoop.done` · once (the waterfall runs, the lagoon rises)
+  - Spirit: It's flowing! The whole lagoon is filling up!
+
 ## Statue and finale
 - `hub.shard.first` · once · → statueSocket (step 9c: in the hub holding a shard)
   - Spirit: Put the shard in the statue. Something's calling it.

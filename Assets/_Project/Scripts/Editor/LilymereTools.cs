@@ -105,7 +105,7 @@ namespace Diorama.EditorTools
 
         // ---- prop keys ----
         const char KGate = 'Z', KShrine = 'Y', KHut = 'h', KPlank = '=', KReeds = 'r', KLily = 'l', KLotus = 'o',
-            KWaterfall = 'Q', KBasin = 'B', KTemple = 'T', KStone = 's', KSign = 'i', KFence = '-';
+            KWaterfall = 'Q', KBasin = 'B', KTemple = 'T', KStone = 's', KSign = 'i', KFence = '-', KChannelGap = '~', KBedGap = ':';
 
         static readonly (char key, string recipe, bool turned)[] Keys =
         {
@@ -113,10 +113,11 @@ namespace Diorama.EditorTools
             (KPlank, "PlankBridge", false), (KReeds, "ReedClump", false), (KLily, "LilyPad", false), (KLotus, "Lotus", false),
             (KWaterfall, "WaterfallFrozen", false), (KBasin, "StoneBasin", false), (KTemple, "LakeTemple", false),
             (KStone, "SteppingStone", false), (KSign, "Signpost", false), (KFence, "Fence", false),
+            (KChannelGap, "ChannelGap", false), (KBedGap, "BedGap", false),
         };
 
         // Keys that may stand on a path tile (the trail goes under or over them) and on water.
-        static readonly HashSet<char> OnPath = new HashSet<char> { KGate, KShrine, KPlank, KStone };
+        static readonly HashSet<char> OnPath = new HashSet<char> { KGate, KShrine, KPlank, KStone, KChannelGap, KBedGap };
         static readonly HashSet<char> OnWater = new HashSet<char> { KLily, KLotus };
 
         // ---- generation state ----
@@ -306,6 +307,7 @@ namespace Diorama.EditorTools
             Shallows();
             Garden();
             Walls();
+            Inlet();
 
             // The main trail (2 wide) with a grass shoulder, the causeway, the side paths (1 wide).
             foreach (var line in new[] { Trail, Causeway })
@@ -323,6 +325,7 @@ namespace Diorama.EditorTools
 
             Arrival();
             Village();
+            Gates();
             ChannelBanks();
             GardenDressing();
             Basin();
@@ -428,6 +431,20 @@ namespace Diorama.EditorTools
                     if (Ell(GardenCenter, GardenRx, GardenRy, x, y) > 1f) _g[x, y] = IslandMap.Tree;
         }
 
+        /// <summary>
+        /// Step 11b: a little inlet of the lagoon under the causeway, near the basin, where a cupped hand scoops water
+        /// (x 25..27 water; x 22..24 dry bed joining it to the lagoon's ring, water once the lagoon rises).
+        /// </summary>
+        static void Inlet()
+        {
+            for (int x = InletX0 - 3; x <= InletX0 + 2; x++)
+                for (int y = 45; y <= 46; y++)
+                    _g[x, y] = x >= InletX0 ? IslandMap.Water : _g[x, y] == IslandMap.Water ? IslandMap.Water : IslandMap.DryBed;
+        }
+
+        /// <summary>The inlet's west water column (x); it runs 3 tiles east, rows y 45..46.</summary>
+        public const int InletX0 = 25;
+
         // ---- places ----
 
         static void Arrival()
@@ -460,6 +477,30 @@ namespace Diorama.EditorTools
             Patch(10f, 15.5f, 1.2f, 1.4f);
             Patch(31.5f, 20.5f, 1.2f, 1.3f);
             Patch(16f, 21.5f, 1.3f, 0.9f);
+        }
+
+        /// <summary>
+        /// Step 11b: the puzzle gates. Open water covers the channel crossing until the lily pads lock in (LilyPadBridge),
+        /// cracked bed covers the garden crossing until the lotus stones bloom (RainGarden). Both block walking.
+        /// </summary>
+        static void Gates()
+        {
+            for (int x = 1; x < Size - 1; x++)
+                for (int y = 1; y < Size - 1; y++)
+                {
+                    if (!IsGate(x, y) || _g[x, y] != IslandMap.Path) continue;
+                    Prop(x, y, IsGardenGate(x, y) ? KBedGap : KChannelGap);
+                }
+        }
+
+        /// <summary>Step 11b: the channel crossing's tiles or the garden crossing's tiles (x, y), for the pieces.</summary>
+        public static List<Vector2Int> GateTiles(bool garden)
+        {
+            var list = new List<Vector2Int>();
+            for (int y = 1; y < Size - 1; y++)
+                for (int x = 1; x < Size - 1; x++)
+                    if (IsGate(x, y) && IsGardenGate(x, y) == garden) list.Add(new Vector2Int(x, y));
+            return list;
         }
 
         static void ChannelBanks()
@@ -834,7 +875,7 @@ namespace Diorama.EditorTools
             {
                 var xy = new Vector2Int(t.x, Size - 1 - t.y);
                 if (closed != null && closed.Contains(xy)) return false;
-                return map.CanWalk(t);
+                return map.CanWalk(t) || IsGate(xy.x, xy.y) && IslandMap.IsWalkable(map.At(t));
             }
             HashSet<Vector2Int> Flood(ICollection<Vector2Int> closed)
             {

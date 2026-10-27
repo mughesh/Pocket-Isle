@@ -48,6 +48,12 @@ namespace Diorama.EditorTools
             Add(LakeTemple());
             Add(SteppingStone());
             Add(LagoonTree());
+            // Step 11b: the puzzle gates' covers and the pieces' own views.
+            Add(ChannelGap());
+            Add(BedGap());
+            Add(LotusStone());
+            Add(WaterBall());
+            Add(BasinWater());
 
             WriteLilymereTheme(all["LagoonTree"], all["ReedClump"]);
             foreach (var r in all.Values) EditorUtility.SetDirty(r);
@@ -304,6 +310,105 @@ namespace Diorama.EditorTools
                     Ell(new Vector3(0.3f, 0.02f, 0.27f), new Vector3(0.13f, 0.045f, 0.12f), 0.02f)), PropSlot.Stone),
             };
             return stones;
+        }
+
+        /// <summary>
+        /// Step 11b: open water over the channel crossing (1 x 1, blocks): a flat teal sheet just above the path, so the
+        /// crossing reads as channel until the lily pads lock in (the piece hides it and opens the tiles).
+        /// </summary>
+        static PropRecipe ChannelGap()
+        {
+            var gap = Recipe("ChannelGap", new Vector2Int(1, 1), true, false, 200);
+            gap.palette = Palette(LagoonTeal, StiltWood, TempleStone, LilyGreen, LagoonWindow, LagoonDeep);
+            gap.yawJitter = 0f;
+            gap.scaleJitter = 0f;
+            gap.outline = 0f;
+            gap.spec = 0.5f;
+            gap.resolution = 24;
+            gap.pieces = new List<PropPiece>
+            {
+                Piece(PShape("ChannelGap_Sheet", Box(new Vector3(0f, 0.015f, 0f), new Vector3(0.52f, 0.02f, 0.52f), 0.005f, 0f)), PropSlot.Clay),
+            };
+            return gap;
+        }
+
+        /// <summary>Step 11b: cracked dry bed over the garden crossing (1 x 1, blocks) until the lotus stones bloom.</summary>
+        static PropRecipe BedGap()
+        {
+            var gap = Recipe("BedGap", new Vector2Int(1, 1), true, false, 300);
+            gap.palette = Palette(C("#EEE7D8"), StiltWood, C("#CDBF9F"), LilyGreen, LagoonWindow, C("#CDBF9F"));
+            gap.yawJitter = 0f;
+            gap.scaleJitter = 0f;
+            gap.outline = 0f;
+            gap.resolution = 28;
+            gap.pieces = new List<PropPiece>
+            {
+                Piece(PShape("BedGap_Sand", Box(new Vector3(0f, 0.015f, 0f), new Vector3(0.52f, 0.02f, 0.52f), 0.005f, 0f).Bumps(0.008f, 14f)), PropSlot.Clay),
+            };
+            return gap;
+        }
+
+        /// <summary>Step 11b: a bloomed lotus as a stepping stone (big open flower on a wide pad, the petals always open).</summary>
+        static PropRecipe LotusStone()
+        {
+            var stone = Recipe("LotusStone", new Vector2Int(1, 1), false, true, 900);
+            stone.palette = Palette(LotusPink, StiltWood, TempleStone, LilyGreen, C("#FFD45A", 0.6f), C("#FBD3DC"));
+            stone.scaleJitter = 0f;
+            stone.outline = 0.014f;
+            stone.resolution = 32;
+            var petals = new List<SdfPrimitive>();
+            for (int i = 0; i < 6; i++)
+            {
+                float a = i * Mathf.PI / 3f;
+                var dir = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a));
+                petals.Add(Ell(new Vector3(0f, 0.08f, 0f) + dir * 0.22f, new Vector3(0.12f, 0.05f, 0.2f), petals.Count == 0 ? 0f : 0.03f,
+                    new Vector3(-12f, -a * Mathf.Rad2Deg + 90f, 0f)));
+            }
+            stone.pieces = new List<PropPiece>
+            {
+                Piece(PShape("LotusStone_Pad", Ell(new Vector3(0f, -0.04f, 0f), new Vector3(0.5f, 0.04f, 0.5f), 0f)), PropSlot.Leaf),
+                Piece(PShape("LotusStone_Petals", petals.ToArray()), PropSlot.Clay),
+                Piece(PShape("LotusStone_Heart", Sphere(new Vector3(0f, 0.12f, 0f), 0.08f, 0f)), PropSlot.Glow),
+            };
+            return stone;
+        }
+
+        /// <summary>Step 11b: the scooped ball of water (a glossy teal blob with bubbles; the piece wobbles and places it).</summary>
+        static PropRecipe WaterBall()
+        {
+            var ball = Recipe("WaterBall", new Vector2Int(1, 1), false, false, 700);
+            ball.palette = Palette(LagoonTeal, StiltWood, TempleStone, LilyGreen, C("#E8FBFF", 0.6f), C("#BFEFF4", 0.2f));
+            ball.yawJitter = 0f;
+            ball.scaleJitter = 0f;
+            ball.outline = 0.012f;
+            ball.spec = 0.9f;
+            ball.resolution = 32;
+            ball.pieces = new List<PropPiece>
+            {
+                Piece(PShape("WaterBall_Body", Sphere(new Vector3(0f, 0.5f, 0f), 0.45f, 0f)), PropSlot.Clay),
+                Piece(PShape("WaterBall_Bubbles",
+                    Sphere(new Vector3(0.18f, 0.62f, 0.3f), 0.07f, 0f),
+                    Sphere(new Vector3(-0.15f, 0.42f, 0.32f), 0.05f, 0f),
+                    Sphere(new Vector3(0.05f, 0.75f, 0.33f), 0.04f, 0f)), PropSlot.Glow),
+            };
+            return ball;
+        }
+
+        /// <summary>Step 11b: the water in the stone basin (a teal disc the piece raises a step per pour).</summary>
+        static PropRecipe BasinWater()
+        {
+            var water = Recipe("BasinWater", new Vector2Int(2, 2), false, false, 300);
+            water.palette = Palette(LagoonTeal, StiltWood, TempleStone, LilyGreen, C("#E8FBFF", 0.5f), LagoonDeep);
+            water.yawJitter = 0f;
+            water.scaleJitter = 0f;
+            water.outline = 0f;
+            water.spec = 0.7f;
+            water.resolution = 32;
+            water.pieces = new List<PropPiece>
+            {
+                Piece(PShape("BasinWater_Disc", Cone(new Vector3(0f, 0f, 0f), new Vector3(0f, 0.05f, 0f), 0.66f, 0.66f, 0f)), PropSlot.Clay),
+            };
+            return water;
         }
 
         /// <summary>The woods: the hub's calm tree in willow greens with pale tips.</summary>

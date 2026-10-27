@@ -1314,6 +1314,76 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: This little pond feels deep. Something big could live in it.
+  - id: lm.pads
+    once: 0
+    priority: 2
+    note: lesson at the lily channel; chip "Push!"
+    target: puzzle:lm.pads
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The channel's too wide. Nudge the lily pads together!
+  - id: lm.pads.done
+    once: 1
+    priority: 2
+    note: all three pads locked into a path
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: A lily pad bridge! Hop across.
+  - id: lm.rain
+    once: 0
+    priority: 2
+    note: lesson at the lotus garden; chip "Palm down!"
+    target: puzzle:lm.rain
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: So dry... Hold your hand over it like a little cloud.
+  - id: lm.rain.done
+    once: 1
+    priority: 2
+    note: every bud bloomed into a stepping stone
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Look at them bloom! A path of lotus.
+  - id: lm.scoop
+    once: 0
+    priority: 2
+    note: lesson at the waterfall basin; chip "Scoop!"
+    target: puzzle:lm.lagoon
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The falls are frozen. Bring them some water!
+  - id: lm.scoop.more
+    once: 0
+    priority: 2
+    note: 
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: One more!
+  - id: lm.scoop.done
+    once: 1
+    priority: 2
+    note: the waterfall runs, the lagoon rises
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: It's flowing! The whole lagoon is filling up!
   - id: hub.shard.first
     once: 1
     priority: 2

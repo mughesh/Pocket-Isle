@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 374f6b77629fa034d93d2a7945ac7885, type: 3}
+  m_Name: BedGap
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.PropRecipe
+  pieces:
+  - shape: {fileID: 11400000, guid: de96e0d2a9fb2e04ea4c53eecdf0200d, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 0
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 0
+  palette:
+  - restored: {r: 0.9986667, g: 0.9616606, b: 0.9008142, a: 1}
+    unrestored: {r: 0.93333334, g: 0.90588236, b: 0.84705883, a: 1}
+    glow: 0
+  - restored: {r: 0.58325493, g: 0.43388155, b: 0.29414514, a: 1}
+    unrestored: {r: 0.54509807, g: 0.41568628, b: 0.2901961, a: 1}
+    glow: 0
+  - restored: {r: 0.8601961, g: 0.78565025, b: 0.65559536, a: 1}
+    unrestored: {r: 0.8039216, g: 0.7490196, b: 0.62352943, a: 1}
+    glow: 0
+  - restored: {r: 0.35800943, g: 0.7049412, b: 0.39946336, a: 1}
+    unrestored: {r: 0.3529412, g: 0.65882355, b: 0.40784314, a: 1}
+    glow: 0
+  - restored: {r: 1, g: 0.8128581, b: 0.5136471, a: 1}
+    unrestored: {r: 1, g: 0.8509804, b: 0.5411765, a: 1}
+    glow: 1
+  - restored: {r: 0.8601961, g: 0.78565025, b: 0.65559536, a: 1}
+    unrestored: {r: 0.8039216, g: 0.7490196, b: 0.62352943, a: 1}
+    glow: 0
+  tips:
+    on: 0
+    onSlot: 0
+    tipSlot: 0
+    at: 0
+    byHeight: 0
+  spec: 0.15
+  outline: 0
+  footprint: {x: 1, y: 1}
+  blocksWalking: 1
+  randomYaw: 0
+  yawJitter: 0
+  scaleJitter: 0
+  resolution: 28
+  triangleBudget: 300
+  bakedMesh: {fileID: 4300000, guid: bc0172061f988b347b4ae033317ec1b5, type: 2}
