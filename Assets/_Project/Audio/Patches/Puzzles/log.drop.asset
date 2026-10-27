@@ -509,4 +509,6 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 
+    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: log.drop_1
+      good (thud plus two bounces and debris); log.drop_2 good (single solid hit
+      then light rattle); log.drop_3 ok (solid thud, 34 clipped samples)'

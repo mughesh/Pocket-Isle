@@ -509,4 +509,6 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 
+    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: walk.bump_1
+      good (single short dull tap, clean transient (test clip)); walk.bump_2 good
+      (dull tap with small double hit); walk.bump_4 ok (short soft tap, quieter)'

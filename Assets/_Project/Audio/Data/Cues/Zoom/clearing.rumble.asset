@@ -15,6 +15,8 @@ MonoBehaviour:
   id: clearing.rumble
   clips:
   - {fileID: 8300000, guid: 79aa31c618c7a054e99d3d5c726a296b, type: 3}
+  - {fileID: 8300000, guid: b057f5f8529fef04faa7b2c2d4d570dc, type: 3}
+  - {fileID: 8300000, guid: b0551d85526382b45bd5c4f8c6bbc458, type: 3}
   volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.98

@@ -509,4 +509,6 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 
+    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: scene.sink_3
+      ok (sparse pebble trickle, quiet); scene.sink_4 good (dense pebble trickle
+      0.7 s; add synth low rumble)'

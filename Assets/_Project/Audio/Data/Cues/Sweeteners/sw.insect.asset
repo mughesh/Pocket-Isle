@@ -13,7 +13,16 @@ MonoBehaviour:
   m_Name: sw.insect
   m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
   id: sw.insect
-  clips: []
+  clips:
+  - {fileID: 8300000, guid: b189b5204789f4945a9858af386206d6, type: 3}
+  - {fileID: 8300000, guid: 3bea8673059812e44a6b0ecb0669960e, type: 3}
+  - {fileID: 8300000, guid: ee55dce72d62f86458cd5764f0991741, type: 3}
+  - {fileID: 8300000, guid: 7d10156a642bd2c4fa8c4190ad5e5ee1, type: 3}
+  - {fileID: 8300000, guid: 4ec6e7689fa320647a78b7d4f2613b56, type: 3}
+  - {fileID: 8300000, guid: 856ca0d69769b5740b83d7776c1e68f5, type: 3}
+  - {fileID: 8300000, guid: 501d43f289aed514a8611175de1a089a, type: 3}
+  - {fileID: 8300000, guid: 85c0711b0c3ac084385ae0a1527a3d39, type: 3}
+  - {fileID: 8300000, guid: 8eeac333bdea47d44915e7f43db1dbfa, type: 3}
   volume: 0.8
   volumeJitter: 0.2
   pitchMin: 0.96
@@ -31,4 +40,11 @@ MonoBehaviour:
   notes: Awaiting the gen batch (Import Gen Batch).
   review:
     status: 0
-    note: 
+    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: sw.insect_1_s1
+      good (9 cricket chirp bursts, ~4.5 kHz); sw.insect_1_s2 good (9 cricket chirp
+      bursts, ~4.5 kHz); sw.insect_1_s3 good (9 cricket chirp bursts, ~4.5 kHz);
+      sw.insect_1_s4 good (9 cricket chirp bursts, ~4.5 kHz); sw.insect_1_s5 good
+      (9 cricket chirp bursts, ~4.5 kHz); sw.insect_1_s6 good (9 cricket chirp bursts,
+      ~4.5 kHz); sw.insect_1_s7 good (9 cricket chirp bursts, ~4.5 kHz); sw.insect_1_s8
+      good (9 cricket chirp bursts, ~4.5 kHz); sw.insect_1_s9 good (9 cricket chirp
+      bursts, ~4.5 kHz)'

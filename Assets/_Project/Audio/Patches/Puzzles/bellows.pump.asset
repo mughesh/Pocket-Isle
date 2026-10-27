@@ -273,4 +273,6 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 
+    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: bellows.pump_1
+      good (airy puff with body, 0.4 s; quiet original); bellows.pump_3 ok (longer
+      softer puff)'

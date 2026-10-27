@@ -391,4 +391,6 @@ MonoBehaviour:
   confidence: 3
   review:
     status: 0
-    note: 
+    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: enc.rustle_1
+      good (rhythmic grass shake 1.1 s); enc.rustle_2 ok (grass shake with low thumps:
+      HPF); enc.rustle_3 ok (grass shake, bit lower)'

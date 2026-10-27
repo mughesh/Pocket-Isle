@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: sw.leaves
   m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
   id: sw.leaves
-  clips: []
+  clips:
+  - {fileID: 8300000, guid: c8f82b2b87d7ab94ba885870b0ff0c04, type: 3}
   volume: 0.8
   volumeJitter: 0.2
   pitchMin: 0.96
@@ -31,4 +32,5 @@ MonoBehaviour:
   notes: Awaiting the gen batch (Import Gen Batch).
   review:
     status: 0
-    note: 
+    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: sw.leaves_1
+      ok (continuous 5 s leaf flutter, kept whole (not separable))'

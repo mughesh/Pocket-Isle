@@ -60,12 +60,22 @@ namespace Diorama.Audio.EditorTools
             }
             var manifest = JsonUtility.FromJson<Manifest>(File.ReadAllText(manifestPath));
             var known = new HashSet<string>(SynthRecipes.All().Select(r => r.id));
-            int copied = 0, skipped = 0, missing = 0;
+            int copied = 0, skipped = 0, missing = 0, weak = 0;
             var unknown = new SortedSet<string>();
             var touched = new Dictionary<string, List<Clip>>();
             foreach (var c in manifest.clips)
             {
                 if (string.IsNullOrEmpty(c.cue) || string.IsNullOrEmpty(c.file)) continue;
+                // The gen lane grades each clip good / ok / weak; weak ones never join a cue (Mugesh, Oct 27).
+                if (string.Equals(c.note, "weak", StringComparison.OrdinalIgnoreCase))
+                {
+                    var stale = DestPath(c);
+                    var staleLevelled = AudioImportRules.Root + "Levelled/" + stale.Substring(AudioImportRules.Root.Length);
+                    if (File.Exists(stale)) AssetDatabase.DeleteAsset(stale);
+                    if (File.Exists(staleLevelled)) AssetDatabase.DeleteAsset(staleLevelled);
+                    weak++;
+                    continue;
+                }
                 var src = Path.Combine(root, c.file);
                 if (!File.Exists(src))
                 {
@@ -89,7 +99,7 @@ namespace Diorama.Audio.EditorTools
             }
             AudioCueTools.SyncAll();
             MarkForPick(touched);
-            Debug.Log($"[AudioLab] Gen import from {root}: {copied} new, {skipped} already here, {missing} missing." +
+            Debug.Log($"[AudioLab] Gen import from {root}: {copied} new, {skipped} already here, {weak} weak left out, {missing} missing." +
                       (unknown.Count > 0 ? $" No cue yet for: {string.Join(", ", unknown)} (copied; they join a cue once its recipe exists)." : ""));
             return copied;
         }

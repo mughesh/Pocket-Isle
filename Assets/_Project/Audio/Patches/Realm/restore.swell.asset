@@ -770,4 +770,6 @@ MonoBehaviour:
   confidence: 1
   review:
     status: 0
-    note: 
+    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: restore.swell_1
+      ok (clean 2 s noise swell, little shimmer: add synth sparkle (S+G)); restore.swell_2
+      ok (same, brighter, 9 clipped samples)'

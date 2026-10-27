@@ -155,4 +155,8 @@ MonoBehaviour:
   confidence: 1
   review:
     status: 0
-    note: 
+    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: sw.crackle_1_s1
+      good (7 ember pops); sw.crackle_1_s2 good (7 ember pops); sw.crackle_1_s3 good
+      (7 ember pops); sw.crackle_1_s4 good (7 ember pops); sw.crackle_1_s5 good (7
+      ember pops); sw.crackle_1_s6 good (7 ember pops); sw.crackle_1_s7 good (7 ember
+      pops)'

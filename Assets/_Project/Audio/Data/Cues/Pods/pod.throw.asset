@@ -17,6 +17,9 @@ MonoBehaviour:
   - {fileID: 8300000, guid: c044b8966419cf545bb764fbcf201f45, type: 3}
   - {fileID: 8300000, guid: 0b1aefc119242ff4e97c23def7918854, type: 3}
   - {fileID: 8300000, guid: fe21e721009e8ce4ebed50794c2c9bdb, type: 3}
+  - {fileID: 8300000, guid: c69e8389ddbd03646ab09dfefa64cadc, type: 3}
+  - {fileID: 8300000, guid: a150031b44895cc488eb883af992a846, type: 3}
+  - {fileID: 8300000, guid: 8ff7c8d3cba6da143a5c4abd907b1d46, type: 3}
   volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97

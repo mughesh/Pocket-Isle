@@ -155,4 +155,13 @@ MonoBehaviour:
   confidence: 1
   review:
     status: 0
-    note: 
+    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: sw.drip_1_s1
+      good (13 drip slices, pitched plinks); sw.drip_1_s2 good (13 drip slices, pitched
+      plinks); sw.drip_1_s3 good (13 drip slices, pitched plinks); sw.drip_1_s4 good
+      (13 drip slices, pitched plinks); sw.drip_1_s5 good (13 drip slices, pitched
+      plinks); sw.drip_1_s6 good (13 drip slices, pitched plinks); sw.drip_1_s7 good
+      (13 drip slices, pitched plinks); sw.drip_1_s8 good (13 drip slices, pitched
+      plinks); sw.drip_1_s9 good (13 drip slices, pitched plinks); sw.drip_1_s10
+      good (13 drip slices, pitched plinks); sw.drip_1_s11 good (13 drip slices,
+      pitched plinks); sw.drip_1_s12 good (13 drip slices, pitched plinks); sw.drip_1_s13
+      good (13 drip slices, pitched plinks)'

@@ -273,4 +273,6 @@ MonoBehaviour:
   confidence: 3
   review:
     status: 0
-    note: 
+    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: grass.rustle_1
+      good (short crisp rustle swish); grass.rustle_2 ok (longer rustle, low wobble:
+      HPF ~150 Hz); grass.rustle_3 ok (short rustle, low wobble: HPF ~150 Hz)'

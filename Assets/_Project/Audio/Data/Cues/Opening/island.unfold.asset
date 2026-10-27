@@ -15,6 +15,9 @@ MonoBehaviour:
   id: island.unfold
   clips:
   - {fileID: 8300000, guid: b2471962886cb284ca986146a3616416, type: 3}
+  - {fileID: 8300000, guid: abbd3a7dfbcaec84ea8ff22ec0e89781, type: 3}
+  - {fileID: 8300000, guid: d346883ac865d0a47a5d3e1a76a0a493, type: 3}
+  - {fileID: 8300000, guid: ec7ae817e748e4b49976c44be35b5188, type: 3}
   volume: 0.8
   volumeJitter: 0.05
   pitchMin: 1

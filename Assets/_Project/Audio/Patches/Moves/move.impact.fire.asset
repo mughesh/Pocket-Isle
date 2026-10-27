@@ -627,4 +627,6 @@ MonoBehaviour:
   confidence: 1
   review:
     status: 0
-    note: 
+    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: move.impact.fire_1
+      ok (small crackle burst, quieter); move.impact.fire_2 good (crackle burst,
+      23 clipped); move.impact.fire_3 good (crackle burst, clean)'

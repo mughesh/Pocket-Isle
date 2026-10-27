@@ -391,4 +391,6 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 
+    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: pond.splash_1
+      ok (small splash with droplets, delayed start); pond.splash_2 ok (quick plop
+      and drips); pond.splash_3 good (plop plus droplets, lively)'
