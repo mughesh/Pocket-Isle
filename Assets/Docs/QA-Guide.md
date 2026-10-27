@@ -46,13 +46,16 @@ never saved.
 - **Village flame** (Go to > CW: village or CW: shrine): the shrine's flame is nearly out and you can't rest there yet.
   Cup it with both hands, palms toward it, about 2 s (one hand curled round it: 3 s; look + pinch-hold: 3 s). The whole
   plaza lights up; then the shrine heals as before.
-- **Smoky hollow** (Go to > CW: hollow): dark smoke blocks the trail to the hot springs. Touch the top of a stone lantern
-  with a fingertip; touch two in a row quickly and the fire races down the line. The smoke burns away.
-- **Ember** (Go to > CW: forge door): the bellows do nothing yet. Hold your open hand palm-up next to the glowing vent
-  until the ember hops onto your palm, carry it to the stone mouth in the cliff beside the bellows and turn your hand
-  over. The forge roars; now the bellows light the braziers.
+- **Smoky hollow** (Go to > CW: hollow; after the village flame): dark smoke blocks the trail to the hot springs. Gold
+  glows float over the stone lanterns: touch one with a fingertip; touch two in a row quickly and the fire races down the
+  line. The smoke burns away.
+- **Ember** (Go to > CW: forge door): the bellows do nothing yet. A gold ring marks the glowing vent: pinch (or grab)
+  the ember, carry it to the gold glow at the stone mouth beside the bellows and let go. The forge roars; now the
+  bellows light the braziers.
+- A new game starts in the hub again (it had started in Cinderwood). The dev panel opens behind the island; point a
+  hand ray at it and pinch.
 - Story tab: **CW flame / CW hollow / CW firebox** toggle each one (edits the save, reloads).
-- Tell us: did the cup, the lantern touch and the palm-up carry work first time? Anything you had to try twice?
+- Tell us: did the cup, the lantern touch and the ember pick-up work first time? Anything you had to try twice?
 
 ## Earlier (steps 10a-10b, Oct 27: Galewick, the wind realm)
 

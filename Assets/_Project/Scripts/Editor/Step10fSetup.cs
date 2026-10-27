@@ -63,6 +63,7 @@ namespace Diorama.EditorTools
             }
             DialogueTools.Import();
             log.Append("\n  Script_v1 reimported (cw.* lines)");
+            Feedback(log);
 
             EditorSceneManager.MarkSceneDirty(active);
             EditorSceneManager.SaveScene(active);
@@ -185,8 +186,8 @@ namespace Diorama.EditorTools
             ember.id = EmberId;
             ember.reach = 4;
             ember.lessonLine = "cw.ember";
-            ember.lessonChip = "Palm up!";
-            ember.ghostClip = "palm_carry";
+            ember.lessonChip = "Pick it up!";
+            ember.ghostClip = "grab_drop";
             ember.ghostScale = 1f;
             ember.vent = CinderwoodTools.Tile(CinderwoodTools.ForgeVentXY);
             ember.firebox = CinderwoodTools.Tile(CinderwoodTools.FireboxXY);
@@ -196,12 +197,46 @@ namespace Diorama.EditorTools
             ember.warmSlot = ForgeSlot;
             ember.forgeCentre = new Vector2(CinderwoodTools.TempleXY.x, CinderwoodTools.Size - 1 - CinderwoodTools.TempleXY.y);
             ember.forgeRadius = 9f;
+            ember.guideMaterial = Step7bSetup.BeaconMaterial();
+            ember.ventRing = 0.9f;
+            ember.mouthRing = 1.4f;
             EditorUtility.SetDirty(ember);
             log.Append($"\n  'Forge Ember' {Wired(ember)}: vent c{ember.vent.x} r{ember.vent.y}, firebox c{ember.firebox.x} r{ember.firebox.y}, " +
-                       $"palm up within {ember.pickRadius * 100f:0.#} cm for {0.35f} s, tip over within {ember.fireboxRadius * 100f:0} cm of the mouth; " +
-                       $"bellows {(bellows != null ? "blocked until it's in" : "MISSING (Set Up MR_Main (9b puzzles))")}; warmth {ember.forgeRadius} tiles; lesson cw.ember + ghost palm_carry" +
+                       $"pinch or grab within {ember.grabRadius * 100f:0.#} cm, let go within {ember.fireboxRadius * 100f:0} cm of the mouth; gold rings {(ember.guideMaterial != null ? "on" : "MISSING")}; " +
+                       $"bellows {(bellows != null ? "blocked until it's in" : "MISSING (Set Up MR_Main (9b puzzles))")}; warmth {ember.forgeRadius} tiles; lesson cw.ember + ghost grab_drop" +
                        Baked(("Ember", ember.emberRecipe), ("Firebox", PropKit.Load("Firebox"))));
         }
+
+        // ---- Oct 27 headset notes ----
+
+        /// <summary>
+        /// A new game starts in the hub (the island's world had been left on Cinderwood since step 10f A, so the opening
+        /// played there); the dev panel opens behind the island with rays that reach it.
+        /// </summary>
+        static void Feedback(StringBuilder log)
+        {
+            var island = Object.FindFirstObjectByType<IslandBuilder>(FindObjectsInactive.Include);
+            var hub = AssetDatabase.LoadAssetAtPath<WorldMap>(HubMapPath);
+            if (island != null && hub != null && island.world != hub)
+            {
+                Undo.RecordObject(island, "Step 10f");
+                log.Append($"\n  island world {(island.world != null ? island.world.name : "none")} -> {hub.name} (a new game starts in the hub)");
+                island.world = hub;
+                EditorUtility.SetDirty(island);
+            }
+            else if (hub == null) Debug.LogError($"[Step10f] No hub map at {HubMapPath}.");
+            var panel = Object.FindFirstObjectByType<DevPanel>(FindObjectsInactive.Include);
+            if (panel != null)
+            {
+                Undo.RecordObject(panel, "Step 10f");
+                panel.behindIsland = true;
+                panel.rayLength = 2f;
+                EditorUtility.SetDirty(panel);
+                log.Append("\n  dev panel: opens behind the island, rays 2 m");
+            }
+        }
+
+        public const string HubMapPath = "Assets/_Project/Data/WorldMap_StillIsle.asset";
 
         // ---- B: the smoky hollow ----
 
@@ -219,6 +254,12 @@ namespace Diorama.EditorTools
             hollow.smoke = CinderwoodTools.HollowTiles;
             hollow.smokeRecipe = PropKit.Load("SmokeCloud");
             hollow.firstSlot = FirstLanternSlot;
+            hollow.touchRadius = 0.04f;
+            hollow.waitFor = FlameId;
+            hollow.ringSize = 0.9f;
+            hollow.ringLift = 0.2f;
+            hollow.orbSize = 0.35f;
+            hollow.guideMaterial = Step7bSetup.BeaconMaterial();
             EditorUtility.SetDirty(hollow);
             // Lit, the stone lanterns' little window has to read from the seat: a stronger glow (palette only, no re-bake;
             // the glade's ring shares it, so it burns brighter once Cinderwood is restored too).
@@ -230,7 +271,8 @@ namespace Diorama.EditorTools
             }
             log.Append($"\n  'Smoky Hollow' {Wired(hollow)}: {hollow.lanterns.Length} lanterns, {hollow.smoke.Length} smoke tiles; touch {hollow.touchRadius * 100f:0.#} cm, " +
                        $"a sweep within {hollow.sweepWindow} s races {hollow.raceStep} s apart, look + pinch lights the next {hollow.nudgeDelay} s later; " +
-                       $"warm slots {hollow.firstSlot}-{hollow.firstSlot + hollow.lanterns.Length - 1}; lesson cw.lanterns + ghost poke" + Baked(("SmokeCloud", hollow.smokeRecipe)));
+                       $"warm slots {hollow.firstSlot}-{hollow.firstSlot + hollow.lanterns.Length - 1}; lesson cw.lanterns (after {hollow.waitFor}) + ghost poke, " +
+                       $"gold rings {(hollow.guideMaterial != null ? "on" : "MISSING")}" + Baked(("SmokeCloud", hollow.smokeRecipe)));
         }
     }
 }

@@ -10,9 +10,9 @@ namespace Diorama
     /// <summary>
     /// The in-headset dev / QA panel (step 9e). Only in the Editor and QA builds (scripting define POCKET_DEV); a release
     /// build compiles it out and the object removes itself. Step 9g: opened from the game menu's Dev rune (the left hand's
-    /// menu gesture now opens the game menu) or F2; F2 closes it. A plain 2D panel opens a little past arm's reach in front of
-    /// the player, toward the dominant hand and below the eyes, facing them; it stays put (world-locked) and comes back
-    /// in front when the head turns well away. Its edge moves it like the island's rim (pinch the frame, or point at it and pinch, then drag);
+    /// menu gesture now opens the game menu) or F2; F2 closes it. A plain 2D panel opens behind the island (Oct 27; the rays
+    /// reach it), facing the player, and follows only when the island moves (<see cref="behindIsland"/> off: a little past
+    /// arm's reach in front, toward the dominant hand, coming back in front when the head turns well away). Its edge moves it like the island's rim (pinch the frame, or point at it and pinch, then drag);
     /// it keeps that spot (relative to the head's facing) until the app closes. Buttons work with a poke (a fingertip
     /// touches the panel) and with each hand's own ray (ISDK pointer pose: a thin line to the panel, pinch to press; this
     /// panel only); in the Editor also with a mouse click. No look + pinch (step 9e: it fought the game's own gaze).
@@ -38,8 +38,12 @@ namespace Diorama
         [Tooltip("Comes back in front when the head turns further than this from it (degrees).")]
         public float followAngle = 55f;
         public float fontSize = 0.1f;
+        [Tooltip("Oct 27: opens behind the island (the far side from the head, facing it), its lower edge this high above " +
+                 "the island and this far past its edge (m). Off = the old spot beside the head.")]
+        public bool behindIsland = true;
+        public float behindHeight = 0.05f, behindGap = 0.1f;
         [Tooltip("Hand rays reach this far (m).")]
-        public float rayLength = 1.2f;
+        public float rayLength = 2f;
         [Tooltip("The grab frame round the panel (m): visible width; a pinch from this far outside to this far inside the edge grabs it. " +
                  "A pinch (or the ray + pinch) on any empty spot of the panel, not on a button, grabs it too.")]
         public float frame = 0.018f;
@@ -101,7 +105,7 @@ namespace Diorama
         int _dragHand = -1;
         Vector3 _dragFrom, _dragRootFrom;
         bool _moved;
-        Vector3 _offset;
+        Vector3 _offset, _islandAt;
         Vector3 _anchorForward;
         int _species;
         int _level = 9;
@@ -489,6 +493,22 @@ namespace Diorama
         void Place(bool snap)
         {
             if (_dragHand >= 0 || !TryHeadYaw(out var head, out var fwd)) return;
+            if (!_moved && behindIsland && island != null)
+            {
+                // Oct 27 (Mugesh): behind the island, a ray's reach away, instead of beside the head; stays there and
+                // only follows when the island itself is moved.
+                Vector3 at = island.transform.position;
+                if (!snap && (at - _islandAt).sqrMagnitude < 0.05f * 0.05f) return;
+                _islandAt = at;
+                Vector3 away = at - head;
+                away.y = 0f;
+                away = away.sqrMagnitude > 1e-4f ? away.normalized : fwd;
+                Vector2 half = island.FootprintHalfSize * island.transform.lossyScale.x;
+                float r = Mathf.Max(half.x, half.y) * 1.2f + behindGap;
+                _root.position = at + away * r + Vector3.up * (behindHeight + size.y * 0.5f);
+                Face(head);
+                return;
+            }
             if (!snap && Vector3.Angle(fwd, _anchorForward) < followAngle) return;
             _anchorForward = fwd;
             if (_moved) _root.position = head + Quaternion.LookRotation(fwd) * _offset;

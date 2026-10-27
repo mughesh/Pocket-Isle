@@ -891,13 +891,14 @@ MonoBehaviour:
   - id: cw.lanterns
     once: 0
     priority: 2
-    note: lesson at the smoky hollow; chip "Touch them!"
+    note: lesson at the smoky hollow, once the village flame is rekindled; chip "Touch
+      them!"
     target: puzzle:cw.hollow
     validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: It's too dark to pass. Light the lanterns!
+      text: Smoke blocks the way. Touch the lanterns to light them!
   - id: cw.lanterns.done
     once: 1
     priority: 2
@@ -911,13 +912,13 @@ MonoBehaviour:
   - id: cw.ember
     once: 0
     priority: 2
-    note: lesson at the forge's ember vent, before the bellows; chip "Palm up!"
+    note: lesson at the forge's ember vent, before the bellows; chip "Pick it up!"
     target: puzzle:cw.ember
     validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Carry an ember to the forge. Gently!
+      text: Pick up the ember and drop it in the forge's mouth!
   - id: cw.forge.cold
     once: 0
     priority: 2
@@ -931,7 +932,7 @@ MonoBehaviour:
   - id: cw.ember.done
     once: 1
     priority: 2
-    note: 'the ember tipped into the firebox: it roars'
+    note: 'the ember dropped into the firebox: it roars'
     target: 
     validWhile: 
     lines:

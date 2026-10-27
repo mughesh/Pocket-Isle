@@ -15,6 +15,9 @@ namespace Diorama
     /// owns a <see cref="WarmSpots"/> slot, so the island's own instanced lanterns burn (no extra draws). The smoke is
     /// the map's instanced props until it burns; then it is taken off the map in one go (one island rebuild) and drawn
     /// by short-lived views that roll away. A realm already restored counts it as cleared.
+    /// Oct 27 (Mugesh's headset notes): its lesson waits until the village flame is rekindled (<see cref="waitFor"/>; the
+    /// two are close and both started at once), and every unlit lantern carries a gold ring floating over its top (the
+    /// drop spots' look, <see cref="GuideRings"/>) while the explorer is near, brighter under a fingertip or the gaze.
     /// </summary>
     [DefaultExecutionOrder(-20)] // before tile touch reads the blocked fingertips
     public class LanternHollowPiece : HandPuzzle
@@ -30,7 +33,15 @@ namespace Diorama
         [Tooltip("The lantern's top (its cap), tiles above the cap.")]
         public float topHeight = 0.72f;
         [Tooltip("A fingertip this close to the top lights it (metres at the placed island size).")]
-        public float touchRadius = 0.025f;
+        public float touchRadius = 0.04f;
+
+        [Header("Guidance")]
+        [Tooltip("Its lesson waits until this puzzle is solved (the village flame). Empty = no wait.")]
+        public string waitFor = "cw.flame";
+        [Tooltip("The beacon material (ring mode), as the carried log's drop spots. Empty = no rings.")]
+        public Material guideMaterial;
+        [Tooltip("Ring size (tiles across) and height over the lantern's top (tiles).")]
+        public float ringSize = 0.9f, ringLift = 0.2f, orbSize = 0.35f;
 
         [Header("Chain (LanternChain)")]
         public float sweepWindow = 1.5f, raceStep = 0.15f, nudgeDelay = 0.5f;
@@ -51,8 +62,10 @@ namespace Diorama
         readonly HandState[] _hands = new HandState[2];
         readonly bool[] _touching = new bool[2];
         PropView[] _burning;
+        GuideRings _rings;
         AudioSource _audio;
         int _gazed = -1, _lastLit = -1;
+        readonly int[] _near = { -1, -1 };
         bool _burnRunning, _quietSolve;
         float _wispAt;
 
@@ -84,6 +97,9 @@ namespace Diorama
 
         public override float FocusRadius => 0.5f * TileWorld;
 
+        /// <summary>The village flame first (or a restored realm): the lesson and the rings wait for it.</summary>
+        protected override bool Available => string.IsNullOrEmpty(waitFor) || PuzzleState.IsSolved(waitFor) || RealmState.Restored >= 0.99f;
+
         float Scale => grabGuard != null ? grabGuard.ScaleFactor : 1f;
 
         protected override void Start()
@@ -95,6 +111,8 @@ namespace Diorama
             _burning = new PropView[smoke.Length];
             if (island != null)
                 for (int i = 0; i < smoke.Length; i++) _burning[i] = new PropView($"Hollow Smoke {i}", island, smokeRecipe);
+            _rings = new GuideRings("Lantern Guide", island, guideMaterial, lanterns.Length, fx);
+            if (guideMaterial == null) Debug.LogError($"[LanternHollowPiece] {name}: no guide material, so no gold rings (Set Up MR_Main (10f Cinderwood hands)).", this);
             base.Start();
         }
 
@@ -102,6 +120,7 @@ namespace Diorama
         {
             if (_burning != null)
                 foreach (var v in _burning) v?.Destroy();
+            _rings?.Destroy();
             if (map != null)
                 foreach (var t in smoke)
                 {
@@ -148,6 +167,7 @@ namespace Diorama
             }
             Warm();
             Wisps();
+            Guide();
             base.Update();
         }
 
@@ -173,15 +193,23 @@ namespace Diorama
                 if (_hands[h].busy || !HandLookup.TryGetJoint(hand, HandJointId.HandIndexTip, out var tip))
                 {
                     _touching[h] = false;
+                    _near[h] = -1;
                     continue;
                 }
                 int touched = -1;
                 bool near = false;
+                float best = r * 2.5f;
+                _near[h] = -1;
                 for (int i = 0; i < lanterns.Length; i++)
                 {
                     float d = (tip - TopWorld(i)).magnitude;
                     if (d <= r * 3f) near = true;
                     if (d <= r) touched = i;
+                    if (d < best && !_chain.lit[i])
+                    {
+                        best = d;
+                        _near[h] = i;
+                    }
                 }
                 // A fingertip at the lanterns never walks the explorer.
                 if (near) TileTouch.Block(h == 0, 0.4f);
@@ -319,6 +347,21 @@ namespace Diorama
             {
                 if (Here && _chain != null && _chain.lit[i]) WarmSpots.Set(firstSlot + i, lanterns[i], spotRadius, 0.15f, ts);
                 else WarmSpots.Clear(firstSlot + i);
+            }
+        }
+
+        /// <summary>A gold ring over every unlit lantern's top while the explorer is near; brighter under a fingertip or the gaze.</summary>
+        void Guide()
+        {
+            if (_rings == null) return;
+            bool on = InView && Available && !IsSolved && !_burnRunning && _chain != null && explorer != null &&
+                      Mathf.Max(Mathf.Abs(explorer.Tile.x - HomeTile.x), Mathf.Abs(explorer.Tile.y - HomeTile.y)) <= reach + 3;
+            if (!Usable) _near[0] = _near[1] = -1;
+            for (int i = 0; i < lanterns.Length; i++)
+            {
+                bool hot = _near[0] == i || _near[1] == i || _gazed == i;
+                float pulse = 0.8f + 0.2f * Mathf.Sin(Time.time * 3f + i * 0.9f);
+                _rings.Draw(i, on && !_chain.lit[i], new Vector3(lanterns[i].x, topHeight + ringLift, lanterns[i].y), ringSize * (hot ? 1.2f : 1f), hot ? 2.6f : 1.6f * pulse, orbSize * (hot ? 1.3f : pulse));
             }
         }
 

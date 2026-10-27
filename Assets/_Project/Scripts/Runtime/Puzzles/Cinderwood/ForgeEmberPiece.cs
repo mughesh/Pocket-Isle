@@ -7,10 +7,12 @@ namespace Diorama
     /// <summary>
     /// Step 10f, Cinderwood's forge temple, before the bellows: the forge's firebox (a stone mouth in the cliff beside
     /// the bellows, a chimney up the cliff) is cold, so the bellows only give a grey puff (<see cref="PumpPiece.Blocked"/>).
-    /// An ember vent near the forge glows faintly with a live ember in it. Hold an open hand palm-up beside the vent (or
-    /// pinch the ember): it hops up and sits on your palm, glowing (a warm halo, sparks drifting up), for as long as the
-    /// palm stays roughly up. Turn the hand over above the firebox and it tips in; tipped or dropped anywhere else it
-    /// falls back to its vent (<see cref="EmberCarry"/>). Look + pinch the vent, then the firebox: it flies in by itself.
+    /// An ember vent near the forge glows faintly with a live ember in it. Pick and place (Oct 27, was a palm-up scoop):
+    /// pinch or grab the ember and it comes with that hand, glowing (a warm halo, sparks drifting up); let go over the
+    /// firebox's mouth and it drops in, anywhere else it falls back to its vent (<see cref="EmberCarry"/>). Gold rings
+    /// show the way (the drop spots' look, <see cref="GuideRings"/>): one on the vent while the ember waits there, one at
+    /// the firebox's mouth that burns brighter while it's carried (brightest when letting go would drop it in), and gold
+    /// sparks stream from the carried ember toward the mouth. Look + pinch the vent, then the firebox: it flies in by itself.
     /// Ember in: the firebox roars and a warm spot spreads from it over the temple (<see cref="WarmSpots"/>: the firebox
     /// mouth glows, its chimney smokes, every ember vent along the cliff burns, the pipe warms), and the bellows work as
     /// built in 9b. Saved as solved; already solved bellows (an old save) or a restored realm count it as done.
@@ -35,14 +37,15 @@ namespace Diorama
         public float mouthHeight = 0.26f, mouthFront = 0.45f;
 
         [Header("Hands (metres at the placed island size)")]
-        [Tooltip("A palm-up hand within this of the vent lifts it.")]
-        public float pickRadius = 0.075f;
-        [Tooltip("A pinch within this of the ember picks it.")]
-        public float pinchRadius = 0.03f;
-        [Tooltip("Over the firebox: this far round its mouth (across), and up to this high above it.")]
+        [Tooltip("A pinch or grab started this close to the ember picks it.")]
+        public float grabRadius = 0.04f;
+        [Tooltip("Letting go over the firebox: this far round its mouth (across), and from a little below up to this high above it.")]
         public float fireboxRadius = 0.08f, fireboxAbove = 0.18f;
-        [Range(0f, 1f)] public float pickUp = 0.6f;
-        [Range(-1f, 1f)] public float keepUp = 0.2f;
+
+        [Header("Guidance (gold rings, tiles across)")]
+        [Tooltip("The beacon material (ring mode), as the carried log's drop spots. Empty = no rings.")]
+        public Material guideMaterial;
+        public float ventRing = 0.9f, mouthRing = 1.4f;
 
         [Header("The forge answers")]
         public int warmSlot = 7;
@@ -57,22 +60,26 @@ namespace Diorama
         readonly EmberCarry _carry = new EmberCarry();
         readonly HandState[] _hands = new HandState[2];
         readonly EmberCarry.Hand[] _in = new EmberCarry.Hand[2];
+        readonly Vector3[] _grip = new Vector3[2];
         PropView _ember;
         BattleFx.Item _halo;
+        GuideRings _rings;
         AudioSource _audio;
         Vector3 _emberWorld, _fallFrom;
-        float _anim, _sparkAt;
+        float _anim, _sparkAt, _trailAt;
         int _gazed = -1; // 0 = the ember / vent, 1 = the firebox
         bool _roaring, _quietSolve;
 
         public EmberCarry Carry => _carry;
-        /// <summary>Debug (bridge shots): while it waits (hovering), it sits here instead (a ghost hand's palm).</summary>
+        /// <summary>Debug (bridge shots): while it waits (hovering), it sits here instead (a ghost hand's grip).</summary>
         [System.NonSerialized] public Vector3? debugAt;
-        public override bool Busy => _carry.State == EmberState.OnPalm || _carry.State == EmberState.Flying;
+        public override bool Busy => _carry.State == EmberState.Held || _carry.State == EmberState.Flying;
         protected override Vector2 HomeTile => vent;
 
         public override Vector3? FocusPoint => Here && !IsSolved && (_carry.State == EmberState.InVent || _carry.State == EmberState.Hovering) ? _emberWorld : (Vector3?)null;
         public override float FocusRadius => 0.5f * TileWorld;
+        /// <summary>The lesson's grab_drop ghost picks the ember and lets go at the firebox's mouth.</summary>
+        public override Vector3? GhostDropPoint => Here && !IsSolved ? MouthWorld : (Vector3?)null;
 
         float Scale => grabGuard != null ? grabGuard.ScaleFactor : 1f;
         Vector3 VentWorld => MapToWorld(new Vector3(vent.x, ventHeight, vent.y));
@@ -81,12 +88,12 @@ namespace Diorama
 
         protected override void Start()
         {
-            _carry.pickUp = pickUp;
-            _carry.keepUp = keepUp;
             _audio = gameObject.AddComponent<AudioSource>();
             _audio.playOnAwake = false;
             _audio.spatialBlend = 0f;
             if (island != null) _ember = new PropView("Forge Ember", island, emberRecipe);
+            _rings = new GuideRings("Ember Guide", island, guideMaterial, 2, fx);
+            if (guideMaterial == null) Debug.LogError($"[ForgeEmberPiece] {name}: no guide material, so no gold rings (Set Up MR_Main (10f Cinderwood hands)).", this);
             if (bellows == null) Debug.LogError($"[ForgeEmberPiece] {name}: no bellows to wake (Set Up MR_Main (10f Cinderwood hands)).", this);
             base.Start();
         }
@@ -94,6 +101,7 @@ namespace Diorama
         protected override void OnDestroy()
         {
             _ember?.Destroy();
+            _rings?.Destroy();
             ReleaseHalo();
             WarmSpots.Clear(warmSlot);
             if (bellows != null) bellows.Blocked = false;
@@ -129,16 +137,16 @@ namespace Diorama
         {
             bool usable = Usable;
             var state = _carry.State;
-            if (state == EmberState.InVent || state == EmberState.Hovering || state == EmberState.OnPalm)
+            if (state == EmberState.InVent || state == EmberState.Hovering || state == EmberState.Held)
             {
-                for (int h = 0; h < 2; h++) _in[h] = usable || state == EmberState.OnPalm ? Measure(h) : default;
+                for (int h = 0; h < 2; h++) _in[h] = usable || state == EmberState.Held ? Measure(h) : default;
                 var was = state;
                 var now = _carry.Feed(Time.deltaTime, _in);
                 if (now != was) Changed(was, now);
             }
             if (usable && (_carry.State == EmberState.InVent || _carry.State == EmberState.Hovering)) LookPinch();
             else _gazed = -1;
-            if (_carry.State == EmberState.OnPalm)
+            if (_carry.State == EmberState.Held)
             {
                 // The carrying hand never walks the explorer or swipes.
                 IslandHandle.MarkHandHeld(_carry.Holder == 0);
@@ -149,24 +157,15 @@ namespace Diorama
         EmberCarry.Hand Measure(int h)
         {
             var s = _hands[h];
-            var x = new EmberCarry.Hand { tracked = s.tracked, busy = s.busy, pinching = s.pinch, pinchStarted = s.pinchStarted };
-            if (!s.tracked) return x;
-            var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
-            if (!HandLookup.TryGetJointPose(hand, HandJointId.HandPalm, out var palm))
-            {
-                x.tracked = false;
-                return x;
-            }
-            Vector3 up = island.transform.up;
-            // The palmar side is the palm joint's -Y for both hands (ISDK v207, as PalmHover).
-            Vector3 normal = palm.rotation * Vector3.down;
-            x.up = Vector3.Dot(normal, up);
+            var x = new EmberCarry.Hand { tracked = s.tracked, busy = s.busy, holding = s.Holding, gripStarted = s.pinchStarted || s.fistStarted };
+            if (!s.tracked || !s.Holding) return x;
+            _grip[h] = s.GripPoint;
             float scale = Scale;
-            x.nearVent = (palm.position - VentWorld).magnitude <= pickRadius * scale;
-            x.atEmber = s.pinch && (s.pinchPoint - _emberWorld).magnitude <= pinchRadius * scale + 0.25f * emberSize * TileWorld;
-            Vector3 d = palm.position - MouthWorld;
+            x.atEmber = (_grip[h] - _emberWorld).magnitude <= grabRadius * scale + 0.25f * emberSize * TileWorld;
+            Vector3 up = island.transform.up;
+            Vector3 d = _grip[h] - MouthWorld;
             float above = Vector3.Dot(d, up);
-            x.overFirebox = (d - up * above).magnitude <= fireboxRadius * scale && above >= -0.03f * scale && above <= fireboxAbove * scale;
+            x.overFirebox = (d - up * above).magnitude <= fireboxRadius * scale && above >= -0.04f * scale && above <= fireboxAbove * scale;
             return x;
         }
 
@@ -174,19 +173,19 @@ namespace Diorama
         {
             switch (now)
             {
-                case EmberState.OnPalm:
+                case EmberState.Held:
                     MarkInteracted();
-                    Debug.Log($"[ForgeEmberPiece] {id}: the ember hops onto the {(_carry.Holder == 0 ? "left" : "right")} palm{(_carry.Pinched ? " (pinched)" : "")}.");
+                    Debug.Log($"[ForgeEmberPiece] {id}: picked up ({(_carry.Holder == 0 ? "left" : "right")} hand, {(_hands[_carry.Holder].pinch ? "pinch" : "grab")}).");
                     if (_audio != null) _audio.PlayOneShot(PuzzleSounds.Catch, volume * 0.5f);
                     if (fx != null) fx.Burst(_emberWorld, 10, new Color(1f, 0.6f, 0.25f), TileWorld * 0.4f, 0.6f, TileWorld * 0.04f, island.transform.up * TileWorld * 0.8f);
                     break;
                 case EmberState.Falling:
-                    Debug.Log($"[ForgeEmberPiece] {id}: dropped, the ember falls back to its vent.");
+                    Debug.Log($"[ForgeEmberPiece] {id}: let go away from the firebox, the ember falls back to its vent.");
                     _fallFrom = _emberWorld;
                     _anim = 0f;
                     break;
                 case EmberState.In:
-                    Debug.Log($"[ForgeEmberPiece] {id}: tipped into the firebox.");
+                    Debug.Log($"[ForgeEmberPiece] {id}: dropped into the firebox.");
                     StartCoroutine(Roar(_emberWorld));
                     break;
             }
@@ -296,14 +295,9 @@ namespace Diorama
                 case EmberState.Hovering:
                     _emberWorld = debugAt ?? Vector3.Lerp(_emberWorld, HoverWorld, Time.deltaTime * 4f);
                     break;
-                case EmberState.OnPalm:
-                    var hand = HandRegistry.Get(_carry.Holder == 0 ? Handedness.Left : Handedness.Right);
-                    if (HandLookup.TryGetJointPose(hand, HandJointId.HandPalm, out var palm))
-                    {
-                        // Sits in the palm: a little out from it on the palmar side.
-                        Vector3 normal = palm.rotation * Vector3.down;
-                        _emberWorld = Vector3.Lerp(_emberWorld, palm.position + normal * 0.014f * Scale, Time.deltaTime * 20f);
-                    }
+                case EmberState.Held:
+                    // In the fingers (the pinch point) or the fist.
+                    if (_carry.Holder >= 0) _emberWorld = Vector3.Lerp(_emberWorld, _grip[_carry.Holder], Time.deltaTime * 25f);
                     break;
                 case EmberState.Falling:
                     _anim += Time.deltaTime / 0.5f;
@@ -316,6 +310,7 @@ namespace Diorama
                     }
                     break;
             }
+            Guide(show);
             if (_ember == null) return;
             if (!show)
             {
@@ -323,7 +318,7 @@ namespace Diorama
                 ReleaseHalo();
                 return;
             }
-            bool carried = s == EmberState.OnPalm || s == EmberState.Flying || s == EmberState.Hovering;
+            bool carried = s == EmberState.Held || s == EmberState.Flying || s == EmberState.Hovering;
             // In its vent it glows faintly (a dim pulse); carried it burns bright.
             float pulse = carried ? 1f : 0.45f + 0.15f * Mathf.Sin(Time.time * 2.4f);
             _ember.restoredSelf = carried ? 1f : 0.55f;
@@ -342,6 +337,33 @@ namespace Diorama
                 _sparkAt = Time.time + 0.16f;
                 fx.Burst(_emberWorld, 1, new Color(1f, 0.7f, 0.3f), TileWorld * 0.15f, 0.8f, TileWorld * 0.03f, island.transform.up * TileWorld * 0.9f);
             }
+        }
+
+        /// <summary>Near enough to work it soon: the explorer within a few tiles more than its reach.</summary>
+        bool Near => explorer != null && Mathf.Max(Mathf.Abs(explorer.Tile.x - vent.x), Mathf.Abs(explorer.Tile.y - vent.y)) <= reach + 3;
+
+        /// <summary>
+        /// The gold rings: the vent's while the ember waits there, the mouth's always while unsolved (dim), brighter while
+        /// it's carried, brightest when letting go would drop it in. Carried: gold sparks stream toward the mouth.
+        /// </summary>
+        void Guide(bool show)
+        {
+            if (_rings == null) return;
+            var s = _carry.State;
+            bool on = show && InView && Near && !_roaring;
+            bool waiting = s == EmberState.InVent;
+            bool carried = s == EmberState.Held || s == EmberState.Hovering;
+            float pulse = 0.8f + 0.2f * Mathf.Sin(Time.time * 3f);
+            _rings.Draw(0, on && waiting, new Vector3(vent.x, ventHeight + 0.05f, vent.y), ventRing, 1.5f * pulse);
+            float mouth = _carry.OverFirebox || _gazed == 1 ? 2.6f : carried ? 1.8f * pulse : 0.8f * pulse;
+            _rings.Draw(1, on && s != EmberState.Falling, new Vector3(firebox.x, mouthHeight - 0.12f, firebox.y + mouthFront), mouthRing * (_carry.OverFirebox ? 1.15f : 1f), mouth, (carried ? 0.75f : 0.4f) * pulse);
+            if (!on || !carried || fx == null || Time.time < _trailAt) return;
+            // A dotted line of sparks drifting from the ember to the mouth: "it goes there".
+            _trailAt = Time.time + 0.07f;
+            float u = Mathf.Repeat(Time.time * 0.9f, 1f);
+            float tile = TileWorld;
+            var p = Vector3.Lerp(_emberWorld, MouthWorld, u) + island.transform.up * tile * 0.8f * Mathf.Sin(u * Mathf.PI);
+            fx.Burst(p, 1, new Color(1f, 0.78f, 0.3f), tile * 0.02f, 0.45f, tile * 0.05f, Vector3.zero);
         }
 
         void Halo(float strength, bool carried)

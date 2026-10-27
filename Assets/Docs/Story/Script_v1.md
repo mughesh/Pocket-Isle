@@ -186,15 +186,15 @@ Step 10f, Cinderwood's new hand moments (lesson lines stay pinned as a chip unti
   - Spirit: It's too weak to rest by. Warm it up first!
 - `cw.flame.done` · once (the flame rekindled: the warmth rolls over the plaza)
   - Spirit: It's burning! Look, the whole village is waking up.
-- `cw.lanterns` · → puzzle:cw.hollow (lesson at the smoky hollow; chip "Touch them!")
-  - Spirit: It's too dark to pass. Light the lanterns!
+- `cw.lanterns` · → puzzle:cw.hollow (lesson at the smoky hollow, once the village flame is rekindled; chip "Touch them!")
+  - Spirit: Smoke blocks the way. Touch the lanterns to light them!
 - `cw.lanterns.done` · once (every lantern lit: the smoke burns off the path)
   - Spirit: The smoke's burning away! The path is clear.
-- `cw.ember` · → puzzle:cw.ember (lesson at the forge's ember vent, before the bellows; chip "Palm up!")
-  - Spirit: Carry an ember to the forge. Gently!
+- `cw.ember` · → puzzle:cw.ember (lesson at the forge's ember vent, before the bellows; chip "Pick it up!")
+  - Spirit: Pick up the ember and drop it in the forge's mouth!
 - `cw.forge.cold` · (the bellows pumped while the firebox is cold; at most every 8 s)
   - Spirit: The forge is stone cold. It needs a spark first.
-- `cw.ember.done` · once (the ember tipped into the firebox: it roars)
+- `cw.ember.done` · once (the ember dropped into the firebox: it roars)
   - Spirit: It's roaring! Now the bellows can blow.
 
 ## Galewick (wind, step 10a)

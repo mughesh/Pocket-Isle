@@ -64,6 +64,15 @@ namespace Diorama.EditorTools
             Debug.Log($"[Step10fDebug] Reset {Arg} ({n} entry).");
         }
 
+        /// <summary>Marks the puzzle "id[,stage]" in arg.txt solved (puts a save back after a check that reset it).</summary>
+        public static void Solve()
+        {
+            var parts = Arg.Split(',');
+            int stage = parts.Length > 1 && int.TryParse(parts[1], out int s) ? s : 1;
+            PuzzleState.Solve(parts[0], stage);
+            Debug.Log($"[Step10fDebug] Solved {parts[0]} (stage {stage}).");
+        }
+
         /// <summary>
         /// D: the XP trail check on the current maps (KeeperSim.Trail: start, first grass, plaza, springs, log, temple; the
         /// hollow is on the way now). Works in Edit mode.
@@ -121,8 +130,8 @@ namespace Diorama.EditorTools
         }
 
         /// <summary>
-        /// The ember on a synthetic palm: the lesson's palm_carry ghost frozen palm-up (arg.txt = the clip time 0..1, default
-        /// 0.5) at the vent, the waiting ember moved onto its palm, then a close shot 10f_ember_palm.png.
+        /// The ember at a synthetic grip: the lesson's grab_drop ghost frozen (arg.txt = the clip time 0..1, default
+        /// 0.5) at the vent, the waiting ember moved to its key point, then a close shot 10f_ember_palm.png.
         /// </summary>
         public static void EmberPalm()
         {
@@ -130,11 +139,11 @@ namespace Diorama.EditorTools
             var g = Find<GhostHands>();
             if (e == null || g == null) return;
             if (e.Carry.State == EmberState.InVent) e.DebugLookPinchVent();
-            g.Show("palm_carry", GhostPlace.AtTarget, "puzzle:" + e.id, 1f, DominantHand.Left, false);
+            g.Show("grab_drop", GhostPlace.AtTarget, "puzzle:" + e.id, 1f, DominantHand.Left, false);
             g.debugFreeze = ArgFloat(0.5f);
             g.DebugPose();
             if (g.KeyPoint.HasValue) e.debugAt = g.KeyPoint.Value + Vector3.up * 0.016f;
-            Debug.Log($"[Step10fDebug] Ember on the ghost palm at {e.debugAt}.");
+            Debug.Log($"[Step10fDebug] Ember at the ghost grip at {e.debugAt}.");
         }
 
         public static void EmberPalmOff()

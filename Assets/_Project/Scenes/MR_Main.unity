@@ -827,7 +827,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.IslandBuilder
   map: {fileID: 11400000, guid: 02a8766f02fce1f41867418f88b1c36b, type: 2}
-  world: {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
+  world: {fileID: 11400000, guid: ab0469af29722704f949fec768f94b68, type: 2}
   seed: 7
   column: {fileID: 2100000, guid: 9713c6c0478a20d42ad0c527671d1d01, type: 2}
   underside: {fileID: 2100000, guid: 93dba253338bffb44acaff7f568fcf55, type: 2}
@@ -3178,7 +3178,12 @@ MonoBehaviour:
   - {x: 31, y: 23}
   smokeRecipe: {fileID: 11400000, guid: 8011fa5b8621e244bb7ae74db9c428bb, type: 2}
   topHeight: 0.72
-  touchRadius: 0.025
+  touchRadius: 0.04
+  waitFor: cw.flame
+  guideMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  ringSize: 0.9
+  ringLift: 0.2
+  orbSize: 0.35
   sweepWindow: 1.5
   raceStep: 0.15
   nudgeDelay: 0.5
@@ -3811,7 +3816,10 @@ MonoBehaviour:
   downAngle: 22
   followAngle: 55
   fontSize: 0.1
-  rayLength: 1.2
+  behindIsland: 1
+  behindHeight: 0.05
+  behindGap: 0.1
+  rayLength: 2
   frame: 0.018
   grabOut: 0.05
   grabIn: 0.03
@@ -4969,9 +4977,9 @@ MonoBehaviour:
   fx: {fileID: 1078587927}
   reach: 4
   lessonLine: cw.ember
-  ghostClip: palm_carry
+  ghostClip: grab_drop
   ghostScale: 1
-  lessonChip: Palm up!
+  lessonChip: Pick it up!
   vent: {x: 26, y: 5}
   firebox: {x: 24, y: 3}
   bellows: {fileID: 1127440542}
@@ -4980,12 +4988,12 @@ MonoBehaviour:
   ventHeight: 0.08
   mouthHeight: 0.26
   mouthFront: 0.45
-  pickRadius: 0.075
-  pinchRadius: 0.03
+  grabRadius: 0.04
   fireboxRadius: 0.08
   fireboxAbove: 0.18
-  pickUp: 0.6
-  keepUp: 0.2
+  guideMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  ventRing: 0.9
+  mouthRing: 1.4
   warmSlot: 7
   forgeCentre: {x: 20, y: 6}
   forgeRadius: 9
