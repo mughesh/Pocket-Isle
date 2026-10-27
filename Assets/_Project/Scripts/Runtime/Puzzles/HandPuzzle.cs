@@ -59,6 +59,8 @@ namespace Diorama
         public Material focusMaterial;
         [Tooltip("Gold ring brightness (1 = the drop spots' resting glow).")]
         public float markIntensity = 1.3f;
+        [Tooltip("Step 12b: a pinch or fist anywhere this close (m, real world) grabs the nearest pick-up; it shows white hover while a hand is in range.")]
+        public float grabAssist = 0.08f;
 
         /// <summary>Said once when an objective's object is outside the island window (an arrow points to it).</summary>
         public const string MoreLine = "objective.more";

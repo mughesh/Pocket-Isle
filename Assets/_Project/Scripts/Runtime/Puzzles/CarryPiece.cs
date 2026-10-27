@@ -273,7 +273,8 @@ namespace Diorama
             // Map space mirrors columns (column + = map -X); the axis only needs to lie along the object, either way works.
             Vector3 a = _pos + new Vector3(-axis.x, 0.25f, axis.z), b = _pos + new Vector3(axis.x, 0.25f, -axis.z);
             float slack = grabSlack / Mathf.Max(1e-5f, TileWorld);
-            return CarryLogic.DistanceToSegment(m, a, b) <= grabRadius + slack;
+            // Step 12b: at least the grab assist (real-world metres) round the log.
+            return CarryLogic.DistanceToSegment(m, a, b) <= Mathf.Max(grabRadius + slack, grabAssist / Mathf.Max(1e-5f, TileWorld));
         }
 
         void Hold()

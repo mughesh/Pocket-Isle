@@ -158,10 +158,14 @@ namespace Diorama
         {
             var s = _hands[h];
             var x = new EmberCarry.Hand { tracked = s.tracked, busy = s.busy, holding = s.Holding, gripStarted = s.pinchStarted || s.fistStarted };
+            float scale = Scale;
+            // Step 12b: grab assist (pinch or fist within grabAssist) and white hover while a free hand is in range.
+            float reach = Mathf.Max(grabRadius * scale + 0.25f * emberSize * TileWorld, grabAssist);
+            bool waiting = _carry.State == EmberState.InVent || _carry.State == EmberState.Hovering;
+            if (s.tracked && !s.busy && waiting && (s.GripPoint - _emberWorld).magnitude <= reach) FocusHighlight.Hover(_emberWorld, FocusRadius);
             if (!s.tracked || !s.Holding) return x;
             _grip[h] = s.GripPoint;
-            float scale = Scale;
-            x.atEmber = (_grip[h] - _emberWorld).magnitude <= grabRadius * scale + 0.25f * emberSize * TileWorld;
+            x.atEmber = (_grip[h] - _emberWorld).magnitude <= reach;
             Vector3 up = island.transform.up;
             Vector3 d = _grip[h] - MouthWorld;
             float above = Vector3.Dot(d, up);

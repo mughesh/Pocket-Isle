@@ -246,7 +246,12 @@ namespace Diorama
                 var p = _pulls[i];
                 Ends(i, out p.endA, out p.endB);
                 p.center = KnotWorld(i);
-                p.grabRadius = grabRadius * scale;
+                // Step 12b: grab assist, and white hover on an end a free hand is near.
+                p.grabRadius = Mathf.Max(grabRadius * scale, grabAssist);
+                foreach (var hs in _hands)
+                    if (hs.tracked && !hs.busy && !hs.Holding &&
+                        Mathf.Min((hs.GripPoint - p.endA).magnitude, (hs.GripPoint - p.endB).magnitude) <= p.grabRadius)
+                        FocusHighlight.Hover((hs.GripPoint - p.endA).sqrMagnitude < (hs.GripPoint - p.endB).sqrMagnitude ? p.endA : p.endB, endSpread * Scale * 0.5f);
                 p.twoHandPull = twoHandPull;
                 p.oneHandPull = oneHandPull;
                 bool wasHeld = p.AnyHeld;

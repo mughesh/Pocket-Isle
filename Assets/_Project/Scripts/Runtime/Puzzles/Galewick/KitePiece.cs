@@ -260,13 +260,22 @@ namespace Diorama
         void Grab()
         {
             float tile = TileWorld;
+            float reach = Mathf.Max(grabRadius * tile + grabSlack, grabAssist);
+            // Step 12b: white hover on the kite a grab would catch, while a free hand is in range.
+            for (int h = 0; h < 2; h++)
+            {
+                var s = _hands[h];
+                if (!s.tracked || s.busy || HoldingKite(h)) continue;
+                int near = NearestLying(s.GripPoint, reach);
+                if (near >= 0) FocusHighlight.Hover(Local2World(_kites[near].pos), FocusRadius);
+            }
             for (int h = 0; h < 2; h++)
             {
                 var s = _hands[h];
                 if (s.busy || !(s.pinchStarted || s.fistStarted)) continue;
                 if (HoldingKite(h)) continue;
                 int best = -1;
-                float bestD = grabRadius * tile + grabSlack;
+                float bestD = reach;
                 for (int i = 0; i < _kites.Count; i++)
                 {
                     var k = _kites[i];
@@ -285,6 +294,24 @@ namespace Diorama
                 MarkInteracted();
                 Debug.Log($"[KitePiece] Kite {best} grabbed by the {(h == 0 ? "left" : "right")} {(s.pinch ? "pinch" : "fist")}.");
             }
+        }
+
+        int NearestLying(Vector3 at, float reach)
+        {
+            int best = -1;
+            float bestD = reach;
+            for (int i = 0; i < _kites.Count; i++)
+            {
+                var k = _kites[i];
+                if (k.state != K.Lying && k.state != K.Falling) continue;
+                float d = (Local2World(k.pos) - at).magnitude;
+                if (d < bestD)
+                {
+                    bestD = d;
+                    best = i;
+                }
+            }
+            return best;
         }
 
         bool HoldingKite(int h)
