@@ -58,6 +58,8 @@ namespace Diorama.EditorTools
         public static Vector2Int Arrive => Tile(ArriveXY);
         public static readonly Vector2Int ArriveFacing = new Vector2Int(0, -1);
         public static Vector2Int TempleFront => Tile(TempleXY.x + 1, TempleXY.y - 2);
+        /// <summary>Step 11c: the temple's return gate (2 x 1, west of the temple, its front on the shore path; shown once Tidemother is calm).</summary>
+        public static readonly Vector2Int TempleGateXY = new Vector2Int(13, 49);
         public static Vector2Int BasinFront => Tile(BasinXY.x, BasinXY.y - 2);
 
         // The main trail (2 wide around the centre line), straight legs only (Mugesh, Oct 27: zig-zags are hard to walk).
@@ -543,6 +545,11 @@ namespace Diorama.EditorTools
         {
             Fill(TempleXY.x - 1, TempleXY.x + 3, TempleXY.y - 1, TempleXY.y, IslandMap.Grass);
             Prop(TempleXY, KTemple);
+            // Step 11c: the return gate beside the temple, its front on the grass by the causeway.
+            Ground(TempleGateXY.x, TempleGateXY.y, IslandMap.Grass);
+            Ground(TempleGateXY.x + 1, TempleGateXY.y, IslandMap.Grass);
+            for (int x = TempleGateXY.x; x <= TempleXY.x; x++) Ground(x, TempleGateXY.y - 1, IslandMap.Grass);
+            Prop(TempleGateXY, KGate);
             // Lily pads and lotus on the lagoon's open water.
             foreach (var (x, y) in new[] { (14, 40), (19, 43), (21, 39), (16, 37), (13, 43) }) Prop(x, y, KLily);
             foreach (var (x, y) in new[] { (18, 41), (15, 42) }) Prop(x, y, KLotus);
@@ -910,6 +917,7 @@ namespace Diorama.EditorTools
             Need("garden crossing", new Vector2Int(GardenPathX, Mathf.RoundToInt(GardenCenter.y)));
             Need("basin front", BasinXY + new Vector2Int(0, -2));
             Need("temple door front", TempleXY + new Vector2Int(1, -2));
+            Need("temple return gate front", TempleGateXY + Vector2Int.down);
             Need("return gate front", GateXY + Vector2Int.down);
             Need("jetty end", JettyXY);
             foreach (var z in new[] { "arrival", "village", "channel", "marsh", "garden", "pond", "wind", "basin" })

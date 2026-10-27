@@ -56,6 +56,10 @@ never saved.
   the lotus crossing is just the flowers; the rain cloud is palm-sized; at the garden the island shows all five buds;
   scoop with **both hands cupped together** (one hand still works), the basin fills half way after one pour.
 
+- **Lilymere's Islings and Keeper** (step 11c): new water Islings in Lilymere's grass (Marimoss, Drizzcan, Lilyvole,
+  Sailfold; rare Bottlewhale in the rare pond). After the basin (the lagoon rises) the **lake temple door glows**: walk
+  in and calm **Tidemother**. Dev panel **Go to > LM: lake temple**; Story tab **Tidemother / Water shard**.
+
 ## Earlier (Oct 28: sound, and Lilymere for Mugesh)
 
 - **Sound everywhere**: footsteps, battles, catching, the Cinderwood beats, Keeper, ambience per area. No music yet

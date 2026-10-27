@@ -247,6 +247,7 @@ MonoBehaviour:
   placedLine: hub.shard.placed
   moreLine: hub.shard.more
   twoLine: statue.two
+  threeLine: statue.three
 --- !u!1 &78739057
 GameObject:
   m_ObjectHideFlags: 0
@@ -350,6 +351,9 @@ Transform:
   - {fileID: 254543052}
   - {fileID: 366644025}
   - {fileID: 1612879609}
+  - {fileID: 678983519}
+  - {fileID: 896397233}
+  - {fileID: 288828728}
   m_Father: {fileID: 1553131432}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &155307357
@@ -1112,6 +1116,65 @@ MonoBehaviour:
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.RealmRestoration
   island: {fileID: 270959109}
   fadeSeconds: 2
+--- !u!1 &288828727
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 288828728}
+  - component: {fileID: 288828729}
+  m_Layer: 0
+  m_Name: Temple Door
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &288828728
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 288828727}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 93667893}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &288828729
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 288828727}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 826775554}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.TempleDoor
+  map: {fileID: 11400000, guid: 62a4d08fb1efa974aa00c824d650dab0, type: 2}
+  island: {fileID: 270959109}
+  explorer: {fileID: 374318554}
+  swap: {fileID: 221433162}
+  fx: {fileID: 1078587927}
+  glowMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  openWhen: lm.lagoon
+  front:
+  - {x: 17, y: 11}
+  doorway: {x: 17, y: 0.7, z: 10.45}
+  portalSize: {x: 1.1, y: 1.3}
+  hall: {fileID: 11400000, guid: 320028e817a355b40b98f43d02ec05d3, type: 2}
+  hallEntry: {x: 4, y: 8}
+  shutLine: lm.temple.shut
+  openLine: lm.temple.open
 --- !u!1 &299480873
 GameObject:
   m_ObjectHideFlags: 0
@@ -2507,6 +2570,7 @@ MonoBehaviour:
   placedLine: hub.shard.placed
   moreLine: hub.shard.more
   twoLine: statue.two
+  threeLine: statue.three
 --- !u!1 &570826974
 GameObject:
   m_ObjectHideFlags: 0
@@ -2542,6 +2606,8 @@ MonoBehaviour:
   otherShards:
   - id: shard.wind
     recipe: {fileID: 11400000, guid: 0d00935bd93bf4d44ba91c69122fee75, type: 2}
+  - id: shard.water
+    recipe: {fileID: 11400000, guid: d4841e0bb04882b43a2477d94a098d44, type: 2}
   carryMetres: 0.022
   offerMetres: 0.05
   orbitRadius: 0.035
@@ -2648,6 +2714,85 @@ Transform:
   m_Children: []
   m_Father: {fileID: 200327675}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &678983518
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 678983519}
+  - component: {fileID: 678983521}
+  - component: {fileID: 678983520}
+  m_Layer: 0
+  m_Name: Lake Temple Hall
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &678983519
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 678983518}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 93667893}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &678983520
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 678983518}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 811afc0801ff3104187c8ad58985b3e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.LakeTempleHall
+  swap: {fileID: 221433162}
+  hall: {fileID: 11400000, guid: 320028e817a355b40b98f43d02ec05d3, type: 2}
+  island: {fileID: 270959109}
+  fx: {fileID: 1078587927}
+  domeRecipe: {fileID: 11400000, guid: 4409544a1daaee94a92137773ffd00eb, type: 2}
+  domeAt: {x: 4.5, y: 1.4}
+  domeScale: 1
+  doorAt: {x: 4.5, y: 9}
+  keeperId: lm.keeper
+  keeper: {fileID: 896397234}
+  flowSeconds: 2.4
+--- !u!114 &678983521
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 678983518}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed0c46d1e7631a24db4a1b75749f7f3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.ForgeHall
+  swap: {fileID: 221433162}
+  hall: {fileID: 11400000, guid: 320028e817a355b40b98f43d02ec05d3, type: 2}
+  island: {fileID: 270959109}
+  explorer: {fileID: 374318554}
+  ringMaterial: {fileID: 0}
+  doorTiles:
+  - {x: 4, y: 9}
+  - {x: 5, y: 9}
+  keeperSpot: {x: 4.5, y: 3.4}
+  ringSize: 2.4
+  firstLine: 
 --- !u!1 &694551494
 GameObject:
   m_ObjectHideFlags: 0
@@ -2807,6 +2952,21 @@ MonoBehaviour:
   coneWidth: 0.02
   beamLinger: 1.5
   island: {fileID: 270959109}
+--- !u!115 &826775554
+MonoScript:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  serializedVersion: 7
+  m_DefaultReferences: {}
+  m_Icon: {fileID: 0}
+  m_Type: 0
+  m_ExecutionOrder: 0
+  m_ClassName: TempleDoor
+  m_Namespace: Diorama
+  m_AssemblyName: Diorama.Runtime
 --- !u!1 &886928184
 GameObject:
   m_ObjectHideFlags: 0
@@ -2838,6 +2998,110 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1294784576}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &896397232
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 896397233}
+  - component: {fileID: 896397234}
+  m_Layer: 0
+  m_Name: Keeper Hall (Tidemother)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &896397233
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 896397232}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 93667893}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &896397234
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 896397232}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8940da4ed106e64880d1edb2b9bebac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.KeeperHall
+  keeperId: lm.keeper
+  realmName: Lilymere
+  keeperTarget: tidemother
+  shardTarget: waterShard
+  captionFormat: '{0} churns up the water!'
+  shardColor: {r: 0.45, g: 0.72, b: 1, a: 1}
+  untangle: {fileID: 0}
+  forgeFlame: 0
+  stomps: 0
+  keeperLift: 0
+  restsWhenCalm: 1
+  hoots: 0
+  approachRestart: 2.5
+  tangledFury: 0.35
+  frightenedFur: {r: 0.46, g: 0.58, b: 0.58, a: 1}
+  frightenedBelly: {r: 0.74, g: 0.76, b: 0.72, a: 1}
+  smokeLight: {r: 0.62, g: 0.76, b: 0.78, a: 0.5}
+  smokeDark: {r: 0.3, g: 0.42, b: 0.46, a: 0.72}
+  sparks: {r: 0.8, g: 0.95, b: 1, a: 1}
+  eyeFrightened: {r: 0.9, g: 0.32, b: 0.36, a: 0.9}
+  glowColor: {r: 0.6, g: 0.95, b: 0.85, a: 1}
+  shellCore: {r: 0.86, g: 1, b: 0.84, a: 1}
+  shellEdge: {r: 0.4, g: 0.75, b: 0.5, a: 1}
+  swap: {fileID: 221433162}
+  hall: {fileID: 11400000, guid: 320028e817a355b40b98f43d02ec05d3, type: 2}
+  realmMap: {fileID: 11400000, guid: 62a4d08fb1efa974aa00c824d650dab0, type: 2}
+  island: {fileID: 270959109}
+  explorer: {fileID: 374318554}
+  encounters: {fileID: 1499891275}
+  stage: {fileID: 1078587928}
+  fx: {fileID: 1078587927}
+  realm: {fileID: 270959114}
+  holder: {fileID: 570826975}
+  save: {fileID: 1541842443}
+  ghosts: {fileID: 1421177268}
+  keeperSpecies: {fileID: 11400000, guid: ed3f5a9e74faaad4bb4409295e869b79, type: 2}
+  keeperLevel: 9
+  ownShard: shard.water
+  beaconMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  shardRecipe: {fileID: 11400000, guid: d4841e0bb04882b43a2477d94a098d44, type: 2}
+  smokeMaterial: {fileID: 2100000, guid: 63c5a847d0fbf454882a87650c5454fc, type: 2}
+  shardGrabReach: 0.09
+  shardAutoSeconds: 4
+  spirit: {fileID: 1847074513}
+  keeperSpot: {x: 4.5, y: 3.4}
+  keeperPad: {x: 4, y: 3}
+  partyPad: {x: 4, y: 7}
+  hallEntry: {x: 4, y: 8}
+  forgeMouth: {x: 4.5, y: 1.4}
+  forgeMouthHeight: 1.2
+  waveOrigin: {x: 17, y: 9.5}
+  waveSeconds: 5
+  templeGate: {x: 13, y: 10}
+  meetLine: lm.keeper.meet
+  shieldLine: lm.keeper.shield
+  brokenLine: lm.keeper.shield.break
+  phase2Line: keeper.phase2
+  winLine: lm.keeper.win
+  shardLine: lm.shard.take
+  restoredLine: lm.restored
 --- !u!1 &904585642
 GameObject:
   m_ObjectHideFlags: 0
@@ -4120,6 +4384,8 @@ MonoBehaviour:
   towerHall: {fileID: 11400000, guid: 578ca2940d06cb3459ed047d2fb89378, type: 2}
   lilymere: {fileID: 11400000, guid: 62a4d08fb1efa974aa00c824d650dab0, type: 2}
   towerHallEntry: {x: 4, y: 8}
+  lakeTemple: {fileID: 11400000, guid: 320028e817a355b40b98f43d02ec05d3, type: 2}
+  lakeTempleEntry: {x: 4, y: 8}
   firstWalkLesson: walk
   presetCommons:
   - Steambara
@@ -4198,6 +4464,83 @@ MonoBehaviour:
   runes: {fileID: 622588089}
   hub: {fileID: 11400000, guid: ab0469af29722704f949fec768f94b68, type: 2}
   cinderwood: {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
+--- !u!1 &1291464261
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1291464262}
+  - component: {fileID: 1291464263}
+  m_Layer: 0
+  m_Name: Statue Socket (water)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1291464262
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1291464261}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1553131432}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1291464263
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1291464261}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1437310275e9d804fb27460ded232a52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.StatueSocket
+  id: shard.water
+  map: {fileID: 11400000, guid: ab0469af29722704f949fec768f94b68, type: 2}
+  island: {fileID: 270959109}
+  window: {fileID: 270959113}
+  explorer: {fileID: 374318554}
+  grabGuard: {fileID: 270959111}
+  ghosts: {fileID: 1421177268}
+  fx: {fileID: 1078587927}
+  reach: 6
+  lessonLine: hub.shard.first
+  ghostClip: grab_drop
+  ghostScale: 1
+  lessonChip: 
+  counterLabel: 
+  focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  markIntensity: 1.3
+  holder: {fileID: 570826975}
+  shardRecipe: {fileID: 11400000, guid: d4841e0bb04882b43a2477d94a098d44, type: 2}
+  statueRecipe: {fileID: 11400000, guid: 4e524cd358b9b874f9c8ac964bd660a2, type: 2}
+  statueAnchor: {x: 14, y: 16}
+  statueYaw: 0
+  socket: {x: 0, y: 1.17, z: 0.57}
+  ringMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  rimSlot: 1
+  shardColor: {r: 0.4, g: 0.65, b: 1, a: 1}
+  drawsStatue: 0
+  targetName: statueSocketWater
+  grabRadius: 0.07
+  snapRadius: 0.06
+  placedLine: hub.shard.placed
+  moreLine: hub.shard.more
+  twoLine: statue.two
+  threeLine: statue.three
 --- !u!1 &1294784575
 GameObject:
   m_ObjectHideFlags: 0
@@ -4996,6 +5339,7 @@ Transform:
   - {fileID: 66748612}
   - {fileID: 359768277}
   - {fileID: 93667893}
+  - {fileID: 1291464262}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1583412946

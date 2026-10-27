@@ -360,6 +360,13 @@ namespace Diorama
                         Flag("LM pads", "lm.pads", 7);
                         Flag("LM rain", "lm.rain", 31);
                         Flag("LM basin + rise", LilymereLagoon.RisenId, 2);
+                        // Step 11c: Tidemother and the water shard.
+                        Add(() => $"Tidemother: {(GameState.Solved("lm.keeper") ? "calm" : "frightened")}",
+                            () => Edit(state.SetPuzzle("lm.keeper", !GameState.Solved("lm.keeper"), GameState.Solved("lm.keeper") ? 0 : 1)), () => GameState.Solved("lm.keeper"));
+                        Add(() => $"Water shard: {(GameState.Solved(ShardHolder.WaterId) ? "in statue" : ShardHolder.Holds(ShardHolder.WaterId) ? "held" : "none")}",
+                            () => Edit(GameState.Solved(ShardHolder.WaterId) ? state.SetPuzzle(ShardHolder.WaterId, false, 0)
+                                : ShardHolder.Holds(ShardHolder.WaterId) ? state.SetPuzzle(ShardHolder.WaterId, true, 2) : state.SetPuzzle(ShardHolder.WaterId, false, 1)),
+                            () => PuzzleState.Stage(ShardHolder.WaterId) > 0 || GameState.Solved(ShardHolder.WaterId));
                     }
                     Add("Reset all story", () => Edit(state.ResetStory()), null, true);
                     break;

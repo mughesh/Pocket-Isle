@@ -16,6 +16,8 @@ namespace Diorama
     {
         public const string FireId = "shard.fire";
         public const string WindId = "shard.wind";
+        /// <summary>Step 11c: Tidemother's water shard.</summary>
+        public const string WaterId = "shard.water";
 
         [Serializable]
         public class Shard

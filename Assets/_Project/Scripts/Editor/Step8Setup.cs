@@ -251,6 +251,8 @@ namespace Diorama.EditorTools
             lilymere.gates = new List<GateLink>
             {
                 new GateLink { id = "home", tile = LilymereTools.ReturnGate, to = hub, arrive = toHub, arriveFacing = new Vector2Int(0, 1), portal = HomeColor },
+                // Step 11c: the return gate beside the lake temple, shown once Tidemother is calm.
+                new GateLink { id = "home", tile = LilymereTools.Tile(LilymereTools.TempleGateXY), to = hub, arrive = toHub, arriveFacing = new Vector2Int(0, 1), portal = HomeColor },
             };
             EditorUtility.SetDirty(hub);
             EditorUtility.SetDirty(lilymere);

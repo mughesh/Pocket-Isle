@@ -1420,6 +1420,92 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: A Bottlewhale! Look, there's a tiny ship inside it!
+  - id: lm.temple.shut
+    once: 0
+    priority: 2
+    note: 'step 11c: at the lake temple''s door before the lagoon rises'
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The temple's sunk. The water's too low to open it.
+  - id: lm.temple.open
+    once: 1
+    priority: 2
+    note: 'the lagoon rises: the temple door surfaces and glows'
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The temple door is open! Let's go in.
+  - id: lm.keeper.meet
+    once: 1
+    priority: 2
+    note: 'step 11c: in the lake temple, she clutches the hoarded water'
+    target: tidemother
+    validWhile: 
+    lines:
+    - speaker: 1
+      speakerName: Tidemother
+      text: Stay back! This water is all that's left. I won't lose it again!
+    - speaker: 0
+      speakerName: Spirit
+      text: She's so scared. Let's calm her down.
+  - id: lm.keeper.shield
+    once: 1
+    priority: 2
+    note: the Lily Shell goes up the first time
+    target: tidemother
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: She's hiding in her shell. Wind could lift it off!
+  - id: lm.keeper.shield.break
+    once: 1
+    priority: 2
+    note: 
+    target: tidemother
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The shell's open. Now!
+  - id: lm.keeper.win
+    once: 1
+    priority: 2
+    note: she calms and lets the water go
+    target: tidemother
+    validWhile: 
+    lines:
+    - speaker: 1
+      speakerName: Tidemother
+      text: I watched it drain away once. I was so afraid of losing it again.
+    - speaker: 1
+      speakerName: Tidemother
+      text: Thank you, guardian. Water is meant to flow.
+  - id: lm.shard.take
+    once: 1
+    priority: 2
+    note: 'step 11c: the water shard floats out to the player'
+    target: waterShard
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The water shard! Grab it.
+  - id: lm.restored
+    once: 1
+    priority: 2
+    note: the restoration wave from the temple
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Listen... the whole lagoon is singing again!
   - id: objective.more
     once: 0
     priority: 2
@@ -1471,6 +1557,16 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: Two pieces home. It's almost awake...
+  - id: statue.three
+    once: 1
+    priority: 2
+    note: 'step 11c: the third shard locks into the statue; the finale comes later'
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: All three pieces home... Something is waking up!
   - id: statue.shard.1
     once: 0
     priority: 2

@@ -301,6 +301,24 @@ Step 11b, the hand moments (lesson lines stay pinned as a chip until the moment 
   - Spirit: A Sailfold! Folded from an old map, I bet. It sails anywhere.
 - `lm.meet.bottlewhale` · once (step 11c: the rare Bottlewhale)
   - Spirit: A Bottlewhale! Look, there's a tiny ship inside it!
+- `lm.temple.shut` (step 11c: at the lake temple's door before the lagoon rises)
+  - Spirit: The temple's sunk. The water's too low to open it.
+- `lm.temple.open` · once (the lagoon rises: the temple door surfaces and glows)
+  - Spirit: The temple door is open! Let's go in.
+- `lm.keeper.meet` · once · → tidemother (step 11c: in the lake temple, she clutches the hoarded water)
+  - Tidemother: Stay back! This water is all that's left. I won't lose it again!
+  - Spirit: She's so scared. Let's calm her down.
+- `lm.keeper.shield` · once · → tidemother (the Lily Shell goes up the first time)
+  - Spirit: She's hiding in her shell. Wind could lift it off!
+- `lm.keeper.shield.break` · once · → tidemother
+  - Spirit: The shell's open. Now!
+- `lm.keeper.win` · once · → tidemother (she calms and lets the water go)
+  - Tidemother: I watched it drain away once. I was so afraid of losing it again.
+  - Tidemother: Thank you, guardian. Water is meant to flow.
+- `lm.shard.take` · once · → waterShard (step 11c: the water shard floats out to the player)
+  - Spirit: The water shard! Grab it.
+- `lm.restored` · once (the restoration wave from the temple)
+  - Spirit: Listen... the whole lagoon is singing again!
 
 ## Objectives (step 11d)
 - `objective.more` (step 11d: an objective's object is outside the island window; a gold arrow points to it; once per moment a session)
@@ -313,6 +331,8 @@ Step 11b, the hand moments (lesson lines stay pinned as a chip until the moment 
 - `hub.shard.more` · once: Spirit: Two more shards are out there.
 - `statue.two` · once (step 10e: the second shard locks into the statue)
   - Spirit: Two pieces home. It's almost awake...
+- `statue.three` · once (step 11c: the third shard locks into the statue; the finale comes later)
+  - Spirit: All three pieces home... Something is waking up!
 - `statue.shard.1`
   - Spirit: The statue's warmer. And I feel... brighter?
 - `statue.shard.2`

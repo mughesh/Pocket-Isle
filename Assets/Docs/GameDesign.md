@@ -325,7 +325,18 @@ Mugesh kept finding tasks by accident. One rule now covers every hand moment in 
   in the lagoon's inlet by the causeway, lift: a wobbly ball of water; tip it over the stone basin to pour, anywhere else
   it spills; 2 pours: the waterfall cracks and runs, the lagoon rises; look + pinch the water, then the basin, pours by
   itself). Each teaches itself once with a pinned chip (Push! / Palm down! / Scoop!) and a ghost.
-- Encounter tables are placeholders (Pebbloop, Steambara, wind visitors) until the water roster (11c).
+- **Water roster (11c)**: Marimoss -> Marimound (moss ball / grassy hill with flowers), Drizzcan -> Rainurn (watering-can
+  elephant calf / banded urn), Lilyvole -> Lotusvole (lily-pad hat / lotus hat), Sailfold -> Galleyfold (paper boat /
+  three sails), Bottlewhale -> Lighthousewhale (rare; a ship painted inside the bottle / a lighthouse with a glowing
+  lamp). Evolve at 16 (rare 18). Moves Moss Splash, Spout Spray, Pad Swipe, Wake Ram, Cork Pop + a Neutral + a support.
+  Tables ~70% water, ~20% wind visitors (Kitelet, Samarling, Vanehare), Bottlewhale 5% (rare) in the pond.
+- **Tidemother (11c)**: a huge cozy sea turtle, jade shell with lily pads and a lotus. The lake temple's door glows open
+  once the lagoon rises; inside, a flooded hall (shallow water floor, stepping stones, lily pools, a high water-light
+  window) with the hoarded water piled in a glassy dome behind her. Battle Lv 9 (+2 per other shard), HP 132, Tide Shot,
+  Shell Slam, Lily Shell (breaks to Wind). Win: she lets the water go (the dome flows out), the water shard floats out
+  (it flies to the Spirit by itself after 4 s), restoration wave from the temple, a return gate beside the temple. The
+  hub statue's blue socket takes it; with all three placed the Spirit says "All three pieces home..." (finale later).
+  Sim (starter + Kitelet + a water common, equal levels): 64% at 0 shards, 69% at 2 shards (Pufflet ~97%, wind beats her).
 
 ## Galewick as built (steps 10a-10b, Oct 27)
 - 60 x 60 (`GalewickTools`): arrival meadow + return gate, windmill village (4 cottages, 2 small mills, big mill),

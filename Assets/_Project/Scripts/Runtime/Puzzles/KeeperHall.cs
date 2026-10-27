@@ -536,7 +536,7 @@ namespace Diorama
                 Vector3 at = actor != null ? actor.WorldCenter : fury.transform.position;
                 if (fx != null) fx.Burst(at, 30, sparks, TileWorld * 1.2f, 0.8f, TileWorld * 0.05f, Vector3.up * TileWorld * 0.3f);
                 if (spirit != null) spirit.Flinch(at);
-                Debug.Log($"[KeeperHall] Battle intro: {KeeperName} flaps up in a gust.");
+                Debug.Log($"[KeeperHall] Battle intro: {KeeperName} rears up (a hop and a burst, no stomp).");
                 yield break;
             }
             fury.Stomped += OnBattleStomp;

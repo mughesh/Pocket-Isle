@@ -49,6 +49,8 @@ namespace Diorama
         public string moreLine = "hub.shard.more";
         [Tooltip("Step 10e: said instead of the more line when this makes two shards placed.")]
         public string twoLine = "statue.two";
+        [Tooltip("Step 11c: said instead when this makes all three shards placed (the finale comes later).")]
+        public string threeLine = "statue.three";
 
         static readonly int IntensityId = Shader.PropertyToID("_Intensity");
         static readonly int FillId = Shader.PropertyToID("_Fill");
@@ -278,7 +280,8 @@ namespace Diorama
             Debug.Log($"[StatueSocket] {id} locks into the statue: {placed} / 3 placed.");
             yield return new WaitForSeconds(0.8f);
             if (!string.IsNullOrEmpty(placedLine)) Dialogue.Say(placedLine);
-            string next = placed == 2 && !string.IsNullOrEmpty(twoLine) ? twoLine : moreLine;
+            string next = placed >= 3 && !string.IsNullOrEmpty(threeLine) ? threeLine
+                : placed == 2 && !string.IsNullOrEmpty(twoLine) ? twoLine : moreLine;
             if (!string.IsNullOrEmpty(next)) Dialogue.Say(next);
         }
 

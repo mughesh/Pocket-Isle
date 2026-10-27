@@ -40,6 +40,9 @@ namespace Diorama
         [Tooltip("Step 11a: the water realm (Go to works even while its gate is sealed in builds).")]
         public WorldMap lilymere;
         public Vector2Int towerHallEntry = new Vector2Int(4, 8);
+        [Tooltip("Step 11c: Lilymere's lake temple hall (Go to, entered from the temple door).")]
+        public WorldMap lakeTemple;
+        public Vector2Int lakeTempleEntry = new Vector2Int(4, 8);
         [Tooltip("Lesson the tutorial restarts at (the first one after the opening).")]
         public string firstWalkLesson = "walk";
         [Tooltip("Who a preset team gets after the lead (species asset names). Step 9f: Steambara (the Keeper is tuned for a Water Isling in the party) and a fire common.")]
@@ -141,6 +144,8 @@ namespace Diorama
                 AddMark(lilymere, "LM: temple", "temple");
                 AddMark(lilymere, "LM: marsh", "marsh");
                 AddMark(lilymere, "LM: rare pond", "pond");
+                if (lakeTemple != null)
+                    _spots.Add(new Spot { label = "LM: lake temple", map = lakeTemple, tile = lakeTempleEntry, facing = north, interior = true, outdoor = lilymere, door = "temple" });
             }
         }
 
