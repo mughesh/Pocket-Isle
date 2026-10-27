@@ -34,6 +34,7 @@ namespace Diorama.EditorTools
             Focus(log);
             Clouds(log);
             Drought(log);
+            ExitDoors(log);
             DialogueTools.Import();
             log.Append("\n  Script_v1 reimported (cw.ember.tip)");
             EditorSceneManager.MarkSceneDirty(active);
@@ -78,6 +79,26 @@ namespace Diorama.EditorTools
             }
             log.Append($"\n  drought mud: theme {(theme != null ? "done" : "MISSING")}, garden crossing {(gap != null ? "rebaked" : "MISSING")}");
         }
+
+        /// <summary>A4: the way out of every interior glows like a door, with a gold floor arrow.</summary>
+        static void ExitDoors(StringBuilder log)
+        {
+            var swap = Object.FindFirstObjectByType<SceneSwap>(FindObjectsInactive.Include);
+            if (swap == null)
+            {
+                log.Append(NL + "  exit doors: no scene swap (MISSING)");
+                return;
+            }
+            var g = swap.GetComponent<ExitDoorGuide>();
+            if (g == null) g = Undo.AddComponent<ExitDoorGuide>(swap.gameObject);
+            g.swap = swap;
+            g.island = swap.island;
+            g.fx = Object.FindFirstObjectByType<BattleFx>(FindObjectsInactive.Include);
+            g.beaconMaterial = Step7bSetup.BeaconMaterial();
+            log.Append(NL + "  exit doors: glow + floor arrow in every interior");
+        }
+
+        const string NL = "\n";
 
         /// <summary>A1: one focus lock for every hand moment, next to the explorer.</summary>
         static void Focus(StringBuilder log)

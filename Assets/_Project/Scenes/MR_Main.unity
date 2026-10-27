@@ -605,6 +605,7 @@ GameObject:
   m_Component:
   - component: {fileID: 221433163}
   - component: {fileID: 221433162}
+  - component: {fileID: 221433164}
   m_Layer: 0
   m_Name: Scene Swap
   m_TagString: Untagged
@@ -653,6 +654,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &221433164
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 221433161}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63bc0d86a6e265248aafc106cbdcf42f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.ExitDoorGuide
+  swap: {fileID: 221433162}
+  island: {fileID: 270959109}
+  fx: {fileID: 1078587927}
+  beaconMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  doorSize: {x: 2, y: 2.2}
 --- !u!1 &232676576
 GameObject:
   m_ObjectHideFlags: 0
