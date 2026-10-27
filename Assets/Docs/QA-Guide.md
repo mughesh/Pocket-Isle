@@ -41,10 +41,23 @@ clear storage): they turn red, press again within 3 seconds.
 Cheats (one-hit KO, invincible, wild battles off, rare x10, time and walk speed) last until the app closes. They are
 never saved.
 
-## 4. What's new in this build (steps 10a-10b, Oct 27: Galewick, the wind realm)
+## 4. What's new in this build (step 10f, Oct 27: Cinderwood's new hand moments)
 
-- **Galewick is reachable only through the dev panel** in this build: **Go to > GW: arrival** (or village, big mill,
-  kite field, ridge, tower, shrine, rare grass, fire patch). The hub's wind gate stays sealed until it's finished.
+- **Village flame** (Go to > CW: village or CW: shrine): the shrine's flame is nearly out and you can't rest there yet.
+  Cup it with both hands, palms toward it, about 2 s (one hand curled round it: 3 s; look + pinch-hold: 3 s). The whole
+  plaza lights up; then the shrine heals as before.
+- **Smoky hollow** (Go to > CW: hollow): dark smoke blocks the trail to the hot springs. Touch the top of a stone lantern
+  with a fingertip; touch two in a row quickly and the fire races down the line. The smoke burns away.
+- **Ember** (Go to > CW: forge door): the bellows do nothing yet. Hold your open hand palm-up next to the glowing vent
+  until the ember hops onto your palm, carry it to the stone mouth in the cliff beside the bellows and turn your hand
+  over. The forge roars; now the bellows light the braziers.
+- Story tab: **CW flame / CW hollow / CW firebox** toggle each one (edits the save, reloads).
+- Tell us: did the cup, the lantern touch and the palm-up carry work first time? Anything you had to try twice?
+
+## Earlier (steps 10a-10b, Oct 27: Galewick, the wind realm)
+
+- **The hub's wind gate is open in builds now** (Oct 27); Go to > GW: arrival (or village, big mill, kite field, ridge,
+  tower, shrine, rare grass, fire patch) also works.
 - Windmill highlands, bright but **completely still** until restored (Story tab > **Galewick restored**: grass waves,
   sails turn, kites fly on posts, seeds drift).
 - **Flick the big mill**: flick its sails with a fingertip (or look at them and pinch), 3 flicks within 4 s. The

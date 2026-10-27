@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 04f0eb8c0b1b2384183dd1d7f9dfe3c6, type: 3}
   m_Name: GalewickConfig
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.GalewickConfig
-  open: 0
+  open: 1
   openInEditor: 1

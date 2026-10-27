@@ -181,6 +181,22 @@ iron bands heat, it sinks into the ground with steam and sparks, "The forge is w
 chains, dim ember crystals). Walk onto the open doorway to go in; the Keeper's spot is an empty glowing ring ("Something
 huge sleeps here... not yet."); the door tiles lead back out in front of the forge, facing away.
 
+### Cinderwood hand moments as built (step 10f, Oct 27)
+Three moments added on top of the log and the bellows (RealmsDesign "Cinderwood upgrade"). Rekindled places light the
+island's own props through **warm spots** (a circle in which glows burn, smoke rises and colour comes back; no extra draws).
+
+| Where | Moment | World answers |
+|---|---|---|
+| Kiln village shrine | The flame is nearly out (a blue sputtering wisp) and the shrine can't be rested at. **Cup it**: both palms turned toward it within ~10 cm for 2 s, or one hand curled round it 3 s, or look + pinch-hold 3 s. Let go and it shrinks back. Chip "Cup it!" | It flares; a warm pulse rolls from the shrine over the plaza: kilns glow and smoke, windows and lantern posts catch one after another, the plaza Islings hop; the shrine heals and saves from then on |
+| Smoky hollow (trail village -> springs, x28-31 y33-36) | Dark smoke on 8 path tiles between rocks, 6 dead stone lanterns. **Touch a lantern's top** to light it; two in a row within 1.5 s and the fire races down the line (0.15 s apart, a spark trail). Look + pinch lights one and the next follows. Chip "Touch them!" | The smoke rolls away from the lit end and the path opens; the lanterns keep burning |
+| Forge temple, before the bellows | The firebox (a stone mouth in the cliff beside the bellows) is cold; pumping only puffs grey. **Hold a palm up beside the ember vent** (or pinch the ember): it sits glowing on your palm while it stays up; turn the hand over above the firebox to tip it in. Look + pinch the vent, then the firebox. Chip "Palm up!" | The firebox roars, its chimney smokes, every vent along the cliff glows, the pipe warms; then the bellows work |
+
+- The village's north edge is forest now (it opened onto the trail back from the springs), so the way on runs through the
+  hollow. Trail 111 tiles; a Lv 5 starter reaches the temple at ~Lv 8.4.
+- All three are saved (cw.flame, cw.hollow, cw.ember), count as done once the realm is restored, and stay lit (no
+  flicker) through the restoration wave. Quick Journey keeps them.
+- Virtual light only: the ember's glow is on the ember and its halo, not on the real room or the hand.
+
 ### Keeper and shard as built (step 9c, Oct 26)
 - **Hearthstag**: Fire Keeper, **Lv 10, base HP 110 (HP 154 = 2.75x a normal Lv 10), atk 10, def 11, spd 8** (step 9f
   balance, `KeeperSim`: a Lv 8 team of 3 with Steambara, Water leading, wins ~80% with Kilnpot, ~62% with Pufflet, ~93%
