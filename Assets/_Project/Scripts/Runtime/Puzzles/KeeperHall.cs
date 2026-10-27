@@ -19,10 +19,26 @@ namespace Diorama
     /// Step 9e: frightened, it rages (<see cref="KeeperFury"/>: smoke aura, crown flames, trembling, ember eyes, snorts,
     /// stomps); the battle opens with it rearing and stomping (the Spirit flinches back), phase 2 makes it all stronger,
     /// and on victory the fury burns off into gold motes before it lowers its head and calms.
+    /// Step 10e: one component per realm's Keeper. The ids, names and dialogue targets are fields; the defaults are
+    /// Cinderwood's (Hearthstag, the fire shard), so its scene data stays as it was.
     /// </summary>
     public class KeeperHall : MonoBehaviour
     {
+        /// <summary>Cinderwood's Keeper (Hearthstag).</summary>
         public const string KeeperId = "cinder.keeper";
+
+        [Header("Which Keeper (step 10e)")]
+        [Tooltip("Saved id: solved = calmed.")]
+        public string keeperId = KeeperId;
+        [Tooltip("Realm name for the save note once restored.")]
+        public string realmName = "Cinderwood";
+        [Tooltip("Dialogue targets: the Keeper and its floating shard.")]
+        public string keeperTarget = "hearthstag";
+        public string shardTarget = "fireShard";
+        [Tooltip("The battle's opening caption ({0} = the Keeper's name).")]
+        public string captionFormat = "{0} blocks the way, crown ablaze!";
+        [Tooltip("Sparks as the shard reaches the Spirit.")]
+        public Color shardColor = new Color(1f, 0.7f, 0.3f);
 
         public SceneSwap swap;
         public WorldMap hall;
@@ -95,7 +111,8 @@ namespace Diorama
         readonly bool[] _wasPinching = { true, true };
         float _snortAt;
 
-        public static bool Calmed => PuzzleState.IsSolved(KeeperId);
+        public bool Calmed => PuzzleState.IsSolved(keeperId);
+        string KeeperName => keeperSpecies != null ? keeperSpecies.displayName : keeperId;
         bool Active => swap != null && swap.Inside && swap.Interior == hall;
         float TileWorld => island.map.tileSize * island.Zoom * island.transform.lossyScale.x;
 
@@ -121,15 +138,15 @@ namespace Diorama
                 _flame = go.transform;
                 go.SetActive(false);
             }
-            if (shardRecipe != null) _shard = new PropView("Fire Shard (flying)", island, shardRecipe) { restoredSelf = 1f };
+            if (shardRecipe != null) _shard = new PropView($"{ownShard} (flying)", island, shardRecipe) { restoredSelf = 1f };
             swap.Finished += OnSwapFinished;
             swap.Returned += OnReturned;
             encounters.BattleEnded += OnBattleEnded;
             stage.Presented += OnPresented;
             PuzzleState.Restored += ApplyState;
-            Dialogue.RegisterTarget("hearthstag", () => _model != null && _model.gameObject.activeSelf ? _model.WorldCenter : (Vector3?)null, k => { },
+            Dialogue.RegisterTarget(keeperTarget, () => _model != null && _model.gameObject.activeSelf ? _model.WorldCenter : (Vector3?)null, k => { },
                 () => 1.2f * TileWorld);
-            Dialogue.RegisterTarget("fireShard", () => _shardHovering ? island.transform.TransformPoint(_shardLocal) : (Vector3?)null, k => { },
+            Dialogue.RegisterTarget(shardTarget, () => _shardHovering ? island.transform.TransformPoint(_shardLocal) : (Vector3?)null, k => { },
                 () => 0.05f * island.transform.lossyScale.x);
             ApplyState();
             StartCoroutine(EnforceRestoredAfterLoad());
@@ -195,7 +212,7 @@ namespace Diorama
         {
             if (_model != null || keeperSpecies.Prefab == null) return;
             var go = Instantiate(keeperSpecies.Prefab, island.transform);
-            go.name = "Hearthstag (hall)";
+            go.name = $"{KeeperName} (hall)";
             _model = go.AddComponent<StageActor>();
             _model.island = island;
             _model.tile = keeperSpot;
@@ -260,7 +277,7 @@ namespace Diorama
             if (Calmed)
             {
                 _model.View.Daze(); // resting by its forge
-                Debug.Log("[KeeperHall] Hearthstag rests by the burning forge (calmed).");
+                Debug.Log($"[KeeperHall] {KeeperName} rests in its hall (calmed).");
                 return;
             }
             StartCoroutine(Meet());
@@ -275,7 +292,7 @@ namespace Diorama
             _look.SetAllCrystals(0.6f);
             _model.View.Daze();
             explorer.Locked = true;
-            Debug.Log("[KeeperHall] Hearthstag lies by the cold forge, frightened.");
+            Debug.Log($"[KeeperHall] {KeeperName} lies in its hall, frightened.");
             yield return new WaitForSeconds(0.6f);
             if (!string.IsNullOrEmpty(meetLine)) Dialogue.Say(meetLine);
             for (float t = 0f; t < 9f && Dialogue.IsPending(meetLine); t += Time.deltaTime) yield return null;
@@ -308,7 +325,7 @@ namespace Diorama
                 keeper = new IslingInstance(keeperSpecies, level),
                 keeperPad = keeperPad,
                 myPad = partyPad,
-                caption = $"{keeperSpecies.displayName} blocks the way, crown ablaze!",
+                caption = string.Format(captionFormat, keeperSpecies.displayName),
             };
             _phase = Phase.Fighting;
             _battleLook = null;
@@ -355,7 +372,7 @@ namespace Diorama
             if (fury == null || _phase != Phase.Fighting) yield break;
             fury.Stomped += OnBattleStomp;
             fury.Stomp(26f);
-            Debug.Log("[KeeperHall] Battle intro: Hearthstag rears up and stomps.");
+            Debug.Log($"[KeeperHall] Battle intro: {KeeperName} rears up and stomps.");
             yield return new WaitForSeconds(1.2f);
             if (fury != null) fury.idleStomps = true;
         }
@@ -456,9 +473,9 @@ namespace Diorama
             // The fury burns off into gold motes: flames shrink, eyes blink and soften, the trembling stops.
             _fury.phase2 = false;
             _fury.fury = 1f;
-            Debug.Log("[KeeperHall] Hearthstag's fury burns off into gold motes.");
+            Debug.Log($"[KeeperHall] {KeeperName}'s fury burns off into gold motes.");
             yield return _fury.BurnOff(1.8f);
-            Debug.Log("[KeeperHall] Hearthstag lowers its head and calms.");
+            Debug.Log($"[KeeperHall] {KeeperName} lowers its head and calms.");
             // Lowers its head (kneels).
             for (float t = 0f; t < 0.6f; t += Time.deltaTime)
             {
@@ -473,7 +490,7 @@ namespace Diorama
                 yield return null;
             }
             _look.calm = 1f;
-            PuzzleState.Solve(KeeperId, 1); // saved: calmed
+            PuzzleState.Solve(keeperId, 1); // saved: calmed
             // Nods.
             for (float t = 0f; t < 1f; t += Time.deltaTime)
             {
@@ -486,7 +503,7 @@ namespace Diorama
             // The forge ignites.
             Vector3 mouth = island.transform.TransformPoint(island.TileToLocal(forgeMouth, island.Content.capHeight + forgeMouthHeight * island.map.tileSize));
             if (fx != null) fx.Burst(mouth, 50, new Color(1f, 0.6f, 0.2f), TileWorld * 1.4f, 1f, TileWorld * 0.07f, Vector3.up * TileWorld);
-            Debug.Log("[KeeperHall] The forge ignites; the fire shard rises.");
+            Debug.Log($"[KeeperHall] The forge ignites; {ownShard} rises.");
             yield return new WaitForSeconds(0.6f);
             yield return ShardRise();
         }
@@ -517,7 +534,7 @@ namespace Diorama
             if (ghosts != null) ghosts.Show("grab_drop", GhostPlace.AtTarget, "fireShard", 1f, DominantHand.Left, false);
             FocusHighlight.SetPending(() => _shardHovering ? island.transform.TransformPoint(_shardLocal) : (Vector3?)null, 0.05f * island.transform.lossyScale.x);
             explorer.Locked = false;
-            Debug.Log("[KeeperHall] The fire shard floats in front of the player: grab it (pinch, or look + pinch).");
+            Debug.Log($"[KeeperHall] {ownShard} floats in front of the player: grab it (pinch, or look + pinch).");
         }
 
         Vector3 _shardHome;
@@ -567,7 +584,7 @@ namespace Diorama
         public void CollectShard(string how)
         {
             if (_phase != Phase.Shard || !_shardHovering) return;
-            Debug.Log($"[KeeperHall] Fire shard taken ({how}): it flies to the Spirit.");
+            Debug.Log($"[KeeperHall] {ownShard} taken ({how}): it flies to the Spirit.");
             StartCoroutine(ShardToHolder());
         }
 
@@ -577,22 +594,22 @@ namespace Diorama
             if (ghosts != null && ghosts.ClipName == "grab_drop") ghosts.Hide();
             FocusHighlight.Clear();
             Vector3 from = _shardLocal, to = from;
-            if (holder != null) holder.FireOut = true;
+            if (holder != null) holder.SetOut(ownShard, true);
             float small = holder != null ? holder.carryMetres : 0.016f;
             for (float t = 0f; t < 0.9f; t += Time.deltaTime)
             {
                 float k = Mathf.SmoothStep(0f, 1f, t / 0.9f);
                 // The Spirit bobs: aim at where its shard spot is now; shrink on the way.
-                if (holder != null) to = holder.CupLocal(0);
+                if (holder != null) to = holder.CupLocal(ownShard);
                 _shardLocal = Vector3.Lerp(from, to, k) + Vector3.up * (0.05f * Mathf.Sin(k * Mathf.PI));
                 DrawShard(Mathf.Lerp(BigShard, small, k));
                 yield return null;
             }
             _shardHovering = false;
             if (_shard != null) _shard.Hide();
-            PuzzleState.SetStage(ShardHolder.FireId, 1); // saved: held
-            if (holder != null) holder.FireOut = false;
-            if (fx != null) fx.Burst(island.transform.TransformPoint(to), 20, new Color(1f, 0.7f, 0.3f), 0.03f, 0.6f, 0.004f);
+            PuzzleState.SetStage(ownShard, 1); // saved: held
+            if (holder != null) holder.SetOut(ownShard, false);
+            if (fx != null) fx.Burst(island.transform.TransformPoint(to), 20, shardColor, 0.03f, 0.6f, 0.004f);
             yield return new WaitForSeconds(1.2f);
             _phase = Phase.Idle;
             if (Active && swap.Return()) Debug.Log("[KeeperHall] Back outside for the restoration.");
@@ -630,7 +647,7 @@ namespace Diorama
             Debug.Log("[KeeperHall] The temple's return gate appears.");
             yield return new WaitForSeconds(waveSeconds * 0.5f + 0.2f);
             if (realm != null) realm.Remember(realmMap, 1f);
-            if (save != null) save.Save("Cinderwood restored", true);
+            if (save != null) save.Save($"{realmName} restored", true);
         }
 
         // ---- calmed: poke for a snort ----
@@ -658,7 +675,7 @@ namespace Diorama
             _model.View.Hop();
             if (fx != null) fx.Burst(_model.WorldCenter + island.transform.forward * (_model.View.height * 0.4f * island.Zoom * island.transform.lossyScale.x),
                 12, new Color(1f, 0.9f, 0.75f, 0.8f), TileWorld * 0.3f, 0.6f, TileWorld * 0.05f, Vector3.up * TileWorld * 0.3f);
-            Debug.Log("[KeeperHall] Hearthstag snorts happily.");
+            Debug.Log($"[KeeperHall] {KeeperName} snorts happily.");
             StartCoroutine(BackToRest());
         }
 

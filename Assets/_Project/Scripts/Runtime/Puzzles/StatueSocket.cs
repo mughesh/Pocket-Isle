@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Diorama
@@ -12,6 +13,8 @@ namespace Diorama
     /// Look + pinch the shard: it floats into the socket by itself. Locked in: a light pulse, the statue's red rims and
     /// cracks glow, moss falls away, the Spirit feels warmer ("shard.fire" solved, saved). The island stops drawing the
     /// statue then and this draws it (glowing) with the shard in its socket.
+    /// Step 10e: one socket per shard (<see cref="HandPuzzle.id"/> = the shard's id: fire, wind). The statue is drawn
+    /// once, by the socket with <see cref="drawsStatue"/>, with every placed socket's rim lit.
     /// </summary>
     [DefaultExecutionOrder(-20)]
     public class StatueSocket : HandPuzzle
@@ -26,6 +29,14 @@ namespace Diorama
         public Vector3 socket = new Vector3(0.24f, 1.03f, 0.52f);
         [Tooltip("Diorama/Beacon material: the socket's glow ring.")]
         public Material ringMaterial;
+        [Tooltip("Step 10e: this socket's rim on the statue prop (fire = Clay, water = Wood, wind = Accent): lit once placed.")]
+        public PropSlot rimSlot = PropSlot.Clay;
+        [Tooltip("Sparks when it locks in.")]
+        public Color shardColor = new Color(1f, 0.6f, 0.3f);
+        [Tooltip("Step 10e: this socket draws the lit statue (one per statue; the others add their shard and rim).")]
+        public bool drawsStatue = true;
+        [Tooltip("Dialogue target name (one per socket).")]
+        public string targetName = "statueSocket";
 
         [Header("Grab")]
         [Tooltip("World metres round the shard.")]
@@ -36,6 +47,8 @@ namespace Diorama
         [Header("Lines")]
         public string placedLine = "hub.shard.placed";
         public string moreLine = "hub.shard.more";
+        [Tooltip("Step 10e: said instead of the more line when this makes two shards placed.")]
+        public string twoLine = "statue.two";
 
         static readonly int IntensityId = Shader.PropertyToID("_Intensity");
         static readonly int FillId = Shader.PropertyToID("_Fill");
@@ -51,12 +64,27 @@ namespace Diorama
         bool _flying;
         Vector3 _shardWorld, _grabOffset;
         float _pulse;
+        bool _statueHidden;
+
+        static readonly List<StatueSocket> All = new List<StatueSocket>();
+
+        /// <summary>Shards placed in the statue (every socket in the scene).</summary>
+        public static int PlacedCount
+        {
+            get
+            {
+                int n = 0;
+                foreach (var s in All)
+                    if (s != null && s.IsSolved) n++;
+                return n;
+            }
+        }
 
         public override bool Busy => _hand >= 0 || _flying;
-        protected override bool Available => ShardHolder.HasFire;
+        protected override bool Available => ShardHolder.Holds(id);
         protected override Vector2 HomeTile => statueAnchor + Vector2.one;
 
-        public override Vector3? FocusPoint => Here && ShardHolder.HasFire && holder != null ? holder.CupWorld(0) : (Vector3?)null;
+        public override Vector3? FocusPoint => Here && ShardHolder.Holds(id) && holder != null ? holder.CupWorld(id) : (Vector3?)null;
         public override float FocusRadius => 0.045f * island.transform.lossyScale.x;
 
         Vector2 StatueCenter => statueAnchor + Vector2.one;
@@ -76,8 +104,9 @@ namespace Diorama
         protected override void Start()
         {
             _block = new MaterialPropertyBlock();
-            if (shardRecipe != null) _shard = new PropView("Fire Shard (statue)", island, shardRecipe) { restoredSelf = 1f };
-            if (statueRecipe != null) _statue = new PropView("Statue (lit)", island, statueRecipe);
+            All.Add(this);
+            if (shardRecipe != null) _shard = new PropView($"{id} (statue)", island, shardRecipe) { restoredSelf = 1f };
+            if (statueRecipe != null && drawsStatue) _statue = new PropView("Statue (lit)", island, statueRecipe);
             if (ringMaterial != null)
             {
                 _quad = BattleHud.VerticalQuad();
@@ -91,37 +120,49 @@ namespace Diorama
                 _ring = go.transform;
                 go.SetActive(false);
             }
-            Dialogue.RegisterTarget("statueSocket", () => Here ? SocketWorld : (Vector3?)null, k => { }, () => 0.5f * TileWorld);
+            Dialogue.RegisterTarget(targetName, () => Here ? SocketWorld : (Vector3?)null, k => { }, () => 0.5f * TileWorld);
             base.Start();
         }
 
         protected override void OnDestroy()
         {
             base.OnDestroy();
+            All.Remove(this);
             _shard?.Destroy();
             _statue?.Destroy();
             if (_ring != null) Destroy(_ring.gameObject);
             if (_quad != null) Destroy(_quad);
-            if (map != null) map.SetPropHidden(statueAnchor, false);
+            if (map != null && drawsStatue) map.SetPropHidden(statueAnchor, false);
         }
 
         protected override void ApplyState()
         {
             _hand = -1;
             _flying = false;
-            if (holder != null) holder.FireOut = false;
-            // Placed: the island stops drawing the statue; this draws it lit, the shard in its socket.
-            map.SetPropHidden(statueAnchor, IsSolved);
+            if (holder != null) holder.SetOut(id, false);
+            SyncStatue(true);
             SetProgressQuiet(IsSolved ? 1f : 0f);
+        }
+
+        /// <summary>Any shard placed: the island stops drawing the statue; the drawing socket draws it lit, shards in.</summary>
+        void SyncStatue(bool force)
+        {
+            if (!drawsStatue || map == null) return;
+            bool hide = PlacedCount > 0;
+            if (!force && hide == _statueHidden) return;
+            _statueHidden = hide;
+            map.SetPropHidden(statueAnchor, hide);
         }
 
         protected override void Update()
         {
             ReadHands(_hands);
             bool here = Here;
-            if (holder != null) holder.Offering = here && !IsSolved && ShardHolder.HasFire && Usable;
+            SyncStatue(false);
+            bool held = ShardHolder.Holds(id);
+            if (holder != null) holder.SetOffering(id, here && !IsSolved && held && Usable);
             if (_hand >= 0) Hold();
-            else if (!_flying && !IsSolved && ShardHolder.HasFire && Usable) TryGrab();
+            else if (!_flying && !IsSolved && held && Usable) TryGrab();
             if (_hand >= 0) IslandHandle.MarkHandHeld(_hand == 0);
             Draw(here);
             base.Update();
@@ -130,7 +171,7 @@ namespace Diorama
         void TryGrab()
         {
             if (holder == null) return;
-            Vector3 cup = holder.CupWorld(0);
+            Vector3 cup = holder.CupWorld(id);
             for (int h = 0; h < 2; h++)
             {
                 var s = _hands[h];
@@ -140,9 +181,9 @@ namespace Diorama
                 _hand = h;
                 _shardWorld = cup;
                 _grabOffset = cup - grip;
-                holder.FireOut = true;
+                holder.SetOut(id, true);
                 MarkInteracted();
-                Debug.Log($"[StatueSocket] Fire shard taken from the holder ({(s.left ? "left" : "right")} {(s.pinchStarted ? "pinch" : "palm")}).");
+                Debug.Log($"[StatueSocket] {id} taken from the holder ({(s.left ? "left" : "right")} {(s.pinchStarted ? "pinch" : "palm")}).");
                 return;
             }
             // Look + pinch on the shard in its cup: it floats into the socket.
@@ -156,7 +197,7 @@ namespace Diorama
                     if (GazePinch(_hands))
                     {
                         MarkInteracted();
-                        Debug.Log("[StatueSocket] Look + pinch on the fire shard: it floats to the socket.");
+                        Debug.Log($"[StatueSocket] Look + pinch on {id}: it floats to the socket.");
                         StartCoroutine(Fly(cup, true));
                     }
                 }
@@ -181,17 +222,17 @@ namespace Diorama
         IEnumerator Fly(Vector3 from, bool toSocket)
         {
             _flying = true;
-            if (holder != null) holder.FireOut = true;
+            if (holder != null) holder.SetOut(id, true);
             float seconds = toSocket ? 0.7f : 0.5f;
             for (float t = 0f; t < seconds; t += Time.deltaTime)
             {
                 float k = Mathf.SmoothStep(0f, 1f, t / seconds);
-                Vector3 to = toSocket ? SocketWorld : holder != null ? holder.CupWorld(0) : from;
+                Vector3 to = toSocket ? SocketWorld : holder != null ? holder.CupWorld(id) : from;
                 _shardWorld = Vector3.Lerp(from, to, k) + island.transform.up * (0.03f * Mathf.Sin(k * Mathf.PI));
                 yield return null;
             }
             _flying = false;
-            if (holder != null) holder.FireOut = false;
+            if (holder != null) holder.SetOut(id, false);
             if (toSocket) StartCoroutine(LockIn());
         }
 
@@ -202,7 +243,7 @@ namespace Diorama
             float tile = TileWorld;
             if (fx != null)
             {
-                fx.Burst(SocketWorld, 40, new Color(1f, 0.6f, 0.3f), tile * 1.2f, 0.8f, tile * 0.05f);
+                fx.Burst(SocketWorld, 40, shardColor, tile * 1.2f, 0.8f, tile * 0.05f);
                 // Moss falls away from the shoulders and head.
                 foreach (var m in new[] { new Vector3(0f, 1.52f, -0.06f), new Vector3(0f, 2.3f, 0.12f), new Vector3(0.45f, 0.72f, -0.3f) })
                 {
@@ -210,10 +251,12 @@ namespace Diorama
                     fx.Burst(MapToWorld(new Vector3(StatueCenter.x - s.x, s.y, StatueCenter.y + s.z)), 18, new Color(0.45f, 0.6f, 0.32f), tile * 0.5f, 1.2f, tile * 0.05f, Vector3.zero, tile * 3f);
                 }
             }
-            Debug.Log("[StatueSocket] The fire shard locks into the statue: 1 / 3 placed.");
+            int placed = PlacedCount;
+            Debug.Log($"[StatueSocket] {id} locks into the statue: {placed} / 3 placed.");
             yield return new WaitForSeconds(0.8f);
             if (!string.IsNullOrEmpty(placedLine)) Dialogue.Say(placedLine);
-            if (!string.IsNullOrEmpty(moreLine)) Dialogue.Say(moreLine);
+            string next = placed == 2 && !string.IsNullOrEmpty(twoLine) ? twoLine : moreLine;
+            if (!string.IsNullOrEmpty(next)) Dialogue.Say(next);
         }
 
         void Draw(bool here)
@@ -224,10 +267,23 @@ namespace Diorama
             if (_statue != null)
             {
                 _statue.restoredSelf = -1f;
-                // Red socket rims and the cracks glow (the rims are the Clay slot, the cracks the Glow slot).
-                _statue.glowBoostA = new Vector4(1.1f + 1.5f * _pulse, 0f, 0f, 0f);
-                _statue.glowBoostB = new Vector4(0.6f + 0.8f * _pulse, 0f, 0f, 0f);
-                _statue.Place(StatueCenter, 0f, rot, here && solved);
+                // Each placed socket's rim and the cracks glow (the cracks are the Glow slot), pulsing with the newest.
+                var a = Vector4.zero;
+                var b = Vector4.zero;
+                float pulse = 0f;
+                foreach (var s in All)
+                {
+                    if (s == null || !s.IsSolved) continue;
+                    pulse = Mathf.Max(pulse, s._pulse);
+                    float rim = 1.1f + 1.5f * s._pulse;
+                    int slot = (int)s.rimSlot;
+                    if (slot < 4) a[slot] += rim;
+                    else b[slot - 4] += rim;
+                }
+                b.x += 0.6f + 0.8f * pulse;
+                _statue.glowBoostA = a;
+                _statue.glowBoostB = b;
+                _statue.Place(StatueCenter, 0f, rot, here && PlacedCount > 0);
             }
             if (_shard != null)
             {
@@ -242,7 +298,7 @@ namespace Diorama
             }
             if (_ring != null)
             {
-                bool glow = here && !solved && ShardHolder.HasFire && Usable;
+                bool glow = here && !solved && ShardHolder.Holds(id) && Usable;
                 _ring.gameObject.SetActive(glow);
                 if (glow)
                 {
@@ -262,9 +318,9 @@ namespace Diorama
         /// <summary>Debug (bridge): the shard goes into the socket as if carried there.</summary>
         public void DebugPlace()
         {
-            if (!Here || IsSolved || !ShardHolder.HasFire || holder == null) return;
+            if (!Here || IsSolved || !ShardHolder.Holds(id) || holder == null) return;
             MarkInteracted();
-            StartCoroutine(Fly(holder.CupWorld(0), true));
+            StartCoroutine(Fly(holder.CupWorld(id), true));
         }
     }
 }
