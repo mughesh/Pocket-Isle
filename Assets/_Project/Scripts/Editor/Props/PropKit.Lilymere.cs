@@ -332,11 +332,14 @@ namespace Diorama.EditorTools
             return gap;
         }
 
+        /// <summary>Step 12b: the drought's cracked mud (dry bed tiles, the garden crossing).</summary>
+        public static Color DroughtMud => Hex("#A8774A");
+
         /// <summary>Step 11b: cracked dry bed over the garden crossing (1 x 1, blocks) until the lotus stones bloom.</summary>
         static PropRecipe BedGap()
         {
             var gap = Recipe("BedGap", new Vector2Int(1, 1), true, false, 300);
-            gap.palette = Palette(C("#EEE7D8"), StiltWood, C("#CDBF9F"), LilyGreen, LagoonWindow, C("#CDBF9F"));
+            gap.palette = Palette(new PropColor(DroughtMud, DroughtMud, 0f), StiltWood, C("#6E4A2C"), LilyGreen, LagoonWindow, C("#6E4A2C"));
             gap.yawJitter = 0f;
             gap.scaleJitter = 0f;
             gap.outline = 0f;
@@ -429,9 +432,10 @@ namespace Diorama.EditorTools
             var theme = Asset<RealmTheme>($"{Root}/Themes/Lilymere.asset");
             var baseLook = new ThemeColors
             {
-                // The path is a warm tan, the dry lagoon bed a pale grey-beige (and sunk), so walkable reads apart.
+                // The path is a warm tan, the dry lagoon bed drought mud (step 12b: ochre-brown, was near-white; sunk), so
+                // walkable reads apart and a cream rain cloud stands out against it.
                 grass = Hex("#8FC77A"), tallGrass = Hex("#B7B26A"), path = Hex("#D6B987"),
-                water = Hex("#5FB8C4"), hotSpring = Hex("#7FD0E0"), dryBed = Hex("#EEE7D8"),
+                water = Hex("#5FB8C4"), hotSpring = Hex("#7FD0E0"), dryBed = DroughtMud,
                 shortBase = Hex("#5E9A5A"), shortTip = Hex("#A8D58E"), tallBase = Hex("#8E8A48"), tallTip = Hex("#D2CC80"),
                 dirt = Hex("#C9C0A8"), underside = Hex("#8E9E9A"),
                 trunk = Hex("#6A5844"), leavesLow = Hex("#5FA06A"), leavesHigh = Hex("#8CC48A"), rock = Hex("#A9B8B0"),

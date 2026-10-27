@@ -33,6 +33,7 @@ namespace Diorama.EditorTools
             ShardColours(log);
             Focus(log);
             Clouds(log);
+            Drought(log);
             DialogueTools.Import();
             log.Append("\n  Script_v1 reimported (cw.ember.tip)");
             EditorSceneManager.MarkSceneDirty(active);
@@ -55,6 +56,27 @@ namespace Diorama.EditorTools
                 bank.shadowMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Glyph.mat");
                 log.Append($"\n  cloud bank: 2 rows, {bank.puffHeight} tiles up, shadows {(bank.shadowMaterial != null ? "on" : "MISSING (run 12a setup)")}");
             }
+        }
+
+        /// <summary>D10: Lilymere's dry bed and the garden crossing become ochre drought mud (never near-white).</summary>
+        static void Drought(StringBuilder log)
+        {
+            var theme = AssetDatabase.LoadAssetAtPath<RealmTheme>("Assets/_Project/Data/Props/Themes/Lilymere.asset");
+            if (theme != null)
+            {
+                theme.unrestored.dryBed = PropKit.DroughtMud;
+                theme.restored.dryBed = PropKit.DroughtMud;
+                EditorUtility.SetDirty(theme);
+            }
+            var gap = AssetDatabase.LoadAssetAtPath<PropRecipe>("Assets/_Project/Data/Props/BedGap.asset");
+            if (gap != null && gap.palette != null && gap.palette.Length > 2)
+            {
+                gap.palette[0] = new PropColor(PropKit.DroughtMud, PropKit.DroughtMud, 0f);
+                gap.palette[2] = new PropColor(new Color(0.43f, 0.29f, 0.17f), new Color(0.43f, 0.29f, 0.17f), 0f);
+                EditorUtility.SetDirty(gap);
+                PropBaker.Bake(gap);
+            }
+            log.Append($"\n  drought mud: theme {(theme != null ? "done" : "MISSING")}, garden crossing {(gap != null ? "rebaked" : "MISSING")}");
         }
 
         /// <summary>A1: one focus lock for every hand moment, next to the explorer.</summary>

@@ -24,14 +24,14 @@ MonoBehaviour:
     motionAmount: 0
     budgetWeight: 0
   palette:
-  - restored: {r: 0.9986667, g: 0.9616606, b: 0.9008142, a: 1}
-    unrestored: {r: 0.93333334, g: 0.90588236, b: 0.84705883, a: 1}
+  - restored: {r: 0.65882355, g: 0.46666667, b: 0.2901961, a: 1}
+    unrestored: {r: 0.65882355, g: 0.46666667, b: 0.2901961, a: 1}
     glow: 0
   - restored: {r: 0.58325493, g: 0.43388155, b: 0.29414514, a: 1}
     unrestored: {r: 0.54509807, g: 0.41568628, b: 0.2901961, a: 1}
     glow: 0
-  - restored: {r: 0.8601961, g: 0.78565025, b: 0.65559536, a: 1}
-    unrestored: {r: 0.8039216, g: 0.7490196, b: 0.62352943, a: 1}
+  - restored: {r: 0.43, g: 0.29, b: 0.17, a: 1}
+    unrestored: {r: 0.43, g: 0.29, b: 0.17, a: 1}
     glow: 0
   - restored: {r: 0.35800943, g: 0.7049412, b: 0.39946336, a: 1}
     unrestored: {r: 0.3529412, g: 0.65882355, b: 0.40784314, a: 1}
