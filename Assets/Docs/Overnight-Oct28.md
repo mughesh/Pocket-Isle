@@ -85,6 +85,11 @@ tester's QA APK built from that and kept as `Builds/PocketIsle-QA-oct27-tester.a
 
 ## Blocked or reverted
 - Nothing reverted. Two shell heredocs broke on quotes (no changes made); scripts went to files instead.
+- **Audio settings slipped (my mistake):** the evening's Project Settings > Audio edit was made on disk with the Editor
+  open, and Unity wrote its own copy back (DSP 1024, Meta XR Audio spatializer). Set again through Unity's settings
+  object (`AudioHookupDebug.ApplyProjectAudio`: requested DSP 256, 48 kHz, 32 / 64 voices, no spatializer), committed
+  `37d054c`, and the overnight APK rebuilt with it. **The tester's evening APK still has DSP 1024** (AudioService doesn't
+  use the spatializer, so only latency differs).
 - Props over their triangle budget even after simplifying (the decimator stops early on these shapes): StiltHut 2960
   (2600), Lotus 1898 (1000), LakeTemple 4914 (3800), LotusStone 1016 (900), WaterBall 812 (700), BasinWater 494 (300).
   All well under the creature budget; the lotus is placed ~15 times on the map.
@@ -106,5 +111,5 @@ tester's QA APK built from that and kept as `Builds/PocketIsle-QA-oct27-tester.a
   session scratchpad).
 
 ## QA APK
-- `Builds/PocketIsle-QA.apk` (well gate sealed), built at the end: 106.6 MB (5.5 min). Not installed. The tester's evening
+- `Builds/PocketIsle-QA.apk` (well gate sealed), built at the end: 106.6 MB (rebuilt after the audio settings fix). Not installed. The tester's evening
   build is `Builds/PocketIsle-QA-oct27-tester.apk` (106 MB).
