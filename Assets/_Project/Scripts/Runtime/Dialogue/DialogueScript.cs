@@ -23,6 +23,8 @@ namespace Diorama
         public string id;
         [Tooltip("Only the first time (remembered; saved in step 7).")]
         public bool once;
+        [Tooltip("Step 12a: an objective (a lesson, a task, a hand moment's line): gold bubble with a target icon, bold, kept through a scene change. Script: \"· objective\".")]
+        public bool objective;
         [Tooltip("Higher interrupts lower (idle hints are 0, tutorials 1, story 2).")]
         public int priority = 1;
         [Tooltip("The script's comment, e.g. when it fires.")]

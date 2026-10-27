@@ -232,6 +232,7 @@ namespace Diorama
             Inside = kind == Kind.Enter;
             Interior = Inside ? to : null;
             MapCreature.HideAll = Inside;
+            Dialogue.FlushForNewPlace();
             switch (kind)
             {
                 case Kind.Enter:

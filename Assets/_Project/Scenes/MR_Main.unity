@@ -684,6 +684,8 @@ MonoBehaviour:
   grabGuard: {fileID: 270959111}
   island: {fileID: 270959109}
   fontSize: 0.14
+  chatterScale: 0.86
+  objectiveGold: {r: 0.93, g: 0.66, b: 0.12, a: 1}
   maxWidth: 0.2
   padding: {x: 0.012, y: 0.009}
   heightAbove: 0.045
@@ -6193,6 +6195,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1847074512}
   - component: {fileID: 1847074513}
+  - component: {fileID: 1847074514}
   m_Layer: 0
   m_Name: Lantern Spirit
   m_TagString: Untagged
@@ -6242,6 +6245,24 @@ MonoBehaviour:
   fovHalfAngle: 35
   keepOut: {x: 0.025, y: 0.012}
   battleOffset: {x: 0.035, y: 0.06, z: 0.05}
+--- !u!114 &1847074514
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1847074511}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b19b179a07dae134abbcd5452064c65c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.SpiritPoke
+  spirit: {fileID: 1847074513}
+  grabGuard: {fileID: 270959111}
+  pokeRadius: 0.025
+  gazeRadius: 0.03
+  idleLine: spirit.poke.idle
+  cooldown: 1.2
 --- !u!1 &1858573326
 GameObject:
   m_ObjectHideFlags: 0

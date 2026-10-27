@@ -89,6 +89,7 @@ namespace Diorama.EditorTools
         // Dots only between word characters (puzzle:cinder.log), so a target can still end a sentence.
         static readonly Regex TargetFlag = new Regex(@"·?\s*→\s*([A-Za-z][\w:,]*(?:\.\w+)*)");
         static readonly Regex WhileFlag = new Regex(@"·\s*while\s+([!\w.&| ]+)");
+        static readonly Regex ObjectiveFlag = new Regex(@"·\s*objective\b");
 
         /// <summary>
         /// After the id: "· once", "· once (note)", "· once: Spirit: text", "· Spirit: text", or nothing, plus an optional
@@ -97,6 +98,12 @@ namespace Diorama.EditorTools
         /// </summary>
         static void ParseFlags(DialogueTrigger t, string rest, int n, StringBuilder warnings)
         {
+            var objective = ObjectiveFlag.Match(rest);
+            if (objective.Success)
+            {
+                t.objective = true;
+                rest = rest.Remove(objective.Index, objective.Length);
+            }
             var when = WhileFlag.Match(rest);
             if (when.Success)
             {

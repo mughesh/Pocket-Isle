@@ -15,6 +15,7 @@ MonoBehaviour:
   triggers:
   - id: intro.shard
     once: 1
+    objective: 1
     priority: 1
     note: only if the shard isn't touched within 3 s
     target: shard
@@ -25,6 +26,7 @@ MonoBehaviour:
       text: Something's here. Touch it?
   - id: intro.arrive
     once: 1
+    objective: 0
     priority: 1
     note: 
     target: 
@@ -35,6 +37,7 @@ MonoBehaviour:
       text: Hello, big one! I'm a Lantern Spirit.
   - id: intro.world
     once: 1
+    objective: 1
     priority: 1
     note: 
     target: rim
@@ -45,6 +48,7 @@ MonoBehaviour:
       text: This little island is yours. Grab its rocky edge to move it.
   - id: intro.starter
     once: 1
+    objective: 1
     priority: 1
     note: 
     target: starterPods
@@ -55,6 +59,7 @@ MonoBehaviour:
       text: Pick an Isling friend!
   - id: starter.kilnpot
     once: 0
+    objective: 0
     priority: 1
     note: 
     target: 
@@ -65,6 +70,7 @@ MonoBehaviour:
       text: Kilnpot! Warm as a fresh-baked pot.
   - id: starter.pebbloop
     once: 0
+    objective: 0
     priority: 1
     note: 
     target: 
@@ -75,6 +81,7 @@ MonoBehaviour:
       text: Pebbloop! Bubbly, and very round.
   - id: starter.pufflet
     once: 0
+    objective: 0
     priority: 1
     note: 
     target: 
@@ -85,6 +92,7 @@ MonoBehaviour:
       text: Pufflet! Light as a cloud, twice as fluffy.
   - id: intro.statue
     once: 1
+    objective: 0
     priority: 1
     note: first time within ~3 tiles of the statue
     target: landmark:statue
@@ -98,6 +106,7 @@ MonoBehaviour:
       text: I feel like I know it.
   - id: lesson.pinch
     once: 0
+    objective: 1
     priority: 1
     note: 'step 9h, after `intro.arrive`: the ghost pinches beside your own hand'
     target: 
@@ -108,6 +117,7 @@ MonoBehaviour:
       text: Tap your thumb and finger together. Like this!
   - id: lesson.move.again
     once: 0
+    objective: 1
     priority: 1
     note: 
     target: rim
@@ -118,6 +128,7 @@ MonoBehaviour:
       text: Grab the rocky edge and slide it.
   - id: lesson.starter.again
     once: 0
+    objective: 1
     priority: 1
     note: 
     target: starterPods
@@ -128,6 +139,7 @@ MonoBehaviour:
       text: Look at one and pinch, or grab it.
   - id: lesson.walk
     once: 0
+    objective: 1
     priority: 1
     note: 
     target: ghost
@@ -138,6 +150,7 @@ MonoBehaviour:
       text: Swipe your thumb along your finger to take a few steps.
   - id: lesson.walk.again
     once: 0
+    objective: 1
     priority: 1
     note: 
     target: ghost
@@ -148,6 +161,7 @@ MonoBehaviour:
       text: Swipe toward the gold tile. Like this!
   - id: lesson.walk.turn
     once: 0
+    objective: 1
     priority: 1
     note: step 12a
     target: ghost
@@ -158,6 +172,7 @@ MonoBehaviour:
       text: The path turns. Swipe again!
   - id: lesson.walk.turn.again
     once: 0
+    objective: 1
     priority: 1
     note: 
     target: ghost
@@ -168,6 +183,7 @@ MonoBehaviour:
       text: Swipe, and I'll follow the path.
   - id: lesson.walk.far
     once: 0
+    objective: 1
     priority: 1
     note: step 12a
     target: ghost
@@ -178,6 +194,7 @@ MonoBehaviour:
       text: Swipe twice quickly to keep walking. Tap to stop.
   - id: lesson.walk.far.again
     once: 0
+    objective: 1
     priority: 1
     note: 
     target: ghost
@@ -188,6 +205,7 @@ MonoBehaviour:
       text: Two quick swipes to keep going. A tap stops.
   - id: lesson.walk.help
     once: 0
+    objective: 1
     priority: 1
     note: 
     target: ghost
@@ -198,6 +216,7 @@ MonoBehaviour:
       text: Or look at a spot and pinch.
   - id: lesson.stop
     once: 0
+    objective: 0
     priority: 1
     note: 
     target: ghost
@@ -208,6 +227,7 @@ MonoBehaviour:
       text: Swipe to walk, then tap your thumb to stop.
   - id: lesson.stop.again
     once: 0
+    objective: 0
     priority: 1
     note: 
     target: ghost
@@ -218,6 +238,7 @@ MonoBehaviour:
       text: Swipe, then tap to stop.
   - id: lesson.look
     once: 0
+    objective: 1
     priority: 1
     note: 
     target: goldTile
@@ -228,6 +249,7 @@ MonoBehaviour:
       text: Look at the glowing spot and pinch.
   - id: lesson.look.again
     once: 0
+    objective: 1
     priority: 1
     note: 
     target: goldTile
@@ -238,6 +260,7 @@ MonoBehaviour:
       text: The glowing spot. Look, then pinch!
   - id: lesson.grass
     once: 0
+    objective: 1
     priority: 1
     note: 
     target: landmark:firstGrass
@@ -248,6 +271,7 @@ MonoBehaviour:
       text: Islings hide in tall grass. Let's peek!
   - id: lesson.grass.again
     once: 0
+    objective: 1
     priority: 1
     note: 
     target: landmark:firstGrass
@@ -258,6 +282,7 @@ MonoBehaviour:
       text: Follow the gold tiles into the tall grass.
   - id: lesson.send.again
     once: 0
+    objective: 1
     priority: 1
     note: 
     target: leadPod
@@ -268,6 +293,7 @@ MonoBehaviour:
       text: Toss your friend's pod onto the island!
   - id: lesson.rune.again
     once: 0
+    objective: 1
     priority: 1
     note: 
     target: nearestRune
@@ -278,6 +304,7 @@ MonoBehaviour:
       text: Poke a rune!
   - id: lesson.catch.again
     once: 0
+    objective: 1
     priority: 1
     note: 
     target: cradle
@@ -288,6 +315,7 @@ MonoBehaviour:
       text: Grab the big pod and flick it!
   - id: lesson.twohands
     once: 0
+    objective: 1
     priority: 1
     note: step 8c, once after the first battle
     target: islandRim
@@ -298,6 +326,7 @@ MonoBehaviour:
       text: Use both hands to turn or resize the island.
   - id: lesson.hands
     once: 0
+    objective: 0
     priority: 1
     note: 
     target: 
@@ -308,6 +337,7 @@ MonoBehaviour:
       text: Show me your hands!
   - id: praise.nice
     once: 0
+    objective: 0
     priority: 1
     note: 
     target: 
@@ -318,6 +348,7 @@ MonoBehaviour:
       text: Nice!
   - id: praise.like
     once: 0
+    objective: 0
     priority: 1
     note: 
     target: 
@@ -328,6 +359,7 @@ MonoBehaviour:
       text: Just like that!
   - id: praise.perfect
     once: 0
+    objective: 0
     priority: 1
     note: 
     target: 
@@ -338,6 +370,7 @@ MonoBehaviour:
       text: Perfect!
   - id: gate.sealed
     once: 0
+    objective: 0
     priority: 2
     note: walking into or pinching a sealed gate
     target: gate:last
@@ -348,6 +381,7 @@ MonoBehaviour:
       text: This one's still asleep. Maybe later.
   - id: gate.fire.first
     once: 1
+    objective: 0
     priority: 2
     note: first time the fire gate comes into the window
     target: gate:fire
@@ -358,6 +392,7 @@ MonoBehaviour:
       text: That arch is warm. It leads somewhere.
   - id: realm.cinderwood.first
     once: 1
+    objective: 0
     priority: 2
     note: 'first arrival in Cinderwood; step 9a: the first ember grass by the gate'
     target: landmark:firstGrass
@@ -371,6 +406,7 @@ MonoBehaviour:
       text: Let's find out why.
   - id: hub.return.first
     once: 1
+    objective: 0
     priority: 2
     note: first time back in the hub from a realm
     target: landmark:statue
@@ -381,6 +417,7 @@ MonoBehaviour:
       text: Home again. The statue looks... different?
   - id: tut.grass
     once: 1
+    objective: 0
     priority: 1
     note: 
     target: 
@@ -391,6 +428,7 @@ MonoBehaviour:
       text: Tall grass rustles when an Isling is hiding in it.
   - id: tut.pond
     once: 1
+    objective: 0
     priority: 1
     note: first time next to water
     target: 
@@ -401,6 +439,7 @@ MonoBehaviour:
       text: Face the water and tap. Something might bite!
   - id: pod.first
     once: 1
+    objective: 1
     priority: 1
     note: encounter start
     target: leadPod
@@ -411,6 +450,7 @@ MonoBehaviour:
       text: Grab your friend's pod from the rim and toss it in!
   - id: battle.first
     once: 1
+    objective: 1
     priority: 1
     note: 
     target: nearestRune
@@ -421,6 +461,7 @@ MonoBehaviour:
       text: Poke a rune to attack!
   - id: battle.types
     once: 1
+    objective: 0
     priority: 1
     note: first super or not-very effective hit
     target: 
@@ -431,6 +472,7 @@ MonoBehaviour:
       text: Water beats Fire. Fire beats Wind. Wind beats Water.
   - id: battle.win.first
     once: 1
+    objective: 0
     priority: 1
     note: 
     target: 
@@ -441,6 +483,7 @@ MonoBehaviour:
       text: You did it! Your friend is getting stronger.
   - id: battle.lose.first
     once: 1
+    objective: 0
     priority: 1
     note: 
     target: 
@@ -451,6 +494,7 @@ MonoBehaviour:
       text: Everyone's tired. Let's rest at the shrine.
   - id: capture.first
     once: 1
+    objective: 1
     priority: 1
     note: first time the wild HP bar is red
     target: cradle
@@ -461,6 +505,7 @@ MonoBehaviour:
       text: It's weak now. Grab the big pod and flick it!
   - id: capture.locked
     once: 1
+    objective: 0
     priority: 1
     note: a pod thrown above red shatters
     target: cradle
@@ -471,6 +516,7 @@ MonoBehaviour:
       text: Weaken it first!
   - id: capture.dazed.first
     once: 1
+    objective: 0
     priority: 1
     note: first dazed wild Isling
     target: cradle
@@ -481,6 +527,7 @@ MonoBehaviour:
       text: It's dazed. Quick, a pod!
   - id: capture.success.first
     once: 1
+    objective: 0
     priority: 1
     note: 
     target: 
@@ -491,6 +538,7 @@ MonoBehaviour:
       text: A new Isling! It's in your pods now.
   - id: party.full
     once: 1
+    objective: 0
     priority: 1
     note: 
     target: 
@@ -501,6 +549,7 @@ MonoBehaviour:
       text: Your pods are full. New friends will wait for you at the Hearth Lodge.
   - id: evolve.first
     once: 1
+    objective: 0
     priority: 1
     note: first evolution
     target: nearPad
@@ -511,6 +560,7 @@ MonoBehaviour:
       text: Look at that! They've grown into something new.
   - id: shrine.first
     once: 1
+    objective: 0
     priority: 1
     note: first time a shrine comes into the window
     target: shrine
@@ -521,6 +571,7 @@ MonoBehaviour:
       text: A Hearth Shrine! Warm your hand over the flame.
   - id: shrine.near
     once: 1
+    objective: 0
     priority: 1
     note: 'step 8c: first time the explorer stands next to one'
     target: shrine
@@ -531,6 +582,7 @@ MonoBehaviour:
       text: Warm your hand over the flame.
   - id: lodge.first
     once: 1
+    objective: 0
     priority: 1
     note: first time inside the Hearth Lodge; the lodge hint chain starts, step 7c
     target: lodgeCenter
@@ -541,6 +593,7 @@ MonoBehaviour:
       text: This is the Hearth Lodge. Islings you've caught rest here.
   - id: lodge.inspect
     once: 1
+    objective: 0
     priority: 1
     note: 'chain 2: waits for an inspect, comes back after 15 s'
     target: lodgeIsling
@@ -551,6 +604,7 @@ MonoBehaviour:
       text: Look at one and pinch to see how it's doing.
   - id: lodge.take
     once: 1
+    objective: 0
     priority: 1
     note: chain 3, after the first inspect; then the gold moves to a rim socket
     target: pedestal
@@ -561,6 +615,7 @@ MonoBehaviour:
       text: Pick it up and set it in a pod on the rim to bring it along.
   - id: lodge.leave
     once: 1
+    objective: 0
     priority: 1
     note: chain 4, after the first swap
     target: rimPod
@@ -571,6 +626,7 @@ MonoBehaviour:
       text: To leave one here, toss its pod onto the floor.
   - id: lodge.exit
     once: 1
+    objective: 0
     priority: 1
     note: chain 5, after chain 4 or 30 s
     target: lodgeDoor
@@ -581,6 +637,7 @@ MonoBehaviour:
       text: The door takes you back outside.
   - id: lodge.first.empty
     once: 1
+    objective: 0
     priority: 1
     note: 'step 8c: first visit with nobody in the lodge; the empty-lodge chain starts'
     target: lodgeCenter
@@ -591,6 +648,7 @@ MonoBehaviour:
       text: This is the Hearth Lodge. Islings you leave here rest by the fire.
   - id: lodge.toss
     once: 1
+    objective: 0
     priority: 1
     note: 'empty chain 2: waits for a pod let go on the floor; ghost toss'
     target: rimPod
@@ -601,6 +659,7 @@ MonoBehaviour:
       text: Toss a pod onto the floor to let one rest here.
   - id: lodge.inspect.one
     once: 1
+    objective: 0
     priority: 1
     note: empty chain 3, after it pops out; then lodge.take, lodge.exit
     target: lodgeIsling
@@ -611,6 +670,7 @@ MonoBehaviour:
       text: Look at it and pinch to see how it's doing.
   - id: lodge.last
     once: 0
+    objective: 0
     priority: 1
     note: the last rim pod refuses to leave
     target: leadPod
@@ -621,6 +681,7 @@ MonoBehaviour:
       text: Keep at least one Isling with you!
   - id: gate.first
     once: 1
+    objective: 0
     priority: 1
     note: 
     target: 
@@ -634,6 +695,7 @@ MonoBehaviour:
       text: Step in when you're ready.
   - id: rare.first
     once: 1
+    objective: 0
     priority: 1
     note: first gold sparkle
     target: 
@@ -644,6 +706,7 @@ MonoBehaviour:
       text: Ooh, sparkly! That one's rare.
   - id: xp.first
     once: 1
+    objective: 0
     priority: 1
     note: 'step 9f: the first XP after a win'
     target: nearPad
@@ -654,6 +717,7 @@ MonoBehaviour:
       text: Your Islings learn from every battle. Watch them grow!
   - id: steambara.first
     once: 1
+    objective: 0
     priority: 1
     note: 'step 9f: the first wild Steambara'
     target: wildPad
@@ -664,6 +728,7 @@ MonoBehaviour:
       text: A water Isling, visiting the springs! Water beats fire...
   - id: menu.first
     once: 1
+    objective: 0
     priority: 1
     note: 'step 9g: a few calm seconds after the lessons end, never in a battle'
     target: 
@@ -674,6 +739,7 @@ MonoBehaviour:
       text: Palm up and pinch with your left hand any time to pause.
   - id: cw.arrive
     once: 1
+    objective: 0
     priority: 2
     note: 
     target: 
@@ -687,6 +753,7 @@ MonoBehaviour:
       text: The leaves have gone grey. It's so cold.
   - id: cinder.village.first
     once: 1
+    objective: 0
     priority: 2
     note: 'step 9a: first time the explorer comes near the village plaza'
     target: landmark:plaza
@@ -697,6 +764,7 @@ MonoBehaviour:
       text: A kiln village. The kilns are cold... everyone's gone quiet.
   - id: cinder.springs.first
     once: 1
+    objective: 0
     priority: 2
     note: first time near a pool
     target: landmark:springs
@@ -707,6 +775,7 @@ MonoBehaviour:
       text: Hot springs! Well, warm-ish. Not much steam.
   - id: cinder.log.first
     once: 1
+    objective: 0
     priority: 2
     note: first time near the fallen log
     target: landmark:log
@@ -717,6 +786,7 @@ MonoBehaviour:
       text: A huge log blocks the path. Too heavy for the explorer...
   - id: cinder.temple.first
     once: 1
+    objective: 0
     priority: 2
     note: first time near the forge door; past the log, so from 9b
     target: landmark:temple
@@ -727,6 +797,7 @@ MonoBehaviour:
       text: A forge in the cliff. The fire came from here.
   - id: cinder.ruins.first
     once: 1
+    objective: 0
     priority: 2
     note: first time in the kiln ruins
     target: landmark:ruins
@@ -737,6 +808,7 @@ MonoBehaviour:
       text: Old kilns. Something glazed is moving in the grass...
   - id: cinder.log.hands
     once: 1
+    objective: 1
     priority: 2
     note: 'step 9b: right after cinder.log.first; the ghost shows the lift'
     target: puzzle:cinder.log
@@ -747,6 +819,7 @@ MonoBehaviour:
       text: Maybe your big hands could move it?
   - id: cinder.log.done
     once: 1
+    objective: 0
     priority: 2
     note: 'step 9b: the log set down on a ledge, the trail open'
     target: 
@@ -757,6 +830,7 @@ MonoBehaviour:
       text: You're strong! Let's go on.
   - id: cw.temple
     once: 1
+    objective: 0
     priority: 2
     note: first time at the temple door
     target: 
@@ -767,6 +841,7 @@ MonoBehaviour:
       text: The forge temple. Something big is breathing in there.
   - id: cinder.bellows.first
     once: 1
+    objective: 1
     priority: 2
     note: 'step 9b: first time the bellows are in reach; the ghost pokes the pad'
     target: puzzle:cinder.bellows
@@ -777,6 +852,7 @@ MonoBehaviour:
       text: Bellows! Poke them to send heat to the braziers.
   - id: cinder.brazier.one
     once: 0
+    objective: 0
     priority: 2
     note: 
     target: 
@@ -787,6 +863,7 @@ MonoBehaviour:
       text: One!
   - id: cinder.brazier.two
     once: 0
+    objective: 0
     priority: 2
     note: 
     target: 
@@ -797,6 +874,7 @@ MonoBehaviour:
       text: Two!
   - id: cinder.brazier.three
     once: 0
+    objective: 0
     priority: 2
     note: 
     target: 
@@ -807,6 +885,7 @@ MonoBehaviour:
       text: Three!
   - id: cinder.forge.open
     once: 1
+    objective: 0
     priority: 2
     note: 'step 9b: all three braziers lit, the door glows and opens'
     target: 
@@ -817,6 +896,7 @@ MonoBehaviour:
       text: The forge is waking up!
   - id: cinder.hall.first
     once: 1
+    objective: 0
     priority: 2
     note: 'step 9b: first time inside the Forge Hall; Hearthstag comes in 9c'
     target: hallKeeper
@@ -827,6 +907,7 @@ MonoBehaviour:
       text: Something huge sleeps here... not yet.
   - id: cinder.keeper.first
     once: 1
+    objective: 0
     priority: 2
     note: 'step 9c: first time in the Forge Hall; then the Keeper battle'
     target: hearthstag
@@ -840,6 +921,7 @@ MonoBehaviour:
       text: Let's calm it down. Gently!
   - id: keeper.shield.first
     once: 1
+    objective: 0
     priority: 2
     note: first blocked hit
     target: 
@@ -850,6 +932,7 @@ MonoBehaviour:
       text: Its crown shields it! Water breaks it, or keep chipping away.
   - id: keeper.shield.broken.first
     once: 1
+    objective: 0
     priority: 2
     note: 
     target: 
@@ -860,6 +943,7 @@ MonoBehaviour:
       text: The shield's down. Now!
   - id: keeper.phase2
     once: 1
+    objective: 0
     priority: 2
     note: below half HP
     target: 
@@ -870,6 +954,7 @@ MonoBehaviour:
       text: It's fighting the fear. Keep going!
   - id: cinder.keeper.win
     once: 1
+    objective: 0
     priority: 2
     note: it kneels and calms
     target: hearthstag
@@ -880,6 +965,7 @@ MonoBehaviour:
       text: It wasn't angry. It was scared, holding all the fire in.
   - id: cinder.shard.take
     once: 1
+    objective: 0
     priority: 2
     note: the fire shard floats to the player
     target: fireShard
@@ -890,6 +976,7 @@ MonoBehaviour:
       text: The fire shard! Take it.
   - id: cinder.restored
     once: 1
+    objective: 0
     priority: 2
     note: the restoration wave outside
     target: 
@@ -900,6 +987,7 @@ MonoBehaviour:
       text: Cinderwood is warm again!
   - id: cw.flame
     once: 0
+    objective: 1
     priority: 2
     note: lesson at the kiln village's shrine, its flame nearly out; chip "Cup it!"
     target: puzzle:cw.flame
@@ -910,6 +998,7 @@ MonoBehaviour:
       text: The village flame is fading! Keep it warm with your hands.
   - id: cw.flame.cold
     once: 1
+    objective: 0
     priority: 2
     note: trying to rest at the shrine before it's rekindled
     target: shrine
@@ -920,6 +1009,7 @@ MonoBehaviour:
       text: It's too weak to rest by. Warm it up first!
   - id: cw.flame.done
     once: 1
+    objective: 0
     priority: 2
     note: 'the flame rekindled: the warmth rolls over the plaza'
     target: 
@@ -930,6 +1020,7 @@ MonoBehaviour:
       text: It's burning! Look, the whole village is waking up.
   - id: cw.lanterns
     once: 0
+    objective: 1
     priority: 2
     note: lesson at the smoky hollow, once the village flame is rekindled; chip "Touch
       them!"
@@ -941,6 +1032,7 @@ MonoBehaviour:
       text: Smoke blocks the way. Touch the lanterns to light them!
   - id: cw.lanterns.done
     once: 1
+    objective: 0
     priority: 2
     note: 'every lantern lit: the smoke burns off the path'
     target: 
@@ -951,6 +1043,7 @@ MonoBehaviour:
       text: The smoke's burning away! The path is clear.
   - id: cw.ember
     once: 0
+    objective: 1
     priority: 2
     note: lesson at the forge's ember vent, before the bellows; chip "Pick it up!"
     target: puzzle:cw.ember
@@ -961,6 +1054,7 @@ MonoBehaviour:
       text: Pick up the ember and drop it in the forge's mouth!
   - id: cw.forge.cold
     once: 0
+    objective: 0
     priority: 2
     note: the bellows pumped while the firebox is cold; at most every 8 s
     target: 
@@ -971,6 +1065,7 @@ MonoBehaviour:
       text: The forge is stone cold. It needs a spark first.
   - id: cw.ember.done
     once: 1
+    objective: 0
     priority: 2
     note: 'the ember dropped into the firebox: it roars'
     target: 
@@ -981,6 +1076,7 @@ MonoBehaviour:
       text: It's roaring! Now the bellows can blow.
   - id: gate.wind.first
     once: 1
+    objective: 0
     priority: 2
     note: first time the wind gate comes into the window, once it leads somewhere
     target: gate:wind
@@ -991,6 +1087,7 @@ MonoBehaviour:
       text: Listen... no wind through this tunnel at all.
   - id: realm.galewick.first
     once: 1
+    objective: 0
     priority: 2
     note: first arrival in Galewick
     target: landmark:firstGrass
@@ -1004,6 +1101,7 @@ MonoBehaviour:
       text: The grass isn't even swaying.
   - id: gw.village.first
     once: 1
+    objective: 0
     priority: 2
     note: first time near the village plaza
     target: landmark:plaza
@@ -1014,6 +1112,7 @@ MonoBehaviour:
       text: Windmills, and not one sail turning.
   - id: gw.mill.first
     once: 1
+    objective: 0
     priority: 2
     note: first time by the big mill and the ditch
     target: landmark:mill
@@ -1024,6 +1123,7 @@ MonoBehaviour:
       text: The bridge is up. That big mill must lower it.
   - id: gw.kites.first
     once: 1
+    objective: 0
     priority: 2
     note: first time in the kite field
     target: landmark:kites
@@ -1034,6 +1134,7 @@ MonoBehaviour:
       text: Kites, lying in the grass. Nobody to fly them.
   - id: gw.ridge.first
     once: 1
+    objective: 0
     priority: 2
     note: first time near the ridge path
     target: landmark:ridge
@@ -1044,6 +1145,7 @@ MonoBehaviour:
       text: A cloud sits right on the path. Stuck, like everything.
   - id: gw.tower.first
     once: 1
+    objective: 0
     priority: 2
     note: first time near the wind tower
     target: landmark:tower
@@ -1054,6 +1156,7 @@ MonoBehaviour:
       text: The wind tower. Its vanes should be spinning.
   - id: gw.rare.first
     once: 1
+    objective: 0
     priority: 2
     note: first time in the rare grass
     target: landmark:rare
@@ -1064,6 +1167,7 @@ MonoBehaviour:
       text: This grass feels different. Something odd floats here.
   - id: gw.mill
     once: 0
+    objective: 1
     priority: 2
     note: lesson at the big mill; chip "Flick!"
     target: puzzle:gw.mill
@@ -1074,6 +1178,7 @@ MonoBehaviour:
       text: The mill is stuck. Give its sails a flick!
   - id: gw.mill.done
     once: 1
+    objective: 0
     priority: 2
     note: 'three flicks: the sails keep turning, the drawbridge comes down'
     target: 
@@ -1084,6 +1189,7 @@ MonoBehaviour:
       text: There it goes! The bridge is coming down.
   - id: gw.kites
     once: 0
+    objective: 0
     priority: 2
     note: lesson in the kite field; chip "Pull it up!"
     target: puzzle:gw.kites
@@ -1094,6 +1200,7 @@ MonoBehaviour:
       text: Kites! Lift one up into the sky.
   - id: gw.kites.task
     once: 0
+    objective: 1
     priority: 2
     note: 'step 11d: the kite field''s lesson says the task; chip "Kites n/3"'
     target: puzzle:gw.kites
@@ -1107,6 +1214,7 @@ MonoBehaviour:
       text: Pinch one and lift it up into the sky.
   - id: gw.kites.one
     once: 0
+    objective: 0
     priority: 2
     note: 
     target: 
@@ -1117,6 +1225,7 @@ MonoBehaviour:
       text: One!
   - id: gw.kites.two
     once: 0
+    objective: 0
     priority: 2
     note: 
     target: 
@@ -1127,6 +1236,7 @@ MonoBehaviour:
       text: Two!
   - id: gw.kites.three
     once: 0
+    objective: 0
     priority: 2
     note: 
     target: 
@@ -1137,6 +1247,7 @@ MonoBehaviour:
       text: All three!
   - id: gw.gust
     once: 0
+    objective: 1
     priority: 2
     note: lesson at the cloud bank; chip "Sweep!"
     target: puzzle:gw.clouds
@@ -1147,6 +1258,7 @@ MonoBehaviour:
       text: This cloud is stuck. Sweep your open hand fast over the island!
   - id: gw.gust.done
     once: 1
+    objective: 0
     priority: 2
     note: the last puff blown off the ridge path
     target: 
@@ -1157,6 +1269,7 @@ MonoBehaviour:
       text: The path is clear! Feel that breeze?
   - id: gw.tower.kites
     once: 0
+    objective: 0
     priority: 2
     note: at the tower door with fewer than three kites
     target: landmark:tower
@@ -1167,6 +1280,7 @@ MonoBehaviour:
       text: The tower needs all three kites.
   - id: gw.tower.open
     once: 1
+    objective: 0
     priority: 2
     note: the kites tie onto the crown, the vanes turn
     target: 
@@ -1180,6 +1294,7 @@ MonoBehaviour:
       text: The tower's open! Let's go in.
   - id: gw.meet.kitelet
     once: 1
+    objective: 0
     priority: 2
     note: 'step 10c: the first wild Kitelet'
     target: 
@@ -1190,6 +1305,7 @@ MonoBehaviour:
       text: A Kitelet! It wants to fly, but there's no wind.
   - id: gw.meet.zeppelope
     once: 1
+    objective: 0
     priority: 2
     note: 'step 10c: the rare Zeppelope'
     target: 
@@ -1200,6 +1316,7 @@ MonoBehaviour:
       text: A Zeppelope! It's drifting... it never lands!
   - id: gw.keeper.knots
     once: 0
+    objective: 1
     priority: 2
     note: lesson in the tower hall; chip "Pull apart!"
     target: galeowl
@@ -1210,6 +1327,7 @@ MonoBehaviour:
       text: It's all tangled up! Pull the knots apart.
   - id: gw.keeper.meet
     once: 1
+    objective: 0
     priority: 2
     note: 'all three knots undone: it shakes free and flares up'
     target: galeowl
@@ -1223,6 +1341,7 @@ MonoBehaviour:
       text: It's scared. Let's calm it down!
   - id: gw.keeper.shield
     once: 1
+    objective: 0
     priority: 2
     note: the Gust Wall goes up the first time
     target: galeowl
@@ -1233,6 +1352,7 @@ MonoBehaviour:
       text: A wall of wind! Fire should break it.
   - id: gw.keeper.shield.break
     once: 1
+    objective: 0
     priority: 2
     note: 
     target: galeowl
@@ -1243,6 +1363,7 @@ MonoBehaviour:
       text: The wall is down. Now!
   - id: gw.keeper.win
     once: 1
+    objective: 0
     priority: 2
     note: it calms and bows
     target: galeowl
@@ -1259,6 +1380,7 @@ MonoBehaviour:
       text: Thank you, guardian. Let it blow.
   - id: gw.shard.take
     once: 1
+    objective: 0
     priority: 2
     note: 'step 10e: the wind shard floats out of the window to the player'
     target: windShard
@@ -1269,6 +1391,7 @@ MonoBehaviour:
       text: The wind shard! Grab it.
   - id: gw.restored
     once: 1
+    objective: 0
     priority: 2
     note: the restoration wave from the tower
     target: 
@@ -1279,6 +1402,7 @@ MonoBehaviour:
       text: Feel that? Galewick is breathing again!
   - id: gate.water.first
     once: 1
+    objective: 0
     priority: 2
     note: first time the well gate comes into the window, once it leads somewhere
     target: gate:water
@@ -1289,6 +1413,7 @@ MonoBehaviour:
       text: Listen... the well is silent. Not even a drip.
   - id: realm.lilymere.first
     once: 1
+    objective: 0
     priority: 2
     note: first arrival in Lilymere
     target: landmark:firstGrass
@@ -1302,6 +1427,7 @@ MonoBehaviour:
       text: Half the water is gone, and nothing ripples.
   - id: lm.village.first
     once: 1
+    objective: 0
     priority: 2
     note: first time near the stilt village
     target: landmark:village
@@ -1312,6 +1438,7 @@ MonoBehaviour:
       text: Stilt huts, standing over almost nothing.
   - id: lm.channel.first
     once: 1
+    objective: 0
     priority: 2
     note: first time at the lily channel
     target: landmark:channel
@@ -1322,6 +1449,7 @@ MonoBehaviour:
       text: The lily pads have all drifted apart.
   - id: lm.garden.first
     once: 1
+    objective: 0
     priority: 2
     note: first time at the lotus garden
     target: landmark:garden
@@ -1332,6 +1460,7 @@ MonoBehaviour:
       text: A lotus garden, dried to cracks. The buds won't open.
   - id: lm.basin.first
     once: 1
+    objective: 0
     priority: 2
     note: first time at the waterfall basin
     target: landmark:basin
@@ -1342,6 +1471,7 @@ MonoBehaviour:
       text: The waterfall froze mid-fall. Look, the drops just hang there.
   - id: lm.temple.first
     once: 1
+    objective: 0
     priority: 2
     note: first time near the lake temple
     target: landmark:temple
@@ -1352,6 +1482,7 @@ MonoBehaviour:
       text: A temple, half under the lagoon. Someone is hiding in there.
   - id: lm.marsh.first
     once: 1
+    objective: 0
     priority: 2
     note: first time in the reed marsh
     target: landmark:marsh
@@ -1362,6 +1493,7 @@ MonoBehaviour:
       text: Reeds taller than you! Stay close.
   - id: lm.pond.first
     once: 1
+    objective: 0
     priority: 2
     note: first time at the rare pond
     target: landmark:pond
@@ -1372,6 +1504,7 @@ MonoBehaviour:
       text: This little pond feels deep. Something big could live in it.
   - id: lm.pads
     once: 0
+    objective: 1
     priority: 2
     note: lesson at the lily channel; chip "Push!"
     target: puzzle:lm.pads
@@ -1382,6 +1515,7 @@ MonoBehaviour:
       text: The channel's too wide. Nudge the lily pads together!
   - id: lm.pads.done
     once: 1
+    objective: 0
     priority: 2
     note: all three pads locked into a path
     target: 
@@ -1392,6 +1526,7 @@ MonoBehaviour:
       text: A lily pad bridge! Hop across.
   - id: lm.rain
     once: 0
+    objective: 1
     priority: 2
     note: lesson at the lotus garden; chip "Palm down!"
     target: puzzle:lm.rain
@@ -1402,6 +1537,7 @@ MonoBehaviour:
       text: So dry... Hold your hand over it like a little cloud.
   - id: lm.rain.done
     once: 1
+    objective: 0
     priority: 2
     note: every bud bloomed into a stepping stone
     target: 
@@ -1412,6 +1548,7 @@ MonoBehaviour:
       text: Look at them bloom! A path of lotus.
   - id: lm.scoop
     once: 0
+    objective: 1
     priority: 2
     note: lesson at the waterfall basin; chip "Scoop!"
     target: puzzle:lm.lagoon
@@ -1422,6 +1559,7 @@ MonoBehaviour:
       text: The falls are frozen. Bring them some water!
   - id: lm.scoop.more
     once: 0
+    objective: 0
     priority: 2
     note: 
     target: 
@@ -1432,6 +1570,7 @@ MonoBehaviour:
       text: One more!
   - id: lm.scoop.done
     once: 1
+    objective: 0
     priority: 2
     note: the waterfall runs, the lagoon rises
     target: 
@@ -1442,6 +1581,7 @@ MonoBehaviour:
       text: It's flowing! The whole lagoon is filling up!
   - id: lm.meet.sailfold
     once: 1
+    objective: 0
     priority: 2
     note: 'step 11c: the first wild Sailfold'
     target: 
@@ -1452,6 +1592,7 @@ MonoBehaviour:
       text: A Sailfold! Folded from an old map, I bet. It sails anywhere.
   - id: lm.meet.bottlewhale
     once: 1
+    objective: 0
     priority: 2
     note: 'step 11c: the rare Bottlewhale'
     target: 
@@ -1462,6 +1603,7 @@ MonoBehaviour:
       text: A Bottlewhale! Look, there's a tiny ship inside it!
   - id: lm.temple.shut
     once: 0
+    objective: 0
     priority: 2
     note: 'step 11c: at the lake temple''s door before the lagoon rises'
     target: 
@@ -1472,6 +1614,7 @@ MonoBehaviour:
       text: The temple's sunk. The water's too low to open it.
   - id: lm.temple.open
     once: 1
+    objective: 0
     priority: 2
     note: 'the lagoon rises: the temple door surfaces and glows'
     target: 
@@ -1482,6 +1625,7 @@ MonoBehaviour:
       text: The temple door is open! Let's go in.
   - id: lm.keeper.meet
     once: 1
+    objective: 0
     priority: 2
     note: 'step 11c: in the lake temple, she clutches the hoarded water'
     target: tidemother
@@ -1495,6 +1639,7 @@ MonoBehaviour:
       text: She's so scared. Let's calm her down.
   - id: lm.keeper.shield
     once: 1
+    objective: 0
     priority: 2
     note: the Lily Shell goes up the first time
     target: tidemother
@@ -1505,6 +1650,7 @@ MonoBehaviour:
       text: She's hiding in her shell. Wind could lift it off!
   - id: lm.keeper.shield.break
     once: 1
+    objective: 0
     priority: 2
     note: 
     target: tidemother
@@ -1515,6 +1661,7 @@ MonoBehaviour:
       text: The shell's open. Now!
   - id: lm.keeper.win
     once: 1
+    objective: 0
     priority: 2
     note: she calms and lets the water go
     target: tidemother
@@ -1528,6 +1675,7 @@ MonoBehaviour:
       text: Thank you, guardian. Water is meant to flow.
   - id: lm.shard.take
     once: 1
+    objective: 0
     priority: 2
     note: 'step 11c: the water shard floats out to the player'
     target: waterShard
@@ -1538,6 +1686,7 @@ MonoBehaviour:
       text: The water shard! Grab it.
   - id: lm.restored
     once: 1
+    objective: 0
     priority: 2
     note: the restoration wave from the temple
     target: 
@@ -1548,6 +1697,7 @@ MonoBehaviour:
       text: Listen... the whole lagoon is singing again!
   - id: objective.more
     once: 0
+    objective: 1
     priority: 2
     note: 'step 11d: an objective''s object is outside the island window; a gold
       arrow points to it; once per moment a session'
@@ -1557,8 +1707,21 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: One more over there!
+  - id: spirit.poke.idle
+    once: 0
+    objective: 0
+    priority: 2
+    note: 'step 12a: the Spirit poked with no objective active; its gold trail shows
+      the way'
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: This way! Follow my gold trail.
   - id: hub.shard.first
     once: 1
+    objective: 1
     priority: 2
     note: 'step 9c: in the hub holding a shard'
     target: statueSocket
@@ -1569,6 +1732,7 @@ MonoBehaviour:
       text: Put the shard in the statue. Something's calling it.
   - id: hub.shard.placed
     once: 1
+    objective: 0
     priority: 2
     note: the shard locks in
     target: 
@@ -1579,6 +1743,7 @@ MonoBehaviour:
       text: I... feel warmer. Strange.
   - id: hub.shard.more
     once: 1
+    objective: 0
     priority: 2
     note: 
     target: 
@@ -1589,6 +1754,7 @@ MonoBehaviour:
       text: Two more shards are out there.
   - id: statue.two
     once: 1
+    objective: 0
     priority: 2
     note: 'step 10e: the second shard locks into the statue'
     target: 
@@ -1599,6 +1765,7 @@ MonoBehaviour:
       text: Two pieces home. It's almost awake...
   - id: statue.three
     once: 1
+    objective: 0
     priority: 2
     note: 'step 11c: the third shard locks into the statue; the finale comes later'
     target: 
@@ -1609,6 +1776,7 @@ MonoBehaviour:
       text: All three pieces home... Something is waking up!
   - id: statue.shard.1
     once: 0
+    objective: 0
     priority: 2
     note: 
     target: 
@@ -1619,6 +1787,7 @@ MonoBehaviour:
       text: The statue's warmer. And I feel... brighter?
   - id: statue.shard.2
     once: 0
+    objective: 0
     priority: 2
     note: 
     target: 
@@ -1629,6 +1798,7 @@ MonoBehaviour:
       text: Two shards. I can almost remember something.
   - id: statue.shard.3
     once: 0
+    objective: 0
     priority: 2
     note: 
     target: 
@@ -1639,6 +1809,7 @@ MonoBehaviour:
       text: Three! Something's waking up...
   - id: heart.wake
     once: 0
+    objective: 0
     priority: 2
     note: 
     target: 
@@ -1655,6 +1826,7 @@ MonoBehaviour:
       text: The world broke, and so did I. Show me it can be whole.
   - id: heart.win
     once: 0
+    objective: 0
     priority: 2
     note: 
     target: 
@@ -1671,6 +1843,7 @@ MonoBehaviour:
       text: I'll be right here. In the middle of everything.
   - id: end
     once: 0
+    objective: 0
     priority: 2
     note: 
     target: 
@@ -1681,6 +1854,7 @@ MonoBehaviour:
       text: (glows, slots into the Heart's forehead)
   - id: quick.gift
     once: 1
+    objective: 0
     priority: 2
     note: after the capture lesson, in the hub; two pods fly from the Spirit to the
       rim
@@ -1692,6 +1866,7 @@ MonoBehaviour:
       text: The road to Cinderwood is long. Take two friends with you!
   - id: quick.gate
     once: 1
+    objective: 0
     priority: 2
     note: 'right after the gift: the Spirit points at the fire gate'
     target: gate:fire
@@ -1702,6 +1877,7 @@ MonoBehaviour:
       text: Bring back the fire shard!
   - id: quick.end
     once: 1
+    objective: 0
     priority: 2
     note: the fire shard locks into the statue; then the Keep exploring / Title runes
     target: 

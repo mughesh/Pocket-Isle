@@ -58,6 +58,7 @@ namespace Diorama
             public string trigger;
             public string target;
             public string validWhile;
+            public bool objective;
         }
 
         static readonly Dictionary<string, Target> _targets = new Dictionary<string, Target>();
@@ -106,6 +107,37 @@ namespace Diorama
         public static void Repeat(string triggerId)
         {
             if (_instance != null) _instance.Fire(triggerId, false, true);
+        }
+
+        /// <summary>Step 12a: the pinned objective's trigger (the lesson or hand moment teaching now), or null.</summary>
+        public static string CurrentObjective => _instance != null && _instance._pinned.Count > 0 ? _instance._lesson : null;
+
+        /// <summary>
+        /// Step 12a (poke the Spirit): says the current objective again in full (a chip showing opens up). False when
+        /// nothing is pinned.
+        /// </summary>
+        public static bool RepeatObjective()
+        {
+            var d = _instance;
+            if (d == null || d._pinned.Count == 0 || string.IsNullOrEmpty(d._lesson)) return false;
+            if (d._current.HasValue && d._pinned.Contains(d._current.Value.trigger))
+            {
+                if (d.bubble != null) d.bubble.ReopenChip("Spirit poked");
+            }
+            else Repeat(d._lesson);
+            return true;
+        }
+
+        /// <summary>
+        /// Step 12a: a scene change (interior, realm): queued lines tied to the old place go; objectives stay (their pieces
+        /// say them again where they apply).
+        /// </summary>
+        public static void FlushForNewPlace()
+        {
+            var d = _instance;
+            if (d == null) return;
+            int n = d._queue.RemoveAll(q => !q.objective && !d._pinned.Contains(q.trigger));
+            if (n > 0) Debug.Log($"[Dialogue] New place: dropped {n} queued line(s) from the last one.");
         }
 
         /// <summary>A trigger's lines are showing or waiting in the queue.</summary>
@@ -384,7 +416,7 @@ namespace Diorama
         }
 
         static Queued Make(DialogueLine line, DialogueTrigger t, string id) =>
-            new Queued { line = line, priority = t.priority, trigger = id, target = t.target, validWhile = t.validWhile };
+            new Queued { line = line, priority = t.priority, trigger = id, target = t.target, validWhile = t.validWhile, objective = t.objective };
 
         /// <summary>Queues a trigger's lines in front of everything (the praise after a lesson).</summary>
         void FireFirst(string id)
@@ -426,7 +458,7 @@ namespace Diorama
             var anchor = AnchorFor(q.line.speaker);
             // The lesson's last line stays (pinned) until the lesson is done.
             bool stays = _pinned.Contains(q.trigger) && !_transient.Contains(q.trigger) && !_queue.Exists(o => o.trigger == q.trigger);
-            if (bubble != null) bubble.Show(q.line, anchor, stays ? (string.IsNullOrEmpty(_chip) ? q.line.text : _chip) : null);
+            if (bubble != null) bubble.Show(q.line, anchor, stays ? (string.IsNullOrEmpty(_chip) ? q.line.text : _chip) : null, q.objective || stays);
             Speaking?.Invoke(q.line.speaker);
         }
 

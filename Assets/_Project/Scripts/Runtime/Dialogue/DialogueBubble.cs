@@ -37,6 +37,10 @@ namespace Diorama
 
         [Header("Look")]
         public float fontSize = 0.14f;
+        [Tooltip("Step 12a: chatter (story, praise, flavour) text size as a share of the font size; objectives use the full size.")]
+        public float chatterScale = 0.86f;
+        [Tooltip("Step 12a: the objective bubble's border and target icon.")]
+        public Color objectiveGold = new Color(0.93f, 0.66f, 0.12f);
         [Tooltip("Text wraps at this width (metres).")]
         public float maxWidth = 0.2f;
         public Vector2 padding = new Vector2(0.012f, 0.009f);
@@ -99,6 +103,8 @@ namespace Diorama
         Transform _root, _panel, _tail, _visual;
         MeshRenderer _panelRenderer, _tailRenderer;
         TextMeshPro _text;
+        bool _objective;
+        Mesh _targetMesh;
         BoundsClipper _clipper;
         PokeInteractable _poke;
         Mesh _quad;
@@ -199,6 +205,47 @@ namespace Diorama
             iconGo.SetActive(false);
         }
 
+        /// <summary>Step 12a: the objective's target icon (a ring round a dot) as one flat mesh, uvs at the middle like the hand.</summary>
+        static Mesh TargetIconMesh()
+        {
+            const int n = 24;
+            var verts = new System.Collections.Generic.List<Vector3>();
+            var tris = new System.Collections.Generic.List<int>();
+            // Ring: outer 0.48, inner 0.34.
+            for (int i = 0; i < n; i++)
+            {
+                float a = Mathf.PI * 2f * i / n;
+                var d = new Vector3(Mathf.Cos(a), Mathf.Sin(a), 0f);
+                verts.Add(d * 0.48f);
+                verts.Add(d * 0.34f);
+            }
+            for (int i = 0; i < n; i++)
+            {
+                int a0 = 2 * i, a1 = 2 * i + 1, b0 = 2 * ((i + 1) % n), b1 = b0 + 1;
+                tris.AddRange(new[] { a0, b0, a1, a1, b0, b1 });
+            }
+            // Dot: radius 0.17.
+            int c = verts.Count;
+            verts.Add(Vector3.zero);
+            for (int i = 0; i < n; i++)
+            {
+                float a = Mathf.PI * 2f * i / n;
+                verts.Add(new Vector3(Mathf.Cos(a), Mathf.Sin(a), 0f) * 0.17f);
+            }
+            for (int i = 0; i < n; i++) tris.AddRange(new[] { c, c + 1 + (i + 1) % n, c + 1 + i });
+            var mesh = new Mesh { name = "Objective Target Icon" };
+            mesh.SetVertices(verts);
+            var uv = new Vector2[verts.Count];
+            for (int i = 0; i < uv.Length; i++) uv[i] = new Vector2(0.5f, 0.5f);
+            mesh.uv = uv;
+            // Wound both ways so it shows from either side like the hand icon's fans.
+            var both = new System.Collections.Generic.List<int>(tris);
+            for (int i = 0; i < tris.Count; i += 3) both.AddRange(new[] { tris[i], tris[i + 2], tris[i + 1] });
+            mesh.SetTriangles(both, 0);
+            mesh.RecalculateBounds();
+            return mesh;
+        }
+
         /// <summary>
         /// An open hand (palm, four fingers, thumb) as flat capsules in a 1 x 1 box round the origin, the fingers up,
         /// the thumb to the left. Every uv is (0.5, 0.5) so the HUD shader fills it with the back colour.
@@ -267,8 +314,9 @@ namespace Diorama
         /// that chip text (with a small hand) after <see cref="chipAfter"/>, and opens again while the chip or the Spirit
         /// is looked at. Poking or pinching it doesn't skip it.
         /// </summary>
-        public void Show(DialogueLine line, Transform anchor, string chip = null)
+        public void Show(DialogueLine line, Transform anchor, string chip = null, bool objective = false)
         {
+            _objective = objective;
             _anchor = anchor;
             _line = line;
             _chipText = string.IsNullOrEmpty(chip) ? null : chip;
@@ -308,7 +356,11 @@ namespace Diorama
             _text.maxVisibleCharacters = 99999;
             _pointing = _line.speaker == DialogueSpeaker.Spirit && Dialogue.GetTarget(out _) == Dialogue.TargetState.Active;
             float width = chip ? maxWidth : _pointing ? maxWidth * sideWidth : maxWidth;
-            _text.fontSize = chip ? fontSize * chipFontScale : fontSize;
+            // Step 12a: objectives read bold behind a target icon; chatter is a little smaller and plain.
+            _text.fontSize = chip ? fontSize * chipFontScale : _objective ? fontSize : fontSize * chatterScale;
+            _text.fontStyle = _objective ? FontStyles.Bold : FontStyles.Normal;
+            bool target = _objective && !chip;
+            if (target) width -= iconSize + padding.x * 0.6f;
             var pref = _text.GetPreferredValues(text, width, 1f);
             if (_pointing && !chip)
             {
@@ -323,16 +375,19 @@ namespace Diorama
             }
             _text.ForceMeshUpdate();
             float w = Mathf.Min(width, pref.x), h = pref.y;
-            float icon = chip ? iconSize + padding.x * 0.6f : 0f;
+            float icon = chip || target ? iconSize + padding.x * 0.6f : 0f;
             _text.rectTransform.sizeDelta = new Vector2(w + 0.002f, h + 0.002f);
             _text.transform.localPosition = new Vector3(icon * 0.5f, 0f, -0.001f);
             _size = new Vector2(w + icon + padding.x * 2f, Mathf.Max(h, chip ? iconSize : 0f) + padding.y * 2f);
-            _icon.gameObject.SetActive(chip);
-            if (chip)
+            _icon.gameObject.SetActive(chip || target);
+            if (chip || target)
             {
+                var mf = _icon.GetComponent<MeshFilter>();
+                if (target && _targetMesh == null) _targetMesh = TargetIconMesh();
+                mf.sharedMesh = target ? _targetMesh : _iconMesh;
                 _icon.localPosition = new Vector3(-(w + icon) * 0.5f + iconSize * 0.5f - padding.x * 0.3f, 0f, -0.001f);
                 _icon.localScale = new Vector3(iconSize, iconSize, 1f);
-                Paint(_iconRenderer, outlineColor, 1f, 0f, 0f);
+                Paint(_iconRenderer, target || _objective ? objectiveGold : outlineColor, 1f, 0f, 0f);
             }
             _panel.localScale = new Vector3(_size.x, _size.y, 1f);
             float tail = 0.016f;
@@ -341,8 +396,10 @@ namespace Diorama
             _clipper.Size = new Vector3(_size.x, _size.y, 0.02f);
 
             var back = _line.speaker == DialogueSpeaker.Keeper ? keeperColor : _line.speaker == DialogueSpeaker.Heart ? heartColor : spiritColor;
-            Paint(_panelRenderer, back, _size.x / _size.y, Mathf.Min(0.45f, (chip ? 0.5f * _size.y : 0.012f) / _size.y), 0.0018f / _size.y);
-            Paint(_tailRenderer, back, 1f, 0.1f, 0.12f);
+            // Objectives: a gold border twice as thick; chatter: the plain cream bubble.
+            Color edge = _objective ? objectiveGold : outlineColor;
+            Paint(_panelRenderer, back, _size.x / _size.y, Mathf.Min(0.45f, (chip ? 0.5f * _size.y : 0.012f) / _size.y), (_objective ? 0.0036f : 0.0018f) / _size.y, edge);
+            Paint(_tailRenderer, back, 1f, 0.1f, 0.12f, edge);
         }
 
         /// <summary>
@@ -355,11 +412,11 @@ namespace Diorama
             _endAt = Mathf.Min(_endAt, Mathf.Max(Time.time, _shownAt + HoldSeconds(_chars, holdBase, holdPerChar)));
         }
 
-        void Paint(MeshRenderer r, Color back, float aspect, float radius, float border)
+        void Paint(MeshRenderer r, Color back, float aspect, float radius, float border, Color? edge = null)
         {
             _block.Clear();
             _block.SetColor(BackColorId, back);
-            _block.SetColor(BorderColorId, outlineColor);
+            _block.SetColor(BorderColorId, edge ?? outlineColor);
             _block.SetFloat(FillId, 0f);
             _block.SetFloat(AspectId, aspect);
             _block.SetFloat(RadiusId, radius);
@@ -401,6 +458,14 @@ namespace Diorama
             Debug.Log($"[DialogueBubble] Skipped by {how}.");
             _showing = false;
             Skipped?.Invoke();
+        }
+
+        /// <summary>Step 12a: a pinned line's chip opens to the full line (the Spirit poked).</summary>
+        public void ReopenChip(string why)
+        {
+            Reopen(why);
+            // Stays open a few seconds longer than a glance does.
+            _lookedAt = Time.time + 3f;
         }
 
         void Reopen(string why)

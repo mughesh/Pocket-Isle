@@ -63,7 +63,18 @@ namespace Diorama.EditorTools
         /// <summary>Later parts of 12a (lessons, Spirit's trail) wire their pieces here.</summary>
         static void Extra(StringBuilder log, Material gold)
         {
+            MarkObjectives(log);
             Lessons(log, gold);
+            var spirit = Object.FindFirstObjectByType<LanternSpirit>(FindObjectsInactive.Include);
+            if (spirit != null)
+            {
+                var poke = spirit.GetComponent<SpiritPoke>();
+                if (poke == null) poke = Undo.AddComponent<SpiritPoke>(spirit.gameObject);
+                poke.spirit = spirit;
+                poke.grabGuard = Object.FindFirstObjectByType<IslandHandle>(FindObjectsInactive.Include);
+                log.Append("\n  Spirit: poke / look + pinch repeats the objective");
+            }
+            else log.Append("\n  Lantern Spirit: MISSING");
             var settings = Object.FindFirstObjectByType<SettingsBoard>(FindObjectsInactive.Include);
             if (settings != null)
             {
@@ -115,6 +126,40 @@ namespace Diorama.EditorTools
             if (quick != null) log.Append($"\n  quick slot cuts: {string.Join(", ", quick.cutLessons)}");
             DialogueTools.Import();
             log.Append("\n  Script_v1 reimported (lesson.walk*, lesson.walk.turn*, lesson.walk.far*)");
+        }
+
+        const string ScriptPath = "Assets/Docs/Story/Script_v1.md";
+
+        /// <summary>
+        /// C: marks the objective lines in Script_v1.md ("· objective" after the id): every lesson's lines, every hand
+        /// moment's lesson line, task lines (*.task) and objective.more. Chatter (story, praise, first-meet) stays plain.
+        /// </summary>
+        static void MarkObjectives(StringBuilder log)
+        {
+            var ids = new System.Collections.Generic.HashSet<string> { HandPuzzle.MoreLine };
+            var lessons = AssetDatabase.LoadAssetAtPath<OnboardingScript>(Step8bSetup.LessonsPath);
+            if (lessons != null)
+                foreach (var l in lessons.lessons)
+                    foreach (var id in new[] { l.line, l.again, l.help })
+                        if (!string.IsNullOrEmpty(id)) ids.Add(id);
+            foreach (var p in Object.FindObjectsByType<HandPuzzle>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                if (!string.IsNullOrEmpty(p.lessonLine)) ids.Add(p.lessonLine);
+            string path = System.IO.Path.GetFullPath(ScriptPath);
+            var lines = System.IO.File.ReadAllLines(path);
+            var head = new System.Text.RegularExpressions.Regex(@"^- `([^`]+)`");
+            int marked = 0;
+            for (int i = 0; i < lines.Length; i++)
+            {
+                var m = head.Match(lines[i]);
+                if (!m.Success) continue;
+                string id = m.Groups[1].Value;
+                if (!ids.Contains(id) && !id.EndsWith(".task")) continue;
+                if (lines[i].Contains("· objective")) continue;
+                lines[i] = lines[i].Insert(m.Length, " · objective");
+                marked++;
+            }
+            System.IO.File.WriteAllText(path, string.Join("\n", lines) + "\n");
+            log.Append($"\n  objectives: {marked} newly marked ({ids.Count} ids from lessons and hand moments)");
         }
 
         static GhostHandClip BuildSwipeTwice()

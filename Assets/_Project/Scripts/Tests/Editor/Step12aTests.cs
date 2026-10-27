@@ -143,6 +143,19 @@ namespace Diorama.Tests
         }
 
         [Test]
+        public void ObjectiveLines_MarkedInTheScript_ChatterPlain()
+        {
+            var s = UnityEditor.AssetDatabase.LoadAssetAtPath<DialogueScript>("Assets/_Project/Data/Dialogue/Script_v1.asset");
+            if (s == null) Assert.Inconclusive("Script_v1.asset missing.");
+            foreach (var id in new[] { "lesson.walk", "lesson.walk.far", "gw.kites.task", "objective.more", "intro.shard" })
+                Assert.IsTrue(s.Find(id) != null && s.Find(id).objective, $"{id} is an objective");
+            foreach (var id in new[] { "praise.nice", "realm.lilymere.first", "spirit.poke.idle" })
+                Assert.IsTrue(s.Find(id) != null && !s.Find(id).objective, $"{id} is chatter");
+            Assert.IsTrue(s.Find("intro.shard").once, "the once flag still reads after objective");
+            Assert.AreEqual("shard", s.Find("intro.shard").target);
+        }
+
+        [Test]
         public void DoubleSwipeWindow()
         {
             var r = new Vector2Int(1, 0);

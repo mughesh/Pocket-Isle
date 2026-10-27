@@ -62,6 +62,24 @@ namespace Diorama.EditorTools
             Debug.Log($"[Step12aDebug] Standalone Initialize XR on Startup: {prop.GetValue(s)}.");
         }
 
+        /// <summary>Pokes the Lantern Spirit (repeat the objective, or the idle line and the trail).</summary>
+        public static void Poke()
+        {
+            var p = Object.FindFirstObjectByType<SpiritPoke>();
+            if (p != null) p.DebugPoke();
+            else Debug.LogWarning("[Step12aDebug] No SpiritPoke.");
+        }
+
+        /// <summary>Says the trigger in arg.txt (even if once).</summary>
+        public static void Say() => Dialogue.Repeat(Arg);
+
+        /// <summary>Ends the tutorial (no praise).</summary>
+        public static void FinishTutorial()
+        {
+            var o = Object.FindFirstObjectByType<Onboarding>();
+            if (o != null) o.DebugFinish();
+        }
+
         public static void State()
         {
             var e = Explorer;
