@@ -37,6 +37,7 @@ MonoBehaviour:
     ghostSpread: 0
     goldPath: 
     goldTileSteps: 0
+    goldTileRule: 
     tutorialGrass: 0
   - id: pinch
     line: lesson.pinch
@@ -62,6 +63,7 @@ MonoBehaviour:
     ghostSpread: 0
     goldPath: 
     goldTileSteps: 0
+    goldTileRule: 
     tutorialGrass: 0
   - id: move
     line: intro.world
@@ -87,6 +89,7 @@ MonoBehaviour:
     ghostSpread: 0
     goldPath: 
     goldTileSteps: 0
+    goldTileRule: 
     tutorialGrass: 0
   - id: twoHands
     line: lesson.twohands
@@ -112,6 +115,7 @@ MonoBehaviour:
     ghostSpread: 0
     goldPath: 
     goldTileSteps: 0
+    goldTileRule: 
     tutorialGrass: 0
   - id: starter
     line: intro.starter
@@ -137,16 +141,17 @@ MonoBehaviour:
     ghostSpread: 0
     goldPath: 
     goldTileSteps: 0
+    goldTileRule: 
     tutorialGrass: 0
   - id: walk
     line: lesson.walk
     again: lesson.walk.again
-    chip: Thumb swipe
+    chip: Swipe
     help: lesson.walk.help
     helpAfter: 30
     startWhen: canWalk
     delay: 1.5
-    doneWhen: walked3
+    doneWhen: atGoldTile | smartSteps4
     validWhile: 
     skipAfter: 0
     failWhen: 
@@ -162,22 +167,23 @@ MonoBehaviour:
     ghostSpread: 0
     goldPath: 
     goldTileSteps: 0
+    goldTileRule: ahead
     tutorialGrass: 0
-  - id: stop
-    line: lesson.stop
-    again: lesson.stop.again
-    chip: Tap to stop
+  - id: turn
+    line: lesson.walk.turn
+    again: lesson.walk.turn.again
+    chip: Swipe again
     help: 
     helpAfter: 30
     startWhen: canWalk
     delay: 0.8
-    doneWhen: stopped
+    doneWhen: atGoldTile | smartSteps3
     validWhile: 
     skipAfter: 0
     failWhen: 
     rewindTo: 
     praise: 1
-    ghost: thumb_tap
+    ghost: thumb_swipe_forward
     place: 2
     target: ghost
     source: 
@@ -187,6 +193,33 @@ MonoBehaviour:
     ghostSpread: 0
     goldPath: 
     goldTileSteps: 0
+    goldTileRule: turn
+    tutorialGrass: 0
+  - id: far
+    line: lesson.walk.far
+    again: lesson.walk.far.again
+    chip: Swipe twice
+    help: 
+    helpAfter: 30
+    startWhen: canWalk
+    delay: 0.8
+    doneWhen: atGoldTile | smartSteps3
+    validWhile: 
+    skipAfter: 0
+    failWhen: 
+    rewindTo: 
+    praise: 1
+    ghost: thumb_swipe_twice_tap
+    place: 2
+    target: ghost
+    source: 
+    targetLift: 0
+    ghostScale: 0.6
+    bothHands: 0
+    ghostSpread: 0
+    goldPath: 
+    goldTileSteps: 0
+    goldTileRule: far
     tutorialGrass: 0
   - id: look
     line: lesson.look
@@ -212,6 +245,7 @@ MonoBehaviour:
     ghostSpread: 0
     goldPath: 
     goldTileSteps: 3
+    goldTileRule: 
     tutorialGrass: 0
   - id: grass
     line: lesson.grass
@@ -237,6 +271,7 @@ MonoBehaviour:
     ghostSpread: 0
     goldPath: firstGrass
     goldTileSteps: 0
+    goldTileRule: 
     tutorialGrass: 1
   - id: send
     line: pod.first
@@ -262,6 +297,7 @@ MonoBehaviour:
     ghostSpread: 0
     goldPath: 
     goldTileSteps: 0
+    goldTileRule: 
     tutorialGrass: 0
   - id: rune
     line: battle.first
@@ -287,6 +323,7 @@ MonoBehaviour:
     ghostSpread: 0
     goldPath: 
     goldTileSteps: 0
+    goldTileRule: 
     tutorialGrass: 0
   - id: catch
     line: capture.first
@@ -312,6 +349,7 @@ MonoBehaviour:
     ghostSpread: 0
     goldPath: 
     goldTileSteps: 0
+    goldTileRule: 
     tutorialGrass: 0
   - id: free
     line: 
@@ -337,6 +375,7 @@ MonoBehaviour:
     ghostSpread: 0
     goldPath: 
     goldTileSteps: 0
+    goldTileRule: 
     tutorialGrass: 0
   praise:
   - praise.nice

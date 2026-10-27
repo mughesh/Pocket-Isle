@@ -50,6 +50,9 @@ namespace Diorama
         [Tooltip("The lesson that counts pinches (either hand).")]
         public string pinchLesson = "pinch";
         [Min(1)] public int pinchCount = 2;
+        [Tooltip("Step 12a: Diorama/GoldMark (Materials/GoldMark) for the lesson's gold tile.")]
+        public Material goldMaterial;
+
         [Tooltip("Pooled particles for the gold sparkle at the fingertips on each pinch.")]
         public BattleFx fx;
         public Color sparkleColor = new Color(1f, 0.82f, 0.35f);
@@ -57,7 +60,7 @@ namespace Diorama
         /// <summary>Lesson event names (anything else in a condition is a <see cref="GameConditions"/> state).</summary>
         public static readonly string[] Events =
         {
-            "shardTouched", "islandGrabbed", "starterPicked", "walked3", "stopped", "gazeWalk",
+            "shardTouched", "islandGrabbed", "starterPicked", "walked3", "stopped", "gazeWalk", "walkedOn",
             "grassBattle", "sentOut", "moveUsed", "podThrown", "wonOrCaught", "battleFailed", "twoHandGrab", "pinched",
         };
 
@@ -115,6 +118,8 @@ namespace Diorama
             {
                 explorer.OnStep -= OnStep;
                 explorer.Stopped -= OnStopped;
+                explorer.Swiped -= OnSwiped;
+                explorer.walkStops.Remove(GoldStop);
             }
             if (encounters != null) encounters.BattleEnded -= OnBattleEnded;
         }
@@ -129,12 +134,18 @@ namespace Diorama
             }
             explorer.OnStep += OnStep;
             explorer.Stopped += OnStopped;
+            explorer.Swiped += OnSwiped;
+            explorer.walkStops.Add(GoldStop);
             encounters.BattleEnded += OnBattleEnded;
+            _goldMarks = new GoldMarks("Lesson Gold Tile", island, goldMaterial);
 
             GameConditions.Register("battle.send", () => encounters != null && encounters.AwaitingSendOut);
             GameConditions.Register("battle.out", () => encounters != null && encounters.PlayerOut);
             GameConditions.Register("wildRed", () => encounters != null && encounters.InBattle && encounters.CurrentBattle != null && encounters.CurrentBattle.CatchUnlocked);
             GameConditions.Register("canWalk", () => explorer != null && explorer.CanMove && !Opening.InProgress && !SceneSwap.IsBusy && !SceneSwap.IsInside);
+            // Step 12a: smart steps since the current lesson showed (the walk lessons never block).
+            GameConditions.Register("smartSteps3", () => explorer != null && explorer.SmartStepsTaken - _smartAtShow >= 3);
+            GameConditions.Register("smartSteps4", () => explorer != null && explorer.SmartStepsTaken - _smartAtShow >= 4);
             GameConditions.Register("atGoldTile", () => _goldTile.HasValue && explorer != null && explorer.Tile == _goldTile.Value && !explorer.Destination.HasValue);
             GameConditions.Register("tutorial", () => Running);
             GameConditions.Register("encounters", () => EncountersEnabled);
@@ -165,6 +176,8 @@ namespace Diorama
         public void Restore(string lessonId, bool finished)
         {
             if (_runner == null) return;
+            // Step 12a: the stop lesson became the walk-on lesson (it teaches the tap too).
+            if (lessonId == "stop") lessonId = "far";
             // Step 9h moved the two-hands lesson into the opening: a save that waited for it at the end is done.
             if (finished || lessonId == "twoHands")
             {
@@ -235,6 +248,15 @@ namespace Diorama
         {
             if (_runner != null && _runner.IsRunning) _runner.Mark("stopped");
         }
+
+        void OnSwiped(bool walkOn)
+        {
+            if (walkOn && _runner != null && _runner.IsRunning) _runner.Mark("walkedOn");
+        }
+
+        /// <summary>Step 12a: a smart step stops on the lesson's gold tile.</summary>
+        WalkStop GoldStop(Vector2Int from, Vector2Int next) =>
+            Running && _goldTile.HasValue && next == _goldTile.Value ? WalkStop.On : WalkStop.None;
 
         void OnBattleEnded(BattleResult result)
         {
@@ -332,7 +354,9 @@ namespace Diorama
             _wasPinching[0] = _wasPinching[1] = true; // a pinch already held doesn't count
             _helped = false;
             _lineAway = 0f;
-            if (l.goldTileSteps > 0) PickGoldTile(l.goldTileSteps);
+            _smartAtShow = explorer != null ? explorer.SmartStepsTaken : 0;
+            if (!string.IsNullOrEmpty(l.goldTileRule)) PickSmartGoldTile(l.goldTileRule);
+            else if (l.goldTileSteps > 0) PickGoldTile(l.goldTileSteps);
             if (!string.IsNullOrEmpty(l.goldPath) && _goldPath == null) _goldPath = StartCoroutine(GoldPath(l));
             // Step 9h: one instruction at a time, and it stays until the lesson is done.
             if (!string.IsNullOrEmpty(l.line))
@@ -376,7 +400,7 @@ namespace Diorama
                 StopCoroutine(_goldPath);
                 _goldPath = null;
             }
-            if (l.goldTileSteps > 0) _goldTile = null;
+            if (l.goldTileSteps > 0 || !string.IsNullOrEmpty(l.goldTileRule)) _goldTile = null;
             if (done && l.praise) GameAudio.Ui(Diorama.Audio.AudioIds.UiLesson);
             if (HandsMissing) SetHandsMissing(false);
             if (_shown) LessonEnded?.Invoke(l, done);
@@ -458,6 +482,95 @@ namespace Diorama
                 }
                 yield return new WaitForSeconds(1.2f);
             }
+        }
+
+        /// <summary>
+        /// Step 12a: the gold tile from a smart-step plan from the explorer (tries all four ways, prefers path tiles and
+        /// away from the player): ahead = the 4th tile (else the last, at least 3); turn = one past the first turn (else a
+        /// junction stop); far = the end of the longest walk-on stretch (at least 6). Only tiles in view.
+        /// </summary>
+        void PickSmartGoldTile(string rule)
+        {
+            _goldTile = null;
+            var world = island.world;
+            if (world == null || explorer == null) return;
+            var plan = new List<Vector2Int>();
+            var ways = new[] { new Vector2Int(0, -1), new Vector2Int(-1, 0), new Vector2Int(1, 0), new Vector2Int(0, 1) };
+            float best = float.MinValue;
+            for (int w = 0; w < ways.Length; w++)
+            {
+                bool far = rule == "far";
+                string end = SmartStep.Plan(world, explorer.Tile, ways[w], far, far ? 12 : rule == "turn" ? 9 : SmartStep.SmartTiles, null, plan);
+                // Only tiles in view count.
+                int n = 0;
+                while (n < plan.Count && island.FootprintContains(island.TileToLocal(plan[n], island.Content.capHeight))) n++;
+                if (n == 0) continue;
+                Vector2Int? pick = null;
+                float score = 0f;
+                if (rule == "turn")
+                {
+                    for (int i = 1; i < n && !pick.HasValue; i++)
+                    {
+                        var before = i >= 2 ? plan[i - 1] - plan[i - 2] : plan[0] - explorer.Tile;
+                        if (plan[i] - plan[i - 1] != before) pick = plan[Mathf.Min(i + 1, n - 1)];
+                    }
+                    if (pick.HasValue) score = 20f;
+                    else if (end == SmartStep.Junction && n == plan.Count && n >= 2)
+                    {
+                        pick = plan[n - 1];
+                        score = 10f;
+                    }
+                }
+                else if (rule == "far")
+                {
+                    // The end of the straight part (at least 5 tiles), else the end of any walk of 6 or more.
+                    int straight = 1;
+                    while (straight < n && plan[straight] - plan[straight - 1] == plan[0] - explorer.Tile) straight++;
+                    if (straight >= 5)
+                    {
+                        pick = plan[straight - 1];
+                        score = 10f + straight;
+                    }
+                    else if (n >= 6)
+                    {
+                        pick = plan[n - 1];
+                        score = n;
+                    }
+                }
+                else
+                {
+                    if (n >= 3) pick = plan[Mathf.Min(3, n - 1)];
+                    score = n;
+                }
+                if (!pick.HasValue || world.At(pick.Value) == IslandMap.TallGrass) continue;
+                if (world.At(pick.Value) == IslandMap.Path) score += 3f;
+                if (w == 0) score += 1.5f;
+                // Not back the way it just came.
+                if (ways[w] == -explorer.Facing) score -= 6f;
+                if (score > best)
+                {
+                    best = score;
+                    _goldTile = pick;
+                }
+            }
+            if (!_goldTile.HasValue && rule != "ahead") PickSmartGoldTile("ahead");
+            Debug.Log(_goldTile.HasValue
+                ? $"[Onboarding] Gold tile ({rule}) c{_goldTile.Value.x} r{_goldTile.Value.y} from c{explorer.Tile.x} r{explorer.Tile.y}."
+                : $"[Onboarding] No {rule} gold tile in view: the lesson finishes after a few smart steps.");
+        }
+
+        // ---- the gold tile's look (step 12a) ----
+
+        GoldMarks _goldMarks;
+        int _smartAtShow;
+
+        void LateUpdate()
+        {
+            if (_goldMarks == null) return;
+            _goldMarks.Begin();
+            if (_goldTile.HasValue && Running && explorer != null && explorer.Tile != _goldTile.Value)
+                _goldMarks.Draw(_goldTile.Value, GoldMarks.Tile, 0f, 0.92f, 1f, 1f, true);
+            _goldMarks.End();
         }
 
         /// <summary>A walkable tile about <paramref name="steps"/> steps away, in view, not tall grass, toward the island's middle.</summary>

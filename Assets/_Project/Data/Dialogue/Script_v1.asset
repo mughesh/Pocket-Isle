@@ -135,7 +135,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Slide your thumb along your finger to walk.
+      text: Swipe your thumb along your finger to take a few steps.
   - id: lesson.walk.again
     once: 0
     priority: 1
@@ -145,7 +145,47 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Thumb along your finger. Like this!
+      text: Swipe toward the gold tile. Like this!
+  - id: lesson.walk.turn
+    once: 0
+    priority: 1
+    note: step 12a
+    target: ghost
+    validWhile: canWalk
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The path turns. Swipe again!
+  - id: lesson.walk.turn.again
+    once: 0
+    priority: 1
+    note: 
+    target: ghost
+    validWhile: canWalk
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Swipe, and I'll follow the path.
+  - id: lesson.walk.far
+    once: 0
+    priority: 1
+    note: step 12a
+    target: ghost
+    validWhile: canWalk
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Swipe twice quickly to keep walking. Tap to stop.
+  - id: lesson.walk.far.again
+    once: 0
+    priority: 1
+    note: 
+    target: ghost
+    validWhile: canWalk
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Two quick swipes to keep going. A tap stops.
   - id: lesson.walk.help
     once: 0
     priority: 1

@@ -23,3 +23,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 67a336e220f41ce42ac9a18099ee5d03, type: 2}
   - {fileID: 11400000, guid: b58ac3d5cfaec074faaec744a96da9dd, type: 2}
   - {fileID: 11400000, guid: 9a7e3358aa9291f45a78a2a8697908b7, type: 2}
+  - {fileID: 11400000, guid: 637bb0b31d78f67428fa70186fa471a6, type: 2}
+  targetScale: 0.75

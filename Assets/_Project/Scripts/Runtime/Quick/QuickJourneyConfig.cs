@@ -12,7 +12,7 @@ namespace Diorama
     {
         [Header("Lessons")]
         [Tooltip("Lesson ids skipped in the quick slot (every lesson that teaches a hand verb stays).")]
-        public string[] cutLessons = { "stop", "twoHands" };
+        public string[] cutLessons = { "twoHands" };
 
         [Header("The gift (after the capture lesson, in the hub)")]
         public IslingSpecies[] giftSpecies = new IslingSpecies[2];

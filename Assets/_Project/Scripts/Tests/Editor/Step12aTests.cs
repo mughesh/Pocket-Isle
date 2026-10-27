@@ -123,6 +123,26 @@ namespace Diorama.Tests
         }
 
         [Test]
+        public void WalkLessons_TaughtInBothSlots()
+        {
+            var s = UnityEditor.AssetDatabase.LoadAssetAtPath<OnboardingScript>("Assets/_Project/Data/Onboarding/Onboarding_Main.asset");
+            if (s == null) Assert.Inconclusive("Onboarding_Main missing (run Setup > Walking + Guidance (12) > Set Up MR_Main (12a walking)).");
+            var ids = s.lessons.ConvertAll(l => l.id);
+            Assert.IsFalse(ids.Contains("stop"), "the stop lesson is folded into walk.far");
+            int walk = ids.IndexOf("walk"), turn = ids.IndexOf("turn"), far = ids.IndexOf("far"), look = ids.IndexOf("look");
+            Assert.IsTrue(walk >= 0 && walk < turn && turn < far && far < look, string.Join(", ", ids));
+            Assert.AreEqual("ahead", s.lessons[walk].goldTileRule);
+            Assert.AreEqual("turn", s.lessons[turn].goldTileRule);
+            Assert.AreEqual("far", s.lessons[far].goldTileRule);
+            foreach (var i in new[] { walk, turn, far })
+                StringAssert.Contains("smartSteps", s.lessons[i].doneWhen, "a walk lesson never blocks");
+            var quick = UnityEditor.AssetDatabase.LoadAssetAtPath<QuickJourneyConfig>("Assets/_Project/Data/QuickJourney.asset");
+            if (quick != null)
+                foreach (var id in new[] { "walk", "turn", "far" })
+                    Assert.IsFalse(QuickJourney.SkipsLesson(id, true, quick), $"the quick slot teaches {id} too");
+        }
+
+        [Test]
         public void DoubleSwipeWindow()
         {
             var r = new Vector2Int(1, 0);

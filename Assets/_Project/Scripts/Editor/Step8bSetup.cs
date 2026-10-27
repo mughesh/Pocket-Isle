@@ -177,16 +177,25 @@ namespace Diorama.EditorTools
                     // Step 9h: grabs the looked-at pod (else the next one each loop) and sets it on the rim socket.
                     doneWhen = "starterPicked", ghost = "grab_drop", place = GhostPlace.AtTarget, source = "starterPod:#", target = "starterSocket",
                 },
+                // Step 12a: smart steps. A gold tile 3-4 tiles ahead on the path (the smart step stops on it), then one round
+                // a corner, then a long stretch for two quick swipes (it never blocks: 3 smart steps also finish it).
                 new LessonData
                 {
-                    id = "walk", line = "lesson.walk", chip = "Thumb swipe", again = "lesson.walk.again", help = "lesson.walk.help", helpAfter = 30f,
-                    startWhen = "canWalk", delay = 1.5f, doneWhen = "walked3",
+                    id = "walk", line = "lesson.walk", chip = "Swipe", again = "lesson.walk.again", help = "lesson.walk.help", helpAfter = 30f,
+                    startWhen = "canWalk", delay = 1.5f, doneWhen = "atGoldTile | smartSteps4", goldTileRule = "ahead",
                     ghost = "thumb_swipe_forward", place = GhostPlace.AboveIsland, target = "ghost", ghostScale = 0.6f,
                 },
                 new LessonData
                 {
-                    id = "stop", line = "lesson.stop", chip = "Tap to stop", again = "lesson.stop.again", startWhen = "canWalk", delay = 0.8f, doneWhen = "stopped",
-                    ghost = "thumb_tap", place = GhostPlace.AboveIsland, target = "ghost", ghostScale = 0.6f,
+                    id = "turn", line = "lesson.walk.turn", chip = "Swipe again", again = "lesson.walk.turn.again", startWhen = "canWalk", delay = 0.8f,
+                    doneWhen = "atGoldTile | smartSteps3", goldTileRule = "turn",
+                    ghost = "thumb_swipe_forward", place = GhostPlace.AboveIsland, target = "ghost", ghostScale = 0.6f,
+                },
+                new LessonData
+                {
+                    id = "far", line = "lesson.walk.far", chip = "Swipe twice", again = "lesson.walk.far.again", startWhen = "canWalk", delay = 0.8f,
+                    doneWhen = "atGoldTile | smartSteps3", goldTileRule = "far",
+                    ghost = Step12aSetup.SwipeTwiceClip, place = GhostPlace.AboveIsland, target = "ghost", ghostScale = 0.6f,
                 },
                 new LessonData
                 {

@@ -4728,6 +4728,7 @@ MonoBehaviour:
   handsMissingSeconds: 3
   pinchLesson: pinch
   pinchCount: 2
+  goldMaterial: {fileID: 2100000, guid: dc3915bdb04a1cb4eb4760821e23e7b7, type: 2}
   fx: {fileID: 1078587927}
   sparkleColor: {r: 1, g: 0.82, b: 0.35, a: 1}
 --- !u!4 &1380201672
@@ -6438,6 +6439,7 @@ MonoBehaviour:
     Font: Liberation Sans (SIL Open Font License)'
   creditLines: 7
   creditSeconds: 2.2
+  glyphMaterial: {fileID: 2100000, guid: cc8ec5f70f1d0b542924a207dfb808ba, type: 2}
 --- !u!1 &1954810186
 GameObject:
   m_ObjectHideFlags: 0

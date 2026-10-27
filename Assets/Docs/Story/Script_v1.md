@@ -40,9 +40,17 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
 - `lesson.starter.again` · → starterPods
   - Spirit: Look at one and pinch, or grab it.
 - `lesson.walk` · while canWalk · → ghost
-  - Spirit: Slide your thumb along your finger to walk.
+  - Spirit: Swipe your thumb along your finger to take a few steps.
 - `lesson.walk.again` · while canWalk · → ghost
-  - Spirit: Thumb along your finger. Like this!
+  - Spirit: Swipe toward the gold tile. Like this!
+- `lesson.walk.turn` · while canWalk · → ghost (step 12a)
+  - Spirit: The path turns. Swipe again!
+- `lesson.walk.turn.again` · while canWalk · → ghost
+  - Spirit: Swipe, and I'll follow the path.
+- `lesson.walk.far` · while canWalk · → ghost (step 12a)
+  - Spirit: Swipe twice quickly to keep walking. Tap to stop.
+- `lesson.walk.far.again` · while canWalk · → ghost
+  - Spirit: Two quick swipes to keep going. A tap stops.
 - `lesson.walk.help` · while canWalk · → ghost
   - Spirit: Or look at a spot and pinch.
 - `lesson.stop` · while canWalk · → ghost

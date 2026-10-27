@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: QuickJourney
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.QuickJourneyConfig
   cutLessons:
-  - stop
   - twoHands
   giftSpecies:
   - {fileID: 11400000, guid: 081cd6bac15516a438300833ff827291, type: 2}

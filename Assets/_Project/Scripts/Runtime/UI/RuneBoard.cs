@@ -177,6 +177,26 @@ namespace Diorama
             return t;
         }
 
+        /// <summary>Step 12a: a flat picture on the board (the Controls card's glyphs), with a Diorama/Glyph material.</summary>
+        public MeshRenderer AddImage(Texture texture, Material material, Vector2 center, Vector2 size)
+        {
+            if (texture == null || material == null) return null;
+            var go = new GameObject("Image");
+            go.transform.SetParent(_root, false);
+            go.transform.localPosition = new Vector3(center.x, center.y, -0.002f);
+            go.transform.localScale = new Vector3(size.x, size.y, 1f);
+            go.AddComponent<MeshFilter>().sharedMesh = _quad;
+            var r = go.AddComponent<MeshRenderer>();
+            r.sharedMaterial = material;
+            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            var block = new MaterialPropertyBlock();
+            block.SetTexture("_MainTex", texture);
+            r.SetPropertyBlock(block);
+            _extras.Add(go);
+            Grow(center, size);
+            return r;
+        }
+
         /// <summary>A dark stone slab behind the runes (settings, credits).</summary>
         public MeshRenderer AddBacking(Vector2 center, Vector2 size)
         {

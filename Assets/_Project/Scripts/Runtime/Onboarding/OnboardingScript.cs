@@ -89,6 +89,8 @@ namespace Diorama
         public string goldPath;
         [Tooltip("Picks a gold tile this many steps from the explorer when it starts (target goldTile). 0 = none.")]
         public int goldTileSteps;
+        [Tooltip("Step 12a: picks the gold tile from a smart-step plan instead: ahead (3-4 tiles along the path), turn (round a corner), far (the end of a long straight stretch). The smart step stops on it.")]
+        public string goldTileRule;
         [Tooltip("While this lesson is the current one, the tutorial grass patch starts the scripted first encounter.")]
         public bool tutorialGrass;
     }

@@ -21,6 +21,17 @@ namespace Diorama
         [Tooltip("Credits: lines shown at once; longer credits scroll up a line every few seconds.")]
         public int creditLines = 7;
         public float creditSeconds = 2.2f;
+        [Tooltip("Step 12a: Diorama/Glyph (Materials/Glyph) for the Controls card's drawn glyphs.")]
+        public Material glyphMaterial;
+
+        /// <summary>Step 12a: the Controls card's rows (glyph, text).</summary>
+        public static readonly string[] ControlsRows =
+        {
+            "<b>Swipe</b> your thumb along your finger: a few steps",
+            "<b>Swipe twice</b> quickly: keep walking. <b>Tap</b>: stop",
+            "<b>Look</b> at a spot and <b>pinch</b>: go there",
+            "<b>Pinch</b> or <b>grab</b> things on the island",
+        };
 
         public static bool IsOpen { get; private set; }
 
@@ -87,9 +98,10 @@ namespace Diorama
                 () => GameSettings.FewerHints ? 1 : 0, i => GameSettings.FewerHints = i == 1);
             Choices("Touch tiles to walk", top - 6f * RowGap, new[] { "On", "Off" },
                 () => GameSettings.TouchWalk ? 0 : 1, i => GameSettings.TouchWalk = i == 0);
-            runes.Add("Recenter island", new Vector2(-0.09f, 0f), Wide, Recenter);
-            runes.Add("Credits", new Vector2(0f, 0f), Wide, BuildCredits);
-            var back = runes.Add("Back", new Vector2(0.09f, 0f), Wide, Close);
+            runes.Add("Recenter island", new Vector2(-0.1275f, 0f), Wide, Recenter);
+            runes.Add("Controls", new Vector2(-0.0425f, 0f), Wide, () => BuildControls(BuildMain));
+            runes.Add("Credits", new Vector2(0.0425f, 0f), Wide, BuildCredits);
+            var back = runes.Add("Back", new Vector2(0.1275f, 0f), Wide, Close);
             back.tint = new Color(0.62f, 0.55f, 0.4f);
             runes.Show();
         }
@@ -156,6 +168,46 @@ namespace Diorama
             }
             placer.Place();
             Debug.Log("[Settings] Recentered the island in front of the head.");
+        }
+
+        // ---- controls (step 12a) ----
+
+        /// <summary>Opens the Controls card on its own (the game menu's Controls rune); <paramref name="closed"/> runs on Back.</summary>
+        public void OpenControls(Action closed)
+        {
+            if (runes == null)
+            {
+                closed?.Invoke();
+                return;
+            }
+            _closed = closed;
+            IsOpen = true;
+            BuildControls(Close);
+            Debug.Log("[Settings] Controls card.");
+        }
+
+        void BuildControls(Action back)
+        {
+            runes.Clear();
+            _creditText = null;
+            const float rowH = 0.05f, glyph = 0.048f;
+            int n = ControlsRows.Length;
+            float top = 0.03f + n * rowH;
+            runes.AddBacking(new Vector2(0f, 0.025f + n * rowH * 0.5f + 0.012f), new Vector2(0.36f, n * rowH + 0.07f));
+            runes.AddText("<b>Controls</b>", new Vector2(0f, top + 0.006f), runes.fontSize * 1.1f);
+            for (int i = 0; i < n; i++)
+            {
+                float y = top - (i + 0.75f) * rowH;
+                runes.AddImage(ControlsGlyphs.Get(i), glyphMaterial, new Vector2(-0.145f, y), new Vector2(glyph, glyph));
+                var t = runes.AddText(ControlsRows[i], new Vector2(0.03f, y), runes.fontSize * 0.82f, TextAlignmentOptions.Left, 0.27f);
+                t.textWrappingMode = TextWrappingModes.Normal;
+                t.alignment = TextAlignmentOptions.MidlineLeft;
+                t.rectTransform.sizeDelta = new Vector2(0.27f, rowH);
+            }
+            if (glyphMaterial == null) Debug.LogError("[Settings] No glyph material (Set Up MR_Main (12a walking)): the Controls card has no pictures.", this);
+            var b = runes.Add("Back", new Vector2(0f, 0f), Wide, () => back());
+            b.tint = new Color(0.62f, 0.55f, 0.4f);
+            runes.Show();
         }
 
         // ---- credits ----

@@ -116,16 +116,17 @@ namespace Diorama
         {
             runes.Clear();
             var size = new Vector2(0.072f, 0.034f);
-            int n = 3;
+            int n = 4;
 #if UNITY_EDITOR || POCKET_DEV
-            n = 4;
+            n = 5;
 #endif
             float x0 = -(n - 1) * 0.04f;
             var resume = runes.Add("Resume", new Vector2(x0, 0f), size, () => Close("Resume"));
             runes.Add("Settings", new Vector2(x0 + 0.08f, 0f), size, OpenSettings);
-            runes.Add("Title", new Vector2(x0 + 0.16f, 0f), size, ToTitle);
+            runes.Add("Controls", new Vector2(x0 + 0.16f, 0f), size, OpenControls);
+            runes.Add("Title", new Vector2(x0 + 0.24f, 0f), size, ToTitle);
 #if UNITY_EDITOR || POCKET_DEV
-            var dev = runes.Add("Dev", new Vector2(x0 + 0.24f, 0f), size, OpenDev);
+            var dev = runes.Add("Dev", new Vector2(x0 + 0.32f, 0f), size, OpenDev);
             dev.tint = new Color(0.45f, 0.5f, 0.62f);
 #endif
             runes.DefaultFocus = resume;
@@ -151,6 +152,17 @@ namespace Diorama
             if (settings == null) return;
             runes.Hide();
             settings.Open(() =>
+            {
+                if (IsOpen) runes.Show();
+            });
+        }
+
+        /// <summary>Step 12a: the How to play card.</summary>
+        void OpenControls()
+        {
+            if (settings == null) return;
+            runes.Hide();
+            settings.OpenControls(() =>
             {
                 if (IsOpen) runes.Show();
             });
