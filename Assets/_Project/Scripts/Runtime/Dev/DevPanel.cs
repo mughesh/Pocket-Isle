@@ -354,6 +354,13 @@ namespace Diorama
                                 : ShardHolder.Holds(ShardHolder.WindId) ? state.SetPuzzle(ShardHolder.WindId, true, 2) : state.SetPuzzle(ShardHolder.WindId, false, 1)),
                             () => PuzzleState.Stage(ShardHolder.WindId) > 0 || GameState.Solved(ShardHolder.WindId));
                     }
+                    if (state.lilymere != null)
+                    {
+                        // Step 11b: Lilymere's beats, in story order (basin = the lagoon risen).
+                        Flag("LM pads", "lm.pads", 7);
+                        Flag("LM rain", "lm.rain", 31);
+                        Flag("LM basin + rise", LilymereLagoon.RisenId, 2);
+                    }
                     Add("Reset all story", () => Edit(state.ResetStory()), null, true);
                     break;
                 case Tab.Save:

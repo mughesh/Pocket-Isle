@@ -285,6 +285,27 @@ the base bobs. 9.8k triangles, 4 draws.
   estimates in the config; the real route time comes from the timer in the dev readout (opening start to the shard
   in the statue).
 
+## Lilymere as built (steps 11a-11b, Oct 27 night)
+- 60 x 60 (`LilymereTools`, seed 1131), straight legs only: arrival + return gate, the stilt village round shallows (a
+  plank bridge over them, 5 stilt huts, Hearth Shrine), the lily channel (3 rows of water across the map, one 2-wide
+  crossing), the lotus garden (a dry cracked pond bed the trail crosses), the waterfall basin under the cliff (the frozen
+  waterfall on its face), the lake temple half-sunk on the lagoon's north shore, reached by a causeway. Pockets: reed
+  marsh, rare pond, wind-visitor meadow, a lookout jetty. Woods walls make the two puzzles the only ways on.
+- New tile **D (dry bed)**: pale, sunk like water, not walkable. Unrestored the lagoon is half dry (its outer ring is D);
+  `WorldMap.SetRisen` turns every D into water at runtime (never saved into the asset), driven by `LilymereLagoon`
+  (lm.lagoon solved or the realm restored).
+- Look: unrestored water still and a little grey; restored water ripples and sparkles (Toon `_Ripple` on the island's
+  water caps only), lotus open (the Lotus prop's flower only shows once restored).
+- Hub **well (water) gate** <-> Lilymere; builds keep it sealed (`LilymereConfig.open` = false). Dev panel LM: spots.
+- Hand moments (11b): **lily pad bridge** (push three drifting pads with a fingertip into three slots across the
+  crossing; drag 0.8, snap 0.6 tiles; look + pinch steers one in), **rain hand** (palm down within 40 deg, 5-25 cm over
+  the garden for 0.6 s = a cloud under the palm that rains; wiggle the fingers to rain harder; five buds bloom into lotus
+  stepping stones in 2 s / 1 s hard; look + pinch-hold rains on one bud), **scoop and pour** (cup a hand palm up, dip it
+  in the lagoon's inlet by the causeway, lift: a wobbly ball of water; tip it over the stone basin to pour, anywhere else
+  it spills; 2 pours: the waterfall cracks and runs, the lagoon rises; look + pinch the water, then the basin, pours by
+  itself). Each teaches itself once with a pinned chip (Push! / Palm down! / Scoop!) and a ghost.
+- Encounter tables are placeholders (Pebbloop, Steambara, wind visitors) until the water roster (11c).
+
 ## Galewick as built (steps 10a-10b, Oct 27)
 - 60 x 60 (`GalewickTools`): arrival meadow + return gate, windmill village (4 cottages, 2 small mills, big mill),
   shrine, a ditch crossed only at the drawbridge, the kite field loop (3 kites), a hill band crossed only by the

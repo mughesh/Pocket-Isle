@@ -274,3 +274,11 @@ New interactions since the audio branch was cut that still play a procedural pla
 | Spirit beam / focus pulse | not hooked (P1) | `spirit.beam`, `spirit.focus` |
 | Lodge door / page / pod tick | not hooked (P2) | `lodge.*` |
 | Settings pebble | the board's `rune.select` covers it | `ui.pebble` if it should differ |
+| Lilymere: lily pad clicks into a slot | `pond.splash` | `lily.click` (soft wooden tok + water slap), a frog croak on the pad |
+| Lilymere: all pads lock | `pond.splash` | `frog.chorus` (a short chorus), `channel.ripple` |
+| Lilymere: rain from the palm cloud | `sw.drip` every ~1 s | `rain.soft` / `rain.hard` loops (follow the cloud) |
+| Lilymere: a bud blooms | PuzzleSounds.Catch + `pond.splash` | `lotus.bloom` (petal pop + sparkle) |
+| Lilymere: scoop, ball in the palm, pour, spill | `pond.tap`, `pond.splash`, PuzzleSounds.Whoosh | `water.scoop`, `water.slosh` (loop while held), `water.pour`, `water.spill` |
+| Lilymere: the frozen waterfall cracks, runs | `catch.shatter` | `ice.crack`, `ice.shatter`, `waterfall.run` (loop) |
+| Lilymere: the lagoon rises | `restore.swell` | `lagoon.rise` |
+| Lilymere ambience | reuses `amb.pond` | `amb.lilymere` / `amb.lilymere.restored` (water lapping, frogs, birds) |

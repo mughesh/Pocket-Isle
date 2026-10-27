@@ -41,7 +41,19 @@ clear storage): they turn red, press again within 3 seconds.
 Cheats (one-hit KO, invincible, wild battles off, rare x10, time and walk speed) last until the app closes. They are
 never saved.
 
-## 4. What's new in this build (step 10f, Oct 27: Cinderwood's new hand moments)
+## 4. What's new in this build (Oct 28: sound, and Lilymere for Mugesh)
+
+- **Sound everywhere**: footsteps, battles, catching, the Cinderwood beats, Keeper, ambience per area. No music yet
+  (no tracks). Note any moment that's too loud / too quiet / wrong / annoying.
+- **Lilymere** (water realm; the well gate stays sealed in this build, use dev panel **Go to > LM: ...**):
+  - **LM: channel**: push the drifting lily pads with a fingertip into the three gold rings across the channel.
+  - **LM: garden**: hold one hand palm down over the dry garden, about a hand's width up: a little cloud rains. Wiggle
+    your fingers for harder rain. The five buds on the path bloom into stepping stones.
+  - **LM: basin**: cup a hand palm up, dip it in the little pool by the path, lift it out: water sits in your palm. Tip
+    it over the stone basin. Twice: the waterfall breaks free and the lagoon fills.
+  - Story tab: **LM pads / LM rain / LM basin + rise** and **Lilymere restored** toggle them.
+
+## Earlier (step 10f, Oct 27: Cinderwood's new hand moments)
 
 - **Village flame** (Go to > CW: village or CW: shrine): the shrine's flame is nearly out and you can't rest there yet.
   Cup it with both hands, palms toward it, about 2 s (one hand curled round it: 3 s; look + pinch-hold: 3 s). The whole
