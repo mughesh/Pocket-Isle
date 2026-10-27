@@ -29,6 +29,8 @@ namespace Diorama
         public IslandHandle grabGuard;
         [Tooltip("Step 10a: the wind gate stays sealed in builds until Galewick is finished (GalewickConfig.open).")]
         public GalewickConfig galewick;
+        [Tooltip("Step 11a: the well (water) gate stays sealed in builds until Lilymere is finished (LilymereConfig.open).")]
+        public LilymereConfig lilymere;
 
         static readonly int ColorId = Shader.PropertyToID("_Color");
         static readonly int ShapeId = Shader.PropertyToID("_Shape");
@@ -247,7 +249,8 @@ namespace Diorama
         bool AtFront(GateLink g, Vector2Int tile) => tile == g.Front(0) || tile == g.Front(1);
 
         /// <summary>Open, and (step 10a) the wind gate only while Galewick is allowed (the Editor, or a build after 10d).</summary>
-        public bool IsOpen(GateLink g) => g.Open && (g.id != "wind" || galewick == null || galewick.IsOpen);
+        public bool IsOpen(GateLink g) => g.Open && (g.id != "wind" || galewick == null || galewick.IsOpen) &&
+                                          (g.id != "water" || lilymere == null || lilymere.IsOpen);
 
         /// <summary>Look + pinch on a gate (also Step8Debug): use it from its front, otherwise walk there first.</summary>
         public void Pick(int index, string how)

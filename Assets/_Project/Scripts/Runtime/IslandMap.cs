@@ -4,7 +4,7 @@ namespace Diorama
 {
     /// <summary>
     /// Island layout as a text grid, one character per tile:
-    /// G grass, T tall grass, P path, W water, H hot spring, F tree, R rock, X blocked border, '.' empty.
+    /// G grass, T tall grass, P path, W water, H hot spring, F tree, R rock, X blocked border, D dry bed, '.' empty.
     /// The island's own map is its footprint (the window shape); <see cref="WorldMap"/> is the bigger map it shows.
     /// </summary>
     /// <remarks>
@@ -23,6 +23,8 @@ namespace Diorama
         public const char Rock = 'R';
         public const char Blocked = 'X';
         public const char HotSpring = 'H';
+        /// <summary>Step 11a (Lilymere): a drained lagoon's bed, pale cracked sand. Not walkable; turns to water when the map rises (<see cref="WorldMap.SetRisen"/>).</summary>
+        public const char DryBed = 'D';
 
         public const string PrototypeLayout =
             "..GGGGGGGGGG..\n" +
@@ -78,7 +80,10 @@ namespace Diorama
             }
         }
 
-        public char At(int row, int column)
+        public virtual char At(int row, int column) => Raw(row, column);
+
+        /// <summary>The layout character as written (no runtime changes such as a risen lagoon).</summary>
+        public char Raw(int row, int column)
         {
             var rows = RowsCache;
             if (row < 0 || row >= rows.Length || column < 0 || column >= rows[row].Length) return Empty;

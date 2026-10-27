@@ -4,6 +4,7 @@
     "references": [
         "Diorama.Runtime",
         "Diorama.Audio",
+        "Diorama.Audio.Editor",
         "Oculus.VR",
         "Oculus.VR.Editor",
         "Oculus.Interaction",

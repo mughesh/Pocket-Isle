@@ -506,7 +506,7 @@ namespace Diorama.EditorTools
 
         static ThemeColors Map(ThemeColors c, System.Func<Color, Color> f, float leafGlow) => new ThemeColors
         {
-            grass = f(c.grass), tallGrass = f(c.tallGrass), path = f(c.path), water = f(c.water), hotSpring = f(c.hotSpring),
+            grass = f(c.grass), tallGrass = f(c.tallGrass), path = f(c.path), water = f(c.water), hotSpring = f(c.hotSpring), dryBed = f(c.dryBed),
             shortBase = f(c.shortBase), shortTip = f(c.shortTip), tallBase = f(c.tallBase), tallTip = f(c.tallTip),
             dirt = f(c.dirt), underside = f(c.underside), trunk = f(c.trunk), leavesLow = f(c.leavesLow),
             leavesHigh = f(c.leavesHigh), rock = f(c.rock), leafGlow = leafGlow, outlineTint = c.outlineTint,
@@ -521,7 +521,7 @@ namespace Diorama.EditorTools
             }
             return new ThemeColors
             {
-                grass = G(c.grass), tallGrass = G(c.tallGrass), path = G(c.path), water = G(c.water), hotSpring = G(c.hotSpring),
+                grass = G(c.grass), tallGrass = G(c.tallGrass), path = G(c.path), water = G(c.water), hotSpring = G(c.hotSpring), dryBed = G(c.dryBed),
                 shortBase = G(c.shortBase), shortTip = G(c.shortTip), tallBase = G(c.tallBase), tallTip = G(c.tallTip),
                 dirt = G(c.dirt), underside = G(c.underside), trunk = G(c.trunk), leavesLow = G(c.leavesLow),
                 leavesHigh = G(c.leavesHigh), rock = G(c.rock), leafGlow = 0f, outlineTint = c.outlineTint,

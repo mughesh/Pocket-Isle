@@ -37,6 +37,8 @@ namespace Diorama
         public Vector2Int hallEntry = new Vector2Int(4, 8);
         [Tooltip("Step 10e: Galewick's tower hall (Go to, entered from the tower door).")]
         public WorldMap towerHall;
+        [Tooltip("Step 11a: the water realm (Go to works even while its gate is sealed in builds).")]
+        public WorldMap lilymere;
         public Vector2Int towerHallEntry = new Vector2Int(4, 8);
         [Tooltip("Lesson the tutorial restarts at (the first one after the opening).")]
         public string firstWalkLesson = "walk";
@@ -127,6 +129,18 @@ namespace Diorama
                 AddMark(galewick, "GW: fire patch", "fire");
                 if (towerHall != null)
                     _spots.Add(new Spot { label = "GW: tower hall", map = towerHall, tile = towerHallEntry, facing = north, interior = true, outdoor = galewick, door = "tower" });
+            }
+            if (lilymere != null)
+            {
+                AddMark(lilymere, "LM: arrival", "start");
+                AddMark(lilymere, "LM: village", "village");
+                AddMark(lilymere, "LM: shrine", "shrine");
+                AddMark(lilymere, "LM: channel", "channel");
+                AddMark(lilymere, "LM: garden", "garden");
+                AddMark(lilymere, "LM: basin", "basin");
+                AddMark(lilymere, "LM: temple", "temple");
+                AddMark(lilymere, "LM: marsh", "marsh");
+                AddMark(lilymere, "LM: rare pond", "pond");
             }
         }
 

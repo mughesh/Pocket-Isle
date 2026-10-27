@@ -323,6 +323,9 @@ namespace Diorama
                     if (state.galewick != null)
                         Add(() => $"Galewick restored: {OnOff(state.Restored(state.galewick))}", () => Edit(state.SetRestored(state.galewick, !state.Restored(state.galewick))),
                             () => state.Restored(state.galewick));
+                    if (state.lilymere != null)
+                        Add(() => $"Lilymere restored: {OnOff(state.Restored(state.lilymere))}", () => Edit(state.SetRestored(state.lilymere, !state.Restored(state.lilymere))),
+                            () => state.Restored(state.lilymere));
                     Flag("CW flame", "cw.flame", 1); // step 10f
                     Flag("CW hollow", "cw.hollow", 63);
                     Flag("CW firebox", "cw.ember", 1);

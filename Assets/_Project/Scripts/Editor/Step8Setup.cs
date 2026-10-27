@@ -195,7 +195,7 @@ namespace Diorama.EditorTools
             hub.gates = new List<GateLink>
             {
                 new GateLink { id = "fire", tile = StillIsleTools.FireGate, to = cinderwood, arrive = toCinder, arriveFacing = CinderwoodTools.ArriveFacing, portal = FireColor, firstSeenLine = "gate.fire.first" },
-                new GateLink { id = "water", tile = StillIsleTools.WaterGate, isSealed = true, portal = WaterColor },
+                WaterLink(),
                 WindLink(),
             };
             cinderwood.gates = new List<GateLink>
@@ -223,6 +223,39 @@ namespace Diorama.EditorTools
                 id = "wind", tile = StillIsleTools.WindGate, to = galewick, arrive = GalewickTools.Arrive, arriveFacing = GalewickTools.ArriveFacing,
                 portal = WindColor, firstSeenLine = "gate.wind.first",
             };
+        }
+
+        /// <summary>
+        /// Step 11a: the hub's well (water) gate leads to Lilymere once its map exists (sealed in builds by LilymereConfig);
+        /// before that it stays sealed. Kept here so re-running the 9a setup doesn't re-seal it.
+        /// </summary>
+        internal static GateLink WaterLink()
+        {
+            var lilymere = AssetDatabase.LoadAssetAtPath<WorldMap>(LilymereTools.MapPath);
+            if (lilymere == null) return new GateLink { id = "water", tile = StillIsleTools.WaterGate, isSealed = true, portal = WaterColor };
+            return new GateLink
+            {
+                id = "water", tile = StillIsleTools.WaterGate, to = lilymere, arrive = LilymereTools.Arrive, arriveFacing = LilymereTools.ArriveFacing,
+                portal = WaterColor, firstSeenLine = "gate.water.first",
+            };
+        }
+
+        /// <summary>Step 11a: the hub's well gate <-> Lilymere's return gate (by the arrival).</summary>
+        internal static void LinkLilymere(WorldMap hub, WorldMap lilymere, StringBuilder log)
+        {
+            int water = hub.gates.FindIndex(g => g.id == "water");
+            var link = WaterLink();
+            if (water >= 0) hub.gates[water] = link;
+            else hub.gates.Add(link);
+            var toHub = StillIsleTools.WaterGate + new Vector2Int(1, 1);
+            lilymere.gates = new List<GateLink>
+            {
+                new GateLink { id = "home", tile = LilymereTools.ReturnGate, to = hub, arrive = toHub, arriveFacing = new Vector2Int(0, 1), portal = HomeColor },
+            };
+            EditorUtility.SetDirty(hub);
+            EditorUtility.SetDirty(lilymere);
+            AssetDatabase.SaveAssets();
+            log.Append($"\n  gates: hub water c{StillIsleTools.WaterGate.x} r{StillIsleTools.WaterGate.y} <-> Lilymere home c{LilymereTools.ReturnGate.x} r{LilymereTools.ReturnGate.y} (builds: sealed until LilymereConfig.open)");
         }
 
         /// <summary>Step 10a: Galewick's return gate (by the arrival) back to the hub's wind gate.</summary>

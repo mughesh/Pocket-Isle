@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Diorama.Audio
 {
     /// <summary>What the music should be playing (one cue each, see <see cref="MusicDirector.CueFor"/>).</summary>
-    public enum MusicState { None, Hub, Cinderwood, Galewick, BattleWild, BattleKeeper }
+    public enum MusicState { None, Hub, Cinderwood, Galewick, Lilymere, BattleWild, BattleKeeper }
 
     /// <summary>
     /// One music cue per game state, crossfaded through <see cref="AudioService.SetMusic"/>, plus level offsets in dB that
@@ -45,6 +45,7 @@ namespace Diorama.Audio
                 case MusicState.Hub: return AudioIds.MusicHub;
                 case MusicState.Cinderwood: return AudioIds.MusicCinderwood;
                 case MusicState.Galewick: return AudioIds.MusicGalewick;
+                case MusicState.Lilymere: return AudioIds.MusicLilymere;
                 case MusicState.BattleWild: return AudioIds.MusicBattleWild;
                 case MusicState.BattleKeeper: return AudioIds.MusicBattleKeeper;
                 default: return null;

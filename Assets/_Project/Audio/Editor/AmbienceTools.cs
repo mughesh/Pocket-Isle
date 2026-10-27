@@ -37,6 +37,10 @@ namespace Diorama.Audio.EditorTools
                 "Wind only, quiet under the battle music. Also Duck(-6, 0.5, pauseSweeteners: true) while a battle runs."),
             ("GalewickFaded", "amb.battle", new[] { S("sw.gust", 14f, 30f, 0.6f) },
                 "Galewick faded: still air (the synth wind bed, low), a rare gust. Reuses amb.battle until a Galewick bed is made."),
+            ("LilymereFaded", "amb.pond", new[] { S("sw.drip", 10f, 24f, 0.5f) },
+                "Lilymere faded: still air over the half-dry lagoon, a rare drip. Reuses amb.pond until a Lilymere bed is made."),
+            ("LilymereRestored", "amb.pond", new[] { S("sw.drip", 4f, 10f, 0.8f), S("sw.insect", 6f, 14f, 0.8f), S("sw.bird", 5f, 12f, 0.9f) },
+                "Lilymere restored: water lapping, drips, frogs and insects, birds. Reuses amb.pond until a Lilymere bed is made."),
             ("GalewickRestored", "amb.battle", new[] { S("sw.gust", 5f, 12f, 0.9f), S("sw.creak", 7f, 18f, 0.7f), S("sw.bird", 6f, 14f, 0.9f) },
                 "Galewick restored: the wind bed up, gusts, mill and rope creaks, birds back. Reuses amb.battle until a Galewick bed is made."),
         };

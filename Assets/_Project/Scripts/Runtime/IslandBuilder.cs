@@ -119,6 +119,7 @@ namespace Diorama
         static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
         static readonly int OutlineColorId = Shader.PropertyToID("_OutlineColor");
         static readonly int EmissiveId = Shader.PropertyToID("_Emissive");
+        static readonly int RippleId = Shader.PropertyToID("_Ripple");
         static readonly int ClearColorId = Shader.PropertyToID("_ClearColor");
         static readonly int ShortBaseId = Shader.PropertyToID("_ShortBase");
         static readonly int ShortTipId = Shader.PropertyToID("_ShortTip");
@@ -128,7 +129,7 @@ namespace Diorama
         MaterialPropertyBlock _flashProps;
 
         /// <summary>Which theme colour a batch takes (None = the material's own).</summary>
-        enum ThemeRole { None, Grass, TallGrass, Path, Water, HotSpring, Dirt, Underside, Trunk, LeavesLow, LeavesHigh, Rock, Blades }
+        enum ThemeRole { None, Grass, TallGrass, Path, Water, HotSpring, Dirt, Underside, Trunk, LeavesLow, LeavesHigh, Rock, Blades, DryBed }
 
         /// <summary>Fixed to the island (footprint) or part of the scrolling map (content, grouped by map cell).</summary>
         sealed class Batch
@@ -539,6 +540,8 @@ namespace Diorama
                 { IslandMap.Path, AddBatch(_capMesh, capPath, true, ThemeRole.Path) },
                 { IslandMap.Water, AddBatch(_capMesh, capWater, true, ThemeRole.Water) },
                 { IslandMap.HotSpring, AddBatch(_capMesh, capHotSpring, true, ThemeRole.HotSpring) },
+                // Step 11a: the dry lagoon bed is a path cap in the theme's sand colour, sunk like water.
+                { IslandMap.DryBed, AddBatch(_capMesh, capPath, true, ThemeRole.DryBed) },
             };
             // Trees, rocks and the blocked border stand on grass. The border is drawn as forest.
             caps[IslandMap.Tree] = caps[IslandMap.Rock] = caps[IslandMap.Blocked] = caps[IslandMap.Grass];
@@ -550,7 +553,7 @@ namespace Diorama
             {
                 if (!caps.TryGetValue(ch, out var b)) return;
                 hasHotSpring |= ch == IslandMap.HotSpring;
-                float y = ch == IslandMap.Water || ch == IslandMap.HotSpring ? -WaterDrop : 0f;
+                float y = ch == IslandMap.Water || ch == IslandMap.HotSpring || ch == IslandMap.DryBed ? -WaterDrop : 0f;
                 b.local.Add(Matrix4x4.Translate(MapPoint(new Vector2(c, r)) + Vector3.up * y));
                 TileCount++;
             });
@@ -1035,6 +1038,7 @@ namespace Diorama
                 }
                 b.props.SetColor(BaseColorId, c);
                 if (b.role == ThemeRole.LeavesLow || b.role == ThemeRole.LeavesHigh) b.props.SetFloat(EmissiveId, t.leafGlow);
+                if (b.role == ThemeRole.Water) b.props.SetFloat(RippleId, theme.waterRipples * RealmState.Restored);
                 if (b.role == ThemeRole.TallGrass) b.props.SetColor(ClearColorId, new Color(t.grass.r, t.grass.g, t.grass.b, 1f));
             }
         }
@@ -1046,6 +1050,7 @@ namespace Diorama
             ThemeRole.Path => t.path,
             ThemeRole.Water => t.water,
             ThemeRole.HotSpring => t.hotSpring,
+            ThemeRole.DryBed => t.dryBed,
             ThemeRole.Dirt => t.dirt,
             ThemeRole.Underside => t.underside,
             ThemeRole.Trunk => t.trunk,

@@ -48,6 +48,7 @@ Shader "Diorama/Toon"
         _Emissive ("Emissive", Range(0, 2)) = 0
         _Flash ("Flash", Range(0, 1)) = 0
         _OriginJitter ("Per-Instance Shade Jitter", Range(0, 0.5)) = 0
+        _Ripple ("Water Ripples (step 11a, island water caps)", Range(0, 1)) = 0
 
         [Header(Motion)]
         _Breathe ("Breathe", Float) = 0
@@ -173,6 +174,20 @@ Shader "Diorama/Toon"
                 col += smoothstep(0.93, 0.95, dot(n, h)) * _Spec * 0.55;
                 col += c * _Emissive;
                 if (_CrackOn > 0.5) col = ToonLava(col, pO);
+                if (_Ripple > 0.001)
+                {
+                    // Step 11a: restored water. Two slow wave trains in map space (tiles) cross into soft bright bands,
+                    // and a few cells sparkle now and then. Off (0) = still glassy water.
+                    float2 q = mapXZ / 0.05;
+                    float t = _Time.y;
+                    float w = sin(q.x * 1.7 + q.y * 0.9 + t * 1.3) * sin(q.y * 1.9 - q.x * 0.6 - t * 0.9);
+                    col += smoothstep(0.45, 0.8, w) * 0.16 * _Ripple * float3(0.85, 1.0, 1.0);
+                    float2 cell = floor(q * 3.0);
+                    float rnd = frac(sin(dot(cell, float2(12.9898, 78.233))) * 43758.5453);
+                    float blink = smoothstep(0.92, 1.0, sin(t * (1.5 + rnd * 2.0) + rnd * 40.0));
+                    float2 f = frac(q * 3.0) - 0.5;
+                    col += step(0.86, rnd) * blink * smoothstep(0.18, 0.0, length(f)) * 0.6 * _Ripple;
+                }
                 col = lerp(col, float3(1.0, 1.0, 1.0), _Flash);
                 if (_WindowClip > 0.5) col = DioramaFocus(col, mapXZ);
                 return float4(col, 1.0);

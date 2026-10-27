@@ -44,6 +44,7 @@ CBUFFER_START(UnityPerMaterial)
     float  _Emissive;
     float  _Flash;
     float  _OriginJitter;
+    float  _Ripple;
 
     float  _Breathe;
     float  _BreatheSpeed;

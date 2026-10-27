@@ -142,6 +142,24 @@ namespace Diorama
         HashSet<Vector2Int> _blocked;
         // Runtime changes (step 9b puzzles): never serialized, so a Play session can't write them into the asset.
         [NonSerialized] HashSet<Vector2Int> _hiddenProps, _openProps;
+        [NonSerialized] bool _risen;
+
+        /// <summary>Step 11a: the dry bed tiles (D) read as water (Lilymere's lagoon has risen). Runtime only.</summary>
+        public bool Risen => _risen;
+
+        /// <summary>Runtime only: every dry bed tile becomes water (or dry again). Rebuilds the island.</summary>
+        public void SetRisen(bool risen)
+        {
+            if (risen == _risen) return;
+            _risen = risen;
+            version++;
+        }
+
+        public override char At(int row, int column)
+        {
+            char c = Raw(row, column);
+            return _risen && c == DryBed ? Water : c;
+        }
 
         /// <summary>The zone legend entry at a tile (column, row). False outside every zone.</summary>
         public bool TryGetZone(Vector2Int tile, out MapZone zone)
@@ -269,9 +287,10 @@ namespace Diorama
         /// <summary>Drops every runtime change (puzzles call it when they go away; tests).</summary>
         public void ClearRuntimeChanges()
         {
-            bool any = _hiddenProps != null && _hiddenProps.Count > 0 || _openProps != null && _openProps.Count > 0;
+            bool any = _hiddenProps != null && _hiddenProps.Count > 0 || _openProps != null && _openProps.Count > 0 || _risen;
             _hiddenProps = null;
             _openProps = null;
+            _risen = false;
             _blocked = null;
             if (any) version++;
         }

@@ -258,6 +258,27 @@ Step 10d / 10e, the tower hall:
 - `gw.restored` · once (the restoration wave from the tower)
   - Spirit: Feel that? Galewick is breathing again!
 
+## Lilymere (water, step 11a)
+- `gate.water.first` · once · → gate:water (first time the well gate comes into the window, once it leads somewhere)
+  - Spirit: Listen... the well is silent. Not even a drip.
+- `realm.lilymere.first` · once · → landmark:firstGrass (first arrival in Lilymere)
+  - Spirit: Lilymere... the lagoon used to reach right up to here.
+  - Spirit: Half the water is gone, and nothing ripples.
+- `lm.village.first` · once · → landmark:village (first time near the stilt village)
+  - Spirit: Stilt huts, standing over almost nothing.
+- `lm.channel.first` · once · → landmark:channel (first time at the lily channel)
+  - Spirit: The lily pads have all drifted apart.
+- `lm.garden.first` · once · → landmark:garden (first time at the lotus garden)
+  - Spirit: A lotus garden, dried to cracks. The buds won't open.
+- `lm.basin.first` · once · → landmark:basin (first time at the waterfall basin)
+  - Spirit: The waterfall froze mid-fall. Look, the drops just hang there.
+- `lm.temple.first` · once · → landmark:temple (first time near the lake temple)
+  - Spirit: A temple, half under the lagoon. Someone is hiding in there.
+- `lm.marsh.first` · once · → landmark:marsh (first time in the reed marsh)
+  - Spirit: Reeds taller than you! Stay close.
+- `lm.pond.first` · once · → landmark:pond (first time at the rare pond)
+  - Spirit: This little pond feels deep. Something big could live in it.
+
 ## Statue and finale
 - `hub.shard.first` · once · → statueSocket (step 9c: in the hub holding a shard)
   - Spirit: Put the shard in the statue. Something's calling it.

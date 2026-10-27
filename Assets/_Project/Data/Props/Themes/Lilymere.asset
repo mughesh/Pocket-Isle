@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fa9e6e7080daa641a8fa8ea9b093741, type: 3}
+  m_Name: Lilymere
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.RealmTheme
+  restored:
+    grass: {r: 0.6064894, g: 0.83501965, b: 0.4925357, a: 1}
+    tallGrass: {r: 0.7678824, g: 0.72509414, b: 0.42539847, a: 1}
+    path: {r: 0.89796084, g: 0.7478906, b: 0.54658127, a: 1}
+    water: {r: 0.37254903, g: 0.72156864, b: 0.76862746, a: 1}
+    hotSpring: {r: 0.50848085, g: 0.89464253, b: 0.9399216, a: 1}
+    dryBed: {r: 0.93333334, g: 0.90588236, b: 0.84705883, a: 1}
+    shortBase: {r: 0.39640525, g: 0.6461961, b: 0.36153415, a: 1}
+    shortTip: {r: 0.71255964, g: 0.89376473, b: 0.5779679, a: 1}
+    tallBase: {r: 0.5958432, g: 0.5593709, b: 0.28449416, a: 1}
+    tallTip: {r: 0.88117653, g: 0.8326061, b: 0.5164534, a: 1}
+    dirt: {r: 0.8434118, g: 0.7945745, b: 0.696633, a: 1}
+    underside: {r: 0.59181494, g: 0.66298044, b: 0.64091915, a: 1}
+    trunk: {r: 0.44478434, g: 0.35745835, b: 0.2757663, a: 1}
+    leavesLow: {r: 0.3822628, g: 0.6713726, b: 0.41384247, a: 1}
+    leavesHigh: {r: 0.5888307, g: 0.82243145, b: 0.5644565, a: 1}
+    rock: {r: 0.7053609, g: 0.7720785, b: 0.73249274, a: 1}
+    leafGlow: 0.1
+    outlineTint: {r: 1, g: 1, b: 1, a: 1}
+  unrestored:
+    grass: {r: 0.56078434, g: 0.78039217, b: 0.47843137, a: 1}
+    tallGrass: {r: 0.7176471, g: 0.69803923, b: 0.41568628, a: 1}
+    path: {r: 0.8392157, g: 0.7254902, b: 0.5294118, a: 1}
+    water: {r: 0.46509805, g: 0.69803923, b: 0.7309804, a: 1}
+    hotSpring: {r: 0.49803922, g: 0.8156863, b: 0.8784314, a: 1}
+    dryBed: {r: 0.93333334, g: 0.90588236, b: 0.84705883, a: 1}
+    shortBase: {r: 0.36862746, g: 0.6039216, b: 0.3529412, a: 1}
+    shortTip: {r: 0.65882355, g: 0.8352941, b: 0.5568628, a: 1}
+    tallBase: {r: 0.5568628, g: 0.5411765, b: 0.28235295, a: 1}
+    tallTip: {r: 0.8235294, g: 0.8, b: 0.5019608, a: 1}
+    dirt: {r: 0.7882353, g: 0.7529412, b: 0.65882355, a: 1}
+    underside: {r: 0.5568628, g: 0.61960787, b: 0.6039216, a: 1}
+    trunk: {r: 0.41568628, g: 0.34509805, b: 0.26666668, a: 1}
+    leavesLow: {r: 0.37254903, g: 0.627451, b: 0.41568628, a: 1}
+    leavesHigh: {r: 0.54901963, g: 0.76862746, b: 0.5411765, a: 1}
+    rock: {r: 0.6627451, g: 0.72156864, b: 0.6901961, a: 1}
+    leafGlow: 0
+    outlineTint: {r: 1, g: 1, b: 1, a: 1}
+  treeProp: {fileID: 11400000, guid: 5c8b511c4bbf65b4e95bd236be414db2, type: 2}
+  treePropAlt: {fileID: 11400000, guid: 543b4873bc3029e48a2eaf858b771f0b, type: 2}
+  treeAltShare: 0.25
+  frontBorderTrees: 1
+  startRestored: 0
+  embers: 0
+  leaves: 0
+  seeds: 0
+  stillWhenUnrestored: 0.85
+  windSpin: 0
+  bladeHeight: 1.15
+  bladeWidth: 0.85
+  waterRipples: 1
+  overrideLight: 0
+  lightColor: {r: 1, g: 1, b: 1, a: 1}
+  lightIntensity: 1

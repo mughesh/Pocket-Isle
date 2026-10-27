@@ -83,8 +83,14 @@ namespace Diorama
             var outdoor = swap != null ? swap.Outdoor : _island.world;
             restored = (swap != null ? swap.OutdoorRestored : RealmState.Restored) >= RestoredAt;
             string name = outdoor != null ? outdoor.name : "";
-            realm = name.Contains("Cinderwood") ? "Cinderwood" : name.Contains("Galewick") ? "Galewick" : "StillIsle";
-            music = realm == "Cinderwood" ? MusicState.Cinderwood : realm == "Galewick" ? MusicState.Galewick : MusicState.Hub;
+            realm = name.Contains("Cinderwood") ? "Cinderwood" : name.Contains("Galewick") ? "Galewick" : name.Contains("Lilymere") ? "Lilymere" : "StillIsle";
+            music = realm switch
+            {
+                "Cinderwood" => MusicState.Cinderwood,
+                "Galewick" => MusicState.Galewick,
+                "Lilymere" => MusicState.Lilymere,
+                _ => MusicState.Hub,
+            };
             if (swap != null && swap.Inside && swap.Interior != null)
             {
                 // The lodge is home (hub music); the realm halls are big stone rooms that keep the realm's music.

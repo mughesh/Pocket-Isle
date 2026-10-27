@@ -13,6 +13,8 @@ namespace Diorama
         public Color path;
         public Color water;
         public Color hotSpring;
+        [Tooltip("Step 11a: a drained lagoon's bed (D tiles, Lilymere).")]
+        public Color dryBed;
 
         [Header("Grass blades (base to tip)")]
         public Color shortBase;
@@ -42,6 +44,7 @@ namespace Diorama
             path = Color.Lerp(a.path, b.path, t),
             water = Color.Lerp(a.water, b.water, t),
             hotSpring = Color.Lerp(a.hotSpring, b.hotSpring, t),
+            dryBed = Color.Lerp(a.dryBed, b.dryBed, t),
             shortBase = Color.Lerp(a.shortBase, b.shortBase, t),
             shortTip = Color.Lerp(a.shortTip, b.shortTip, t),
             tallBase = Color.Lerp(a.tallBase, b.tallBase, t),
@@ -97,6 +100,10 @@ namespace Diorama
         [Tooltip("Grass blade height and width (1 = Cinderwood's). Galewick: taller and thinner wind grass.")]
         public float bladeHeight = 1f;
         public float bladeWidth = 1f;
+
+        [Header("Water (step 11a)")]
+        [Tooltip("Ripple and sparkle bands on the water once restored (0 = still glassy water; Lilymere 1). Fades in with the restoration. The still, greyer unrestored water is the unrestored colours' water.")]
+        [Range(0f, 1f)] public float waterRipples;
 
         [Header("Light (interiors)")]
         [Tooltip("While this map shows, the main light takes this colour and intensity (interiors: warm hearth light).")]

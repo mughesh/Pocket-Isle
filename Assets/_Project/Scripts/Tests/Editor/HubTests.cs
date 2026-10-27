@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using Diorama.EditorTools;
 
 namespace Diorama.Tests
 {
@@ -63,7 +64,7 @@ namespace Diorama.Tests
         }
 
         [Test]
-        public void Gates_FireLeadsToCinderwoodAndHomeLeadsBack_WaterSealed()
+        public void Gates_FireLeadsToCinderwoodAndHomeLeadsBack_WaterToLilymere()
         {
             var hub = Load(HubPath);
             var cw = Load(CinderwoodPath);
@@ -80,7 +81,10 @@ namespace Diorama.Tests
             int near = Mathf.Min(Mathf.Abs(fire.arrive.x - home.Front(0).x), Mathf.Abs(fire.arrive.x - home.Front(1).x)) + Mathf.Abs(fire.arrive.y - home.Front(0).y);
             Assert.IsTrue(near >= 1 && near <= 2, $"you arrive beside Cinderwood's return gate (off its front by {near})");
             Assert.AreEqual(new Vector2Int(0, -1), fire.arriveFacing, "arrival faces north (up the trail)");
-            Assert.IsFalse(Gate(hub, "water").Open);
+            // Step 11a: the water (well) gate leads to Lilymere; builds keep it sealed by LilymereConfig (Step11aTests).
+            var lilymere = AssetDatabase.LoadAssetAtPath<WorldMap>(LilymereTools.MapPath);
+            if (lilymere == null) Assert.IsFalse(Gate(hub, "water").Open);
+            else Assert.AreEqual(lilymere, Gate(hub, "water").to);
             // Step 10a: the wind gate leads to Galewick (builds keep it sealed through GalewickConfig, see Step10aTests).
             var wind = Gate(hub, "wind");
             Assert.IsTrue(wind.to == null || wind.to.name == "WorldMap_Galewick", "the wind gate leads to Galewick or nowhere yet");

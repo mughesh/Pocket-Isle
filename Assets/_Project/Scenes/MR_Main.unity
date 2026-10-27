@@ -590,6 +590,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ab0469af29722704f949fec768f94b68, type: 2}
   - {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
   - {fileID: 11400000, guid: 1c0f5df7c1c50ad4789ffbf83b2addd2, type: 2}
+  - {fileID: 11400000, guid: 62a4d08fb1efa974aa00c824d650dab0, type: 2}
   seconds: 1.2
 --- !u!4 &221433163
 Transform:
@@ -3850,6 +3851,7 @@ MonoBehaviour:
   galewick: {fileID: 11400000, guid: 1c0f5df7c1c50ad4789ffbf83b2addd2, type: 2}
   hallEntry: {x: 4, y: 8}
   towerHall: {fileID: 11400000, guid: 578ca2940d06cb3459ed047d2fb89378, type: 2}
+  lilymere: {fileID: 11400000, guid: 62a4d08fb1efa974aa00c824d650dab0, type: 2}
   towerHallEntry: {x: 4, y: 8}
   firstWalkLesson: walk
   presetCommons:
@@ -4107,7 +4109,6 @@ MonoBehaviour:
   pinchCount: 2
   fx: {fileID: 1078587927}
   sparkleColor: {r: 1, g: 0.82, b: 0.35, a: 1}
-  chimeVolume: 0.35
 --- !u!4 &1380201672
 Transform:
   m_ObjectHideFlags: 0
@@ -5561,6 +5562,7 @@ MonoBehaviour:
   portalMaterial: {fileID: 2100000, guid: c44ab4528771f3c43b6d4c78e2eb6871, type: 2}
   grabGuard: {fileID: 270959111}
   galewick: {fileID: 11400000, guid: 03d1dafe75ab9fc41b8a1faba99e63e4, type: 2}
+  lilymere: {fileID: 11400000, guid: b038c9eac3f90d8479112fc4f7802bce, type: 2}
 --- !u!4 &1858573328
 Transform:
   m_ObjectHideFlags: 0
@@ -6219,6 +6221,53 @@ MonoBehaviour:
   installationRoutineCheckpoint:
     _installationRoutineId: 2063f481-1b63-4eda-9ee8-a00df98536bc
     _installationVariants: []
+--- !u!1 &2107210735
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2107210737}
+  - component: {fileID: 2107210736}
+  m_Layer: 0
+  m_Name: Lilymere Lagoon
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2107210736
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2107210735}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e925df918cc0f2488f691010a9d8d59, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.LilymereLagoon
+  island: {fileID: 270959109}
+  map: {fileID: 11400000, guid: 62a4d08fb1efa974aa00c824d650dab0, type: 2}
+  restoredAt: 0.99
+--- !u!4 &2107210737
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2107210735}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2121894496
 GameObject:
   m_ObjectHideFlags: 0
@@ -6577,3 +6626,4 @@ SceneRoots:
   - {fileID: 1811331407}
   - {fileID: 1553131432}
   - {fileID: 1200054858}
+  - {fileID: 2107210737}

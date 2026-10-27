@@ -186,12 +186,12 @@ MonoBehaviour:
     firstSeenLine: gate.fire.first
   - id: water
     tile: {x: 14, y: 2}
-    to: {fileID: 0}
-    arrive: {x: 0, y: 0}
-    arriveFacing: {x: 0, y: 0}
-    isSealed: 1
+    to: {fileID: 11400000, guid: 62a4d08fb1efa974aa00c824d650dab0, type: 2}
+    arrive: {x: 11, y: 54}
+    arriveFacing: {x: 0, y: -1}
+    isSealed: 0
     portal: {r: 0.36, g: 0.72, b: 1, a: 1}
-    firstSeenLine: 
+    firstSeenLine: gate.water.first
   - id: wind
     tile: {x: 26, y: 15}
     to: {fileID: 11400000, guid: 1c0f5df7c1c50ad4789ffbf83b2addd2, type: 2}

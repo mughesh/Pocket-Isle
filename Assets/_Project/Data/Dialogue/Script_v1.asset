@@ -1221,6 +1221,99 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: Feel that? Galewick is breathing again!
+  - id: gate.water.first
+    once: 1
+    priority: 2
+    note: first time the well gate comes into the window, once it leads somewhere
+    target: gate:water
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Listen... the well is silent. Not even a drip.
+  - id: realm.lilymere.first
+    once: 1
+    priority: 2
+    note: first arrival in Lilymere
+    target: landmark:firstGrass
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Lilymere... the lagoon used to reach right up to here.
+    - speaker: 0
+      speakerName: Spirit
+      text: Half the water is gone, and nothing ripples.
+  - id: lm.village.first
+    once: 1
+    priority: 2
+    note: first time near the stilt village
+    target: landmark:village
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Stilt huts, standing over almost nothing.
+  - id: lm.channel.first
+    once: 1
+    priority: 2
+    note: first time at the lily channel
+    target: landmark:channel
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The lily pads have all drifted apart.
+  - id: lm.garden.first
+    once: 1
+    priority: 2
+    note: first time at the lotus garden
+    target: landmark:garden
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: A lotus garden, dried to cracks. The buds won't open.
+  - id: lm.basin.first
+    once: 1
+    priority: 2
+    note: first time at the waterfall basin
+    target: landmark:basin
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The waterfall froze mid-fall. Look, the drops just hang there.
+  - id: lm.temple.first
+    once: 1
+    priority: 2
+    note: first time near the lake temple
+    target: landmark:temple
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: A temple, half under the lagoon. Someone is hiding in there.
+  - id: lm.marsh.first
+    once: 1
+    priority: 2
+    note: first time in the reed marsh
+    target: landmark:marsh
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Reeds taller than you! Stay close.
+  - id: lm.pond.first
+    once: 1
+    priority: 2
+    note: first time at the rare pond
+    target: landmark:pond
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: This little pond feels deep. Something big could live in it.
   - id: hub.shard.first
     once: 1
     priority: 2
