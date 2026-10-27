@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28966354f9950c5429c46b779a504dcd, type: 3}
+  m_Name: bellows.pump
+  m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
+  id: bellows.pump
+  clips:
+  - {fileID: 8300000, guid: 231afca064e96624488e40d6c9d5e87f, type: 3}
+  - {fileID: 8300000, guid: d332f28e5ef08b04194557f3373896b1, type: 3}
+  - {fileID: 8300000, guid: 1666698d0d1c33542ad62553facbb6fb, type: 3}
+  - {fileID: 8300000, guid: 098b2c99c468f904392c51aeaeb811cb, type: 3}
+  - {fileID: 8300000, guid: cad083f2e4a2c2249b353dc1183bca2f, type: 3}
+  - {fileID: 8300000, guid: d7cb5374159231c4cb83f68d54588a60, type: 3}
+  volume: 0.8
+  volumeJitter: 0.05
+  pitchMin: 0.97
+  pitchMax: 1.03
+  pitchStepSemitones: 0
+  bus: 2
+  spatial: 1
+  minDistance: 0.1
+  maxDistance: 1.5
+  loop: 0
+  maxVoices: 2
+  minInterval: 0.03
+  priority: 70
+  awaitingClips: 0
+  notes: 
+  review:
+    status: 0
+    note: 

@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28966354f9950c5429c46b779a504dcd, type: 3}
+  m_Name: step.grass
+  m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
+  id: step.grass
+  clips:
+  - {fileID: 8300000, guid: 90d75567d9122c54c9f2b05939d83c66, type: 3}
+  - {fileID: 8300000, guid: b2de40dfe0818ed40b53fae6aa852c6d, type: 3}
+  - {fileID: 8300000, guid: 4a2cb2463e4474f4586cbf97a17b03b9, type: 3}
+  - {fileID: 8300000, guid: 5f22e0611847ff04faf5bc79d066bd08, type: 3}
+  - {fileID: 8300000, guid: 0f3167a133c7efd4a8e9a98cb2b8e244, type: 3}
+  - {fileID: 8300000, guid: 59e56e620293f7640b242864d13a124c, type: 3}
+  - {fileID: 8300000, guid: 46d0708348327b84da00cfd0d994498a, type: 3}
+  - {fileID: 8300000, guid: 3856bca68d687e5448cbaab012539246, type: 3}
+  - {fileID: 8300000, guid: e38de5f139aa6754aad35f690485a6b2, type: 3}
+  - {fileID: 8300000, guid: 593878cc81793d543a6d9816930431fa, type: 3}
+  - {fileID: 8300000, guid: 6631b8e1e04de9247a4b0d05b6d31c33, type: 3}
+  volume: 0.8
+  volumeJitter: 0.1
+  pitchMin: 0.95
+  pitchMax: 1.05
+  pitchStepSemitones: 0
+  bus: 2
+  spatial: 1
+  minDistance: 0.1
+  maxDistance: 1.5
+  loop: 0
+  maxVoices: 3
+  minInterval: 0.06
+  priority: 150
+  awaitingClips: 0
+  notes: 'Pick by tile: grass / path / stone (halls) / wood (lodge).'
+  review:
+    status: 0
+    note: 

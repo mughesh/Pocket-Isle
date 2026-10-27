@@ -1,0 +1,512 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e32aa42b52848444bbb64add3d1f1e2d, type: 3}
+  m_Name: hit.normal
+  m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.SynthPatch
+  id: hit.normal
+  recipe: batch2
+  mode: 0
+  duration: 0.25
+  seed: 1
+  variants: 3
+  jitterPitch: 1
+  jitterTime: 0.08
+  jitterFilter: 0.1
+  layers:
+  - enabled: 1
+    label: Modal/Clay pot tok
+    instrument: 0
+    model: 1
+    wave: 0
+    note: B4
+    hz: 440
+    gate: 0
+    startOffset: 0
+    gain: 1
+    pitchStart: 0
+    pitchEnd: 0
+    pitchTime: 0.1
+    pitchCurve: 1
+    amp:
+      attack: 0.003
+      hold: 3
+      decay: 0.05
+      sustain: 0
+      release: 0.02
+    vibratoRate: 0
+    vibratoDepth: 0
+    vibratoDelay: 0
+    tremoloRate: 0
+    tremoloDepth: 0
+    fmRatio: 0
+    fmIndex: 0
+    fmDecay: 0
+    filter: 0
+    cutoffStart: 2000
+    cutoffEnd: 2000
+    cutoffTime: 0.2
+    cutoffCurve: 1
+    resonance: 0.1
+    formant: 0
+    f1Start: 700
+    f1End: 300
+    f2Start: 1200
+    f2End: 2200
+    formantTime: 0.2
+    formantQ: 8
+    formantMix: 1
+    crackleDensity: 0
+    crackleLength: 2
+    crackleGain: 0.5
+    modal:
+      material: 4
+      exciter: 1
+      exciterMs: 1.5
+      decayScale: 1
+      damping: 0
+      strike: 0.22
+      detune: 0
+      modes: []
+    particles:
+      density: 300
+      systemDecay: 0.1
+      grainMs: 3
+      res1: 2000
+      res2: 0
+      res3: 0
+      q: 4
+      freqJitter: 0.3
+      gainJitter: 0.7
+    bubbles:
+      atStart: 1
+      rate: 0
+      radiusMin: 2
+      radiusMax: 4
+      rise: 0.1
+      decayScale: 1.5
+      ampJitter: 0.5
+    fire:
+      intensity: 0.6
+      crackleRate: 25
+      crackleFreq: 2500
+      crackleGain: 1
+      hissGain: 0.3
+      hissFreq: 3000
+      lapGain: 0.5
+      lapFreq: 450
+      lapRate: 3
+    wind:
+      freq: 700
+      q: 1.5
+      gustRate: 0.4
+      gustDepth: 0.6
+      baseLevel: 0.35
+      whistleGain: 0.3
+      whistleFreq: 1400
+      whistleThreshold: 0.6
+      leavesGain: 0
+    friction:
+      rateStart: 12
+      rateEnd: 30
+      rateTime: 0.6
+      irregularity: 0.3
+      pressure: 0.6
+      body: 1
+      bodyDecay: 0.6
+      scrape: 0.2
+    breath:
+      formantStart: 600
+      formantEnd: 1400
+      sweepTime: 0.15
+      sweepCurve: 0.6
+      secondFormant: 2.4
+      q: 3
+      pinkMix: 0.5
+      flutterRate: 0
+      flutterDepth: 0
+    group: -1
+    scatter:
+      count: 0
+      window: 0.5
+      pitchJitter: 2
+      gainJitter: 0.5
+      bunching: 1
+  - enabled: 1
+    label: Modal/Stone clack
+    instrument: 0
+    model: 1
+    wave: 0
+    note: C#6
+    hz: 440
+    gate: 0
+    startOffset: 0
+    gain: 0.4
+    pitchStart: 0
+    pitchEnd: 0
+    pitchTime: 0.1
+    pitchCurve: 1
+    amp:
+      attack: 0.003
+      hold: 3
+      decay: 0.05
+      sustain: 0
+      release: 0.02
+    vibratoRate: 0
+    vibratoDepth: 0
+    vibratoDelay: 0
+    tremoloRate: 0
+    tremoloDepth: 0
+    fmRatio: 0
+    fmIndex: 0
+    fmDecay: 0
+    filter: 0
+    cutoffStart: 2000
+    cutoffEnd: 2000
+    cutoffTime: 0.2
+    cutoffCurve: 1
+    resonance: 0.1
+    formant: 0
+    f1Start: 700
+    f1End: 300
+    f2Start: 1200
+    f2End: 2200
+    formantTime: 0.2
+    formantQ: 8
+    formantMix: 1
+    crackleDensity: 0
+    crackleLength: 2
+    crackleGain: 0.5
+    modal:
+      material: 2
+      exciter: 0
+      exciterMs: 0.3
+      decayScale: 1
+      damping: 0
+      strike: 0.22
+      detune: 0
+      modes: []
+    particles:
+      density: 300
+      systemDecay: 0.1
+      grainMs: 3
+      res1: 2000
+      res2: 0
+      res3: 0
+      q: 4
+      freqJitter: 0.3
+      gainJitter: 0.7
+    bubbles:
+      atStart: 1
+      rate: 0
+      radiusMin: 2
+      radiusMax: 4
+      rise: 0.1
+      decayScale: 1.5
+      ampJitter: 0.5
+    fire:
+      intensity: 0.6
+      crackleRate: 25
+      crackleFreq: 2500
+      crackleGain: 1
+      hissGain: 0.3
+      hissFreq: 3000
+      lapGain: 0.5
+      lapFreq: 450
+      lapRate: 3
+    wind:
+      freq: 700
+      q: 1.5
+      gustRate: 0.4
+      gustDepth: 0.6
+      baseLevel: 0.35
+      whistleGain: 0.3
+      whistleFreq: 1400
+      whistleThreshold: 0.6
+      leavesGain: 0
+    friction:
+      rateStart: 12
+      rateEnd: 30
+      rateTime: 0.6
+      irregularity: 0.3
+      pressure: 0.6
+      body: 1
+      bodyDecay: 0.6
+      scrape: 0.2
+    breath:
+      formantStart: 600
+      formantEnd: 1400
+      sweepTime: 0.15
+      sweepCurve: 0.6
+      secondFormant: 2.4
+      q: 3
+      pinkMix: 0.5
+      flutterRate: 0
+      flutterDepth: 0
+    group: -1
+    scatter:
+      count: 0
+      window: 0.5
+      pitchJitter: 2
+      gainJitter: 0.5
+      bunching: 1
+  - enabled: 1
+    label: Breath/Puff
+    instrument: 0
+    model: 7
+    wave: 0
+    note: 
+    hz: 440
+    gate: 0
+    startOffset: 0
+    gain: 0.3
+    pitchStart: 0
+    pitchEnd: 0
+    pitchTime: 0.1
+    pitchCurve: 1
+    amp:
+      attack: 0.003
+      hold: 0
+      decay: 0.08
+      sustain: 0
+      release: 0.05
+    vibratoRate: 0
+    vibratoDepth: 0
+    vibratoDelay: 0
+    tremoloRate: 0
+    tremoloDepth: 0
+    fmRatio: 0
+    fmIndex: 0
+    fmDecay: 0
+    filter: 0
+    cutoffStart: 2000
+    cutoffEnd: 2000
+    cutoffTime: 0.2
+    cutoffCurve: 1
+    resonance: 0.1
+    formant: 0
+    f1Start: 700
+    f1End: 300
+    f2Start: 1200
+    f2End: 2200
+    formantTime: 0.2
+    formantQ: 8
+    formantMix: 1
+    crackleDensity: 0
+    crackleLength: 2
+    crackleGain: 0.5
+    modal:
+      material: 1
+      exciter: 1
+      exciterMs: 1.5
+      decayScale: 1
+      damping: 0
+      strike: 0.22
+      detune: 0
+      modes: []
+    particles:
+      density: 300
+      systemDecay: 0.1
+      grainMs: 3
+      res1: 2000
+      res2: 0
+      res3: 0
+      q: 4
+      freqJitter: 0.3
+      gainJitter: 0.7
+    bubbles:
+      atStart: 1
+      rate: 0
+      radiusMin: 2
+      radiusMax: 4
+      rise: 0.1
+      decayScale: 1.5
+      ampJitter: 0.5
+    fire:
+      intensity: 0.6
+      crackleRate: 25
+      crackleFreq: 2500
+      crackleGain: 1
+      hissGain: 0.3
+      hissFreq: 3000
+      lapGain: 0.5
+      lapFreq: 450
+      lapRate: 3
+    wind:
+      freq: 700
+      q: 1.5
+      gustRate: 0.4
+      gustDepth: 0.6
+      baseLevel: 0.35
+      whistleGain: 0.3
+      whistleFreq: 1400
+      whistleThreshold: 0.6
+      leavesGain: 0
+    friction:
+      rateStart: 12
+      rateEnd: 30
+      rateTime: 0.6
+      irregularity: 0.3
+      pressure: 0.6
+      body: 1
+      bodyDecay: 0.6
+      scrape: 0.2
+    breath:
+      formantStart: 1500
+      formantEnd: 800
+      sweepTime: 0.08
+      sweepCurve: 0.5
+      secondFormant: 2.4
+      q: 2.5
+      pinkMix: 0.6
+      flutterRate: 0
+      flutterDepth: 0
+    group: -1
+    scatter:
+      count: 0
+      window: 0.5
+      pitchJitter: 2
+      gainJitter: 0.5
+      bunching: 1
+  - enabled: 1
+    label: 
+    instrument: 0
+    model: 0
+    wave: 0
+    note: 
+    hz: 140
+    gate: 0
+    startOffset: 0
+    gain: 0.12
+    pitchStart: 4
+    pitchEnd: 0
+    pitchTime: 0.04
+    pitchCurve: 0.6
+    amp:
+      attack: 0.003
+      hold: 0
+      decay: 0.08
+      sustain: 0
+      release: 0.05
+    vibratoRate: 0
+    vibratoDepth: 0
+    vibratoDelay: 0
+    tremoloRate: 0
+    tremoloDepth: 0
+    fmRatio: 0
+    fmIndex: 0
+    fmDecay: 0
+    filter: 0
+    cutoffStart: 2000
+    cutoffEnd: 2000
+    cutoffTime: 0.2
+    cutoffCurve: 1
+    resonance: 0.1
+    formant: 0
+    f1Start: 700
+    f1End: 300
+    f2Start: 1200
+    f2End: 2200
+    formantTime: 0.2
+    formantQ: 8
+    formantMix: 1
+    crackleDensity: 0
+    crackleLength: 2
+    crackleGain: 0.5
+    modal:
+      material: 1
+      exciter: 1
+      exciterMs: 1.5
+      decayScale: 1
+      damping: 0
+      strike: 0.22
+      detune: 0
+      modes: []
+    particles:
+      density: 300
+      systemDecay: 0.1
+      grainMs: 3
+      res1: 2000
+      res2: 0
+      res3: 0
+      q: 4
+      freqJitter: 0.3
+      gainJitter: 0.7
+    bubbles:
+      atStart: 1
+      rate: 0
+      radiusMin: 2
+      radiusMax: 4
+      rise: 0.1
+      decayScale: 1.5
+      ampJitter: 0.5
+    fire:
+      intensity: 0.6
+      crackleRate: 25
+      crackleFreq: 2500
+      crackleGain: 1
+      hissGain: 0.3
+      hissFreq: 3000
+      lapGain: 0.5
+      lapFreq: 450
+      lapRate: 3
+    wind:
+      freq: 700
+      q: 1.5
+      gustRate: 0.4
+      gustDepth: 0.6
+      baseLevel: 0.35
+      whistleGain: 0.3
+      whistleFreq: 1400
+      whistleThreshold: 0.6
+      leavesGain: 0
+    friction:
+      rateStart: 12
+      rateEnd: 30
+      rateTime: 0.6
+      irregularity: 0.3
+      pressure: 0.6
+      body: 1
+      bodyDecay: 0.6
+      scrape: 0.2
+    breath:
+      formantStart: 600
+      formantEnd: 1400
+      sweepTime: 0.15
+      sweepCurve: 0.6
+      secondFormant: 2.4
+      q: 3
+      pinkMix: 0.5
+      flutterRate: 0
+      flutterDepth: 0
+    group: -1
+    scatter:
+      count: 0
+      window: 0.5
+      pitchJitter: 2
+      gainJitter: 0.5
+      bunching: 1
+  groups: []
+  loopCrossfade: 1
+  notes: []
+  gain: 1
+  limiter: 1
+  lowpass: 9000
+  normalize: 1
+  levelMode: 1
+  tier: 3
+  tierTrimDb: 0
+  peakDb: -3
+  gap: 0
+  confidence: 1
+  review:
+    status: 0
+    note: 

@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28966354f9950c5429c46b779a504dcd, type: 3}
+  m_Name: sw.bird
+  m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
+  id: sw.bird
+  clips: []
+  volume: 0.8
+  volumeJitter: 0.2
+  pitchMin: 0.96
+  pitchMax: 1.04
+  pitchStepSemitones: 0
+  bus: 1
+  spatial: 1
+  minDistance: 0.1
+  maxDistance: 1.5
+  loop: 0
+  maxVoices: 3
+  minInterval: 0.1
+  priority: 220
+  awaitingClips: 1
+  notes: Awaiting the gen batch (Import Gen Batch).
+  review:
+    status: 0
+    note: 

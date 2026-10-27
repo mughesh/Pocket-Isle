@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28966354f9950c5429c46b779a504dcd, type: 3}
+  m_Name: keeper.fury
+  m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
+  id: keeper.fury
+  clips:
+  - {fileID: 8300000, guid: ce7b2f90ca445bd418a308b136254682, type: 3}
+  - {fileID: 8300000, guid: 1facd23a4cab3674996748baae31f071, type: 3}
+  - {fileID: 8300000, guid: 4d5f4fa093283dc4db698b9c9d58864b, type: 3}
+  - {fileID: 8300000, guid: 46d2687c3c62b494a843b502c608d736, type: 3}
+  volume: 0.8
+  volumeJitter: 0.05
+  pitchMin: 0.97
+  pitchMax: 1.03
+  pitchStepSemitones: 0
+  bus: 2
+  spatial: 1
+  minDistance: 0.1
+  maxDistance: 3
+  loop: 0
+  maxVoices: 1
+  minInterval: 0.03
+  priority: 20
+  awaitingClips: 0
+  notes: 
+  review:
+    status: 0
+    note: 

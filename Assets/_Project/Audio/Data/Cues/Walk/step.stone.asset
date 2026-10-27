@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28966354f9950c5429c46b779a504dcd, type: 3}
+  m_Name: step.stone
+  m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
+  id: step.stone
+  clips:
+  - {fileID: 8300000, guid: 5c4529a634e2a5a42a28e03380b71878, type: 3}
+  - {fileID: 8300000, guid: b3722cc7daf44e04ea67120090978d54, type: 3}
+  - {fileID: 8300000, guid: 410f6356038ebe04d97c2bc477857859, type: 3}
+  - {fileID: 8300000, guid: 71486c6bb3daaa144bdb53d48314603e, type: 3}
+  - {fileID: 8300000, guid: ca0a6e2b0082fad49ac40ec6d168399c, type: 3}
+  - {fileID: 8300000, guid: c8a86e9c783a11140a088222f9e9f10f, type: 3}
+  - {fileID: 8300000, guid: 33c7735af90390746bb54ca91a4c1c4e, type: 3}
+  - {fileID: 8300000, guid: d141abe2b4f5c4d47976dfc56711d8ab, type: 3}
+  - {fileID: 8300000, guid: a287510f31bb1604389d8ed673237341, type: 3}
+  - {fileID: 8300000, guid: 7d68d9ac43a1f384987a7e6732fcabba, type: 3}
+  - {fileID: 8300000, guid: 32d5028c593b0e241b467aca3d48b34d, type: 3}
+  - {fileID: 8300000, guid: 142a0f19c6aa57b42bc1043098996a35, type: 3}
+  - {fileID: 8300000, guid: 8e4cf53e95f3d9549a76c3070351deb7, type: 3}
+  - {fileID: 8300000, guid: ade83743dbd7f4843a4cc12730c28d6c, type: 3}
+  - {fileID: 8300000, guid: 6bebecb1806ef624796db41fad5ab0d7, type: 3}
+  - {fileID: 8300000, guid: a38b3c49b03eef944b77a46aa1b49313, type: 3}
+  volume: 0.8
+  volumeJitter: 0.1
+  pitchMin: 0.95
+  pitchMax: 1.05
+  pitchStepSemitones: 0
+  bus: 2
+  spatial: 1
+  minDistance: 0.1
+  maxDistance: 1.5
+  loop: 0
+  maxVoices: 3
+  minInterval: 0.06
+  priority: 150
+  awaitingClips: 0
+  notes: 'Pick by tile: grass / path / stone (halls) / wood (lodge).'
+  review:
+    status: 0
+    note: 
