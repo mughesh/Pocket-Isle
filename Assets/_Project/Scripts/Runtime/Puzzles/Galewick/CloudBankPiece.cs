@@ -19,8 +19,10 @@ namespace Diorama
         public GustField gusts;
         [Tooltip("A gust hits a puff within this far of its sweep line (island-local metres).")]
         public float corridor = 0.2f;
-        [Tooltip("Puffs drawn this much bigger than a tile (they sit on the path like a wall).")]
-        public float puffScale = 1.35f;
+        [Tooltip("Puffs drawn this much bigger than a tile (they sit on the path like a wall). Step 11d: 2.7 (was 1.35, hidden by the plants).")]
+        public float puffScale = 2.7f;
+        [Tooltip("Step 11d: the puffs float this many tiles over the path, clear of the plants.")]
+        public float puffHeight = 0.6f;
 
         [Header("Thinning (CloudBank)")]
         public float perGust = 0.36f;
@@ -46,12 +48,32 @@ namespace Diorama
             {
                 if (!Here) return null;
                 for (int i = 0; i < puffs.Length; i++)
-                    if (!_bank.Gone(i)) return PuffWorld(i, 0.5f);
+                    if (!_bank.Gone(i)) return PuffWorld(i, puffHeight + 0.5f);
                 return null;
             }
         }
 
         public override float FocusRadius => 1f * TileWorld;
+
+        // ---- step 11d: the objective (gold over every puff still there, "Clouds n/3") ----
+
+        public override bool CountObjective(out int done, out int total)
+        {
+            total = puffs.Length;
+            done = ObjectiveRules.Count(_bank.Mask);
+            return true;
+        }
+
+        protected override int MarkCount => puffs.Length;
+
+        protected override bool Mark(int i, out Vector3 world, out float tiles)
+        {
+            tiles = 1.2f * puffScale;
+            world = default;
+            if (_bank.Gone(i)) return false;
+            world = PuffWorld(i, puffHeight + 0.55f * puffScale);
+            return true;
+        }
 
         protected override void Start()
         {
@@ -112,7 +134,7 @@ namespace Diorama
             for (int i = 0; i < puffs.Length; i++)
             {
                 if (_bank.Gone(i)) continue;
-                var local = island.transform.InverseTransformPoint(PuffWorld(i, 0.4f));
+                var local = island.transform.InverseTransformPoint(PuffWorld(i, puffHeight + 0.4f));
                 var p = new Vector2(local.x, local.z) - origin;
                 float lateral = Mathf.Abs(p.x * dir.y - p.y * dir.x);
                 if (lateral > corridor) continue;
@@ -124,7 +146,7 @@ namespace Diorama
                 {
                     float tile = TileWorld;
                     var worldDir = island.transform.TransformDirection(new Vector3(dir.x, 0f, dir.y));
-                    fx.Burst(PuffWorld(i, 0.5f), 10, new Color(1f, 1f, 1f, 0.7f), tile * 0.6f, 0.9f, tile * 0.12f, worldDir * tile * 3f);
+                    fx.Burst(PuffWorld(i, puffHeight + 0.5f), 10, new Color(1f, 1f, 1f, 0.7f), tile * 0.6f, 0.9f, tile * 0.12f, worldDir * tile * 3f);
                 }
                 LessonComplete();
                 if (gone) Gone(i);
@@ -154,7 +176,7 @@ namespace Diorama
         {
             _gazed = Gazed();
             if (_gazed < 0) return;
-            FocusHighlight.Hover(PuffWorld(_gazed, 0.5f), FocusRadius);
+            FocusHighlight.Hover(PuffWorld(_gazed, puffHeight + 0.5f), FocusRadius);
             bool held = false;
             foreach (var h in _hands)
                 if (h.pinch && !h.busy) held = true;
@@ -170,7 +192,7 @@ namespace Diorama
             if (!HeadGaze.TryGetRay(out var ray)) return -1;
             var pick = new HeadGaze.ConePick(ray, _gazed);
             for (int i = 0; i < puffs.Length; i++)
-                if (!_bank.Gone(i)) pick.Consider(i, PuffWorld(i, 0.5f), Mathf.Max(HeadGaze.MinRadius * island.transform.lossyScale.x, 0.8f * TileWorld));
+                if (!_bank.Gone(i)) pick.Consider(i, PuffWorld(i, puffHeight + 0.5f), Mathf.Max(HeadGaze.MinRadius * island.transform.lossyScale.x, 0.4f * puffScale * TileWorld));
             return pick.Best;
         }
 
@@ -188,7 +210,7 @@ namespace Diorama
             }
             float size = puffScale * (0.45f + 0.55f * Mathf.Max(thick, 0.2f)) * fade;
             var tile = (Vector2)puffs[i] + new Vector2(-_drift[i].x, _drift[i].y) * 2f;
-            v.Place(tile, 0.15f * (1f - fade), Quaternion.Euler(0f, 37f * i, 0f), Here && size > 0.02f, size);
+            v.Place(tile, puffHeight + 0.15f * (1f - fade), Quaternion.Euler(0f, 37f * i, 0f), Here && size > 0.02f, size);
         }
 
         Vector3 PuffWorld(int i, float height) => MapToWorld(new Vector3(puffs[i].x - _drift[i].x * 2f, height, puffs[i].y + _drift[i].y * 2f));
@@ -197,7 +219,7 @@ namespace Diorama
         public void DebugGust(float strength = 0.9f)
         {
             if (gusts == null || !Here) return;
-            var local = island.transform.InverseTransformPoint(PuffWorld(0, 0.4f));
+            var local = island.transform.InverseTransformPoint(PuffWorld(0, puffHeight + 0.4f));
             // Blow along the path (map east = island-local -X), starting just west of the first puff.
             gusts.Blow(new Vector2(local.x + 0.06f, local.z), new Vector2(-1f, 0f), strength, "bridge");
         }

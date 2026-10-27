@@ -97,6 +97,9 @@ namespace Diorama
             _easing = true;
         }
 
+        /// <summary>Step 11d: the view is centred on a focus point (a battle, the lotus garden), not the explorer.</summary>
+        public bool HasFocus => _focus.HasValue;
+
         /// <summary>Where the view centre ends up when focused on <paramref name="tile"/> (clamped to the map).</summary>
         public Vector2 FocusCenter(Vector2 tile) => ClampToMap(tile + CenterBias());
 

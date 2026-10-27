@@ -13,6 +13,7 @@ namespace Diorama
 
         const string HandKey = "pocketisle.hand";
         const string HintsKey = "pocketisle.fewerHints";
+        const string TouchWalkKey = "pocketisle.touchWalk";
 
         public static event Action Changed;
 
@@ -28,6 +29,22 @@ namespace Diorama
                 PlayerPrefs.SetInt(HandKey, (int)value);
                 PlayerPrefs.Save();
                 Debug.Log($"[GameSettings] Dominant hand: {value}.");
+                Changed?.Invoke();
+            }
+        }
+
+        /// <summary>
+        /// Step 11d (Note 1): touching a tile with a fingertip walks the explorer there. Off by default: it fought the
+        /// hand moments on the island. Walking stays with the thumb swipe and look + pinch.
+        /// </summary>
+        public static bool TouchWalk
+        {
+            get => PlayerPrefs.GetInt(TouchWalkKey, 0) == 1;
+            set
+            {
+                PlayerPrefs.SetInt(TouchWalkKey, value ? 1 : 0);
+                PlayerPrefs.Save();
+                Debug.Log($"[GameSettings] Touch tiles to walk: {(value ? "on" : "off")}.");
                 Changed?.Invoke();
             }
         }

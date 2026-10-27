@@ -38,6 +38,12 @@ namespace Diorama
         public float rainRadius = 1.3f;
         [Tooltip("Cloud size on the island (x the CloudPuff prop) and how far under the palm it floats (metres).")]
         public float cloudScale = 0.55f, cloudBelow = 0.025f;
+        [Tooltip("Step 11d: the cloud's width in the room (metres, about a palm). 0 = Cloud Scale as before.")]
+        public float cloudMetres = 0.11f;
+
+        [Header("Garden view (step 11d)")]
+        [Tooltip("With the explorer this close (tiles) to the buds' middle, the window glides over to show all five buds.")]
+        public float settleReach = 7f;
 
         [Header("Buds (BudGarden)")]
         public float softSeconds = 2f, hardSeconds = 1f;
@@ -84,6 +90,29 @@ namespace Diorama
 
         public override float FocusRadius => 1.2f * TileWorld;
 
+        // ---- step 11d: the objective (gold on every closed bud, "Lotus n/5") ----
+
+        public override bool CountObjective(out int done, out int total)
+        {
+            total = buds.Length;
+            done = _garden != null ? Count(_garden.Mask) : 0;
+            return true;
+        }
+
+        protected override int MarkCount => buds.Length;
+
+        protected override bool Mark(int i, out Vector3 world, out float tiles)
+        {
+            world = default;
+            tiles = 1.3f;
+            if (_garden == null || i >= buds.Length || _garden.Bloomed(i) || _finishing) return false;
+            world = MapToWorld(new Vector3(buds[i].x, 0.05f, buds[i].y));
+            return true;
+        }
+
+        /// <summary>The cloud's size in CloudPuff units now (step 11d: about a palm across in the room).</summary>
+        float CloudScaleNow => cloudMetres > 0f ? cloudMetres / Mathf.Max(1e-4f, TileWorld) : cloudScale;
+
         protected override void Start()
         {
             _cloud = new RainCloud { maxAngle = maxAngle, formSeconds = formSeconds, wiggleSpeed = wiggleSpeed };
@@ -112,6 +141,7 @@ namespace Diorama
             if (_stoneViews != null)
                 foreach (var v in _stoneViews) v?.Destroy();
             _cloudView?.Destroy();
+            _stand?.Destroy();
             if (map != null)
                 foreach (var t in gapTiles)
                 {
@@ -136,7 +166,8 @@ namespace Diorama
         {
             foreach (var t in gapTiles)
             {
-                map.SetPropHidden(t, open);
+                // Step 11d: the crossing is the lotus stones only: the bed keeps showing under them.
+                map.SetPropHidden(t, false);
                 map.SetPropOpen(t, open);
             }
         }
@@ -175,6 +206,7 @@ namespace Diorama
             if (_cloud.Raining && live) RainOnBuds(new Vector2(_cloudMap.x, _cloudMap.z), rainRadius, _cloud.Hard, Time.deltaTime);
             if (_lookHold && _gazed >= 0) RainOnBud(_gazed, Time.deltaTime * softSeconds / Mathf.Max(0.1f, lookSeconds), false);
             if (!IsSolved && !_finishing && _garden.AllBloomed) StartCoroutine(Finish());
+            Settle();
             Draw();
             base.Update();
         }
@@ -323,21 +355,24 @@ namespace Diorama
             if (_cloudView == null) return;
             float size = _cloud != null ? _cloud.Size : 0f;
             bool show = here && size > 0.01f;
+            float scale = CloudScaleNow;
             float belowTiles = cloudBelow * Scale / Mathf.Max(1e-4f, TileWorld);
-            float h = Mathf.Max(0.6f, _cloudMap.y - belowTiles);
-            _cloudView.Place(new Vector2(_cloudMap.x, _cloudMap.z), h - 0.5f * cloudScale, Quaternion.Euler(0f, Time.time * 10f, 0f), show,
-                cloudScale * Mathf.SmoothStep(0.2f, 1f, size));
+            float h = Mathf.Max(0.6f + 0.25f * scale, _cloudMap.y - belowTiles);
+            _cloudView.Place(new Vector2(_cloudMap.x, _cloudMap.z), h - 0.5f * scale, Quaternion.Euler(0f, Time.time * 10f, 0f), show,
+                scale * Mathf.SmoothStep(0.2f, 1f, size));
             if (!show || !_cloud.Raining || fx == null) return;
-            // Rain: short streaks falling from the cloud, splash dots on the bed; more when hard.
-            float rate = _cloud.Hard ? 0.02f : 0.05f;
+            // Rain: streaks falling from the whole cloud, splash dots on the bed; more when hard (step 11d: more, bigger).
+            float rate = _cloud.Hard ? 0.006f : 0.015f;
             float tile = TileWorld;
+            float spread = Mathf.Max(1f, scale * 0.6f);
             while (Time.time >= _dropAt)
             {
                 _dropAt = Mathf.Max(_dropAt + rate, Time.time - 0.1f);
-                var from = MapToWorld(new Vector3(_cloudMap.x + Random.Range(-0.6f, 0.6f) * cloudScale * 1.6f, h - 0.3f, _cloudMap.z + Random.Range(-0.4f, 0.4f) * cloudScale * 1.6f));
-                fx.Burst(from, 1, new Color(0.75f, 0.9f, 1f, 0.9f), tile * 0.02f, 0.35f, tile * 0.03f, -island.transform.up * tile * h * 2.6f);
-                var ground = MapToWorld(new Vector3(_cloudMap.x + Random.Range(-1f, 1f), 0.02f, _cloudMap.z + Random.Range(-1f, 1f)));
-                fx.Burst(ground, 1, new Color(0.65f, 0.85f, 0.95f, 0.8f), tile * 0.1f, 0.25f, tile * 0.03f, island.transform.up * tile * 0.15f);
+                var from = MapToWorld(new Vector3(_cloudMap.x + Random.Range(-0.6f, 0.6f) * spread, h - 0.5f * scale, _cloudMap.z + Random.Range(-0.45f, 0.45f) * spread));
+                fx.Burst(from, 1, new Color(0.75f, 0.9f, 1f, 0.95f), tile * 0.03f, 0.4f, tile * 0.05f, -island.transform.up * tile * h * 2.6f);
+                if (Random.value < 0.6f) continue;
+                var ground = MapToWorld(new Vector3(_cloudMap.x + Random.Range(-0.7f, 0.7f) * spread, 0.02f, _cloudMap.z + Random.Range(-0.7f, 0.7f) * spread));
+                fx.Burst(ground, 1, new Color(0.65f, 0.85f, 0.95f, 0.85f), tile * 0.14f, 0.3f, tile * 0.04f, island.transform.up * tile * 0.15f);
             }
             if (Time.time >= _dripAt)
             {
@@ -347,6 +382,90 @@ namespace Diorama
         }
 
         Vector3 BudWorld(int i) => MapToWorld(new Vector3(buds[i].x, 0.4f, buds[i].y));
+
+        /// <summary>The buds' middle (map tiles).</summary>
+        public Vector2 BudsCenter
+        {
+            get
+            {
+                Vector2 sum = Vector2.zero;
+                foreach (var b in buds) sum += b;
+                return buds.Length > 0 ? sum / buds.Length : gardenCenter;
+            }
+        }
+
+        bool _settled;
+        Vector2 _focusAt;
+        GuideRings _stand;
+
+        /// <summary>The window holds the garden while the explorer is at it (step 11d).</summary>
+        public bool Settled => _settled;
+
+        /// <summary>The gold "stand here" tile shows (the window can't hold every bud and the explorer from where they are).</summary>
+        public bool StandHereShown { get; private set; }
+
+        /// <summary>
+        /// Step 11d (Note 15): at the garden the window glides over so all five buds and the explorer are in view (from
+        /// the path only three or four showed), following the explorer within the garden, and back to plain following
+        /// when they walk off, the garden is done or a battle takes the view. Too far for one window: a gold tile marks
+        /// where to stand.
+        /// </summary>
+        void Settle()
+        {
+            if (window == null || explorer == null || island == null || island.map == null) return;
+            Vector2 lo = buds.Length > 0 ? buds[0] : gardenCenter, hi = lo;
+            foreach (var b in buds)
+            {
+                lo = Vector2.Min(lo, b);
+                hi = Vector2.Max(hi, b);
+            }
+            var c = BudsCenter;
+            Vector2 ex = explorer.Tile;
+            bool near = Mathf.Max(Mathf.Abs(ex.x - c.x), Mathf.Abs(ex.y - c.y)) <= settleReach;
+            Vector2 all0 = Vector2.Min(lo, ex), all1 = Vector2.Max(hi, ex);
+            // The window holds about its width in tiles; keep a tile and a half of margin for the round corners.
+            float room = Mathf.Min(island.map.Columns, island.map.Rows) / Mathf.Max(1f, island.Zoom) - 2.5f;
+            bool fits = all1.x - all0.x <= room && all1.y - all0.y <= room;
+            bool live = Here && !IsSolved && !_finishing && !explorer.Locked && !Opening.InProgress && !Onboarding.Running;
+            bool want = live && near && fits;
+            Vector2 focus = (all0 + all1) * 0.5f;
+            if (want && (!_settled && !window.HasFocus || _settled && (focus - _focusAt).sqrMagnitude > 0.06f))
+            {
+                if (!_settled) Debug.Log($"[RainGarden] {id}: at the garden: the window settles over all {buds.Length} buds and the explorer.");
+                window.SetFocus(focus);
+                _focusAt = focus;
+                _settled = true;
+            }
+            else if (!want && _settled)
+            {
+                _settled = false;
+                if (!explorer.Locked) window.SetFocus(null);
+            }
+            // Too far apart for one window: a gold tile just south of the buds is where to stand.
+            Vector2Int standAt = default;
+            bool stand = live && !fits && Mathf.Max(Mathf.Abs(ex.x - c.x), Mathf.Abs(ex.y - c.y)) <= settleReach + 4f && StandTile(hi, out standAt);
+            if (focusMaterial != null && _stand == null) _stand = new GuideRings("Lotus Stand Here", island, focusMaterial, 1, fx);
+            if (_stand != null)
+            {
+                float pulse = 0.85f + 0.2f * Mathf.Sin(Time.time * 3f);
+                _stand.Draw(0, stand, stand ? new Vector3(standAt.x, 0.04f, standAt.y) : default, 1.3f, 1.5f * pulse, 0.35f * pulse);
+            }
+            if (stand != StandHereShown) Debug.Log($"[RainGarden] {id}: stand-here tile {(stand ? "shown" : "gone")}.");
+            StandHereShown = stand;
+        }
+
+        /// <summary>The first walkable tile on the buds' column just south of them (toward the player).</summary>
+        bool StandTile(Vector2 budsMax, out Vector2Int tile)
+        {
+            int col = Mathf.RoundToInt(BudsCenter.x - 0.5f);
+            for (int row = Mathf.CeilToInt(budsMax.y) + 1; row <= Mathf.CeilToInt(budsMax.y) + 5; row++)
+            {
+                tile = new Vector2Int(col, row);
+                if (map.CanWalk(tile)) return true;
+            }
+            tile = default;
+            return false;
+        }
 
         static int Count(int mask)
         {

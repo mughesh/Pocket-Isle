@@ -41,7 +41,22 @@ clear storage): they turn red, press again within 3 seconds.
 Cheats (one-hit KO, invincible, wild battles off, rare x10, time and walk speed) last until the app closes. They are
 never saved.
 
-## 4. What's new in this build (Oct 28: sound, and Lilymere for Mugesh)
+## 4. What's new in this build (step 11d: fixes from Mugesh's Oct 27 notes)
+
+- **Every task now shows itself**: gold rings on what you can act on, a counter in the Spirit's chip (Kites 1/3,
+  Clouds 2/3, Flicks 1/3, Knots 1/3, Pads 1/3, Lotus 4/5, Pours 1/2), and a gold arrow at the island's edge when one is
+  out of view. Tell us any task you still found by accident.
+- **Settings > Touch tiles to walk** is **Off** now. Walk with the thumb swipe or by looking at a tile and pinching.
+- **Open doors glow** (the forge door, the wind tower door): a warm swirl in the doorway and a gold ring in front.
+- **Galewick**: the big mill's flick zone is bigger and slower, and the middle finger counts too; the cloud puffs are
+  twice as big and float above the plants; the tower crown shows three empty hooks; after Galeowl a **return gate**
+  stands beside the tower.
+- **The shard after a Keeper win**: pinch or grab it, or just wait 4 s and it flies to the Spirit.
+- **Lilymere**: pads float on the water and come back if they drift out of view; the finished bridge is just the pads;
+  the lotus crossing is just the flowers; the rain cloud is palm-sized; at the garden the island shows all five buds;
+  scoop with **both hands cupped together** (one hand still works), the basin fills half way after one pour.
+
+## Earlier (Oct 28: sound, and Lilymere for Mugesh)
 
 - **Sound everywhere**: footsteps, battles, catching, the Cinderwood beats, Keeper, ambience per area. No music yet
   (no tracks). Note any moment that's too loud / too quiet / wrong / annoying.

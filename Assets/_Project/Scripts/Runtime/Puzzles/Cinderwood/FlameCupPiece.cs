@@ -68,6 +68,17 @@ namespace Diorama
         public override Vector3? FocusPoint => Here && !IsSolved ? FlameWorld : (Vector3?)null;
         public override float FocusRadius => 0.7f * TileWorld;
 
+        // ---- step 11d: gold round the weak flame until it's rekindled ----
+
+        protected override int MarkCount => 1;
+
+        protected override bool Mark(int i, out Vector3 world, out float tiles)
+        {
+            world = MapToWorld(new Vector3(Centre.x, 0.05f, Centre.y));
+            tiles = 1.8f;
+            return true;
+        }
+
         // The lesson ghost: both hands cupping, mirrored, either side of the flame.
         protected override bool GhostBothHands => true;
         protected override float GhostSpread => 0.11f * Scale;

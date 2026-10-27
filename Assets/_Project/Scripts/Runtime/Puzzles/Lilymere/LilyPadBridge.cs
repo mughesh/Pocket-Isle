@@ -38,6 +38,12 @@ namespace Diorama
         public float pushShare = 0.8f;
         public float drag = 0.8f, bounce = 0.5f, snapRadius = 0.6f;
 
+        [Header("Floating (step 11d)")]
+        [Tooltip("The pad's underside rides this many tiles above the water (or the crossing's water sheet once locked), with a slow bob.")]
+        public float floatHeight = 0.03f;
+        [Tooltip("A free pad outside the island window this long (s) fades and comes back at its start, so there are always three.")]
+        public float respawnAfter = 3f;
+
         [Header("Guidance")]
         public Material guideMaterial;
         public float ringSize = 1.6f, orbSize = 0.3f;
@@ -54,6 +60,8 @@ namespace Diorama
         readonly Vector3[] _lastTip = new Vector3[2];
         readonly bool[] _hadTip = new bool[2];
         readonly float[] _bob = new float[3];
+        readonly float[] _away = new float[3];
+        readonly float[] _fade = { 1f, 1f, 1f };
         int _gazed = -1;
         bool _quietSolve, _finishing;
 
@@ -75,9 +83,30 @@ namespace Diorama
 
         public override float FocusRadius => 0.6f * TileWorld;
 
+        // ---- step 11d: the objective (gold on every free pad, "Pads n/3") ----
+
+        public override bool CountObjective(out int done, out int total)
+        {
+            total = slots.Length;
+            done = _drift != null ? Count(_drift.Mask) : 0;
+            return true;
+        }
+
+        protected override int MarkCount => padStart.Length;
+
+        protected override bool Mark(int i, out Vector3 world, out float tiles)
+        {
+            world = default;
+            tiles = padScale * 0.9f;
+            if (_drift == null || i >= _drift.Count || _drift.Locked(i) || _finishing) return false;
+            world = PadWorld(i) + island.transform.up * (FloatHeight * island.map.tileSize * island.Zoom * island.transform.lossyScale.x);
+            return true;
+        }
+
         protected override void Start()
         {
-            _drift = new PadDrift(padStart, slots, channel) { drag = drag, bounce = bounce, snapRadius = snapRadius };
+            _drift = new PadDrift(padStart, slots, channel) { drag = drag, bounce = bounce, snapRadius = snapRadius, isWater = PadWater };
+            if (explorer != null) explorer.groundLifts.Add(StandLift);
             _views = new PropView[padStart.Length];
             if (island != null)
                 for (int i = 0; i < _views.Length; i++) _views[i] = new PropView($"Lily Pad {i}", island, padRecipe);
@@ -93,6 +122,7 @@ namespace Diorama
             if (_views != null)
                 foreach (var v in _views) v?.Destroy();
             _rings?.Destroy();
+            if (explorer != null) explorer.groundLifts.Remove(StandLift);
             if (map != null)
                 foreach (var t in gapTiles)
                 {
@@ -117,7 +147,8 @@ namespace Diorama
         {
             foreach (var t in gapTiles)
             {
-                map.SetPropHidden(t, open);
+                // Step 11d: the crossing stays water under the pads (its cover keeps drawing), only walkable once open.
+                map.SetPropHidden(t, false);
                 map.SetPropOpen(t, open);
             }
         }
@@ -285,11 +316,15 @@ namespace Diorama
                 var v = _views[i];
                 if (v == null) continue;
                 _bob[i] = Mathf.MoveTowards(_bob[i], 0f, Time.deltaTime * 2f);
+                Respawn(i);
                 bool locked = _drift.Locked(i);
                 // On the crossing (path tiles, higher than the water) a locked pad sits on top.
-                float bob = (locked ? 0.1f : 0f) + 0.04f * Mathf.Sin(Time.time * 1.3f + i * 2f) + 0.08f * _bob[i] * Mathf.Sin(_bob[i] * 18f);
+                // Step 11d: they float on top (never under the surface), bobbing slowly. The LilyPad disc hangs below its
+                // origin, more the bigger it's drawn: lift by that so its underside rests on the water or the sheet.
+                float scale = locked ? slotScale : padScale;
+                float bob = PadLift(locked, scale) + 0.015f * (1f + Mathf.Sin(Time.time * 1.3f + i * 2f)) + 0.08f * _bob[i] * Mathf.Sin(_bob[i] * 18f);
                 float yaw = locked ? 0f : 40f * i + Time.time * (6f + 3f * i);
-                v.Place(_drift.pos[i], bob, Quaternion.Euler(0f, yaw, 0f), Here, locked ? slotScale : padScale);
+                v.Place(_drift.pos[i], bob, Quaternion.Euler(0f, yaw, 0f), Here && _fade[i] > 0.02f, scale * _fade[i]);
             }
         }
 
@@ -308,6 +343,68 @@ namespace Diorama
         }
 
         Vector3 PadWorld(int i) => MapToWorld(new Vector3(_drift.pos[i].x, 0f, _drift.pos[i].y));
+
+        // Tiles relative to the cap: the water's surface (IslandBuilder's water drop), the crossing's water sheet's top,
+        // and how far the LilyPad prop's disc reaches below its origin (shape units, x its scale).
+        const float WaterTop = -0.1f, SheetTop = 0.035f, DiscBelow = 0.095f;
+
+        /// <summary>The pad's height (tiles above the cap) so its underside floats on the water or the locked crossing.</summary>
+        public float PadLift(bool locked, float scale) => (locked ? SheetTop : WaterTop) + DiscBelow * scale + floatHeight;
+
+        float FloatHeight => PadLift(false, padScale) - 0.05f;
+
+        /// <summary>
+        /// Step 11d: on the finished bridge the explorer stands on the pads (map metres above the cap at map point
+        /// <paramref name="p"/>): it steps up at either end and hops a little from one pad to the next.
+        /// </summary>
+        float StandLift(Vector2 p)
+        {
+            if (!IsSolved || !Here || slots.Length == 0 || island == null || island.map == null) return 0f;
+            float x = slots[0].x, y0 = slots[0].y, y1 = slots[0].y;
+            foreach (var s in slots)
+            {
+                y0 = Mathf.Min(y0, s.y);
+                y1 = Mathf.Max(y1, s.y);
+            }
+            if (Mathf.Abs(p.x - x) > 1.1f || p.y < y0 - 0.9f || p.y > y1 + 0.9f) return 0f;
+            float top = PadLift(true, slotScale) - 0.045f * slotScale;
+            float ramp = Mathf.Clamp01((p.y - (y0 - 0.9f)) / 0.45f) * Mathf.Clamp01(((y1 + 0.9f) - p.y) / 0.45f);
+            float between = Mathf.Repeat(p.y - y0, 1f);
+            float hop = p.y > y0 && p.y < y1 ? 0.18f * Mathf.Sin(between * Mathf.PI) : 0f;
+            return (top * Mathf.SmoothStep(0f, 1f, ramp) + hop) * island.map.tileSize;
+        }
+
+        /// <summary>Step 11d: a free pad outside the window for <see cref="respawnAfter"/> s fades and comes back at its start.</summary>
+        void Respawn(int i)
+        {
+            if (_drift == null || i >= _away.Length || i >= padStart.Length) return;
+            if (_drift.Locked(i) || IsSolved || !InView)
+            {
+                _away[i] = 0f;
+                _fade[i] = Mathf.MoveTowards(_fade[i], 1f, Time.deltaTime * 2f);
+                return;
+            }
+            bool outside = !island.FootprintContains(island.TileToLocal(_drift.pos[i], island.Content.capHeight));
+            _away[i] = outside ? _away[i] + Time.deltaTime : 0f;
+            if (_away[i] < respawnAfter)
+            {
+                _fade[i] = Mathf.MoveTowards(_fade[i], 1f, Time.deltaTime * 2f);
+                return;
+            }
+            _fade[i] = Mathf.MoveTowards(_fade[i], 0f, Time.deltaTime * 2f);
+            if (_fade[i] > 0f) return;
+            _drift.Respawn(i, padStart[i]);
+            _away[i] = 0f;
+            Debug.Log($"[LilyPadBridge] {id}: pad {i} drifted out of the window: back at its start.");
+        }
+
+        bool PadWater(Vector2 p)
+        {
+            var t = new Vector2Int(Mathf.RoundToInt(p.x), Mathf.RoundToInt(p.y));
+            foreach (var g in gapTiles)
+                if (g == t || g + Vector2Int.right == t) return true;
+            return map != null && map.At(t) == IslandMap.Water;
+        }
 
         static int Count(int mask)
         {

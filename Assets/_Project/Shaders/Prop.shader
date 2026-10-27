@@ -155,7 +155,9 @@ Shader "Diorama/Prop"
         }
         else if (m == 4) // spin: round the piece centre about +Z; amount = how fast it follows the wind spin
         {
-            float ang = (_SpinSelf > -999.0 ? _SpinSelf : _WindSpin * amt * (0.85 + 0.3 * hash)) + hash * 6.283;
+            // Step 11d: a piece with its own angle (a flicked mill, the tower's vanes) turns by exactly that angle, with no
+            // per-position phase: that phase came from the map position, which moves with the window while walking.
+            float ang = _SpinSelf > -999.0 ? _SpinSelf : _WindSpin * amt * (0.85 + 0.3 * hash) + hash * 6.283;
             float c = cos(ang), sn = sin(ang);
             float3 d = p - centre;
             d.xy = float2(c * d.x - sn * d.y, sn * d.x + c * d.y);

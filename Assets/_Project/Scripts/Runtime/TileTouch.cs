@@ -63,6 +63,12 @@ namespace Diorama
         void Update()
         {
             if (island == null || explorer == null || island.map == null) return;
+            // Step 11d: off unless the player turned it on in Settings (it fought the hand moments on the island).
+            if (!GameSettings.TouchWalk)
+            {
+                foreach (var f in _fingers) f.hasLast = f.dipped = false;
+                return;
+            }
             for (int h = 0; h < 2; h++) UpdateFinger(_fingers[h], h == 0);
         }
 

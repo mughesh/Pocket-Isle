@@ -13,6 +13,8 @@ namespace Diorama
     {
         public float drag = 0.8f, maxSpeed = 2.5f, bounce = 0.5f, radius = 0.42f, snapRadius = 0.6f, glide = 4f, idle = 0.05f;
         public Rect bounds;
+        /// <summary>Step 11d: optional, the channel's water tiles (a pad never leaves them; it bounces back).</summary>
+        public System.Func<Vector2, bool> isWater;
         public readonly Vector2[] pos, vel;
         public readonly int[] slotOf;
         public readonly Vector2[] slots;
@@ -108,7 +110,17 @@ namespace Diorama
                 // A faint idle drift so they never sit dead still.
                 vel[i] += new Vector2(Mathf.Sin(_time * 0.7f + i * 2.1f), Mathf.Cos(_time * 0.5f + i * 1.3f)) * idle * dt;
                 vel[i] *= Mathf.Exp(-drag * dt);
+                var was = pos[i];
                 pos[i] += vel[i] * dt;
+                if (isWater != null && !isWater(pos[i]) && isWater(was))
+                {
+                    // A bank that isn't on the rect (the channel's ragged edge): back, bounced.
+                    bool xOk = isWater(new Vector2(pos[i].x, was.y)), yOk = isWater(new Vector2(was.x, pos[i].y));
+                    if (!xOk) vel[i].x = -vel[i].x * bounce;
+                    if (!yOk) vel[i].y = -vel[i].y * bounce;
+                    if (xOk && yOk) vel[i] = -vel[i] * bounce;
+                    pos[i] = was;
+                }
                 // Banks.
                 if (pos[i].x < bounds.xMin + radius) { pos[i].x = bounds.xMin + radius; vel[i].x = Mathf.Abs(vel[i].x) * bounce; }
                 if (pos[i].x > bounds.xMax - radius) { pos[i].x = bounds.xMax - radius; vel[i].x = -Mathf.Abs(vel[i].x) * bounce; }
@@ -146,6 +158,14 @@ namespace Diorama
                     if (!lb) vel[b] += j;
                 }
             return locked;
+        }
+
+        /// <summary>Step 11d: a free pad that drifted out of reach comes back at <paramref name="start"/>, still.</summary>
+        public void Respawn(int i, Vector2 start)
+        {
+            if (i < 0 || i >= pos.Length || Locked(i)) return;
+            pos[i] = start;
+            vel[i] = Vector2.zero;
         }
 
         /// <summary>From the save: slots in the mask are full (their pads locked there), the rest drift where they started.</summary>
@@ -300,13 +320,32 @@ namespace Diorama
         public bool Full => Pours >= poursNeeded;
         float _lost;
 
+        /// <summary>Step 11d: the holder index of both hands cupped together (the third entry of the hands passed in).</summary>
+        public const int Both = 2;
+
+        /// <summary>
+        /// Step 11d: two palms cupped together, side by side: each palm normal · up at least <paramref name="minUp"/> and
+        /// the palms within <paramref name="maxGap"/> of each other. Their middle and their average "up" (the pair's
+        /// palm). While carrying, pass a low minUp: the pair stays a pair while it tips over, as long as it stays close.
+        /// </summary>
+        public static bool Cupped(Vector3 palmA, Vector3 normalA, Vector3 palmB, Vector3 normalB, Vector3 up, float maxGap, out Vector3 mid, out float avgUp, float minUp = 0.45f)
+        {
+            mid = (palmA + palmB) * 0.5f;
+            float a = Vector3.Dot(normalA.normalized, up), b = Vector3.Dot(normalB.normalized, up);
+            avgUp = (a + b) * 0.5f;
+            if (normalA.sqrMagnitude < 1e-6f || normalB.sqrMagnitude < 1e-6f) return false;
+            return (palmA - palmB).magnitude <= maxGap && Mathf.Min(a, b) >= minUp;
+        }
+
         public ScoopState Feed(float dt, Hand[] hands)
         {
             switch (State)
             {
                 case ScoopState.Empty:
-                    for (int h = 0; h < hands.Length; h++)
+                    // Both hands together first (step 11d), then either one.
+                    for (int k = 0; k < hands.Length; k++)
                     {
+                        int h = hands.Length > Both ? (k == 0 ? Both : k - 1) : k;
                         var x = hands[h];
                         if (x.tracked && !x.busy && x.overWater && x.up >= cupUp && x.aboveWater <= dipDepth)
                         {

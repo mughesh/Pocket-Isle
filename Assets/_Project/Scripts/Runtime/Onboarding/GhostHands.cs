@@ -21,6 +21,8 @@ namespace Diorama
     {
         public Onboarding onboarding;
         public IslandBuilder island;
+        [Tooltip("Step 11d: a tiny gold spark where a pinch ghost's thumb and index close (optional).")]
+        public BattleFx fx;
         [Tooltip("The rig's hand visuals the ghosts copy (mesh + skeleton).")]
         public HandVisual leftSource, rightSource;
         public Material material;
@@ -98,6 +100,7 @@ namespace Diorama
         Request _request, _saved;
         bool _showing, _hasSaved;
         GhostHandClip _clip;
+        float _lastT = -1f;
         float _time, _visible, _struggle;
         int _loops;
         Vector3 _keyWorld;
@@ -225,6 +228,7 @@ namespace Diorama
             _clip = c;
             _showing = true;
             _time = 0f;
+            _lastT = -1f;
             _loops = 0;
             _struggle = 0f;
             var grab = GrabOf(c);
@@ -376,6 +380,24 @@ namespace Diorama
             _keyWorld = point;
             _keyValid = true;
             UpdateDot(point, t / Mathf.Max(0.01f, _clip.Duration), alpha);
+            Spark(grab, t, point, alpha, scale);
+        }
+
+        /// <summary>Step 11d: a pinch ghost's thumb and index close: a tiny gold spark at the pinch (where it grabs).</summary>
+        void Spark(Grab grab, float t, Vector3 point, float alpha, float scale)
+        {
+            float at = grab.has ? grab.grab : _clip.keyTime * _clip.Duration;
+            bool crossed = _lastT >= 0f && _lastT < at && t >= at;
+            _lastT = t;
+            bool pinchClip = _clip.keyPinch || _clip.clipName == "pinch_pull" || _clip.clipName == "pinch";
+            if (!crossed || !pinchClip || fx == null || alpha < 0.3f || debugFreeze >= 0f) return;
+            Vector3 p = point;
+            if (grab.has && !string.IsNullOrEmpty(_request.source) && Dialogue.TryGetTarget(_request.source, out var st) && st.point != null)
+            {
+                var sp = st.point();
+                if (sp.HasValue) p = sp.Value;
+            }
+            fx.Burst(p, 6, new Color(1f, 0.82f, 0.3f), 0.012f * scale, 0.35f, 0.0025f * scale, Vector3.up * 0.015f);
         }
 
         /// <summary>

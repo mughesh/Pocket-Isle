@@ -74,6 +74,26 @@ namespace Diorama
             }
         }
 
+        // ---- step 11d: the objective (gold on every knot still tied, "Knots n/3") ----
+
+        public override bool CountObjective(out int done, out int total)
+        {
+            total = knots.Length;
+            done = Undone;
+            return true;
+        }
+
+        protected override int MarkCount => knots.Length;
+
+        protected override bool Mark(int i, out Vector3 world, out float tiles)
+        {
+            world = default;
+            tiles = 0.9f;
+            if (i >= _pulls.Count || Done(i)) return false;
+            world = KnotWorld(i);
+            return true;
+        }
+
         /// <summary>Knots undone (0..3).</summary>
         public int Undone
         {
@@ -254,7 +274,8 @@ namespace Diorama
         KnotPull.Hand Hand(int h)
         {
             var s = _hands[h];
-            return new KnotPull.Hand(s.pinch, s.pinchStarted, s.pinchPoint, s.busy);
+            // Step 11d: a whole-hand grab holds an end too (people close their fist on it anyway).
+            return new KnotPull.Hand(s.Holding, s.pinchStarted || s.fistStarted, s.GripPoint, s.busy);
         }
 
         void Gaze(KnotPull.Hand left, KnotPull.Hand right)

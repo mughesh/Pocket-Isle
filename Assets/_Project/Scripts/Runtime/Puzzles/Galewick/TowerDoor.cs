@@ -32,6 +32,11 @@ namespace Diorama
         public PropRecipe openRecipe, doorRecipe;
         public float vaneSpeed = 1.6f;
         public float openSeconds = 2.4f;
+        [Tooltip("Step 11d: the open doorway's portal swirl and threshold ring, and the crown's three empty glowing hooks (Diorama/Beacon).")]
+        public Material glowMaterial;
+        [Tooltip("The portal's middle (tiles: column offset from the tower's middle, height, row offset from its north edge) and size (tiles).")]
+        public Vector3 portalOffset = new Vector3(0f, 0.75f, 1.6f);
+        public Vector2 portalSize = new Vector2(0.9f, 1.3f);
 
         [Header("Lines")]
         public string needKitesLine = "gw.tower.kites";
@@ -43,6 +48,8 @@ namespace Diorama
         public Vector2Int hallEntry = new Vector2Int(4, 8);
 
         PropView _open, _door;
+        DoorGlow _glow;
+        GuideRings _hooks;
         AudioSource _audio;
         float _sink, _vanes, _vaneSpeed;
         bool _isOpen, _opening, _warnedHall;
@@ -65,6 +72,8 @@ namespace Diorama
             _audio.spatialBlend = 0f;
             _open = new PropView("Wind Tower (open)", island, openRecipe);
             _door = new PropView("Wind Tower Door", island, doorRecipe);
+            _glow = new DoorGlow("Wind Tower Door", island, glowMaterial, fx);
+            _hooks = new GuideRings("Wind Tower Hook", island, glowMaterial, 3, fx);
             explorer.OnStep += OnStep;
             explorer.OnBump += OnBump;
             PuzzleState.Restored += Apply;
@@ -81,6 +90,8 @@ namespace Diorama
             PuzzleState.Restored -= Apply;
             _open?.Destroy();
             _door?.Destroy();
+            _glow?.Destroy();
+            _hooks?.Destroy();
             if (map != null) map.SetPropHidden(tower, false);
         }
 
@@ -187,7 +198,22 @@ namespace Diorama
             _open.spinSelf = _vanes;
             _open.Place(Center, 0f, Quaternion.identity, here && drawOpen);
             _door.Place(Center, -1.2f * _sink, Quaternion.identity, here && drawOpen && _sink < 0.999f);
+            // Step 11d: an open door glows like the forge's; before the kites are tied, the crown shows three empty hooks.
+            _glow?.Draw(here && _isOpen, new Vector3(Center.x + portalOffset.x, portalOffset.y, tower.y + portalOffset.z), portalSize,
+                front.Length > 0 ? (Vector2)front[0] : Center + Vector2.up * 2f);
+            if (_hooks != null && kites != null)
+            {
+                bool hooks = here && !_isOpen && !_opening;
+                for (int i = 0; i < 3; i++)
+                {
+                    float pulse = 0.85f + 0.2f * Mathf.Sin(Time.time * 2.5f + i * 1.3f);
+                    _hooks.Draw(i, hooks, kites.tiedAt + new Vector3((i - 1) * 0.55f, 0.05f, 0f), 0.6f, 1.2f * pulse, 0.45f * pulse);
+                }
+            }
         }
+
+        /// <summary>The open door's glow shows (tests, bridge).</summary>
+        public bool Glowing => _glow != null && _glow.Showing;
 
         float TileWorld => island.map.tileSize * island.Zoom * island.transform.lossyScale.x;
 

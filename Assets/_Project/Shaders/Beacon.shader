@@ -1,7 +1,9 @@
 // Hearth Shrine flame beacon (step 7b), additive, four modes:
 // 0 = a soft flame column on a camera-facing quad (fades upward, flickers, slow pulse), seen from across the window;
 // 1 = a flat glow ring above the bowl whose arc fills with _Fill (the palm-hold progress);
-// 2 = a calm thin light pillar (step 9e: the gaze tile); 3 = lava cracks spreading on a flat quad (a Keeper's stomp).
+// 2 = a calm thin light pillar (step 9e: the gaze tile); 3 = lava cracks spreading on a flat quad (a Keeper's stomp);
+// step 11d: 4 = a warm portal swirl standing in an open doorway; 5 = a flat arrow along +v (an objective outside the
+// island window).
 Shader "Diorama/Beacon"
 {
     Properties
@@ -9,7 +11,7 @@ Shader "Diorama/Beacon"
         _Color ("Edge Colour", Color) = (1, 0.55, 0.2, 1)
         _Core ("Core Colour", Color) = (1, 0.9, 0.6, 1)
         _Intensity ("Intensity", Range(0, 3)) = 1
-        _Mode ("Mode (0 column, 1 ring, 2 pillar, 3 cracks)", Float) = 0
+        _Mode ("Mode (0 column, 1 ring, 2 pillar, 3 cracks, 4 portal, 5 arrow)", Float) = 0
         _Fill ("Ring Fill", Range(0, 1)) = 0
         [Enum(UnityEngine.Rendering.CompareFunction)] _ZTest ("Depth Test", Float) = 4
     }
@@ -83,6 +85,30 @@ Shader "Diorama/Beacon"
                     float pulse = 0.8 + 0.2 * sin(t * 1.6);
                     a = across * rise * licks * pulse;
                     col = lerp(_Color.rgb, _Core.rgb, saturate(across * (1.0 - y) * 1.5));
+                }
+                else if (_Mode > 4.5)
+                {
+                    // Arrow (step 11d): a head and a stem along +v, soft edged, nudging forward now and then.
+                    float2 p = i.uv * 2.0 - 1.0;
+                    p.y -= 0.12 * pow(saturate(sin(t * 3.2)), 4.0);
+                    float head = max(-p.y, abs(p.x) * 0.8 + p.y * 0.6 - 0.48);
+                    float stem = max(abs(p.x) - 0.17, max(-p.y - 0.62, p.y - 0.05));
+                    float d = min(head, stem);
+                    a = saturate(1.0 - d / 0.07) * (d > 0.0 ? 0.5 : 1.0);
+                    col = lerp(_Color.rgb, _Core.rgb, saturate(-d * 5.0));
+                    a *= 0.8 + 0.2 * sin(t * 5.0);
+                }
+                else if (_Mode > 3.5)
+                {
+                    // Portal (step 11d): a warm soft oval in the doorway with a slow swirl turning through it.
+                    float2 p = i.uv * 2.0 - 1.0;
+                    float r = length(p * float2(1.0, 0.8));
+                    float ang = atan2(p.y, p.x);
+                    float swirl = 0.5 + 0.5 * sin(ang * 3.0 + r * 9.0 - t * 2.2);
+                    float disk = saturate(1.0 - r);
+                    disk = disk * disk * (3.0 - 2.0 * disk);
+                    a = disk * (0.5 + 0.5 * swirl) * (0.85 + 0.15 * sin(t * 1.7));
+                    col = lerp(_Color.rgb, _Core.rgb, saturate(disk * 1.4));
                 }
                 else if (_Mode > 2.5)
                 {

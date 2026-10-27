@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Diorama
@@ -22,6 +23,13 @@ namespace Diorama
         readonly MeshRenderer _renderer;
         readonly MaterialPropertyBlock _block = new MaterialPropertyBlock();
         PropRecipe _recipe;
+        // Step 11d: where it was placed on the map, re-applied at render time (Sync): the window may scroll after the
+        // piece placed it this frame (the explorer follows in its own Update), and a frame-old position flickered the
+        // spin phase of a turning mill while walking.
+        static readonly List<PropView> _all = new List<PropView>();
+        Vector2 _tile;
+        float _height;
+        bool _onMap;
         float _appliedRestored = float.NaN, _appliedClip = float.NaN, _appliedSpin = float.NaN;
         Vector4 _appliedBoostA, _appliedBoostB;
 
@@ -52,6 +60,7 @@ namespace Diorama
             _renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             _renderer.receiveShadows = false;
             _renderer.enabled = false;
+            _all.Add(this);
             if (island.propMaterial == null) Debug.LogError($"[PropView] {name}: the IslandBuilder has no Prop Material.", island);
             SetRecipe(recipe);
         }
@@ -83,7 +92,10 @@ namespace Diorama
             Vector3 local = _island.TileToLocal(tile, (content != null ? content.capHeight : 0f) + height * t);
             bool inWindow = show && content != null && _filter.sharedMesh != null && NearFootprint(tile, content.capHeight);
             _renderer.enabled = inWindow;
+            _onMap = inWindow;
             if (!inWindow) return;
+            _tile = tile;
+            _height = height;
             transform.localPosition = local;
             transform.localRotation = rotation;
             transform.localScale = scale * (t * _island.Zoom);
@@ -98,6 +110,7 @@ namespace Diorama
         {
             if (_renderer == null) return;
             _renderer.enabled = show && _filter.sharedMesh != null;
+            _onMap = false;
             if (!_renderer.enabled) return;
             windowClip = false;
             transform.localPosition = local;
@@ -152,7 +165,32 @@ namespace Diorama
 
         public void Destroy()
         {
+            _all.Remove(this);
             if (transform != null) Object.Destroy(transform.gameObject);
         }
+
+        /// <summary>
+        /// Step 11d: the island is about to draw: every view placed on its map this frame goes to where its tile is in
+        /// the window now (the view may have scrolled since it was placed).
+        /// </summary>
+        public static void Sync(IslandBuilder island)
+        {
+            for (int i = _all.Count - 1; i >= 0; i--)
+            {
+                var v = _all[i];
+                if (v == null || v.transform == null)
+                {
+                    _all.RemoveAt(i);
+                    continue;
+                }
+                if (v._island != island || !v._onMap || v._renderer == null || !v._renderer.enabled) continue;
+                var content = island.Content;
+                if (content == null || island.map == null) continue;
+                v.transform.localPosition = island.TileToLocal(v._tile, content.capHeight + v._height * island.map.tileSize);
+            }
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStatics() => _all.Clear();
     }
 }

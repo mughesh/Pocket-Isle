@@ -457,6 +457,12 @@ namespace Diorama.EditorTools
                 Ground(x, 46, IslandMap.Tree);
                 if (x >= 21) Ground(x, 48, IslandMap.Tree);
             }
+            // Step 11d (Note 7): low rocks, not hillocks, right beside the cloud bank, so its puffs aren't hidden.
+            for (int x = CloudXY[0].x - 1; x <= CloudXY[CloudXY.Length - 1].x + 1; x++)
+            {
+                Ground(x, 46, IslandMap.Rock);
+                Ground(x, 48, IslandMap.Rock);
+            }
             // Clouds parked on the hills either side (the bank on the path comes in 10b).
             foreach (var (x, y) in new[] { (27, 44), (16, 46), (30, 42), (13, 49) }) Prop(x, y, KCloud);
             Patch(30f, 44.5f, 1.6f, 1f);
@@ -471,6 +477,11 @@ namespace Diorama.EditorTools
             Disc(18f, 52.5f, 2.6f, IslandMap.Path);
             Fill(TowerXY.x - 1, TowerXY.x + 2, TowerXY.y - 1, TowerXY.y, IslandMap.Grass);
             Prop(TowerXY, KTower);
+            // Step 11d (Note 9): the return gate beside the tower (hidden until Galeowl is calmed), its front on the plaza.
+            for (int x = 20; x <= TowerGateXY.x + 1; x++) Ground(x, TowerGateXY.y - 1, IslandMap.Path);
+            Ground(TowerGateXY.x, TowerGateXY.y, IslandMap.Path);
+            Ground(TowerGateXY.x + 1, TowerGateXY.y, IslandMap.Path);
+            Prop(TowerGateXY, KGate);
             for (int x = 12; x <= 24; x++)
                 if (x < TowerXY.x - 1 || x > TowerXY.x + 2) Ground(x, 56, IslandMap.Tree);
             foreach (var (x, y) in new[] { (14, 51), (22, 51) }) Prop(x, y, KKitePost);
@@ -846,6 +857,7 @@ namespace Diorama.EditorTools
             foreach (var c in CloudXY) Need("ridge path", c);
             Need("tower door front", TowerXY + new Vector2Int(0, -2));
             Need("return gate front", GateXY + Vector2Int.down);
+            Need("tower return gate front", TowerGateXY + Vector2Int.down);
             foreach (var z in new[] { "arrival", "village", "kites", "ridge", "rare", "fire", "tower" })
                 if (!reach.Any(t => map.ZoneAt(t) == z && map.CanWalk(t))) problems.Add($"pocket '{z}' has no reachable tile");
 

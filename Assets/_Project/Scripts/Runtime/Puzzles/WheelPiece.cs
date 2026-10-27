@@ -27,10 +27,10 @@ namespace Diorama
         public Vector3 hubShape = new Vector3(0f, 2.25f, 0.62f);
         [Tooltip("Sail reach (tiles).")]
         public float radius = 1.25f;
-        [Tooltip("A fingertip this close to the sails' plane counts (world metres; ~2 cm).")]
-        public float nearPlane = 0.022f;
-        [Tooltip("Extra world metres on the radius (hand tracking wobble).")]
-        public float slack = 0.015f;
+        [Tooltip("A fingertip this close to the sails' plane counts (world metres; step 11d: 4 cm, was 2.2).")]
+        public float nearPlane = 0.04f;
+        [Tooltip("Extra world metres on the radius (hand tracking wobble; step 11d: 2.5 cm, was 1.5).")]
+        public float slack = 0.025f;
         [Tooltip("Tiles round the sails (in front, behind and past the tips) where a fingertip doesn't walk the explorer.")]
         public float touchGuard = 1.2f;
         [Tooltip("Per hand: after a flick, the next counts after this long (one swipe = one flick).")]
@@ -38,7 +38,8 @@ namespace Diorama
 
         [Header("Spin (WheelSpin)")]
         public float drag = 1.5f;
-        public float minFlickSpeed = 0.5f;
+        [Tooltip("Step 11d: 0.35 m/s (was 0.5): the flick was hard to hit.")]
+        public float minFlickSpeed = 0.35f;
         public float maxFlickScale = 2.5f;
         [Tooltip("Flicks within the window that solve it. 0 = a toy (never solves, no lesson).")]
         public int flicksNeeded = 3;
@@ -63,10 +64,31 @@ namespace Diorama
         public float TurnsNeeded => flicksNeeded;
         public void NudgeQuarter() => DoFlick(lookFlickSpeed, "nudge");
 
+        // ---- step 11d: the objective (gold on the sails, "Flicks n/3") ----
+
+        public override bool CountObjective(out int done, out int total)
+        {
+            total = flicksNeeded;
+            done = IsSolved ? flicksNeeded : Mathf.Min(Spin.RecentFlicks, flicksNeeded);
+            return flicksNeeded > 0;
+        }
+
+        protected override int MarkCount => flicksNeeded > 0 ? 1 : 0;
+
+        protected override bool Mark(int i, out Vector3 world, out float tiles)
+        {
+            world = HubWorld;
+            tiles = radius * 1.6f;
+            return true;
+        }
+
         PropView _view;
         readonly HandState[] _hands = new HandState[2];
-        readonly Vector3[] _lastTip = new Vector3[2];
-        readonly bool[] _hasTip = new bool[2];
+        // Step 11d: index and middle fingertips both flick (hand x 2 + finger).
+        static readonly HandJointId[] FlickTips = { HandJointId.HandIndexTip, HandJointId.HandMiddleTip };
+        readonly Vector3[] _lastTip = new Vector3[4];
+        readonly bool[] _hasTip = new bool[4];
+        float _jolt;
         readonly float[] _cool = new float[2];
         bool _gazed;
 
@@ -116,7 +138,7 @@ namespace Diorama
             ReadHands(_hands);
             bool usable = Usable;
             if (usable) Fingertips();
-            else for (int h = 0; h < 2; h++) _hasTip[h] = false;
+            else for (int k = 0; k < _hasTip.Length; k++) _hasTip[k] = false;
             if (usable && !IsSolved) LookPinch();
             else _gazed = false;
             if (!Spin.Kept && RealmState.Restored > 0.5f && Here) Spin.Keep();
@@ -126,16 +148,21 @@ namespace Diorama
                 if (explorer != null) explorer.Cheer();
                 MarkSolved(1);
             }
+            _jolt = Mathf.MoveTowards(_jolt, 0f, Time.deltaTime * 4f);
             if (_view != null)
             {
+                // The sails' angle is the wheel's own, accumulated (never recomputed from time or reset by the map scrolling).
                 _view.spinSelf = Spin.Angle;
-                _view.Place(Center, 0f, Quaternion.identity, Here);
+                _view.Place(Center, 0f, Quaternion.identity, Here, 1f + 0.06f * Mathf.Sin(_jolt * Mathf.PI));
             }
             for (int h = 0; h < 2; h++) _cool[h] = Mathf.Max(0f, _cool[h] - Time.deltaTime);
             base.Update();
         }
 
-        /// <summary>Index fingertips crossing the sails' disc fast enough along the turn add spin.</summary>
+        /// <summary>
+        /// Index or middle fingertips crossing the sails' disc fast enough along the turn add spin (step 11d: either
+        /// finger, a thicker zone, a lower speed; any movement through the disc with a part along the turn counts).
+        /// </summary>
         void Fingertips()
         {
             Vector3 hub = HubWorld;
@@ -145,33 +172,34 @@ namespace Diorama
             for (int h = 0; h < 2; h++)
             {
                 var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
-                if (_hands[h].busy || !HandLookup.TryGetJoint(hand, HandJointId.HandIndexTip, out var tip))
+                for (int f = 0; f < FlickTips.Length; f++)
                 {
-                    _hasTip[h] = false;
-                    continue;
+                    int k = h * 2 + f;
+                    if (_hands[h].busy || !HandLookup.TryGetJoint(hand, FlickTips[f], out var tip))
+                    {
+                        _hasTip[k] = false;
+                        continue;
+                    }
+                    if (!_hasTip[k] || Time.deltaTime <= 0f)
+                    {
+                        _lastTip[k] = tip;
+                        _hasTip[k] = true;
+                        continue;
+                    }
+                    Vector3 velocity = (tip - _lastTip[k]) / Time.deltaTime;
+                    _lastTip[k] = tip;
+                    if (!WheelRules.Flick(tip, velocity, hub, normal, reach, nearPlane, 0.15f * tile, minFlickSpeed, touchGuard * tile, out float speed, out bool guard))
+                    {
+                        // A fingertip at the sails is flicking, not touching tiles: its dips onto the grass don't walk (Oct 27).
+                        if (guard) TileTouch.Block(h == 0, 0.8f);
+                        continue;
+                    }
+                    TileTouch.Block(h == 0, 0.8f);
+                    if (_cool[h] > 0f) continue;
+                    _cool[h] = handCooldown;
+                    MarkInteracted();
+                    DoFlick(speed, $"{(h == 0 ? "left" : "right")} {(f == 0 ? "index" : "middle")} fingertip");
                 }
-                if (!_hasTip[h] || Time.deltaTime <= 0f)
-                {
-                    _lastTip[h] = tip;
-                    _hasTip[h] = true;
-                    continue;
-                }
-                Vector3 velocity = (tip - _lastTip[h]) / Time.deltaTime;
-                _lastTip[h] = tip;
-                Vector3 rel = tip - hub;
-                float off = Vector3.Dot(rel, normal);
-                Vector3 inPlane = rel - normal * off;
-                float r = inPlane.magnitude;
-                // A fingertip at the sails is flicking, not touching tiles: its dips onto the grass don't walk (Oct 27).
-                if (Mathf.Abs(off) < touchGuard * tile && r < reach + touchGuard * tile) TileTouch.Block(h == 0, 0.8f);
-                if (Mathf.Abs(off) > nearPlane || r > reach || r < 0.15f * tile || _cool[h] > 0f) continue;
-                // Counter-clockwise as the player sees it (+Z toward them) is positive, like the shader's angle.
-                Vector3 tangent = Vector3.Cross(normal, inPlane / r);
-                float speed = Vector3.Dot(velocity, tangent);
-                if (Mathf.Abs(speed) < minFlickSpeed) continue;
-                _cool[h] = handCooldown;
-                MarkInteracted();
-                DoFlick(speed, $"{(h == 0 ? "left" : "right")} fingertip");
             }
         }
 
@@ -179,6 +207,7 @@ namespace Diorama
         {
             if (!Spin.Flick(speed)) return;
             int recent = Spin.RecentFlicks;
+            _jolt = 1f;
             Debug.Log($"[WheelPiece] {id}: flick by the {how} at {speed:0.00} m/s ({recent} in {flickWindow:0.#} s).");
             if (fx != null)
             {

@@ -105,6 +105,30 @@ namespace Diorama
     }
 
     /// <summary>
+    /// Step 11d: does a fingertip flick a wheel (pure, EditMode-tested)? Within <paramref name="nearPlane"/> of the
+    /// sails' plane, inside the disc (<paramref name="reach"/>, not at the hub), moving along the turn (tangential part)
+    /// at least <paramref name="minSpeed"/>. The signed tangential speed (counter-clockwise as seen from the player is +),
+    /// and whether the fingertip is close enough to the sails that its touches shouldn't walk the explorer.
+    /// </summary>
+    public static class WheelRules
+    {
+        public static bool Flick(Vector3 tip, Vector3 velocity, Vector3 hub, Vector3 normal, float reach, float nearPlane, float hubRadius,
+            float minSpeed, float guardRange, out float speed, out bool guard)
+        {
+            speed = 0f;
+            Vector3 rel = tip - hub;
+            float off = Vector3.Dot(rel, normal);
+            Vector3 inPlane = rel - normal * off;
+            float r = inPlane.magnitude;
+            guard = Mathf.Abs(off) < guardRange && r < reach + guardRange;
+            if (Mathf.Abs(off) > nearPlane || r > reach || r < hubRadius) return false;
+            Vector3 tangent = Vector3.Cross(normal, inPlane / r);
+            speed = Vector3.Dot(velocity, tangent);
+            return Mathf.Abs(speed) >= minSpeed;
+        }
+    }
+
+    /// <summary>
     /// Step 10b: gust detection for one hand (pure): an open, flat hand (not pinching, not a fist, not holding the island)
     /// moving faster than <see cref="minSpeed"/> over the island footprint, at most <see cref="maxHeight"/> above it, is a
     /// gust in the direction it moves, strength from its speed. One gust per <see cref="cooldown"/>. Velocity is smoothed

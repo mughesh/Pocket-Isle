@@ -58,6 +58,11 @@ namespace Diorama
         public float sinkDepth = 2.9f;
         [Tooltip("Iron and inside glow while braziers are lit, before it opens (0..1 per lit brazier share).")]
         public float preheat = 0.35f;
+        [Tooltip("Step 11d: the open doorway's portal swirl and threshold ring (Diorama/Beacon), the same as every enterable door.")]
+        public Material doorGlowMaterial;
+        [Tooltip("The portal's middle (tiles: column offset from the door's middle, height, row offset) and size (tiles).")]
+        public Vector3 portalOffset = new Vector3(0f, 0.95f, 0.3f);
+        public Vector2 portalSize = new Vector2(1.5f, 1.8f);
 
         [Header("Into the forge")]
         [Tooltip("The Forge Hall interior. Empty = the doorway leads nowhere yet.")]
@@ -72,6 +77,7 @@ namespace Diorama
         [Range(0f, 1f)] public float volume = 0.7f;
 
         PropView _body, _frame, _leaf;
+        DoorGlow _glow;
         PropView[] _braziers;
         AudioSource _audio;
         int _shown;          // strokes the braziers show (a pulse has to arrive first)
@@ -97,6 +103,7 @@ namespace Diorama
             _body = new PropView("Forge Bellows Body", island, bodyRecipe);
             _frame = new PropView("Forge Door Frame", island, doorFrame);
             _leaf = new PropView("Forge Door Leaf", island, doorLeaf);
+            _glow = new DoorGlow("Forge Door", island, doorGlowMaterial, fx);
             _braziers = new PropView[braziers.Length];
             for (int i = 0; i < braziers.Length; i++) _braziers[i] = new PropView($"Forge Brazier {i}", island, brazierCold);
             pump.Stroked += OnStroked;
@@ -120,6 +127,7 @@ namespace Diorama
             _body?.Destroy();
             _frame?.Destroy();
             _leaf?.Destroy();
+            _glow?.Destroy();
             if (_braziers != null)
                 foreach (var b in _braziers) b?.Destroy();
             var map = Map;
@@ -164,6 +172,8 @@ namespace Diorama
             _frame.Place(doorCenter, 0f, Quaternion.identity, here);
             _leaf.restoredSelf = _doorHeat;
             _leaf.Place(doorCenter, -sinkDepth * _sink, Quaternion.identity, here && _sink < 0.999f);
+            _glow?.Draw(here && _open && _sink > 0.9f, new Vector3(doorCenter.x + portalOffset.x, portalOffset.y, door.y + portalOffset.z), portalSize,
+                new Vector2(doorCenter.x, door.y + 1f));
         }
 
         void DrawBrazier(int i, bool here)

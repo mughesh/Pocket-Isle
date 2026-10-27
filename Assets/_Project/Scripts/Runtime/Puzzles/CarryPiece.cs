@@ -116,6 +116,17 @@ namespace Diorama
 
         public override Vector3? FocusPoint => _view != null && _view.Visible ? MapToWorld(_pos + Vector3.up * 0.35f) : (Vector3?)null;
 
+        // ---- step 11d: gold on the thing to carry while it waits ----
+
+        protected override int MarkCount => 1;
+
+        protected override bool Mark(int i, out Vector3 world, out float tiles)
+        {
+            world = MapToWorld(_pos + Vector3.up * 0.05f);
+            tiles = 1.8f;
+            return State == Phase.Resting && _view != null && _view.Visible;
+        }
+
         public override float FocusRadius => (halfLength + 0.2f) * TileWorld;
 
         /// <summary>Step 9h: the lesson ghost carries the piece to the nearest spot (a little above it).</summary>

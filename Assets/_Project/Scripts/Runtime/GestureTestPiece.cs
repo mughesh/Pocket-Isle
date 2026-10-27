@@ -72,6 +72,20 @@ namespace Diorama
         [Tooltip("Hop height in map metres when tapping while standing.")]
         public float hopHeight = 0.012f;
 
+        /// <summary>
+        /// Step 11d: things the explorer stands on above the cap at a map point (map metres; the highest wins). Lilymere's
+        /// lily pad bridge: it steps up onto the pads and hops from one to the next. None = the cap, as before.
+        /// </summary>
+        public readonly System.Collections.Generic.List<System.Func<Vector2, float>> groundLifts = new System.Collections.Generic.List<System.Func<Vector2, float>>();
+
+        float GroundLift(Vector2 p)
+        {
+            float lift = 0f;
+            foreach (var g in groundLifts)
+                if (g != null) lift = Mathf.Max(lift, g(p));
+            return lift;
+        }
+
         /// <summary>Raised when the explorer arrives on a tall grass tile (column, row).</summary>
         public event Action<Vector2Int> OnTallGrassStep;
 
@@ -513,7 +527,7 @@ namespace Diorama
             }
             if (_view == null)
             {
-                _cube.localPosition = island.TileToLocal(p, Map.capHeight + cubeSize * 0.5f + hop);
+                _cube.localPosition = island.TileToLocal(p, Map.capHeight + cubeSize * 0.5f + hop + GroundLift(p));
                 _cube.localScale = Vector3.one * (cubeSize * island.Zoom * Mathf.Max(0.001f, Shrink));
                 return;
             }
@@ -524,7 +538,7 @@ namespace Diorama
             _view.StepPhase = moving ? _stepT : 0f;
             float yaw = Mathf.Atan2(-_facing.x, _facing.y) * Mathf.Rad2Deg;
             _yaw = Mathf.LerpAngle(_yaw, yaw, 1f - Mathf.Exp(-Time.deltaTime * 14f));
-            _cube.localPosition = island.TileToLocal(p, Map.capHeight + _view.Lift);
+            _cube.localPosition = island.TileToLocal(p, Map.capHeight + _view.Lift + GroundLift(p));
             _cube.localRotation = Quaternion.Euler(0f, _yaw + _view.Glance, 0f) * Quaternion.Euler(_view.Lean, 0f, 0f);
             _cube.localScale = Vector3.one * (island.Zoom * Mathf.Max(0.001f, Shrink));
         }

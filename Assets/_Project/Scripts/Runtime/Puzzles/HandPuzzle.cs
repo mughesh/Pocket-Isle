@@ -51,6 +51,18 @@ namespace Diorama
                  "(LessonComplete, or solved), not just until the first touch. Empty = the 9b behaviour (said once).")]
         public string lessonChip;
 
+        [Header("Objective (step 11d: gold focus on what you can act on, a counter, arrows to what's out of view)")]
+        [Tooltip("Counter in the chip while the objective needs N ('Kites' -> 'Kites 1/3'). Set = the lesson line stays pinned " +
+                 "until the objective is done (and pins again when you come back). Empty = the lesson chip as before.")]
+        public string counterLabel;
+        [Tooltip("Gold rings + glow on every object you can act on now, gold arrows at the window edge toward ones out of view (Diorama/Beacon). Empty = none.")]
+        public Material focusMaterial;
+        [Tooltip("Gold ring brightness (1 = the drop spots' resting glow).")]
+        public float markIntensity = 1.3f;
+
+        /// <summary>Said once when an objective's object is outside the island window (an arrow points to it).</summary>
+        public const string MoreLine = "objective.more";
+
         /// <summary>0..1 (a pump's strokes, a carry lifted / placed).</summary>
         public event Action<HandPuzzle, float> ProgressChanged;
         public event Action<HandPuzzle> Solved;
@@ -114,7 +126,9 @@ namespace Diorama
 
         protected virtual void OnDestroy()
         {
-            if (_pinned) Dialogue.Unpin();
+            if (_pinned) Unpin();
+            _marks?.Destroy();
+            _arrows?.Destroy();
             PuzzleState.Restored -= OnRestored;
             if (id != null && _byId.TryGetValue(id, out var p) && p == this) _byId.Remove(id);
             EndLesson();
@@ -129,6 +143,7 @@ namespace Diorama
         protected virtual void Update()
         {
             UpdateLesson();
+            UpdateMarks();
         }
 
         // ---- progress ----
@@ -181,9 +196,12 @@ namespace Diorama
             UpdatePin();
         }
 
-        bool _pinned, _lessonComplete;
+        bool _pinned, _lessonComplete, _everPinned;
+        string _chipShown;
+        // Step 11d: one objective holds the bubble at a time (two near each other don't unpin each other).
+        static HandPuzzle _pinOwner;
 
-        /// <summary>Step 10b: the lesson's pinned line closes (the action it taught worked once).</summary>
+        /// <summary>Step 10b: the lesson's pinned line closes (the action it taught worked once). With a counter it stays until done.</summary>
         protected void LessonComplete()
         {
             if (_lessonComplete) return;
@@ -191,19 +209,127 @@ namespace Diorama
             UpdatePin();
         }
 
-        /// <summary>The pinned lesson line stays while the lesson shows or was touched but not yet completed, and the piece is usable.</summary>
+        public bool HasCounter => !string.IsNullOrEmpty(counterLabel);
+        public bool IsPinned => _pinned;
+
+        /// <summary>Step 11d: how far the objective is (kites flying of 3). False = no counter right now.</summary>
+        public virtual bool CountObjective(out int done, out int total)
+        {
+            done = total = 0;
+            return false;
+        }
+
+        /// <summary>The chip now: "Kites 1/3" with a counter, else the lesson chip.</summary>
+        public string ChipText => HasCounter && CountObjective(out int done, out int total) && total > 0
+            ? ObjectiveRules.Chip(counterLabel, done, total)
+            : !string.IsNullOrEmpty(lessonChip) ? lessonChip : counterLabel;
+
+        /// <summary>Step 11d: lines that may show over the pinned lesson and give it back (a count: "One!").</summary>
+        protected virtual IEnumerable<string> PassingLines => null;
+
+        /// <summary>
+        /// The pinned lesson line stays while the lesson shows or was touched but not yet completed, and the piece is usable.
+        /// Step 11d: with a counter it stays until the objective is done, pinning again when you come back, and the chip
+        /// counts.
+        /// </summary>
         void UpdatePin()
         {
-            if (string.IsNullOrEmpty(lessonChip) || string.IsNullOrEmpty(lessonLine)) return;
-            bool want = !_lessonComplete && !IsSolved && Usable && Available && (LessonShowing || Interacted);
-            if (want == _pinned) return;
-            _pinned = want;
-            if (want)
+            if (string.IsNullOrEmpty(lessonLine) || string.IsNullOrEmpty(lessonChip) && !HasCounter) return;
+            bool want = ObjectiveRules.WantPin(HasCounter, _lessonComplete, IsSolved, Usable && Available, LessonShowing || Interacted);
+            if (want && !_pinned && _pinOwner != null && _pinOwner != this && _pinOwner._pinned) want = false;
+            if (want != _pinned)
             {
-                Dialogue.Pin(new[] { lessonLine }, lessonChip);
-                Dialogue.Say(lessonLine);
+                if (want) Pin();
+                else Unpin();
             }
-            else Dialogue.Unpin();
+            if (!_pinned) return;
+            var chip = ChipText;
+            if (chip == _chipShown) return;
+            _chipShown = chip;
+            Dialogue.SetChip(chip);
+        }
+
+        void Pin()
+        {
+            _pinned = true;
+            _pinOwner = this;
+            _chipShown = ChipText;
+            var passing = new List<string> { MoreLine };
+            var extra = PassingLines;
+            if (extra != null) passing.AddRange(extra);
+            Dialogue.Pin(new[] { lessonLine }, _chipShown, passing);
+            // The first time the line is said; coming back it is said again (it's a once line).
+            if (_everPinned) Dialogue.Repeat(lessonLine);
+            else Dialogue.Say(lessonLine);
+            _everPinned = true;
+            Debug.Log($"[{GetType().Name}] {id}: pinned '{lessonLine}' (chip '{_chipShown}').");
+        }
+
+        void Unpin()
+        {
+            _pinned = false;
+            if (_pinOwner == this) _pinOwner = null;
+            Dialogue.Unpin();
+        }
+
+        // ---- objective marks (step 11d) ----
+
+        GuideRings _marks;
+        GuideArrows _arrows;
+        bool _saidMore;
+
+        /// <summary>How many objects the objective has (kites, puffs, knots); 0 = no gold marks.</summary>
+        protected virtual int MarkCount => 0;
+
+        /// <summary>
+        /// Object <paramref name="i"/> can be acted on right now: where its gold mark goes (world) and the ring's size
+        /// (tiles). False = done or not now (no mark).
+        /// </summary>
+        protected virtual bool Mark(int i, out Vector3 world, out float tiles)
+        {
+            world = default;
+            tiles = 0f;
+            return false;
+        }
+
+        /// <summary>Marks show while the objective can be worked: usable, available, not solved.</summary>
+        protected virtual bool MarksOn => !IsSolved && Usable && Available;
+
+        /// <summary>Marks drawn now (tests, bridge): in the window, and arrows toward ones outside it.</summary>
+        public int MarksShown { get; private set; }
+        public int ArrowsShown { get; private set; }
+
+        void UpdateMarks()
+        {
+            int n = MarkCount;
+            if (n <= 0 || focusMaterial == null || island == null || island.map == null || island.Content == null) return;
+            if (_marks == null)
+            {
+                _marks = new GuideRings($"{id} Focus", island, focusMaterial, n, fx);
+                _arrows = new GuideArrows($"{id} Arrow", island, focusMaterial, n);
+            }
+            bool on = MarksOn;
+            int shown = 0, arrows = 0;
+            for (int i = 0; i < Mathf.Min(n, _marks.Count); i++)
+            {
+                Vector3 world = default;
+                float tiles = 1f;
+                bool want = on && Mark(i, out world, out tiles);
+                Vector3 m = want ? WorldToMap(world) : default;
+                bool inside = want && island.FootprintContains(island.TileToLocal(new Vector2(m.x, m.z), island.Content.capHeight));
+                float pulse = 0.85f + 0.2f * Mathf.Sin(Time.time * 3f + i * 1.1f);
+                _marks.Draw(i, inside, m, tiles, markIntensity * pulse, 0.3f * tiles * pulse);
+                _arrows.Draw(i, want && !inside, new Vector2(m.x, m.z), 1.1f, 1.4f * pulse);
+                if (inside) shown++;
+                if (want && !inside) arrows++;
+            }
+            MarksShown = shown;
+            ArrowsShown = arrows;
+            if (arrows > 0 && shown + arrows > 1 && !_saidMore)
+            {
+                _saidMore = true;
+                Dialogue.Say(MoreLine);
+            }
         }
 
         void BeginLesson()
@@ -215,7 +341,7 @@ namespace Diorama
             {
                 // A piece you carry: the ghost grabs it and lets go over its spot (step 9h); others play at the piece.
                 if (GhostDropPoint.HasValue)
-                    ghosts.Show(ghostClip, GhostPlace.AtTarget, "puzzleTo:" + id, ghostScale, DominantHand.Left, false, 0f, "puzzle:" + id);
+                    ghosts.Show(ghostClip, GhostPlace.AtTarget, "puzzleTo:" + id, ghostScale, DominantHand.Left, GhostBothHands, GhostSpread, "puzzle:" + id);
                 else ghosts.Show(ghostClip, GhostPlace.AtTarget, "puzzle:" + id, ghostScale, DominantHand.Left, GhostBothHands, GhostSpread);
             }
             Debug.Log($"[{GetType().Name}] {id}: lesson ({lessonLine}, ghost {(string.IsNullOrEmpty(ghostClip) ? "none" : ghostClip)}).");
@@ -263,6 +389,9 @@ namespace Diorama
                 hands[h] = s;
             }
         }
+
+        /// <summary>Step 11d: <see cref="IsFist"/> for scripts that aren't pieces (the Keeper's shard).</summary>
+        public static bool IsFistPose(IHand hand, Vector3 palm) => IsFist(hand, palm);
 
         /// <summary>Middle and ring fingertips curled in near the palm (a palm grab).</summary>
         static bool IsFist(IHand hand, Vector3 palm)

@@ -223,6 +223,9 @@ Step 10b, the hand moments (lesson lines stay pinned as a chip until the moment 
   - Spirit: There it goes! The bridge is coming down.
 - `gw.kites` · → puzzle:gw.kites (lesson in the kite field; chip "Pull it up!")
   - Spirit: Kites! Lift one up into the sky.
+- `gw.kites.task` · → puzzle:gw.kites (step 11d: the kite field's lesson says the task; chip "Kites n/3")
+  - Spirit: The tower needs kites. Let's fly all three!
+  - Spirit: Pinch one and lift it up into the sky.
 - `gw.kites.one` · Spirit: One!
 - `gw.kites.two` · Spirit: Two!
 - `gw.kites.three` · Spirit: All three!
@@ -234,6 +237,7 @@ Step 10b, the hand moments (lesson lines stay pinned as a chip until the moment 
   - Spirit: The tower needs all three kites.
 - `gw.tower.open` · once (the kites tie onto the crown, the vanes turn)
   - Spirit: The kites caught the wind. The door is opening!
+  - Spirit: The tower's open! Let's go in.
 - `gw.meet.kitelet` · once (step 10c: the first wild Kitelet)
   - Spirit: A Kitelet! It wants to fly, but there's no wind.
 - `gw.meet.zeppelope` · once (step 10c: the rare Zeppelope)
@@ -293,6 +297,10 @@ Step 11b, the hand moments (lesson lines stay pinned as a chip until the moment 
 - `lm.scoop.more` · Spirit: One more!
 - `lm.scoop.done` · once (the waterfall runs, the lagoon rises)
   - Spirit: It's flowing! The whole lagoon is filling up!
+
+## Objectives (step 11d)
+- `objective.more` (step 11d: an objective's object is outside the island window; a gold arrow points to it; once per moment a session)
+  - Spirit: One more over there!
 
 ## Statue and finale
 - `hub.shard.first` · once · → statueSocket (step 9c: in the hub holding a shard)

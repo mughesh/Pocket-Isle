@@ -288,6 +288,18 @@ namespace Diorama
             Place(true);
         }
 
+        /// <summary>Step 11d: the pinned line's chip text changes (a counter); a chip already showing is laid out again.</summary>
+        public void SetChip(string chip)
+        {
+            if (!_showing || _chipText == null || string.IsNullOrEmpty(chip) || chip == _chipText) return;
+            _chipText = chip;
+            if (_chip) Layout(chip, true);
+            Debug.Log($"[DialogueBubble] Chip now: {chip}");
+        }
+
+        /// <summary>The chip's text while a pinned line shows (null otherwise).</summary>
+        public string ChipText => _showing ? _chipText : null;
+
         /// <summary>Sizes the panel round the full line or the chip (icon + short text).</summary>
         void Layout(string text, bool chip)
         {

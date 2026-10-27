@@ -1052,6 +1052,19 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: Kites! Lift one up into the sky.
+  - id: gw.kites.task
+    once: 0
+    priority: 2
+    note: 'step 11d: the kite field''s lesson says the task; chip "Kites n/3"'
+    target: puzzle:gw.kites
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The tower needs kites. Let's fly all three!
+    - speaker: 0
+      speakerName: Spirit
+      text: Pinch one and lift it up into the sky.
   - id: gw.kites.one
     once: 0
     priority: 2
@@ -1122,6 +1135,9 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: The kites caught the wind. The door is opening!
+    - speaker: 0
+      speakerName: Spirit
+      text: The tower's open! Let's go in.
   - id: gw.meet.kitelet
     once: 1
     priority: 2
@@ -1384,6 +1400,17 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: It's flowing! The whole lagoon is filling up!
+  - id: objective.more
+    once: 0
+    priority: 2
+    note: 'step 11d: an objective''s object is outside the island window; a gold
+      arrow points to it; once per moment a session'
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: One more over there!
   - id: hub.shard.first
     once: 1
     priority: 2

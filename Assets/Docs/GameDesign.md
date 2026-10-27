@@ -285,6 +285,27 @@ the base bobs. 9.8k triangles, 4 draws.
   estimates in the config; the real route time comes from the timer in the dev readout (opening start to the shard
   in the statue).
 
+## The objective rule (step 11d, Oct 27 headset notes)
+Mugesh kept finding tasks by accident. One rule now covers every hand moment in all three realms:
+- **Gold on what you can act on now**: a pulsing gold ring with a soft glow on each object of the current objective
+  (kites lying in the grass, cloud puffs, the mill's sails, Galeowl's knots, lily pads, lotus buds, the scoop pool then
+  the basin, the log, the bellows pad, the village flame; the lanterns, ember vent and firebox keep their 10f rings).
+  Off once that object is done. Same language as the 9h focus: gold = act now, white = hover.
+- **A counter in the chip** when an objective needs N: Kites 1/3, Clouds 2/3, Flicks 1/3, Knots 1/3, Pads 1/3,
+  Lotus 4/5, Pours 1/2 (the lanterns race, no counter). The lesson line stays pinned until the objective is done and
+  pins again when you come back. Count lines ("One!") pass over the pinned line and give it back.
+- **Say the task**: the kite field opens with "The tower needs kites. Let's fly all three!"; the tower's crown shows
+  three empty glowing hooks until the kites are tied.
+- **Open doors glow** (forge, wind tower, the lake temple later): a warm portal swirl in the doorway and a gold ring on
+  the threshold, the same component (`DoorGlow`) for every enterable door.
+- **Out of view**: when an objective's object is outside the island window, a small gold arrow lies at the window's
+  edge pointing to it, and the Spirit says once "One more over there!".
+- **Touch tiles to walk is off by default** (Settings row, saved). Walking: thumb swipe and look + pinch.
+- **Pick-ups read as a pinch**: the ghosts for the kites, log, ember and Keeper shard pinch with thumb and index (the
+  other fingers relaxed) with a tiny gold spark when it closes; every pick-up also takes a whole-hand grab.
+- **The Keeper's shard** after a win: pinch or grab within 9 cm, gold ring, look + pinch, and after 4 s it floats to
+  the Spirit by itself.
+
 ## Lilymere as built (steps 11a-11b, Oct 27 night)
 - 60 x 60 (`LilymereTools`, seed 1131), straight legs only: arrival + return gate, the stilt village round shallows (a
   plank bridge over them, 5 stilt huts, Hearth Shrine), the lily channel (3 rows of water across the map, one 2-wide

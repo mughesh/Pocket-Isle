@@ -8,7 +8,7 @@ namespace Diorama
     /// <summary>
     /// Settings (step 9g): one stone board of runes above the near rim, opened from the title or the game menu; Back
     /// closes it. Rows: Music, Effects, Ambience (five pebbles each: off, 1-4; <see cref="VolumeSettings"/>), Dominant
-    /// hand (Auto / Left / Right), Spirit hints (On / Fewer) (<see cref="GameSettings"/>), then Recenter island (the
+    /// hand (Auto / Left / Right), Spirit hints (On / Fewer), Touch tiles to walk (On / Off, step 11d) (<see cref="GameSettings"/>), then Recenter island (the
     /// placer's standard re-place in front of the head), Credits (a stone card that scrolls) and Back. Everything is
     /// saved in PlayerPrefs at once.
     /// </summary>
@@ -75,7 +75,7 @@ namespace Diorama
             runes.Clear();
             _creditText = null;
             _pebbles.Clear();
-            float top = 6f * RowGap;
+            float top = 7f * RowGap;
             runes.AddBacking(new Vector2(0f, top * 0.5f + 0.004f), new Vector2(0.34f, top + 0.06f));
             runes.AddText("<b>Settings</b>", new Vector2(0f, top + 0.004f), runes.fontSize * 1.1f);
             Volume("Music", VolumeSettings.Music, top - RowGap);
@@ -85,6 +85,8 @@ namespace Diorama
                 () => (int)GameSettings.DominantHand, i => GameSettings.DominantHand = (GameSettings.Hand)i);
             Choices("Spirit hints", top - 5f * RowGap, new[] { "On", "Fewer" },
                 () => GameSettings.FewerHints ? 1 : 0, i => GameSettings.FewerHints = i == 1);
+            Choices("Touch tiles to walk", top - 6f * RowGap, new[] { "On", "Off" },
+                () => GameSettings.TouchWalk ? 0 : 1, i => GameSettings.TouchWalk = i == 0);
             runes.Add("Recenter island", new Vector2(-0.09f, 0f), Wide, Recenter);
             runes.Add("Credits", new Vector2(0f, 0f), Wide, BuildCredits);
             var back = runes.Add("Back", new Vector2(0.09f, 0f), Wide, Close);

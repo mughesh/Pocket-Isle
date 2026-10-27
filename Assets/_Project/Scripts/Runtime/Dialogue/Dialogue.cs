@@ -74,7 +74,9 @@ namespace Diorama
         readonly Dictionary<DialogueSpeaker, Transform> _anchors = new Dictionary<DialogueSpeaker, Transform>();
         Queued? _current;
         readonly HashSet<string> _pinned = new HashSet<string>();
-        string _chip;
+        // Step 11d: pinned triggers that show over the lesson and then give it back (a count, "one more over there").
+        readonly HashSet<string> _transient = new HashSet<string>();
+        string _chip, _lesson;
         float _lastInput, _lastIdle = -999f;
         int _lastHint = -1, _debugIndex = -1;
 
@@ -128,23 +130,49 @@ namespace Diorama
         /// Step 9h: a lesson starts teaching. Only these triggers may show until <see cref="Unpin"/>; the last line of the
         /// one showing stays (no time-out), shrinking to <paramref name="chip"/> after a while. Other lines queue.
         /// </summary>
-        public static void Pin(IEnumerable<string> triggers, string chip)
+        public static void Pin(IEnumerable<string> triggers, string chip, IEnumerable<string> transient = null)
         {
-            if (_instance != null) _instance.PinLines(triggers, chip);
+            if (_instance != null) _instance.PinLines(triggers, chip, transient);
         }
 
         /// <summary><see cref="Pin"/> on this Dialogue (tests).</summary>
-        public void PinLines(IEnumerable<string> triggers, string chip)
+        public void PinLines(IEnumerable<string> triggers, string chip, IEnumerable<string> transient = null)
         {
             var d = this;
             d._pinned.Clear();
+            d._transient.Clear();
+            d._lesson = null;
             foreach (var t in triggers)
-                if (!string.IsNullOrEmpty(t)) d._pinned.Add(t);
+                if (!string.IsNullOrEmpty(t))
+                {
+                    d._pinned.Add(t);
+                    if (d._lesson == null) d._lesson = t;
+                }
+            if (transient != null)
+                foreach (var t in transient)
+                    if (!string.IsNullOrEmpty(t) && d._pinned.Add(t)) d._transient.Add(t);
             d._chip = chip;
             // A line that is not the lesson's ends after its minimum time; then only lesson lines show.
             if (d._current.HasValue && !d._pinned.Contains(d._current.Value.trigger) && d.bubble != null) d.bubble.FinishSoon();
             Debug.Log($"[Dialogue] Pinned for the lesson: {string.Join(", ", d._pinned)} (chip '{chip}').");
         }
+
+        /// <summary>Step 11d: the pinned lesson's chip text changes (a counter going up: "Kites 1/3").</summary>
+        public static void SetChip(string chip)
+        {
+            if (_instance != null) _instance.SetChipText(chip);
+        }
+
+        /// <summary><see cref="SetChip"/> on this Dialogue (tests).</summary>
+        public void SetChipText(string chip)
+        {
+            if (_pinned.Count == 0 || string.IsNullOrEmpty(chip) || chip == _chip) return;
+            _chip = chip;
+            if (bubble != null) bubble.SetChip(chip);
+        }
+
+        /// <summary>The pinned lesson's chip text (null when nothing is pinned).</summary>
+        public string PinnedChip => _pinned.Count > 0 ? _chip : null;
 
         /// <summary>
         /// The lesson is over: its lines close (the chip pops), <paramref name="first"/> (the praise) shows next, then the
@@ -162,6 +190,8 @@ namespace Diorama
             if (d._pinned.Count == 0) return;
             var pinned = new List<string>(d._pinned);
             d._pinned.Clear();
+            d._transient.Clear();
+            d._lesson = null;
             d._chip = null;
             d._queue.RemoveAll(q => pinned.Contains(q.trigger));
             bool showingLesson = d._current.HasValue && pinned.Contains(d._current.Value.trigger);
@@ -330,6 +360,9 @@ namespace Diorama
                     _queue.RemoveAll(q => _pinned.Contains(q.trigger));
                     int first = 0;
                     foreach (var line in t.lines) _queue.Insert(first++, Make(line, t, id));
+                    // Step 11d: a passing line (a count) gives the lesson's last line back afterwards.
+                    var lesson = _transient.Contains(id) && _lesson != null ? script.Find(_lesson) : null;
+                    if (lesson != null && lesson.lines.Count > 0) _queue.Insert(first, Make(lesson.lines[lesson.lines.Count - 1], lesson, _lesson));
                     Debug.Log($"[Dialogue] {id}: {t.lines.Count} lesson line(s).");
                     if (!_current.HasValue || _pinned.Contains(_current.Value.trigger)) Next();
                     return;
@@ -392,7 +425,7 @@ namespace Diorama
             SetTarget(q.target);
             var anchor = AnchorFor(q.line.speaker);
             // The lesson's last line stays (pinned) until the lesson is done.
-            bool stays = _pinned.Contains(q.trigger) && !_queue.Exists(o => o.trigger == q.trigger);
+            bool stays = _pinned.Contains(q.trigger) && !_transient.Contains(q.trigger) && !_queue.Exists(o => o.trigger == q.trigger);
             if (bubble != null) bubble.Show(q.line, anchor, stays ? (string.IsNullOrEmpty(_chip) ? q.line.text : _chip) : null);
             Speaking?.Invoke(q.line.speaker);
         }
@@ -443,6 +476,9 @@ namespace Diorama
 
         /// <summary>The trigger whose line shows now, or null.</summary>
         public string CurrentTrigger => _current.HasValue ? _current.Value.trigger : null;
+
+        /// <summary>Tests: the line showing finished (as the bubble would report): the next one comes.</summary>
+        public void DebugFinishLine() => Next();
 
         /// <summary>
         /// A battle or scene swap started (called by those events; public for tests): hint lines (priority 1 or lower)
@@ -526,6 +562,8 @@ namespace Diorama
         public void ClearAll()
         {
             _pinned.Clear();
+            _transient.Clear();
+            _lesson = null;
             _chip = null;
             _queue.Clear();
             _current = null;

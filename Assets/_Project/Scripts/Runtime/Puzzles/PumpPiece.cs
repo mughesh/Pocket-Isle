@@ -75,6 +75,17 @@ namespace Diorama
 
         public override float FocusRadius => 0.6f * TileWorld;
 
+        // ---- step 11d: gold on the pad while it can be pumped ----
+
+        protected override int MarkCount => 1;
+
+        protected override bool Mark(int i, out Vector3 world, out float tiles)
+        {
+            world = MapToWorld(new Vector3(pad.x, 0.05f, pad.y));
+            tiles = 1.4f;
+            return true;
+        }
+
         /// <summary>The pad's top now (world).</summary>
         public Vector3 PadWorld => MapToWorld(new Vector3(pad.x, padHeight - pressTravel * Travel, pad.y));
 

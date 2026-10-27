@@ -282,3 +282,5 @@ New interactions since the audio branch was cut that still play a procedural pla
 | Lilymere: the frozen waterfall cracks, runs | `catch.shatter` | `ice.crack`, `ice.shatter`, `waterfall.run` (loop) |
 | Lilymere: the lagoon rises | `restore.swell` | `lagoon.rise` |
 | Lilymere ambience | reuses `amb.pond` | `amb.lilymere` / `amb.lilymere.restored` (water lapping, frogs, birds) |
+| Spirit text typing (`DialogueBubble.Blip`, Oct 27 note) | a blip every 3 typed characters | too often, too many beats, annoying: fewer, softer ticks, or one soft chime per line |
+| The log's drop (`FallenLog`, Oct 27 note) | PuzzleSounds.Thud | weak, almost silent: a solid wooden `log.drop` thud |

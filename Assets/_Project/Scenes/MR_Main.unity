@@ -228,6 +228,9 @@ MonoBehaviour:
   ghostClip: grab_drop
   ghostScale: 1
   lessonChip: 
+  counterLabel: 
+  focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  markIntensity: 1.3
   holder: {fileID: 570826975}
   shardRecipe: {fileID: 11400000, guid: 0d00935bd93bf4d44ba91c69122fee75, type: 2}
   statueRecipe: {fileID: 11400000, guid: 4e524cd358b9b874f9c8ac964bd660a2, type: 2}
@@ -553,9 +556,12 @@ MonoBehaviour:
   fx: {fileID: 1078587927}
   reach: 3
   lessonLine: cinder.log.hands
-  ghostClip: grab_drop
+  ghostClip: pinch_drop
   ghostScale: 1
   lessonChip: 
+  counterLabel: 
+  focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  markIntensity: 1.3
   recipe: {fileID: 11400000, guid: 782c07a7a06cda744b18f4eed5f22284, type: 2}
   home: {x: 20.5, y: 14}
   homeHeight: 0
@@ -766,6 +772,9 @@ MonoBehaviour:
   ghostClip: poke
   ghostScale: 1
   lessonChip: Push!
+  counterLabel: Pads
+  focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  markIntensity: 1.3
   padStart:
   - {x: 29.5, y: 34}
   - {x: 37.5, y: 35}
@@ -776,9 +785,9 @@ MonoBehaviour:
   - {x: 33.5, y: 33}
   channel:
     serializedVersion: 2
-    x: 23.5
+    x: 27.5
     y: 32.5
-    width: 20
+    width: 12
     height: 3
   gapTiles:
   - {x: 33, y: 35}
@@ -796,6 +805,8 @@ MonoBehaviour:
   drag: 1.2
   bounce: 0.5
   snapRadius: 0.6
+  floatHeight: 0.03
+  respawnAfter: 3
   guideMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
   ringSize: 1.6
   orbSize: 0.3
@@ -1514,6 +1525,9 @@ MonoBehaviour:
   ghostClip: palm_sweep
   ghostScale: 1
   lessonChip: Palm down!
+  counterLabel: Lotus
+  focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  markIntensity: 1.3
   buds:
   - {x: 40.5, y: 26}
   - {x: 40.5, y: 24.5}
@@ -1550,6 +1564,8 @@ MonoBehaviour:
   rainRadius: 1.3
   cloudScale: 0.55
   cloudBelow: 0.025
+  cloudMetres: 0.11
+  settleReach: 7
   softSeconds: 2
   hardSeconds: 1
   lookSeconds: 2.5
@@ -1939,6 +1955,8 @@ MonoBehaviour:
   beaconMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
   shardRecipe: {fileID: 11400000, guid: 0d00935bd93bf4d44ba91c69122fee75, type: 2}
   smokeMaterial: {fileID: 2100000, guid: 63c5a847d0fbf454882a87650c5454fc, type: 2}
+  shardGrabReach: 0.09
+  shardAutoSeconds: 4
   spirit: {fileID: 1847074513}
   keeperSpot: {x: 4.5, y: 2.6}
   keeperPad: {x: 4, y: 3}
@@ -2220,6 +2238,9 @@ MonoBehaviour:
   ghostClip: palm_sweep
   ghostScale: 1
   lessonChip: Sweep!
+  counterLabel: Clouds
+  focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  markIntensity: 1.3
   puffs:
   - {x: 21, y: 12}
   - {x: 22, y: 12}
@@ -2227,7 +2248,8 @@ MonoBehaviour:
   recipe: {fileID: 11400000, guid: 257f22ee3e426244c8b7611f0b678d54, type: 2}
   gusts: {fileID: 1589595547}
   corridor: 0.2
-  puffScale: 1.35
+  puffScale: 2.7
+  puffHeight: 0.6
   perGust: 0.36
   holdRate: 0.4
   doneLine: gw.gust.done
@@ -2466,6 +2488,9 @@ MonoBehaviour:
   ghostClip: grab_drop
   ghostScale: 1
   lessonChip: 
+  counterLabel: 
+  focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  markIntensity: 1.3
   holder: {fileID: 570826975}
   shardRecipe: {fileID: 11400000, guid: 243f873e41708f049b1a176b344ec7c1, type: 2}
   statueRecipe: {fileID: 11400000, guid: 4e524cd358b9b874f9c8ac964bd660a2, type: 2}
@@ -2680,6 +2705,9 @@ MonoBehaviour:
   ghostClip: cup_hands
   ghostScale: 1
   lessonChip: Cup it!
+  counterLabel: 
+  focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  markIntensity: 1.3
   shrine: {x: 24, y: 26}
   flameHeight: 1.58
   wispBase: 1.36
@@ -3214,17 +3242,20 @@ MonoBehaviour:
   ghostClip: 
   ghostScale: 1
   lessonChip: 
+  counterLabel: 
+  focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  markIntensity: 1.3
   anchor: {x: 31, y: 39}
   footprint: {x: 1, y: 1}
   recipe: {fileID: 11400000, guid: 94f3ed9fca8fe024fa525b334e4d5c26, type: 2}
   hubShape: {x: 0, y: 1.32, z: 0.34}
   radius: 0.68
-  nearPlane: 0.022
-  slack: 0.015
+  nearPlane: 0.04
+  slack: 0.025
   touchGuard: 1.2
   handCooldown: 0.25
   drag: 1.5
-  minFlickSpeed: 0.5
+  minFlickSpeed: 0.35
   maxFlickScale: 2.5
   flicksNeeded: 0
   flickWindow: 4
@@ -3385,6 +3416,9 @@ MonoBehaviour:
   ghostClip: poke
   ghostScale: 1
   lessonChip: Touch them!
+  counterLabel: 
+  focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  markIntensity: 1.3
   lanterns:
   - {x: 30, y: 26}
   - {x: 28, y: 25}
@@ -3746,6 +3780,9 @@ MonoBehaviour:
   openSeconds: 2.6
   sinkDepth: 2.9
   preheat: 0.35
+  doorGlowMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  portalOffset: {x: 0, y: 0.95, z: 0.3}
+  portalSize: {x: 1.5, y: 1.8}
   hall: {fileID: 11400000, guid: 826b78d0c19f2014a9858fa40dff5037, type: 2}
   hallEntry: {x: 4, y: 8}
   brazierLines:
@@ -3780,6 +3817,9 @@ MonoBehaviour:
   ghostClip: poke
   ghostScale: 1
   lessonChip: 
+  counterLabel: 
+  focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  markIntensity: 1.3
   pad: {x: 23, y: 4}
   padHeight: 0.57
   pressTravel: 0.3
@@ -3921,10 +3961,13 @@ MonoBehaviour:
   ghosts: {fileID: 1421177268}
   fx: {fileID: 1078587927}
   reach: 7
-  lessonLine: gw.kites
-  ghostClip: grab_toss
+  lessonLine: gw.kites.task
+  ghostClip: pinch_lift
   ghostScale: 1
   lessonChip: Pull it up!
+  counterLabel: Kites
+  focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  markIntensity: 1.3
   kites:
   - {x: 35, y: 22}
   - {x: 43, y: 20}
@@ -4426,6 +4469,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.GhostHands
   onboarding: {fileID: 1380201671}
   island: {fileID: 270959109}
+  fx: {fileID: 1078587927}
   leftSource: {fileID: 1365154989}
   rightSource: {fileID: 374903275}
   material: {fileID: 2100000, guid: ee25ba6990f6da74d877dde8bcab8ed4, type: 2}
@@ -5203,9 +5247,12 @@ MonoBehaviour:
   fx: {fileID: 1078587927}
   reach: 4
   lessonLine: cw.ember
-  ghostClip: grab_drop
+  ghostClip: pinch_drop
   ghostScale: 1
   lessonChip: Pick it up!
+  counterLabel: 
+  focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  markIntensity: 1.3
   vent: {x: 26, y: 5}
   firebox: {x: 24, y: 3}
   bellows: {fileID: 1127440542}
@@ -5281,9 +5328,12 @@ MonoBehaviour:
   fx: {fileID: 1078587927}
   reach: 6
   lessonLine: lm.scoop
-  ghostClip: grab_drop
+  ghostClip: cup_scoop
   ghostScale: 1
   lessonChip: Scoop!
+  counterLabel: Pours
+  focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  markIntensity: 1.3
   basin: {x: 30.5, y: 9.5}
   waterfallAnchor: {x: 30, y: 7}
   waterfallCenter: {x: 30.5, y: 7}
@@ -5303,6 +5353,9 @@ MonoBehaviour:
   poursNeeded: 2
   ballSize: 0.03
   ballLift: 0.012
+  pairGap: 0.08
+  pairSlack: 1.6
+  pairBall: 1.8
   crackSeconds: 1.2
   riseSeconds: 3
   moreLine: lm.scoop.more
@@ -5754,6 +5807,9 @@ MonoBehaviour:
   ghostClip: pinch_pull
   ghostScale: 0.85
   lessonChip: Pull apart!
+  counterLabel: Knots
+  focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  markIntensity: 1.3
   keeper: {fileID: 388614567}
   swap: {fileID: 221433162}
   stringMaterial: {fileID: 2100000, guid: eca8edd0ce339e444b04540e378ffbf3, type: 2}
@@ -6312,17 +6368,20 @@ MonoBehaviour:
   ghostClip: 
   ghostScale: 1
   lessonChip: 
+  counterLabel: 
+  focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  markIntensity: 1.3
   anchor: {x: 17, y: 38}
   footprint: {x: 1, y: 1}
   recipe: {fileID: 11400000, guid: 94f3ed9fca8fe024fa525b334e4d5c26, type: 2}
   hubShape: {x: 0, y: 1.32, z: 0.34}
   radius: 0.68
-  nearPlane: 0.022
-  slack: 0.015
+  nearPlane: 0.04
+  slack: 0.025
   touchGuard: 1.2
   handCooldown: 0.25
   drag: 1.5
-  minFlickSpeed: 0.5
+  minFlickSpeed: 0.35
   maxFlickScale: 2.5
   flicksNeeded: 0
   flickWindow: 4
@@ -6386,6 +6445,9 @@ MonoBehaviour:
   doorRecipe: {fileID: 11400000, guid: 8133e3cf801fc9049bf49e8881120cc1, type: 2}
   vaneSpeed: 1.6
   openSeconds: 2.4
+  glowMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  portalOffset: {x: 0, y: 0.75, z: 1.6}
+  portalSize: {x: 0.9, y: 1.3}
   needKitesLine: gw.tower.kites
   openLine: gw.tower.open
   volume: 0.7
@@ -6659,6 +6721,8 @@ MonoBehaviour:
   beaconMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
   shardRecipe: {fileID: 11400000, guid: 243f873e41708f049b1a176b344ec7c1, type: 2}
   smokeMaterial: {fileID: 2100000, guid: 63c5a847d0fbf454882a87650c5454fc, type: 2}
+  shardGrabReach: 0.09
+  shardAutoSeconds: 4
   spirit: {fileID: 1847074513}
   keeperSpot: {x: 4.5, y: 2.7}
   keeperPad: {x: 4, y: 3}
@@ -6760,17 +6824,20 @@ MonoBehaviour:
   ghostClip: finger_flick
   ghostScale: 1
   lessonChip: Flick!
+  counterLabel: Flicks
+  focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  markIntensity: 1.3
   anchor: {x: 28, y: 34}
   footprint: {x: 2, y: 2}
   recipe: {fileID: 11400000, guid: af760acb3feb8ac408d0da79d027cfd9, type: 2}
   hubShape: {x: 0, y: 2.25, z: 0.62}
   radius: 1.25
-  nearPlane: 0.022
-  slack: 0.015
+  nearPlane: 0.04
+  slack: 0.025
   touchGuard: 1.2
   handCooldown: 0.25
   drag: 1.5
-  minFlickSpeed: 0.5
+  minFlickSpeed: 0.35
   maxFlickScale: 2.5
   flicksNeeded: 3
   flickWindow: 4

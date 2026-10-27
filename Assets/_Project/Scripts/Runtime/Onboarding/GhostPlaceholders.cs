@@ -39,7 +39,7 @@ namespace Diorama
         public static readonly string[] Names =
         {
             "poke", "grab_rim_slide", "grab_drop", "thumb_swipe_forward", "thumb_tap", "pinch", "grab_toss", "grab_flick", "palm_hover", "hands_up",
-            "finger_flick", "palm_sweep", "pinch_pull", "cup_hands", "palm_carry",
+            "finger_flick", "palm_sweep", "pinch_pull", "cup_hands", "palm_carry", "pinch_drop", "pinch_lift", "cup_scoop",
         };
 
         /// <summary>Builds a placeholder clip from the right hand's rest pose (joint-local), or null for an unknown name.</summary>
@@ -57,6 +57,8 @@ namespace Diorama
             clip.placeOffset = offset;
             clip.gazeDotUntil = gaze;
             clip.holdEnd = 0.25f;
+            // Step 11d: the pinch pick-ups put the pinch point (thumb + index) on the object.
+            clip.keyPinch = name == "pinch_drop" || name == "pinch_lift";
             int n = Mathf.CeilToInt(seconds * clip.fps) + 1;
             for (int f = 0; f < n; f++)
             {
@@ -130,6 +132,14 @@ namespace Diorama
         {
             t = t, pos = pos, fingers = fingers, dorsal = dorsal,
             thumb = 0.75f, index = 0.72f, middle = 0.78f, ring = 0.82f, pinky = 0.85f, swing = 0.45f,
+        };
+
+        /// <summary>Step 11d: thumb and index closing into a pinch (k 0..1), the other fingers relaxed and open.</summary>
+        static Key PinchKey(float t, Vector3 pos, Vector3 fingers, Vector3 dorsal, float k) => new Key
+        {
+            t = t, pos = pos, fingers = fingers, dorsal = dorsal,
+            thumb = Mathf.Lerp(0.1f, 0.6f, k), index = Mathf.Lerp(0.2f, 0.55f, k), middle = 0.28f, ring = 0.34f, pinky = 0.4f,
+            swing = Mathf.Lerp(0.6f, -0.2f, k),
         };
 
         /// <summary>
@@ -341,6 +351,56 @@ namespace Diorama
                         Open(0f, new Vector3(0f, 0.05f, -0.02f), f, up, 0.22f), Open(0.3f, Vector3.zero, f, up, 0.28f),
                         Open(0.42f, Vector3.zero, f, up, 0.3f), Open(0.65f, new Vector3(-0.02f, 0.05f, 0.01f), f, up, 0.3f),
                         Open(0.82f, new Vector3(-0.03f, 0.055f, 0.01f), f, over, 0.25f), Open(1f, new Vector3(0f, 0.05f, -0.02f), f, up, 0.22f),
+                    };
+                }
+                case "pinch_drop":
+                {
+                    // Step 11d (Note 5): pick and place with a clear thumb + index pinch, the other fingers relaxed and
+                    // open (the fist ghost read as a whole-hand grab). Comes down over the object, pinches, carries, lets go.
+                    seconds = 2.8f;
+                    keyJoint = HandJointId.HandIndexTip;
+                    keyTime = 0.36f;
+                    gaze = 0.2f;
+                    Vector3 f = new Vector3(0f, -0.75f, 1f), d = new Vector3(0f, 1f, 0.75f);
+                    Vector3 away = new Vector3(0f, -0.07f, -0.06f);
+                    return new List<Key>
+                    {
+                        PinchKey(0f, new Vector3(0f, 0.05f, -0.08f), f, d, 0f), PinchKey(0.22f, new Vector3(0f, 0.04f, -0.08f), f, d, 0f),
+                        PinchKey(0.32f, Vector3.zero, f, d, 0f), PinchKey(0.38f, Vector3.zero, f, d, 1f),
+                        PinchKey(0.72f, away, f, d, 1f), PinchKey(0.8f, away, f, d, 0f),
+                        PinchKey(1f, away + new Vector3(0f, 0.04f, -0.07f), f, d, 0f),
+                    };
+                }
+                case "pinch_lift":
+                {
+                    // Step 11d: a kite. Pinch it (thumb + index, fingers relaxed), lift it well up, let go up there.
+                    seconds = 2.4f;
+                    keyJoint = HandJointId.HandIndexTip;
+                    keyTime = 0.3f;
+                    gaze = 0.2f;
+                    Vector3 f = new Vector3(0f, -0.75f, 1f), d = new Vector3(0f, 1f, 0.75f);
+                    Vector3 high = new Vector3(0f, 0.13f, 0.02f);
+                    return new List<Key>
+                    {
+                        PinchKey(0f, new Vector3(0f, 0.05f, -0.07f), f, d, 0f), PinchKey(0.22f, Vector3.zero, f, d, 0f),
+                        PinchKey(0.3f, Vector3.zero, f, d, 1f), PinchKey(0.62f, high, new Vector3(0f, -0.3f, 1f), Vector3.up, 1f),
+                        PinchKey(0.7f, high, new Vector3(0f, -0.3f, 1f), Vector3.up, 0f),
+                        PinchKey(1f, new Vector3(0f, 0.06f, -0.05f), f, d, 0f),
+                    };
+                }
+                case "cup_scoop":
+                {
+                    // Step 11d: Lilymere's scoop. Shown with both hands (mirrored, side by side): palms up and softly
+                    // cupped, they dip into the water, lift out together, then tip over (rolling outward) to pour.
+                    seconds = 3.2f;
+                    keyTime = 0.3f;
+                    Vector3 f = new Vector3(0f, 0.1f, 1f), up = Vector3.down, tip = new Vector3(1f, 0.35f, 0f);
+                    return new List<Key>
+                    {
+                        Open(0f, new Vector3(0f, 0.05f, -0.02f), f, up, 0.3f), Open(0.22f, new Vector3(0f, -0.012f, 0f), f, up, 0.34f),
+                        Open(0.36f, new Vector3(0f, -0.012f, 0f), f, up, 0.36f), Open(0.58f, new Vector3(0f, 0.06f, 0.01f), f, up, 0.36f),
+                        Open(0.7f, new Vector3(0f, 0.065f, 0.02f), f, up, 0.36f), Open(0.86f, new Vector3(0.01f, 0.06f, 0.02f), f, tip, 0.3f),
+                        Open(1f, new Vector3(0f, 0.05f, -0.02f), f, up, 0.3f),
                     };
                 }
                 case "hands_up":

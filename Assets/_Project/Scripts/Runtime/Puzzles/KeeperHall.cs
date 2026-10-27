@@ -95,6 +95,13 @@ namespace Diorama
         public PropRecipe shardRecipe;
         [Tooltip("Diorama/Smoke material: the frightened aura (step 9e).")]
         public Material smokeMaterial;
+        [Header("Taking the shard (step 11d: it was too hard)")]
+        [Tooltip("A pinch, or a fist closing, this close to the floating shard takes it (m, real hands).")]
+        public float shardGrabReach = 0.09f;
+        [Tooltip("Not taken after this long (s): it floats to the Spirit by itself.")]
+        public float shardAutoSeconds = 4f;
+        /// <summary>Step 11d: the shard's ghost pinches it (thumb + index), not a fist.</summary>
+        public const string ShardGhost = "pinch_lift";
         [Tooltip("Flinches back when it stomps at the start of the battle.")]
         public LanternSpirit spirit;
 
@@ -142,6 +149,9 @@ namespace Diorama
         Vector3 _shardLocal;
         bool _shardHovering;
         readonly bool[] _wasPinching = { true, true };
+        readonly bool[] _wasFist = { true, true };
+        float _shardWait;
+        GuideRings _shardRing;
         float _snortAt;
 
         /// <summary>The scene's Keeper hall for <paramref name="id"/>, inactive ones too (editor tools, the bridge).</summary>
@@ -220,6 +230,7 @@ namespace Diorama
             if (_flame != null) Destroy(_flame.gameObject);
             if (_quad != null) Destroy(_quad);
             _shard?.Destroy();
+            _shardRing?.Destroy();
             if (realmMap != null)
             {
                 realmMap.SetPropHidden(templeGate, false);
@@ -702,8 +713,9 @@ namespace Diorama
                 yield return null;
             }
             _shardHome = hover;
+            _shardWait = 0f;
             if (!string.IsNullOrEmpty(shardLine)) Dialogue.Say(shardLine);
-            if (ghosts != null) ghosts.Show("grab_drop", GhostPlace.AtTarget, shardTarget, 1f, DominantHand.Left, false);
+            if (ghosts != null) ghosts.Show(ShardGhost, GhostPlace.AtTarget, shardTarget, 1f, DominantHand.Left, false);
             FocusHighlight.SetPending(() => _shardHovering ? island.transform.TransformPoint(_shardLocal) : (Vector3?)null, 0.05f * island.transform.lossyScale.x);
             explorer.Locked = false;
             Debug.Log($"[KeeperHall] {ownShard} floats in front of the player: grab it (pinch, or look + pinch).");
@@ -728,6 +740,14 @@ namespace Diorama
             _shardLocal = _shardHome + Vector3.up * (0.006f * Mathf.Sin(Time.time * 2f));
             DrawShard();
             Vector3 world = island.transform.TransformPoint(_shardLocal);
+            DrawShardRing(true);
+            // Step 11d: not taken within a few seconds, it goes to the Spirit by itself.
+            _shardWait += Time.deltaTime;
+            if (_shardWait >= shardAutoSeconds)
+            {
+                CollectShard($"by itself after {shardAutoSeconds:0.#} s");
+                return;
+            }
             bool gazed = false;
             if (HeadGaze.TryGetRay(out var ray))
             {
@@ -742,14 +762,35 @@ namespace Diorama
                 bool pinching = hand != null && hand.IsTrackedDataValid && hand.GetIndexFingerIsPinching();
                 bool started = pinching && !_wasPinching[h];
                 _wasPinching[h] = pinching;
+                bool fist = hand != null && hand.IsTrackedDataValid && HandLookup.TryGetJoint(hand, HandJointId.HandPalm, out var palm) &&
+                            HandPuzzle.IsFistPose(hand, palm) && (palm - world).magnitude < shardGrabReach * 1.2f;
+                bool fistStarted = fist && !_wasFist[h];
+                _wasFist[h] = fist;
+                if (fistStarted)
+                {
+                    CollectShard($"{(h == 0 ? "left" : "right")} hand grab");
+                    return;
+                }
                 if (!started) continue;
-                bool near = IslandHandle.TryGetPinchPoint(hand, out var p) && (p - world).magnitude < 0.09f;
+                bool near = IslandHandle.TryGetPinchPoint(hand, out var p) && (p - world).magnitude < shardGrabReach;
                 if (near || gazed)
                 {
                     CollectShard(near ? $"{(h == 0 ? "left" : "right")} pinch" : "look + pinch");
                     return;
                 }
             }
+        }
+
+        /// <summary>Step 11d: a gold ring and glow round the floating shard while it waits.</summary>
+        void DrawShardRing(bool on)
+        {
+            if (beaconMaterial == null || island == null || island.map == null || island.Content == null) return;
+            if (_shardRing == null) _shardRing = new GuideRings("Keeper Shard Focus", island, beaconMaterial, 1, fx);
+            float tileMetres = Mathf.Max(1e-5f, island.map.tileSize * island.Zoom);
+            Vector2 tile = island.LocalToTile(_shardLocal);
+            float height = (_shardLocal.y - island.CapTopLocal) / tileMetres - 0.04f / tileMetres;
+            float pulse = 0.85f + 0.2f * Mathf.Sin(Time.time * 3f);
+            _shardRing.Draw(0, on, new Vector3(tile.x, height, tile.y), 0.1f / tileMetres, 1.4f * pulse, 0.05f / tileMetres * pulse);
         }
 
         /// <summary>The shard is taken (a hand, look + pinch, or the bridge): it flies into the holder.</summary>
@@ -764,8 +805,9 @@ namespace Diorama
         IEnumerator ShardToHolder()
         {
             _phase = Phase.Leaving;
-            if (ghosts != null && ghosts.ClipName == "grab_drop") ghosts.Hide();
+            if (ghosts != null && ghosts.ClipName == ShardGhost) ghosts.Hide();
             FocusHighlight.Clear();
+            DrawShardRing(false);
             Vector3 from = _shardLocal, to = from;
             if (holder != null) holder.SetOut(ownShard, true);
             float small = holder != null ? holder.carryMetres : 0.016f;

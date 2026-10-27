@@ -41,6 +41,14 @@ namespace Diorama
         [Tooltip("The ball in the palm (metres across at the placed island size), above the palm.")]
         public float ballSize = 0.03f, ballLift = 0.012f;
 
+        [Header("Two hands (step 11d)")]
+        [Tooltip("Both palms up, side by side within this (metres, real hands): one bigger scoop between them.")]
+        public float pairGap = 0.08f;
+        [Tooltip("While carrying, the hands may drift this much further apart (x Pair Gap).")]
+        public float pairSlack = 1.6f;
+        [Tooltip("The two-hand ball is this much bigger.")]
+        public float pairBall = 1.8f;
+
         [Header("Breaking free")]
         public float crackSeconds = 1.2f, riseSeconds = 3f;
 
@@ -52,14 +60,17 @@ namespace Diorama
         PropView _ball, _basinWater, _running;
         AudioSource _audio;
         readonly HandState[] _hands = new HandState[2];
-        readonly WaterScoop.Hand[] _measured = new WaterScoop.Hand[2];
+        // Step 11d: left, right, and both cupped together (index 2, tried first).
+        readonly WaterScoop.Hand[] _measured = new WaterScoop.Hand[3];
+        readonly Vector3[] _palmPos = new Vector3[2];
+        readonly Vector3[] _palmNormal = new Vector3[2];
         readonly List<Vector2Int> _dry = new List<Vector2Int>();
         Vector3 _ballWorld, _ballVel, _lastPalm;
         float _wobble, _fill, _dripAt, _mistAt;
-        bool _pouring, _breaking, _quietSolve, _pickedWater, _running0;
+        bool _pouring, _breaking, _quietSolve, _pickedWater, _running0, _bigBall;
         int _gazed = -1; // 0 = the water, 1 = the basin
         // Debug (bridge): a synthetic hand (palm pose in map space) driving the scoop.
-        bool _debugHand;
+        bool _debugHand, _debugPair;
         Vector3 _debugMap;
         float _debugUp;
 
@@ -78,8 +89,44 @@ namespace Diorama
             }
         }
 
-        public override Vector3? GhostDropPoint => Here && !IsSolved ? BasinWorld(0.6f) : (Vector3?)null;
+        // Step 11d: the two-hand cup ghost plays at the pool (scoop, lift, tip), not as a grab carried to the basin.
+        public override Vector3? GhostDropPoint => null;
         public override float FocusRadius => 1f * TileWorld;
+
+        // ---- step 11d: the objective (gold on the pool while scooping, on the basin while carrying; "Pours n/2") ----
+
+        public override bool CountObjective(out int done, out int total)
+        {
+            total = poursNeeded;
+            done = _scoop != null ? _scoop.Pours : 0;
+            return true;
+        }
+
+        protected override int MarkCount => 2;
+        protected override bool MarksOn => base.MarksOn && !_pouring && !_breaking;
+
+        protected override bool Mark(int i, out Vector3 world, out float tiles)
+        {
+            world = default;
+            tiles = 2f;
+            if (_scoop == null) return false;
+            bool carrying = _scoop.State == ScoopState.Held || _pickedWater;
+            if (i == 0 && !carrying)
+            {
+                world = MapToWorld(new Vector3(scoopSpot.x, -0.05f, scoopSpot.y));
+                return true;
+            }
+            if (i == 1 && carrying)
+            {
+                world = BasinWorld(0.35f);
+                tiles = 2.2f;
+                return true;
+            }
+            return false;
+        }
+
+        protected override bool GhostBothHands => true;
+        protected override float GhostSpread => pairGap * 0.8f;
 
         protected override void Start()
         {
@@ -147,14 +194,15 @@ namespace Diorama
             float s = Scale, tile = Mathf.Max(1e-4f, TileWorld);
             for (int h = 0; h < 2; h++)
             {
+                _palmNormal[h] = Vector3.zero;
                 var x = new WaterScoop.Hand { tracked = _hands[h].tracked, busy = _hands[h].busy };
                 Vector3 palmPos = default;
                 Vector3 normal = Vector3.down;
-                if (_debugHand && h == 0)
+                if (_debugHand && (h == 0 || _debugPair))
                 {
                     x.tracked = true;
                     x.busy = false;
-                    palmPos = MapToWorld(_debugMap);
+                    palmPos = MapToWorld(_debugMap) + (_debugPair ? island.transform.right * (h == 0 ? -0.025f : 0.025f) * Scale : Vector3.zero);
                     normal = island.transform.up * _debugUp;
                 }
                 else if (x.tracked)
@@ -175,19 +223,40 @@ namespace Diorama
                     _measured[h] = x;
                     continue;
                 }
+                _palmPos[h] = palmPos;
+                _palmNormal[h] = normal.normalized;
                 x.up = Vector3.Dot(normal.normalized, island.transform.up);
-                var m = WorldToMap(palmPos);
-                var t = new Vector2Int(Mathf.RoundToInt(m.x), Mathf.RoundToInt(m.z));
-                x.overWater = map.At(t) == IslandMap.Water && ((Vector2)t - basin).magnitude <= scoopReach;
-                // The water sits 0.1 tiles under the cap (the island's water drop); metres in the room.
-                x.aboveWater = (m.y + 0.1f) * tile;
-                x.overBasin = (new Vector2(m.x, m.z) - basin).magnitude <= basinRadius && m.y * tile >= -0.01f * s && m.y * tile <= basinAbove * s;
+                Where(ref x, palmPos, s, tile);
                 _measured[h] = x;
-                if (h == _scoop.Holder || x.overWater || x.overBasin) TileTouch.Block(h == 0, 0.4f);
+                if (h == _scoop.Holder || _scoop.Holder == WaterScoop.Both || x.overWater || x.overBasin) TileTouch.Block(h == 0, 0.4f);
                 if (h == _scoop.Holder || _scoop.Holder < 0 && h == 0) _lastPalm = palmPos;
             }
+            // Both hands cupped together, side by side: one scoop between them (held, the pair may drift a bit apart).
+            var both = new WaterScoop.Hand();
+            float gap = pairGap * (_scoop.Holder == WaterScoop.Both ? pairSlack : 1f);
+            if (_measured[0].tracked && _measured[1].tracked && !_measured[0].busy && !_measured[1].busy &&
+                WaterScoop.Cupped(_palmPos[0], _palmNormal[0], _palmPos[1], _palmNormal[1], island.transform.up, gap, out var mid, out float up,
+                    _scoop.Holder == WaterScoop.Both ? -2f : cupUp * 0.8f))
+            {
+                both.tracked = true;
+                both.up = up;
+                Where(ref both, mid, s, tile);
+                if (_scoop.Holder == WaterScoop.Both || _scoop.Holder < 0) _lastPalm = mid;
+            }
+            _measured[WaterScoop.Both] = both;
             _scoop.dipDepth = dipDepth * s;
             _scoop.liftHeight = liftHeight * s;
+        }
+
+        /// <summary>Over the lagoon (and how high above its surface) or over the basin, for a palm (or the pair's middle).</summary>
+        void Where(ref WaterScoop.Hand x, Vector3 palmPos, float s, float tile)
+        {
+            var m = WorldToMap(palmPos);
+            var t = new Vector2Int(Mathf.RoundToInt(m.x), Mathf.RoundToInt(m.z));
+            x.overWater = map.At(t) == IslandMap.Water && ((Vector2)t - basin).magnitude <= scoopReach;
+            // The water sits 0.1 tiles under the cap (the island's water drop); metres in the room.
+            x.aboveWater = (m.y + 0.1f) * tile;
+            x.overBasin = (new Vector2(m.x, m.z) - basin).magnitude <= basinRadius && m.y * tile >= -0.01f * s && m.y * tile <= basinAbove * s;
         }
 
         void Changed(ScoopState from, ScoopState to)
@@ -196,7 +265,7 @@ namespace Diorama
             {
                 case ScoopState.Dipped:
                     MarkInteracted();
-                    Debug.Log($"[ScoopPour] {id}: a cupped hand dips into the lagoon ({(_scoop.Holder == 0 ? "left" : "right")}).");
+                    Debug.Log($"[ScoopPour] {id}: {(_scoop.Holder == WaterScoop.Both ? "both hands cupped together dip" : "a cupped hand dips")} into the lagoon ({(_scoop.Holder == 0 ? "left" : _scoop.Holder == 1 ? "right" : "both")}).");
                     Splash(PalmWorld(), 8);
                     break;
                 case ScoopState.Held:
@@ -204,6 +273,7 @@ namespace Diorama
                     Debug.Log($"[ScoopPour] {id}: lifted out: a ball of water sits in the palm.");
                     _ballWorld = PalmWorld();
                     _ballVel = Vector3.zero;
+                    _bigBall = _scoop.Holder == WaterScoop.Both;
                     GameAudio.At(AudioIds.PondTap, _ballWorld);
                     break;
                 case ScoopState.Pouring:
@@ -252,6 +322,7 @@ namespace Diorama
         void LookPour()
         {
             _pickedWater = false;
+            _bigBall = false;
             LessonComplete();
             _scoop.PourByItself();
             Debug.Log($"[ScoopPour] {id}: look + pinch on the basin: a ball floats over and pours ({_scoop.Pours}/{poursNeeded}).");
@@ -398,7 +469,7 @@ namespace Diorama
                 bool show = here && (_scoop.State == ScoopState.Held || _pouring);
                 float jelly = 1f + 0.12f * _wobble * Mathf.Sin(Time.time * 22f);
                 var local = island.transform.InverseTransformPoint(_ballWorld);
-                float metres = ballSize * Scale / Mathf.Max(1e-4f, island.transform.lossyScale.x);
+                float metres = ballSize * Scale / Mathf.Max(1e-4f, island.transform.lossyScale.x) * (_bigBall ? pairBall : 1f);
                 _ball.PlaceLocal(local - Vector3.up * metres * 0.5f, Quaternion.Euler(0f, Time.time * 30f, 0f), metres * jelly, show);
             }
             _basinWater?.Place(basin, 0.1f + 0.2f * _fill, Quaternion.identity, here && _fill > 0.01f, 1f);
@@ -429,9 +500,10 @@ namespace Diorama
         /// Debug (bridge): a synthetic left hand at map point (column, height in tiles, row) with its palm normal's
         /// up-component <paramref name="up"/> (1 = palm up, -1 = down), until <see cref="DebugHandOff"/>.
         /// </summary>
-        public void DebugHand(Vector3 mapPoint, float up)
+        public void DebugHand(Vector3 mapPoint, float up, bool pair = false)
         {
             _debugHand = true;
+            _debugPair = pair;
             _debugMap = mapPoint;
             _debugUp = up;
         }

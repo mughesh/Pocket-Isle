@@ -971,6 +971,7 @@ namespace Diorama
             UpdateWorldMatrices();
             SetWindowGlobals();
             ApplyTheme();
+            PropView.Sync(this);
 
             var bounds = TransformBounds(transform.localToWorldMatrix, _localBounds);
             if (_flashProps == null)

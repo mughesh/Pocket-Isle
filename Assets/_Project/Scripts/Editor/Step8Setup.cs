@@ -269,6 +269,8 @@ namespace Diorama.EditorTools
             galewick.gates = new List<GateLink>
             {
                 new GateLink { id = "home", tile = GalewickTools.ReturnGate, to = hub, arrive = toHub, arriveFacing = new Vector2Int(0, 1), portal = HomeColor },
+                // Step 11d (Note 9): the return gate beside the wind tower, shown once Galeowl is calmed (like Cinderwood's temple gate).
+                new GateLink { id = "home", tile = GalewickTools.Tile(GalewickTools.TowerGateXY), to = hub, arrive = toHub, arriveFacing = new Vector2Int(0, 1), portal = HomeColor },
             };
             EditorUtility.SetDirty(hub);
             EditorUtility.SetDirty(galewick);

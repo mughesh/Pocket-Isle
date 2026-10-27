@@ -147,6 +147,27 @@ namespace Diorama
 
         public override float FocusRadius => 0.8f * TileWorld;
 
+        // ---- step 11d: the objective (gold on the lying kites, "Kites n/3", the count lines pass over the lesson) ----
+
+        public override bool CountObjective(out int done, out int total)
+        {
+            total = kites.Length;
+            done = _tied ? total : FlyingCount;
+            return true;
+        }
+
+        protected override IEnumerable<string> PassingLines => countLines;
+        protected override int MarkCount => kites.Length;
+
+        protected override bool Mark(int i, out Vector3 world, out float tiles)
+        {
+            tiles = 1.6f;
+            world = default;
+            if (i >= _kites.Count || _kites[i].state != K.Lying) return false;
+            world = LyingWorld(i);
+            return true;
+        }
+
         protected override void Start()
         {
             for (int i = 0; i < kites.Length; i++)
