@@ -289,8 +289,14 @@ the base bobs. 9.8k triangles, 4 draws.
 - Wind roster (10c): Kitelet -> Kitewyrm, Whirlby -> Windwhirl, Samarling -> Samaroak, Vanehare -> Compasshare (Lv 16),
   Zeppelope -> Skyshiplope (rare, Lv 18); Pufflet -> Nimbulpaca, Pebbloop -> Riverloom (Lv 14). Tables ~70% wind, ~30% fire
   visitors, Zeppelope 5% in the rare pocket.
-- Galeowl (10d part one): Wind Keeper, Gust Wall breaks to Fire, Lv 9 (11 at one other shard). Hall, untangle, victory and
-  the wind shard still to build.
+- Galeowl (10d part one, 10e): Wind Keeper, Gust Wall breaks to Fire, Lv 9 (11 at one other shard). Tower hall (10e):
+  round cloud-stone room, tangled kite strings on the beams, a round window of still grey sky beside its perch. It sits
+  wrapped in strings with 3 glowing knots: pinch both loose ends and pull apart > 12 cm (one hand: > 15 cm away; look +
+  pinch: loosens in 2 s), twang, loops fall. Freed, it flares up and fights. Won: it calms and bows, the window clears
+  (sky, light, drifting clouds), the teal wind shard floats out to you and rides with the Spirit, Galewick restores in a
+  wave from the tower, the tower's return gate appears. Calmed it preens on its perch; poke it for a hoot.
+- One Keeper flow for every realm (10e): `KeeperHall` per Keeper (ids, names, look as fields), the shard holder carries
+  any number of shards, one statue socket per shard (the wind socket is teal; two placed = `statue.two`).
 
 ### Look of the two states (decided Oct 24)
 The element "not flowing" shows as things being **still and unlit**, not as colour loss. The bright palette is the
