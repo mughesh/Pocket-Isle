@@ -9,10 +9,13 @@ namespace Diorama
 {
     public enum MoveMode
     {
-        [Tooltip("Swipe starts walking; it keeps going until another swipe, a tap or a blocked tile.")]
-        AutoWalk,
+        // Step 12a: SmartStep took AutoWalk's slot (0), so the scene moves over to it; old saves are mapped in GameSave.
+        [Tooltip("Step 12a: a swipe walks a few tiles along the path (stops at junctions, things to use, grass, 5 tiles); two quick swipes keep walking until a tap.")]
+        SmartStep,
         [Tooltip("Swipe starts walking; it keeps going only while the thumb stays off-centre.")]
         HoldToWalk,
+        [Tooltip("Swipe starts walking; it keeps going until another swipe, a tap or a blocked tile.")]
+        AutoWalk,
     }
 
     /// <summary>
@@ -42,7 +45,7 @@ namespace Diorama
         public CreatureView explorerPrefab;
 
         [Tooltip("Can be switched live in Play mode.")]
-        public MoveMode moveMode = MoveMode.AutoWalk;
+        public MoveMode moveMode = MoveMode.SmartStep;
 
         [Tooltip("Start tile (column, row) when the island has no world map; a world map has its own start tile.")]
         public Vector2Int startTile = new Vector2Int(10, 7);
@@ -52,6 +55,16 @@ namespace Diorama
         public float walkSeconds = 0.4f;
         [Tooltip("Seconds per tile when running.")]
         public float runSeconds = 0.2f;
+
+        [Header("Smart steps (step 12a)")]
+        [Tooltip("Seconds per tile on a smart step (one swipe).")]
+        public float smartSeconds = 0.53f;
+        [Tooltip("Seconds per tile when walking on (two quick swipes).")]
+        public float continuousSeconds = 0.4f;
+        [Tooltip("Most tiles one swipe walks.")]
+        [Min(1)] public int smartTiles = SmartStep.SmartTiles;
+        [Tooltip("A second swipe the same way within this many seconds keeps walking.")]
+        public float doubleSwipeSeconds = 0.45f;
 
         [Header("Go to tile")]
         [Tooltip("Longest path GoTo will walk, in steps.")]
@@ -103,6 +116,44 @@ namespace Diorama
 
         /// <summary>A thumb tap stopped a walk (or a GoTo path).</summary>
         public event Action Stopped;
+
+        /// <summary>
+        /// Step 12a: extra smart-step stops (from tile, next tile), for a scene's own interactables. Gates and unsolved hand
+        /// moments are built in (<see cref="BuiltInStop"/>).
+        /// </summary>
+        public readonly List<Func<Vector2Int, Vector2Int, WalkStop>> walkStops = new List<Func<Vector2Int, Vector2Int, WalkStop>>();
+
+        /// <summary>Step 12a: a new smart-step plan (the footprints redraw).</summary>
+        public event Action PlanChanged;
+
+        /// <summary>Step 12a: the tiles the current smart step will walk (empty when none).</summary>
+        public IReadOnlyList<Vector2Int> Plan => _plan;
+
+        /// <summary>Step 12a: how many plan tiles have been stepped onto (the one being stepped onto counts).</summary>
+        public int PlanIndex => _planIndex;
+
+        /// <summary>Step 12a: walking on (two quick swipes) rather than a smart step.</summary>
+        public bool Continuous => _continuous;
+
+        /// <summary>Step 12a: the tile the current plan starts from.</summary>
+        public Vector2Int PlanFrom { get; private set; }
+
+        /// <summary>Step 12a: why the current plan ends (<see cref="SmartStep.Cap"/>, junction, ...).</summary>
+        public string PlanEnd { get; private set; }
+
+        /// <summary>Step 12a: smart steps started by a swipe (the walk lessons count them).</summary>
+        public int SmartStepsTaken { get; private set; }
+
+        /// <summary>Step 12a: a fresh swipe or the walk-on upgrade (true = walk on).</summary>
+        public event Action<bool> Swiped;
+
+        readonly List<Vector2Int> _plan = new List<Vector2Int>();
+        int _planIndex;
+        bool _continuous;
+        Vector2Int _lastSwipe;
+        float _lastSwipeAt = -99f;
+        HandPuzzle[] _pieces;
+        float _piecesAt = -99f;
 
         Transform _cube;
         ExplorerView _view;
@@ -320,7 +371,8 @@ namespace Diorama
                 CancelPath();
                 _last += " - path cancelled";
                 if (gesture == ThumbGesture.Tap) Stopped?.Invoke();
-                if (gesture != ThumbGesture.Tap && !Zoomed)
+                if (gesture != ThumbGesture.Tap && !Zoomed && moveMode == MoveMode.SmartStep) SmartSwipe(d, source);
+                else if (gesture != ThumbGesture.Tap && !Zoomed)
                 {
                     _heading = _facing = d;
                     _source = source;
@@ -341,6 +393,10 @@ namespace Diorama
             {
                 _last += " - zoomed, no walking";
             }
+            else if (moveMode == MoveMode.SmartStep)
+            {
+                SmartSwipe(d, source);
+            }
             else
             {
                 if (d == _heading) _running = true;
@@ -351,6 +407,99 @@ namespace Diorama
                 if (_stepT >= 1f) TryStep();
             }
             RefreshLabel();
+        }
+
+        // ---- smart steps (step 12a) ----
+
+        void SmartSwipe(Vector2Int d, GestureSource source)
+        {
+            float now = Time.unscaledTime;
+            bool twice = SmartStep.WalkOn(_lastSwipe, _lastSwipeAt, d, now, doubleSwipeSeconds, _plan.Count > 0 && _heading != Vector2Int.zero);
+            _lastSwipe = d;
+            _lastSwipeAt = now;
+            _source = source;
+            _swipeTime = now;
+            if (twice)
+            {
+                // Walk on from where it is, the way it is going now (it may have turned with the path).
+                var way = _stepT < 1f ? _tile - _fromTile : _heading;
+                if (way.sqrMagnitude != 1) way = d;
+                Replan(way, true);
+                _last += " - walk on";
+            }
+            else Replan(d, false);
+            if (_plan.Count == 0)
+            {
+                // Can't move that way at all: turn to it and bump.
+                _heading = Vector2Int.zero;
+                _facing = d;
+                var front = _tile + d;
+                char ch = Map.At(front.y, front.x);
+                GameAudio.At(AudioIds.WalkBump, TileWorld(front));
+                if (_stepT >= 1f && _view != null) _view.Hop();
+                if (ch != IslandMap.Empty && IslandMap.IsWalkable(ch)) OnBump?.Invoke(front);
+                _last += $" - can't go ({PlanEnd})";
+                UpdateExplorer();
+                return;
+            }
+            if (!twice) SmartStepsTaken++;
+            Swiped?.Invoke(twice);
+            _heading = _plan[0] - _tile;
+            if (_stepT >= 1f) TryStep();
+        }
+
+        /// <summary>Plans from the tile being stepped onto (the current step always finishes).</summary>
+        void Replan(Vector2Int way, bool continuous)
+        {
+            _continuous = continuous;
+            PlanFrom = _tile;
+            PlanEnd = SmartStep.Plan(Map, _tile, way, continuous, continuous ? 60 : smartTiles, PlanStop, _plan);
+            _planIndex = 0;
+            _running = false;
+            PlanChanged?.Invoke();
+            Debug.Log($"[GestureTestPiece] {(continuous ? "Walk on" : "Smart step")} {HeadingName(way)} from c{_tile.x} r{_tile.y}: {_plan.Count} tiles, ends at {PlanEnd}.");
+        }
+
+        void ClearPlan()
+        {
+            if (_plan.Count == 0) return;
+            _plan.Clear();
+            _planIndex = 0;
+            _continuous = false;
+            PlanChanged?.Invoke();
+        }
+
+        WalkStop PlanStop(Vector2Int from, Vector2Int next)
+        {
+            var s = BuiltInStop(from, next);
+            foreach (var f in walkStops)
+            {
+                if (f == null) continue;
+                var x = f(from, next);
+                if (x > s) s = x;
+            }
+            return s;
+        }
+
+        /// <summary>Stop before a gate's tiles; stop on the tile that first brings an unsolved hand moment within reach.</summary>
+        WalkStop BuiltInStop(Vector2Int from, Vector2Int next)
+        {
+            var world = island.world;
+            if (world == null) return WalkStop.None;
+            foreach (var g in world.gates)
+                if (g.Covers(next) && !g.Covers(from)) return WalkStop.Before;
+            if (SceneSwap.IsInside) return WalkStop.None;
+            if (_pieces == null || Time.unscaledTime - _piecesAt > 5f)
+            {
+                _pieces = FindObjectsByType<HandPuzzle>(FindObjectsSortMode.None);
+                _piecesAt = Time.unscaledTime;
+            }
+            foreach (var p in _pieces)
+            {
+                if (p == null || p.map != world || !p.WalkStopWanted) continue;
+                if (p.InReach(next) && !p.InReach(from)) return WalkStop.On;
+            }
+            return WalkStop.None;
         }
 
         /// <summary>A little hop on the spot (waking up in the opening).</summary>
@@ -393,6 +542,34 @@ namespace Diorama
 
         void TryStep()
         {
+            if (moveMode == MoveMode.SmartStep && _plan.Count > 0 && !FollowingPath)
+            {
+                if (_planIndex >= _plan.Count && _continuous && PlanEnd == SmartStep.Cap) Replan(_heading, true);
+                if (_planIndex >= _plan.Count)
+                {
+                    // Arrived. The plan stays until the next swipe so the footprints can fade out.
+                    if (_heading != Vector2Int.zero) GameAudio.At(AudioIds.WalkStop, TileWorld(_tile));
+                    _heading = Vector2Int.zero;
+                    _running = false;
+                    RefreshLabel();
+                    return;
+                }
+                var step = _plan[_planIndex];
+                if (!Map.CanWalk(step) || (step - _tile).sqrMagnitude != 1)
+                {
+                    _last += " - plan blocked";
+                    Stop();
+                    RefreshLabel();
+                    return;
+                }
+                _planIndex++;
+                _heading = _facing = step - _tile;
+                _fromTile = _tile;
+                _tile = step;
+                _stepT = 0f;
+                RefreshLabel();
+                return;
+            }
             if (FollowingPath)
             {
                 if (_pathIndex >= _path.Count)
@@ -441,7 +618,13 @@ namespace Diorama
             if (_heading != Vector2Int.zero) GameAudio.At(AudioIds.WalkStop, TileWorld(_tile));
             _heading = Vector2Int.zero;
             _running = false;
+            ClearPlan();
         }
+
+        /// <summary>Seconds for the step being taken now.</summary>
+        float StepSeconds => moveMode == MoveMode.SmartStep && !FollowingPath
+            ? (_continuous ? continuousSeconds : smartSeconds)
+            : _running ? runSeconds : walkSeconds;
 
         /// <summary>Audio hookup: a tile's middle on the cap, in world space.</summary>
         Vector3 TileWorld(Vector2Int t) => island.transform.TransformPoint(island.TileToLocal(t, Map.capHeight));
@@ -490,7 +673,7 @@ namespace Diorama
             if (_stepT < 1f)
             {
                 // Linear so consecutive steps join into a steady walk.
-                _stepT = Mathf.Min(1f, _stepT + Time.deltaTime / (_running ? runSeconds : walkSeconds));
+                _stepT = Mathf.Min(1f, _stepT + Time.deltaTime / StepSeconds);
                 if (_stepT >= 1f)
                 {
                     OnStep?.Invoke(_tile);

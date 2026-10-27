@@ -96,6 +96,12 @@ namespace Diorama
 
         public bool Reachable => explorer != null && Mathf.Max(Mathf.Abs(explorer.Tile.x - HomeTile.x), Mathf.Abs(explorer.Tile.y - HomeTile.y)) <= reach + 0.5f;
 
+        /// <summary>Step 12a: a tile is within this moment's reach (the explorer's smart step stops on entering it).</summary>
+        public bool InReach(Vector2Int tile) => Mathf.Max(Mathf.Abs(tile.x - HomeTile.x), Mathf.Abs(tile.y - HomeTile.y)) <= reach + 0.5f;
+
+        /// <summary>Step 12a: the smart step should stop when it comes within reach (unsolved, workable, outside).</summary>
+        public bool WalkStopWanted => !IsSolved && Available && Here;
+
         /// <summary>In view, the explorer near, no battle, opening or tutorial.</summary>
         public bool Usable => InView && Reachable && !Opening.InProgress && !Onboarding.Running && (!explorer.Locked || Busy);
 

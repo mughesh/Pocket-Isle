@@ -213,7 +213,8 @@ namespace Diorama
                 foreach (var id in data.seen) encounters.Seen.Add(id);
             }
             NoteParty();
-            if (Enum.TryParse(data.walkMode, out MoveMode mode)) explorer.moveMode = mode;
+            // Step 12a: AutoWalk was the old default (nobody picked it), so those saves move to smart steps.
+            if (Enum.TryParse(data.walkMode, out MoveMode mode)) explorer.moveMode = mode == MoveMode.AutoWalk ? MoveMode.SmartStep : mode;
             DominantHand.Restore(data.dominantHand);
             if (data.inside)
             {

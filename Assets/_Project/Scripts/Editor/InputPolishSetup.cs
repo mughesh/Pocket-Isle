@@ -41,7 +41,7 @@ namespace Diorama.EditorTools
             }
 
             Undo.RecordObject(explorer, "5d explorer");
-            explorer.moveMode = MoveMode.AutoWalk;
+            explorer.moveMode = MoveMode.SmartStep;
             explorer.walkSeconds = 0.4f;
             explorer.runSeconds = 0.2f;
             explorer.cubeSize = 0.018f;

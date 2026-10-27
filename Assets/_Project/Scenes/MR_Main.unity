@@ -1157,7 +1157,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 288828727}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 826775554}
+  m_Script: {fileID: 11500000, guid: f50460ff466fc174ba8b84ce43c523fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.TempleDoor
   map: {fileID: 11400000, guid: 62a4d08fb1efa974aa00c824d650dab0, type: 2}
@@ -1774,6 +1774,7 @@ GameObject:
   - component: {fileID: 374318555}
   - component: {fileID: 374318554}
   - component: {fileID: 374318558}
+  - component: {fileID: 374318559}
   m_Layer: 0
   m_Name: Step2 Gesture Test
   m_TagString: Untagged
@@ -1805,6 +1806,10 @@ MonoBehaviour:
   cubeSize: 0.018
   walkSeconds: 0.4
   runSeconds: 0.2
+  smartSeconds: 0.53
+  continuousSeconds: 0.4
+  smartTiles: 5
+  doubleSwipeSeconds: 0.45
   maxPathSteps: 40
   runPathSteps: 8
   showDebugLabels: 0
@@ -1878,6 +1883,27 @@ MonoBehaviour:
   restLookback: 0.5
   heldThresholdMm: 8
   barRangeMm: 20
+--- !u!114 &374318559
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 374318553}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84b52c00d5f541a4ba7635f70b8e166f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.WalkPreview
+  explorer: {fileID: 374318554}
+  island: {fileID: 270959109}
+  material: {fileID: 2100000, guid: dc3915bdb04a1cb4eb4760821e23e7b7, type: 2}
+  footTiles: 0.9
+  ringTiles: 1.05
+  fadeSeconds: 0.35
+  appearStagger: 0.04
+  walkOnAhead: 6
+  intensity: 1.4
 --- !u!114 &374903275 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8702425413754196321, guid: 0a7d2469f24041c4284c66706f84c45e, type: 3}
@@ -2952,21 +2978,6 @@ MonoBehaviour:
   coneWidth: 0.02
   beamLinger: 1.5
   island: {fileID: 270959109}
---- !u!115 &826775554
-MonoScript:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  serializedVersion: 7
-  m_DefaultReferences: {}
-  m_Icon: {fileID: 0}
-  m_Type: 0
-  m_ExecutionOrder: 0
-  m_ClassName: TempleDoor
-  m_Namespace: Diorama
-  m_AssemblyName: Diorama.Runtime
 --- !u!1 &886928184
 GameObject:
   m_ObjectHideFlags: 0

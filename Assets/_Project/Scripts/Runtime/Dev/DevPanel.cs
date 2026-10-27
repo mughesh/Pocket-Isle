@@ -110,7 +110,7 @@ namespace Diorama
         int _species;
         int _level = 9;
         bool _fpsOn, _walkFast;
-        float _walkSeconds, _runSeconds;
+        float _walkSeconds, _runSeconds, _smartSeconds, _onSeconds;
         float _fpsValue, _fpsAccum;
         int _fpsFrames;
 
@@ -131,6 +131,8 @@ namespace Diorama
             {
                 _walkSeconds = state.explorer.walkSeconds;
                 _runSeconds = state.explorer.runSeconds;
+                _smartSeconds = state.explorer.smartSeconds;
+                _onSeconds = state.explorer.continuousSeconds;
             }
             Build();
             SetOpen(false);
@@ -442,6 +444,8 @@ namespace Diorama
             if (state == null || state.explorer == null) return;
             state.explorer.walkSeconds = _walkFast ? _walkSeconds * 0.5f : _walkSeconds;
             state.explorer.runSeconds = _walkFast ? _runSeconds * 0.5f : _runSeconds;
+            state.explorer.smartSeconds = _walkFast ? _smartSeconds * 0.5f : _smartSeconds;
+            state.explorer.continuousSeconds = _walkFast ? _onSeconds * 0.5f : _onSeconds;
         }
 
         void RecordGhost()
