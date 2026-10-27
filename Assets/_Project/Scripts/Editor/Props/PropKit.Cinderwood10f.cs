@@ -84,7 +84,8 @@ namespace Diorama.EditorTools
         static PropRecipe SmokeCloud()
         {
             var cloud = Recipe("SmokeCloud", Vector2Int.one, true, true, 1100);
-            cloud.palette = Palette(C("#5A4F63"), Wood, C("#3B3442"), Leaf, C("#FF7A2E", 1.1f), C("#6E6478"));
+            // Oct 27 headset: the grey-violet read as purple blocks; charcoal smoke, lighter on top.
+            cloud.palette = Palette(C("#57524F"), Wood, C("#3A3634"), Leaf, C("#FF7A2E", 1.1f), C("#7A7470"));
             cloud.outline = 0.016f;
             cloud.spec = 0.03f;
             cloud.scaleJitter = 0.15f;
@@ -98,10 +99,10 @@ namespace Diorama.EditorTools
                     Sphere(new Vector3(-0.15f, 0.62f, -0.06f), 0.21f, 0.06f),
                     Sphere(new Vector3(0.04f, 0.36f, 0.3f), 0.22f, 0.06f),
                     Sphere(new Vector3(-0.04f, 0.38f, -0.3f), 0.22f, 0.06f),
-                    Plane(new Vector3(0f, 0.12f, 0f), Vector3.down, 0.06f)), PropSlot.Clay, PropMotion.Sway, 0.05f),
+                    Plane(new Vector3(0f, 0.12f, 0f), Vector3.down, 0.06f)), PropSlot.Clay, PropMotion.Sway, 0.09f),
                 Piece(PShape("SmokeCloud_Top",
                     Sphere(new Vector3(0.02f, 0.84f, 0f), 0.14f),
-                    Sphere(new Vector3(-0.1f, 0.78f, 0.08f), 0.11f, 0.05f)), PropSlot.Accent, PropMotion.Sway, 0.09f),
+                    Sphere(new Vector3(-0.1f, 0.78f, 0.08f), 0.11f, 0.05f)), PropSlot.Accent, PropMotion.Sway, 0.15f),
                 Piece(PShape("SmokeCloud_Under",
                     Ell(new Vector3(0f, 0.14f, 0f), new Vector3(0.52f, 0.08f, 0.46f), 0f)), PropSlot.Stone, PropMotion.Sway, 0.03f),
                 Piece(PShape("SmokeCloud_Embers",

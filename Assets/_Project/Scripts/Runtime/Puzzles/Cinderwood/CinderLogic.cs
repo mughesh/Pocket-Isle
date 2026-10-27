@@ -25,12 +25,15 @@ namespace Diorama
 
     /// <summary>
     /// Step 10f: how warm the cupped flame is (0..1). Both hands cupping fill it in <see cref="twoHands"/> s, one hand
-    /// curled round it in <see cref="oneHand"/> s, a look + pinch-hold in <see cref="look"/> s; let go and it cools at
-    /// <see cref="cool"/> per second. Full = rekindled (once).
+    /// curled round it in <see cref="oneHand"/> s, one hand just facing it in <see cref="oneFacing"/> s, a look +
+    /// pinch-hold in <see cref="look"/> s. Headset feedback Oct 27: tracking flickers a hand in and out of the zone, and
+    /// cooling on those frames cancelled the filling (stuck halfway), so a drop shorter than <see cref="grace"/> s keeps
+    /// filling at the last rate; let go for longer and it cools at <see cref="cool"/> per second. Full = rekindled (once).
     /// </summary>
     public class CupMeter
     {
-        public float twoHands = 2f, oneHand = 3f, look = 3f, cool = 0.5f;
+        public float twoHands = 2f, oneHand = 3f, oneFacing = 4f, look = 3f, cool = 0.25f, grace = 0.35f;
+        float _lastRate, _graceLeft;
         public float Progress { get; private set; }
         public bool Done { get; private set; }
 
@@ -43,7 +46,18 @@ namespace Diorama
             if (Done) return false;
             float rate = facingHands >= 2 ? 1f / Mathf.Max(0.01f, twoHands)
                 : wrapped ? 1f / Mathf.Max(0.01f, oneHand)
-                : lookHold ? 1f / Mathf.Max(0.01f, look) : 0f;
+                : lookHold ? 1f / Mathf.Max(0.01f, look)
+                : facingHands == 1 ? 1f / Mathf.Max(0.01f, oneFacing) : 0f;
+            if (rate > 0f)
+            {
+                _lastRate = rate;
+                _graceLeft = grace;
+            }
+            else if (_graceLeft > 0f)
+            {
+                _graceLeft -= dt;
+                rate = _lastRate;
+            }
             Held = rate > 0f;
             Progress = Held ? Mathf.Min(1f, Progress + rate * dt) : Mathf.Max(0f, Progress - cool * dt);
             if (Progress < 1f) return false;
@@ -56,6 +70,7 @@ namespace Diorama
             Done = done;
             Progress = done ? 1f : 0f;
             Held = false;
+            _graceLeft = 0f;
         }
     }
 

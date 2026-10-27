@@ -54,6 +54,7 @@ namespace Diorama
         AudioSource _audio;
         int _gazed = -1, _lastLit = -1;
         bool _burnRunning, _quietSolve;
+        float _wispAt;
 
         public LanternChain Chain => _chain;
         public override bool Busy => false;
@@ -146,7 +147,19 @@ namespace Diorama
                 if (_chain.AllLit && !_burnRunning && Here) StartCoroutine(Burn());
             }
             Warm();
+            Wisps();
             base.Update();
+        }
+
+        /// <summary>Oct 27 headset: dark wisps curl up off the smoke now and then, so it reads as smoke, not blocks.</summary>
+        void Wisps()
+        {
+            if (IsSolved || _burnRunning || fx == null || !InView || smoke.Length == 0 || Time.time < _wispAt) return;
+            _wispAt = Time.time + 0.3f;
+            var t = smoke[Random.Range(0, smoke.Length)];
+            float tile = TileWorld;
+            var at = MapToWorld(new Vector3(t.x + Random.Range(-0.3f, 0.3f), 0.85f, t.y + Random.Range(-0.3f, 0.3f)));
+            fx.Burst(at, 2, new Color(0.3f, 0.29f, 0.28f, 0.7f), tile * 0.12f, 1.6f, tile * 0.13f, island.transform.up * tile * 0.35f);
         }
 
         // ---- lighting ----

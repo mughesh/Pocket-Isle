@@ -62,15 +62,16 @@ namespace Diorama
             return 0.6f * (env1 * s1 + env2 * s2) + 0.04f * n * (env1 + env2);
         });
 
-        /// <summary>Step 10f: a fire crackling (a flame held in cupped hands, the forge roaring): soft roar with random pops.</summary>
+        /// <summary>Step 10f: a fire crackling (a flame held in cupped hands, the forge roaring): a soft hiss with random pops.</summary>
         public static AudioClip Crackle => _crackle != null ? _crackle : _crackle = Make("Puzzle Crackle", 1.2f, (t, n) =>
         {
             float env = Mathf.Min(1f, t / 0.1f) * Mathf.Clamp01((1.2f - t) / 0.3f);
             // Pops: short noisy clicks on a hashed beat.
             float beat = Mathf.Floor(t * 23f);
             float hash = Mathf.Abs(Mathf.Sin(beat * 12.9898f) * 43758.5453f) % 1f;
-            float pop = hash > 0.72f ? Mathf.Exp(-(t * 23f - beat) * 14f) * n * 1.4f : 0f;
-            return env * (n * 0.22f + Mathf.Sin(2f * Mathf.PI * 55f * t) * 0.12f + pop);
+            float pop = hash > 0.8f ? Mathf.Exp(-(t * 23f - beat) * 18f) * n * 0.9f : 0f;
+            // Oct 27 headset: no low sine under it (it droned like a motor); just a soft hiss and pops.
+            return env * (n * 0.12f + pop);
         });
 
         /// <summary>Step 10f: a stone lantern catching: a short bright tick and a small flame puff.</summary>

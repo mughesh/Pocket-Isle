@@ -30,8 +30,11 @@ namespace Diorama
         public Vector2 wispSize = new Vector2(0.75f, 1.4f);
 
         [Header("Cup (metres at the placed island size)")]
-        public float radius = 0.1f;
-        [Range(10f, 90f)] public float facingAngle = 60f;
+        [Tooltip("Oct 27 headset: 10 cm / 60 deg was too tight for real cupped hands.")]
+        public float radius = 0.14f;
+        [Range(10f, 90f)] public float facingAngle = 75f;
+        [Tooltip("A hand already cupping stays in until it's this much farther / more turned away (tracking wobble).")]
+        public float keepRadius = 1.3f, keepAngle = 15f;
         public float twoHandSeconds = 2f, oneHandSeconds = 3f, lookSeconds = 3f;
 
         [Header("The village answers")]
@@ -53,7 +56,7 @@ namespace Diorama
         readonly HandState[] _hands = new HandState[2];
         readonly bool[] _cupping = new bool[2];
         PropView _body, _wisp;
-        AudioSource _audio;
+        AudioSource _audio, _crackle;
         bool _gazed, _lookHold, _pulsing, _quietSolve;
         float _shown, _sparkAt, _debugUntil;
 
@@ -79,6 +82,14 @@ namespace Diorama
             _audio = gameObject.AddComponent<AudioSource>();
             _audio.playOnAwake = false;
             _audio.spatialBlend = 0f;
+            // A soft crackle that swells while the flame is held (one looping source; one-shots restarted on every
+            // tracking flicker and droned like a motor on the headset).
+            _crackle = gameObject.AddComponent<AudioSource>();
+            _crackle.playOnAwake = false;
+            _crackle.spatialBlend = 0f;
+            _crackle.loop = true;
+            _crackle.clip = PuzzleSounds.Crackle;
+            _crackle.volume = 0f;
             if (island != null)
             {
                 _body = new PropView("Village Shrine (cold)", island, coldShrine);
@@ -126,6 +137,9 @@ namespace Diorama
             }
             Draw();
             Warm();
+            Sound();
+            // The shrine's ring fills while it's held, so it's clear how far it got.
+            if (map != null) HearthShrines.SetDormantFill(map.name, shrine, IsSolved ? 0f : _meter.Progress);
             base.Update();
         }
 
@@ -139,13 +153,21 @@ namespace Diorama
             bool wrapped = false;
             for (int h = 0; h < 2; h++)
             {
+                bool was = _cupping[h];
                 _cupping[h] = false;
                 if (!_hands[h].tracked || _hands[h].busy) continue;
                 var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
                 if (!HandLookup.TryGetJointPose(hand, HandJointId.HandPalm, out var palm)) continue;
                 // The palmar side is the palm joint's -Y for both hands (ISDK v207, as PalmHover).
                 Vector3 normal = palm.rotation * Vector3.down;
-                if (!CupRules.Facing(palm.position, normal, flame, r, facingAngle)) continue;
+                // Sticky: a hand already in stays in a little farther and more turned (tracking wobble).
+                float rr = was ? r * keepRadius : r, aa = was ? facingAngle + keepAngle : facingAngle;
+                if (DevReadout.Active)
+                {
+                    var to = flame - palm.position;
+                    DevReadout.Text($"cup{h}", $"cup {(h == 0 ? "L" : "R")}: {to.magnitude * 100f:0.0} cm (<{rr * 100f:0}), angle {Vector3.Angle(normal, to):0} (<{aa:0}), warmth {_meter.Progress:0.00}");
+                }
+                if (!CupRules.Facing(palm.position, normal, flame, rr, aa)) continue;
                 _cupping[h] = true;
                 facing++;
                 if (HandLookup.TryGetJoint(hand, HandJointId.HandMiddleTip, out var middle) && CupRules.Wraps(palm.position, normal, middle, flame, r, facingAngle))
@@ -164,8 +186,8 @@ namespace Diorama
             {
                 MarkInteracted();
                 Debug.Log($"[FlameCupPiece] {id}: cupped ({(facing >= 2 ? "two hands" : wrapped ? "one hand round it" : _lookHold ? "look + pinch-hold" : "?")}).");
-                if (_audio != null) _audio.PlayOneShot(PuzzleSounds.Crackle, volume * 0.6f);
             }
+            if (!_meter.Held && wasHeld) Debug.Log($"[FlameCupPiece] {id}: let go at warmth {_meter.Progress:0.00}.");
             SetProgress(_meter.Progress);
             if (_meter.Held && Time.time >= _sparkAt && fx != null)
             {
@@ -323,6 +345,15 @@ namespace Diorama
             _wisp.glowBoostB = new Vector4(0.9f + 0.6f * _shown, 0f, 0f, 0f);
             _wisp.Place(Centre, wispBase, Quaternion.Euler(0f, Time.time * 40f, 0f), show, size);
             if (IsSolved && _shown >= 0.999f && map.IsPropHidden(shrine)) map.SetPropHidden(shrine, false);
+        }
+
+        void Sound()
+        {
+            if (_crackle == null) return;
+            float want = !IsSolved && Here && _meter.Held ? volume * 0.3f * (0.4f + 0.6f * _meter.Progress) : 0f;
+            _crackle.volume = Mathf.MoveTowards(_crackle.volume, want, Time.deltaTime * 0.8f);
+            if (_crackle.volume > 0.001f && !_crackle.isPlaying) _crackle.Play();
+            else if (_crackle.volume <= 0.001f && _crackle.isPlaying) _crackle.Stop();
         }
 
         void Warm()

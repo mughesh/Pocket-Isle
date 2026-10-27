@@ -114,13 +114,29 @@ namespace Diorama
 
         public static bool IsDormant(string map, Vector2Int anchor) => map != null && _dormant.Contains((map, anchor));
 
+        static readonly Dictionary<(string, Vector2Int), float> _dormantFill = new Dictionary<(string, Vector2Int), float>();
+
+        /// <summary>Step 10f: how far a dormant shrine's flame is warmed (0..1): its ring shows and fills while it's cupped.</summary>
+        public static void SetDormantFill(string map, Vector2Int anchor, float fill)
+        {
+            if (string.IsNullOrEmpty(map)) return;
+            if (fill <= 0f) _dormantFill.Remove((map, anchor));
+            else _dormantFill[(map, anchor)] = Mathf.Clamp01(fill);
+        }
+
+        static float DormantFill(string map, Vector2Int anchor) => map != null && _dormantFill.TryGetValue((map, anchor), out float f) ? f : 0f;
+
         [Tooltip("Step 10f: said once when someone tries to rest at a dormant shrine.")]
         public string dormantLine = "cw.flame.cold";
 
         bool Dormant(int i) => i >= 0 && i < _shrines.Count && _scanned != null && IsDormant(_scanned.name, _shrines[i]);
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void ResetDormant() => _dormant.Clear();
+        static void ResetDormant()
+        {
+            _dormant.Clear();
+            _dormantFill.Clear();
+        }
 
         class Beacon
         {
@@ -300,7 +316,19 @@ namespace Diorama
                 if (b.column != null)
                 {
                     b.column.gameObject.SetActive(false);
-                    b.ring.gameObject.SetActive(false);
+                    float fill = DormantFill(_scanned.name, s);
+                    b.ring.gameObject.SetActive(visible && fill > 0.01f);
+                    if (visible && fill > 0.01f)
+                    {
+                        b.ring.localPosition = local + Vector3.up * (island.map.tileSize * 0.25f);
+                        b.ring.localRotation = Quaternion.Euler(90f, 0f, 0f);
+                        b.ring.localScale = Vector3.one * island.map.tileSize * 1.1f;
+                        _block.Clear();
+                        _block.SetFloat(ModeId, 1f);
+                        _block.SetFloat(FillId, fill);
+                        _block.SetFloat(IntensityId, 1.4f);
+                        b.ringRenderer.SetPropertyBlock(_block);
+                    }
                 }
                 return;
             }

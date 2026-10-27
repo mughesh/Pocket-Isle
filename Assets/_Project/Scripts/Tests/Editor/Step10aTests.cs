@@ -58,7 +58,7 @@ namespace Diorama.Tests
         }
 
         [Test]
-        public void WindGate_LeadsToGalewickAndBack_SealedInBuildsByDefault()
+        public void WindGate_LeadsToGalewickAndBack_OpenInTheEditor()
         {
             var map = Load();
             var hub = AssetDatabase.LoadAssetAtPath<WorldMap>(StillIsleTools.MapPath);
@@ -71,7 +71,7 @@ namespace Diorama.Tests
             Assert.IsTrue(hub.CanWalk(home.arrive));
             var config = AssetDatabase.LoadAssetAtPath<GalewickConfig>(GalewickTools.ConfigPath);
             Assert.IsNotNull(config);
-            Assert.IsFalse(config.open, "builds keep the wind gate sealed until step 10d passes (Mugesh decides)");
+            // config.open (builds) is Mugesh's switch: open since Oct 27 (step 10f), not asserted.
             Assert.IsTrue(config.openInEditor);
             var theme = map.theme;
             Assert.IsNotNull(theme);

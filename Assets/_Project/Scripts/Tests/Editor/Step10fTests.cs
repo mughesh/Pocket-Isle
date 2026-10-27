@@ -63,8 +63,9 @@ namespace Diorama.Tests
             Assert.AreEqual(-1, Feed(two, 1f, 2), "done fires once");
 
             var one = new CupMeter();
-            Assert.AreEqual(-1, Feed(one, 5f, 1), "one hand that only faces it never rekindles it");
             Assert.AreEqual(3f, Feed(one, 4f, 1, true) / 72f, 0.05f, "one hand curled round it: 3 s");
+            var facing = new CupMeter();
+            Assert.AreEqual(4f, Feed(facing, 5f, 1) / 72f, 0.05f, "one hand only facing it: 4 s");
 
             var look = new CupMeter();
             Assert.AreEqual(3f, Feed(look, 4f, 0, false, true) / 72f, 0.05f, "look + pinch-hold: 3 s");
@@ -73,8 +74,21 @@ namespace Diorama.Tests
             Feed(cools, 1.5f, 2);
             Assert.AreEqual(0.75f, cools.Progress, 0.02f);
             Feed(cools, 1f, 0);
-            Assert.AreEqual(0.25f, cools.Progress, 0.02f, "let go: cools at 0.5 a second");
+            // 0.35 s of grace still filling (+0.175), then 0.65 s cooling at 0.25 a second (-0.16).
+            Assert.AreEqual(0.76f, cools.Progress, 0.03f, "let go: a short grace, then it cools slowly");
             Assert.IsFalse(cools.Done);
+        }
+
+        [Test]
+        public void CupMeter_TrackingFlickerEveryOtherFewFrames_StillFillsInAboutTwoSeconds()
+        {
+            // Headset Oct 27: two hands in the zone, tracking dropping one out for 4 frames in every 8.
+            var m = new CupMeter();
+            int frame = 0;
+            float t = 0f;
+            for (; t < 4f && !m.Done; t += 1f / 72f, frame++) m.Feed(1f / 72f, frame % 8 < 4 ? 2 : 0, false, false);
+            Assert.IsTrue(m.Done, "it still rekindles");
+            Assert.Less(t, 2.2f, "about as fast as a steady hold");
         }
 
         [Test]

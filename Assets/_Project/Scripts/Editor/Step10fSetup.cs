@@ -157,6 +157,10 @@ namespace Diorama.EditorTools
             cup.coldShrine = PropKit.Load("HearthShrineCold");
             cup.wisp = PropKit.Load("ShrineWisp");
             cup.wispBase = 1.36f;
+            cup.radius = 0.14f;
+            cup.facingAngle = 75f;
+            cup.keepRadius = 1.3f;
+            cup.keepAngle = 15f;
             cup.wispSize = new Vector2(0.75f, 1.4f);
             cup.warmSlot = VillageSlot;
             cup.villageCentre = new Vector2(VillageXY.x, CinderwoodTools.Size - 1 - VillageXY.y);
