@@ -3610,9 +3610,10 @@ MonoBehaviour:
   followAngle: 55
   fontSize: 0.1
   rayLength: 1.2
-  frame: 0.012
-  grabOut: 0.03
-  grabIn: 0.012
+  frame: 0.018
+  grabOut: 0.05
+  grabIn: 0.03
+  grabDepth: 0.08
 --- !u!114 &1200054857
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -40,9 +40,12 @@ namespace Diorama
         public float fontSize = 0.1f;
         [Tooltip("Hand rays reach this far (m).")]
         public float rayLength = 1.2f;
-        [Tooltip("The grab frame round the panel (m): visible width; a pinch from this far outside to this far inside the edge grabs it.")]
-        public float frame = 0.012f;
-        public float grabOut = 0.03f, grabIn = 0.012f;
+        [Tooltip("The grab frame round the panel (m): visible width; a pinch from this far outside to this far inside the edge grabs it. " +
+                 "A pinch (or the ray + pinch) on any empty spot of the panel, not on a button, grabs it too.")]
+        public float frame = 0.018f;
+        public float grabOut = 0.05f, grabIn = 0.03f;
+        [Tooltip("A direct pinch counts this far in front of or behind the panel (m).")]
+        public float grabDepth = 0.08f;
 
 #if UNITY_EDITOR || POCKET_DEV
         enum Tab { GoTo, Party, Encounter, Story, Save, Tools }
@@ -525,7 +528,15 @@ namespace Diorama
         bool PinchOnFrame(Vector3 pinch)
         {
             Vector3 l = _root.InverseTransformPoint(pinch);
-            return Mathf.Abs(l.z) < 0.05f && OnFrame(new Vector2(l.x, l.y), grabOut, grabIn);
+            return Mathf.Abs(l.z) < grabDepth && OnGrab(new Vector2(l.x, l.y));
+        }
+
+        /// <summary>Oct 27 (Mugesh: the frame was too thin): the wide edge band, or any empty spot of the panel.</summary>
+        bool OnGrab(Vector2 p)
+        {
+            if (OnFrame(p, grabOut, grabIn)) return true;
+            bool inside = Mathf.Abs(p.x) <= size.x * 0.5f && Mathf.Abs(p.y) <= size.y * 0.5f;
+            return inside && ButtonAt(p) == null;
         }
 
         /// <summary>
@@ -658,8 +669,8 @@ namespace Diorama
                 var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
                 if (hand == null || !hand.IsTrackedDataValid || _fingerNear[h] || _dragHand >= 0 || !hand.GetPointerPose(out var pose)) continue;
                 if (!HitPlane(new Ray(pose.position, pose.forward), out var p)) continue;
-                // The ray on the frame (just outside the edge) grabs; inside it presses buttons.
-                bool onBar = !Hit(new Ray(pose.position, pose.forward), out _) && OnFrame(p, frame + 0.01f, 0f);
+                // The ray on the frame band or an empty spot of the panel grabs; on a button it presses it.
+                bool onBar = OnGrab(p);
                 if (!onBar && (Mathf.Abs(p.x) > size.x * 0.5f || Mathf.Abs(p.y) > size.y * 0.5f)) continue;
                 Vector3 end = _root.TransformPoint(new Vector3(p.x, p.y, -0.003f));
                 Vector3 a = pose.position, along = end - a;

@@ -252,6 +252,25 @@ namespace Diorama.EditorTools
             Save(log);
         }
 
+        /// <summary>Oct 27 (Mugesh): the dev panel's grab frame was too thin. Wider band, a visible frame, deeper reach.</summary>
+        public static void PanelGrab()
+        {
+            if (!Ready()) return;
+            var panel = Object.FindFirstObjectByType<DevPanel>(FindObjectsInactive.Include);
+            if (panel == null)
+            {
+                Debug.LogError("[Step10e] No DevPanel in MR_Main.");
+                return;
+            }
+            Undo.RecordObject(panel, "Panel grab");
+            panel.frame = 0.018f;
+            panel.grabOut = 0.05f;
+            panel.grabIn = 0.03f;
+            panel.grabDepth = 0.08f;
+            EditorUtility.SetDirty(panel);
+            Save(new StringBuilder("[Step10e] Dev panel grab: frame 1.8 cm, band 5 cm out / 3 cm in, 8 cm deep, empty spots grab too."));
+        }
+
         static bool Ready()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)
