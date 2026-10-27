@@ -298,7 +298,9 @@ namespace Diorama
                 var stop = cinderwoodTrail[i];
                 if (!explorer.GoTo(stop))
                 {
-                    Debug.LogWarning($"[PerfTour] Can't path to trail stop {i} c{stop.x} r{stop.y} from c{explorer.Tile.x} r{explorer.Tile.y}: skipped.");
+                    // Step 10f: a puzzle gate (the smoky hollow, the log) in the way: jump past it.
+                    Debug.LogWarning($"[PerfTour] Can't path to trail stop {i} c{stop.x} r{stop.y} from c{explorer.Tile.x} r{explorer.Tile.y}: teleported.");
+                    explorer.Teleport(stop, new Vector2Int(0, -1));
                     continue;
                 }
                 for (float t = 0f; explorer.Destination.HasValue && t < 30f; t += Time.deltaTime) yield return null;

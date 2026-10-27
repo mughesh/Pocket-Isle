@@ -40,6 +40,22 @@ namespace Diorama.EditorTools
         /// <summary>Step 9c: the temple's return gate (2 x 1, front y 51), hidden until the Keeper is calmed (KeeperHall).</summary>
         public static readonly Vector2Int TempleGateXY = new Vector2Int(24, 52);
         static readonly Vector2Int FirstGrassXY = new Vector2Int(15, 7);
+
+        // Step 10f: the smoky hollow on the trail from the village to the springs. The eight path tiles under the smoke (in
+        // order along the trail) and the six stone lanterns lining it (in order: the chain runs this way). Everything else
+        // walkable beside it turns to rock, so the smoke is the only way through.
+        public static readonly Vector2Int[] HollowXY =
+        {
+            new Vector2Int(28, 33), new Vector2Int(29, 33), new Vector2Int(29, 34), new Vector2Int(30, 34),
+            new Vector2Int(29, 35), new Vector2Int(30, 35), new Vector2Int(30, 36), new Vector2Int(31, 36),
+        };
+        public static readonly Vector2Int[] HollowLanternXY =
+        {
+            new Vector2Int(30, 33), new Vector2Int(28, 34), new Vector2Int(31, 34), new Vector2Int(28, 35), new Vector2Int(31, 35), new Vector2Int(29, 36),
+        };
+        public static readonly Vector2Int HollowMarkXY = new Vector2Int(29, 34);
+        public static Vector2Int[] HollowTiles => System.Array.ConvertAll(HollowXY, Tile);
+        public static Vector2Int[] HollowLanterns => System.Array.ConvertAll(HollowLanternXY, Tile);
         static readonly Vector2Int PlazaXY = new Vector2Int(15, 33);
 
         /// <summary>(x, y) to the map's (column, row).</summary>
@@ -100,7 +116,7 @@ namespace Diorama.EditorTools
         const char KGate = 'Z', KShrine = 'Y', KHut = 'h', KKiln = 'k', KPots = 'p', KWood = 'w', KLanternPost = 'l',
             KStoneLantern = 'n', KBush = 'b', KLog = 'o', KSign = 's', KLeaves = 'v', KCliff = 'c', KCliffB = 'C',
             KDoor = 'd', KBrazier = 'u', KRuin = 'r', KShards = 'x', KVent = 'e', KBellows = 'B', KPipe = 'i',
-            KFence = '-', KFenceTurned = '|', KCornerWS = '1', KCornerNW = '2', KCornerEN = '3', KCornerSE = '4';
+            KFence = '-', KFenceTurned = '|', KCornerWS = '1', KCornerNW = '2', KCornerEN = '3', KCornerSE = '4', KSmoke = 'q';
 
         // ---- generation state ----
         static char[,] _g, _p, _z; // [x, y]
@@ -133,7 +149,7 @@ namespace Diorama.EditorTools
                      {
                          "ReturnGate", HearthShrines.RecipeName, "ClayHut", "Kiln", "PotCluster", "Woodpile", "LanternPost",
                          "StoneLantern", "BerryBush", "FallenLog", "Signpost", "LeafPile", "CliffWall", "ForgeDoor", "Brazier",
-                         "RuinedKiln", "PotShards", "EmberVent", "Fence", "FenceCorner", "Bellows", "ForgePipe",
+                         "RuinedKiln", "PotShards", "EmberVent", "Fence", "FenceCorner", "Bellows", "ForgePipe", "SmokeCloud",
                      })
             {
                 var r = PropKit.Load(name);
@@ -182,6 +198,7 @@ namespace Diorama.EditorTools
                 new Landmark { name = "log", tile = LogTile, line = "cinder.log.first", radius = 3 },
                 new Landmark { name = "temple", tile = Tile(DoorXY + Vector2Int.right), line = "cinder.temple.first", radius = 4 },
                 new Landmark { name = "ruins", tile = Tile(50, 52), line = "cinder.ruins.first", radius = 5 },
+                new Landmark { name = "hollow", tile = Tile(HollowMarkXY) }, // step 10f (its lesson line says the rest)
                 new Landmark { name = "field", tile = Tile(38, 8) },
                 new Landmark { name = "glade", tile = Tile(37, 21) },
                 new Landmark { name = "grove", tile = Tile(51, 30) },
@@ -222,6 +239,7 @@ namespace Diorama.EditorTools
             Key(KRuin, "RuinedKiln");
             Key(KShards, "PotShards");
             Key(KVent, "EmberVent");
+            Key(KSmoke, "SmokeCloud");
             Key(KFence, "Fence");
             Key(KFenceTurned, "Fence", 0f, true);
             // FenceCorner's rails run to local +X (west on the map) and +Z (south); yaw turns them clockwise from above.
@@ -330,6 +348,7 @@ namespace Diorama.EditorTools
             Ruins();
             ForestBits();
             Filler();
+            Hollow();
             CleanUnderProps();
             SealCutOff();
             ThinDeepForest();
@@ -511,6 +530,70 @@ namespace Diorama.EditorTools
             Patch(53f, 55.5f, 1.4f, 1.2f);
         }
 
+        /// <summary>
+        /// Step 10f: the smoky hollow. Smoke on the eight path tiles, stone lanterns on six of the tiles beside them, every
+        /// other walkable tile next to the smoke turned to rock (blocking props stay), so the smoke is the only way through.
+        /// Runs after the filler, so the rest of the map keeps its seeded layout.
+        /// </summary>
+        static void Hollow()
+        {
+            var hollow = new HashSet<Vector2Int>(HollowXY);
+            var lanterns = new HashSet<Vector2Int>(HollowLanternXY);
+            int walls = 0;
+            foreach (var h in HollowXY)
+            {
+                if (_g[h.x, h.y] != IslandMap.Path) Debug.LogError($"[Cinderwood] Hollow tile x{h.x} y{h.y} isn't on the trail ('{_g[h.x, h.y]}').");
+                for (int dx = -1; dx <= 1; dx++)
+                    for (int dy = -1; dy <= 1; dy++)
+                    {
+                        var n = new Vector2Int(h.x + dx, h.y + dy);
+                        if (!In(n.x, n.y) || hollow.Contains(n) || lanterns.Contains(n) || _g[n.x, n.y] == IslandMap.Path) continue;
+                        if (!IslandMap.IsWalkable(_g[n.x, n.y]) || Blocks(n.x, n.y)) continue;
+                        ClearProp(n);
+                        _g[n.x, n.y] = IslandMap.Rock;
+                        walls++;
+                    }
+            }
+            // The village's north edge opened onto the trail back from the springs to the log: a short cut past the
+            // springs (and now past the hollow). Close it with forest, so the way on runs through the hollow.
+            int edge = 0;
+            for (int x = 18; x <= 28; x++)
+                for (int y = 40; y <= 41; y++)
+                {
+                    if (_g[x, y] == IslandMap.Path || !IslandMap.IsWalkable(_g[x, y]) || Blocks(x, y)) continue;
+                    ClearProp(new Vector2Int(x, y));
+                    _g[x, y] = IslandMap.Tree;
+                    edge++;
+                }
+            foreach (var l in HollowLanternXY)
+            {
+                ClearProp(l);
+                Ground(l.x, l.y, IslandMap.Grass);
+                Prop(l, KStoneLantern);
+            }
+            foreach (var h in HollowXY)
+            {
+                ClearProp(h);
+                Prop(h, KSmoke);
+            }
+            _log?.Append($"\n  smoky hollow: {HollowXY.Length} smoke tiles, {HollowLanternXY.Length} lanterns, {walls} tiles beside it to rock, {edge} on the village's north edge to forest");
+        }
+
+        /// <summary>Takes a 1 x 1 prop off a tile (the hollow's walls and lantern spots).</summary>
+        static void ClearProp(Vector2Int t)
+        {
+            if (_p[t.x, t.y] == IslandMap.Empty) return;
+            _p[t.x, t.y] = IslandMap.Empty;
+            _covered.Remove(t);
+        }
+
+        static bool IsHollow(int x, int y)
+        {
+            foreach (var h in HollowXY)
+                if (h.x == x && h.y == y) return true;
+            return false;
+        }
+
         static void ForestBits()
         {
             foreach (var (x, y, rx, ry) in new[] { (13.5f, 13f, 1.3f, 2f), (6f, 17f, 1.5f, 1.5f), (12f, 20f, 1.8f, 1.3f), (17.5f, 25f, 1.5f, 1.2f), (26f, 41.5f, 1.5f, 1f), (7f, 10.5f, 1.3f, 1.2f) })
@@ -664,7 +747,7 @@ namespace Diorama.EditorTools
                 KWood => "Woodpile", KLanternPost => "LanternPost", KStoneLantern => "StoneLantern", KBush => "BerryBush",
                 KLog => "FallenLog", KSign => "Signpost", KLeaves => "LeafPile", KCliff or KCliffB => "CliffWall",
                 KDoor => "ForgeDoor", KBrazier => "Brazier", KRuin => "RuinedKiln", KShards => "PotShards", KVent => "EmberVent",
-                KBellows => "Bellows", KPipe => "ForgePipe",
+                KBellows => "Bellows", KPipe => "ForgePipe", KSmoke => "SmokeCloud",
                 KFence or KFenceTurned => "Fence", KCornerWS or KCornerNW or KCornerEN or KCornerSE => "FenceCorner",
                 _ => null,
             };
@@ -689,7 +772,9 @@ namespace Diorama.EditorTools
                 {
                     var n = t + d;
                     bool log = n.y == LogXY.y && (n.x == LogXY.x || n.x == LogXY.x + 1);
-                    if (seen.Contains(n) || !(Walkable(n.x, n.y) || log)) continue;
+                    // Step 10f: the hollow's smoke burns away, so what lies past it counts as reachable.
+                    bool smoke = IsHollow(n.x, n.y);
+                    if (seen.Contains(n) || !(Walkable(n.x, n.y) || log || smoke)) continue;
                     seen.Add(n);
                     queue.Enqueue(n);
                 }
@@ -825,8 +910,9 @@ namespace Diorama.EditorTools
             var problems = new List<string>();
             if (map.Columns != Size || map.Rows != Size) problems.Add($"map is {map.Columns}x{map.Rows}, not {Size}x{Size}");
 
-            bool Walk(Vector2Int t, bool logOpen) => map.CanWalk(t) || logOpen && IsLogTile(map, t) && IslandMap.IsWalkable(map.At(t));
-            HashSet<Vector2Int> Flood(bool logOpen)
+            bool Walk(Vector2Int t, bool logOpen, bool hollowOpen) => map.CanWalk(t) || logOpen && IsLogTile(map, t) && IslandMap.IsWalkable(map.At(t)) ||
+                                                                      hollowOpen && IsHollowTile(t) && IslandMap.IsWalkable(map.At(t));
+            HashSet<Vector2Int> Flood(bool logOpen, bool hollowOpen = true)
             {
                 var seen = new HashSet<Vector2Int>();
                 var queue = new Queue<Vector2Int>();
@@ -839,7 +925,7 @@ namespace Diorama.EditorTools
                     foreach (var d in new[] { Vector2Int.right, Vector2Int.left, Vector2Int.up, Vector2Int.down })
                     {
                         var n = t + d;
-                        if (!seen.Contains(n) && Walk(n, logOpen))
+                        if (!seen.Contains(n) && Walk(n, logOpen, hollowOpen))
                         {
                             seen.Add(n);
                             queue.Enqueue(n);
@@ -851,6 +937,12 @@ namespace Diorama.EditorTools
             if (!map.CanWalk(Arrive)) problems.Add($"arrival tile c{Arrive.x} r{Arrive.y} isn't walkable");
             var reach = Flood(false);
             var reachOpen = Flood(true);
+            // Step 10f: with the smoke on the path the village and its shrine are reachable, the springs are not.
+            var smoky = Flood(false, false);
+            if (!smoky.Contains(Tile(ShrineXY + new Vector2Int(0, -2)))) problems.Add("the shrine front isn't reachable before the smoky hollow");
+            if (smoky.Contains(Tile(37, 41))) problems.Add("the smoky hollow can be walked round (the springs are reachable with the smoke on the path)");
+            foreach (var h in HollowXY)
+                if (map.CanWalk(Tile(h)) || !IslandMap.IsWalkable(map.At(Tile(h)))) problems.Add($"hollow tile x{h.x} y{h.y} isn't a smoke-blocked path tile");
 
             void Need(string what, Vector2Int xy)
             {
@@ -909,6 +1001,8 @@ namespace Diorama.EditorTools
                            $"longest plain stretch {gap}, bare edge tiles {bare}/{ring}");
             return problems;
         }
+
+        static bool IsHollowTile(Vector2Int t) => IsHollow(t.x, Size - 1 - t.y);
 
         static bool IsLogTile(WorldMap map, Vector2Int t)
         {

@@ -888,6 +888,26 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: It's burning! Look, the whole village is waking up.
+  - id: cw.lanterns
+    once: 0
+    priority: 2
+    note: lesson at the smoky hollow; chip "Touch them!"
+    target: puzzle:cw.hollow
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: It's too dark to pass. Light the lanterns!
+  - id: cw.lanterns.done
+    once: 1
+    priority: 2
+    note: 'every lantern lit: the smoke burns off the path'
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The smoke's burning away! The path is clear.
   - id: gate.wind.first
     once: 1
     priority: 2

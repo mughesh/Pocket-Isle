@@ -22,6 +22,7 @@ MonoBehaviour:
     slot: 2
     motion: 0
     motionAmount: 0
+    budgetWeight: 0
   - shape: {fileID: 11400000, guid: 418317c1c8fa9974287a03399de10461, type: 2}
     part: {fileID: 0}
     position: {x: 0, y: 0, z: 0}
@@ -31,6 +32,7 @@ MonoBehaviour:
     slot: 4
     motion: 2
     motionAmount: 0.002
+    budgetWeight: 0
   palette:
   - restored: {r: 0.8140393, g: 0.50571483, b: 0.24471544, a: 1}
     unrestored: {r: 0.7607843, g: 0.45882353, b: 0.25882354, a: 1}
@@ -46,7 +48,7 @@ MonoBehaviour:
     glow: 0
   - restored: {r: 1, g: 0.69846123, b: 0.33905882, a: 1}
     unrestored: {r: 1, g: 0.7529412, b: 0.3764706, a: 1}
-    glow: 1
+    glow: 1.9
   - restored: {r: 0.99447066, g: 0.9532836, b: 0.90106595, a: 1}
     unrestored: {r: 0.92941177, g: 0.8980392, b: 0.84705883, a: 1}
     glow: 0.2
@@ -55,6 +57,7 @@ MonoBehaviour:
     onSlot: 0
     tipSlot: 0
     at: 0
+    byHeight: 0
   spec: 0.15
   outline: 0.022
   footprint: {x: 1, y: 1}

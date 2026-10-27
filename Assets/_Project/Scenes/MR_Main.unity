@@ -1326,6 +1326,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 694551495}
+  - {fileID: 1066025592}
   m_Father: {fileID: 1553131432}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &367221214
@@ -2448,7 +2449,7 @@ MonoBehaviour:
   grabGuard: {fileID: 270959111}
   ghosts: {fileID: 1421177268}
   fx: {fileID: 1078587927}
-  reach: 4
+  reach: 2
   lessonLine: cw.flame
   ghostClip: cup_hands
   ghostScale: 1
@@ -3079,7 +3080,7 @@ MonoBehaviour:
   - {x: 14, y: 30}
   - {x: 19, y: 29}
   - {x: 26, y: 29}
-  - {x: 30, y: 23}
+  - {x: 30, y: 22}
   - {x: 36, y: 19}
   - {x: 20, y: 15}
   villageSpot: {x: 15, y: 28}
@@ -3099,6 +3100,91 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1066025591
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1066025592}
+  - component: {fileID: 1066025593}
+  m_Layer: 0
+  m_Name: Smoky Hollow
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1066025592
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1066025591}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 359768277}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1066025593
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1066025591}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d48a563055e11104ea4f4b290a5e5ca6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.LanternHollowPiece
+  id: cw.hollow
+  map: {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
+  island: {fileID: 270959109}
+  window: {fileID: 270959113}
+  explorer: {fileID: 374318554}
+  grabGuard: {fileID: 270959111}
+  ghosts: {fileID: 1421177268}
+  fx: {fileID: 1078587927}
+  reach: 4
+  lessonLine: cw.lanterns
+  ghostClip: poke
+  ghostScale: 1
+  lessonChip: Touch them!
+  lanterns:
+  - {x: 30, y: 26}
+  - {x: 28, y: 25}
+  - {x: 31, y: 25}
+  - {x: 28, y: 24}
+  - {x: 31, y: 24}
+  - {x: 29, y: 23}
+  smoke:
+  - {x: 28, y: 26}
+  - {x: 29, y: 26}
+  - {x: 29, y: 25}
+  - {x: 30, y: 25}
+  - {x: 29, y: 24}
+  - {x: 30, y: 24}
+  - {x: 30, y: 23}
+  - {x: 31, y: 23}
+  smokeRecipe: {fileID: 11400000, guid: 8011fa5b8621e244bb7ae74db9c428bb, type: 2}
+  topHeight: 0.72
+  touchRadius: 0.025
+  sweepWindow: 1.5
+  raceStep: 0.15
+  nudgeDelay: 0.5
+  firstSlot: 1
+  spotRadius: 0.45
+  burnStep: 0.15
+  burnSeconds: 0.9
+  doneLine: cw.lanterns.done
+  volume: 0.7
 --- !u!1 &1067947787
 GameObject:
   m_ObjectHideFlags: 0

@@ -106,6 +106,7 @@ namespace Diorama
                 AddMark(cinderwood, "CW: arrival", "start");
                 AddMark(cinderwood, "CW: village", "plaza");
                 AddMark(cinderwood, "CW: shrine", "shrine");
+                AddMark(cinderwood, "CW: hollow", "hollow"); // step 10f
                 AddMark(cinderwood, "CW: springs", "springs");
                 AddMark(cinderwood, "CW: ruins", "ruins");
                 AddMark(cinderwood, "CW: log", "log");
