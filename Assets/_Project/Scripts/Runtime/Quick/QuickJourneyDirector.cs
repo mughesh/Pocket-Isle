@@ -242,10 +242,14 @@ namespace Diorama
                     return best;
                 }
                 if (PuzzleState.IsSolved(ShardHolder.FireId)) return null;
-                return Mark(world, PuzzleState.IsSolved(GameState.LogId) ? "temple" : "log");
+                // Step 10f: the smoky hollow blocks the way to the springs and the log until its lanterns are lit.
+                return Mark(world, PuzzleState.IsSolved(GameState.LogId) ? "temple" : PuzzleState.IsSolved("cw.hollow") || PastHollow(world) ? "log" : "hollow");
             }
             return null;
         }
+
+        /// <summary>Step 10f: the log's trail is reachable from here (past the hollow already: an old save, a Temple preset).</summary>
+        bool PastHollow(WorldMap world) => Mark(world, "log") is Vector2Int log && explorer.CanReach(log);
 
         static Vector2Int? Mark(WorldMap world, string landmark) =>
             world.TryGetLandmark(landmark, out var t) ? GameState.NearestWalkable(world, t) : (Vector2Int?)null;

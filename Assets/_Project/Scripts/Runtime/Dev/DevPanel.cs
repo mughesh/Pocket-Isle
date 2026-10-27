@@ -321,6 +321,7 @@ namespace Diorama
                             () => state.Restored(state.galewick));
                     Flag("CW flame", "cw.flame", 1); // step 10f
                     Flag("CW hollow", "cw.hollow", 63);
+                    Flag("CW firebox", "cw.ember", 1);
                     Add(() => $"Log: {(GameState.Solved(GameState.LogId) ? "placed" : "fallen")}",
                         () => Edit(state.SetPuzzle(GameState.LogId, !GameState.Solved(GameState.LogId), GameState.Solved(GameState.LogId) ? 0 : 2)), () => GameState.Solved(GameState.LogId));
                     Add(() => $"Forge + door: {(GameState.Solved(GameState.BellowsId) ? "lit, open" : "cold")}",

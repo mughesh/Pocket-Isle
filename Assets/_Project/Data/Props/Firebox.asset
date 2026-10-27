@@ -1,0 +1,110 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 374f6b77629fa034d93d2a7945ac7885, type: 3}
+  m_Name: Firebox
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.PropRecipe
+  pieces:
+  - shape: {fileID: 11400000, guid: 13ad333173285c74c875a27fad998419, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 2
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 0
+  - shape: {fileID: 11400000, guid: c4ac0562185fe4347891a5d20e1ccea3, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 3
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 0
+  - shape: {fileID: 11400000, guid: 131809761714e68458c586b2c2a61872, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 2
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 0
+  - shape: {fileID: 11400000, guid: 75c72375538b369498f4ea18653c31c6, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 4
+    motion: 2
+    motionAmount: 0.004
+    budgetWeight: 0
+  - shape: {fileID: 11400000, guid: bbb5f54b4796269428bd978a810cd7a7, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 0
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 0
+  - shape: {fileID: 11400000, guid: d28d27fe09a4ee6428ef640a41c83dea, type: 2}
+    part: {fileID: 0}
+    position: {x: 0.36, y: 4.9, z: 0.5}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 5
+    motion: 3
+    motionAmount: 0.08
+    budgetWeight: 0
+  palette:
+  - restored: {r: 0.75949025, g: 0.45765957, b: 0.23019686, a: 1}
+    unrestored: {r: 0.70980394, g: 0.41568628, b: 0.24313726, a: 1}
+    glow: 0
+  - restored: {r: 0.44898042, g: 0.31714636, b: 0.19990121, a: 1}
+    unrestored: {r: 0.41960785, g: 0.2901961, b: 0.2, a: 1}
+    glow: 0
+  - restored: {r: 0.46156865, g: 0.38115165, b: 0.31923768, a: 1}
+    unrestored: {r: 0.43137255, g: 0.3529412, b: 0.30588236, a: 1}
+    glow: 0
+  - restored: {r: 0.75949025, g: 0.4396903, b: 0.15903138, a: 1}
+    unrestored: {r: 0.70980394, g: 0.39607844, b: 0.18039216, a: 1}
+    glow: 0
+  - restored: {r: 1, g: 0.55112815, b: 0.13121575, a: 1}
+    unrestored: {r: 1, g: 0.5411765, b: 0.18039216, a: 1}
+    glow: 1.4
+  - restored: {r: 0.99447066, g: 0.9532836, b: 0.90106595, a: 1}
+    unrestored: {r: 0.92941177, g: 0.8980392, b: 0.84705883, a: 1}
+    glow: 0.2
+  tips:
+    on: 0
+    onSlot: 0
+    tipSlot: 0
+    at: 0
+    byHeight: 0
+  spec: 0.15
+  outline: 0.022
+  footprint: {x: 1, y: 1}
+  blocksWalking: 1
+  randomYaw: 0
+  yawJitter: 0
+  scaleJitter: 0
+  resolution: 44
+  triangleBudget: 3100
+  bakedMesh: {fileID: 4300000, guid: a018dcfcf904400499a32d6bbd251848, type: 2}

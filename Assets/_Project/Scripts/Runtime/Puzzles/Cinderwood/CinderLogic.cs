@@ -175,4 +175,142 @@ namespace Diorama
             return i;
         }
     }
+
+    /// <summary>Where the forge's ember is (step 10f).</summary>
+    public enum EmberState { InVent, OnPalm, Falling, Hovering, Flying, In }
+
+    /// <summary>
+    /// Step 10f: carrying an ember on an open palm (pure, EditMode-tested). In its vent, an open hand held palm-up
+    /// beside it for <see cref="pickSeconds"/> (or a pinch at the ember) lifts it onto that palm. It stays while the palm
+    /// is still roughly up (<see cref="keepUp"/>) or the pinch holds; turned over (or let go) above the firebox it tips in,
+    /// anywhere else it falls back to its vent. Lost tracking drops it too. <see cref="Falling"/>, hovering (look +
+    /// pinch) and flying are timed by the piece, which calls <see cref="Back"/>, <see cref="Hover"/>, <see cref="Fly"/>
+    /// and <see cref="Arrive"/>.
+    /// </summary>
+    public class EmberCarry
+    {
+        /// <summary>One hand this frame, already measured by the piece.</summary>
+        public struct Hand
+        {
+            public bool tracked, busy, pinching, pinchStarted;
+            /// <summary>Palm normal · up (1 = palm straight up, -1 = palm down).</summary>
+            public float up;
+            /// <summary>The palm beside the vent (pick-up zone), the pinch point at the ember, the palm over the firebox.</summary>
+            public bool nearVent, atEmber, overFirebox;
+        }
+
+        public float pickSeconds = 0.35f, pickUp = 0.6f, keepUp = 0.2f;
+
+        public EmberState State { get; private set; } = EmberState.InVent;
+        /// <summary>The hand carrying it (0 left, 1 right), -1 = none.</summary>
+        public int Holder { get; private set; } = -1;
+        public bool Pinched { get; private set; }
+        float _hold;
+
+        public static bool PalmUp(float up, float threshold) => up >= threshold;
+
+        /// <summary>One frame. Returns the state now (it changed when it differs from before).</summary>
+        public EmberState Feed(float dt, Hand[] hands)
+        {
+            switch (State)
+            {
+                case EmberState.InVent:
+                case EmberState.Hovering:
+                {
+                    bool any = false;
+                    for (int h = 0; h < hands.Length; h++)
+                    {
+                        var x = hands[h];
+                        if (!x.tracked || x.busy) continue;
+                        if (x.pinchStarted && x.atEmber)
+                        {
+                            Lift(h, true);
+                            return State;
+                        }
+                        if (State == EmberState.InVent && x.nearVent && PalmUp(x.up, pickUp))
+                        {
+                            any = true;
+                            _hold += dt;
+                            if (_hold >= pickSeconds)
+                            {
+                                Lift(h, false);
+                                return State;
+                            }
+                        }
+                    }
+                    if (!any) _hold = 0f;
+                    break;
+                }
+                case EmberState.OnPalm:
+                {
+                    var x = Holder >= 0 && Holder < hands.Length ? hands[Holder] : default;
+                    if (Pinched && !x.pinching) Pinched = false;
+                    if (!x.tracked)
+                    {
+                        Drop();
+                        break;
+                    }
+                    if (Pinched || PalmUp(x.up, keepUp)) break;
+                    // Turned over or let go: in, if it's above the firebox; otherwise it falls.
+                    if (x.overFirebox)
+                    {
+                        State = EmberState.In;
+                        Holder = -1;
+                    }
+                    else Drop();
+                    break;
+                }
+            }
+            return State;
+        }
+
+        void Lift(int hand, bool pinched)
+        {
+            State = EmberState.OnPalm;
+            Holder = hand;
+            Pinched = pinched;
+            _hold = 0f;
+        }
+
+        void Drop()
+        {
+            State = EmberState.Falling;
+            Holder = -1;
+            Pinched = false;
+        }
+
+        /// <summary>It fell back into its vent.</summary>
+        public void Back()
+        {
+            State = EmberState.InVent;
+            _hold = 0f;
+        }
+
+        /// <summary>Look + pinch the vent: it rises and waits.</summary>
+        public void Hover()
+        {
+            if (State == EmberState.InVent) State = EmberState.Hovering;
+        }
+
+        /// <summary>Look + pinch the firebox while it waits: it flies there by itself.</summary>
+        public void Fly()
+        {
+            if (State == EmberState.Hovering) State = EmberState.Flying;
+        }
+
+        public void Arrive()
+        {
+            State = EmberState.In;
+            Holder = -1;
+        }
+
+        /// <summary>From the save: in (lit) or back in its vent.</summary>
+        public void Restore(bool lit)
+        {
+            State = lit ? EmberState.In : EmberState.InVent;
+            Holder = -1;
+            Pinched = false;
+            _hold = 0f;
+        }
+    }
 }

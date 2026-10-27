@@ -53,7 +53,13 @@ namespace Diorama.EditorTools
         {
             new Vector2Int(30, 33), new Vector2Int(28, 34), new Vector2Int(31, 34), new Vector2Int(28, 35), new Vector2Int(31, 35), new Vector2Int(29, 36),
         };
-        public static readonly Vector2Int HollowMarkXY = new Vector2Int(29, 34);
+        /// <summary>The trail tile just before the smoke on the village side (landmark, dev panel Go to).</summary>
+        public static readonly Vector2Int HollowMarkXY = new Vector2Int(28, 32);
+        // Step 10f: the forge's firebox (in the cliff line, just east of the bellows) and the ember vent beside it.
+        public static readonly Vector2Int FireboxXY = new Vector2Int(24, 56);
+        public static readonly Vector2Int ForgeVentXY = new Vector2Int(26, 54);
+        /// <summary>The temple plaza's middle (x, y): where the roaring forge's warmth settles.</summary>
+        public static readonly Vector2 TempleXY = new Vector2(20f, 53f);
         public static Vector2Int[] HollowTiles => System.Array.ConvertAll(HollowXY, Tile);
         public static Vector2Int[] HollowLanterns => System.Array.ConvertAll(HollowLanternXY, Tile);
         static readonly Vector2Int PlazaXY = new Vector2Int(15, 33);
@@ -116,7 +122,7 @@ namespace Diorama.EditorTools
         const char KGate = 'Z', KShrine = 'Y', KHut = 'h', KKiln = 'k', KPots = 'p', KWood = 'w', KLanternPost = 'l',
             KStoneLantern = 'n', KBush = 'b', KLog = 'o', KSign = 's', KLeaves = 'v', KCliff = 'c', KCliffB = 'C',
             KDoor = 'd', KBrazier = 'u', KRuin = 'r', KShards = 'x', KVent = 'e', KBellows = 'B', KPipe = 'i',
-            KFence = '-', KFenceTurned = '|', KCornerWS = '1', KCornerNW = '2', KCornerEN = '3', KCornerSE = '4', KSmoke = 'q';
+            KFence = '-', KFenceTurned = '|', KCornerWS = '1', KCornerNW = '2', KCornerEN = '3', KCornerSE = '4', KSmoke = 'q', KFirebox = 'm';
 
         // ---- generation state ----
         static char[,] _g, _p, _z; // [x, y]
@@ -149,7 +155,7 @@ namespace Diorama.EditorTools
                      {
                          "ReturnGate", HearthShrines.RecipeName, "ClayHut", "Kiln", "PotCluster", "Woodpile", "LanternPost",
                          "StoneLantern", "BerryBush", "FallenLog", "Signpost", "LeafPile", "CliffWall", "ForgeDoor", "Brazier",
-                         "RuinedKiln", "PotShards", "EmberVent", "Fence", "FenceCorner", "Bellows", "ForgePipe", "SmokeCloud",
+                         "RuinedKiln", "PotShards", "EmberVent", "Fence", "FenceCorner", "Bellows", "ForgePipe", "SmokeCloud", "Firebox",
                      })
             {
                 var r = PropKit.Load(name);
@@ -240,6 +246,7 @@ namespace Diorama.EditorTools
             Key(KShards, "PotShards");
             Key(KVent, "EmberVent");
             Key(KSmoke, "SmokeCloud");
+            Key(KFirebox, "Firebox");
             Key(KFence, "Fence");
             Key(KFenceTurned, "Fence", 0f, true);
             // FenceCorner's rails run to local +X (west on the map) and +Z (south); yaw turns them clockwise from above.
@@ -509,7 +516,7 @@ namespace Diorama.EditorTools
                 for (int y = 57; y <= 58; y++) Ground(x, y, IslandMap.Rock);
                 if (x >= DoorXY.x && x <= DoorXY.x + 2) continue;
                 Ground(x, 56, IslandMap.Grass);
-                Prop(x, 56, (x * 7 + 3) % 5 < 2 ? KCliffB : KCliff);
+                Prop(x, 56, x == FireboxXY.x ? KFirebox : (x * 7 + 3) % 5 < 2 ? KCliffB : KCliff);
             }
             Ground(DoorXY.x, DoorXY.y, IslandMap.Grass);
             Prop(DoorXY, KDoor);
@@ -519,6 +526,7 @@ namespace Diorama.EditorTools
             Prop(BellowsXY, KBellows);
             Prop(PipeXY, KPipe);
             foreach (var (x, y) in new[] { (14, 52), (26, 50), (12, 49) }) Prop(x, y, KVent);
+            Prop(ForgeVentXY, KVent); // step 10f: the ember's vent
         }
 
         static void Ruins()
@@ -747,7 +755,7 @@ namespace Diorama.EditorTools
                 KWood => "Woodpile", KLanternPost => "LanternPost", KStoneLantern => "StoneLantern", KBush => "BerryBush",
                 KLog => "FallenLog", KSign => "Signpost", KLeaves => "LeafPile", KCliff or KCliffB => "CliffWall",
                 KDoor => "ForgeDoor", KBrazier => "Brazier", KRuin => "RuinedKiln", KShards => "PotShards", KVent => "EmberVent",
-                KBellows => "Bellows", KPipe => "ForgePipe", KSmoke => "SmokeCloud",
+                KBellows => "Bellows", KPipe => "ForgePipe", KSmoke => "SmokeCloud", KFirebox => "Firebox",
                 KFence or KFenceTurned => "Fence", KCornerWS or KCornerNW or KCornerEN or KCornerSE => "FenceCorner",
                 _ => null,
             };

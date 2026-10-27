@@ -9,7 +9,7 @@ namespace Diorama.Tests
     /// <summary>
     /// Step 10f: Cinderwood's hand moments, fed synthetic hand poses: cupping the village flame (two hands, one hand
     /// curled round it, hands that don't cup); the hollow's lantern chain timing; the smoke blocking the trail and the
-    /// map connecting once it's gone.
+    /// map connecting once it's gone; carrying the forge's ember palm-up and tipping it in.
     /// </summary>
     public class Step10fTests
     {
@@ -193,6 +193,63 @@ namespace Diorama.Tests
             {
                 map.ClearRuntimeChanges();
             }
+        }
+
+        // ---- C: ember in your palm ----
+
+        static EmberCarry.Hand Palm(float up, bool nearVent = false, bool overFirebox = false, bool pinching = false, bool pinchStarted = false, bool atEmber = false) =>
+            new EmberCarry.Hand { tracked = true, up = up, nearVent = nearVent, overFirebox = overFirebox, pinching = pinching, pinchStarted = pinchStarted, atEmber = atEmber };
+
+        static EmberState Hold(EmberCarry c, float seconds, EmberCarry.Hand left, EmberCarry.Hand right)
+        {
+            var hands = new[] { left, right };
+            for (float t = 0f; t < seconds; t += 1f / 72f) c.Feed(1f / 72f, hands);
+            return c.State;
+        }
+
+        [Test]
+        public void Ember_PalmUpBesideTheVent_HopsOn_StaysWhileUp_TippedOverTheFirebox_GoesIn()
+        {
+            var c = new EmberCarry();
+            Assert.AreEqual(EmberState.InVent, Hold(c, 0.2f, default, Palm(0.95f, nearVent: true)), "0.2 s is not enough");
+            Assert.AreEqual(EmberState.OnPalm, Hold(c, 0.3f, default, Palm(0.95f, nearVent: true)));
+            Assert.AreEqual(1, c.Holder, "on the right palm");
+            Assert.AreEqual(EmberState.OnPalm, Hold(c, 2f, default, Palm(0.5f)), "tilted but still roughly up: carried");
+            Assert.AreEqual(EmberState.OnPalm, Hold(c, 0.5f, default, Palm(0.9f, overFirebox: true)), "over the firebox palm up: still on the palm");
+            Assert.AreEqual(EmberState.In, Hold(c, 1f / 72f, default, Palm(-0.8f, overFirebox: true)), "turned over above the firebox: in");
+        }
+
+        [Test]
+        public void Ember_TippedElsewhere_OrHandLost_FallsBack_PalmDownBesideTheVent_DoesNotLift()
+        {
+            var c = new EmberCarry();
+            Assert.AreEqual(EmberState.InVent, Hold(c, 1f, Palm(-0.9f, nearVent: true), default), "palm down beside it: no");
+            Hold(c, 0.5f, Palm(0.9f, nearVent: true), default);
+            Assert.AreEqual(EmberState.OnPalm, c.State);
+            Assert.AreEqual(EmberState.Falling, Hold(c, 1f / 72f, Palm(-0.2f), default), "turned over away from the firebox: it falls");
+            c.Back();
+            Assert.AreEqual(EmberState.InVent, c.State);
+            Hold(c, 0.5f, Palm(0.9f, nearVent: true), default);
+            Assert.AreEqual(EmberState.Falling, Hold(c, 1f / 72f, default, default), "tracking lost: it falls");
+        }
+
+        [Test]
+        public void Ember_Pinched_IsCarriedWhileThePinchHolds_LetGoOverTheFireboxGoesIn_LookPinchFlies()
+        {
+            var c = new EmberCarry();
+            Hold(c, 1f / 72f, Palm(-0.5f, pinching: true, pinchStarted: true, atEmber: true), default);
+            Assert.AreEqual(EmberState.OnPalm, c.State);
+            Assert.IsTrue(c.Pinched);
+            Assert.AreEqual(EmberState.OnPalm, Hold(c, 1f, Palm(-0.5f, pinching: true), default), "pinched: the palm can face any way");
+            Assert.AreEqual(EmberState.In, Hold(c, 1f / 72f, Palm(-0.5f, overFirebox: true), default), "pinch opened over the firebox: in");
+
+            var look = new EmberCarry();
+            look.Hover();
+            Assert.AreEqual(EmberState.Hovering, look.State);
+            look.Fly();
+            Assert.AreEqual(EmberState.Flying, look.State);
+            look.Arrive();
+            Assert.AreEqual(EmberState.In, look.State);
         }
     }
 }

@@ -141,11 +141,11 @@ MonoBehaviour:
 
     ............................................................
 
-    ..........cCccCcCccd..ccCcCccCc................e...r........
+    ..........cCccCcCccd..ccmcCccCc................e...r........
 
     ..................u..iuB..........................x.........
 
-    .......................................................x....
+    ..........................e............................x....
 
     ...............................................r..e.........
 
@@ -341,6 +341,10 @@ MonoBehaviour:
     yaw: 0
   - key: q
     recipe: {fileID: 11400000, guid: 8011fa5b8621e244bb7ae74db9c428bb, type: 2}
+    turned: 0
+    yaw: 0
+  - key: m
+    recipe: {fileID: 11400000, guid: 6df2a15a5054c724e8633ba7f3bf2876, type: 2}
     turned: 0
     yaw: 0
   - key: '-'
@@ -574,7 +578,7 @@ MonoBehaviour:
     line: cinder.ruins.first
     radius: 5
   - name: hollow
-    tile: {x: 29, y: 25}
+    tile: {x: 28, y: 27}
     line: 
     radius: 0
   - name: field

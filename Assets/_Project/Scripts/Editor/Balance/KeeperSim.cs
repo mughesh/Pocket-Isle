@@ -222,7 +222,9 @@ namespace Diorama.EditorTools
             return battles;
         }
 
-        internal static Vector2Int Mark(WorldMap map, string name) => map.TryGetLandmark(name, out var t) ? t : map.startTile;
+        // Step 10f: the nearest walkable tile (the springs landmark sits in a pool, the temple's on the door: the path search
+        // could never reach them, so the trail estimate skipped the plaza -> springs -> log legs).
+        internal static Vector2Int Mark(WorldMap map, string name) => map.TryGetLandmark(name, out var t) ? GameState.NearestWalkable(map, t) : map.startTile;
 
         static int GrassOn(WorldMap map, List<Vector2Int> path)
         {

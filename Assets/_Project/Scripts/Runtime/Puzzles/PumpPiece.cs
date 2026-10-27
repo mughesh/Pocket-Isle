@@ -45,6 +45,16 @@ namespace Diorama
         public event Action<PumpPiece, int> Stroked;
         /// <summary>Heat cooled away one stroke (strokes left).</summary>
         public event Action<PumpPiece, int> Cooled;
+        /// <summary>Step 10f: a stroke while <see cref="Blocked"/> (it pumps, nothing comes of it).</summary>
+        public event Action<PumpPiece> BlockedStroke;
+
+        /// <summary>
+        /// Step 10f: the pad still moves and strokes still register, but they don't count (Cinderwood's bellows while the
+        /// forge's firebox is cold, <see cref="ForgeEmberPiece"/>). Its lesson waits until it's free. Runtime only.
+        /// </summary>
+        [NonSerialized] public bool Blocked;
+
+        protected override bool Available => !Blocked;
 
         /// <summary>0 = pad up at rest, 1 = pushed all the way down.</summary>
         public float Travel { get; private set; }
@@ -103,8 +113,18 @@ namespace Diorama
                 else _gazed = false;
             }
             if (_hand >= 0) IslandHandle.MarkHandHeld(_hand == 0);
-            if (_strokes.Feed(Travel)) OnStroke();
-            if (!IsSolved && _strokes.Tick(Time.deltaTime))
+            if (Blocked)
+            {
+                // Pumped while blocked: the pad goes down and up, the stroke is only reported.
+                if (_strokes.Feed(Travel))
+                {
+                    _strokes.Restore(_strokes.Strokes - 1);
+                    Debug.Log($"[PumpPiece] {id}: a stroke while blocked (nothing happens).");
+                    BlockedStroke?.Invoke(this);
+                }
+            }
+            else if (_strokes.Feed(Travel)) OnStroke();
+            if (!IsSolved && !Blocked && _strokes.Tick(Time.deltaTime))
             {
                 SetProgress(_strokes.Strokes / (float)_strokes.needed);
                 Debug.Log($"[PumpPiece] {id}: cooled to {_strokes.Strokes} stroke(s).");

@@ -1327,6 +1327,7 @@ Transform:
   m_Children:
   - {fileID: 694551495}
   - {fileID: 1066025592}
+  - {fileID: 1605616301}
   m_Father: {fileID: 1553131432}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &367221214
@@ -3520,6 +3521,7 @@ MonoBehaviour:
   - cinder.brazier.two
   - cinder.brazier.three
   openLine: cinder.forge.open
+  coldLine: cw.forge.cold
   volume: 0.7
 --- !u!114 &1127440542
 MonoBehaviour:
@@ -4911,6 +4913,84 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1542799535}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1605616300
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1605616301}
+  - component: {fileID: 1605616302}
+  m_Layer: 0
+  m_Name: Forge Ember
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1605616301
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1605616300}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 359768277}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1605616302
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1605616300}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14b97a4d027c99442b3cf4f3aac72379, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.ForgeEmberPiece
+  id: cw.ember
+  map: {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
+  island: {fileID: 270959109}
+  window: {fileID: 270959113}
+  explorer: {fileID: 374318554}
+  grabGuard: {fileID: 270959111}
+  ghosts: {fileID: 1421177268}
+  fx: {fileID: 1078587927}
+  reach: 4
+  lessonLine: cw.ember
+  ghostClip: palm_carry
+  ghostScale: 1
+  lessonChip: Palm up!
+  vent: {x: 26, y: 5}
+  firebox: {x: 24, y: 3}
+  bellows: {fileID: 1127440542}
+  emberRecipe: {fileID: 11400000, guid: 9795bdddd41984243949039c59c11847, type: 2}
+  emberSize: 0.34
+  ventHeight: 0.08
+  mouthHeight: 0.26
+  mouthFront: 0.45
+  pickRadius: 0.075
+  pinchRadius: 0.03
+  fireboxRadius: 0.08
+  fireboxAbove: 0.18
+  pickUp: 0.6
+  keepUp: 0.2
+  warmSlot: 7
+  forgeCentre: {x: 20, y: 6}
+  forgeRadius: 9
+  forgeEdge: 1.5
+  roarSeconds: 2.5
+  doneLine: cw.ember.done
+  volume: 0.7
 --- !u!1 &1736066349
 GameObject:
   m_ObjectHideFlags: 0

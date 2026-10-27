@@ -9,7 +9,8 @@ namespace Diorama.EditorTools
     /// <summary>
     /// Step 10f: Cinderwood's hand moments. Writes and bakes their props, rewrites the Cinderwood map (B: the smoky
     /// hollow, same seed) and wires under "Hand Puzzles/Cinderwood": A, cup the village flame (FlameCupPiece on the kiln
-    /// village's Hearth Shrine); B, the hollow's lanterns and smoke (LanternHollowPiece). Safe to re-run.
+    /// village's Hearth Shrine); B, the hollow's lanterns and smoke (LanternHollowPiece); C, the ember for the forge's
+    /// firebox (ForgeEmberPiece, which keeps the 9b bellows blocked until it's in). Safe to re-run.
     /// </summary>
     public static class Step10fSetup
     {
@@ -17,7 +18,8 @@ namespace Diorama.EditorTools
         const string RootName = "Hand Puzzles";
 
         // WarmSpots slots (Cinderwood): the village, the six hollow lanterns, the forge.
-        public const int VillageSlot = 0, FirstLanternSlot = 1;
+        public const int VillageSlot = 0, FirstLanternSlot = 1, ForgeSlot = 7;
+        public const string EmberId = "cw.ember";
         public const string HollowId = "cw.hollow";
 
         public const string FlameId = "cw.flame";
@@ -51,6 +53,7 @@ namespace Diorama.EditorTools
             var root = Root();
             Flame(root, map, log);
             Hollow(root, map, log);
+            Ember(root, map, log);
             var tour = Object.FindFirstObjectByType<PerfTour>(FindObjectsInactive.Include);
             if (tour != null)
             {
@@ -164,6 +167,36 @@ namespace Diorama.EditorTools
                        $"(two hands {cup.twoHandSeconds} s, one hand {cup.oneHandSeconds} s, look + pinch {cup.lookSeconds} s), warmth {cup.villageRadius} tiles round " +
                        $"c{cup.villageCentre.x} r{cup.villageCentre.y}; lesson cw.flame + ghost cup_hands" +
                        Baked(("HearthShrineCold", cup.coldShrine), ("ShrineWisp", cup.wisp)));
+        }
+
+        // ---- C: ember in your palm ----
+
+        static void Ember(Transform root, WorldMap map, StringBuilder log)
+        {
+            PumpPiece bellows = null;
+            foreach (var p in Object.FindObjectsByType<PumpPiece>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                if (p.id == GameState.BellowsId) bellows = p;
+            var ember = Child<ForgeEmberPiece>(root, "Forge Ember");
+            Common(ember, map);
+            ember.id = EmberId;
+            ember.reach = 4;
+            ember.lessonLine = "cw.ember";
+            ember.lessonChip = "Palm up!";
+            ember.ghostClip = "palm_carry";
+            ember.ghostScale = 1f;
+            ember.vent = CinderwoodTools.Tile(CinderwoodTools.ForgeVentXY);
+            ember.firebox = CinderwoodTools.Tile(CinderwoodTools.FireboxXY);
+            ember.bellows = bellows;
+            ember.emberRecipe = PropKit.Load("Ember");
+            ember.emberSize = 0.34f;
+            ember.warmSlot = ForgeSlot;
+            ember.forgeCentre = new Vector2(CinderwoodTools.TempleXY.x, CinderwoodTools.Size - 1 - CinderwoodTools.TempleXY.y);
+            ember.forgeRadius = 9f;
+            EditorUtility.SetDirty(ember);
+            log.Append($"\n  'Forge Ember' {Wired(ember)}: vent c{ember.vent.x} r{ember.vent.y}, firebox c{ember.firebox.x} r{ember.firebox.y}, " +
+                       $"palm up within {ember.pickRadius * 100f:0.#} cm for {0.35f} s, tip over within {ember.fireboxRadius * 100f:0} cm of the mouth; " +
+                       $"bellows {(bellows != null ? "blocked until it's in" : "MISSING (Set Up MR_Main (9b puzzles))")}; warmth {ember.forgeRadius} tiles; lesson cw.ember + ghost palm_carry" +
+                       Baked(("Ember", ember.emberRecipe), ("Firebox", PropKit.Load("Firebox"))));
         }
 
         // ---- B: the smoky hollow ----

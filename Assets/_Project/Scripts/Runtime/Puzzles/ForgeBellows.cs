@@ -13,6 +13,8 @@ namespace Diorama
     /// says <see cref="openLine"/> and the door tiles open (saved). Walking onto them goes into the Forge Hall
     /// (<see cref="hall"/>); coming out lands in front of the door facing away.
     /// The island doesn't draw the map's bellows, braziers and door: this draws them (<see cref="PropView"/>).
+    /// Step 10f: while the firebox is cold (<see cref="ForgeEmberPiece"/>, <see cref="PumpPiece.Blocked"/>) a pump only
+    /// gives a weak grey puff and the Spirit's <see cref="coldLine"/>.
     /// </summary>
     public class ForgeBellows : MonoBehaviour
     {
@@ -64,6 +66,8 @@ namespace Diorama
         [Header("Lines")]
         public string[] brazierLines = { "cinder.brazier.one", "cinder.brazier.two", "cinder.brazier.three" };
         public string openLine = "cinder.forge.open";
+        [Tooltip("Step 10f: pumped while the firebox is cold (said at most every few seconds).")]
+        public string coldLine = "cw.forge.cold";
         [Range(0f, 1f)] public float volume = 0.7f;
 
         PropView _body, _frame, _leaf;
@@ -73,6 +77,7 @@ namespace Diorama
         float _doorHeat, _sink;
         bool _open, _opening;
         bool _warnedHall;
+        float _coldSaidAt = -99f;
 
         WorldMap Map => pump != null ? pump.map : null;
         int PerBrazier => Mathf.Max(1, pump.checkpoint);
@@ -95,6 +100,7 @@ namespace Diorama
             for (int i = 0; i < braziers.Length; i++) _braziers[i] = new PropView($"Forge Brazier {i}", island, brazierCold);
             pump.Stroked += OnStroked;
             pump.Cooled += OnCooled;
+            pump.BlockedStroke += OnBlockedStroke;
             if (explorer != null) explorer.OnStep += OnStep;
             PuzzleState.Restored += Apply;
             Apply();
@@ -106,6 +112,7 @@ namespace Diorama
             {
                 pump.Stroked -= OnStroked;
                 pump.Cooled -= OnCooled;
+                pump.BlockedStroke -= OnBlockedStroke;
             }
             if (explorer != null) explorer.OnStep -= OnStep;
             PuzzleState.Restored -= Apply;
@@ -175,7 +182,8 @@ namespace Diorama
             else
             {
                 view.SetRecipe(brazierCold);
-                view.restoredSelf = -1f;
+                // Step 10f: the realm's own restoration, so the roaring firebox's warm spot doesn't light a cold brazier.
+                view.restoredSelf = RealmState.Restored;
             }
             view.Place(BrazierTile(i), Lift(i).y, Quaternion.identity, here);
         }
@@ -189,6 +197,19 @@ namespace Diorama
             if (fx != null) fx.Burst(MapWorld(NozzleMap), 8, new Color(0.95f, 0.9f, 0.85f, 0.8f), tile * 0.5f, 0.5f, tile * 0.05f, Vector3.up * tile * 0.3f);
             int target = Mathf.Clamp((strokes - 1) / PerBrazier, 0, braziers.Length - 1);
             StartCoroutine(Pulse(target, strokes));
+        }
+
+        /// <summary>Step 10f: pumped with the firebox cold: a weak grey puff, nothing flows.</summary>
+        void OnBlockedStroke(PumpPiece p)
+        {
+            if (_audio != null) _audio.PlayOneShot(PuzzleSounds.Puff, volume * 0.45f);
+            float tile = TileWorld;
+            if (fx != null) fx.Burst(MapWorld(NozzleMap), 5, new Color(0.55f, 0.53f, 0.52f, 0.6f), tile * 0.25f, 0.5f, tile * 0.04f, Vector3.up * tile * 0.15f);
+            if (!string.IsNullOrEmpty(coldLine) && Time.time - _coldSaidAt > 8f)
+            {
+                _coldSaidAt = Time.time;
+                Dialogue.Say(coldLine);
+            }
         }
 
         void OnCooled(PumpPiece p, int strokes)

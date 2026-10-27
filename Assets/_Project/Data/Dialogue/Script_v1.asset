@@ -908,6 +908,36 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: The smoke's burning away! The path is clear.
+  - id: cw.ember
+    once: 0
+    priority: 2
+    note: lesson at the forge's ember vent, before the bellows; chip "Palm up!"
+    target: puzzle:cw.ember
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Carry an ember to the forge. Gently!
+  - id: cw.forge.cold
+    once: 0
+    priority: 2
+    note: the bellows pumped while the firebox is cold; at most every 8 s
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The forge is stone cold. It needs a spark first.
+  - id: cw.ember.done
+    once: 1
+    priority: 2
+    note: 'the ember tipped into the firebox: it roars'
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: It's roaring! Now the bellows can blow.
   - id: gate.wind.first
     once: 1
     priority: 2
