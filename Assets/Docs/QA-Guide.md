@@ -37,14 +37,29 @@ Each tab is split into groups under gold headings.
 | **Travel** (was Go to) | Teleports the explorer. Hub: start, shrine, statue, first grass, the three gates. Cinderwood (CW): arrival, village, shrine, springs, ruins, log, forge door. **Forge Hall** goes inside (the Keeper meets you there). Not during a battle. |
 | **Team** (was Party) | Heal all. Lead level -1 / +1 / +5. All to Lv 5 / 10 / 15. **Team of 3** at Lv 8 or 10 (your starter + Steambara, the Water Isling, + a fire Isling; the others go to storage). Lv 8 is the Keeper fight as tuned (about 2 in 3 wins), Lv 10 is easy. Clear storage. Species picker: `< Species >`, `Lv -1 / +1`, **Add to party**. |
 | **Battle** (was Encounter) | Same species picker, then **Fight now** for a wild battle on the spot. **One-hit KO** (your hits knock anything out). **Invincible** (your Islings take no damage). Wild battles on / off. Rare x10. |
-| **Story** | Skip / reset the tutorial. **Replay opening** (a new game). Cinderwood restored on / off. Log placed / fallen. Forge + door lit / cold. Keeper calm / frightened. Fire shard held / none. Shard in the statue on / off. Reset all story. *Story buttons save, change the save and reload the game: wait 2-3 seconds.* |
+| **Story** | **Finale: play from wake / from the goodbye** (all three shards put in the statue, the finale not done; it plays on the hub at once). Skip / reset the tutorial. **Replay opening** (a new game). Cinderwood restored on / off. Log placed / fallen. Forge + door lit / cold. Keeper calm / frightened. Fire shard held / none. Shard in the statue on / off. Reset all story. *Story buttons save, change the save and reload the game: wait 2-3 seconds.* |
 | **Save** | **Save 1-3** keep a snapshot; **Load 1-3** go back to one (reloads). **Load auto** = the snapshot taken automatically before the last new game. **New game** (in the slot you are playing). Show save path. **Quick: start / at gift / at gate / at temple** jump into the Quick Journey slot: the opening, the hub right before the gift, the fire gate after the gift, the forge door with the log placed. The line at the bottom shows which slot you play and the Quick Journey timer. |
 | **Tools** | FPS counter. Debug readouts (lines and numbers for us, off at start). Time x1 / x2 / x4. Walk x2. Debug labels. Record ghost (the next missing ghost-hand clip, for Mugesh). **Report bug**. (Close is now the X.) |
 
 Cheats (one-hit KO, invincible, wild battles off, rare x10, time and walk speed) last until the app closes. They are
 never saved.
 
-## 4. What's new in this build (step 12c, Oct 28)
+## 4. What's new in this build (step 13, Oct 28: the finale)
+
+- **The statue talks:** each shard you put in makes it whisper a memory (a gold-white bubble with no tail), and it
+  wakes a little: eyes glow after one, it breathes after two.
+- **The finale** starts when the third shard goes in (or Dev > Story > **Finale: play from wake**). The statue wakes
+  as the **Heart of the World**. When the Spirit asks "Will you take me?": **hold one open hand out, palm up**. The
+  Spirit lands on it. **Lift your hand to the Heart's forehead** (the round gold setting): it floats in. (Or look at the
+  Heart and pinch: it goes by itself.) Then: the Heart's eyes open, the hub glows, your Islings come out one by one
+  with cards, the credits, and the Spirit comes back as a small Spark. About 3 minutes.
+- **Finale: from the goodbye** skips straight to the palm part.
+- **After the finale:** poke the Heart to see how many Islings you've met in each realm. Poke a calm Keeper in its
+  hall for a friendly match ("Spar?").
+- Things to watch: does the Spirit land on your palm easily? Does the forehead feel reachable? Is the Heart's look
+  majestic and kind? Is anything hard to read (cards, credits)?
+
+## Earlier (step 12c, Oct 28)
 
 - Walking is a little faster (same speed as look + pinch). Footprints now point the way you walk.
 - The gold trail follows the roads.

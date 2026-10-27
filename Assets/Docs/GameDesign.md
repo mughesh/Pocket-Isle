@@ -557,9 +557,46 @@ before the action is done, pinch never taught):**
   the explorer turns to face the wild Isling; the Spirit waits beside the near rim on the non-dominant side; its bubble
   never sinks into the island.
 
-## Finale
-- All 3 shards in the statue. It wakes: the **Heart of the World**, a huge ancient creature.
-- Final battle with your team. On victory the shards rejoin and the world is whole.
+## Finale (step 13: the Heart wakes; no final battle)
+Everything happens on the hub at the game's normal scale. Modelled on how creature games end (a hall of fame, credits,
+the world stays open), with our own heart: the Lantern Spirit was a piece of the Heart all along, and the player gives
+it back with their own hand.
+- **The statue means something from the first shard.** Each shard that locks in makes it whisper a memory in the
+  Heart's voice (`heart.dream.fire / wind / water`: its own bubble from the statue's head, no tail, soft gold-white,
+  larger, letters fading in, no typing ticks), and the Spirit answers (`spirit.dream.1`: "Did the statue just...
+  speak?", `.2`: "That voice... why does it feel like mine?"). It wakes a little with each: one = its closed eyes glow
+  faintly, two = it breathes and its moss sways, three = the finale.
+- **The Heart of the World** = the statue come alive (a shrine guardian, the sitting temple lion-dog kind, our own):
+  on its haunches on the statue's plinth, at most ~1.3x the statue's height; mossy grey-green stone with gold veins
+  from a core in its chest that pulse like a heartbeat; a mane of carved stone curls (three rings) with moss and tiny
+  flowers; a curled tail ending in a ribbon of wind; a crown of the three elements (ember crest, lotus, cloud-wing
+  plumes); cloud-wings that unfold; an empty round setting in its forehead for the Spirit; kind heavy-lidded eyes that
+  open gold; a collar with the three shard gems. Four rigid props (body, head closed / open, a mirrored wing): 8 draws,
+  24k tris.
+- **The finale** (~2.5-3 min; walking, wild battles and the menu's Title wait):
+  1. Wake: the sockets flare, light runs up the statue, stone flakes and moss fall, a burst of dust and gold, it is the
+     Heart; it breathes and lifts its head: "...little light. You found your way home."
+  2. The Spirit floats before its empty forehead: "I think... I'm a piece of it. Its light." "I have to go back. Will
+     you take me?" (chip: Hold out your hand).
+  3. **The goodbye in your palm:** an open hand palm up and the Spirit lands on it, glowing (chip: Lift it to the
+     Heart). Within ~6 cm of the forehead it floats off into the setting with a soft chime ("Thank you, big one. For
+     everything."). Look + pinch the Heart = it goes by itself. 30 s with nothing: "It's okay. Whenever you're ready."
+     It never forces it.
+  4. Its eyes open gold, the wings unfold, the crown blazes; the hub answers (the gates bloom with their element, the
+     grass waves, warm motes rise into the room, a golden ring of light under the island): "Guardian. You carried the
+     world in your hands."
+  5. **Hall of Fame:** "And these are the friends who carried it with you." The party comes out of the rim pods onto
+     the path, each with a stone card (name · Lv · met in <realm>); two Lodge Islings wander out; everyone cheers. A
+     Hall of Fame record (party + date) goes into the save.
+  6. **Credits:** seven stone tablets rise one at a time over the island's far side.
+  7. **The spark returns:** a tiny spark slips from the Heart's eye into the explorer's lantern and hops out as the guide,
+     the Spark (the Spirit's look, smaller and warmer, no acorn cap); the Spirit's light stays in the Heart's forehead:
+     "...hello again. I'll always be in your light." Free play.
+- Quitting in the middle restarts at the goodbye. Dev panel Story > Finale: play from wake / from the goodbye.
+- **Post-game:** poke the Heart: the Isling collection per realm (caught of each realm's roster incl. evolutions) and a
+  warm line. The Spark hints at realms with Islings still to meet. A completed roster: its gate sparkles gold and the
+  matching crown piece wears a halo. **Keeper rematch:** poke a calm Keeper in its hall: Spar? / Not now; a friendly
+  match 5 levels over the last fight (no fury, a softer shield, XP, no shard); win or lose, it bows.
 
 ## Length and scope
 - Full playthrough 1–2 hours. Judges play ~10 minutes, so the hub + first region must be excellent.

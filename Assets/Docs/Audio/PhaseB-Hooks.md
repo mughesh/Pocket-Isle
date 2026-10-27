@@ -284,3 +284,11 @@ New interactions since the audio branch was cut that still play a procedural pla
 | Lilymere ambience | reuses `amb.pond` | `amb.lilymere` / `amb.lilymere.restored` (water lapping, frogs, birds) |
 | Spirit text typing (`DialogueBubble.Blip`, Oct 27 note) | a blip every 3 typed characters | too often, too many beats, annoying: fewer, softer ticks, or one soft chime per line |
 | The log's drop (`FallenLog`, Oct 27 note) | PuzzleSounds.Thud | weak, almost silent: a solid wooden `log.drop` thud |
+| Step 13 finale: the statue cracks while it wakes (`FinaleDirector.Wake`) | `statue.socket` | `heart.crack`: deep stone cracking, grit falling |
+| Step 13: the Heart's heartbeat (wake, then the veins' pulse) | `statue.socket` once | `heart.beat`: a slow warm lub-dub (a loop would suit) |
+| Step 13: the Heart's wings unfold | `statue.socket` | `heart.wings`: a big soft feathery-stone unfurl |
+| Step 13: the Spirit lands on the palm / settles into the forehead / the spark leaves the eye | `ui.saved` / `statue.socket` | `spark.chime`: a small warm glassy chime |
+| Step 13: the gates bloom, the hub answers | `jingle.shard` | `gates.bloom`: a rising shimmer (fire crackle + water sparkle + wind whoosh) |
+| Step 13: each credits tablet rises | `statue.socket` | `credits.tablet`: a soft stone slide |
+| Step 13: the finale's music | silent (`music.finale` has no clips) | `music.finale`: a warm swelling theme, about 3 minutes |
+| Step 13: the Heart's voice | `voice.heart` blips are off for the Heart (no typing ticks) | a soft breathy hum when a whisper starts, if anything |
