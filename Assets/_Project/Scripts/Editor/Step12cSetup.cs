@@ -101,6 +101,12 @@ namespace Diorama.EditorTools
                     AssetDatabase.CreateAsset(mat, WaterSheetPath);
                 }
             }
+            if (mat != null)
+            {
+                // Oct 28: "very little water": less see-through.
+                mat.SetFloat("_Alpha", 0.86f);
+                EditorUtility.SetDirty(mat);
+            }
             foreach (var scoop in Object.FindObjectsByType<ScoopPour>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
                 Undo.RecordObject(scoop, "Step 12c");
@@ -108,7 +114,14 @@ namespace Diorama.EditorTools
                 scoop.frozenRecipe = PropKit.Load("BowlFallFrozen");
                 scoop.bowl = scoop.waterfallCenter;
                 scoop.waterSheetMaterial = mat;
-                scoop.basinRadius = 1f;
+                // Oct 28 (Mugesh: two hands were bad, one hand kind of worked): one cupped hand, a bigger pool in the
+                // palm, an easier tip and a forgiving pour zone (the bowl, the fall and its pool).
+                scoop.twoHands = false;
+                scoop.basinRadius = 1.8f;
+                scoop.basinAbove = 0.35f;
+                scoop.tipUp = -0.25f;
+                scoop.palmPool = 0.036f;
+                scoop.sheetDome = 0.012f;
                 scoop.ghostClip = "cup_carry";
                 log.Append(NL + $"  {scoop.id}: pours into the cliff bowl at c{scoop.bowl.x:0.#} r{scoop.bowl.y:0.#} ({scoop.bowlRim} tiles up), " +
                            $"fall {(scoop.frozenRecipe != null && scoop.runningRecipe != null ? "frozen + running" : "MISSING")}, water sheet {(mat != null ? "on" : "MISSING")}, ghost cup_carry");

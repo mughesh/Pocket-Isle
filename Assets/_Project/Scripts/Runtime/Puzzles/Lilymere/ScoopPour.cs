@@ -59,6 +59,8 @@ namespace Diorama
         public float ballSize = 0.03f, ballLift = 0.012f;
 
         [Header("Two hands (step 11d)")]
+        [Tooltip("Oct 28 (Mugesh): two cupped hands were hard (little water, pours missed); off = one cupped hand only, and a one-hand ghost.")]
+        public bool twoHands;
         [Tooltip("Both palms up, side by side within this (metres, real hands): one bigger scoop between them.")]
         public float pairGap = 0.08f;
         [Tooltip("While carrying, the hands may drift this much further apart (x Pair Gap).")]
@@ -159,7 +161,7 @@ namespace Diorama
             return false;
         }
 
-        protected override bool GhostBothHands => true;
+        protected override bool GhostBothHands => twoHands;
         protected override float GhostSpread => pairGap * 0.8f;
 
         protected override void Start()
@@ -277,7 +279,7 @@ namespace Diorama
             // Both hands cupped together, side by side: one scoop between them (held, the pair may drift a bit apart).
             var both = new WaterScoop.Hand();
             float gap = pairGap * (_scoop.Holder == WaterScoop.Both ? pairSlack : 1f);
-            if (_measured[0].tracked && _measured[1].tracked && !_measured[0].busy && !_measured[1].busy &&
+            if (twoHands && _measured[0].tracked && _measured[1].tracked && !_measured[0].busy && !_measured[1].busy &&
                 WaterScoop.Cupped(_palmPos[0], _palmNormal[0], _palmPos[1], _palmNormal[1], island.transform.up, gap, out var mid, out float up,
                     _scoop.Holder == WaterScoop.Both ? -2f : cupUp * 0.8f))
             {
@@ -300,7 +302,15 @@ namespace Diorama
             // The water sits 0.1 tiles under the cap (the island's water drop); metres in the room.
             x.aboveWater = (m.y + 0.1f) * tile;
             float above = (m.y - PourBase) * tile;
-            x.overBasin = (new Vector2(m.x, m.z) - PourSpot).magnitude <= basinRadius && above >= -0.01f * s && above <= basinAbove * s;
+            var at = new Vector2(m.x, m.z);
+            if (UsesBowl)
+            {
+                // Oct 28: forgiving: anywhere over the cliff bowl, the fall or its pool, from the ground up to a hand's
+                // height over the rim, counts as pouring onto the falls (the stream still lands in the bowl).
+                bool near = (at - bowl).magnitude <= basinRadius || (at - waterfallCenter).magnitude <= basinRadius || (at - basin).magnitude <= basinRadius;
+                x.overBasin = near && m.y >= 0f && above <= basinAbove * s;
+            }
+            else x.overBasin = (at - PourSpot).magnitude <= basinRadius && above >= -0.01f * s && above <= basinAbove * s;
         }
 
         void Changed(ScoopState from, ScoopState to)

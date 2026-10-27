@@ -5801,21 +5801,22 @@ MonoBehaviour:
   bowlRim: 2.5
   bowlWaterScale: 0.52
   waterSheetMaterial: {fileID: 2100000, guid: cb028ab75689499449db79890aa9ac31, type: 2}
-  palmPool: 0.026
+  palmPool: 0.036
   pairWide: 0.034
   pairPast: 0.028
-  sheetDome: 0.008
+  sheetDome: 0.012
   cupUp: 0.55
   keepUp: 0.1
-  tipUp: -0.35
+  tipUp: -0.25
   dipDepth: 0.01
   liftHeight: 0.02
   scoopReach: 14
-  basinRadius: 1
-  basinAbove: 0.3
+  basinRadius: 1.8
+  basinAbove: 0.35
   poursNeeded: 2
   ballSize: 0.03
   ballLift: 0.012
+  twoHands: 0
   pairGap: 0.08
   pairSlack: 1.6
   pairBall: 1.8
