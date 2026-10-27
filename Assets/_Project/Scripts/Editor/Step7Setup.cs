@@ -15,7 +15,7 @@ namespace Diorama.EditorTools
         const string ProgressionPath = "Assets/_Project/Data/Battle/Progression.asset";
         const string SpeciesDir = "Assets/_Project/Data/Creatures/Species";
 
-        [MenuItem("Tools/Pocket Isle/Set Up MR_Main (7 progression)", priority = 44)]
+        [MenuItem("Tools/Pocket Isle/Setup/Early (5-8)/Set Up MR_Main (7 progression)", priority = 504)]
         public static void SetUp()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)

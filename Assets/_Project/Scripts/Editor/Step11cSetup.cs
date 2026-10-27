@@ -15,7 +15,7 @@ namespace Diorama.EditorTools
     /// </summary>
     public static class Step11cSetup
     {
-        [MenuItem("Tools/Pocket Isle/Set Up Water Roster (11c)", priority = 71)]
+        [MenuItem("Tools/Pocket Isle/Setup/Lilymere (11)/Set Up Water Roster (11c)", priority = 802)]
         public static void Roster()
         {
             Marimoss();
@@ -76,7 +76,7 @@ namespace Diorama.EditorTools
         const string TidemotherPath = "Assets/_Project/Data/Creatures/Species/Tidemother.asset";
 
         /// <summary>Everything for 11c B: Tidemother's model, the temple hall and the Keeper, the water shard and socket, the door.</summary>
-        [MenuItem("Tools/Pocket Isle/Set Up MR_Main (11c Tidemother)", priority = 72)]
+        [MenuItem("Tools/Pocket Isle/Setup/Lilymere (11)/Set Up MR_Main (11c Tidemother)", priority = 803)]
         public static void Keeper()
         {
             Tidemother();

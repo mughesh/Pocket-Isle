@@ -15,7 +15,7 @@ namespace Diorama.EditorTools
     /// </summary>
     public static class Step10cSetup
     {
-        [MenuItem("Tools/Pocket Isle/Set Up Wind Roster (10c)", priority = 62)]
+        [MenuItem("Tools/Pocket Isle/Setup/Galewick (10)/Set Up Wind Roster (10c)", priority = 702)]
         public static void All()
         {
             Kitelet();

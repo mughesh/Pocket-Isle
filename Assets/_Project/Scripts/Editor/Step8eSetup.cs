@@ -19,7 +19,7 @@ namespace Diorama.EditorTools
         const float ShellIn = 0.04f, ShellOut = 0.04f, ShellTop = 0.012f, ShellBottom = -0.13f;
         const float MinCorner = 0.03f;
 
-        [MenuItem("Tools/Pocket Isle/Set Up MR_Main (8e hands and modes)", priority = 49)]
+        [MenuItem("Tools/Pocket Isle/Setup/Early (5-8)/Set Up MR_Main (8e hands and modes)", priority = 511)]
         public static void SetUp()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)

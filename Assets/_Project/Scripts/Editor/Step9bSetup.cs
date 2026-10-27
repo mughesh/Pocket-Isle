@@ -21,7 +21,7 @@ namespace Diorama.EditorTools
         /// <summary>The log lies this high on a ledge's rocks (tiles).</summary>
         const float LedgeHeight = 0.18f;
 
-        [MenuItem("Tools/Pocket Isle/Set Up MR_Main (9b puzzles)", priority = 54)]
+        [MenuItem("Tools/Pocket Isle/Setup/Cinderwood + Hub (9, 10f)/Set Up MR_Main (9b puzzles)", priority = 601)]
         public static void SetUp()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)

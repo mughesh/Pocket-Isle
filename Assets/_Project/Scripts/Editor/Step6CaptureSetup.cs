@@ -22,7 +22,7 @@ namespace Diorama.EditorTools
         const string HudPath = "Assets/_Project/Materials/Battle/Hud.mat";
         const float Radius = 0.015f; // glass radius, metres at island scale 1 (a 3 cm pod)
 
-        [MenuItem("Tools/Pocket Isle/Set Up MR_Main (6 capture)", priority = 41)]
+        [MenuItem("Tools/Pocket Isle/Setup/Early (5-8)/Set Up MR_Main (6 capture)", priority = 501)]
         public static void SetUp()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)

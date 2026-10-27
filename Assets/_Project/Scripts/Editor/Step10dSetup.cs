@@ -12,7 +12,7 @@ namespace Diorama.EditorTools
     /// </summary>
     public static class Step10dSetup
     {
-        [MenuItem("Tools/Pocket Isle/Write Galeowl (10d part one)", priority = 63)]
+        [MenuItem("Tools/Pocket Isle/Setup/Galewick (10)/Write Galeowl (10d part one)", priority = 703)]
         public static void Galeowl()
         {
             var s = GaleowlKit.Write();

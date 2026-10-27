@@ -12,7 +12,7 @@ namespace Diorama.EditorTools
     {
         const string ScenePath = "Assets/_Project/Scenes/MR_Main.unity";
 
-        [MenuItem("Tools/Pocket Isle/Set Up MR_Main (6 fixes 2)", priority = 43)]
+        [MenuItem("Tools/Pocket Isle/Setup/Early (5-8)/Set Up MR_Main (6 fixes 2)", priority = 503)]
         public static void SetUp()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)

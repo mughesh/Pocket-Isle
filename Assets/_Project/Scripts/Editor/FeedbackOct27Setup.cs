@@ -16,7 +16,7 @@ namespace Diorama.EditorTools
     {
         const string ScenePath = "Assets/_Project/Scenes/MR_Main.unity";
 
-        [MenuItem("Tools/Pocket Isle/Apply Oct 27 Galewick Feedback", priority = 64)]
+        [MenuItem("Tools/Pocket Isle/Setup/Galewick (10)/Apply Oct 27 Galewick Feedback", priority = 706)]
         public static void All()
         {
             Step10aSetup.PropsOnly();

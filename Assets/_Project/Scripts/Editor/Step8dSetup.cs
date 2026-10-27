@@ -20,7 +20,7 @@ namespace Diorama.EditorTools
         // The base skirt, island-local metres: from the cap's edge down to below the deepest edge column.
         const float SkirtTop = 0f, SkirtBottom = -0.13f;
 
-        [MenuItem("Tools/Pocket Isle/Set Up MR_Main (8d grab and touch)", priority = 48)]
+        [MenuItem("Tools/Pocket Isle/Setup/Early (5-8)/Set Up MR_Main (8d grab and touch)", priority = 510)]
         public static void SetUp()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)

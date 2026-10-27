@@ -22,7 +22,7 @@ namespace Diorama.EditorTools
         static Vector2 Map(float x, float y) => new Vector2(x, Size - 1 - y);
         static Vector2Int MapI(Vector2Int xy) => new Vector2Int(xy.x, Size - 1 - xy.y);
 
-        [MenuItem("Tools/Pocket Isle/Set Up MR_Main (11b Lilymere hands)", priority = 63)]
+        [MenuItem("Tools/Pocket Isle/Setup/Lilymere (11)/Set Up MR_Main (11b Lilymere hands)", priority = 801)]
         public static void SetUp()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)

@@ -14,7 +14,7 @@ namespace Diorama.EditorTools
     {
         const string ScenePath = "Assets/_Project/Scenes/MR_Main.unity";
 
-        [MenuItem("Tools/Pocket Isle/Set Up MR_Main (9e dev panel and fury)")]
+        [MenuItem("Tools/Pocket Isle/Setup/Cinderwood + Hub (9, 10f)/Set Up MR_Main (9e dev panel and fury)", priority = 603)]
         public static void All()
         {
             var log = new StringBuilder("[Step9e] Set up:");

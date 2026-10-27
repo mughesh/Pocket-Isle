@@ -13,7 +13,7 @@ namespace Diorama.EditorTools
     {
         const string ScenePath = "Assets/_Project/Scenes/MR_Main.unity";
 
-        [MenuItem("Tools/Pocket Isle/Set Up MR_Main (8c polish)", priority = 49)]
+        [MenuItem("Tools/Pocket Isle/Setup/Early (5-8)/Set Up MR_Main (8c polish)", priority = 509)]
         public static void SetUp()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)

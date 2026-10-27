@@ -26,7 +26,7 @@ namespace Diorama.EditorTools
         static readonly Color WindColor = new Color(0.86f, 0.95f, 1f);
         static readonly Color HomeColor = new Color(1f, 0.85f, 0.48f);
 
-        [MenuItem("Tools/Pocket Isle/Set Up MR_Main (8 hub)", priority = 47)]
+        [MenuItem("Tools/Pocket Isle/Setup/Early (5-8)/Set Up MR_Main (8 hub)", priority = 507)]
         public static void SetUp()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)

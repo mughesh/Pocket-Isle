@@ -36,7 +36,7 @@ namespace Diorama.EditorTools
 
         // ---- Keeper ----
 
-        [MenuItem("Tools/Pocket Isle/Quick Journey Keeper Sim", priority = 71)]
+        [MenuItem("Tools/Pocket Isle/Quick Journey/Keeper Sim", priority = 901)]
         public static void Keeper()
         {
             var config = Config;
@@ -174,7 +174,7 @@ namespace Diorama.EditorTools
 
         // ---- dry run ----
 
-        [MenuItem("Tools/Pocket Isle/Quick Journey Dry Run", priority = 70)]
+        [MenuItem("Tools/Pocket Isle/Quick Journey/Dry Run", priority = 900)]
         public static void DryRun()
         {
             var config = Config;

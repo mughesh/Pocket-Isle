@@ -26,7 +26,7 @@ namespace Diorama.EditorTools
         /// <summary>The kiln village plaza's middle (x, y), where the flame's warm pulse settles.</summary>
         public static readonly Vector2 VillageXY = new Vector2(15.5f, 32.5f);
 
-        [MenuItem("Tools/Pocket Isle/Set Up MR_Main (10f Cinderwood hands)", priority = 67)]
+        [MenuItem("Tools/Pocket Isle/Setup/Cinderwood + Hub (9, 10f)/Set Up MR_Main (10f Cinderwood hands)", priority = 607)]
         public static void SetUp()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)

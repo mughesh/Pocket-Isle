@@ -23,7 +23,7 @@ namespace Diorama.EditorTools
             ("lm.pads", "Pads"), ("lm.rain", "Lotus"), ("lm.lagoon", "Pours"),
         };
 
-        [MenuItem("Tools/Pocket Isle/Set Up MR_Main (11d Oct 27 notes)", priority = 70)]
+        [MenuItem("Tools/Pocket Isle/Setup/Lilymere (11)/Set Up MR_Main (11d Oct 27 notes)", priority = 804)]
         public static void All()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)

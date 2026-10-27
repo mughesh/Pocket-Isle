@@ -17,7 +17,7 @@ namespace Diorama.EditorTools
         public const string LessonsPath = "Assets/_Project/Data/Onboarding/Onboarding_Main.asset";
         const string GhostMaterialPath = "Assets/_Project/Materials/Onboarding/GhostHand.mat";
 
-        [MenuItem("Tools/Pocket Isle/Set Up MR_Main (8b onboarding)", priority = 48)]
+        [MenuItem("Tools/Pocket Isle/Setup/Early (5-8)/Set Up MR_Main (8b onboarding)", priority = 508)]
         public static void SetUp()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)

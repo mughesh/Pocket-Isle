@@ -41,7 +41,7 @@ namespace Diorama.EditorTools
             Debug.Log(log.ToString());
         }
 
-        [MenuItem("Tools/Pocket Isle/Set Up MR_Main (9c keeper)", priority = 55)]
+        [MenuItem("Tools/Pocket Isle/Setup/Cinderwood + Hub (9, 10f)/Set Up MR_Main (9c keeper)", priority = 602)]
         public static void SetUp()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)

@@ -18,7 +18,7 @@ namespace Diorama.EditorTools
         const string ScenePath = "Assets/_Project/Scenes/MR_Main.unity";
         const string StringMaterialPath = "Assets/_Project/Materials/Props/KiteString.mat";
 
-        [MenuItem("Tools/Pocket Isle/Set Up MR_Main (10b Galewick hands)", priority = 61)]
+        [MenuItem("Tools/Pocket Isle/Setup/Galewick (10)/Set Up MR_Main (10b Galewick hands)", priority = 701)]
         public static void SetUp()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)

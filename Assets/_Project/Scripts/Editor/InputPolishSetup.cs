@@ -14,7 +14,7 @@ namespace Diorama.EditorTools
         const string ScenePath = "Assets/_Project/Scenes/MR_Main.unity";
         const string HudPath = "Assets/_Project/Materials/Battle/Hud.mat";
 
-        [MenuItem("Tools/Pocket Isle/Set Up MR_Main (5d-5e input)", priority = 40)]
+        [MenuItem("Tools/Pocket Isle/Setup/Early (5-8)/Set Up MR_Main (5d-5e input)", priority = 500)]
         public static void SetUpMain()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)

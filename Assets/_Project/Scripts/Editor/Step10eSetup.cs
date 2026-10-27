@@ -14,7 +14,7 @@ namespace Diorama.EditorTools
     {
         const string ScenePath = "Assets/_Project/Scenes/MR_Main.unity";
 
-        [MenuItem("Tools/Pocket Isle/Set Up MR_Main (10e tower hall)", priority = 65)]
+        [MenuItem("Tools/Pocket Isle/Setup/Galewick (10)/Set Up MR_Main (10e tower hall)", priority = 704)]
         public static void Hall()
         {
             if (!Ready()) return;
@@ -67,7 +67,7 @@ namespace Diorama.EditorTools
         const string KiteStringPath = "Assets/_Project/Materials/Props/KiteString.mat";
 
         /// <summary>Everything for 10e: the hall, then Galeowl, the knots, the wind shard and the statue's wind socket.</summary>
-        [MenuItem("Tools/Pocket Isle/Set Up MR_Main (10e Galeowl)", priority = 66)]
+        [MenuItem("Tools/Pocket Isle/Setup/Galewick (10)/Set Up MR_Main (10e Galeowl)", priority = 705)]
         public static void All()
         {
             Hall();

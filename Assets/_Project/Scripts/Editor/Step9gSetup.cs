@@ -15,7 +15,7 @@ namespace Diorama.EditorTools
         const string ScenePath = "Assets/_Project/Scenes/MR_Main.unity";
         const string LogoMaterialPath = "Assets/_Project/Materials/Props/Logo.mat";
 
-        [MenuItem("Tools/Pocket Isle/Set Up MR_Main (9g title, menus, quick)", priority = 60)]
+        [MenuItem("Tools/Pocket Isle/Setup/Cinderwood + Hub (9, 10f)/Set Up MR_Main (9g title, menus, quick)", priority = 604)]
         public static void All()
         {
             var log = new StringBuilder("[Step9g] Set up:");
