@@ -54,9 +54,6 @@ namespace Diorama
         public BattleFx fx;
         public Color sparkleColor = new Color(1f, 0.82f, 0.35f);
 
-        [Header("Chime")]
-        [Range(0f, 1f)] public float chimeVolume = 0.35f;
-
         /// <summary>Lesson event names (anything else in a condition is a <see cref="GameConditions"/> state).</summary>
         public static readonly string[] Events =
         {
@@ -94,7 +91,6 @@ namespace Diorama
         bool _helped, _shown;
         Vector2Int? _goldTile;
         Coroutine _goldPath;
-        AudioSource _audio;
 
         void Awake()
         {
@@ -151,11 +147,6 @@ namespace Diorama
                 if (!string.IsNullOrEmpty(l.ghost) && (l.place == GhostPlace.AtTarget || l.place == GhostPlace.AboveTarget) &&
                     string.IsNullOrEmpty(l.source) && string.IsNullOrEmpty(l.target))
                     Debug.LogWarning($"[Onboarding] Lesson '{l.id}' has a ghost at a target but no source or target: its ghost never shows.", this);
-
-            _audio = gameObject.AddComponent<AudioSource>();
-            _audio.playOnAwake = false;
-            _audio.spatialBlend = 0f;
-            _audio.clip = MakeChime();
         }
 
         // ---- start, resume ----
@@ -386,7 +377,7 @@ namespace Diorama
                 _goldPath = null;
             }
             if (l.goldTileSteps > 0) _goldTile = null;
-            if (done && l.praise && _audio != null && _audio.clip != null) _audio.PlayOneShot(_audio.clip, chimeVolume);
+            if (done && l.praise) GameAudio.Ui(Diorama.Audio.AudioIds.UiLesson);
             if (HandsMissing) SetHandsMissing(false);
             if (_shown) LessonEnded?.Invoke(l, done);
             _shown = false;
@@ -440,6 +431,8 @@ namespace Diorama
         // ---- gold tiles ----
 
         /// <summary>Gold tiles run from the explorer to the lesson's landmark until it gets there.</summary>
+        float _goldSoundAt = -99f;
+
         IEnumerator GoldPath(LessonData l)
         {
             var path = new List<Vector2Int>();
@@ -450,6 +443,12 @@ namespace Diorama
                 if (explorer.CanMove && explorer.Tile != to && ExplorerPath.Find(world, explorer.Tile, to, path, 60))
                 {
                     var from = explorer.Tile;
+                    // A sparkle as a run starts, at most every 4 s (the run repeats every ~1.2 s).
+                    if (path.Count > 0 && Time.time - _goldSoundAt > 4f)
+                    {
+                        _goldSoundAt = Time.time;
+                        GameAudio.At(Diorama.Audio.AudioIds.PathGold, island.transform.TransformPoint(island.TileToLocal(path[0], island.Content.capHeight)));
+                    }
                     foreach (var tile in path)
                     {
                         if (explorer.Tile != from) break;
@@ -505,34 +504,6 @@ namespace Diorama
             if (!_goldTile.HasValue || k < 0.9f || Time.time - _lastFlash < 0.6f) return;
             _lastFlash = Time.time;
             island.FlashTile(_goldTile.Value, 0.45f);
-        }
-
-        // ---- chime ----
-
-        /// <summary>A soft two-note bell (placeholder until the audio step).</summary>
-        static AudioClip MakeChime()
-        {
-            const int rate = 44100;
-            const float seconds = 0.9f;
-            int n = (int)(rate * seconds);
-            var data = new float[n];
-            for (int i = 0; i < n; i++)
-            {
-                float t = i / (float)rate;
-                float a = Note(t, 0f, 1046.5f) + Note(t, 0.11f, 1568f);
-                data[i] = a * 0.4f;
-            }
-            var clip = AudioClip.Create("Lesson Chime", n, 1, rate, false);
-            clip.SetData(data, 0);
-            return clip;
-        }
-
-        static float Note(float t, float start, float hz)
-        {
-            t -= start;
-            if (t < 0f) return 0f;
-            float env = Mathf.Min(1f, t / 0.005f) * Mathf.Exp(-t * 5f);
-            return env * (Mathf.Sin(2f * Mathf.PI * hz * t) + 0.3f * Mathf.Sin(2f * Mathf.PI * hz * 2.01f * t));
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]

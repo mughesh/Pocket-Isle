@@ -147,6 +147,7 @@ namespace Diorama
         void OnRecentered()
         {
             if (_recenter != null) StopCoroutine(_recenter);
+            GameAudio.Ui(Diorama.Audio.AudioIds.IslandRecenter);
             _recenter = StartCoroutine(PlaceWhenSettled());
         }
 

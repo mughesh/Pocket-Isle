@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Diorama.Audio;
 using UnityEngine;
 
 namespace Diorama
@@ -341,6 +342,7 @@ namespace Diorama
         public void Snort()
         {
             if (_smoke == null) return;
+            GameAudio.At(AudioIds.KeeperSnort, transform.position);
             float h = Height;
             Vector3 nose = new Vector3(0f, h * 0.72f, h * 0.42f) - _smoke.transform.localPosition;
             var p = new ParticleSystem.EmitParams { applyShapeToPosition = false };
@@ -404,6 +406,7 @@ namespace Diorama
         void Impact()
         {
             _crackStart = Time.time;
+            GameAudio.At(AudioIds.KeeperStomp, transform.position);
             float h = Height;
             Vector3 feetLocal = Vector3.zero;
             if (_smoke != null)

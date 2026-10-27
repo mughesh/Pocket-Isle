@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Diorama.Audio;
 using UnityEngine;
 
 namespace Diorama
@@ -192,7 +193,7 @@ namespace Diorama
 
         void OnStroked(PumpPiece p, int strokes)
         {
-            if (_audio != null) _audio.PlayOneShot(PuzzleSounds.Puff, volume);
+            GameAudio.Play(AudioIds.BellowsPump, MapWorld(NozzleMap), _audio, PuzzleSounds.Puff, volume);
             float tile = TileWorld;
             if (fx != null) fx.Burst(MapWorld(NozzleMap), 8, new Color(0.95f, 0.9f, 0.85f, 0.8f), tile * 0.5f, 0.5f, tile * 0.05f, Vector3.up * tile * 0.3f);
             int target = Mathf.Clamp((strokes - 1) / PerBrazier, 0, braziers.Length - 1);
@@ -202,7 +203,7 @@ namespace Diorama
         /// <summary>Step 10f: pumped with the firebox cold: a weak grey puff, nothing flows.</summary>
         void OnBlockedStroke(PumpPiece p)
         {
-            if (_audio != null) _audio.PlayOneShot(PuzzleSounds.Puff, volume * 0.45f);
+            GameAudio.Play(AudioIds.BellowsPump, MapWorld(NozzleMap), _audio, PuzzleSounds.Puff, volume, 0.45f);
             float tile = TileWorld;
             if (fx != null) fx.Burst(MapWorld(NozzleMap), 5, new Color(0.55f, 0.53f, 0.52f, 0.6f), tile * 0.25f, 0.5f, tile * 0.04f, Vector3.up * tile * 0.15f);
             if (!string.IsNullOrEmpty(coldLine) && Time.time - _coldSaidAt > 8f)
@@ -266,6 +267,7 @@ namespace Diorama
         IEnumerator Pulse(int i, int strokes)
         {
             var path = PipePath(i);
+            if (path.Count > 0) GameAudio.At(AudioIds.PipeGlow, MapWorld(path[0]));
             var orb = fx != null ? fx.Get(BattleFx.Shape.Orb) : null;
             var warm = new Color(1f, 0.62f, 0.25f);
             if (orb != null) orb.Set(Color.white, warm, 1f, 1.5f, 1f, 0.3f);
@@ -295,8 +297,12 @@ namespace Diorama
             Vector3 top = MapWorld(BrazierTop(i, 0.62f));
             bool lit = strokes % PerBrazier == 0;
             if (fx != null) fx.Burst(top, lit ? 30 : 8, new Color(1f, 0.65f, 0.25f), tile * (lit ? 0.9f : 0.35f), lit ? 0.9f : 0.5f, tile * 0.06f, Vector3.up * tile * (lit ? 1f : 0.4f));
-            if (!lit) return;
-            if (_audio != null) _audio.PlayOneShot(PuzzleSounds.Whoosh, volume);
+            if (!lit)
+            {
+                GameAudio.At(AudioIds.BrazierWarm, top);
+                return;
+            }
+            GameAudio.Play(AudioIds.BrazierLight, top, _audio, PuzzleSounds.Whoosh, volume);
             int n = strokes / PerBrazier;
             Debug.Log($"[ForgeBellows] Brazier {n} lit.");
             if (n - 1 < brazierLines.Length && !string.IsNullOrEmpty(brazierLines[n - 1])) Dialogue.Say(brazierLines[n - 1]);
@@ -320,7 +326,7 @@ namespace Diorama
                 yield return null;
             }
             _doorHeat = 1f;
-            if (_audio != null) _audio.PlayOneShot(PuzzleSounds.Rumble, volume);
+            GameAudio.Play(AudioIds.ForgeDoor, MapWorld(new Vector3(door.x + 1f, 0.6f, door.y + 0.3f)), _audio, PuzzleSounds.Rumble, volume);
             float next = 0f;
             for (float t = 0f; t < openSeconds; t += Time.deltaTime)
             {

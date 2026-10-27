@@ -128,7 +128,7 @@ namespace Diorama
                 _audio.spatialBlend = 0f;
             }
             _audio.pitch = Mathf.Lerp(0.85f, 1.1f, _strength) * UnityEngine.Random.Range(0.95f, 1.05f);
-            _audio.PlayOneShot(PuzzleSounds.Breeze, volume * Mathf.Lerp(0.5f, 1f, _strength));
+            GameAudio.Procedural(_audio, PuzzleSounds.Breeze, volume * Mathf.Lerp(0.5f, 1f, _strength));
             Gusted?.Invoke(_origin, _dir, _strength);
         }
 

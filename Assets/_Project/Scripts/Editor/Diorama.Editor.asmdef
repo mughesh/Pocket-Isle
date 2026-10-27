@@ -3,6 +3,7 @@
     "rootNamespace": "Diorama.EditorTools",
     "references": [
         "Diorama.Runtime",
+        "Diorama.Audio",
         "Oculus.VR",
         "Oculus.VR.Editor",
         "Oculus.Interaction",

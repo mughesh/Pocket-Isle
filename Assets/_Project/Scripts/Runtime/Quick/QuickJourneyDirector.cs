@@ -175,6 +175,7 @@ namespace Diorama
             {
                 pod = Instantiate(pods.podPrefab, island.transform, false);
                 pod.name = $"Gift Pod {gift.Name}";
+                GameAudio.On(Diorama.Audio.AudioIds.GiftPods, pod.transform);
                 pod.Show(gift);
                 var grab = pod.GetComponent<PodGrab>();
                 if (grab != null) grab.enabled = false;

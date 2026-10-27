@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Diorama.Audio;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -341,6 +342,7 @@ namespace Diorama
         /// <summary>A little hop on the spot (waking up in the opening).</summary>
         public void Hop()
         {
+            GameAudio.At(AudioIds.WalkHop, TileWorld(_tile));
             if (_view != null) _view.Hop();
             else if (_hopStart < 0f) _hopStart = Time.time;
         }
@@ -358,6 +360,7 @@ namespace Diorama
             if (Map.At(front.y, front.x) == IslandMap.Water)
             {
                 _last += " - fishing";
+                GameAudio.At(AudioIds.PondTap, TileWorld(front));
                 OnFishTap?.Invoke(front);
             }
             else Hop();
@@ -406,7 +409,11 @@ namespace Diorama
                 Stop();
                 _last += ch == IslandMap.Empty ? " - edge" : IslandMap.IsWalkable(ch) ? " - blocked (prop)" : $" - blocked ({ch})";
                 RefreshLabel();
-                if (ch != IslandMap.Empty && IslandMap.IsWalkable(ch)) OnBump?.Invoke(next);
+                if (ch != IslandMap.Empty && IslandMap.IsWalkable(ch))
+                {
+                    GameAudio.At(AudioIds.WalkBump, TileWorld(next));
+                    OnBump?.Invoke(next);
+                }
                 return;
             }
             _fromTile = _tile;
@@ -417,8 +424,26 @@ namespace Diorama
 
         void Stop()
         {
+            if (_heading != Vector2Int.zero) GameAudio.At(AudioIds.WalkStop, TileWorld(_tile));
             _heading = Vector2Int.zero;
             _running = false;
+        }
+
+        /// <summary>Audio hookup: a tile's middle on the cap, in world space.</summary>
+        Vector3 TileWorld(Vector2Int t) => island.transform.TransformPoint(island.TileToLocal(t, Map.capHeight));
+
+        /// <summary>A footstep by the tile underfoot (the lodge is wood, the halls stone); tall grass rustles too.</summary>
+        void StepSound()
+        {
+            var at = TileWorld(_tile);
+            char ch = Map.At(_tile.y, _tile.x);
+            string id;
+            if (SceneSwap.IsInside) id = island.world != null && island.world.name.Contains("Lodge") ? AudioIds.StepWood : AudioIds.StepStone;
+            else if (ch == IslandMap.Grass || ch == IslandMap.TallGrass) id = AudioIds.StepGrass;
+            else if (ch == IslandMap.Path) id = AudioIds.StepPath;
+            else id = AudioIds.StepStone;
+            GameAudio.At(id, at);
+            if (ch == IslandMap.TallGrass) GameAudio.At(AudioIds.GrassRustle, at);
         }
 
         bool ThumbStillHeld()
@@ -455,6 +480,7 @@ namespace Diorama
                 if (_stepT >= 1f)
                 {
                     OnStep?.Invoke(_tile);
+                    StepSound();
                     if (Map.At(_tile.y, _tile.x) == IslandMap.TallGrass) OnTallGrassStep?.Invoke(_tile);
                 }
             }

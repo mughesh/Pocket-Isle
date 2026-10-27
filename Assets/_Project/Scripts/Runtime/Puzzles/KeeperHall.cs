@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Diorama.Audio;
 using Oculus.Interaction.Input;
 using UnityEngine;
 
@@ -564,23 +565,28 @@ namespace Diorama
                 case BattleEventKind.Damage when e.side == BattleSide.Wild && e.blocked:
                     int crystal = CrackOrder(e.cracks - 1);
                     _battleLook.SetCrystal(crystal, 0.15f);
+                    GameAudio.At(AudioIds.KeeperCrownShield, stage.Wild.WorldCenter);
+                    GameAudio.At(AudioIds.KeeperCrownCrack, _battleLook.CrystalCount > 0 ? _battleLook.CrystalWorld(crystal) : stage.Wild.WorldCenter);
                     if (fx != null) fx.Burst(_battleLook.CrystalCount > 0 ? _battleLook.CrystalWorld(crystal) : _shell != null ? _shell.transform.position : stage.Wild.WorldCenter,
                         10, glowColor, tile * 0.5f, 0.5f, tile * 0.04f);
                     if (!string.IsNullOrEmpty(shieldLine)) Dialogue.Say(shieldLine);
                     break;
                 case BattleEventKind.ShieldBroken:
+                    GameAudio.At(AudioIds.KeeperCrownBreak, _shell != null ? _shell.transform.position : stage.Wild.WorldCenter);
                     if (fx != null && _shell != null) fx.Burst(_shell.transform.position, 40, shellCore, tile * 1.2f, 0.7f, tile * 0.05f);
                     SetShell(false);
                     _battleLook.SetAllCrystals(0.2f);
                     if (!string.IsNullOrEmpty(brokenLine)) Dialogue.Say(brokenLine);
                     break;
                 case BattleEventKind.ShieldRaised:
+                    GameAudio.At(AudioIds.KeeperCrownShield, stage.Wild.WorldCenter);
                     SetShell(true);
                     _battleLook.SetAllCrystals(1f);
                     if (fx != null) fx.Burst(_battleLook.CrystalCount > 0 ? _battleLook.CrownWorld : stage.Wild.WorldCenter, 24, glowColor, tile * 0.7f, 0.6f, tile * 0.05f, Vector3.up * tile * 0.5f);
                     break;
                 case BattleEventKind.KeeperPhase2:
                     _battleLook.crownBoost = 1.7f;
+                    GameAudio.At(AudioIds.KeeperFury, stage.Wild.WorldCenter);
                     if (_battleFury != null) _battleFury.phase2 = true;
                     if (!string.IsNullOrEmpty(phase2Line)) Dialogue.Say(phase2Line);
                     break;
@@ -634,6 +640,9 @@ namespace Diorama
             _fury.phase2 = false;
             _fury.fury = 1f;
             Debug.Log($"[KeeperHall] {KeeperName}'s fury burns off into gold motes.");
+            GameAudio.At(AudioIds.KeeperCalm, _model.transform.position);
+            GameAudio.Ui(AudioIds.JingleKeeper);
+            MusicDirector.Jingle(4f);
             yield return _fury.BurnOff(1.8f);
             Debug.Log($"[KeeperHall] {KeeperName} lowers its head and calms.");
             // Lowers its head (kneels).
@@ -677,6 +686,8 @@ namespace Diorama
             var half = island.FootprintHalfSize;
             Vector3 hover = new Vector3(0f, island.CapTopLocal + 0.12f, half.y * 0.55f);
             _shardHovering = true;
+            _shardFloat.Stop(0f);
+            _shardFloat = AudioService.PlayLoop(AudioIds.ShardFloat, island.transform.TransformPoint(hover), 0.6f);
             for (float t = 0f; t < 1f; t += Time.deltaTime)
             {
                 _shardLocal = Vector3.Lerp(from, up, Mathf.SmoothStep(0f, 1f, t));
@@ -746,6 +757,7 @@ namespace Diorama
         {
             if (_phase != Phase.Shard || !_shardHovering) return;
             Debug.Log($"[KeeperHall] {ownShard} taken ({how}): it flies to the Spirit.");
+            _shardFloat.Stop(0.5f);
             StartCoroutine(ShardToHolder());
         }
 
@@ -771,6 +783,9 @@ namespace Diorama
             PuzzleState.SetStage(ownShard, 1); // saved: held
             if (holder != null) holder.SetOut(ownShard, false);
             if (fx != null) fx.Burst(island.transform.TransformPoint(to), 20, shardColor, 0.03f, 0.6f, 0.004f);
+            GameAudio.At(AudioIds.ShardDock, island.transform.TransformPoint(to));
+            GameAudio.Ui(AudioIds.JingleShard);
+            MusicDirector.Jingle(3f);
             yield return new WaitForSeconds(1.2f);
             _phase = Phase.Idle;
             if (Active && swap.Return()) Debug.Log("[KeeperHall] Back outside for the restoration.");
@@ -778,6 +793,7 @@ namespace Diorama
         }
 
         bool _waveDue;
+        AudioHandle _shardFloat;
 
         void OnReturned(WorldMap outdoor)
         {
@@ -791,6 +807,7 @@ namespace Diorama
             while (SceneSwap.IsBusy) yield return null;
             yield return new WaitForSeconds(0.3f);
             if (realm != null) realm.Wave(waveOrigin, waveSeconds);
+            GameAudio.Ui(AudioIds.RestoreSwell);
             Debug.Log("[KeeperHall] The restoration wave ripples out from the temple.");
             if (fx != null)
             {
@@ -842,7 +859,7 @@ namespace Diorama
                     _audio.playOnAwake = false;
                     _audio.spatialBlend = 0f;
                 }
-                _audio.PlayOneShot(PuzzleSounds.Hoot, 0.8f);
+                GameAudio.Procedural(_audio, PuzzleSounds.Hoot, 0.8f);
             }
             if (fx != null) fx.Burst(_model.WorldCenter + island.transform.forward * (_model.View.height * 0.4f * island.Zoom * island.transform.lossyScale.x),
                 12, new Color(1f, 0.9f, 0.75f, 0.8f), TileWorld * 0.3f, 0.6f, TileWorld * 0.05f, Vector3.up * TileWorld * 0.3f);

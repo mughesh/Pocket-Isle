@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Diorama.Audio;
 using Oculus.Interaction;
 using Oculus.Interaction.Input;
 using Oculus.Interaction.Surfaces;
@@ -289,7 +290,9 @@ namespace Diorama
             if (!IsShown) return;
             float dt = Time.unscaledDeltaTime;
             Place(false);
+            var was = _hovered;
             _hovered = GazeHover();
+            if (_hovered != null && _hovered != was) GameAudio.At(AudioIds.RuneHover, _hovered.visual.position);
             foreach (var r in _runes)
             {
                 r.hover = Mathf.MoveTowards(r.hover, r == _hovered || _hovered == null && r == DefaultFocus ? 1f : 0f, dt * 8f);
@@ -346,9 +349,12 @@ namespace Diorama
             }
         }
 
+        AudioHandle _holdSound;
+
         void StartHold(Rune r, int hand)
         {
             if (_holding != null && _holding != r) StopHold();
+            if (_holding != r) _holdSound = GameAudio.At(AudioIds.RuneHold, r.visual.position);
             _holding = r;
             _holdHand = hand;
         }
@@ -369,6 +375,8 @@ namespace Diorama
             r.fill = HoldStep(r.fill, kept, dt, holdSeconds);
             if (!kept)
             {
+                // Let go early: the rising tone stops short of its ting.
+                _holdSound.Stop(0.1f);
                 StopHold();
                 return;
             }
@@ -387,6 +395,8 @@ namespace Diorama
         {
             if (!IsShown || !_runes.Contains(r)) return;
             Debug.Log($"[RuneBoard] {name}: {r.label} ({how}).");
+            // A hold rune already rang at the end of its fill tone.
+            if (!r.hold) GameAudio.At(AudioIds.RuneSelect, r.visual.position);
             r.poked = false;
             r.picked?.Invoke();
         }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Diorama.Audio;
 using Oculus.Interaction.Input;
 using UnityEngine;
 
@@ -455,6 +456,7 @@ namespace Diorama
         void OnGrabbed(PodView p)
         {
             if (_card != null) _card.Hide();
+            GameAudio.At(AudioIds.PodGrab, p.transform.position);
             Debug.Log($"[PodRack] Grabbed {p.name}.");
         }
 
@@ -472,7 +474,11 @@ namespace Diorama
                 LodgeDropped(slot, pos, vel);
                 return;
             }
-            if (usable) Thrown(slot, pos, vel);
+            if (usable)
+            {
+                GameAudio.On(AudioIds.PodThrow, p.transform);
+                Thrown(slot, pos, vel);
+            }
             else StartCoroutine(FlyHome(slot));
         }
 
@@ -601,6 +607,7 @@ namespace Diorama
         {
             _cradlePop = Time.time;
             CradleGlow = true;
+            GameAudio.At(AudioIds.CatchAppear, HomeWorld(CradleSlot));
             if (fx != null) fx.Burst(HomeWorld(CradleSlot), 12, new Color(1f, 0.88f, 0.54f), World(0.03f), 0.45f, World(0.003f));
         }
 
@@ -914,6 +921,7 @@ namespace Diorama
             var p = _pods[slot];
             if (p == null) yield break;
             var t = p.transform;
+            GameAudio.At(AudioIds.CatchWobble, t.position);
             for (float u = 0f; u < 1f; u += Time.deltaTime / 0.45f)
             {
                 if (t == null) yield break;
@@ -1008,6 +1016,7 @@ namespace Diorama
             if (p == null) yield break;
             p.Detached = true;
             var t = p.transform;
+            GameAudio.At(AudioIds.CatchShatter, t.position);
             Quaternion r0 = t.localRotation;
             for (float u = 0f; u < 1f; u += Time.deltaTime / 0.3f)
             {
@@ -1058,6 +1067,7 @@ namespace Diorama
             _pods[slot] = null;
             p.Detached = true;
             var t = p.transform;
+            GameAudio.On(AudioIds.CatchToStorage, t);
             Vector3 from = t.localPosition, to = from + new Vector3(0.25f, 0.6f, -0.2f);
             var light = fx != null ? fx.Get(BattleFx.Shape.Orb) : null;
             var gold = new Color(1f, 0.85f, 0.45f);

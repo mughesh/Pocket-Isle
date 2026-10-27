@@ -294,7 +294,7 @@ namespace Diorama
             if (_audio != null)
             {
                 _audio.pitch = Random.Range(0.92f, 1.08f) * (1f + 0.08f * undone);
-                _audio.PlayOneShot(PuzzleSounds.Twang, volume);
+                GameAudio.Procedural(_audio, PuzzleSounds.Twang, volume);
             }
             if (fx != null)
             {

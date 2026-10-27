@@ -6,7 +6,8 @@
         "Oculus.Interaction",
         "meta.xr.mrutilitykit",
         "Unity.InputSystem",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "Diorama.Audio"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

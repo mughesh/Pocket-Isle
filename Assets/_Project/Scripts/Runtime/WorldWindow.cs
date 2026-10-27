@@ -108,6 +108,7 @@ namespace Diorama
         {
             _pivot = pivot;
             StartZoom(Mathf.Max(1f, factor), seconds);
+            GameAudio.Ui(Diorama.Audio.AudioIds.ZoomIn);
             ZoomedIn?.Invoke(Vector2Int.RoundToInt(pivot));
         }
 
@@ -117,6 +118,7 @@ namespace Diorama
         public void ZoomOut(float seconds)
         {
             StartZoom(1f, seconds);
+            GameAudio.Ui(Diorama.Audio.AudioIds.ZoomOut);
             ZoomedOut?.Invoke();
         }
 

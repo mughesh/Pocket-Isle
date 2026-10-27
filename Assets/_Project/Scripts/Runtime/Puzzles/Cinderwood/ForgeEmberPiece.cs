@@ -176,7 +176,7 @@ namespace Diorama
                 case EmberState.Held:
                     MarkInteracted();
                     Debug.Log($"[ForgeEmberPiece] {id}: picked up ({(_carry.Holder == 0 ? "left" : "right")} hand, {(_hands[_carry.Holder].pinch ? "pinch" : "grab")}).");
-                    if (_audio != null) _audio.PlayOneShot(PuzzleSounds.Catch, volume * 0.5f);
+                    GameAudio.Procedural(_audio, PuzzleSounds.Catch, volume * 0.5f);
                     if (fx != null) fx.Burst(_emberWorld, 10, new Color(1f, 0.6f, 0.25f), TileWorld * 0.4f, 0.6f, TileWorld * 0.04f, island.transform.up * TileWorld * 0.8f);
                     break;
                 case EmberState.Falling:
@@ -247,8 +247,8 @@ namespace Diorama
             if (bellows != null) bellows.Blocked = false;
             if (_audio != null)
             {
-                _audio.PlayOneShot(PuzzleSounds.Whoosh, volume);
-                _audio.PlayOneShot(PuzzleSounds.Crackle, volume * 0.8f);
+                GameAudio.Procedural(_audio, PuzzleSounds.Whoosh, volume);
+                GameAudio.Procedural(_audio, PuzzleSounds.Crackle, volume * 0.8f);
             }
             if (explorer != null) explorer.Cheer();
             if (!string.IsNullOrEmpty(doneLine)) Dialogue.Say(doneLine);

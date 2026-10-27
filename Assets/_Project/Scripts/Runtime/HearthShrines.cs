@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Diorama.Audio;
 using Oculus.Interaction.Input;
 using UnityEngine;
 
@@ -53,6 +54,9 @@ namespace Diorama
 
         /// <summary>The explorer rested at this shrine (anchor tile): healed, time to save.</summary>
         public event Action<Vector2Int> Rested;
+
+        AudioHandle _fill;
+        int _fillShrine = -1;
 
         /// <summary>The last shrine used (anchor tile), or null. Saved and loaded with the game.</summary>
         public Vector2Int? LastShrine { get; set; }
@@ -339,6 +343,21 @@ namespace Diorama
             // Warm your hand: the ring fills while a palm faces down over the bowl, wherever the explorer is.
             bool warming = usable && _pending != i && palm.IsOver(island.transform.TransformPoint(local), island.transform.up, grabGuard, "flame");
             b.hold = warming ? b.hold + Time.deltaTime : Mathf.MoveTowards(b.hold, 0f, Time.deltaTime * 2f);
+            // The fill tone rises with the ring (one shrine at a time).
+            if (warming && !_fill.IsValid)
+            {
+                _fill = AudioService.PlayLoop(AudioIds.ShrineFill, island.transform.TransformPoint(local), 0.15f);
+                _fillShrine = i;
+            }
+            if (_fillShrine == i)
+            {
+                if (warming) _fill.SetPitch(1f + Mathf.Clamp01(b.hold / Mathf.Max(0.01f, holdSeconds)));
+                else
+                {
+                    _fill.Stop(0.25f);
+                    _fillShrine = -1;
+                }
+            }
             if (b.hold >= holdSeconds)
             {
                 b.hold = 0f;
@@ -469,6 +488,8 @@ namespace Diorama
             LastShrineMap = OutdoorMap != null ? OutdoorMap.name : null;
             party.HealEveryone();
             pods.WarmWave();
+            GameAudio.At(AudioIds.ShrineFlare, FlameWorld(shrine));
+            GameAudio.Ui(AudioIds.ShrineHeal);
             StartCoroutine(Flare(shrine));
             Debug.Log($"[HearthShrines] Rested at the shrine c{shrine.x} r{shrine.y}: everyone healed; respawn point; into the lodge.");
             Rested?.Invoke(shrine);

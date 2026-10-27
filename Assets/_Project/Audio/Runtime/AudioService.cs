@@ -19,6 +19,8 @@ namespace Diorama.Audio
         public static float DistanceScale = 1f;
         /// <summary>Music level while ducked (0.5 = about -6 dB).</summary>
         public static float DuckLevel = 0.5f;
+        /// <summary>Extra music gain on top of the bus and Duck (MusicDirector: dialogue, pause, jingles, a restored realm).</summary>
+        public static float MusicGain = 1f;
 
         static AudioService _instance;
         static AudioCueTable _table;
@@ -53,6 +55,14 @@ namespace Diorama.Audio
         public static AudioHandle PlayLoop(string id, Vector3 position, float fadeIn = 0.15f) => Start(id, position, null, true, 0, true, fadeIn);
 
         public static AudioHandle PlayLoop2D(string id, float fadeIn = 0.15f) => Start(id, Vector3.zero, null, false, 0, true, fadeIn);
+
+        /// <summary>True when the table has this cue with at least one clip (no warning when it doesn't).</summary>
+        public static bool Has(string id)
+        {
+            if (string.IsNullOrEmpty(id) || !LoadTable()) return false;
+            var cue = _table.Find(id);
+            return cue != null && cue.clips != null && cue.clips.Length > 0;
+        }
 
         /// <summary>Crossfades to a music cue (no-op if it's already playing).</summary>
         public static void SetMusic(string id, float crossfade = 1.5f)
@@ -259,6 +269,7 @@ namespace Diorama.Audio
             _busLoaded = false;
             Warned.Clear();
             DistanceScale = 1f;
+            MusicGain = 1f;
         }
 
         // ---- one pooled source ----
@@ -356,7 +367,7 @@ namespace Diorama.Audio
                 src.volume = Level(duck);
             }
 
-            float Level(float duck) => _base * _volume * _fade * BusVolume[(int)cue.bus] * (cue.bus == AudioBus.Music ? duck : 1f);
+            float Level(float duck) => _base * _volume * _fade * BusVolume[(int)cue.bus] * (cue.bus == AudioBus.Music ? duck * MusicGain : 1f);
 
             void Release()
             {

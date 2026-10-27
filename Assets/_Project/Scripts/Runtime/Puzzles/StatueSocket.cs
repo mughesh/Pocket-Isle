@@ -261,6 +261,9 @@ namespace Diorama
             MarkSolved(2); // saved: placed (shards placed 1 / 3)
             _pulse = 1f;
             float tile = TileWorld;
+            GameAudio.At(Diorama.Audio.AudioIds.StatueSocket, SocketWorld);
+            GameAudio.Ui(Diorama.Audio.AudioIds.JingleShard);
+            Diorama.Audio.MusicDirector.Jingle(3f);
             if (fx != null)
             {
                 fx.Burst(SocketWorld, 40, shardColor, tile * 1.2f, 0.8f, tile * 0.05f);

@@ -281,6 +281,7 @@ namespace Diorama
             _typeSeconds = _chars / Mathf.Max(1f, charsPerSecond);
             _holdSeconds = HoldSeconds(_chars, holdBase, holdPerChar);
             _shownAt = Time.time;
+            _blipAt = 0;
             _endAt = _shownAt + _typeSeconds + _holdSeconds;
             _showing = true;
             for (int i = 0; i < 2; i++) _wasPinching[i] = true; // a pinch already held doesn't skip
@@ -398,6 +399,18 @@ namespace Diorama
             Debug.Log($"[DialogueBubble] Chip opened ({why}): {_line.text}");
         }
 
+        int _blipAt;
+
+        /// <summary>Audio hookup: a wordless voice blip every 3 typed characters (Spirit, Keeper, Heart each their own).</summary>
+        void Blip(int shown)
+        {
+            if (_chip || shown < _blipAt + 3 || shown >= _chars) return;
+            _blipAt = shown;
+            string id = _line.speaker == DialogueSpeaker.Keeper ? Diorama.Audio.AudioIds.VoiceKeeper
+                : _line.speaker == DialogueSpeaker.Heart ? Diorama.Audio.AudioIds.VoiceHeart : Diorama.Audio.AudioIds.SpiritBlip;
+            GameAudio.At(id, _root.position);
+        }
+
         void Update()
         {
             if (_popStart >= 0f)
@@ -417,6 +430,7 @@ namespace Diorama
             }
             float t = Time.time - _shownAt;
             _text.maxVisibleCharacters = _chip ? 99999 : Mathf.Min(_chars, Mathf.CeilToInt(t * charsPerSecond));
+            Blip(_text.maxVisibleCharacters);
             _appear = Mathf.Min(1f, t / 0.15f);
             Place(false);
             if (_chipText == null && Time.time >= _endAt)

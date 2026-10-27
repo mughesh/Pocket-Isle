@@ -1,4 +1,5 @@
 using System.Collections;
+using Diorama.Audio;
 using UnityEngine;
 
 namespace Diorama
@@ -92,12 +93,13 @@ namespace Diorama
                 fx.Burst(LogWorld(0.1f), 14, new Color(0.62f, 0.52f, 0.4f), t * 0.5f, 0.9f, t * 0.05f, Vector3.zero, t * 2f);
             }
             if (explorer != null) explorer.Hop();
+            GameAudio.At(AudioIds.LogLift, LogWorld(0.2f));
         }
 
         void OnLanded(CarryPiece p, int spot)
         {
             bool onLedge = spot >= 0;
-            if (_audio != null) _audio.PlayOneShot(PuzzleSounds.Thud, volume * (onLedge ? 1f : 0.6f));
+            GameAudio.Play(AudioIds.LogDrop, LogWorld(0.05f), _audio, PuzzleSounds.Thud, volume, onLedge ? 1f : 0.6f);
             if (fx != null)
             {
                 float t = TileWorld;

@@ -1,4 +1,5 @@
 using System;
+using Diorama.Audio;
 using Oculus.Interaction;
 using Oculus.Interaction.Input;
 using Oculus.Interaction.Surfaces;
@@ -224,6 +225,8 @@ namespace Diorama
 
         void OnPokeState(int index, InteractableStateChangeArgs args)
         {
+            if (args.NewState == InteractableState.Hover && index >= 0 && index < _runes.Length && _runes[index].shown)
+                GameAudio.At(AudioIds.RuneHover, _runes[index].visual.position);
             if (args.NewState == InteractableState.Hover && !_loggedPokeHover)
             {
                 _loggedPokeHover = true;
@@ -361,7 +364,9 @@ namespace Diorama
         void Update()
         {
             PlaceRow(false);
+            int was = _hovered;
             _hovered = _interactable ? GazeHover() : -1;
+            if (_hovered >= 0 && _hovered != was) GameAudio.At(AudioIds.RuneHover, _runes[_hovered].visual.position);
             for (int i = 0; i < _runes.Length; i++)
             {
                 var r = _runes[i];
@@ -413,6 +418,7 @@ namespace Diorama
         {
             if (index < 0 || index >= _runes.Length || !_runes[index].usable || !_runes[index].shown) return;
             Debug.Log($"[BattleRunes] Picked {(index == RunIndex ? "Run" : $"move {index + 1}")} by {how}.");
+            GameAudio.At(index == RunIndex ? AudioIds.BattleRun : AudioIds.RuneSelect, _runes[index].visual.position);
             _interactable = false;
             Paint();
             Chosen?.Invoke(index);

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Diorama.Audio;
 using UnityEngine;
 
 namespace Diorama
@@ -163,6 +164,8 @@ namespace Diorama
         public IEnumerator RisePads(bool up)
         {
             float from = up ? 0f : 1f, to = up ? 1f : 0f;
+            var padAt = _wildPad != null ? island.transform.TransformPoint(island.TileToLocal(_wildPad.tile, Cap)) : island.transform.position;
+            GameAudio.At(up ? AudioIds.PadsRise : AudioIds.ClearingRumble, padAt);
             yield return Tween(padSeconds, p =>
             {
                 float k = Mathf.Lerp(from, to, p);
@@ -178,6 +181,7 @@ namespace Diorama
         {
             island.FlashTile(tile, seconds);
             Vector3 p = WorldAt(tile, 0.01f);
+            GameAudio.At(AudioIds.EncRustle, p);
             fx.Burst(p, 10, Leaf, World(0.03f), 0.5f, World(0.004f), Vector3.up * World(0.03f));
             float t = 0f;
             while (t < seconds)
@@ -232,8 +236,10 @@ namespace Diorama
             var a = _wild;
             if (a == null) yield break;
             Vector3 burstAt = WorldAt(a.tile, 0.01f);
+            GameAudio.At(rare ? AudioIds.EncRare : AudioIds.EncSting, burstAt);
             if (waterTile.HasValue)
             {
+                GameAudio.At(AudioIds.PondSplash, WorldAt(waterTile.Value, 0f));
                 var water = ElementStyle.Of(Element.Water);
                 Vector2 from = waterTile.Value, to = a.tile;
                 fx.Burst(WorldAt(from, 0.004f), 24, water.burst, World(0.06f), 0.6f, World(0.004f), Vector3.up * World(0.08f));
@@ -272,6 +278,7 @@ namespace Diorama
             var a = _player;
             if (a == null) yield break;
             Vector3 c = WorldAt(a.tile, a.View.centerHeight);
+            GameAudio.At(AudioIds.PodOpen, c);
             fx.Burst(c, 26, new Color(1f, 0.88f, 0.54f), World(0.05f), 0.5f, World(0.004f), Vector3.up * World(0.02f));
             var ring = fx.Get(BattleFx.Shape.Ring);
             var col = ElementStyle.Of(Element.Neutral).burst;
@@ -297,6 +304,7 @@ namespace Diorama
             if (a == null) yield break;
             var light = new Color(1f, 0.88f, 0.54f);
             Vector3 from = a.WorldCenter;
+            GameAudio.At(AudioIds.PodReturn, from);
             yield return Tween(0.4f, p =>
             {
                 a.View.SetFlash(Mathf.Min(1f, p * 2.5f));
@@ -325,6 +333,7 @@ namespace Diorama
             if (a == null) yield break;
             DropShieldOf(BattleSide.Wild, true);
             Vector3 from = a.WorldCenter;
+            GameAudio.At(AudioIds.CatchHit, from);
             var light = new Color(1f, 0.95f, 0.8f);
             yield return Tween(0.45f, p =>
             {
@@ -413,6 +422,7 @@ namespace Diorama
                         if (self != null)
                         {
                             fx.Burst(self.WorldCenter, 20, Smoke, World(0.03f), 0.7f, World(0.005f), Vector3.up * World(0.02f));
+                            GameAudio.At(AudioIds.Faint, self.WorldCenter);
                             if (dazed)
                             {
                                 self.View.Daze();
@@ -456,6 +466,7 @@ namespace Diorama
         IEnumerator DizzyStars(StageActor a)
         {
             float t = 0f;
+            var loop = AudioService.PlayLoop(AudioIds.CatchDazed, a.transform, 0.3f);
             while (a != null && a.View != null && a.View.IsDazed && a.grow > 0.5f)
             {
                 t += Time.deltaTime;
@@ -471,6 +482,7 @@ namespace Diorama
                 }
                 yield return null;
             }
+            loop.Stop(0.3f);
         }
 
         /// <summary>No pod reached the dazed wild creature in time: it fades out (the outro then has nothing left to do for it).</summary>
@@ -500,6 +512,7 @@ namespace Diorama
 
             if (move.kind == MoveKind.Support)
             {
+                GameAudio.At(AudioIds.MoveCharge, user.WorldCenter);
                 yield return Support(user, move, userStyle, impact);
                 yield break;
             }
@@ -542,6 +555,8 @@ namespace Diorama
         {
             var bar = o.side == BattleSide.Player ? _playerBar : _wildBar;
             hud.SetHp(bar, o.hpAfter);
+            GameAudio.At(o.effectiveness == Effectiveness.Super ? AudioIds.HitSuper : o.effectiveness == Effectiveness.NotVery || o.blocked ? AudioIds.HitWeak : AudioIds.HitNormal,
+                target.WorldCenter);
             hud.PopText(target.LocalTop + Vector3.up * 0.042f, $"-{o.amount}", Color.white);
             if (o.blocked) hud.PopText(target.LocalTop + Vector3.up * 0.075f, "Blocked!", new Color(1f, 0.7f, 0.3f), 0.75f, 1.4f);
             else if (o.effectiveness == Effectiveness.Super) hud.PopText(target.LocalTop + Vector3.up * 0.075f, "Super effective!", SuperColor, 0.65f, 1.4f);
@@ -568,8 +583,10 @@ namespace Diorama
 
         IEnumerator Shoot(StageActor user, StageActor target, MoveData move, ElementStyle style, Action impact)
         {
+            GameAudio.At(AudioIds.MoveCharge, user.WorldCenter);
             yield return Tween(0.26f, p => user.squash = new Vector3(1f + 0.12f * p, 1f - 0.12f * p, 1f + 0.12f * p));
             user.squash = Vector3.one;
+            GameAudio.At(ElementCue("move.shoot.", move.element), user.WorldCenter);
             Vector2 dir = (target.tile - user.tile).normalized;
             Vector2 from = user.tile + dir * 0.35f, to = target.tile;
             float h0 = user.View.centerHeight, h1 = target.View.centerHeight;
@@ -586,6 +603,7 @@ namespace Diorama
             });
             fx.Release(orb);
             Vector3 hitAt = target.WorldCenter;
+            GameAudio.At(ElementCue("move.impact.", move.element), hitAt);
             fx.Burst(hitAt, 34, style.burst, World(0.08f), 0.5f, World(0.004f), Vector3.up * World(0.02f));
             StartCoroutine(Pop(hitAt, style.burst));
             impact();
@@ -596,6 +614,7 @@ namespace Diorama
         {
             Vector2 d = target.tile - user.tile;
             yield return Tween(0.14f, p => user.squash = new Vector3(1f + 0.12f * p, 1f - 0.12f * p, 1f + 0.12f * p));
+            GameAudio.At(AudioIds.MoveLunge, user.WorldCenter);
             yield return Tween(0.15f, p =>
             {
                 float q = EaseInOut(p);
@@ -620,6 +639,7 @@ namespace Diorama
                 float k = Mathf.Sin(p * Mathf.PI) * 0.25f;
                 user.squash = new Vector3(1f + k, 1f - k, 1f + k);
             }, () => user.squash = Vector3.one));
+            GameAudio.At(AudioIds.MoveSlam, WorldAt(user.tile, 0.004f));
             fx.Burst(WorldAt(user.tile, 0.004f), 24, style.burst, World(0.06f), 0.45f, World(0.004f), Vector3.up * World(0.03f));
             var ring = fx.Get(BattleFx.Shape.Ring);
             ring.Set(style.edge, style.edge, 1f);
@@ -686,6 +706,7 @@ namespace Diorama
             if (isPlayer) _playerShield = shield;
             else _wildShield = shield;
             shield.Set(style.shield, style.shield, 1f, 2.2f, 0.05f, 0f, 0.06f);
+            GameAudio.At(AudioIds.MoveShieldUp, user.WorldCenter);
             StartCoroutine(GrowShield(shield, user));
         }
 
@@ -719,6 +740,7 @@ namespace Diorama
         IEnumerator PopShield(BattleFx.Item item)
         {
             Vector3 s0 = item.transform.localScale;
+            GameAudio.At(AudioIds.MoveShieldPop, item.transform.position);
             fx.Burst(item.transform.position, 26, Color.white, World(0.07f), 0.4f, World(0.004f));
             yield return Tween(0.3f, p =>
             {
@@ -776,9 +798,11 @@ namespace Diorama
             hud.SetXp(_playerBar, share);
             yield return Tween(0.2f, p => hud.SetXpScale(_playerBar, Mathf.Lerp(1f, XpBarLarge, EaseInOut(p))));
             float fill = Mathf.Max(0.35f, 1f / (ups.Count + 1));
+            _xpStep = 0;
             for (int i = 0; i < ups.Count; i++)
             {
                 float from = share;
+                StartCoroutine(XpTicks(a, fill));
                 yield return Tween(fill, p => hud.SetXp(_playerBar, Mathf.Lerp(from, 1f, EaseInOut(p))));
                 var up = ups[i];
                 hp = c.IsFainted ? 0 : hp + up.hpGain;
@@ -791,6 +815,7 @@ namespace Diorama
             }
             float to = progression != null ? progression.XpShare(c) : 1f;
             float start = share;
+            StartCoroutine(XpTicks(a, fill));
             yield return Tween(fill, p => hud.SetXp(_playerBar, Mathf.Lerp(start, to, EaseInOut(p))));
             yield return Wait(ups.Count > 0 ? 0.6f : 0.5f);
             yield return Tween(0.2f, p => hud.SetXpScale(_playerBar, Mathf.Lerp(XpBarLarge, 1f, EaseInOut(p))));
@@ -802,6 +827,26 @@ namespace Diorama
         /// <summary>Step 9f: "+34" in gold rising from a world point (a benched Isling's pod on the rim).</summary>
         public void PopXpAt(Vector3 world, int amount) =>
             hud.PopText(hud.transform.InverseTransformPoint(world) + Vector3.up * 0.012f, $"+{amount}", Gold, 1.2f, 1.8f);
+
+        int _xpStep;
+
+        /// <summary>Audio hookup: rising ticks while the XP bar fills (one step higher each tick, across level-ups).</summary>
+        IEnumerator XpTicks(StageActor a, float seconds)
+        {
+            for (float t = 0f; t < seconds; t += 0.07f)
+            {
+                if (a == null) yield break;
+                GameAudio.At(AudioIds.XpTick, a.WorldCenter, Mathf.Min(_xpStep++, 24));
+                yield return Wait(0.07f);
+            }
+        }
+
+        /// <summary>move.shoot.fire etc.; neutral when the element has no cue.</summary>
+        static string ElementCue(string prefix, Element e)
+        {
+            var id = prefix + e.ToString().ToLowerInvariant();
+            return AudioService.Has(id) ? id : prefix + "neutral";
+        }
 
         static int SumHp(IReadOnlyList<LevelUp> ups)
         {
@@ -817,6 +862,8 @@ namespace Diorama
             var feet = island.TileToLocal(a.tile, Cap + a.baseLift + 0.002f);
             fx.Burst(island.transform.TransformPoint(feet), 22, Gold, World(0.045f), 0.6f, World(0.004f), Vector3.up * World(0.03f));
             StartCoroutine(GoldRing(a));
+            GameAudio.Ui(AudioIds.JingleLevelup);
+            MusicDirector.Jingle(2f);
             hud.PopText(a.LocalTop + Vector3.up * 0.03f, $"Lv {level}!", Gold, 2.2f, 1.6f);
             a.View.Hop();
         }
@@ -862,6 +909,7 @@ namespace Diorama
             nu.Snap();
             float same = old.View.height / Mathf.Max(1e-4f, nu.View.height);
 
+            var rise = AudioService.PlayLoop(AudioIds.EvoRise, old.transform, 0.3f);
             yield return Tween(0.5f, p => old.View.SetFlash(p));
             nu.View.SetFlash(1f);
             float[] holds = { 0.5f, 0.42f, 0.34f, 0.26f, 0.2f, 0.14f, 0.1f };
@@ -877,6 +925,10 @@ namespace Diorama
             old.grow = 0f;
             nu.grow = same;
             Vector3 c0 = nu.WorldCenter;
+            rise.Stop(0.1f);
+            GameAudio.At(AudioIds.EvoBurst, c0);
+            GameAudio.Ui(AudioIds.JingleEvolve);
+            MusicDirector.Jingle(3f);
             fx.Burst(c0, 34, Color.white, World(0.07f), 0.6f, World(0.005f));
             fx.Burst(c0, 24, Gold, World(0.05f), 0.8f, World(0.004f), Vector3.up * World(0.03f));
             StartCoroutine(GoldRing(nu));

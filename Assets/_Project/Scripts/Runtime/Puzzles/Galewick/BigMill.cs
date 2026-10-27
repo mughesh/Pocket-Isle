@@ -92,7 +92,7 @@ namespace Diorama
         {
             _lowering = true;
             if (!string.IsNullOrEmpty(doneLine)) Dialogue.Say(doneLine);
-            if (_audio != null) _audio.PlayOneShot(PuzzleSounds.Rumble, volume);
+            GameAudio.Procedural(_audio, PuzzleSounds.Rumble, volume);
             yield return new WaitForSeconds(0.6f);
             for (float t = 0f; t < lowerSeconds; t += Time.deltaTime)
             {
@@ -102,7 +102,7 @@ namespace Diorama
                 yield return null;
             }
             _down = 1f;
-            if (_audio != null) _audio.PlayOneShot(PuzzleSounds.Thud, volume);
+            GameAudio.Procedural(_audio, PuzzleSounds.Thud, volume);
             if (fx != null)
             {
                 float tile = TileWorld;

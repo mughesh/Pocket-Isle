@@ -48,9 +48,9 @@ namespace Diorama
 
     /// <summary>
     /// Volume per audio bus, 0-4 (step 9g settings: five pebbles, 0 = off), saved in PlayerPrefs under the bus names the
-    /// audio lane uses: <c>Music</c>, <c>SFX</c>, <c>Ambience</c>. Nothing plays through it yet: the audio step (Nov 4)
-    /// reads <see cref="Volume"/> and listens to <see cref="Changed"/>. Not called AudioSettings: that would hide
-    /// UnityEngine.AudioSettings (dspTime) from every script in this namespace.
+    /// audio lane uses: <c>Music</c>, <c>SFX</c>, <c>Ambience</c>. <see cref="GameAudio"/> maps them onto AudioService's
+    /// buses (UI and Voice follow Effects; the music sits under the effects) and listens to <see cref="Changed"/>. Not
+    /// called AudioSettings: that would hide UnityEngine.AudioSettings (dspTime) from every script in this namespace.
     /// </summary>
     public static class VolumeSettings
     {

@@ -533,6 +533,11 @@ namespace Diorama
         /// </summary>
         IEnumerator Reward(BattleSystem battle, IslingInstance wild, bool rare)
         {
+            if (battle.Result == BattleResult.Won)
+            {
+                GameAudio.Ui(Diorama.Audio.AudioIds.JingleVictory);
+                Diorama.Audio.MusicDirector.Jingle(3f);
+            }
             if (progression == null) yield break;
             runes.HideMoves();
             // Step 9g: x2 in the Quick Journey's Cinderwood (QuickJourneyConfig.xpMultiplier).
@@ -818,6 +823,9 @@ namespace Diorama
             // Caught while dazed: it wakes up in the pod (1 HP), so it doesn't join as a fainted, cracked pod.
             if (wild.currentHp <= 0) wild.currentHp = 1;
             stage.CatchSparkle(pod.transform.position, "Caught!");
+            GameAudio.At(Diorama.Audio.AudioIds.CatchSuccess, pod.transform.position);
+            GameAudio.Ui(Diorama.Audio.AudioIds.JingleCatch);
+            Diorama.Audio.MusicDirector.Jingle(3f);
             stage.RemoveWild();
             runes.SetCaption($"Gotcha! {wild.Name} joined you!");
             Dialogue.Say("capture.success.first");
@@ -829,6 +837,7 @@ namespace Diorama
                 party.Add(wild);
                 Debug.Log($"[EncounterDirector] Caught {wild.Name}: pod {to + 1}.");
                 Caught?.Invoke(wild);
+                if (pods.Pod(to) != null) GameAudio.On(Diorama.Audio.AudioIds.CatchToRim, pods.Pod(to).transform);
                 yield return pods.FlyHome(to, 0.7f);
             }
             else

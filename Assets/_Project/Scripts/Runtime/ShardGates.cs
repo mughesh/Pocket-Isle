@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Diorama.Audio;
 using Oculus.Interaction.Input;
 using UnityEngine;
 
@@ -63,6 +64,7 @@ namespace Diorama
             public MeshRenderer renderer;
             public float bump;
             public bool seen;
+            public AudioHandle hum;
         }
 
         readonly List<Portal> _portals = new List<Portal>();
@@ -114,7 +116,10 @@ namespace Diorama
             if (!Outside || island.world == _scanned) return;
             _scanned = island.world;
             foreach (var p in _portals)
+            {
+                p.hum.Stop(0.6f);
                 if (p.quad != null) Destroy(p.quad.gameObject);
+            }
             _portals.Clear();
             _gazed = _pending = _last = -1;
             if (_scanned == null) return;
@@ -171,6 +176,10 @@ namespace Diorama
                 if (!string.IsNullOrEmpty(p.link.firstSeenLine)) Dialogue.Say(p.link.firstSeenLine);
             }
             p.bump = Mathf.MoveTowards(p.bump, 0f, Time.deltaTime * 2.5f);
+            // An open gate in view hums (3D at the gate); a sealed one is quiet.
+            bool hum = visible && IsOpen(p.link);
+            if (hum && !p.hum.IsValid) p.hum = AudioService.PlayLoop(AudioIds.GateHum, island.transform.TransformPoint(ground), 0.8f);
+            else if (!hum && p.hum.IsValid) p.hum.Stop(0.6f);
             if (p.quad == null) return;
             p.quad.gameObject.SetActive(visible);
             if (!visible) return;
@@ -301,6 +310,8 @@ namespace Diorama
             if (!IsOpen(p.link))
             {
                 p.bump = 1f;
+                var at = GatePoint(i);
+                if (at.HasValue) GameAudio.At(AudioIds.GateSealed, at.Value);
                 Dialogue.Say("gate.sealed");
                 Debug.Log($"[ShardGates] The {p.link.id} gate is sealed: bump.");
                 return;
@@ -315,6 +326,7 @@ namespace Diorama
             var link = _portals[i].link;
             explorer.Locked = true;
             var c = GatePoint(i);
+            if (c.HasValue) GameAudio.At(AudioIds.GateEnter, c.Value);
             if (fx != null && c.HasValue)
             {
                 float scale = island.transform.lossyScale.x * island.map.tileSize * island.Zoom;

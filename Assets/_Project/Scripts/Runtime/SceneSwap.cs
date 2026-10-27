@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Diorama.Audio;
 using UnityEngine;
 
 namespace Diorama
@@ -169,6 +170,7 @@ namespace Diorama
             var fromLight = LightNow();
             var toLight = LightFor(to.theme, kind == Kind.Enter);
             island.rimTheme = to.theme;
+            GameAudio.At(AudioIds.SceneSink, island.transform.position);
             for (float t = 0f; t < half; t += Time.deltaTime)
             {
                 float k = Mathf.SmoothStep(0f, 1f, t / half);
@@ -183,6 +185,7 @@ namespace Diorama
             double b0 = Time.realtimeSinceStartupAsDouble;
             SwapAtBottom(to, tile, facing, kind);
             island.Prepare();
+            GameAudio.At(AudioIds.SceneRise, island.transform.position);
             double bottomMs = (Time.realtimeSinceStartupAsDouble - b0) * 1000.0;
             for (float t = 0f; t < half; t += Time.deltaTime)
             {

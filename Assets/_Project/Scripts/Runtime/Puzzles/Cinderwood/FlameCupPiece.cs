@@ -224,7 +224,7 @@ namespace Diorama
             LessonComplete();
             MarkSolved(1);
             HearthShrines.SetDormant(map.name, shrine, false);
-            if (_audio != null) _audio.PlayOneShot(PuzzleSounds.Whoosh, volume);
+            GameAudio.Procedural(_audio, PuzzleSounds.Whoosh, volume);
             Flare();
             if (explorer != null) explorer.Cheer();
             if (!string.IsNullOrEmpty(doneLine)) Dialogue.Say(doneLine);
@@ -305,7 +305,7 @@ namespace Diorama
             if (fx == null) return;
             float tile = TileWorld;
             fx.Burst(MapToWorld(new Vector3(c.tile.x, c.top, c.tile.y)), 8, new Color(1f, 0.62f, 0.25f), tile * 0.4f, 0.7f, tile * 0.05f, island.transform.up * tile * 0.6f);
-            if (_audio != null) _audio.PlayOneShot(PuzzleSounds.Catch, volume * 0.35f);
+            GameAudio.Procedural(_audio, PuzzleSounds.Catch, volume * 0.35f);
         }
 
         /// <summary>The realm got restored without it (an old save, the dev toggle): the flame just burns, no fanfare.</summary>
@@ -350,7 +350,7 @@ namespace Diorama
         void Sound()
         {
             if (_crackle == null) return;
-            float want = !IsSolved && Here && _meter.Held ? volume * 0.3f * (0.4f + 0.6f * _meter.Progress) : 0f;
+            float want = !IsSolved && Here && _meter.Held ? volume * 0.3f * (0.4f + 0.6f * _meter.Progress) * GameAudio.SfxVolume : 0f;
             _crackle.volume = Mathf.MoveTowards(_crackle.volume, want, Time.deltaTime * 0.8f);
             if (_crackle.volume > 0.001f && !_crackle.isPlaying) _crackle.Play();
             else if (_crackle.volume <= 0.001f && _crackle.isPlaying) _crackle.Stop();

@@ -317,6 +317,7 @@ namespace Diorama
         {
             if (hud == null || spirit == null) return;
             Vector3 world = spirit.position + Vector3.up * 0.035f * hud.transform.lossyScale.x;
+            GameAudio.Ui(Diorama.Audio.AudioIds.UiSaved);
             hud.PopText(hud.transform.InverseTransformPoint(world), "Saved", new Color(1f, 0.92f, 0.7f), 0.7f, 1.2f);
         }
     }

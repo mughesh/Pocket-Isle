@@ -137,14 +137,14 @@ namespace Diorama
             kites.Tie();
             yield return new WaitForSeconds(1.6f);
             map.SetPropHidden(tower, true);
-            if (_audio != null) _audio.PlayOneShot(PuzzleSounds.Whoosh, volume);
+            GameAudio.Procedural(_audio, PuzzleSounds.Whoosh, volume);
             for (float t = 0f; t < 1.2f; t += Time.deltaTime)
             {
                 _vaneSpeed = Mathf.Lerp(0f, vaneSpeed, t / 1.2f);
                 yield return null;
             }
             if (!string.IsNullOrEmpty(openLine)) Dialogue.Say(openLine);
-            if (_audio != null) _audio.PlayOneShot(PuzzleSounds.Rumble, volume);
+            GameAudio.Procedural(_audio, PuzzleSounds.Rumble, volume);
             for (float t = 0f; t < openSeconds; t += Time.deltaTime)
             {
                 _sink = Mathf.SmoothStep(0f, 1f, t / openSeconds);

@@ -57,6 +57,7 @@ namespace Diorama
         {
             Showing = true;
             if (logo != null) logo.Rise(statueLocal, riseSeconds, true);
+            if (island != null) GameAudio.At(Diorama.Audio.AudioIds.LogoRise, island.transform.TransformPoint(statueLocal));
             yield return WaitUnscaled(riseSeconds * 0.6f);
             _picked = null;
             ShowSlotChoice(false);

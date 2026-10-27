@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Diorama.Audio;
 using Oculus.Interaction.Input;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -120,8 +121,9 @@ namespace Diorama
         Vector3 _nudge, _nudgeVel;
         readonly bool[] _wasTouching = new bool[2];
         readonly List<PodView> _starterPods = new List<PodView>();
-        int _gazedPod = -1, _saidPod = -1, _chosen = -1;
+        int _gazedPod = -1, _saidPod = -1, _chosen = -1, _wiggledPod = -1;
         float _gazeSince;
+        AudioHandle _shardHum;
         readonly bool[] _wasPinching = { true, true };
         Coroutine _run;
 
@@ -254,6 +256,7 @@ namespace Diorama
             _stage = Stage.Shard;
             Vector3 rest = island.transform.position + Vector3.up * 0.06f;
             MakeShard(rest + island.transform.rotation * driftFrom);
+            _shardHum = AudioService.PlayLoop(AudioIds.ShardHum, _shard, 1.5f);
             Vector3 from = _shard.position;
             _spinSpeed = 0.6f;
             for (float t = 0f; t < driftSeconds; t += Time.deltaTime)
@@ -291,6 +294,9 @@ namespace Diorama
                 yield return null;
             }
             Burst(_shard.position, 46, new Color(1f, 0.85f, 0.45f), 0.25f);
+            _shardHum.Stop(0.3f);
+            GameAudio.At(AudioIds.ShardCrack, _shard.position);
+            GameAudio.At(AudioIds.IslandUnfold, island.transform.position);
             StartCoroutine(Flash(_shard.position, shardSize * 1.6f, 0.6f));
             for (float t = 0f; t < growSeconds + riseSeconds * 0.6f; t += Time.deltaTime)
             {
@@ -320,6 +326,7 @@ namespace Diorama
             island.swapRadial = false;
 
             // The explorer sits up and stretches.
+            GameAudio.At(AudioIds.ExplorerStretch, explorer.transform.position);
             for (float t = 0f; t < 0.45f; t += Time.deltaTime)
             {
                 explorer.Shrink = EaseOutBack(t / 0.45f);
@@ -588,6 +595,7 @@ namespace Diorama
             _nudgeVel += push * nudgeSpeed;
             StartCoroutine(Flash(at, shardSize * 0.45f, 0.3f));
             Burst(at, 10, new Color(1f, 0.9f, 0.6f), 0.08f);
+            GameAudio.At(AudioIds.ShardTouch, at);
             Debug.Log($"[Opening] Shard touched ({how}).");
         }
 
@@ -732,6 +740,7 @@ namespace Diorama
             }
             if (orb != null) fx.Release(orb);
             Burst(end, 18, gold, 0.06f);
+            GameAudio.At(AudioIds.SpiritAppear, end);
             for (float t = 0f; t < 0.35f; t += Time.deltaTime)
             {
                 spirit.Appear = EaseOutBack(t / 0.35f);
@@ -844,6 +853,7 @@ namespace Diorama
                 _starterPods.Add(pod);
             }
             LayoutPods(-1);
+            GameAudio.At(AudioIds.PodLead, island.transform.TransformPoint(statue));
             for (float t = 0f; t < 1.4f; t += Time.deltaTime)
             {
                 for (int i = 0; i < _starterPods.Count; i++)
@@ -863,6 +873,12 @@ namespace Diorama
             if (_chosen >= 0) return;
             float t = Time.time;
             _gazedPod = GazedPod();
+            if (_gazedPod != _wiggledPod)
+            {
+                _wiggledPod = _gazedPod;
+                if (_gazedPod >= 0 && _gazedPod < _starterPods.Count && _starterPods[_gazedPod] != null)
+                    GameAudio.At(AudioIds.PodWiggle, _starterPods[_gazedPod].transform.position);
+            }
             if (pods != null) pods.SetExternalGaze(this, _gazedPod >= 0);
             if (_gazedPod >= 0 && _gazedPod != _saidPod && Time.time - _gazeSince > 0.35f)
             {

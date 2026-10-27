@@ -58,7 +58,9 @@ namespace Diorama
             if (paused == IsPaused) return;
             IsPaused = paused;
             Time.timeScale = paused ? 0f : 1f;
-            AudioListener.pause = paused;
+            // Audio hookup: only the app pause silences everything; the game menu keeps its own sounds, the music dips
+            // under it (MusicDirector) and the ambience goes on.
+            AudioListener.pause = _app || _focus;
             Debug.Log($"[GamePause] {(paused ? "Paused" : "Resumed")} ({why}).");
         }
 

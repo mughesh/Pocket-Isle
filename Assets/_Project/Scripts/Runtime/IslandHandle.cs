@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Diorama.Audio;
 using Oculus.Interaction;
 using Oculus.Interaction.HandGrab;
 using Oculus.Interaction.Input;
@@ -95,6 +96,9 @@ namespace Diorama
         readonly Dictionary<GameObject, int> _interactorSide = new Dictionary<GameObject, int>();
         bool _podsActive, _modeLogged;
 
+        float _releaseAt = -1f, _lastScale;
+        AudioHandle _scaleLoop;
+
         Transform Target => _grabbable != null ? _grabbable.Transform : transform;
         /// <summary>A hand is holding the island (the opening waits for this).</summary>
         public bool IsGrabbed => _grabbableComponent != null && _grabbableComponent.SelectingPointsCount > 0;
@@ -133,6 +137,10 @@ namespace Diorama
             _startPos = t.position;
             _startYaw = _yaw = YawOf(t.rotation);
             _startScale = t.localScale.x;
+            // ISDK ends and begins again when a second hand joins or leaves: only a fresh grab scrapes.
+            if (_releaseAt < 0f) GameAudio.At(AudioIds.IslandGrab, points.Count > 0 ? points[0].position : t.position);
+            _releaseAt = -1f;
+            _scaleLoop.Stop(0.2f);
             if (points.Count == 1)
             {
                 _offset = _startPos - points[0].position;
@@ -144,6 +152,9 @@ namespace Diorama
                 Vector3 a = points[0].position, b = points[1].position;
                 _startMid = (a + b) * 0.5f;
                 _startDist = Mathf.Max(0.01f, Vector3.Distance(a, b));
+                _scaleLoop = AudioService.PlayLoop(AudioIds.IslandScale, t, 0.2f);
+                _scaleLoop.SetVolume(0f);
+                _lastScale = _startScale;
             }
         }
 
@@ -172,10 +183,17 @@ namespace Diorama
             var yawRot = Quaternion.Euler(0f, _yaw - _startYaw, 0f);
             t.SetPositionAndRotation(mid + yawRot * fromMid, Quaternion.Euler(0f, _yaw, 0f));
             t.localScale = Vector3.one * scale;
+            // The creak follows how fast it resizes.
+            float speed = Mathf.Abs(scale - _lastScale) / Mathf.Max(1e-4f, _startScale * Time.deltaTime);
+            _lastScale = scale;
+            _scaleLoop.SetVolume(Mathf.Clamp01(speed * 2f));
+            _scaleLoop.SetPitch(scale >= _startScale ? 1.05f : 0.95f);
         }
 
         public void EndTransform()
         {
+            _scaleLoop.Stop(0.2f);
+            _releaseAt = Time.time;
             // Finish easing to face the head (Update carries on).
             if (autoFace) StartTurn(faceSeconds);
         }
@@ -247,6 +265,12 @@ namespace Diorama
 
         void Update()
         {
+            // The release sound waits a beat so a hand change (end + begin) isn't a release.
+            if (_releaseAt >= 0f && Time.time - _releaseAt > 0.08f)
+            {
+                _releaseAt = -1f;
+                if (!IsGrabbed) GameAudio.At(AudioIds.IslandRelease, Target.position);
+            }
             ApplyMode(false);
             Resolve(0);
             Resolve(1);

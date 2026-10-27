@@ -111,6 +111,7 @@ namespace Diorama.Audio
         public const string MusicBattleKeeper = "music.battle.keeper";
         public const string MusicBattleWild = "music.battle.wild";
         public const string MusicCinderwood = "music.cinderwood";
+        public const string MusicGalewick = "music.galewick";
         public const string MusicHub = "music.hub";
         public const string MusicLodge = "music.lodge";
         public const string MusicTitle = "music.title";

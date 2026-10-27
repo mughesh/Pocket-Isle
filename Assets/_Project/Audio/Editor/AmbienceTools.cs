@@ -13,7 +13,8 @@ namespace Diorama.Audio.EditorTools
     /// </summary>
     public static class AmbienceTools
     {
-        public const string ProfileRoot = SynthBaker.AudioRoot + "Data/Ambience/";
+        /// <summary>In Resources so the game loads them by name (Resources.Load("Ambience/StillIsle")).</summary>
+        public const string ProfileRoot = SynthBaker.AudioRoot + "Data/Resources/Ambience/";
         const float IslandRadius = 0.35f;
 
         static SweetenerSet S(string cue, float min, float max, float volume = 1f, int maxAtOnce = 1) =>
@@ -34,6 +35,10 @@ namespace Diorama.Audio.EditorTools
                 "Hearth room."),
             ("Battle", "amb.battle", new SweetenerSet[0],
                 "Wind only, quiet under the battle music. Also Duck(-6, 0.5, pauseSweeteners: true) while a battle runs."),
+            ("GalewickFaded", "amb.battle", new[] { S("sw.gust", 14f, 30f, 0.6f) },
+                "Galewick faded: still air (the synth wind bed, low), a rare gust. Reuses amb.battle until a Galewick bed is made."),
+            ("GalewickRestored", "amb.battle", new[] { S("sw.gust", 5f, 12f, 0.9f), S("sw.creak", 7f, 18f, 0.7f), S("sw.bird", 6f, 14f, 0.9f) },
+                "Galewick restored: the wind bed up, gusts, mill and rope creaks, birds back. Reuses amb.battle until a Galewick bed is made."),
         };
 
         [MenuItem("Tools/Pocket Isle/Audio/Create Ambience Profiles", priority = 97)]

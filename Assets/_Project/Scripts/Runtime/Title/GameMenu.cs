@@ -94,6 +94,7 @@ namespace Diorama
                 return;
             }
             IsOpen = true;
+            GameAudio.Ui(Diorama.Audio.AudioIds.MenuOpen);
             if (pause != null) pause.SetMenu(true);
             if (explorer != null)
             {
@@ -135,6 +136,7 @@ namespace Diorama
         {
             if (!IsOpen) return;
             IsOpen = false;
+            GameAudio.Ui(Diorama.Audio.AudioIds.MenuClose);
             if (settings != null && SettingsBoard.IsOpen) settings.Close();
             runes.Hide();
             runes.Clear();

@@ -233,3 +233,44 @@ Until `Bounds` is set, sweeteners use a 0.35 m disc 0.5 m in front of the listen
 Sweetener cues: `sw.crackle`, `sw.drip`, `sw.gust`, `sw.creak`, `sw.pebble` (synth); `sw.bird`, `sw.leaves`, `sw.insect` wait
 for the gen batch (skipped until they have clips). Beds `amb.*` hold the synth placeholder and the gen bed (pick in Review).
 Audition without Play mode: **Audio Lab > Ambience tab**, pick a profile, Play (a minute, panned), Next take for another.
+
+## 5. Hookup done (main lane, Oct 27)
+What the game now does (step audio-hookup). Code: `Scripts/Runtime/Audio/GameAudio.cs` (play helpers, bus volumes,
+procedural fallback), `AudioDirector.cs` (ambience + music by game state), `Audio/Runtime/MusicDirector.cs`.
+
+| Part | As built |
+|---|---|
+| Buses | Settings pebbles (`VolumeSettings`) -> `AudioService` buses on start and on every change. UI and Voice follow Effects. Music bus = pebble x 0.73 (default pebble 3 -> 0.55, under the effects). |
+| Project Settings > Audio | 48 kHz, DSP buffer 256 (Best latency), 32 real / 64 virtual voices, spatializer none (built-in panning). |
+| 3D placement | Every cue plays at its event's world point on the island; `AudioService.DistanceScale` = island scale, `AmbienceDirector.Bounds` = the island's cap disc (0.35 m x scale), both every frame. |
+| Hooks | Every P0 row of SoundList.md, and P1: walk.stop / hop / bump, island.scale (follows the resize speed) / recenter, hp.low is **not** yet (see below), battle.run, shrine.fill / flare / heal, ui.saved, gate.sealed / enter / hum, pond.tap / splash, evo.rise / burst, enc.rare, rune.hold (stops short when let go), menu.open / close, path.gold (once per 4 s), dialogue blips (Spirit / Keeper / Heart). |
+| Procedural sounds | `Onboarding.MakeChime` is gone (`ui.lesson`). FallenLog / ForgeBellows play `log.drop`, `bellows.pump`, `brazier.light`, `forge.door` and fall back to `PuzzleSounds` only while a cue has no clips (logged once: `[GameAudio] Cue '...' has no clips`). Steps 10a-10f keep their `PuzzleSounds` clips, routed through the Effects volume (`GameAudio.Procedural`). |
+| Pause | Only the app pause (Quest menu, focus lost) pauses AudioListener; the game menu keeps its own sounds, the music dips -8 dB. |
+| Ambience | Profiles moved to `Data/Resources/Ambience/` (the game loads them by name). Areas: StillIsle, CinderwoodFaded / Restored (4 s crossfade on restoration), ForgeHall (also the Galeowl tower hall), Lodge, **GalewickFaded / GalewickRestored** (new: the `amb.battle` wind bed + rare gusts; restored adds creaks and birds). Battle: bed -6 dB, sweeteners paused. Dialogue: bed -3 dB. |
+| Music | `MusicDirector` states: Hub (title, Still Isle, lodge), Cinderwood (+2 dB restored), Galewick (`music.galewick`, new empty cue), BattleWild, BattleKeeper. 2 s area crossfades, 0.6 s into battle. Jingles (victory, catch, level up, evolve, Keeper, shard) duck it -8 dB and it comes back over 2 s. Dialogue -4 dB, game menu -8 dB. Every music cue is still empty (no tracks in `_audio-sources/music/` yet): silence, one warning per cue. |
+| Release check | Only **Build Release APK** arms `ReleaseBuildGuard` (SessionState `PocketIsle.ReleaseBuild`). QA and perf APKs build with the free-plan clips. |
+| Gen batch | All 201 good / ok ElevenLabs clips are in; `GenImporter` leaves out the 9 graded weak. |
+| Bridge | `exec:Diorama.EditorTools.AudioHookupDebug.State` logs area, music state and gain, distance scale, buses. |
+
+### Missing sounds (next audio pass)
+New interactions since the audio branch was cut that still play a procedural placeholder (`PuzzleSounds`) or nothing:
+
+| Moment | Now | Wants |
+|---|---|---|
+| Galewick: hand sweep gust (`GustField`) | PuzzleSounds.Breeze | `wind.sweep`: airy whoosh that follows the hand's speed |
+| Galewick: big mill turns / stops (`BigMill`) | Rumble / Thud | `mill.turn` (wooden creak loop), `mill.stop` (thunk) |
+| Galewick: tower door (`TowerDoor`) | Whoosh / Rumble | `tower.door` (wind rush + stone) |
+| Galewick: kites, cloud bank, knots on the mills | nothing | `kite.tug`, `cloud.part`, `knot.pull` |
+| Galeowl: knot snaps (`KeeperUntangle`) | PuzzleSounds.Twang | `keeper.knot.snap` (rope twang) |
+| Galeowl: poked when calm (`KeeperHall`) | PuzzleSounds.Hoot | `voice.galeowl` (soft hoo-hoo), and a `cry.Galeowl` |
+| Galewick wind roster | no cries | `cry.<species>` for the wind Islings (Make Cry Profiles) |
+| Cinderwood: cupping the village flame (`FlameCupPiece`) | Crackle loop, Whoosh, Catch | `flame.cup` (warm crackle loop that swells), `flame.rekindle` |
+| Cinderwood: hollow lanterns (`LanternHollowPiece`) | Catch, Whoosh | `lantern.light` (tick + small flame), `smoke.clear` (smoke rolling away) |
+| Cinderwood: forge ember (`ForgeEmberPiece`) | Catch, Whoosh + Crackle | `ember.pick`, `ember.drop` (into the firebox), `firebox.roar` |
+| Galewick ambience | reuses `amb.battle` | `amb.galewick` / `amb.galewick.restored` beds |
+| Low HP pulse | not hooked (the stage has no max HP at the hit) | `hp.low` hook: start under 25 % HP, stop on heal / battle end |
+| Cries | not hooked yet (step audio-C) | `cry.<species>` on WildAppears, PodBurst, faint |
+| Shrine idle flame, ember vents, hot springs, lanterns sputter | not hooked (P1 loops on tiles) | one 3D loop per landmark in view |
+| Spirit beam / focus pulse | not hooked (P1) | `spirit.beam`, `spirit.focus` |
+| Lodge door / page / pod tick | not hooked (P2) | `lodge.*` |
+| Settings pebble | the board's `rune.select` covers it | `ui.pebble` if it should differ |
