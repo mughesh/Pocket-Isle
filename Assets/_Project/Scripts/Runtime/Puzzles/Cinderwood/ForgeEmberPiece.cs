@@ -234,6 +234,7 @@ namespace Diorama
             if (_carry.State == EmberState.InVent)
             {
                 _carry.Hover();
+                GameAudio.At(AudioIds.EmberPick, _emberWorld);
                 Debug.Log($"[ForgeEmberPiece] {id}: look + pinch: the ember rises and waits (look + pinch the firebox).");
             }
             else if (_gazed == 1)
@@ -423,6 +424,7 @@ namespace Diorama
             if (!Here || IsSolved) return;
             MarkInteracted();
             _carry.Hover();
+            GameAudio.At(AudioIds.EmberPick, _emberWorld);
             Debug.Log($"[ForgeEmberPiece] {id}: debug look + pinch on the vent (state {_carry.State}).");
         }
 

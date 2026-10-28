@@ -39,5 +39,49 @@ namespace Diorama.EditorTools
                       $"buses music {AudioService.GetBusVolume(AudioBus.Music):0.00} / ambience {AudioService.GetBusVolume(AudioBus.Ambience):0.00} / " +
                       $"sfx {AudioService.GetBusVolume(AudioBus.SFX):0.00}, listener paused {AudioListener.pause}, restored {RealmState.Restored:0.00}.");
         }
+
+        /// <summary>Step audio-D: Lilymere back to its drought (pads, rain garden, lagoon, Tidemother, water shard unsolved).</summary>
+        public static void LilyReset()
+        {
+            var saved = PuzzleState.ToSaved();
+            saved.RemoveAll(p => p.id == "lm.pads" || p.id == "lm.rain" || p.id == "lm.lagoon" || p.id == "lm.keeper" || p.id == ShardHolder.WaterId);
+            PuzzleState.Restore(saved);
+            Debug.Log($"[AudioHookupDebug] Lilymere reset: {PuzzleState.Describe()}");
+        }
+
+        /// <summary>Step audio-D: plays the cue id in arg.txt at the island's middle, then lists the voices (it should be there).</summary>
+        public static void PlayTest()
+        {
+            var id = System.IO.File.Exists("Temp/ClaudeBridge/arg.txt") ? System.IO.File.ReadAllText("Temp/ClaudeBridge/arg.txt").Trim() : "";
+            var island = Object.FindFirstObjectByType<IslandBuilder>();
+            var at = island != null ? island.transform.TransformPoint(new Vector3(0f, island.CapTopLocal, 0f)) : Vector3.zero;
+            var h = AudioService.Play(id, at);
+            Debug.Log($"[AudioHookupDebug] PlayTest {id}: has clips {AudioService.Has(id)}, handle valid {h.IsValid}.");
+            Voices();
+        }
+
+        /// <summary>Step audio-D: every busy AudioService voice (cue id, loop or one-shot), to catch loops left running.</summary>
+        public static void Voices()
+        {
+            const System.Reflection.BindingFlags F = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static |
+                                                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public;
+            var service = typeof(AudioService).GetField("_instance", F)?.GetValue(null);
+            if (service == null)
+            {
+                Debug.Log("[AudioHookupDebug] Voices: no AudioService yet.");
+                return;
+            }
+            var lines = new System.Collections.Generic.List<string>();
+            foreach (var listName in new[] { "_3d", "_2d" })
+                foreach (var v in (System.Collections.IEnumerable)typeof(AudioService).GetField(listName, F).GetValue(service))
+                {
+                    var t = v.GetType();
+                    var cue = t.GetField("cue", F).GetValue(v) as AudioCue;
+                    if (cue == null) continue;
+                    bool loop = (bool)t.GetField("looping", F).GetValue(v);
+                    lines.Add($"{cue.id}{(loop ? " (loop)" : "")}");
+                }
+            Debug.Log($"[AudioHookupDebug] Voices ({lines.Count}): {string.Join(", ", lines)}.");
+        }
     }
 }

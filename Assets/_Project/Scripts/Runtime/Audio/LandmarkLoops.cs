@@ -17,7 +17,9 @@ namespace Diorama
         class Kind
         {
             public string cue;
-            public string[] recipes;
+            public string[] recipes = new string[0];
+            /// <summary>A map tile kind that also counts (hot springs are tiles), or '\0'.</summary>
+            public char tile;
             public bool restoredOnly;
             public float volume = 1f;
             public readonly List<Vector2> spots = new List<Vector2>();
@@ -28,7 +30,7 @@ namespace Diorama
         {
             new Kind { cue = AudioIds.ShrineFlame, recipes = new[] { HearthShrines.RecipeName } },
             new Kind { cue = AudioIds.EmberCrackle, recipes = new[] { "EmberVent" }, volume = 0.8f },
-            new Kind { cue = AudioIds.SteamHiss, recipes = new[] { "HotSpringSteam" }, volume = 0.8f },
+            new Kind { cue = AudioIds.SteamHiss, recipes = new[] { "HotSpringSteam" }, tile = IslandMap.HotSpring, volume = 0.8f },
             new Kind { cue = AudioIds.MillTurn, recipes = new[] { "Windmill", "SmallMill" }, restoredOnly = true, volume = 0.6f },
         };
 
@@ -93,6 +95,9 @@ namespace Diorama
             for (int r = 0; r < world.Rows; r++)
                 for (int c = 0; c < world.Columns; c++)
                 {
+                    char ground = world.At(r, c);
+                    foreach (var k in _kinds)
+                        if (k.tile != '\0' && ground == k.tile) k.spots.Add(new Vector2(c, r));
                     if (!world.TryGetProp(world.PropAt(r, c), out var e) || e.recipe == null) continue;
                     foreach (var k in _kinds)
                         if (System.Array.IndexOf(k.recipes, e.recipe.name) >= 0)
