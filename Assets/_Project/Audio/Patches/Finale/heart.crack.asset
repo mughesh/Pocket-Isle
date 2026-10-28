@@ -863,4 +863,6 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 
+    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: heart.crack_1
+      ok (sparse small cracks, quiet original (+10 dB); the synth crack has the weight);
+      heart.crack_2 ok (sparse sharp cracks and a grit fall, peaky)'

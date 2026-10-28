@@ -15,6 +15,7 @@ MonoBehaviour:
   id: amb.lilymere.restored
   clips:
   - {fileID: 8300000, guid: f0b44980895de7c40948bd3c50f897ca, type: 3}
+  - {fileID: 8300000, guid: 24df8fec7e6403b49a27ea35cc1aae33, type: 3}
   volume: 0.8
   volumeJitter: 0
   pitchMin: 1

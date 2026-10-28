@@ -15,6 +15,7 @@ MonoBehaviour:
   id: amb.galewick
   clips:
   - {fileID: 8300000, guid: bd0f70f0bb5ed6546bff5a75224b2d81, type: 3}
+  - {fileID: 8300000, guid: c9ceb886bffaabb4080b18cd377362a9, type: 3}
   volume: 0.8
   volumeJitter: 0
   pitchMin: 1

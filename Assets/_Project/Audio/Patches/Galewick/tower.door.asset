@@ -509,4 +509,7 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 
+    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: tower.door_1
+      ok (steady wind-rush noise with grind, no clear stone thunk at the end; low
+      share 0.30, high-pass ~120 Hz); tower.door_2 ok (rush + grind, clipped peaks;
+      same shape as take 1)'

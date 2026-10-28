@@ -15,6 +15,7 @@ MonoBehaviour:
   id: rain.hard
   clips:
   - {fileID: 8300000, guid: 542a42e078ae83c4283079cd6249368c, type: 3}
+  - {fileID: 8300000, guid: e80bcaf8af0a83d46b5bdffc0505edcd, type: 3}
   volume: 0.8
   volumeJitter: 0
   pitchMin: 1

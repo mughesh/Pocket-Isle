@@ -15,6 +15,8 @@ MonoBehaviour:
   id: ice.shatter
   clips:
   - {fileID: 8300000, guid: b611836f8983b874ab901883924fd5dd, type: 3}
+  - {fileID: 8300000, guid: 9f749b332d3e19c42b3ff953ffbe9eda, type: 3}
+  - {fileID: 8300000, guid: 5c437ee4a95a5e749be2bf0996d0dcd8, type: 3}
   volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97

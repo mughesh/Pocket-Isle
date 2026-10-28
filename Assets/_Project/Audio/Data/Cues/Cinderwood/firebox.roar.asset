@@ -15,6 +15,7 @@ MonoBehaviour:
   id: firebox.roar
   clips:
   - {fileID: 8300000, guid: 31eece34739ceec449547c4db73a2eee, type: 3}
+  - {fileID: 8300000, guid: 0a80007a74df18e488fb825459d22467, type: 3}
   volume: 0.8
   volumeJitter: 0.05
   pitchMin: 1

@@ -15,6 +15,7 @@ MonoBehaviour:
   id: heart.hum
   clips:
   - {fileID: 8300000, guid: 5fe24f19fd0f8cf4fb1df081c26dc4ce, type: 3}
+  - {fileID: 8300000, guid: 7d711c139122e7c42a92c5e3e8962ed2, type: 3}
   volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97

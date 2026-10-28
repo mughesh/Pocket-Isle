@@ -273,4 +273,5 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 
+    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: rain.soft_2
+      ok (soft continuous patter, quiet original (+21 dB level copy))'

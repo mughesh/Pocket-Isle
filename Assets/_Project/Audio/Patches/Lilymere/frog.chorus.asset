@@ -391,4 +391,6 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 
+    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: frog.chorus_1
+      good (two short bursts of a croaking chorus); frog.chorus_2 ok (one dense 2
+      s chorus, clipped peaks (level copy caps them))'
