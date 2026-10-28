@@ -368,8 +368,12 @@ namespace Diorama
             _holdSeconds = HoldSeconds(_chars, holdBase, holdPerChar);
             _shownAt = Time.time;
             _blipAt = 0;
+            _blipTime = 0f;
             _endAt = _shownAt + _typeSeconds + _holdSeconds;
             _showing = true;
+            // Audio-D: an objective card gets one soft chime instead of ticks; the Heart's whisper starts with a breathy hum.
+            if (_heart) GameAudio.At(Diorama.Audio.AudioIds.HeartHum, anchor != null ? anchor.position : _root.position);
+            else if (_objective && string.IsNullOrEmpty(chip)) GameAudio.At(Diorama.Audio.AudioIds.SpiritFocus, _root.position).SetVolume(0.6f);
             for (int i = 0; i < 2; i++) _wasPinching[i] = true; // a pinch already held doesn't skip
             Place(true);
         }
@@ -521,15 +525,26 @@ namespace Diorama
         }
 
         int _blipAt;
+        float _blipTime;
 
-        /// <summary>Audio hookup: a wordless voice blip every 3 typed characters (Spirit, Keeper, Heart each their own).</summary>
+        /// <summary>Typing ticks between blips (Mugesh, Oct 27: every 3 was too frequent, too many beats).</summary>
+        const int BlipEvery = 6;
+        /// <summary>And never closer than this (seconds), however fast the letters come.</summary>
+        const float BlipGap = 0.2f;
+
+        /// <summary>
+        /// A soft wordless voice blip while a line types: one every <see cref="BlipEvery"/> characters at most, quieter,
+        /// a gentle random pitch (Spirit and Keeper each their own voice). Objective cards and the Heart's whispers don't tick.
+        /// </summary>
         void Blip(int shown)
         {
-            if (_chip || _heart || shown < _blipAt + 3 || shown >= _chars) return;
+            if (_chip || _heart || _objective || shown < _blipAt + BlipEvery || shown >= _chars || Time.time < _blipTime + BlipGap) return;
             _blipAt = shown;
-            string id = _line.speaker == DialogueSpeaker.Keeper ? Diorama.Audio.AudioIds.VoiceKeeper
-                : _line.speaker == DialogueSpeaker.Heart ? Diorama.Audio.AudioIds.VoiceHeart : Diorama.Audio.AudioIds.SpiritBlip;
-            GameAudio.At(id, _root.position);
+            _blipTime = Time.time;
+            string id = _line.speaker == DialogueSpeaker.Keeper ? Diorama.Audio.AudioIds.VoiceKeeper : Diorama.Audio.AudioIds.SpiritBlip;
+            var h = GameAudio.At(id, _root.position);
+            h.SetVolume(0.55f);
+            h.SetPitch(UnityEngine.Random.Range(0.94f, 1.06f));
         }
 
         void Update()
