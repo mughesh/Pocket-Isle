@@ -35,14 +35,14 @@ namespace Diorama.Audio.EditorTools
                 "Hearth room."),
             ("Battle", "amb.battle", new SweetenerSet[0],
                 "Wind only, quiet under the battle music. Also Duck(-6, 0.5, pauseSweeteners: true) while a battle runs."),
-            ("GalewickFaded", "amb.battle", new[] { S("sw.gust", 14f, 30f, 0.6f) },
-                "Galewick faded: still air (the synth wind bed, low), a rare gust. Reuses amb.battle until a Galewick bed is made."),
-            ("LilymereFaded", "amb.pond", new[] { S("sw.drip", 10f, 24f, 0.5f) },
-                "Lilymere faded: still air over the half-dry lagoon, a rare drip. Reuses amb.pond until a Lilymere bed is made."),
-            ("LilymereRestored", "amb.pond", new[] { S("sw.drip", 4f, 10f, 0.8f), S("sw.insect", 6f, 14f, 0.8f), S("sw.bird", 5f, 12f, 0.9f) },
-                "Lilymere restored: water lapping, drips, frogs and insects, birds. Reuses amb.pond until a Lilymere bed is made."),
-            ("GalewickRestored", "amb.battle", new[] { S("sw.gust", 5f, 12f, 0.9f), S("sw.creak", 7f, 18f, 0.7f), S("sw.bird", 6f, 14f, 0.9f) },
-                "Galewick restored: the wind bed up, gusts, mill and rope creaks, birds back. Reuses amb.battle until a Galewick bed is made."),
+            ("GalewickFaded", "amb.galewick", new[] { S("sw.gust", 14f, 30f, 0.6f), S("sw.creak", 20f, 40f, 0.4f) },
+                "Galewick faded: still hilltop air, a rare gust, a far creak of a stopped mill."),
+            ("LilymereFaded", "amb.lilymere", new[] { S("sw.drip", 10f, 24f, 0.5f) },
+                "Lilymere faded: dry still air over the half-dry lagoon, dry reeds, a rare drip."),
+            ("LilymereRestored", "amb.lilymere.restored", new[] { S("sw.drip", 4f, 10f, 0.8f), S("frog.croak", 5f, 14f, 0.7f), S("sw.bird", 5f, 12f, 0.9f), S("sw.insect", 8f, 18f, 0.6f) },
+                "Lilymere restored: water lapping, drips, frogs, birds and insects in the reeds."),
+            ("GalewickRestored", "amb.galewick.restored", new[] { S("sw.gust", 5f, 12f, 0.9f), S("sw.creak", 7f, 18f, 0.7f), S("sw.bird", 6f, 14f, 0.9f) },
+                "Galewick restored: a breezy meadow, gusts, mill and rope creaks, larks."),
         };
 
         [MenuItem("Tools/Pocket Isle/Audio/Create Ambience Profiles", priority = 97)]
@@ -63,6 +63,28 @@ namespace Diorama.Audio.EditorTools
             }
             AssetDatabase.SaveAssets();
             Debug.Log($"[AudioLab] Ambience profiles: {made} new in {ProfileRoot}");
+        }
+
+        /// <summary>Step audio-D: rewrites the Galewick and Lilymere profiles (their own beds and sweeteners) from the defaults.</summary>
+        public static void RewriteRealmProfiles()
+        {
+            foreach (var d in Defaults)
+            {
+                if (!d.name.StartsWith("Galewick") && !d.name.StartsWith("Lilymere")) continue;
+                var path = ProfileRoot + d.name + ".asset";
+                var p = AssetDatabase.LoadAssetAtPath<AmbienceProfile>(path);
+                if (p == null)
+                {
+                    p = ScriptableObject.CreateInstance<AmbienceProfile>();
+                    AssetDatabase.CreateAsset(p, path);
+                }
+                p.bed = d.bed;
+                p.sweeteners = d.sets.Select(s => JsonUtility.FromJson<SweetenerSet>(JsonUtility.ToJson(s))).ToList();
+                p.notes = d.notes;
+                EditorUtility.SetDirty(p);
+            }
+            AssetDatabase.SaveAssets();
+            Debug.Log("[AudioLab] Galewick / Lilymere ambience profiles rewritten.");
         }
 
         public static List<AmbienceProfile> Profiles() =>

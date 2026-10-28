@@ -13,7 +13,7 @@ namespace Diorama.Audio.EditorTools
     /// Magic set = crystal / glass modes + detuned FM shimmer in D major pentatonic + soft air: warm, never sci-fi.
     /// Confidence (synth-good / ok / weak) is set after reading each group's AudioScope sheet.
     /// </summary>
-    public static class SynthRemakes
+    public static partial class SynthRemakes
     {
         public const string Set = "batch2";
 
@@ -30,6 +30,7 @@ namespace Diorama.Audio.EditorTools
             Cinderwood();
             Supporting();
             Ambience();
+            AudioD();
             _list = null;
         }
 
