@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f697fb04f6c3fc46ba21dc9d66f53db, type: 3}
+  m_Name: Drizzcan
+  m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.CryProfile
+  speciesId: Drizzcan
+  element: 2
+  bodyHeight: 0.04
+  basePitch: 659.2551
+  syllables:
+  - from: 0
+    to: 0
+    length: 0.06
+    pitchStart: 2
+    pitchEnd: 2
+    gap: 0.04
+    trill: 0
+    trillDepth: 0
+  - from: 4
+    to: 0
+    length: 0.14
+    pitchStart: -3
+    pitchEnd: 4
+    gap: 0.04
+    trill: 0
+    trillDepth: 0
+  evolvedFrom: 
+  semitoneShift: 0
+  slow: 1
+  sub: 0
+  keeper: 0
+  gain: 1

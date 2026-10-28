@@ -65,6 +65,22 @@ namespace Diorama.Audio.EditorTools
             { "Waxle", new[] { "mew", "pip" } },
             { "LanternSpirit", new[] { "pip", "pwee", "yip" } },
             { "Hearthstag", new[] { "bwoh", "coo" } },
+            // Wind roster (Galewick)
+            { "Kitelet", new[] { "pwee", "yip" } },
+            { "Vanehare", new[] { "yip", "pip", "pip" } },
+            { "Whirlby", new[] { "pwee", "mew" } },
+            { "Samarling", new[] { "pip", "chirr" } },
+            { "Zeppelope", new[] { "hum", "bwoh" } },
+            { "Nimbulpaca", new[] { "coo", "mew" } },
+            { "Galeowl", new[] { "coo", "coo" } },
+            // Water roster (Lilymere)
+            { "Bottlewhale", new[] { "bwoh", "wah" } },
+            { "Drizzcan", new[] { "pip", "pwee" } },
+            { "Lilyvole", new[] { "mew", "pip" } },
+            { "Marimoss", new[] { "hum", "pip" } },
+            { "Sailfold", new[] { "wah", "yip" } },
+            { "Riverloom", new[] { "coo", "wah" } },
+            { "Tidemother", new[] { "wah", "hum" } },
         };
 
         static (float f1, float f2) Formants(CryVowel v)

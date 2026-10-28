@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28966354f9950c5429c46b779a504dcd, type: 3}
+  m_Name: cry.Kitewyrm
+  m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
+  id: cry.Kitewyrm
+  clips:
+  - {fileID: 8300000, guid: 30a678a252f57b541981461691749154, type: 3}
+  - {fileID: 8300000, guid: 235439e12581d404ab8e70c1ddcd908f, type: 3}
+  volume: 0.6
+  volumeJitter: 0.05
+  pitchMin: 0.97
+  pitchMax: 1.03
+  pitchStepSemitones: 0
+  bus: 4
+  spatial: 1
+  minDistance: 0.1
+  maxDistance: 1.5
+  loop: 0
+  maxVoices: 2
+  minInterval: 0.04
+  priority: 50
+  awaitingClips: 0
+  notes: 'Hurt: SetPitch(1.25) and stop after ~60%. Faint: SetPitch(0.8).'
+  review:
+    status: 0
+    note: 
