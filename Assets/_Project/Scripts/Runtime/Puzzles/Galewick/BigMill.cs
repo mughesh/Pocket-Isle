@@ -1,4 +1,5 @@
 using System.Collections;
+using Diorama.Audio;
 using UnityEngine;
 
 namespace Diorama
@@ -35,6 +36,7 @@ namespace Diorama
 
         PropView _bridge, _gap, _gear;
         AudioSource _audio;
+        LoopAnchor _turn;
         float _down; // 0 = raised, 1 = lowered
         bool _lowering;
 
@@ -92,7 +94,10 @@ namespace Diorama
         {
             _lowering = true;
             if (!string.IsNullOrEmpty(doneLine)) Dialogue.Say(doneLine);
-            GameAudio.Procedural(_audio, PuzzleSounds.Rumble, volume);
+            var hub = MapWorld(new Vector3(bridge.x + 0.5f, 0.3f, bridge.y + 0.5f));
+            _turn ??= new LoopAnchor(transform, "Mill Sound");
+            _turn.Set(AudioIds.MillTurn, hub, 0.3f);
+            if (!_turn.Playing) GameAudio.Procedural(_audio, PuzzleSounds.Rumble, volume);
             yield return new WaitForSeconds(0.6f);
             for (float t = 0f; t < lowerSeconds; t += Time.deltaTime)
             {
@@ -102,7 +107,8 @@ namespace Diorama
                 yield return null;
             }
             _down = 1f;
-            GameAudio.Procedural(_audio, PuzzleSounds.Thud, volume);
+            _turn.Off(0.25f);
+            GameAudio.Play(AudioIds.MillStop, hub, _audio, PuzzleSounds.Thud, volume);
             if (fx != null)
             {
                 float tile = TileWorld;

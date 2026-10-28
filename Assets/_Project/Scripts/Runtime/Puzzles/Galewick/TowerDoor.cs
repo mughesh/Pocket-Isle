@@ -1,4 +1,5 @@
 using System.Collections;
+using Diorama.Audio;
 using UnityEngine;
 
 namespace Diorama
@@ -51,6 +52,7 @@ namespace Diorama
         DoorGlow _glow;
         GuideRings _hooks;
         AudioSource _audio;
+        LoopAnchor _vaneSound;
         float _sink, _vanes, _vaneSpeed;
         bool _isOpen, _opening, _warnedHall;
         float _nagged = -99f;
@@ -148,14 +150,18 @@ namespace Diorama
             kites.Tie();
             yield return new WaitForSeconds(1.6f);
             map.SetPropHidden(tower, true);
-            GameAudio.Procedural(_audio, PuzzleSounds.Whoosh, volume);
+            var doorAt = MapWorld(new Vector3(Center.x, 0.3f, tower.y + 1.75f));
+            _vaneSound ??= new LoopAnchor(transform, "Vane Sound");
+            _vaneSound.Set(AudioIds.MillTurn, MapWorld(new Vector3(Center.x, 2f, tower.y + 1f)), 0.4f);
+            if (!_vaneSound.Playing) GameAudio.Procedural(_audio, PuzzleSounds.Whoosh, volume);
             for (float t = 0f; t < 1.2f; t += Time.deltaTime)
             {
                 _vaneSpeed = Mathf.Lerp(0f, vaneSpeed, t / 1.2f);
                 yield return null;
             }
             if (!string.IsNullOrEmpty(openLine)) Dialogue.Say(openLine);
-            GameAudio.Procedural(_audio, PuzzleSounds.Rumble, volume);
+            _vaneSound.Off(1.5f);
+            GameAudio.Play(AudioIds.TowerDoor, doorAt, _audio, PuzzleSounds.Rumble, volume);
             for (float t = 0f; t < openSeconds; t += Time.deltaTime)
             {
                 _sink = Mathf.SmoothStep(0f, 1f, t / openSeconds);

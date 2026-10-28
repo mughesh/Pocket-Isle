@@ -348,11 +348,16 @@ namespace Diorama
             window.SetFocus(Center + new Vector2(0f, frameAhead));
             window.ZoomTo(Center, zoom, 2f);
             if (from <= FinaleStep.Wake) yield return Wake();
-            else Awake_(0f);
+            else
+            {
+                Awake_(0f);
+                Beat(true);
+            }
             if (from <= FinaleStep.Understanding) yield return Understanding();
             yield return Goodbye();
             yield return EyesOpen();
             yield return HallOfFame();
+            Beat(false);
             yield return Credits();
             yield return SparkReturns();
             Finish();
@@ -417,7 +422,8 @@ namespace Diorama
                 yield return null;
             }
             heart.appear = 1f;
-            Sfx(AudioIds.HeartBeat, AudioIds.StatueSocket, heart.ChestWorld);
+            if (AudioService.Has(AudioIds.HeartBeat)) Beat(true);
+            else Sfx(AudioIds.HeartBeat, AudioIds.StatueSocket, heart.ChestWorld);
             // It breathes and lifts its head toward the player.
             for (float t = 0f; t < 3f; t += Time.deltaTime)
             {
@@ -782,6 +788,7 @@ namespace Diorama
 
         void Clean()
         {
+            _beat?.Off(0.3f);
             foreach (var g in _guests)
                 if (g != null) Destroy(g.gameObject);
             _guests.Clear();
@@ -957,6 +964,16 @@ namespace Diorama
                     if (m != null) d[FinaleLogic.RealmName(m.realm)] = FinaleLogic.Roster(m);
             return d;
         }
+
+        /// <summary>heart.beat: the Heart's slow lub-dub loop at its chest, from the wake to the end of the Hall of Fame.</summary>
+        void Beat(bool on)
+        {
+            _beat ??= new LoopAnchor(transform, "Heartbeat Sound");
+            if (on && heart != null) _beat.Set(AudioIds.HeartBeat, heart.ChestWorld, 1f);
+            else _beat.Off(1.5f);
+        }
+
+        LoopAnchor _beat;
 
         static void Sfx(string id, string fallback, Vector3 at)
         {

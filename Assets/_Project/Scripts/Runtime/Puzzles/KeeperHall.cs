@@ -905,7 +905,7 @@ namespace Diorama
                     _audio.playOnAwake = false;
                     _audio.spatialBlend = 0f;
                 }
-                GameAudio.Procedural(_audio, PuzzleSounds.Hoot, 0.8f);
+                GameAudio.Play(AudioIds.VoiceGaleowl, _model.WorldCenter, _audio, PuzzleSounds.Hoot, 0.8f);
             }
             if (fx != null) fx.Burst(_model.WorldCenter + island.transform.forward * (_model.View.height * 0.4f * island.Zoom * island.transform.lossyScale.x),
                 12, new Color(1f, 0.9f, 0.75f, 0.8f), TileWorld * 0.3f, 0.6f, TileWorld * 0.05f, Vector3.up * TileWorld * 0.3f);

@@ -1,4 +1,5 @@
 using System;
+using Diorama.Audio;
 using Oculus.Interaction.Input;
 using UnityEngine;
 
@@ -56,11 +57,17 @@ namespace Diorama
         float _strength, _front = 99f, _frontEnd;
         float _cross;
         AudioSource _audio;
+        LoopAnchor _sweep;
+        float _sweepPeak, _sweepFrom;
 
         bool Active => island != null && map != null && island.world == map && !SceneSwap.IsInside && !SceneSwap.IsBusy &&
                        (window == null || !window.IsZoomed) && (encounters == null || !encounters.InBattle) && !GamePause.IsPaused;
 
-        void OnDisable() => Shader.SetGlobalVector(GustFrontId, new Vector4(99f, 1f, 0f, 0f));
+        void OnDisable()
+        {
+            Shader.SetGlobalVector(GustFrontId, new Vector4(99f, 1f, 0f, 0f));
+            _sweep?.Off(0.2f);
+        }
 
         void Update()
         {
@@ -128,12 +135,28 @@ namespace Diorama
                 _audio.spatialBlend = 0f;
             }
             _audio.pitch = Mathf.Lerp(0.85f, 1.1f, _strength) * UnityEngine.Random.Range(0.95f, 1.05f);
-            GameAudio.Procedural(_audio, PuzzleSounds.Breeze, volume * Mathf.Lerp(0.5f, 1f, _strength));
+            if (AudioService.Has(AudioIds.WindSweep))
+            {
+                // wind.sweep follows the sweep: louder and higher for a faster hand, fading as the band crosses (Animate).
+                _sweep ??= new LoopAnchor(transform, "Wind Sweep Sound");
+                _sweep.Set(AudioIds.WindSweep, island.transform.TransformPoint(new Vector3(_origin.x, island.CapTopLocal, _origin.y)), 0.08f);
+                _sweep.Handle.SetPitch(Mathf.Lerp(0.85f, 1.2f, _strength));
+                _sweepPeak = Mathf.Lerp(0.45f, 1f, _strength);
+                _sweepFrom = _front;
+                _sweep.Handle.SetVolume(_sweepPeak);
+            }
+            else GameAudio.Play(AudioIds.WindSweep, transform.position, _audio, PuzzleSounds.Breeze, volume * Mathf.Lerp(0.5f, 1f, _strength));
             Gusted?.Invoke(_origin, _dir, _strength);
         }
 
         void Animate()
         {
+            if (_sweep != null && _sweep.Playing)
+            {
+                float u = Mathf.Clamp01((_front - _sweepFrom) / Mathf.Max(0.01f, _frontEnd - _sweepFrom));
+                _sweep.Handle.SetVolume(_sweepPeak * (1f - u * u));
+                if (_front > _frontEnd) _sweep.Off(0.4f);
+            }
             if (_front > _frontEnd || island == null)
             {
                 Shader.SetGlobalVector(GustFrontId, new Vector4(99f, 1f, 0f, 0f));

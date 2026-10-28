@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Diorama.Audio;
 using UnityEngine;
 
 namespace Diorama
@@ -292,6 +293,7 @@ namespace Diorama
                 kite.state = K.Held;
                 kite.hand = h;
                 MarkInteracted();
+                GameAudio.At(AudioIds.KiteTug, Local2World(kite.pos));
                 Debug.Log($"[KitePiece] Kite {best} grabbed by the {(h == 0 ? "left" : "right")} {(s.pinch ? "pinch" : "fist")}.");
             }
         }
@@ -421,6 +423,7 @@ namespace Diorama
             k.t = 0f;
             int mask = FlyingMask;
             int n = KiteRules.Count(mask);
+            GameAudio.At(AudioIds.KiteTug, Local2World(k.pos)).SetPitch(1.15f);
             if (fx != null)
             {
                 float tile = TileWorld;

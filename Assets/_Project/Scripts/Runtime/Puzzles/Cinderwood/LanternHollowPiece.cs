@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Oculus.Interaction.Input;
+using Diorama.Audio;
 using UnityEngine;
 
 namespace Diorama
@@ -250,7 +251,7 @@ namespace Diorama
             PuzzleState.SetStage(id, _chain.Mask);
             SetProgress(Count(_chain.Mask) / (float)Mathf.Max(1, lanterns.Length));
             Debug.Log($"[LanternHollowPiece] {id}: lantern {i} lit ({how}), {Count(_chain.Mask)}/{lanterns.Length}.");
-            GameAudio.Procedural(_audio, PuzzleSounds.Catch, volume * 0.6f);
+            if (Here) GameAudio.Play(AudioIds.LanternLight, TopWorld(i), _audio, PuzzleSounds.Catch, volume * 0.6f);
             if (fx == null || !Here) return;
             float tile = TileWorld;
             fx.Burst(TopWorld(i) + Vector3.down * tile * 0.25f, 14, new Color(1f, 0.66f, 0.28f), tile * 0.45f, 0.7f, tile * 0.05f, island.transform.up * tile * 0.6f);
@@ -291,7 +292,7 @@ namespace Diorama
                 map.SetPropHidden(t, true);
                 map.SetPropOpen(t, true);
             }
-            GameAudio.Procedural(_audio, PuzzleSounds.Whoosh, volume);
+            GameAudio.Play(AudioIds.SmokeClear, TopWorld(Mathf.Clamp(_chain.Origin >= 0 ? _chain.Origin : 0, 0, lanterns.Length - 1)), _audio, PuzzleSounds.Whoosh, volume);
             float total = burnStep * (order.Count - 1) + burnSeconds;
             float tile = TileWorld;
             var started = new bool[smoke.Length];

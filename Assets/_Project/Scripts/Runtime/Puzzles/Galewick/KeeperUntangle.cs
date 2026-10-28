@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Diorama.Audio;
 using UnityEngine;
 
 namespace Diorama
@@ -259,6 +260,7 @@ namespace Diorama
                 if (!wasHeld && p.AnyHeld)
                 {
                     MarkInteracted();
+                    GameAudio.At(AudioIds.KnotPull, KnotWorld(i));
                     Debug.Log($"[KeeperUntangle] Knot {i + 1}: {(p.BothHeld ? "both ends" : "an end")} pinched.");
                 }
                 // A hand that took an end here isn't free for the other knots this frame.
@@ -320,7 +322,8 @@ namespace Diorama
             if (_audio != null)
             {
                 _audio.pitch = Random.Range(0.92f, 1.08f) * (1f + 0.08f * undone);
-                GameAudio.Procedural(_audio, PuzzleSounds.Twang, volume);
+                var snap = GameAudio.Play(AudioIds.KeeperKnotSnap, KnotWorld(i), _audio, PuzzleSounds.Twang, volume);
+                snap.SetPitch(1f + 0.06f * undone);
             }
             if (fx != null)
             {

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Diorama.Audio;
 using UnityEngine;
 
 namespace Diorama
@@ -168,6 +169,7 @@ namespace Diorama
                     fx.Burst(PuffWorld(i, puffHeight + 0.5f), 10, new Color(1f, 1f, 1f, 0.7f), tile * 0.6f, 0.9f, tile * 0.12f, worldDir * tile * 3f);
                 }
                 LessonComplete();
+                if (gone) GameAudio.At(AudioIds.CloudPart, PuffWorld(i, puffHeight + 0.5f));
                 if (gone) Gone(i);
             }
         }

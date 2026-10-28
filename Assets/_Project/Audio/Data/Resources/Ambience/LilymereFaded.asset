@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ebfaf023fc4ddd458f60d132e353521, type: 3}
   m_Name: LilymereFaded
   m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AmbienceProfile
-  bed: amb.pond
+  bed: amb.lilymere
   bedVolume: 1
   sweeteners:
   - cue: sw.drip
@@ -22,5 +22,5 @@ MonoBehaviour:
     volumeJitter: 0.3
     pitchJitter: 0.06
     maxAtOnce: 1
-  notes: 'Lilymere faded: still air over the half-dry lagoon, a rare drip. Reuses
-    amb.pond until a Lilymere bed is made.'
+  notes: 'Lilymere faded: dry still air over the half-dry lagoon, dry reeds, a rare
+    drip.'

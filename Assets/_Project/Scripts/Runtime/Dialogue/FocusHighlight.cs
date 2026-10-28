@@ -142,7 +142,12 @@ namespace Diorama
             var state = Dialogue.GetTarget(out var world, out var target);
             if (state == Dialogue.TargetState.Active)
             {
-                if (target != _last) _cleared = false;
+                if (target != _last)
+                {
+                    _cleared = false;
+                    // Audio-D: a soft chime when the lantern turns to a new target.
+                    GameAudio.At(Diorama.Audio.AudioIds.SpiritFocus, world).SetVolume(0.7f);
+                }
                 _last = target;
                 _lastEnded = Time.time;
                 sphere = new Vector4(world.x, world.y, world.z, RadiusOf(target));
@@ -182,6 +187,21 @@ namespace Diorama
             Shader.SetGlobalColor(HoverColorId, new Color(hoverColor.r, hoverColor.g, hoverColor.b, hovering ? 1f : 0f));
 
             UpdateBeam(beam || Time.time - _lastEnded < beamLinger && !_cleared && _last != null);
+            BeamSound();
+        }
+
+        LoopAnchor _beamSound;
+
+        /// <summary>spirit.beam: a faint hum on the target while the lantern shines on it.</summary>
+        void BeamSound()
+        {
+            _beamSound ??= new LoopAnchor(transform, "Beam Sound");
+            if (_beam > 0.2f)
+            {
+                _beamSound.Set(Diorama.Audio.AudioIds.SpiritBeam, _beamTo, 0.4f);
+                _beamSound.Handle.SetVolume(0.5f * _beam);
+            }
+            else _beamSound.Off(0.5f);
         }
 
         float RadiusOf(Dialogue.Target t)

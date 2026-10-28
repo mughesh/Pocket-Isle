@@ -65,6 +65,42 @@ namespace Diorama
         float World(float mapMetres) => mapMetres * Zoom * island.transform.lossyScale.x;
         Vector3 WorldAt(Vector2 tile, float height) => island.transform.TransformPoint(island.TileToLocal(tile, Cap + height));
 
+        // ---- audio-D: cries and the low-HP pulse ----
+
+        string _playerCry, _wildCry;
+        AudioHandle _lowHp;
+
+        /// <summary>The Isling's cry (cry.&lt;species&gt;) on it; 0.8 pitch = the faint (slower and lower). Silent for a species without one.</summary>
+        static void Cry(StageActor a, string id, float pitch = 1f)
+        {
+            if (a == null || string.IsNullOrEmpty(id) || !AudioService.Has(id)) return;
+            GameAudio.On(id, a.transform).SetPitch(pitch);
+        }
+
+        IEnumerator CryLater(StageActor a, string id, float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            Cry(a, id);
+        }
+
+        /// <summary>hp.low: a soft pulse while the player's Isling is under a quarter of its HP; stops on a heal or when the battle ends.</summary>
+        void LowHp()
+        {
+            bool low = _playerBar != null && _player != null && _playerBar.target > 0f && _playerBar.target < 0.25f * _playerBar.max;
+            if (low && !_lowHp.IsValid && AudioService.Has(AudioIds.HpLow)) _lowHp = AudioService.PlayLoop2D(AudioIds.HpLow, 0.3f);
+            else if (!low && _lowHp.IsValid)
+            {
+                _lowHp.Stop(0.3f);
+                _lowHp = default;
+            }
+        }
+
+        void OnDisable()
+        {
+            _lowHp.Stop(0.1f);
+            _lowHp = default;
+        }
+
         // ---- setup ----
 
         /// <summary>Puts a creature on the stage, hidden (grow 0) until an entrance plays.</summary>
@@ -88,6 +124,8 @@ namespace Diorama
             actor.Snap();
             if (side == BattleSide.Player) _player = actor;
             else _wild = actor;
+            if (side == BattleSide.Player) _playerCry = AudioIds.Cry(SpeciesRegistry.IdOf(creature.species));
+            else _wildCry = AudioIds.Cry(SpeciesRegistry.IdOf(creature.species));
             return actor;
         }
 
@@ -237,6 +275,7 @@ namespace Diorama
             if (a == null) yield break;
             Vector3 burstAt = WorldAt(a.tile, 0.01f);
             GameAudio.At(rare ? AudioIds.EncRare : AudioIds.EncSting, burstAt);
+            StartCoroutine(CryLater(a, _wildCry, 0.45f));
             if (waterTile.HasValue)
             {
                 GameAudio.At(AudioIds.PondSplash, WorldAt(waterTile.Value, 0f));
@@ -279,6 +318,7 @@ namespace Diorama
             if (a == null) yield break;
             Vector3 c = WorldAt(a.tile, a.View.centerHeight);
             GameAudio.At(AudioIds.PodOpen, c);
+            StartCoroutine(CryLater(a, _playerCry, 0.3f));
             fx.Burst(c, 26, new Color(1f, 0.88f, 0.54f), World(0.05f), 0.5f, World(0.004f), Vector3.up * World(0.02f));
             var ring = fx.Get(BattleFx.Shape.Ring);
             var col = ElementStyle.Of(Element.Neutral).burst;
@@ -423,6 +463,7 @@ namespace Diorama
                         {
                             fx.Burst(self.WorldCenter, 20, Smoke, World(0.03f), 0.7f, World(0.005f), Vector3.up * World(0.02f));
                             GameAudio.At(AudioIds.Faint, self.WorldCenter);
+                            Cry(self, e.side == BattleSide.Player ? _playerCry : _wildCry, 0.8f);
                             if (dazed)
                             {
                                 self.View.Daze();
@@ -768,6 +809,7 @@ namespace Diorama
 
         void LateUpdate()
         {
+            LowHp();
             if (_playerShield != null && _player != null) PlaceShieldIdle(_playerShield, _player);
             if (_wildShield != null && _wild != null) PlaceShieldIdle(_wildShield, _wild);
         }

@@ -32,6 +32,7 @@ namespace Diorama
             var go = new GameObject("[AudioDirector]");
             DontDestroyOnLoad(go);
             _instance = go.AddComponent<AudioDirector>();
+            go.AddComponent<LandmarkLoops>();
         }
 
         /// <summary>The ambience profile name in use (StillIsle, CinderwoodFaded...), for the dev readout and tests.</summary>

@@ -244,9 +244,23 @@ namespace Diorama
             Debug.Log($"[LilyPadBridge] {id}: pad {pad} clicked into slot {_drift.slotOf[pad]}, {Count(_drift.Mask)}/{slots.Length}.");
             if (!Here) return;
             var at = PadWorld(pad);
-            GameAudio.At(AudioIds.PondSplash, at);
+            GameAudio.At(AudioIds.LilyClick, at);
+            StartCoroutine(Croak(at, 0.35f));
             if (fx != null) fx.Burst(at, 14, new Color(0.75f, 0.95f, 1f, 0.9f), TileWorld * 0.5f, 0.5f, TileWorld * 0.04f, island.transform.up * TileWorld * 0.5f);
             StartCoroutine(Ring(new Vector2(_drift.pos[pad].x, _drift.pos[pad].y), 0.6f, 1.6f));
+        }
+
+        /// <summary>A frog on the pad answers the click.</summary>
+        IEnumerator Croak(Vector3 at, float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            if (Here) GameAudio.At(AudioIds.FrogCroak, at).SetVolume(0.7f);
+        }
+
+        IEnumerator Chorus(Vector3 at, float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            if (Here) GameAudio.At(AudioIds.FrogChorus, at);
         }
 
         IEnumerator Finish()
@@ -257,7 +271,8 @@ namespace Diorama
             // Ripples run along the whole channel, out from the crossing.
             if (Here)
             {
-                GameAudio.At(AudioIds.PondSplash, PadWorld(1));
+                GameAudio.At(AudioIds.ChannelRipple, PadWorld(1));
+                StartCoroutine(Chorus(PadWorld(1), 0.6f));
                 for (int k = 0; k < 8; k++)
                 {
                     float off = k * 2.2f;

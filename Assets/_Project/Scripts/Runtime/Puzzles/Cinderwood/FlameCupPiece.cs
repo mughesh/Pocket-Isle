@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Oculus.Interaction.Input;
+using Diorama.Audio;
 using UnityEngine;
 
 namespace Diorama
@@ -57,6 +58,7 @@ namespace Diorama
         readonly bool[] _cupping = new bool[2];
         PropView _body, _wisp;
         AudioSource _audio, _crackle;
+        LoopAnchor _cup;
         bool _gazed, _lookHold, _pulsing, _quietSolve;
         float _shown, _sparkAt, _debugUntil;
 
@@ -235,7 +237,8 @@ namespace Diorama
             LessonComplete();
             MarkSolved(1);
             HearthShrines.SetDormant(map.name, shrine, false);
-            GameAudio.Procedural(_audio, PuzzleSounds.Whoosh, volume);
+            _cup?.Off(0.3f);
+            GameAudio.Play(AudioIds.FlameRekindle, ShrineWorld, _audio, PuzzleSounds.Whoosh, volume);
             Flare();
             if (explorer != null) explorer.Cheer();
             if (!string.IsNullOrEmpty(doneLine)) Dialogue.Say(doneLine);
@@ -316,7 +319,7 @@ namespace Diorama
             if (fx == null) return;
             float tile = TileWorld;
             fx.Burst(MapToWorld(new Vector3(c.tile.x, c.top, c.tile.y)), 8, new Color(1f, 0.62f, 0.25f), tile * 0.4f, 0.7f, tile * 0.05f, island.transform.up * tile * 0.6f);
-            GameAudio.Procedural(_audio, PuzzleSounds.Catch, volume * 0.35f);
+            GameAudio.Play(AudioIds.LanternLight, MapToWorld(new Vector3(c.tile.x, c.top, c.tile.y)), _audio, PuzzleSounds.Catch, volume * 0.35f, 0.6f);
         }
 
         /// <summary>The realm got restored without it (an old save, the dev toggle): the flame just burns, no fanfare.</summary>
@@ -358,10 +361,27 @@ namespace Diorama
             if (IsSolved && _shown >= 0.999f && map.IsPropHidden(shrine)) map.SetPropHidden(shrine, false);
         }
 
+        Vector3 ShrineWorld => MapToWorld(new Vector3(Centre.x, 0.4f, Centre.y));
+
         void Sound()
         {
             if (_crackle == null) return;
-            float want = !IsSolved && Here && _meter.Held ? volume * 0.3f * (0.4f + 0.6f * _meter.Progress) * GameAudio.SfxVolume : 0f;
+            bool held = !IsSolved && Here && _meter.Held;
+            if (AudioService.Has(AudioIds.FlameCup))
+            {
+                // flame.cup swells with the cup's progress (one loop while held, so tracking flickers don't restart it).
+                _cup ??= new LoopAnchor(transform, "Flame Cup Sound");
+                if (!held)
+                {
+                    _cup.Off(0.5f);
+                    return;
+                }
+                _cup.Set(AudioIds.FlameCup, ShrineWorld, 0.3f);
+                _cup.Handle.SetVolume(0.35f + 0.65f * _meter.Progress);
+                _cup.Handle.SetPitch(0.95f + 0.15f * _meter.Progress);
+                return;
+            }
+            float want = held ? volume * 0.3f * (0.4f + 0.6f * _meter.Progress) * GameAudio.SfxVolume : 0f;
             _crackle.volume = Mathf.MoveTowards(_crackle.volume, want, Time.deltaTime * 0.8f);
             if (_crackle.volume > 0.001f && !_crackle.isPlaying) _crackle.Play();
             else if (_crackle.volume <= 0.001f && _crackle.isPlaying) _crackle.Stop();

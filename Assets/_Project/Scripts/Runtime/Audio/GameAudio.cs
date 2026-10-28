@@ -68,6 +68,21 @@ namespace Diorama
             return default;
         }
 
+        /// <summary>A 3D loop at a world point; keep the handle and Stop it. Silent while the cue has no clips (logged once).</summary>
+        public static AudioHandle Loop(string id, Vector3 world, float fadeIn = 0.15f) =>
+            Ready(id) ? AudioService.PlayLoop(id, world, fadeIn) : default;
+
+        /// <summary>A 3D loop that follows a transform (a held piece, the palm cloud). Silent while the cue has no clips.</summary>
+        public static AudioHandle Loop(string id, Transform follow, float fadeIn = 0.15f) =>
+            Ready(id) && follow != null ? AudioService.PlayLoop(id, follow, fadeIn) : default;
+
+        static bool Ready(string id)
+        {
+            if (AudioService.Has(id)) return true;
+            if (FallbackLogged.Add(id)) Debug.LogWarning($"[GameAudio] Cue '{id}' has no clips: its loop stays silent.");
+            return false;
+        }
+
         /// <summary>A procedural clip with no cue yet, at the Effects level.</summary>
         public static void Procedural(AudioSource source, AudioClip clip, float volume)
         {

@@ -67,6 +67,7 @@ namespace Diorama
         int _gazed = -1;
         bool _lookHold, _quietSolve, _finishing;
         float _dropAt, _dripAt;
+        LoopAnchor _rain;
         // Debug (bridge): a synthetic palm-down hand over this map point for a while.
         Vector2? _debugPalm;
         float _debugUntil, _debugWiggle;
@@ -301,8 +302,8 @@ namespace Diorama
             Debug.Log($"[RainGarden] {id}: bud {i} bloomed into a lotus stone, {Count(_garden.Mask)}/{buds.Length}.");
             if (!Here) return;
             var p = BudWorld(i);
-            GameAudio.Procedural(_audio, PuzzleSounds.Catch, volume * 0.7f);
-            GameAudio.At(AudioIds.PondSplash, p);
+            GameAudio.Play(AudioIds.LotusBloom, p, _audio, PuzzleSounds.Catch, volume * 0.7f);
+            GameAudio.At(AudioIds.PondSplash, p).SetVolume(0.5f);
             if (fx == null) return;
             fx.Burst(p, 18, new Color(0.98f, 0.68f, 0.76f), TileWorld * 0.6f, 0.8f, TileWorld * 0.05f, island.transform.up * TileWorld * 0.6f);
             fx.Burst(p, 10, new Color(0.7f, 0.92f, 1f, 0.9f), TileWorld * 0.5f, 0.5f, TileWorld * 0.04f, island.transform.up * TileWorld * 0.3f);
@@ -360,6 +361,7 @@ namespace Diorama
             float h = Mathf.Max(0.6f + 0.25f * scale, _cloudMap.y - belowTiles);
             _cloudView.Place(new Vector2(_cloudMap.x, _cloudMap.z), h - 0.5f * scale, Quaternion.Euler(0f, Time.time * 10f, 0f), show,
                 scale * Mathf.SmoothStep(0.2f, 1f, size));
+            RainSound(show && _cloud.Raining, h - 0.5f * scale);
             if (!show || !_cloud.Raining || fx == null) return;
             // Rain: streaks falling from the whole cloud, splash dots on the bed; more when hard (step 11d: more, bigger).
             float rate = _cloud.Hard ? 0.006f : 0.015f;
@@ -374,11 +376,24 @@ namespace Diorama
                 var ground = MapToWorld(new Vector3(_cloudMap.x + Random.Range(-0.7f, 0.7f) * spread, 0.02f, _cloudMap.z + Random.Range(-0.7f, 0.7f) * spread));
                 fx.Burst(ground, 1, new Color(0.65f, 0.85f, 0.95f, 0.85f), tile * 0.14f, 0.3f, tile * 0.04f, island.transform.up * tile * 0.15f);
             }
-            if (Time.time >= _dripAt)
+            if (!_rain.Playing && Time.time >= _dripAt)
             {
+                // Only while the rain cues have no clips: a drip now and then.
                 _dripAt = Time.time + (_cloud.Hard ? 0.6f : 1.1f);
                 GameAudio.At(AudioIds.SwDrip, MapToWorld(new Vector3(_cloudMap.x, 0f, _cloudMap.z)));
             }
+        }
+
+        /// <summary>rain.soft / rain.hard under the palm cloud, following it; off when it stops raining or leaves the window.</summary>
+        void RainSound(bool raining, float height)
+        {
+            _rain ??= new LoopAnchor(transform, "Rain Sound");
+            if (!raining)
+            {
+                _rain.Off(0.6f);
+                return;
+            }
+            _rain.Set(_cloud.Hard ? AudioIds.RainHard : AudioIds.RainSoft, MapToWorld(new Vector3(_cloudMap.x, height * 0.5f, _cloudMap.z)), 0.4f);
         }
 
         Vector3 BudWorld(int i) => MapToWorld(new Vector3(buds[i].x, 0.4f, buds[i].y));

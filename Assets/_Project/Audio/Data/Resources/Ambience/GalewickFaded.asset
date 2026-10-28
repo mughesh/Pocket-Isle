@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ebfaf023fc4ddd458f60d132e353521, type: 3}
   m_Name: GalewickFaded
   m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AmbienceProfile
-  bed: amb.battle
+  bed: amb.galewick
   bedVolume: 0.8
   sweeteners:
   - cue: sw.gust
@@ -20,6 +20,14 @@ MonoBehaviour:
     maxInterval: 30
     volume: 0.6
     volumeJitter: 0.3
-    pitchJitter: 0.08
+    pitchJitter: 0.06
     maxAtOnce: 1
-  notes: 'Galewick faded: still air (the synth wind bed, low), a rare gust. Reuses amb.battle until a Galewick bed is made.'
+  - cue: sw.creak
+    minInterval: 20
+    maxInterval: 40
+    volume: 0.4
+    volumeJitter: 0.3
+    pitchJitter: 0.06
+    maxAtOnce: 1
+  notes: 'Galewick faded: still hilltop air, a rare gust, a far creak of a stopped
+    mill.'

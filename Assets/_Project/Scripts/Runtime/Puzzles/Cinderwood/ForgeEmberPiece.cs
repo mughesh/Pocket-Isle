@@ -1,5 +1,6 @@
 using System.Collections;
 using Oculus.Interaction.Input;
+using Diorama.Audio;
 using UnityEngine;
 
 namespace Diorama
@@ -195,7 +196,7 @@ namespace Diorama
                         Dialogue.Repeat(tipLine);
                     }
                     Debug.Log($"[ForgeEmberPiece] {id}: picked up ({(_carry.Holder == 0 ? "left" : "right")} hand, {(_hands[_carry.Holder].pinch ? "pinch" : "grab")}).");
-                    GameAudio.Procedural(_audio, PuzzleSounds.Catch, volume * 0.5f);
+                    GameAudio.Play(AudioIds.EmberPick, _emberWorld, _audio, PuzzleSounds.Catch, volume * 0.5f);
                     if (fx != null) fx.Burst(_emberWorld, 10, new Color(1f, 0.6f, 0.25f), TileWorld * 0.4f, 0.6f, TileWorld * 0.04f, island.transform.up * TileWorld * 0.8f);
                     break;
                 case EmberState.Falling:
@@ -266,8 +267,8 @@ namespace Diorama
             if (bellows != null) bellows.Blocked = false;
             if (_audio != null)
             {
-                GameAudio.Procedural(_audio, PuzzleSounds.Whoosh, volume);
-                GameAudio.Procedural(_audio, PuzzleSounds.Crackle, volume * 0.8f);
+                GameAudio.Play(AudioIds.EmberDrop, at, _audio, PuzzleSounds.Crackle, volume * 0.8f);
+                GameAudio.Play(AudioIds.FireboxRoar, at, _audio, PuzzleSounds.Whoosh, volume);
             }
             if (explorer != null) explorer.Cheer();
             if (!string.IsNullOrEmpty(doneLine)) Dialogue.Say(doneLine);

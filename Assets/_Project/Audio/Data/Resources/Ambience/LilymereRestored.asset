@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ebfaf023fc4ddd458f60d132e353521, type: 3}
   m_Name: LilymereRestored
   m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AmbienceProfile
-  bed: amb.pond
+  bed: amb.lilymere.restored
   bedVolume: 1
   sweeteners:
   - cue: sw.drip
@@ -22,10 +22,10 @@ MonoBehaviour:
     volumeJitter: 0.3
     pitchJitter: 0.06
     maxAtOnce: 1
-  - cue: sw.insect
-    minInterval: 6
+  - cue: frog.croak
+    minInterval: 5
     maxInterval: 14
-    volume: 0.8
+    volume: 0.7
     volumeJitter: 0.3
     pitchJitter: 0.06
     maxAtOnce: 1
@@ -36,5 +36,12 @@ MonoBehaviour:
     volumeJitter: 0.3
     pitchJitter: 0.06
     maxAtOnce: 1
-  notes: 'Lilymere restored: water lapping, drips, frogs and insects, birds. Reuses
-    amb.pond until a Lilymere bed is made.'
+  - cue: sw.insect
+    minInterval: 8
+    maxInterval: 18
+    volume: 0.6
+    volumeJitter: 0.3
+    pitchJitter: 0.06
+    maxAtOnce: 1
+  notes: 'Lilymere restored: water lapping, drips, frogs, birds and insects in the
+    reeds.'

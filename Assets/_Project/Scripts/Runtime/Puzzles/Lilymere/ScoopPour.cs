@@ -91,6 +91,7 @@ namespace Diorama
         Vector3 _ballWorld, _ballVel, _lastPalm;
         float _wobble, _fill, _dripAt, _mistAt;
         bool _pouring, _breaking, _quietSolve, _pickedWater, _running0, _bigBall;
+        LoopAnchor _slosh, _fall;
         int _gazed = -1; // 0 = the water, 1 = the basin
         // Debug (bridge): a synthetic hand (palm pose in map space) driving the scoop.
         bool _debugHand, _debugPair;
@@ -228,8 +229,17 @@ namespace Diorama
             }
             else _gazed = -1;
             Carry();
+            FallSound();
             Draw();
             base.Update();
+        }
+
+        /// <summary>waterfall.run: one 3D loop at the fall while it runs and the realm shows.</summary>
+        void FallSound()
+        {
+            _fall ??= new LoopAnchor(transform, "Waterfall Sound");
+            if (Running && Here) _fall.Set(AudioIds.WaterfallRun, MapToWorld(new Vector3(waterfallCenter.x, 1f, waterfallCenter.y + 0.3f)), 1f);
+            else _fall.Off(0.8f);
         }
 
         // ---- hands ----
@@ -321,6 +331,7 @@ namespace Diorama
                     MarkInteracted();
                     Debug.Log($"[ScoopPour] {id}: {(_scoop.Holder == WaterScoop.Both ? "both hands cupped together dip" : "a cupped hand dips")} into the lagoon ({(_scoop.Holder == 0 ? "left" : _scoop.Holder == 1 ? "right" : "both")}).");
                     Splash(PalmWorld(), 8);
+                    GameAudio.At(AudioIds.WaterScoop, PalmWorld());
                     break;
                 case ScoopState.Held:
                     LessonComplete();
@@ -338,7 +349,7 @@ namespace Diorama
                 case ScoopState.Spilled:
                     Debug.Log($"[ScoopPour] {id}: tipped away from the basin: it splashes down.");
                     Splash(_ballWorld, 14);
-                    GameAudio.At(AudioIds.PondSplash, _ballWorld);
+                    GameAudio.At(AudioIds.WaterSpill, _ballWorld);
                     _scoop.Reset();
                     break;
                 case ScoopState.Empty:
@@ -403,7 +414,11 @@ namespace Diorama
 
         void Carry(bool pouring = false)
         {
-            if (_scoop == null || !pouring && (_scoop.State != ScoopState.Held || _pouring)) return;
+            if (_scoop == null || !pouring && (_scoop.State != ScoopState.Held || _pouring))
+            {
+                _slosh?.Off(0.3f);
+                return;
+            }
             var target = PalmWorld();
             // A jelly wobble: the ball lags the palm on a spring.
             var prev = _ballWorld;
@@ -412,6 +427,14 @@ namespace Diorama
             _ballWorld += _ballVel * Time.deltaTime;
             if ((_ballWorld - target).magnitude > 0.05f * Scale) _ballWorld = target;
             _wobble = Mathf.Clamp01(_wobble * Mathf.Exp(-4f * Time.deltaTime) + (_ballWorld - prev).magnitude / Mathf.Max(1e-3f, 0.01f * Scale));
+            // water.slosh rides with the water in the palm, louder while it wobbles.
+            _slosh ??= new LoopAnchor(transform, "Slosh Sound");
+            if (pouring) _slosh.Off(0.2f);
+            else
+            {
+                _slosh.Set(AudioIds.WaterSlosh, _ballWorld, 0.3f);
+                _slosh.Handle.SetVolume(0.3f + 0.7f * _wobble);
+            }
             if (Time.time >= _dripAt && fx != null)
             {
                 _dripAt = Time.time + Random.Range(0.18f, 0.4f);
@@ -428,8 +451,7 @@ namespace Diorama
             var to = PourWorld(UsesBowl ? bowlFloor - bowlRim + 0.1f : 0.2f);
             _streamTo = to;
             float tile = TileWorld;
-            GameAudio.At(AudioIds.PondSplash, to);
-            GameAudio.Procedural(_audio, PuzzleSounds.Whoosh, volume * 0.5f);
+            GameAudio.Play(AudioIds.WaterPour, to, _audio, PuzzleSounds.Whoosh, volume * 0.5f);
             float fillFrom = _fill, fillTo = _scoop.Pours / (float)Mathf.Max(1, poursNeeded);
             for (float t = 0f; t < 0.8f; t += Time.deltaTime)
             {
@@ -469,9 +491,16 @@ namespace Diorama
             Debug.Log(UsesBowl ? $"[ScoopPour] {id}: the bowl is full: water spills over its lip, cracks race down the frozen fall."
                 : $"[ScoopPour] {id}: the basin is full: cracks run up the frozen waterfall.");
             // The basin glows; cracks climb the ice as sparks (12c: the bowl spills over its lip and they race down).
+            int cracks = 0;
             for (float t = 0f; t < crackSeconds; t += Time.deltaTime)
             {
                 float u = t / crackSeconds;
+                if (Here && u >= cracks / 3f && cracks < 3)
+                {
+                    // ice.crack three times down the fall, higher pitch as the cracks race on.
+                    GameAudio.At(AudioIds.IceCrack, MapToWorld(new Vector3(waterfallCenter.x, 1.6f - 0.5f * cracks, waterfallCenter.y + 0.3f))).SetPitch(1f + 0.06f * cracks);
+                    cracks++;
+                }
                 if (fx != null && Here && Random.value < 0.5f)
                 {
                     float h = UsesBowl ? bowlRim - 0.1f - u * (bowlRim - 0.3f) : 0.3f + u * 2.1f;
@@ -488,7 +517,7 @@ namespace Diorama
                 yield return null;
             }
             // The ice shatters, the waterfall runs.
-            GameAudio.At(AudioIds.CatchShatter, MapToWorld(new Vector3(waterfallCenter.x, 1.4f, waterfallCenter.y)));
+            GameAudio.At(AudioIds.IceShatter, MapToWorld(new Vector3(waterfallCenter.x, 1.4f, waterfallCenter.y)));
             if (fx != null && Here)
                 for (int k = 0; k < 4; k++)
                     fx.Burst(MapToWorld(new Vector3(waterfallCenter.x, 0.5f + k * 0.55f, waterfallCenter.y + 0.2f)), 16, new Color(0.9f, 0.98f, 1f), tile * 0.9f, 0.8f, tile * 0.05f, island.transform.up * tile * 0.3f);
@@ -497,7 +526,7 @@ namespace Diorama
             yield return new WaitForSeconds(0.5f);
             // The lagoon rises: the dry ring floods (one island rebuild), a wave of splashes spreads out from the basin.
             Debug.Log($"[ScoopPour] {id}: the waterfall runs: the lagoon rises ({_dry.Count} dry bed tiles flood).");
-            GameAudio.Ui(AudioIds.RestoreSwell);
+            GameAudio.At(AudioIds.LagoonRise, BasinWorld(0.3f));
             MusicDirector.Jingle(3f);
             MarkSolved(_scoop.Pours);
             float maxD = 1f;
