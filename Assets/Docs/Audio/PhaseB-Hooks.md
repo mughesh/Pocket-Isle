@@ -252,43 +252,39 @@ procedural fallback), `AudioDirector.cs` (ambience + music by game state), `Audi
 | Gen batch | All 201 good / ok ElevenLabs clips are in; `GenImporter` leaves out the 9 graded weak. |
 | Bridge | `exec:Diorama.EditorTools.AudioHookupDebug.State` logs area, music state and gain, distance scale, buses. |
 
-### Missing sounds (next audio pass)
-New interactions since the audio branch was cut that still play a procedural placeholder (`PuzzleSounds`) or nothing:
+### Missing sounds: status after step audio-D (Oct 28)
+Report: `AudioD-Report.md`. Every row of the old table is hooked; `PuzzleSounds` only plays as the fallback while a cue
+has no clips (logged once by `GameAudio`). Loops ride on `LoopAnchor` (a child of their piece, so a scene swap ends them).
 
-| Moment | Now | Wants |
+| Moment | Done (cue, where) | Left |
 |---|---|---|
-| Galewick: hand sweep gust (`GustField`) | PuzzleSounds.Breeze | `wind.sweep`: airy whoosh that follows the hand's speed |
-| Galewick: big mill turns / stops (`BigMill`) | Rumble / Thud | `mill.turn` (wooden creak loop), `mill.stop` (thunk) |
-| Galewick: tower door (`TowerDoor`) | Whoosh / Rumble | `tower.door` (wind rush + stone) |
-| Galewick: kites, cloud bank, knots on the mills | nothing | `kite.tug`, `cloud.part`, `knot.pull` |
-| Galeowl: knot snaps (`KeeperUntangle`) | PuzzleSounds.Twang | `keeper.knot.snap` (rope twang) |
-| Galeowl: poked when calm (`KeeperHall`) | PuzzleSounds.Hoot | `voice.galeowl` (soft hoo-hoo), and a `cry.Galeowl` |
-| Galewick wind roster | no cries | `cry.<species>` for the wind Islings (Make Cry Profiles) |
-| Cinderwood: cupping the village flame (`FlameCupPiece`) | Crackle loop, Whoosh, Catch | `flame.cup` (warm crackle loop that swells), `flame.rekindle` |
-| Cinderwood: hollow lanterns (`LanternHollowPiece`) | Catch, Whoosh | `lantern.light` (tick + small flame), `smoke.clear` (smoke rolling away) |
-| Cinderwood: forge ember (`ForgeEmberPiece`) | Catch, Whoosh + Crackle | `ember.pick`, `ember.drop` (into the firebox), `firebox.roar` |
-| Galewick ambience | reuses `amb.battle` | `amb.galewick` / `amb.galewick.restored` beds |
-| Low HP pulse | not hooked (the stage has no max HP at the hit) | `hp.low` hook: start under 25 % HP, stop on heal / battle end |
-| Cries | not hooked yet (step audio-C) | `cry.<species>` on WildAppears, PodBurst, faint |
-| Shrine idle flame, ember vents, hot springs, lanterns sputter | not hooked (P1 loops on tiles) | one 3D loop per landmark in view |
-| Spirit beam / focus pulse | not hooked (P1) | `spirit.beam`, `spirit.focus` |
-| Lodge door / page / pod tick | not hooked (P2) | `lodge.*` |
-| Settings pebble | the board's `rune.select` covers it | `ui.pebble` if it should differ |
-| Lilymere: lily pad clicks into a slot | `pond.splash` | `lily.click` (soft wooden tok + water slap), a frog croak on the pad |
-| Lilymere: all pads lock | `pond.splash` | `frog.chorus` (a short chorus), `channel.ripple` |
-| Lilymere: rain from the palm cloud | `sw.drip` every ~1 s | `rain.soft` / `rain.hard` loops (follow the cloud) |
-| Lilymere: a bud blooms | PuzzleSounds.Catch + `pond.splash` | `lotus.bloom` (petal pop + sparkle) |
-| Lilymere: scoop, ball in the palm, pour, spill | `pond.tap`, `pond.splash`, PuzzleSounds.Whoosh | `water.scoop`, `water.slosh` (loop while held), `water.pour`, `water.spill` |
-| Lilymere: the frozen waterfall cracks, runs | `catch.shatter` | `ice.crack`, `ice.shatter`, `waterfall.run` (loop) |
-| Lilymere: the lagoon rises | `restore.swell` | `lagoon.rise` |
-| Lilymere ambience | reuses `amb.pond` | `amb.lilymere` / `amb.lilymere.restored` (water lapping, frogs, birds) |
-| Spirit text typing (`DialogueBubble.Blip`, Oct 27 note) | a blip every 3 typed characters | too often, too many beats, annoying: fewer, softer ticks, or one soft chime per line |
-| The log's drop (`FallenLog`, Oct 27 note) | PuzzleSounds.Thud | weak, almost silent: a solid wooden `log.drop` thud |
-| Step 13 finale: the statue cracks while it wakes (`FinaleDirector.Wake`) | `statue.socket` | `heart.crack`: deep stone cracking, grit falling |
-| Step 13: the Heart's heartbeat (wake, then the veins' pulse) | `statue.socket` once | `heart.beat`: a slow warm lub-dub (a loop would suit) |
-| Step 13: the Heart's wings unfold | `statue.socket` | `heart.wings`: a big soft feathery-stone unfurl |
-| Step 13: the Spirit lands on the palm / settles into the forehead / the spark leaves the eye | `ui.saved` / `statue.socket` | `spark.chime`: a small warm glassy chime |
-| Step 13: the gates bloom, the hub answers | `jingle.shard` | `gates.bloom`: a rising shimmer (fire crackle + water sparkle + wind whoosh) |
-| Step 13: each credits tablet rises | `statue.socket` | `credits.tablet`: a soft stone slide |
-| Step 13: the finale's music | silent (`music.finale` has no clips) | `music.finale`: a warm swelling theme, about 3 minutes |
-| Step 13: the Heart's voice | `voice.heart` blips are off for the Heart (no typing ticks) | a soft breathy hum when a whisper starts, if anything |
+| Galewick hand sweep | `wind.sweep` loop per gust (GustField.Blow / Animate), level + pitch from the sweep strength | headset feel |
+| Big mill drawbridge | `mill.turn` loop while it lowers, `mill.stop` on landing (BigMill.Lower) | |
+| Tower door | vanes `mill.turn` loop, `tower.door` (TowerDoor.Open) | gen take with a stone thunk (paid month) |
+| Kites, cloud bank, knots | `kite.tug` (grab, launch), `cloud.part` (puff gone), `knot.pull` (end pinched), `keeper.knot.snap` | |
+| Galeowl poked when calm | `voice.galeowl` (KeeperHall) + `cry.Galeowl` | |
+| Wind + water rosters | `cry.<species>` x 24 | all cries still peak-levelled (see report) |
+| Village flame | `flame.cup` loop swelling with the cup, `flame.rekindle`, `lantern.light` per catcher | |
+| Hollow lanterns | `lantern.light`, `smoke.clear` | |
+| Forge ember | `ember.pick` (grab or look + pinch), `ember.drop` + `firebox.roar` | |
+| Galewick / Lilymere ambience | own beds `amb.galewick*`, `amb.lilymere*` in the four profiles | pick gen vs synth |
+| Low HP pulse | `hp.low` 2D loop under 25 % (BattleStage.LowHp) | |
+| Cries | entrance, send-out, faint (0.8 pitch) in BattleStage | lodge `Wake` / `Inspect` cries not hooked |
+| Shrine flame, ember vents, hot springs, mills | `LandmarkLoops`: nearest of each kind in the window | lanterns sputter not hooked |
+| Spirit beam / focus | `spirit.beam` faint loop while it shines, `spirit.focus` on a new target (FocusHighlight) | judge the beam on the headset |
+| Lodge door / page / pod tick | not done (P2) | `lodge.*` |
+| Settings pebble | the board's `rune.select` still covers it | `ui.pebble` if it should differ |
+| Lily pads | `lily.click` + a `frog.croak`; all in: `channel.ripple` + `frog.chorus` | |
+| Rain from the palm cloud | `rain.soft` / `rain.hard` loop following the cloud (RainGarden.RainSound) | |
+| Bud blooms | `lotus.bloom` (+ a soft `pond.splash`) | |
+| Scoop / hold / pour / spill | `water.scoop`, `water.slosh` loop with the water, `water.pour`, `water.spill` | |
+| Frozen fall | `ice.crack` x3, `ice.shatter`, `waterfall.run` loop while it runs and the realm shows | |
+| Lagoon rises | `lagoon.rise` (3D at the basin) | |
+| Typing blips | one tick per 6 chars at most (0.2 s apart, 0.55 vol, random pitch); objective cards one chime; Heart silent | headset feel |
+| The log's drop | `log.drop` remade heavier, one tier louder, 6 gen takes | pick |
+| Finale crack / heartbeat / wings / chimes / gates / tablets | `heart.crack`, `heart.beat` loop (wake to Hall of Fame end), `heart.wings`, `spark.chime`, `gates.bloom`, `credits.tablet` (FinaleDirector) | |
+| The finale's music | `music.finale` slot (empty) | Mugesh's track |
+| The Heart's voice | `heart.hum` once per whisper (DialogueBubble.Show) | |
+
+Bridge: `exec:Diorama.Audio.EditorTools.StepDTools.Synth` / `.ImportGen` / `.Cries` / `.Scope` (Logs/audioD-scope.md);
+`exec:Diorama.EditorTools.AudioHookupDebug.Voices` (every busy voice), `.PlayTest` (cue id in arg.txt), `.LilyReset`.
