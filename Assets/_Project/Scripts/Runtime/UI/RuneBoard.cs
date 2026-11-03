@@ -36,6 +36,9 @@ namespace Diorama
         [Tooltip("The board faces the head when shown, then drifts at most this far (degrees, yaw).")]
         public float maxDrift = 15f;
         public float driftSpeed = 1.5f;
+        [Tooltip("Nov 3: the head this far round the island from where the board was faced (a recenter, the island re-placed " +
+                 "while it showed) faces it at the head again (degrees).")]
+        public float refaceAngle = 35f;
         public float maxTilt = 40f;
 
         [Header("Press")]
@@ -444,6 +447,14 @@ namespace Diorama
                     {
                         _baseYaw = _yaw = headYaw;
                         _tilt = tilt;
+                    }
+                    else if (Mathf.Abs(Mathf.DeltaAngle(_baseYaw, headYaw)) > refaceAngle)
+                    {
+                        // Nov 3: the island moved under the board (recenter, startup placement): it stayed facing the old
+                        // spot, crossways or away. Face the head again (turn there at once when it was far off).
+                        Debug.Log($"[RuneBoard] {name}: the head is {Mathf.DeltaAngle(_baseYaw, headYaw):0} deg round from the board's facing: facing it again.");
+                        if (Mathf.Abs(Mathf.DeltaAngle(_yaw, headYaw)) > 60f) _yaw = headYaw;
+                        _baseYaw = headYaw;
                     }
                     float target = _baseYaw + Mathf.Clamp(Mathf.DeltaAngle(_baseYaw, headYaw), -maxDrift, maxDrift);
                     float k = 1f - Mathf.Exp(-Time.unscaledDeltaTime * driftSpeed);
