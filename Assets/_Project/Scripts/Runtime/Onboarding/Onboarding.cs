@@ -49,6 +49,11 @@ namespace Diorama
         [Header("Pinch lesson (step 9h)")]
         [Tooltip("The lesson that counts pinches (either hand).")]
         public string pinchLesson = "pinch";
+        [Tooltip("Step 14a: after the first of two pinches the line becomes this trigger (\"Nice! Once more.\") and the chip this.")]
+        public string pinchOnceLine = "lesson.pinch.once";
+        public string pinchAgainChip = "Pinch again";
+        [Tooltip("Step 14a: the pinch lesson's praise (\"Perfect!\").")]
+        public string pinchDoneLine = "lesson.pinch.done";
         [Min(1)] public int pinchCount = 2;
         [Tooltip("Step 12a: Diorama/GoldMark (Materials/GoldMark) for the lesson's gold tile.")]
         public Material goldMaterial;
@@ -335,9 +340,18 @@ namespace Diorama
         {
             _pinches++;
             Debug.Log($"[Onboarding] Pinch {_pinches}/{pinchCount} ({(left ? "left" : "right")}).");
+            // Step 14a: the first pinch is a moment: a bigger gold burst, a soft chime, a dot fills, "Nice! Once more."
+            bool first = _pinches == 1 && pinchCount > 1;
             if (fx != null && hand != null && HandLookup.TryGetJoint(hand, HandJointId.HandThumbTip, out var thumb) &&
                 HandLookup.TryGetJoint(hand, HandJointId.HandIndexTip, out var index))
-                fx.Burst((thumb + index) * 0.5f, 10, sparkleColor, 0.06f, 0.45f, 0.004f, Vector3.up * 0.03f);
+                fx.Burst((thumb + index) * 0.5f, first ? 26 : 10, sparkleColor, first ? 0.09f : 0.06f, first ? 0.6f : 0.45f, first ? 0.005f : 0.004f, Vector3.up * 0.03f);
+            Dialogue.SetProgress(_pinches, pinchCount);
+            if (first)
+            {
+                GameAudio.Ui(Diorama.Audio.AudioIds.UiLesson);
+                Dialogue.SetChip(pinchAgainChip);
+                Dialogue.Repeat(pinchOnceLine);
+            }
             if (_pinches >= pinchCount) _runner.Mark("pinched");
         }
 
@@ -361,7 +375,10 @@ namespace Diorama
             // Step 9h: one instruction at a time, and it stays until the lesson is done.
             if (!string.IsNullOrEmpty(l.line))
             {
-                Dialogue.Pin(new[] { l.line, l.again, l.help, script.handsLine }, l.chip);
+                bool pinch = l.id == pinchLesson;
+                Dialogue.Pin(new[] { l.line, l.again, l.help, script.handsLine, pinch ? pinchOnceLine : null }, l.chip);
+                // Step 14a: a counted lesson shows its progress dots (two pinches).
+                if (pinch) Dialogue.SetProgress(0, pinchCount);
                 Dialogue.Repeat(l.line);
             }
             LessonShown?.Invoke(l);
@@ -392,7 +409,9 @@ namespace Diorama
         {
             bool praise = done && l.praise && script.praise.Count > 0;
             // The lesson's line and chip close; the praise comes first, then the lines that waited for the lesson.
-            Dialogue.Unpin(praise ? script.praise[_praiseIndex++ % script.praise.Count] : null);
+            // Step 14a: the pinch lesson ends on its own "Perfect!".
+            Dialogue.Unpin(done && l.id == pinchLesson && !string.IsNullOrEmpty(pinchDoneLine) ? pinchDoneLine
+                : praise ? script.praise[_praiseIndex++ % script.praise.Count] : null);
             foreach (var id in new[] { l.line, l.again, l.help })
                 if (!string.IsNullOrEmpty(id)) Dialogue.Cancel(id);
             if (_goldPath != null)

@@ -149,6 +149,10 @@ namespace Diorama
         Transform _icon;
         MeshRenderer _iconRenderer;
         Mesh _iconMesh;
+        // Step 14a: progress dots under a counted lesson's line or chip (o o -> * o -> * *).
+        readonly System.Collections.Generic.List<MeshRenderer> _dots = new System.Collections.Generic.List<MeshRenderer>();
+        Mesh _dotRing, _dotFull;
+        int _progressDone, _progressTotal;
 
         /// <summary>The shown line stays until the lesson is done (a chip after a while).</summary>
         public bool IsPinned => _showing && _chipText != null;
@@ -172,6 +176,8 @@ namespace Diorama
         {
             Destroy(_quad);
             if (_iconMesh != null) Destroy(_iconMesh);
+            if (_dotRing != null) Destroy(_dotRing);
+            if (_dotFull != null) Destroy(_dotFull);
             if (_overMaterial != null) Destroy(_overMaterial);
         }
 
@@ -371,6 +377,7 @@ namespace Diorama
             _blipTime = 0f;
             _endAt = _shownAt + _typeSeconds + _holdSeconds;
             _showing = true;
+            if (_progressTotal > 0) LayoutDots();
             // Audio-D: an objective card gets one soft chime instead of ticks; the Heart's whisper starts with a breathy hum.
             if (_heart) GameAudio.At(Diorama.Audio.AudioIds.HeartHum, anchor != null ? anchor.position : _root.position);
             else if (_objective && string.IsNullOrEmpty(chip)) GameAudio.At(Diorama.Audio.AudioIds.SpiritFocus, _root.position).SetVolume(0.6f);
@@ -387,6 +394,95 @@ namespace Diorama
             _chipText = chip;
             if (_chip) Layout(chip, true);
             Debug.Log($"[DialogueBubble] Chip now: {chip}");
+        }
+
+        /// <summary>
+        /// Step 14a: progress dots under the bubble (a counted lesson: two pinches). total 0 = none.
+        /// </summary>
+        public void SetProgress(int done, int total)
+        {
+            _progressDone = Mathf.Clamp(done, 0, total);
+            _progressTotal = Mathf.Max(0, total);
+            LayoutDots();
+        }
+
+        const float DotSize = 0.011f, DotGap = 0.006f;
+
+        void LayoutDots()
+        {
+            if (_dotRing == null)
+            {
+                _dotRing = DotMesh(0.32f);
+                _dotFull = DotMesh(0f);
+            }
+            while (_dots.Count < _progressTotal)
+            {
+                var go = new GameObject($"Progress Dot {_dots.Count + 1}");
+                go.transform.SetParent(_visual, false);
+                go.AddComponent<MeshFilter>();
+                var r = go.AddComponent<MeshRenderer>();
+                r.sharedMaterial = _overMaterial != null ? _overMaterial : hudMaterial;
+                r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                r.receiveShadows = false;
+                r.sortingOrder = 2;
+                _dots.Add(r);
+            }
+            float span = _progressTotal * DotSize + (_progressTotal - 1) * DotGap;
+            for (int i = 0; i < _dots.Count; i++)
+            {
+                var r = _dots[i];
+                bool on = i < _progressTotal && _showing;
+                r.gameObject.SetActive(on);
+                if (!on) continue;
+                bool full = i < _progressDone;
+                r.GetComponent<MeshFilter>().sharedMesh = full ? _dotFull : _dotRing;
+                r.transform.localPosition = new Vector3(-span * 0.5f + DotSize * 0.5f + i * (DotSize + DotGap), -_size.y * 0.5f - DotSize * 1.1f, -0.001f);
+                r.transform.localScale = new Vector3(DotSize, DotSize, 1f);
+                Paint(r, full ? objectiveGold : outlineColor, 1f, 0f, 0f);
+            }
+        }
+
+        /// <summary>A disc (inner 0) or a ring, radius 0.5, uvs at the middle (the HUD shader's back colour).</summary>
+        static Mesh DotMesh(float inner)
+        {
+            const int n = 20;
+            var verts = new System.Collections.Generic.List<Vector3>();
+            var tris = new System.Collections.Generic.List<int>();
+            if (inner <= 0f)
+            {
+                verts.Add(Vector3.zero);
+                for (int i = 0; i < n; i++)
+                {
+                    float a = Mathf.PI * 2f * i / n;
+                    verts.Add(new Vector3(Mathf.Cos(a), Mathf.Sin(a), 0f) * 0.5f);
+                }
+                for (int i = 0; i < n; i++) tris.AddRange(new[] { 0, 1 + (i + 1) % n, 1 + i });
+            }
+            else
+            {
+                for (int i = 0; i < n; i++)
+                {
+                    float a = Mathf.PI * 2f * i / n;
+                    var d = new Vector3(Mathf.Cos(a), Mathf.Sin(a), 0f);
+                    verts.Add(d * 0.5f);
+                    verts.Add(d * inner);
+                }
+                for (int i = 0; i < n; i++)
+                {
+                    int a0 = 2 * i, a1 = 2 * i + 1, b0 = 2 * ((i + 1) % n), b1 = b0 + 1;
+                    tris.AddRange(new[] { a0, b0, a1, a1, b0, b1 });
+                }
+            }
+            var mesh = new Mesh { name = inner > 0f ? "Progress Dot Ring" : "Progress Dot" };
+            mesh.SetVertices(verts);
+            var uv = new Vector2[verts.Count];
+            for (int i = 0; i < uv.Length; i++) uv[i] = new Vector2(0.5f, 0.5f);
+            mesh.uv = uv;
+            var both = new System.Collections.Generic.List<int>(tris);
+            for (int i = 0; i < tris.Count; i += 3) both.AddRange(new[] { tris[i], tris[i + 2], tris[i + 1] });
+            mesh.SetTriangles(both, 0);
+            mesh.RecalculateBounds();
+            return mesh;
         }
 
         /// <summary>The chip's text while a pinned line shows (null otherwise).</summary>
@@ -442,6 +538,7 @@ namespace Diorama
             _tail.gameObject.SetActive(!_heart);
             PlaceTail();
             _clipper.Size = new Vector3(_size.x, _size.y, 0.02f);
+            if (_progressTotal > 0 || _dots.Count > 0) LayoutDots();
 
             var back = _line.speaker == DialogueSpeaker.Keeper ? keeperColor : _line.speaker == DialogueSpeaker.Heart ? heartColor : spiritColor;
             // Objectives: a gold border (thinner and rounder since the Oct 28 notes: "feels blocky"); chatter: plain cream.

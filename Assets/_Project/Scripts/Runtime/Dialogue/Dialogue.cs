@@ -184,6 +184,7 @@ namespace Diorama
                 foreach (var t in transient)
                     if (!string.IsNullOrEmpty(t) && d._pinned.Add(t)) d._transient.Add(t);
             d._chip = chip;
+            d._progress = default;
             // A line that is not the lesson's ends after its minimum time; then only lesson lines show.
             if (d._current.HasValue && !d._pinned.Contains(d._current.Value.trigger) && d.bubble != null) d.bubble.FinishSoon();
             Debug.Log($"[Dialogue] Pinned for the lesson: {string.Join(", ", d._pinned)} (chip '{chip}').");
@@ -202,6 +203,16 @@ namespace Diorama
             _chip = chip;
             if (bubble != null) bubble.SetChip(chip);
         }
+
+        /// <summary>Step 14a: progress dots under the pinned lesson's line or chip (total 0 = none).</summary>
+        public static void SetProgress(int done, int total)
+        {
+            if (_instance == null) return;
+            _instance._progress = new Vector2Int(done, total);
+            if (_instance.bubble != null) _instance.bubble.SetProgress(done, total);
+        }
+
+        Vector2Int _progress;
 
         /// <summary>The pinned lesson's chip text (null when nothing is pinned).</summary>
         public string PinnedChip => _pinned.Count > 0 ? _chip : null;
@@ -225,6 +236,7 @@ namespace Diorama
             d._transient.Clear();
             d._lesson = null;
             d._chip = null;
+            d._progress = default;
             d._queue.RemoveAll(q => pinned.Contains(q.trigger));
             bool showingLesson = d._current.HasValue && pinned.Contains(d._current.Value.trigger);
             if (!string.IsNullOrEmpty(first)) d.FireFirst(first);
@@ -458,7 +470,13 @@ namespace Diorama
             var anchor = AnchorFor(q.line.speaker);
             // The lesson's last line stays (pinned) until the lesson is done.
             bool stays = _pinned.Contains(q.trigger) && !_transient.Contains(q.trigger) && !_queue.Exists(o => o.trigger == q.trigger);
-            if (bubble != null) bubble.Show(q.line, anchor, stays ? (string.IsNullOrEmpty(_chip) ? q.line.text : _chip) : null, q.objective || stays);
+            if (bubble != null)
+            {
+                // Step 14a: the lesson's progress dots go with its own lines only.
+                bool lessonLine = _pinned.Contains(q.trigger);
+                bubble.SetProgress(lessonLine ? _progress.x : 0, lessonLine ? _progress.y : 0);
+                bubble.Show(q.line, anchor, stays ? (string.IsNullOrEmpty(_chip) ? q.line.text : _chip) : null, q.objective || stays);
+            }
             Speaking?.Invoke(q.line.speaker);
         }
 
