@@ -177,11 +177,15 @@ namespace Diorama.EditorTools
         /// <summary>A gust along the ridge path over the cloud bank (strength in arg.txt, default 0.9).</summary>
         public static void Gust()
         {
-            var b = Object.FindFirstObjectByType<CloudBankPiece>();
-            if (b == null) return;
+            var banks = Object.FindObjectsByType<CloudBankPiece>(FindObjectsSortMode.None);
+            if (banks.Length == 0) return;
             float strength = float.TryParse(Arg, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var s) ? s : 0.9f;
-            b.DebugGust(strength);
-            Debug.Log($"[GalewickPlay] Cloud bank: {b.Describe()}, here {b.Here}");
+            // Step 14a: every bank in Galewick (the arrival's and the ridge's; each blows only if it is outside now).
+            foreach (var b in banks)
+            {
+                b.DebugGust(strength);
+                Debug.Log($"[GalewickPlay] Cloud bank {b.id}: {b.Describe()}, here {b.Here}");
+            }
         }
 
         /// <summary>A gust across the island toward the player (the ripple), anywhere in Galewick.</summary>

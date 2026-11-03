@@ -158,7 +158,33 @@ namespace Diorama
         public override char At(int row, int column)
         {
             char c = Raw(row, column);
+            if (_wet != null && _wet.Contains(new Vector2Int(column, row))) return Water;
             return _risen && c == DryBed ? Water : c;
+        }
+
+        // Step 14a (Lilymere's arrival stream): single tiles that read as water, and water tiles a pad bridge makes walkable.
+        [NonSerialized] HashSet<Vector2Int> _wet, _bridged;
+
+        /// <summary>Runtime only: this tile (column, row) reads as water (a swelling stream), or as itself again. Rebuilds the island.</summary>
+        public void SetWet(Vector2Int tile, bool wet)
+        {
+            if (wet == IsWet(tile)) return;
+            _wet ??= new HashSet<Vector2Int>();
+            if (wet) _wet.Add(tile);
+            else _wet.Remove(tile);
+            version++;
+        }
+
+        public bool IsWet(Vector2Int tile) => _wet != null && _wet.Contains(tile);
+
+        /// <summary>Runtime only: this tile is walkable whatever it reads as (a lily pad bridge over water).</summary>
+        public void SetBridged(Vector2Int tile, bool bridged)
+        {
+            if (bridged == (_bridged != null && _bridged.Contains(tile))) return;
+            _bridged ??= new HashSet<Vector2Int>();
+            if (bridged) _bridged.Add(tile);
+            else _bridged.Remove(tile);
+            version++;
         }
 
         /// <summary>The zone legend entry at a tile (column, row). False outside every zone.</summary>
@@ -255,7 +281,7 @@ namespace Diorama
             return _blocked.Contains(tile);
         }
 
-        public override bool CanWalk(Vector2Int tile) => base.CanWalk(tile) && !PropBlocks(tile);
+        public override bool CanWalk(Vector2Int tile) => _bridged != null && _bridged.Contains(tile) || base.CanWalk(tile) && !PropBlocks(tile);
 
         /// <summary>True when the island doesn't draw the prop anchored here (a puzzle draws its own). It still blocks.</summary>
         public bool IsPropHidden(Vector2Int anchor) => _hiddenProps != null && _hiddenProps.Contains(anchor);
@@ -287,10 +313,13 @@ namespace Diorama
         /// <summary>Drops every runtime change (puzzles call it when they go away; tests).</summary>
         public void ClearRuntimeChanges()
         {
-            bool any = _hiddenProps != null && _hiddenProps.Count > 0 || _openProps != null && _openProps.Count > 0 || _risen;
+            bool any = _hiddenProps != null && _hiddenProps.Count > 0 || _openProps != null && _openProps.Count > 0 || _risen ||
+                       _wet != null && _wet.Count > 0 || _bridged != null && _bridged.Count > 0;
             _hiddenProps = null;
             _openProps = null;
             _risen = false;
+            _wet = null;
+            _bridged = null;
             _blocked = null;
             if (any) version++;
         }

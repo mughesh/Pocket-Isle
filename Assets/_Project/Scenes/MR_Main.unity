@@ -360,6 +360,7 @@ Transform:
   - {fileID: 678983519}
   - {fileID: 896397233}
   - {fileID: 288828728}
+  - {fileID: 949271663}
   m_Father: {fileID: 1553131432}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &155307357
@@ -771,7 +772,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &254543052
 Transform:
   m_ObjectHideFlags: 0
@@ -1100,6 +1101,9 @@ MonoBehaviour:
   zoneMargin: 0.01
   cornerSize: 0.1
   cornerReach: 0.03
+  lipBelowPods: 0.02
+  lipDepth: 0.05
+  podClearance: 0.01
 --- !u!114 &270959112
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1622,7 +1626,7 @@ MonoBehaviour:
   fx: {fileID: 1078587927}
   reach: 5
   lessonLine: lm.rain
-  ghostClip: palm_sweep
+  ghostClip: 
   ghostScale: 1
   lessonChip: Palm down!
   counterLabel: Lotus
@@ -1670,6 +1674,12 @@ MonoBehaviour:
   softSeconds: 2
   hardSeconds: 1
   lookSeconds: 2.5
+  streamTiles: []
+  crossingTiles: []
+  bridgeSlots: []
+  swellSeconds: 2
+  bridgeSeconds: 1.6
+  legacySolvedId: 
   doneLine: lm.rain.done
   volume: 0.7
 --- !u!1 &367221214
@@ -1871,11 +1881,14 @@ MonoBehaviour:
   island: {fileID: 270959109}
   islandScale: 0.6
   distance: 0.45
+  topBelowEye: 0.3
+  minBelowEye: 0.15
+  minAboveFloor: 0.55
   belowEye: 0.35
   seatedEyeHeight: 1.15
   trackingTimeout: 3
-  settleFrames: 4
-  settleTimeout: 1.5
+  startupSettleMax: 3
+  recenterSettleMax: 2
 --- !u!114 &374318556
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2404,7 +2417,7 @@ MonoBehaviour:
   fx: {fileID: 1078587927}
   reach: 4
   lessonLine: gw.gust
-  ghostClip: palm_sweep
+  ghostClip: 
   ghostScale: 1
   lessonChip: Sweep!
   counterLabel: Clouds
@@ -2434,6 +2447,7 @@ MonoBehaviour:
   perGust: 0.36
   holdRate: 0.4
   doneLine: gw.gust.done
+  rippleOnClear: 0
 --- !u!1 &540416227
 GameObject:
   m_ObjectHideFlags: 0
@@ -2838,6 +2852,89 @@ Transform:
   m_Children: []
   m_Father: {fileID: 200327675}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &635485519
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 635485520}
+  - component: {fileID: 635485521}
+  m_Layer: 0
+  m_Name: Arrival Clouds
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &635485520
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 635485519}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1542799535}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &635485521
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 635485519}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb9c5c0361d69fd4db1b087e8bab25e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.CloudBankPiece
+  id: gw.arrive
+  map: {fileID: 11400000, guid: 1c0f5df7c1c50ad4789ffbf83b2addd2, type: 2}
+  island: {fileID: 270959109}
+  window: {fileID: 270959113}
+  explorer: {fileID: 374318554}
+  grabGuard: {fileID: 270959111}
+  ghosts: {fileID: 1421177268}
+  fx: {fileID: 1078587927}
+  reach: 4
+  lessonLine: gw.arrive.clouds
+  ghostClip: palm_sweep
+  ghostScale: 1
+  lessonChip: Sweep
+  counterLabel: "Sweep \xB7 Clouds"
+  focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  markIntensity: 1.3
+  grabAssist: 0.08
+  puffs:
+  - {x: 10, y: 51}
+  - {x: 10, y: 50}
+  puffTwins:
+  - {x: 11, y: 51}
+  - {x: 11, y: 50}
+  recipe: {fileID: 11400000, guid: 257f22ee3e426244c8b7611f0b678d54, type: 2}
+  gusts: {fileID: 1589595547}
+  corridor: 0.2
+  puffScale: 2.7
+  puffHeight: 0.6
+  bob: 0.1
+  sway: 0.3
+  spin: 9
+  billow: 0.07
+  shadowMaterial: {fileID: 2100000, guid: cc8ec5f70f1d0b542924a207dfb808ba, type: 2}
+  shadowSize: 0.85
+  shadowAlpha: 0.32
+  perGust: 0.36
+  holdRate: 0.4
+  doneLine: gw.arrive.done
+  rippleOnClear: 1
 --- !u!1 &678983518
 GameObject:
   m_ObjectHideFlags: 0
@@ -3441,6 +3538,135 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &949271662
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 949271663}
+  - component: {fileID: 949271664}
+  m_Layer: 0
+  m_Name: Arrival Stream
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &949271663
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 949271662}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 93667893}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &949271664
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 949271662}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 450318bdb245d56498dc48fbdf90d9f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.RainGarden
+  id: lm.stream
+  map: {fileID: 11400000, guid: 62a4d08fb1efa974aa00c824d650dab0, type: 2}
+  island: {fileID: 270959109}
+  window: {fileID: 270959113}
+  explorer: {fileID: 374318554}
+  grabGuard: {fileID: 270959111}
+  ghosts: {fileID: 1421177268}
+  fx: {fileID: 1078587927}
+  reach: 4
+  lessonLine: lm.arrive.stream
+  ghostClip: palm_sweep
+  ghostScale: 1
+  lessonChip: Palm down
+  counterLabel: "Palm down \xB7 Pads"
+  focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  markIntensity: 1.3
+  grabAssist: 0.08
+  buds:
+  - {x: 14, y: 52}
+  - {x: 15.3, y: 52.2}
+  - {x: 16.6, y: 51.9}
+  gardenCenter: {x: 11.5, y: 50.5}
+  gardenRadius: {x: 8, y: 3}
+  gapTiles:
+  - {x: 11, y: 51}
+  - {x: 11, y: 50}
+  - {x: 12, y: 51}
+  - {x: 12, y: 50}
+  budRecipe: {fileID: 11400000, guid: d06190610a847584da6ea1e2a7d9d8af, type: 2}
+  stoneRecipe: {fileID: 11400000, guid: d06190610a847584da6ea1e2a7d9d8af, type: 2}
+  cloudRecipe: {fileID: 11400000, guid: 257f22ee3e426244c8b7611f0b678d54, type: 2}
+  budScale: 1.3
+  stoneScale: 1.7
+  maxAngle: 40
+  minHeight: 0.05
+  maxHeight: 0.25
+  formSeconds: 0.6
+  wiggleSpeed: 0.6
+  rainRadius: 1.3
+  cloudScale: 0.55
+  cloudBelow: 0.025
+  cloudMetres: 0.11
+  settleReach: 6
+  softSeconds: 2
+  hardSeconds: 1
+  lookSeconds: 2.5
+  streamTiles:
+  - {x: 5, y: 51}
+  - {x: 5, y: 50}
+  - {x: 6, y: 51}
+  - {x: 6, y: 50}
+  - {x: 7, y: 51}
+  - {x: 7, y: 50}
+  - {x: 8, y: 51}
+  - {x: 8, y: 50}
+  - {x: 9, y: 51}
+  - {x: 9, y: 50}
+  - {x: 10, y: 51}
+  - {x: 10, y: 50}
+  - {x: 13, y: 51}
+  - {x: 13, y: 50}
+  - {x: 14, y: 51}
+  - {x: 14, y: 50}
+  - {x: 15, y: 51}
+  - {x: 15, y: 50}
+  - {x: 16, y: 51}
+  - {x: 16, y: 50}
+  - {x: 17, y: 51}
+  - {x: 17, y: 50}
+  - {x: 18, y: 51}
+  - {x: 18, y: 50}
+  crossingTiles:
+  - {x: 11, y: 51}
+  - {x: 11, y: 50}
+  - {x: 12, y: 51}
+  - {x: 12, y: 50}
+  bridgeSlots:
+  - {x: 11, y: 51}
+  - {x: 12, y: 50.5}
+  - {x: 11, y: 50}
+  swellSeconds: 2
+  bridgeSeconds: 1.6
+  legacySolvedId: lm.pads
+  doneLine: lm.arrive.stream.done
+  volume: 0.7
 --- !u!1 &980002958
 GameObject:
   m_ObjectHideFlags: 0
@@ -4840,6 +5066,9 @@ MonoBehaviour:
   walkSteps: 3
   handsMissingSeconds: 3
   pinchLesson: pinch
+  pinchOnceLine: lesson.pinch.once
+  pinchAgainChip: Pinch again
+  pinchDoneLine: lesson.pinch.done
   pinchCount: 2
   goldMaterial: {fileID: 2100000, guid: dc3915bdb04a1cb4eb4760821e23e7b7, type: 2}
   fx: {fileID: 1078587927}
@@ -5153,7 +5382,10 @@ MonoBehaviour:
   cornerSegments: 8
   sideSegments: 10
   width: {x: 0.003, y: 0.0045, z: 0.005}
-  showDistance: 0.1
+  showDistance: 0.06
+  idleLevel: 0.18
+  bracketLength: 0.1
+  lipLineBelowPods: 0.03
   zoneFeather: 0.012
   nearSpread: 0.12
   farLevel: 0.25
@@ -5161,8 +5393,8 @@ MonoBehaviour:
   hoverLevel: 1
   grabbedLevel: 1.1
   color: {r: 0.95, g: 0.97, b: 1, a: 1}
-  grabbedColor: {r: 1, g: 0.82, b: 0.45, a: 1}
-  grabbedTint: 0.45
+  grabbedColor: {r: 1, g: 0.78, b: 0.3, a: 1}
+  grabbedTint: 0.85
   fadeInSeconds: 0.12
   fadeSeconds: 0.3
 --- !u!4 &1522577914
@@ -5424,6 +5656,7 @@ Transform:
   - {fileID: 307860328}
   - {fileID: 388614568}
   - {fileID: 1824753088}
+  - {fileID: 635485520}
   m_Father: {fileID: 1553131432}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1553131431
@@ -6326,6 +6559,7 @@ GameObject:
   - component: {fileID: 1847074512}
   - component: {fileID: 1847074513}
   - component: {fileID: 1847074514}
+  - component: {fileID: 1847074515}
   m_Layer: 0
   m_Name: Lantern Spirit
   m_TagString: Untagged
@@ -6371,6 +6605,7 @@ MonoBehaviour:
   flySeconds: 0.5
   flyArc: 0.02
   targetOffset: {x: 0.065, y: 0.012, z: 0}
+  aboveOffset: {x: 0.1, y: 0.015}
   lingerSeconds: 1.5
   fovHalfAngle: 35
   keepOut: {x: 0.025, y: 0.012}
@@ -6396,6 +6631,29 @@ MonoBehaviour:
   gazeRadius: 0.03
   idleLine: spirit.poke.idle
   cooldown: 1.2
+--- !u!114 &1847074515
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1847074511}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73097560b697eac468c1e1554f1d3f50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.SpiritSunrays
+  spirit: {fileID: 1847074513}
+  material: {fileID: 2100000, guid: 796a9a767f0010447b33719eb17e264b, type: 2}
+  rays: 12
+  reach: {x: 0.3, y: 1.05}
+  rootWidth: 0.16
+  color: {r: 1, g: 0.8, b: 0.4, a: 1}
+  brightness: 0.55
+  spin: 0.04
+  pulseSpeed: 1.3
+  pulseAmount: 0.18
+  fadeSeconds: 0.4
 --- !u!1 &1858573326
 GameObject:
   m_ObjectHideFlags: 0

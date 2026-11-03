@@ -111,7 +111,7 @@ namespace Diorama
         }
 
         /// <summary>A gust at island-local <paramref name="origin"/> (xz) blowing <paramref name="dir"/> (xz, unit).</summary>
-        public void Blow(Vector2 origin, Vector2 dir, float strength, string how)
+        public void Blow(Vector2 origin, Vector2 dir, float strength, string how, bool notify = true)
         {
             if (!Active) return;
             Count++;
@@ -146,7 +146,7 @@ namespace Diorama
                 _sweep.Handle.SetVolume(_sweepPeak);
             }
             else GameAudio.Play(AudioIds.WindSweep, transform.position, _audio, PuzzleSounds.Breeze, volume * Mathf.Lerp(0.5f, 1f, _strength));
-            Gusted?.Invoke(_origin, _dir, _strength);
+            if (notify) Gusted?.Invoke(_origin, _dir, _strength);
         }
 
         void Animate()

@@ -10,6 +10,8 @@ namespace Diorama
     /// gusts per puff, <see cref="CloudBank"/>); a gone puff drifts off and opens its tile. All gone = the path is open
     /// (saved: stage = a bit per gone puff, solved = all). Look + pinch-hold a puff: it blows away slowly. Teaches itself
     /// once ("Sweep your open hand fast over the island!", chip "Sweep!", a palm-sweep ghost over the first puff).
+    /// Step 14a: any number of puffs (Galewick's arrival has two: the realm's gesture right after the portal), and
+    /// <see cref="rippleOnClear"/>: the last puff gone sends a big gust rippling across the whole meadow in view.
     /// </summary>
     [DefaultExecutionOrder(-10)]
     public class CloudBankPiece : HandPuzzle
@@ -44,8 +46,12 @@ namespace Diorama
 
         [Header("Lines")]
         public string doneLine = "gw.gust.done";
+        [Tooltip("Step 14a: clearing the last puff sends one big gust across the meadow (the aha after the arrival).")]
+        public bool rippleOnClear;
 
-        readonly CloudBank _bank = new CloudBank(3);
+        CloudBank _bankStore;
+        CloudBank _bank => _bankStore ??= new CloudBank(Mathf.Max(1, puffs.Length));
+        int AllMask => (1 << puffs.Length) - 1;
         readonly HandState[] _hands = new HandState[2];
         PropView[] _views;
         Vector2[] _drift;
@@ -123,7 +129,7 @@ namespace Diorama
 
         protected override void ApplyState()
         {
-            int mask = IsSolved ? 7 : PuzzleState.Stage(id);
+            int mask = IsSolved ? AllMask : PuzzleState.Stage(id);
             _bank.Restore(mask);
             for (int i = 0; i < puffs.Length; i++)
             {
@@ -136,7 +142,7 @@ namespace Diorama
                         map.SetPropOpen(p, _bank.Gone(i));
                     }
             }
-            SetProgressQuiet(KiteRules.Count(mask) / 3f);
+            SetProgressQuiet(KiteRules.Count(mask) / (float)Mathf.Max(1, puffs.Length));
         }
 
         protected override void Update()
@@ -179,17 +185,18 @@ namespace Diorama
             _gone[i] = 0f;
             foreach (var p in Blocks(i)) map.SetPropOpen(p, true);
             int mask = _bank.Mask;
-            Debug.Log($"[CloudBankPiece] Puff {i} blown away ({KiteRules.Count(mask)}/3).");
+            Debug.Log($"[CloudBankPiece] {id}: puff {i} blown away ({KiteRules.Count(mask)}/{puffs.Length}).");
             if (_bank.AllGone)
             {
                 if (!string.IsNullOrEmpty(doneLine)) Dialogue.Say(doneLine);
                 if (explorer != null) explorer.Cheer();
-                MarkSolved(7);
+                MarkSolved(AllMask);
+                if (rippleOnClear) StartCoroutine(Ripple());
             }
             else
             {
                 PuzzleState.SetStage(id, mask);
-                SetProgress(KiteRules.Count(mask) / 3f);
+                SetProgress(KiteRules.Count(mask) / (float)Mathf.Max(1, puffs.Length));
             }
         }
 
@@ -312,6 +319,23 @@ namespace Diorama
             _shadowBlock.SetTexture("_MainTex", _shadowTex);
             _shadowBlock.SetColor("_Tint", new Color(1f, 1f, 1f, shadowAlpha * fade));
             _shadows[i].SetPropertyBlock(_shadowBlock);
+        }
+
+        /// <summary>
+        /// Step 14a: the aha: a beat after the last puff goes, one full-strength gust rolls across the whole meadow in view
+        /// along the path (grass ripple, streaks, sails), a second softer one behind it. It tells no listeners (the ridge's
+        /// puffs stay).
+        /// </summary>
+        System.Collections.IEnumerator Ripple()
+        {
+            yield return new WaitForSeconds(0.5f);
+            if (gusts == null || !Here) yield break;
+            var half = island.FootprintHalfSize;
+            Debug.Log($"[CloudBankPiece] {id}: the wind wakes: a gust ripples across the meadow.");
+            // Map north (toward the far edge) is island-local -Z; start at the near edge.
+            gusts.Blow(new Vector2(0f, half.y), new Vector2(0f, -1f), 1f, "arrival clouds cleared", false);
+            yield return new WaitForSeconds(0.9f);
+            if (gusts != null && Here) gusts.Blow(new Vector2(half.x, half.y * 0.5f), new Vector2(-0.6f, -0.8f), 0.7f, "arrival clouds cleared (second)", false);
         }
 
         /// <summary>Debug (bridge): a gust across the bank toward east (+column).</summary>

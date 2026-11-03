@@ -35,6 +35,10 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
 `pod.first`, `battle.first` and `capture.first` below.
 - `lesson.pinch` · objective · while tutorial (step 9h, after `intro.arrive`: the ghost pinches beside your own hand)
   - Spirit: Tap your thumb and finger together. Like this!
+- `lesson.pinch.once` · objective · while tutorial (step 14a: after the first of the two pinches; chip "Pinch again")
+  - Spirit: Nice! Once more.
+- `lesson.pinch.done` (step 14a: the pinch lesson's praise)
+  - Spirit: Perfect!
 - `lesson.move.again` · objective · → rim
   - Spirit: Grab the rocky edge and slide it.
 - `lesson.starter.again` · objective · → starterPods
@@ -213,6 +217,12 @@ Step 10f, Cinderwood's new hand moments (lesson lines stay pinned as a chip unti
 - `realm.galewick.first` · once · → landmark:firstGrass (first arrival in Galewick)
   - Spirit: Galewick... it's never this quiet.
   - Spirit: The grass isn't even swaying.
+- `gw.arrive` · once (step 14a: a few tiles past the arrival, the cloud puffs on the path ahead)
+  - Spirit: Galewick... the air isn't moving at all.
+- `gw.arrive.clouds` · objective · → puzzle:gw.arrive (step 14a: the realm's signature gesture right after the portal; chip "Sweep", then "Clouds n/2")
+  - Spirit: Clouds are stuck on the path. Sweep your hand to get the wind going!
+- `gw.arrive.done` · once (step 14a: the last puff gone, a gust ripples across the meadow)
+  - Spirit: There's the wind! Feel it run through the grass?
 - `gw.village.first` · once · → landmark:plaza (first time near the village plaza)
   - Spirit: Windmills, and not one sail turning.
 - `gw.mill.first` · once · → landmark:mill (first time by the big mill and the ditch)
@@ -239,8 +249,8 @@ Step 10b, the hand moments (lesson lines stay pinned as a chip until the moment 
 - `gw.kites.one` · Spirit: One!
 - `gw.kites.two` · Spirit: Two!
 - `gw.kites.three` · Spirit: All three!
-- `gw.gust` · objective · → puzzle:gw.clouds (lesson at the cloud bank; chip "Sweep!")
-  - Spirit: This cloud is stuck. Sweep your open hand fast over the island!
+- `gw.gust` · objective · → puzzle:gw.clouds (at the cloud bank; chip "Sweep!"; step 14a: short, the arrival taught it)
+  - Spirit: More stuck clouds. Sweep them away!
 - `gw.gust.done` · once (the last puff blown off the ridge path)
   - Spirit: The path is clear! Feel that breeze?
 - `gw.tower.kites` · → landmark:tower (at the tower door with fewer than three kites)
@@ -278,6 +288,10 @@ Step 10d / 10e, the tower hall:
 - `realm.lilymere.first` · once · → landmark:firstGrass (first arrival in Lilymere)
   - Spirit: Lilymere... the lagoon used to reach right up to here.
   - Spirit: Half the water is gone, and nothing ripples.
+- `lm.arrive.stream` · objective · → puzzle:lm.stream (step 14a: the trickle stream by the arrival; chip "Palm down", then "Pads n/3")
+  - Spirit: The stream's almost dry... Hold your hand over it like a little cloud.
+- `lm.arrive.stream.done` · once (step 14a: the stream runs, the pads float into a bridge)
+  - Spirit: Look, the pads are floating! A bridge, just for us.
 - `lm.village.first` · once · → landmark:village (first time near the stilt village)
   - Spirit: Stilt huts, standing over almost nothing.
 - `lm.channel.first` · once · → landmark:channel (first time at the lily channel)
@@ -298,8 +312,8 @@ Step 11b, the hand moments (lesson lines stay pinned as a chip until the moment 
   - Spirit: The channel's too wide. Nudge the lily pads together!
 - `lm.pads.done` · once (all three pads locked into a path)
   - Spirit: A lily pad bridge! Hop across.
-- `lm.rain` · objective · → puzzle:lm.rain (lesson at the lotus garden; chip "Palm down!")
-  - Spirit: So dry... Hold your hand over it like a little cloud.
+- `lm.rain` · objective · → puzzle:lm.rain (at the lotus garden; chip "Palm down!"; step 14a: short, the stream taught it)
+  - Spirit: The buds are thirsty. Rain on them!
 - `lm.rain.done` · once (every bud bloomed into a stepping stone)
   - Spirit: Look at them bloom! A path of lotus.
 - `lm.scoop` · objective · → puzzle:lm.lagoon (lesson at the waterfall basin; chip "Scoop!")

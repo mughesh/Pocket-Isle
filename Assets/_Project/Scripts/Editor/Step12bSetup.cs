@@ -50,6 +50,8 @@ namespace Diorama.EditorTools
             if (!Step11dSetup.GalewickMap(log)) log.Append("\n  Galewick map: NOT rewritten");
             foreach (var bank in Object.FindObjectsByType<CloudBankPiece>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
+                // Step 14a: only the ridge's bank (the arrival's has its own twins).
+                if (bank.id != "gw.clouds") continue;
                 Undo.RecordObject(bank, "Step 12b");
                 bank.puffTwins = new Vector2Int[GalewickTools.CloudTwinXY.Length];
                 for (int i = 0; i < bank.puffTwins.Length; i++) bank.puffTwins[i] = GalewickTools.Tile(GalewickTools.CloudTwinXY[i]);

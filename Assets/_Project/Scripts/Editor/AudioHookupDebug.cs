@@ -44,7 +44,7 @@ namespace Diorama.EditorTools
         public static void LilyReset()
         {
             var saved = PuzzleState.ToSaved();
-            saved.RemoveAll(p => p.id == "lm.pads" || p.id == "lm.rain" || p.id == "lm.lagoon" || p.id == "lm.keeper" || p.id == ShardHolder.WaterId);
+            saved.RemoveAll(p => p.id == "lm.pads" || p.id == "lm.stream" || p.id == "lm.rain" || p.id == "lm.lagoon" || p.id == "lm.keeper" || p.id == ShardHolder.WaterId);
             PuzzleState.Restore(saved);
             Debug.Log($"[AudioHookupDebug] Lilymere reset: {PuzzleState.Describe()}");
         }

@@ -115,6 +115,28 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: Tap your thumb and finger together. Like this!
+  - id: lesson.pinch.once
+    once: 0
+    objective: 1
+    priority: 1
+    note: 'step 14a: after the first of the two pinches; chip "Pinch again"'
+    target: 
+    validWhile: tutorial
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Nice! Once more.
+  - id: lesson.pinch.done
+    once: 0
+    objective: 0
+    priority: 1
+    note: 'step 14a: the pinch lesson''s praise'
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Perfect!
   - id: lesson.move.again
     once: 0
     objective: 1
@@ -1111,6 +1133,40 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: The grass isn't even swaying.
+  - id: gw.arrive
+    once: 1
+    objective: 0
+    priority: 2
+    note: 'step 14a: a few tiles past the arrival, the cloud puffs on the path ahead'
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Galewick... the air isn't moving at all.
+  - id: gw.arrive.clouds
+    once: 0
+    objective: 1
+    priority: 2
+    note: 'step 14a: the realm''s signature gesture right after the portal; chip
+      "Sweep", then "Clouds n/2"'
+    target: puzzle:gw.arrive
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Clouds are stuck on the path. Sweep your hand to get the wind going!
+  - id: gw.arrive.done
+    once: 1
+    objective: 0
+    priority: 2
+    note: 'step 14a: the last puff gone, a gust ripples across the meadow'
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: There's the wind! Feel it run through the grass?
   - id: gw.village.first
     once: 1
     objective: 0
@@ -1261,13 +1317,14 @@ MonoBehaviour:
     once: 0
     objective: 1
     priority: 2
-    note: lesson at the cloud bank; chip "Sweep!"
+    note: 'at the cloud bank; chip "Sweep!"; step 14a: short, the arrival taught
+      it'
     target: puzzle:gw.clouds
     validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: This cloud is stuck. Sweep your open hand fast over the island!
+      text: More stuck clouds. Sweep them away!
   - id: gw.gust.done
     once: 1
     objective: 0
@@ -1437,6 +1494,29 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: Half the water is gone, and nothing ripples.
+  - id: lm.arrive.stream
+    once: 0
+    objective: 1
+    priority: 2
+    note: 'step 14a: the trickle stream by the arrival; chip "Palm down", then "Pads
+      n/3"'
+    target: puzzle:lm.stream
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The stream's almost dry... Hold your hand over it like a little cloud.
+  - id: lm.arrive.stream.done
+    once: 1
+    objective: 0
+    priority: 2
+    note: 'step 14a: the stream runs, the pads float into a bridge'
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Look, the pads are floating! A bridge, just for us.
   - id: lm.village.first
     once: 1
     objective: 0
@@ -1540,13 +1620,14 @@ MonoBehaviour:
     once: 0
     objective: 1
     priority: 2
-    note: lesson at the lotus garden; chip "Palm down!"
+    note: 'at the lotus garden; chip "Palm down!"; step 14a: short, the stream taught
+      it'
     target: puzzle:lm.rain
     validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: So dry... Hold your hand over it like a little cloud.
+      text: The buds are thirsty. Rain on them!
   - id: lm.rain.done
     once: 1
     objective: 0

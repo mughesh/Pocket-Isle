@@ -452,6 +452,7 @@ namespace Diorama
                     {
                         // Step 10e: Galewick's beats, in story order.
                         Heading("Galewick, in story order");
+                        Flag("Arrival clouds", "gw.arrive", 3); // step 14a
                         Flag("Big mill", "gw.mill", 1);
                         Flag("Kites", "gw.kites", 7);
                         Flag("Clouds", "gw.clouds", 7);
@@ -468,7 +469,7 @@ namespace Diorama
                     {
                         // Step 11b: Lilymere's beats, in story order (basin = the lagoon risen).
                         Heading("Lilymere, in story order");
-                        Flag("Lily pads", "lm.pads", 7);
+                        Flag("LM stream", "lm.stream", 7); // step 14a: the arrival stream replaced the channel's pads
                         Flag("Rain", "lm.rain", 31);
                         Flag("Basin + rise", LilymereLagoon.RisenId, 2);
                         // Step 11c: Tidemother and the water shard.

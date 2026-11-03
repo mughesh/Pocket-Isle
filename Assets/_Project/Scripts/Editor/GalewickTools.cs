@@ -42,6 +42,12 @@ namespace Diorama.EditorTools
         public static readonly Vector2Int[] CloudXY = { new Vector2Int(21, 47), new Vector2Int(22, 47), new Vector2Int(23, 47) };
         /// <summary>Step 12b: the ridge path is 2 wide (rows 47-48); each puff also blocks the tile beside it on row 48.</summary>
         public static readonly Vector2Int[] CloudTwinXY = { new Vector2Int(21, 48), new Vector2Int(22, 48), new Vector2Int(23, 48) };
+        /// <summary>
+        /// Step 14a: the arrival's two cloud puffs on the trail, 3 and 4 tiles past the arrival (west tiles; each also
+        /// blocks the tile east of it: the trail is 2 wide). The realm's gesture taught right after the portal.
+        /// </summary>
+        public static readonly Vector2Int[] ArriveCloudXY = { new Vector2Int(10, 8), new Vector2Int(10, 9) };
+        public static readonly Vector2Int[] ArriveCloudTwinXY = { new Vector2Int(11, 8), new Vector2Int(11, 9) };
         public static readonly Vector2Int TowerXY = new Vector2Int(17, 56);   // 2 x 2, door front y 54
         /// <summary>Step 10d: the tower's return gate (2 x 1), hidden until the Keeper is calmed.</summary>
         public static readonly Vector2Int TowerGateXY = new Vector2Int(23, 53);
@@ -164,7 +170,8 @@ namespace Diorama.EditorTools
             map.startTile = Arrive;
             map.theme = PropKit.Theme("Galewick");
             map.realm = "galewick";
-            map.arrivalLine = "realm.galewick.first";
+            // Step 14a: "Galewick... the air isn't moving at all." (the arrival clouds' objective follows).
+            map.arrivalLine = "gw.arrive";
             map.propLegend = Legend();
             map.SetLayout(Text(_g));
             map.SetProps(Text(_p));
@@ -389,7 +396,10 @@ namespace Diorama.EditorTools
         {
             Fill(6, 12, 3, 5, IslandMap.Path);
             Prop(GateXY, KGate);
+            // Step 14a: the two arrival puffs sit on the trail (the sign beside the first).
             Prop(9, 8, KSign);
+            foreach (var c in ArriveCloudXY) Prop(c, KBank);
+            foreach (var c in ArriveCloudTwinXY) Prop(c, KBank);
             Patch(FirstGrassXY.x, FirstGrassXY.y, 1.8f, 1.4f);
             Patch(6f, 9.5f, 1.4f, 1.2f);
             Patch(15.5f, 9f, 1.3f, 1.2f);
@@ -587,6 +597,8 @@ namespace Diorama.EditorTools
             foreach (var c in CloudXY)
                 if (c.x == x && c.y == y) return true;
             foreach (var c in CloudTwinXY)
+                if (c.x == x && c.y == y) return true;
+            foreach (var c in ArriveCloudXY.Concat(ArriveCloudTwinXY))
                 if (c.x == x && c.y == y) return true;
             return false;
         }

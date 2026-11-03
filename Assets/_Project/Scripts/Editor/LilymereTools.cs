@@ -29,7 +29,20 @@ namespace Diorama.EditorTools
         public static readonly Vector2Int ArriveXY = new Vector2Int(11, 5);   // arrive here facing north
         public static readonly Vector2Int ShrineXY = new Vector2Int(14, 19);  // 2 x 2, front y 17
         static readonly Vector2Int PlazaXY = new Vector2Int(17, 14);
-        static readonly Vector2Int FirstGrassXY = new Vector2Int(15, 8);
+        // Step 14a: north of the arrival stream (it was on the stream's rows).
+        static readonly Vector2Int FirstGrassXY = new Vector2Int(15, 11);
+        /// <summary>
+        /// Step 14a: the arrival stream: a thin trickle (dry bed tiles, rows y 8..9) across the arrival meadow from the
+        /// west woods to the east woods, crossing the trail 3 tiles past the arrival. Rain swells it (RainGarden, stream
+        /// mode, lm.stream); the three lily pads stuck in the mud on its south bank float and drift into a bridge over the
+        /// trail's crossing tiles (x 11..12).
+        /// </summary>
+        public const int StreamY0 = 8, StreamY1 = 9, StreamX0 = 5, StreamX1 = 18;
+        /// <summary>The pads' spots on the south bank (x, y; map tiles may be fractional).</summary>
+        public static readonly Vector2[] StreamPadsXY = { new Vector2(14f, 7f), new Vector2(15.3f, 6.8f), new Vector2(16.6f, 7.1f) };
+        /// <summary>Their bridge slots over the crossing (x, y).</summary>
+        public static readonly Vector2[] StreamBridgeXY = { new Vector2(11f, 8f), new Vector2(12f, 8.5f), new Vector2(11f, 9f) };
+        public static Vector2 MapPoint(Vector2 xy) => new Vector2(xy.x, Size - 1 - xy.y);
         /// <summary>The village shallows (an ellipse of water the trail crosses on a plank bridge).</summary>
         static readonly Vector2 ShallowsCenter = new Vector2(24f, 15f);
         const float ShallowsRx = 4.6f, ShallowsRy = 3.8f;
@@ -192,6 +205,7 @@ namespace Diorama.EditorTools
             {
                 new Landmark { name = "start", tile = Arrive },
                 new Landmark { name = "firstGrass", tile = Tile(FirstGrassXY) },
+                new Landmark { name = "stream", tile = Tile(11, StreamY0 - 2) },
                 new Landmark { name = "village", tile = Tile(PlazaXY), line = "lm.village.first", radius = 4 },
                 new Landmark { name = "shrine", tile = Tile(ShrineXY) },
                 new Landmark { name = "channel", tile = Tile(CrossingXY.x, ChannelY0 - 2), line = "lm.channel.first", radius = 3 },
@@ -327,6 +341,7 @@ namespace Diorama.EditorTools
                         _g[t.x, t.y] = IslandMap.Path;
 
             Arrival();
+            Stream();
             Village();
             Gates();
             ChannelBanks();
@@ -454,12 +469,29 @@ namespace Diorama.EditorTools
         {
             Fill(7, 13, 3, 5, IslandMap.Path);
             Prop(GateXY, KGate);
-            Prop(10, 8, KSign);
+            // Step 14a: the sign by the arrival, off the stream's rows.
+            Prop(10, 6, KSign);
             Patch(FirstGrassXY.x, FirstGrassXY.y, 1.8f, 1.4f);
-            Patch(6.5f, 9.5f, 1.3f, 1.2f);
+            Patch(6.5f, 11.5f, 1.3f, 1.0f);
             Patch(16.5f, 4.5f, 1.2f, 1.1f);
             foreach (var (x, y) in new[] { (5, 4), (16, 9) }) Prop(x, y, KReeds);
         }
+
+        /// <summary>Step 14a: the arrival stream's dry bed (the trail's tiles stay path: the crossing), a bare south bank for the pads.</summary>
+        static void Stream()
+        {
+            for (int x = StreamX0; x <= StreamX1; x++)
+            {
+                for (int y = StreamY0; y <= StreamY1; y++)
+                    if (_g[x, y] != IslandMap.Path) _g[x, y] = IslandMap.DryBed;
+                // The muddy south bank where the pads are stuck: plain ground, no tall grass.
+                if (x >= 13 && x <= 17 && _g[x, StreamY0 - 1] == IslandMap.TallGrass) _g[x, StreamY0 - 1] = IslandMap.Grass;
+            }
+            foreach (var (x, y) in new[] { (6, 10), (17, 10) }) Prop(x, y, KReeds);
+        }
+
+        /// <summary>Step 14a: the trail's tiles over the arrival stream.</summary>
+        public static bool IsStreamGate(int x, int y) => y >= StreamY0 && y <= StreamY1 && x >= StreamX0 && x <= StreamX1 && x >= 11 && x <= 12;
 
         static void Village()
         {
@@ -492,8 +524,12 @@ namespace Diorama.EditorTools
                 for (int y = 1; y < Size - 1; y++)
                 {
                     if (!IsGate(x, y) || _g[x, y] != IslandMap.Path) continue;
-                    Prop(x, y, IsGardenGate(x, y) ? KBedGap : KChannelGap);
+                    Prop(x, y, KBedGap);
                 }
+            // Step 14a: the channel crossing is a plain plank bridge now (the stream by the arrival teaches the pads).
+            for (int x = CrossingXY.x; x <= CrossingXY.x + 1; x++)
+                for (int y = ChannelY0; y <= ChannelY1; y++)
+                    Prop(x, y, KPlank);
         }
 
         /// <summary>Step 11b: the channel crossing's tiles or the garden crossing's tiles (x, y), for the pieces.</summary>
@@ -649,12 +685,11 @@ namespace Diorama.EditorTools
 
         static bool IsPath(int x, int y) => In(x, y) && _g[x, y] == IslandMap.Path;
 
-        /// <summary>A puzzle gate tile (x, y): the channel crossing (11b A) or the garden crossing (11b B); open once solved.</summary>
-        public static bool IsGate(int x, int y)
-        {
-            if (x >= CrossingXY.x && x <= CrossingXY.x + 1 && y >= ChannelY0 && y <= ChannelY1) return true;
-            return IsGardenGate(x, y);
-        }
+        /// <summary>
+        /// A puzzle gate tile (x, y): the arrival stream's crossing (step 14a; it replaced the channel crossing's pads) or
+        /// the garden crossing (11b B); open once solved.
+        /// </summary>
+        public static bool IsGate(int x, int y) => IsStreamGate(x, y) || IsGardenGate(x, y);
 
         /// <summary>The trail's tiles inside the garden's dry bed (x 40..41).</summary>
         public static bool IsGardenGate(int x, int y) =>
@@ -914,6 +949,7 @@ namespace Diorama.EditorTools
             Need("shrine front", ShrineXY + new Vector2Int(0, -2));
             Need("village plaza", PlazaXY);
             Need("channel crossing", CrossingXY);
+            Need("stream crossing", new Vector2Int(11, StreamY0));
             Need("garden crossing", new Vector2Int(GardenPathX, Mathf.RoundToInt(GardenCenter.y)));
             Need("basin front", BasinXY + new Vector2Int(0, -2));
             Need("temple door front", TempleXY + new Vector2Int(1, -2));
@@ -923,15 +959,20 @@ namespace Diorama.EditorTools
             foreach (var z in new[] { "arrival", "village", "channel", "marsh", "garden", "pond", "wind", "basin" })
                 if (!reach.Any(t => map.ZoneAt(t) == z && map.CanWalk(t))) problems.Add($"pocket '{z}' has no reachable tile");
 
-            // The crossing is the only way over the channel, the garden gate the only way past the garden (11b gates them).
+            // Step 14a: the stream crossing is the only way off the arrival meadow, the garden gate the only way past the
+            // garden. The channel crossing is a plank bridge (always open) but still the only way over the channel.
+            var noStream = new HashSet<Vector2Int>();
             var noCrossing = new HashSet<Vector2Int>();
             var noGarden = new HashSet<Vector2Int>();
             for (int x = 0; x < Size; x++)
                 for (int y = 0; y < Size; y++)
                 {
+                    if (IsStreamGate(x, y)) noStream.Add(new Vector2Int(x, y));
                     if (x >= CrossingXY.x && x <= CrossingXY.x + 1 && y >= ChannelY0 && y <= ChannelY1) noCrossing.Add(new Vector2Int(x, y));
                     if (IsGardenGate(x, y)) noGarden.Add(new Vector2Int(x, y));
                 }
+            if (Flood(noStream).Contains(Tile(PlazaXY)))
+                problems.Add("the village is reachable without the stream crossing (the stream leaks)");
             if (Flood(noCrossing).Contains(Tile(GardenPathX, Mathf.RoundToInt(GardenCenter.y - GardenRy) - 1)))
                 problems.Add("the garden is reachable without the channel crossing (the channel leaks)");
             if (Flood(noGarden).Contains(Tile(BasinXY + new Vector2Int(0, -2))))

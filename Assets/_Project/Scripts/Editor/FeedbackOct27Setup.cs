@@ -109,7 +109,7 @@ namespace Diorama.EditorTools
                 mills++;
             }
             log.Append($"\n  {mills} puzzle mill(s): ghost finger_flick.");
-            var bank = Object.FindFirstObjectByType<CloudBankPiece>(FindObjectsInactive.Include);
+            var bank = System.Array.Find(Object.FindObjectsByType<CloudBankPiece>(FindObjectsInactive.Include, FindObjectsSortMode.None), b => b.id == "gw.clouds");
             if (bank != null)
             {
                 Undo.RecordObject(bank, "Oct 27 feedback");

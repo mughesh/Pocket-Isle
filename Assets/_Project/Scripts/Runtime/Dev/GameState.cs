@@ -136,6 +136,7 @@ namespace Diorama
             if (lilymere != null)
             {
                 AddMark(lilymere, "LM: arrival", "start");
+                AddMark(lilymere, "LM: stream", "stream");
                 AddMark(lilymere, "LM: village", "village");
                 AddMark(lilymere, "LM: shrine", "shrine");
                 AddMark(lilymere, "LM: channel", "channel");
