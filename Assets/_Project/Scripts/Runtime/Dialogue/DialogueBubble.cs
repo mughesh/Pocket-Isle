@@ -75,8 +75,10 @@ namespace Diorama
         [Range(0.3f, 1f)] public float sideWidth = 0.6f;
         [Tooltip("At most this many lines while pointing (the text shrinks down to 70% to fit).")]
         public int sideMaxLines = 2;
-        [Tooltip("Gap between the Spirit and the bubble's edge (metres).")]
+        [Tooltip("Gap between the Spirit's glow and the tail's tip (metres).")]
         public float sideGap = 0.012f;
+        [Tooltip("Nov 3: the Spirit's body + glow radius (metres): the tail stops short of it (it reached into the Spirit).")]
+        public float spiritRadius = 0.024f;
 
         [Header("Timing")]
         public float charsPerSecond = 45f;
@@ -728,6 +730,9 @@ namespace Diorama
             else Reopen("debug");
         }
 
+        /// <summary>Spirit centre to the bubble's edge while pointing: its glow, the gap, the tail sticking out of the edge.</summary>
+        float SideClear => spiritRadius + sideGap + (_tail != null ? _tail.localScale.x * 0.7071f : 0.012f);
+
         /// <summary>Tail under the bubble, or (pointing) on the edge facing the Spirit.</summary>
         void PlaceTail()
         {
@@ -745,7 +750,7 @@ namespace Diorama
             Vector3 right = cam.transform.right;
             float d = Vector3.Dot(spirit - target, right);
             if (Mathf.Abs(d) > 0.004f) _sideSign = Mathf.Sign(d);
-            Vector3 pos = spirit + right * (_sideSign * (sideGap + _size.x * 0.5f)) + Vector3.up * (_size.y * 0.25f);
+            Vector3 pos = spirit + right * (_sideSign * (SideClear + _size.x * 0.5f)) + Vector3.up * (_size.y * 0.25f);
             var head = cam.transform;
             for (int i = 0; i < 3; i++)
             {
@@ -799,7 +804,9 @@ namespace Diorama
             {
                 Vector3 from = _anchor.position;
                 Vector3 off = target - from;
-                if (off.magnitude > maxFromSpirit) target = from + off.normalized * maxFromSpirit;
+                // Nov 3: beside the Spirit a wide bubble needs more room, or this pulled its tail into the Spirit.
+                float limit = _pointing ? Mathf.Max(maxFromSpirit, SideClear + _size.x * 0.5f + _size.y * 0.5f) : maxFromSpirit;
+                if (off.magnitude > limit) target = from + off.normalized * limit;
             }
             if (!snap && _hasResolved && (target - _resolved).magnitude < deadband) target = _resolved;
             _resolved = target;
