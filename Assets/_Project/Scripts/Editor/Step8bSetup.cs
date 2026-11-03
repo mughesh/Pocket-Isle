@@ -187,11 +187,14 @@ namespace Diorama.EditorTools
                     startWhen = "canWalk", delay = 1.5f, doneWhen = "swipeWalked",
                     ghost = "thumb_swipe_forward", place = GhostPlace.AboveIsland, target = "ghost", ghostScale = 0.6f,
                 },
+                // Step 14f (players saw no difference between a step and a walk-on, and could sit in it): "Swipe to walk, tap
+                // to stop", done on any tap stop, the gold tile ahead, or two finished swipe walks; it passes itself after 30 s.
+                // Swiping twice still walks on (the Controls card shows it); no lesson teaches it.
                 new LessonData
                 {
-                    id = Onboarding.FarLesson, line = "lesson.walk.far", chip = "Swipe twice, tap", again = "lesson.walk.far.again", startWhen = "canWalk", delay = 0.8f,
-                    doneWhen = "tapStopped | walkedOn3",
-                    ghost = Step12aSetup.SwipeTwiceClip, place = GhostPlace.AboveIsland, target = "ghost", ghostScale = 0.6f,
+                    id = Onboarding.FarLesson, line = "lesson.walk.far", chip = "Swipe, tap", again = "lesson.walk.far.again", startWhen = "canWalk", delay = 0.8f,
+                    doneWhen = "tapStopped | atGoldTile | swipeWalks2", skipAfter = 30f, goldTileRule = "ahead",
+                    ghost = Step12aSetup.SwipeTapClip, place = GhostPlace.AboveIsland, target = "ghost", ghostScale = 0.6f,
                 },
                 new LessonData
                 {

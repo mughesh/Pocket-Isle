@@ -51,6 +51,13 @@ namespace Diorama
                 var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
                 bool pinching = hand != null && hand.IsTrackedDataValid && hand.GetIndexFingerIsPinching();
                 bool busy = grabGuard != null && grabGuard.IsHandBusy(h == 0);
+                // Step 14f: a pinch on a hand moment (near a piece, or one is held) never walks.
+                if (pinching && !_wasPinching[h] && !busy && usable && IslandHandle.TryGetPinchPoint(hand, out var at) && HandPuzzle.ClaimsPinch(at, out var by))
+                {
+                    Debug.Log($"[TileGaze] Pinch ({(h == 0 ? "left" : "right")}) on the hand moment {(by != null ? by.id : "?")}: no walk.");
+                    _wasPinching[h] = pinching;
+                    continue;
+                }
                 if (pinching && !_wasPinching[h] && !busy && usable)
                 {
                     bool ok = explorer.GoTo(tile);

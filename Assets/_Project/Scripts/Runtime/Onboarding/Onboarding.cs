@@ -70,6 +70,8 @@ namespace Diorama
             // Nov 3 (Mugesh: one swipe moved one tile, then into the grass, and the lesson never counted it): tiles really
             // walked by swipes, any way; a tap that stops a walk-on; three walk-ons (the stop lesson never blocks).
             "swipeWalked", "tapStopped", "walkedOn3",
+            // Step 14f: the last walk lesson ("Swipe to walk, tap to stop") also passes after two finished swipe walks.
+            "swipeWalks2",
         };
 
         /// <summary>Nov 3: the walk lesson's id and how many tiles swipes must really walk (any direction).</summary>
@@ -267,13 +269,19 @@ namespace Diorama
                 Dialogue.SetProgress(Mathf.Min(_swipeTiles, swipeTiles), swipeTiles);
                 if (_swipeTiles >= swipeTiles) _runner.Mark("swipeWalked");
             }
+            // Step 14f: a swipe walk that reached its end (not a walk-on that carries on, not a look + pinch path).
+            if (_runner.Current != null && _runner.Current.id == FarLesson && !explorer.Destination.HasValue &&
+                explorer.Plan.Count > 0 && explorer.PlanIndex >= explorer.Plan.Count &&
+                !(explorer.Continuous && explorer.PlanEnd == SmartStep.Cap) && ++_swipeWalks >= 2)
+                _runner.Mark("swipeWalks2");
         }
 
         void OnStopped()
         {
             if (_runner == null || !_runner.IsRunning) return;
             _runner.Mark("stopped");
-            if (_runner.Current != null && _runner.Current.id == FarLesson && _walkOns > 0) _runner.Mark("tapStopped");
+            // Step 14f: any tap that stops a walk (it waited for a walk-on, and players couldn't tell one from a step).
+            if (_runner.Current != null && _runner.Current.id == FarLesson) _runner.Mark("tapStopped");
         }
 
         void OnSwiped(bool walkOn)
@@ -393,7 +401,7 @@ namespace Diorama
             _helped = false;
             _lineAway = 0f;
             _smartAtShow = explorer != null ? explorer.SmartStepsTaken : 0;
-            _swipeTiles = _walkOns = 0;
+            _swipeTiles = _walkOns = _swipeWalks = 0;
             if (!string.IsNullOrEmpty(l.goldTileRule)) PickSmartGoldTile(l.goldTileRule);
             else if (l.goldTileSteps > 0) PickGoldTile(l.goldTileSteps);
             if (!string.IsNullOrEmpty(l.goldPath) && _goldPath == null) _goldPath = StartCoroutine(GoldPath(l));
@@ -609,7 +617,7 @@ namespace Diorama
         // ---- the gold tile's look (step 12a) ----
 
         GoldMarks _goldMarks;
-        int _smartAtShow, _swipeTiles, _walkOns;
+        int _smartAtShow, _swipeTiles, _walkOns, _swipeWalks;
 
         void LateUpdate()
         {

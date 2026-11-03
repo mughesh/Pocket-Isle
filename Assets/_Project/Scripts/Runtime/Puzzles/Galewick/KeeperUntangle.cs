@@ -86,6 +86,19 @@ namespace Diorama
 
         protected override int MarkCount => knots.Length;
 
+        /// <summary>Step 14f: both loose ends of every knot still tied.</summary>
+        protected override void GuardPoints(List<Vector3> into)
+        {
+            base.GuardPoints(into);
+            for (int i = 0; i < _pulls.Count; i++)
+            {
+                if (Done(i)) continue;
+                Ends(i, out var a, out var b);
+                into.Add(a);
+                into.Add(b);
+            }
+        }
+
         protected override bool Mark(int i, out Vector3 world, out float tiles)
         {
             world = default;
@@ -157,6 +170,7 @@ namespace Diorama
         protected override void OnDestroy()
         {
             base.OnDestroy();
+            if (explorer != null && explorer.HeldStill) explorer.HeldStill = false;
             ReleaseOrbs();
             if (_strings != null) Destroy(_strings);
             if (_stringRenderer != null) Destroy(_stringRenderer.gameObject);
@@ -209,6 +223,8 @@ namespace Diorama
             bool here = Here && keeper != null && keeper.Model != null && keeper.Model.gameObject.activeInHierarchy;
             if (here) GuardTouch();
             bool working = here && Available && Usable;
+            // Step 14f: no walking at all while the untangle runs (its pinches read as look + pinch walks).
+            if (explorer != null) explorer.HeldStill = working;
             if (working) Work();
             else
             {

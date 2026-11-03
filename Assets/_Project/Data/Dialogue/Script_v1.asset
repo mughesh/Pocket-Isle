@@ -207,13 +207,13 @@ MonoBehaviour:
     once: 0
     objective: 1
     priority: 1
-    note: 'step 12a; Nov 3: done when a tap stops the walk'
+    note: 'step 14f: done on a tap stop, the gold tile or two swipe walks'
     target: ghost
     validWhile: canWalk
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Swipe twice quickly to keep walking. Then tap your thumb to stop!
+      text: Swipe to walk, tap to stop.
   - id: lesson.walk.far.again
     once: 0
     objective: 1
@@ -224,7 +224,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Two quick swipes to go, one tap to stop.
+      text: Swipe to go. Tap your thumb to stop.
   - id: lesson.walk.help
     once: 0
     objective: 1

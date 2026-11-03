@@ -129,14 +129,14 @@ namespace Diorama.Tests
             if (s == null) Assert.Inconclusive("Onboarding_Main missing (run Setup > Walking + Guidance (12) > Set Up MR_Main (12a walking)).");
             var ids = s.lessons.ConvertAll(l => l.id);
             Assert.IsFalse(ids.Contains("stop"), "the stop lesson is folded into walk.far");
-            // Nov 3: walk (4 tiles really walked, any way) then far (walk on, a tap stops it); no turn lesson, no gold tile.
+            // Nov 3: walk (4 tiles really walked, any way) then far (step 14f: swipe + tap, never blocks); no turn lesson.
             int walk = ids.IndexOf("walk"), far = ids.IndexOf("far"), look = ids.IndexOf("look");
             Assert.IsFalse(ids.Contains("turn"), string.Join(", ", ids));
             Assert.IsTrue(walk >= 0 && walk < far && far < look, string.Join(", ", ids));
             Assert.AreEqual("swipeWalked", s.lessons[walk].doneWhen);
             StringAssert.Contains("tapStopped", s.lessons[far].doneWhen);
-            StringAssert.Contains("walkedOn3", s.lessons[far].doneWhen, "the stop lesson never blocks");
-            Assert.IsTrue(string.IsNullOrEmpty(s.lessons[walk].goldTileRule) && string.IsNullOrEmpty(s.lessons[far].goldTileRule));
+            Assert.IsTrue(s.lessons[far].skipAfter > 0f, "the stop lesson never blocks");
+            Assert.IsTrue(string.IsNullOrEmpty(s.lessons[walk].goldTileRule));
             var quick = UnityEditor.AssetDatabase.LoadAssetAtPath<QuickJourneyConfig>("Assets/_Project/Data/QuickJourney.asset");
             if (quick != null)
                 foreach (var id in new[] { "walk", "far" })

@@ -7005,6 +7005,7 @@ MonoBehaviour:
   headRecipe: {fileID: 11400000, guid: 1bfecbfb573a99142903576e06e09850, type: 2}
   headOpenRecipe: {fileID: 11400000, guid: a139e0fc58a2888419c1e09044ec9f83, type: 2}
   wingRecipe: {fileID: 11400000, guid: 6ba7a60f9a6d4d0468058e25c2f6956d, type: 2}
+  crystalRecipe: {fileID: 11400000, guid: f13d7e6e456923f4d9971e84a35b5bf0, type: 2}
   headPivot: {x: 0, y: 1.86, z: 0.1}
   wingHinge: {x: 0.34, y: 1.62, z: -0.3}
   foreheadSocket: {x: 0, y: 2.37, z: 0.57}
@@ -7750,6 +7751,8 @@ MonoBehaviour:
   waitInFront: 2.2
   inSocketSize: 0.42
   inSocketDrop: 0.32
+  dissolveSeconds: 0.3
+  moteSize: 0.35
   ghostClip: palm_carry
   hallGap: 2.6
   lodgeGuests: 2

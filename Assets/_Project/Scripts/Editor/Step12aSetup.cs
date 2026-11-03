@@ -16,6 +16,8 @@ namespace Diorama.EditorTools
 
         /// <summary>The walk-on lesson's ghost: two quick thumb swipes, then a tap (built from the recorded clips).</summary>
         public const string SwipeTwiceClip = "thumb_swipe_twice_tap";
+        /// <summary>Step 14f: one swipe, a pause, the tap (the last walk lesson's ghost).</summary>
+        public const string SwipeTapClip = "thumb_swipe_tap";
 
         [MenuItem("Tools/Pocket Isle/Setup/Walking + Guidance (12)/Set Up MR_Main (12a walking)", priority = 900)]
         public static void SetUp()
@@ -175,7 +177,12 @@ namespace Diorama.EditorTools
             log.Append($"\n  objectives: {marked} newly marked ({ids.Count} ids from lessons and hand moments)");
         }
 
-        static GhostHandClip BuildSwipeTwice()
+        static GhostHandClip BuildSwipeTwice() => BuildSwipes(SwipeTwiceClip, 2);
+
+        /// <summary>Step 14f: the swipe-then-tap ghost.</summary>
+        internal static GhostHandClip BuildSwipeTap() => BuildSwipes(SwipeTapClip, 1);
+
+        static GhostHandClip BuildSwipes(string name, int swipes)
         {
             var lib = GhostClipTools.Library();
             var swipe = lib.Find("thumb_swipe_forward");
@@ -183,8 +190,8 @@ namespace Diorama.EditorTools
             if (swipe == null || tap == null || swipe.frames.Count < 2 || tap.frames.Count < 2) return null;
             var c = ScriptableObject.CreateInstance<GhostHandClip>();
             EditorUtility.CopySerialized(swipe, c);
-            c.clipName = SwipeTwiceClip;
-            c.name = SwipeTwiceClip;
+            c.clipName = name;
+            c.name = name;
             c.trimStart = c.trimEnd = 0f;
             c.frames = new System.Collections.Generic.List<GhostFrame>();
             // Each swipe sped up (every 3rd of 4 frames kept), a short beat, the second swipe, a pause, then the tap.
@@ -196,8 +203,7 @@ namespace Diorama.EditorTools
                     if (i % 4 < keepOf4) c.frames.Add(from.frames[i]);
                 for (int i = 0; i < hold; i++) c.frames.Add(from.frames[b - 1]);
             }
-            Add(swipe, 3, 2);
-            Add(swipe, 3, 12);
+            for (int s = 0; s < swipes; s++) Add(swipe, 3, s == swipes - 1 ? (swipes == 1 ? 24 : 12) : 2);
             Add(tap, 4, 8);
             c.holdEnd = 0.6f;
             return GhostClipTools.SaveAsset(c);

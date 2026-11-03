@@ -58,6 +58,9 @@ namespace Diorama
         public float waitInFront = 2.2f;
         [Tooltip("In the socket: its size (share of its own) and how far its feet sit below the socket's middle (tiles), so its body fills the setting.")]
         public float inSocketSize = 0.42f, inSocketDrop = 0.32f;
+        [Tooltip("Step 14f: the lantern dissolving into a gold mote (s), the mote's size at its biggest (tiles).")]
+        public float dissolveSeconds = 0.3f, moteSize = 0.35f;
+        const float FlightSeconds = 1.4f;
         [Tooltip("Ghost hand for the goodbye (an open hand palm up).")]
         public string ghostClip = "palm_carry";
         [Tooltip("Hall of Fame: seconds between Islings coming out; Lodge Islings that wander out too.")]
@@ -166,6 +169,7 @@ namespace Diorama
         void Asleep()
         {
             heart.appear = 0f;
+            heart.crystal = 0f;
             StatueSocket.HideStatue = false;
         }
 
@@ -180,12 +184,12 @@ namespace Diorama
             heart.veins = 1f;
             heart.crown = heart.gems = Vector3.one * (eyes > 0.5f ? 1f : 0.35f);
             heart.blaze = 0f;
+            heart.crystal = eyes > 0.5f ? 1f : 0f;
             StatueSocket.HideStatue = true;
         }
 
         void Update()
         {
-            SocketLight(heart.Showing && (Running ? Step >= FinaleStep.Spark : Done));
             if (Running)
             {
                 if (!explorer.Locked) explorer.Locked = true;
@@ -527,19 +531,17 @@ namespace Diorama
                     case PalmHandoff.State.ToSocket:
                         Halo(false, default);
                         flyT += Time.deltaTime;
-                        float k = Mathf.SmoothStep(0f, 1f, flyT / 1.4f);
-                        _hold = Vector3.Lerp(socketFrom, InSocket, k) + Vector3.up * (0.6f * Unit * Mathf.Sin(k * Mathf.PI));
-                        spirit.Appear = Mathf.Lerp(1f, inSocketSize, k);
+                        MoteFlight(flyT, socketFrom);
                         break;
                 }
-                if (handoff.Now == PalmHandoff.State.ToSocket && flyT >= 1.4f) break;
+                if (handoff.Now == PalmHandoff.State.ToSocket && flyT >= FlightSeconds) break;
                 yield return null;
             }
-            // It settles in with a soft chime.
-            Sfx(AudioIds.SparkChime, AudioIds.StatueSocket, heart.SocketWorld);
-            if (fx != null) fx.Burst(heart.SocketWorld, 40, Gold, Unit * 1.5f, 1f, Unit * 0.05f);
+            // Step 14f: the light goes into the crystal; the lantern stays hidden until the Spark comes out of it.
+            ReleaseMote();
+            spirit.Appear = 0f;
             _hold = InSocket;
-            yield return new WaitForSeconds(0.6f);
+            yield return Ignite();
         }
 
         IEnumerator EyesOpen()
@@ -731,8 +733,9 @@ namespace Diorama
         IEnumerator SparkReturns()
         {
             SaveStep(FinaleStep.Spark);
-            // A tiny spark slips from the Heart's eye down into the explorer's lantern...
-            Vector3 eye = heart.HeadPointWorld(new Vector3(0.155f, 2.15f, 0.62f));
+            // A tiny spark slips from the forehead crystal down into the explorer's lantern...
+            Vector3 eye = heart.SocketWorld;
+            if (fx != null) fx.Burst(eye, 16, Gold, Unit * 0.6f, 0.6f, Unit * 0.04f);
             // The explorer's lantern: its tile, at about its hip (the explorer's own transform isn't where it stands).
             Vector3 lantern = MapWorld(explorer.Tile, 0.55f);
             Sfx(AudioIds.SparkChime, AudioIds.UiSaved, eye);
@@ -879,30 +882,68 @@ namespace Diorama
             _halo.SetAlpha(0.4f + 0.1f * Mathf.Sin(Time.time * 4f));
         }
 
-        BattleFx.Item _socketLight;
+        // ---- step 14f: the Spirit turns to light and flies into the forehead crystal ----
 
-        /// <summary>The Spirit's light stays in the Heart's forehead (after the new spark has left it).</summary>
-        void SocketLight(bool on)
+        BattleFx.Item _mote;
+
+        /// <summary>
+        /// The flight, <paramref name="t"/> seconds in: the lantern dissolves into a bright gold mote where it was
+        /// (<see cref="dissolveSeconds"/>), then the mote arcs into the crystal. The lantern mesh is never near the forehead.
+        /// </summary>
+        void MoteFlight(float t, Vector3 from)
         {
+            float d = Mathf.Clamp01(t / dissolveSeconds);
+            spirit.Appear = 1f - Mathf.SmoothStep(0f, 1f, d);
+            float k = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((t - dissolveSeconds) / (FlightSeconds - dissolveSeconds)));
+            Vector3 at = Vector3.Lerp(from, heart.SocketWorld, k) + Vector3.up * (0.6f * Unit * Mathf.Sin(k * Mathf.PI));
+            _hold = at;
             if (fx == null) return;
-            if (!on)
+            if (_mote == null)
             {
-                if (_socketLight != null)
+                _mote = fx.Get(BattleFx.Shape.Orb);
+                if (_mote == null) return;
+                _mote.Set(new Color(1f, 0.97f, 0.8f), new Color(1f, 0.72f, 0.28f), 1f, 1.5f, 1f, 0.3f);
+            }
+            // It swells as the lantern goes, then tightens into a point of light on the way in.
+            float size = moteSize * Unit * Mathf.Lerp(Mathf.SmoothStep(0f, 1f, d), 0.55f, k);
+            _mote.transform.position = at;
+            _mote.transform.localScale = Vector3.one * (size / Mathf.Max(1e-4f, fx.transform.lossyScale.x));
+            _mote.SetAlpha(1f);
+            if (Random.value < Time.deltaTime * 30f) fx.Burst(at, 2, Gold, Unit * 0.05f, 0.5f, Unit * 0.03f);
+        }
+
+        void ReleaseMote()
+        {
+            if (_mote != null && fx != null) fx.Release(_mote);
+            _mote = null;
+        }
+
+        /// <summary>The crystal takes the light: it ignites, a soft ring of light spreads from it, the heartbeat thumps.</summary>
+        IEnumerator Ignite()
+        {
+            Vector3 c = heart.SocketWorld;
+            Sfx(AudioIds.SparkChime, AudioIds.StatueSocket, c);
+            Sfx(AudioIds.HeartBeat, AudioIds.StatueSocket, c);
+            if (fx != null) fx.Burst(c, 30, Gold, Unit * 1.2f, 0.9f, Unit * 0.04f);
+            Moment?.Invoke("crystal.lit");
+            BattleFx.Item ring = fx != null ? fx.Get(BattleFx.Shape.Ring) : null;
+            if (ring != null) ring.Set(new Color(1f, 0.92f, 0.6f), new Color(1f, 0.75f, 0.3f), 1f);
+            for (float t = 0f; t < 1f; t += Time.deltaTime)
+            {
+                heart.crystal = Mathf.SmoothStep(0f, 1f, t / 0.4f);
+                if (ring != null)
                 {
-                    fx.Release(_socketLight);
-                    _socketLight = null;
+                    // Faces the player, widening and fading.
+                    var cam = Camera.main;
+                    Vector3 toward = cam != null ? cam.transform.position - heart.SocketWorld : island.transform.forward;
+                    ring.transform.SetPositionAndRotation(heart.SocketWorld, Quaternion.FromToRotation(Vector3.up, toward));
+                    ring.transform.localScale = Vector3.one * (Unit * Mathf.Lerp(0.3f, 2.4f, t) / Mathf.Max(1e-4f, fx.transform.lossyScale.x));
+                    ring.SetAlpha(0.8f * (1f - t));
                 }
-                return;
+                yield return null;
             }
-            if (_socketLight == null)
-            {
-                _socketLight = fx.Get(BattleFx.Shape.Orb);
-                if (_socketLight == null) return;
-                _socketLight.Set(new Color(1f, 0.95f, 0.7f), new Color(1f, 0.7f, 0.3f), 1f, 1.5f, 1f, 0.3f);
-            }
-            _socketLight.transform.position = heart.SocketWorld;
-            _socketLight.transform.localScale = Vector3.one * (0.16f * Unit / Mathf.Max(1e-4f, fx.transform.lossyScale.x));
-            _socketLight.SetAlpha(0.75f + 0.15f * HeartOfWorld.Heartbeat(Time.time * heart.beatRate));
+            heart.crystal = 1f;
+            if (ring != null) fx.Release(ring);
         }
 
         // ---- the golden ring under the island ----

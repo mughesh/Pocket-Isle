@@ -22,6 +22,8 @@ namespace Diorama.EditorTools
     public static partial class PropKit
     {
         public const string HeartBodyName = "HeartBody", HeartHeadName = "HeartHead", HeartHeadOpenName = "HeartHeadOpen", HeartWingName = "HeartWing";
+        /// <summary>Step 14f: the gold crystal in the forehead setting (head shape space; it rides the head).</summary>
+        public const string HeartCrystalName = "HeartCrystal";
 
         /// <summary>Head and wing pivots (body shape units). Mirror the runtime's HeartView.</summary>
         public static readonly Vector3 HeadPivot = new Vector3(0f, 1.86f, 0.1f);
@@ -50,6 +52,38 @@ namespace Diorama.EditorTools
                 var report = PropBaker.Bake(r);
                 Debug.Log($"[PropKit] {r.name}: {report.triangles} tris ({report.pieces} pieces).");
             }
+        }
+
+        /// <summary>
+        /// Step 14f: bakes the forehead crystal. A cut gem standing in the round setting: a diamond-faced body (Glow slot,
+        /// dull old gold, no glow of its own: the Heart's view lights it) with a raised table facet (Accent, paler).
+        /// </summary>
+        internal static PropRecipe WriteHeartCrystal()
+        {
+            DioramaSceneSetup.EnsureFolder(Root);
+            DioramaSceneSetup.EnsureFolder($"{Root}/Shapes");
+            var r = Recipe(HeartCrystalName, new Vector2Int(1, 1), false, false, 1500);
+            r.palette = Palette(HeartStone, HeartStone, HeartStone, HeartMoss, H("#C99A3E", 0.06f), H("#EBCB7A", 0.04f));
+            r.yawJitter = 0f;
+            r.scaleJitter = 0f;
+            r.resolution = 36;
+            r.outline = 0.02f;
+            var c = ForeheadSocket + new Vector3(0f, 0f, 0.012f);
+            var diamond = new Vector3(0f, 0f, 45f);
+            r.pieces = new List<PropPiece>
+            {
+                Small("HeartCrystal_Gem", c, 8f, PropSlot.Glow, PropMotion.None, 0f, 600f,
+                    Box(c, new Vector3(0.04f, 0.04f, 0.026f), 0.006f, 0f, diamond),
+                    // Bevelled front edges: the gem narrows toward its face.
+                    Box(c + new Vector3(0f, 0f, 0.018f), new Vector3(0.03f, 0.03f, 0.02f), 0.008f, 0.012f, diamond)),
+                Small("HeartCrystal_Table", c + new Vector3(0f, 0f, 0.036f), 8f, PropSlot.Accent, PropMotion.None, 0f, 300f,
+                    Box(c + new Vector3(0f, 0f, 0.036f), new Vector3(0.017f, 0.017f, 0.006f), 0.003f, 0f, diamond)),
+            };
+            EditorUtility.SetDirty(r);
+            AssetDatabase.SaveAssets();
+            var report = PropBaker.Bake(r);
+            Debug.Log($"[PropKit] {r.name}: {report.triangles} tris ({report.pieces} pieces).");
+            return r;
         }
 
         /// <summary>A piece with its own share of the recipe's triangle budget (relative weight).</summary>

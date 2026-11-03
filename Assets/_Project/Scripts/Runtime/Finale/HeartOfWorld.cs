@@ -22,6 +22,8 @@ namespace Diorama
         [Tooltip("The statue's drawing socket (its centre and turn).")]
         public StatueSocket statue;
         public PropRecipe bodyRecipe, headRecipe, headOpenRecipe, wingRecipe;
+        [Tooltip("Step 14f: the gold crystal set in the forehead (head shape space, rides the head).")]
+        public PropRecipe crystalRecipe;
 
         [Header("Rig (body shape units, mirror PropKit.Heart)")]
         public Vector3 headPivot = new Vector3(0f, 1.86f, 0.1f);
@@ -56,8 +58,10 @@ namespace Diorama
         [NonSerialized] public Vector3 crown, gems;
         /// <summary>Extra: the crown and the veins blaze (the eyes opening).</summary>
         [NonSerialized] public float blaze;
+        /// <summary>Step 14f: the forehead crystal, 0 dark (faint gold stone) .. 1 lit by the Spirit (pulses with the heartbeat).</summary>
+        [NonSerialized] public float crystal;
 
-        PropView _body, _head, _wingL, _wingR;
+        PropView _body, _head, _wingL, _wingR, _crystal;
         float _blinkAt, _blinkUntil, _yaw, _pitch;
 
         public static HeartOfWorld Instance { get; private set; }
@@ -80,6 +84,7 @@ namespace Diorama
             _head?.Destroy();
             _wingL?.Destroy();
             _wingR?.Destroy();
+            _crystal?.Destroy();
         }
 
         void Start()
@@ -94,6 +99,8 @@ namespace Diorama
             _head = new PropView("Heart (head)", island, headRecipe) { restoredSelf = 1f };
             _wingL = new PropView("Heart (wing L)", island, wingRecipe) { restoredSelf = 1f };
             _wingR = new PropView("Heart (wing R)", island, wingRecipe) { restoredSelf = 1f };
+            if (crystalRecipe != null) _crystal = new PropView("Heart (crystal)", island, crystalRecipe) { restoredSelf = 1f };
+            else Debug.LogError("[HeartOfWorld] No forehead crystal recipe (Set Up MR_Main (14f menus and fixes)): the forehead stays empty.", this);
             _blinkAt = Time.time + 4f;
         }
 
@@ -107,6 +114,7 @@ namespace Diorama
                 _head.Hide();
                 _wingL.Hide();
                 _wingR.Hide();
+                _crystal?.Hide();
                 return;
             }
             Look();
@@ -119,6 +127,7 @@ namespace Diorama
             Vector3 pivot = Scaled(headPivot, size, breath);
             PlaceAt(_head, pivot - head * (headPivot * size), body * head, Vector3.one * size);
             _head.SetRecipe(EyesShowOpen ? headOpenRecipe : headRecipe);
+            if (_crystal != null) PlaceAt(_crystal, pivot - head * (headPivot * size), body * head, Vector3.one * size);
 
             // The wings fold flat on its back or open out and up; the right one is the left mirrored.
             var w = Quaternion.Slerp(WingRot(wingFolded), WingRot(wingOpen), Mathf.SmoothStep(0f, 1f, wings));
@@ -173,6 +182,12 @@ namespace Diorama
             _head.glowBoostA = new Vector4(crown.x * 1.6f + b, crown.y * 1.3f + b, 0f, 0f);
             _head.glowBoostB = new Vector4(v + (eyes > 0.5f ? 0.6f : 0f), crown.z * 1.1f + b * 0.6f, 0f, 0f);
             _wingL.glowBoostB = _wingR.glowBoostB = new Vector4(v * 0.8f, wings * 0.5f + b * 0.4f, 0f, 0f);
+            if (_crystal != null)
+            {
+                // Glow = the gem, Accent = its table facet.
+                float c = Mathf.Clamp01(crystal);
+                _crystal.glowBoostB = new Vector4(c * (2.2f + 0.9f * beat), c * (1.6f + 0.7f * beat), 0f, 0f);
+            }
         }
 
         /// <summary>A double thump (lub-dub) once per cycle, 0..1.</summary>

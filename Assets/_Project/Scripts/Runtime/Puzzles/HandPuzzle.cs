@@ -135,6 +135,64 @@ namespace Diorama
         /// <summary>Step 12a: the smart step should stop when it comes within reach (unsolved, workable, outside).</summary>
         public bool WalkStopWanted => !IsSolved && Available && Here;
 
+        // ---- step 14f: pinches near a hand moment never walk ----
+
+        /// <summary>Step 14f: a pinch starting this close to an active piece (real metres, more on a bigger island) never walks.</summary>
+        public const float PinchGuard = 0.08f;
+
+        /// <summary>
+        /// Step 14f: a pinch starting at <paramref name="point"/> belongs to a hand moment, not to look + pinch walking: some
+        /// piece is held or working (<see cref="Busy"/>), or the point is within <see cref="PinchGuard"/> of an active
+        /// piece's <see cref="GuardPoints"/>. Every realm's pieces go through this one rule.
+        /// </summary>
+        public static bool ClaimsPinch(Vector3 point, out HandPuzzle by)
+        {
+            var points = new List<Vector3>();
+            foreach (var p in _byId.Values)
+            {
+                by = p;
+                if (p == null || !p.isActiveAndEnabled || p.IsSolved || !p.Here) continue;
+                if (p.Busy) return true;
+                if (!p.Available || !p.InView) continue;
+                points.Clear();
+                p.GuardPoints(points);
+                float guard = PinchGuard * Mathf.Max(1f, p.island.transform.lossyScale.x);
+                foreach (var w in points)
+                    if ((w - point).sqrMagnitude < guard * guard) return true;
+            }
+            by = null;
+            return false;
+        }
+
+        /// <summary>
+        /// Step 14f: where its hand-held parts are now (world), for <see cref="ClaimsPinch"/>: its home a little over the
+        /// ground (every piece has one), the focus point and every gold-marked part. Pieces with more parts add them.
+        /// </summary>
+        protected virtual void GuardPoints(List<Vector3> into)
+        {
+            if (island != null && island.Content != null && Here)
+                into.Add(island.transform.TransformPoint(island.TileToLocal(HomeTile, island.Content.capHeight + 0.5f * island.map.tileSize)));
+            var f = FocusPoint;
+            if (f.HasValue) into.Add(f.Value);
+            for (int i = 0; i < MarkCount; i++)
+                if (Mark(i, out var w, out _)) into.Add(w);
+        }
+
+        /// <summary>Step 14f: debug, every registered piece and how many guard points it has now.</summary>
+        public static string GuardReport()
+        {
+            var sb = new System.Text.StringBuilder();
+            var points = new List<Vector3>();
+            foreach (var p in _byId.Values)
+            {
+                if (p == null) continue;
+                points.Clear();
+                p.GuardPoints(points);
+                sb.Append($"\n  {p.id} ({p.GetType().Name}): {points.Count} points (first {(points.Count > 0 ? points[0].ToString("F3") : "-")}), here {p.Here}, solved {p.IsSolved}, busy {p.Busy}");
+            }
+            return sb.ToString();
+        }
+
         /// <summary>In view, the explorer near, no battle, opening or tutorial.</summary>
         public bool Usable => InView && Reachable && !Opening.InProgress && !Onboarding.Running && (!explorer.Locked || Busy);
 

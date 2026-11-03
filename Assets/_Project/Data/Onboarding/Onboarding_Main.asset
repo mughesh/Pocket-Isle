@@ -172,18 +172,18 @@ MonoBehaviour:
   - id: far
     line: lesson.walk.far
     again: lesson.walk.far.again
-    chip: Swipe twice, tap
+    chip: Swipe, tap
     help: 
     helpAfter: 30
     startWhen: canWalk
     delay: 0.8
-    doneWhen: tapStopped | walkedOn3
+    doneWhen: tapStopped | atGoldTile | swipeWalks2
     validWhile: 
-    skipAfter: 0
+    skipAfter: 30
     failWhen: 
     rewindTo: 
     praise: 1
-    ghost: thumb_swipe_twice_tap
+    ghost: thumb_swipe_tap
     place: 2
     target: ghost
     source: 
@@ -193,7 +193,7 @@ MonoBehaviour:
     ghostSpread: 0
     goldPath: 
     goldTileSteps: 0
-    goldTileRule: 
+    goldTileRule: ahead
     tutorialGrass: 0
   - id: look
     line: lesson.look

@@ -203,8 +203,31 @@ namespace Diorama
             UpdateExplorer();
         }
 
-        /// <summary>False while a battle or the battle zoom is on (no walking, no GoTo).</summary>
-        public bool CanMove => !_locked && !Zoomed;
+        /// <summary>False while a battle or the battle zoom is on, or a hand moment holds it (no walking, no GoTo).</summary>
+        public bool CanMove => !_locked && !_heldStill && !Zoomed;
+
+        /// <summary>
+        /// Step 14f: a hand moment that needs every pinch (untangling Galeowl) holds the explorer still: gestures and walks
+        /// are ignored like in a battle, but <see cref="Locked"/> stays false (hand moments read it as "a battle is on").
+        /// </summary>
+        public bool HeldStill
+        {
+            get => _heldStill;
+            set
+            {
+                if (value == _heldStill) return;
+                _heldStill = value;
+                if (value)
+                {
+                    Stop();
+                    CancelPath();
+                }
+                Debug.Log($"[GestureTestPiece] {(value ? "Held still by a hand moment" : "Free to walk again")}.");
+                RefreshLabel();
+            }
+        }
+
+        bool _heldStill;
 
         /// <summary>
         /// Where the explorer stands relative to its tile, in tiles (battles move it behind the party creature's pad).
@@ -361,9 +384,9 @@ namespace Diorama
                 ThumbGesture.SwipeBack => new Vector2Int(0, 1),
                 _ => Vector2Int.zero,
             };
-            if (_locked)
+            if (_locked || _heldStill)
             {
-                _last += " - battle, ignored";
+                _last += _locked ? " - battle, ignored" : " - hand moment, ignored";
             }
             else if (FollowingPath)
             {
