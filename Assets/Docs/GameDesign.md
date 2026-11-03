@@ -310,6 +310,14 @@ the base bobs. 9.8k triangles, 4 draws.
 - **Dry run** (Tools > Pocket Isle > Quick Journey > Dry Run): **13:00, over the 12:00 target**; per-beat table and
   options in `Run-14c.md` (waiting on Mugesh before anything else is cut).
 
+### Nov 3 evening changes (step 14d)
+- Walk 0.28 s a tile, run 0.15. Walk lessons: swipe any way until 4 tiles are really walked, then walk on + tap to stop
+  (the turn lesson went). The hub shrine is locked through the tutorial.
+- **Quick Journey v2 has no gift** (it gave Islings you had or from other realms): the Spirit sends you to the wind
+  gate; Galeowl is Lv 4 in the quick slot (offset -4: Kilnpot 100%, Pebbloop 64%, Pufflet 90% with the tutorial Toastling).
+- The Spirit's trail shows after every solved hand moment, in both slots. Portals: walking onto a front tile heading in
+  or stopping there goes through; gazed portals glow brighter. Name cards centred higher, with `card.rise` / `card.sink`.
+
 ### Realm name cards and gate signs (step 14c)
 - Entering a realm (or coming home) a carved card rises over the island's far half, after the arrival line: the name in
   the logo's chunky strokes, the element emblem, one line under it (first visit, 3 s); later visits the name only

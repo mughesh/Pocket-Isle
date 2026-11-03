@@ -44,7 +44,15 @@ Each tab is split into groups under gold headings.
 Cheats (one-hit KO, invincible, wild battles off, rare x10, time and walk speed) last until the app closes. They are
 never saved.
 
-## 4. What's new in this build (step 14c, Nov 3: Galewick first)
+## 4. What's new in this build (step 14d, Nov 3 evening)
+
+- Walking is faster. The walk lesson: swipe any way until the dots fill, then swipe twice and **tap your thumb to stop**.
+- The shrine by the lessons stays shut until the tutorial is over.
+- Quick Journey: no gift; the Spirit points you to the wind gate and Galeowl is easier.
+- Walk up to a portal to go through (no need to walk into the arch). A portal you look at glows brightly.
+- After every hand moment the gold trail shows where to go next. Name cards rise in the middle of the island with a sound.
+
+## Earlier (step 14c, Nov 3: Galewick first)
 
 - **Galewick is the first realm now.** After the tutorial the Spirit's trail points to the **wind gate** (the sign over
   it glows gold), then Cinderwood, then Lilymere. Every gate is open; you can still go anywhere.
