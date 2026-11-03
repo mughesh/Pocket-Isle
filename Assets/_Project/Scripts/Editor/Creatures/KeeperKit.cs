@@ -22,7 +22,9 @@ namespace Diorama.EditorTools
 
         // Step 9f balance (KeeperSim, Steambara in the party, Water leads): Lv 10; a Lv 8 party of 3 wins ~60-75% with
         // Kilnpot or Pufflet (Pebbloop's party has two Water Islings and wins more). Was 88 / 8 / 9 (9e, no Water helper).
-        public const int Level = 10;
+        // Step 14c (Galewick first, Cinderwood second): Lv 12, so Lv 14 at the usual one shard (RealmOrderSim: Kilnpot 52%,
+        // Pebbloop 92%, Pufflet 44%; at Lv 10 + 2 it was 96-100%). A Cinderwood-first player meets Lv 12 at 0 shards.
+        public const int Level = 12;
         public const int KeeperHp = 110, KeeperAttack = 10, KeeperDefense = 11;
 
         public static IslingSpecies Write()

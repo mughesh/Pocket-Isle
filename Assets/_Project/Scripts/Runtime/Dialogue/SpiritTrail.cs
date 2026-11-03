@@ -39,10 +39,19 @@ namespace Diorama
             { "lilymere", (ShardHolder.WaterId, "temple") },
         };
 
-        static readonly (string gate, string shard)[] HubOrder =
+        /// <summary>Step 14c: Galewick first (the wind shard), then Cinderwood, then Lilymere. Any open gate still works.</summary>
+        public static readonly (string gate, string shard)[] HubOrder =
         {
-            ("fire", ShardHolder.FireId), ("wind", ShardHolder.WindId), ("water", ShardHolder.WaterId),
+            ("wind", ShardHolder.WindId), ("fire", ShardHolder.FireId), ("water", ShardHolder.WaterId),
         };
+
+        /// <summary>The gate the hub's guidance points to: the first in <see cref="HubOrder"/> whose shard isn't home and that's open (pure).</summary>
+        public static string NextGate(System.Func<string, bool> shardHome, System.Func<string, bool> gateOpen)
+        {
+            foreach (var (gate, shard) in HubOrder)
+                if (!shardHome(shard) && gateOpen(gate)) return gate;
+            return null;
+        }
 
         GoldMarks _marks;
         readonly List<Vector2Int> _path = new List<Vector2Int>();
@@ -115,14 +124,13 @@ namespace Diorama
             {
                 foreach (var (_, shard) in HubOrder)
                     if (ShardHolder.Holds(shard)) return Mark(world, "statue");
-                foreach (var (gate, shard) in HubOrder)
+                var next = NextGate(PuzzleState.IsSolved, id =>
                 {
-                    if (PuzzleState.IsSolved(shard)) continue;
-                    int i = world.gates.FindIndex(g => g.id == gate);
-                    if (i < 0 || gates != null && !gates.IsOpen(world.gates[i])) continue;
-                    return GameState.NearestWalkable(world, world.gates[i].Front(0));
-                }
-                return null;
+                    int g = world.gates.FindIndex(x => x.id == id);
+                    return g >= 0 && (gates == null || gates.IsOpen(world.gates[g]));
+                });
+                int i = next != null ? world.gates.FindIndex(g => g.id == next) : -1;
+                return i >= 0 ? GameState.NearestWalkable(world, world.gates[i].Front(0)) : (Vector2Int?)null;
             }
             if (!Realms.TryGetValue(world.realm ?? "", out var realm)) return null;
             // A shard won (held or home): back to the hub.

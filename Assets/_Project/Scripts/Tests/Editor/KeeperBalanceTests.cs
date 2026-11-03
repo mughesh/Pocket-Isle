@@ -19,16 +19,18 @@ namespace Diorama.Tests
         }
 
         [Test]
-        public void Lv8PartyWithSteambara_WinsAboutTwoInThree()
+        public void OneShardLv12PartyWithSteambara_Wins()
         {
+            // Step 14c: Cinderwood comes second (one shard held): Hearthstag Lv 12 + 2. A Lv 12 party (the usual arrival)
+            // wins most fights, a Lv 11 one mostly only with Pebbloop (water breaks the crown); RealmOrderSim has the full trail.
             var keeper = Keeper();
             var helper = KeeperSim.Load(KeeperSim.Helper);
             if (helper == null) Assert.Inconclusive("Steambara missing (run Step9fSetup.Steambara).");
-            var row = KeeperSim.Run(keeper, KeeperKit.Level, 8, 200, 1, helper);
+            int level = ShardScaling.KeeperLevel(KeeperKit.Level, 1, 2);
+            var row = KeeperSim.Run(keeper, level, 12, 200, 1, helper);
             Assert.AreEqual(3, row.Count, "three starters");
-            Assert.That(row["Kilnpot"].WinRate, Is.InRange(0.5f, 0.85f), "Kilnpot");
-            Assert.That(row["Pufflet"].WinRate, Is.InRange(0.5f, 0.85f), "Pufflet");
-            Assert.That(row["Pebbloop"].WinRate, Is.GreaterThan(0.6f), "Pebbloop");
+            foreach (var kv in row) Assert.That(kv.Value.WinRate, Is.InRange(0.65f, 1f), kv.Key);
+            Assert.That(KeeperSim.Run(keeper, level, 11, 200, 1, helper)["Pebbloop"].WinRate, Is.GreaterThan(0.6f), "Pebbloop at Lv 11");
         }
 
         [Test]

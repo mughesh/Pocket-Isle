@@ -226,7 +226,8 @@ namespace Diorama.EditorTools
             "kites" => Table("Encounters_GwKites", 4, 6, ("Kitelet", 40f, false), ("Vanehare", 25f, false), ("Samarling", 15f, false), ("Kettlewing", 20f, false)),
             "ridge" => Table("Encounters_GwRidge", 5, 7, ("Samarling", 30f, false), ("Vanehare", 25f, false), ("Whirlby", 20f, false), ("Coalbeetle", 15f, false), ("Pufflet", 10f, false)),
             "rare" => Table("Encounters_GwRare", 6, 8, ("Samarling", 35f, false), ("Vanehare", 30f, false), ("Kitelet", 30f, false), ("Zeppelope", 5f, true)),
-            "fire" => Table("Encounters_GwFire", 4, 6, ("Toastling", 30f, false), ("Coalbeetle", 30f, false), ("Ashmole", 30f, false), ("Whirlby", 10f, false)),
+            // Step 14c: one level up (Lv 7-9 with the bonus): the Toastling here is what breaks Galeowl's Gust Wall, and Galewick comes first.
+            "fire" => Table("Encounters_GwFire", 5, 7, ("Toastling", 30f, false), ("Coalbeetle", 30f, false), ("Ashmole", 30f, false), ("Whirlby", 10f, false)),
             _ => null,
         };
 

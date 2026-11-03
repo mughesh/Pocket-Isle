@@ -61,7 +61,7 @@ namespace Diorama.Tests
             Assert.AreEqual(Element.Water, Load("Hearthstag").keeperBreaksWith, "Hearthstag unchanged");
             Assert.AreEqual(3, g.moves.Length);
             Assert.AreEqual(MoveKind.Support, g.moves[2].kind, "Gust Wall");
-            Assert.AreEqual(11, ShardScaling.KeeperLevel(GaleowlKit.Level, 1, 2), "Lv 11 at one other shard");
+            Assert.AreEqual(10, ShardScaling.KeeperLevel(GaleowlKit.Level, 1, 2), "Lv 10 at one other shard (step 14c: Lv 8 first)");
         }
 
         [Test]

@@ -101,7 +101,7 @@ namespace Diorama.Tests
             Assert.IsTrue(hub.CanWalk(home.arrive));
             var config = AssetDatabase.LoadAssetAtPath<LilymereConfig>(LilymereTools.ConfigPath);
             Assert.IsNotNull(config);
-            Assert.IsFalse(config.open, "builds keep the well gate sealed until Lilymere is finished");
+            Assert.IsTrue(config.open, "step 14c: every realm is built, the well gate opens in builds too");
             Assert.IsTrue(config.openInEditor);
             var theme = map.theme;
             Assert.IsNotNull(theme);

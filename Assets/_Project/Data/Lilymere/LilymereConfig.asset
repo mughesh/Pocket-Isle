@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 222b3d00fee6b80469edfa24af1fa493, type: 3}
   m_Name: LilymereConfig
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.LilymereConfig
-  open: 0
+  open: 1
   openInEditor: 1

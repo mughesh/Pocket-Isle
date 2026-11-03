@@ -731,6 +731,7 @@ MonoBehaviour:
   sideWidth: 0.6
   sideMaxLines: 2
   sideGap: 0.012
+  spiritRadius: 0.024
   charsPerSecond: 45
   holdBase: 1.5
   holdPerChar: 0.06
@@ -905,6 +906,7 @@ MonoBehaviour:
   fontSize: 0.11
   maxDrift: 15
   driftSpeed: 1.5
+  refaceAngle: 35
   maxTilt: 40
   pressDepth: 0.008
   holdSeconds: 2
@@ -2132,7 +2134,7 @@ MonoBehaviour:
   save: {fileID: 1541842443}
   ghosts: {fileID: 1421177268}
   keeperSpecies: {fileID: 11400000, guid: facba5a2220f6ac4d8f8ec7afc3d435c, type: 2}
-  keeperLevel: 9
+  keeperLevel: 8
   ownShard: shard.wind
   beaconMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
   shardRecipe: {fileID: 11400000, guid: 0d00935bd93bf4d44ba91c69122fee75, type: 2}
@@ -2818,6 +2820,7 @@ MonoBehaviour:
   fontSize: 0.11
   maxDrift: 15
   driftSpeed: 1.5
+  refaceAngle: 35
   maxTilt: 40
   pressDepth: 0.008
   holdSeconds: 2
@@ -4305,6 +4308,7 @@ MonoBehaviour:
   fontSize: 0.11
   maxDrift: 15
   driftSpeed: 1.5
+  refaceAngle: 35
   maxTilt: 40
   pressDepth: 0.008
   holdSeconds: 2
@@ -7115,6 +7119,7 @@ MonoBehaviour:
   fontSize: 0.11
   maxDrift: 15
   driftSpeed: 1.5
+  refaceAngle: 35
   maxTilt: 40
   pressDepth: 0.008
   holdSeconds: 2
@@ -7659,7 +7664,7 @@ MonoBehaviour:
   save: {fileID: 1541842443}
   ghosts: {fileID: 1421177268}
   keeperSpecies: {fileID: 11400000, guid: 372e47726df79e944b8e3ae698a9b00b, type: 2}
-  keeperLevel: 10
+  keeperLevel: 12
   ownShard: shard.fire
   beaconMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
   shardRecipe: {fileID: 11400000, guid: 243f873e41708f049b1a176b344ec7c1, type: 2}

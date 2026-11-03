@@ -426,6 +426,6 @@ The third shard wakes the statue: it becomes the Heart of the World. Walking, wi
 
 ## Idle hints (random, rare, only when nothing is happening for ~40 s)
 - Spirit: Your Islings get stronger every battle.
-- Spirit: The other gates lead to water and wind. Just saying.
+- Spirit: Every gate leads somewhere different. Just saying.
 - Spirit: Psst. Rare ones hide in tall grass.
 - Spirit: You can move the island anytime. Grab the edge.

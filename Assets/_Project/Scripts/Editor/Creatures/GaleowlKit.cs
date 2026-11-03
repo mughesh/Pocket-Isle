@@ -17,8 +17,11 @@ namespace Diorama.EditorTools
         const string Root = "Assets/_Project/Data/Creatures";
         const string MoveRoot = "Assets/_Project/Data/Battle/Moves";
 
-        /// <summary>Lv 9 with no other shard (Lv 11 with one, ShardScaling). HP about 2.75x a common.</summary>
-        public const int Level = 9;
+        /// <summary>
+        /// Lv 8 with no other shard (Lv 10 with one, ShardScaling). HP about 2.75x a common. Step 14c: Galewick is the first
+        /// realm now (was Lv 9; RealmOrderSim at Lv 8 with the fire patch's Toastling Lv 7-9: Kilnpot 100%, Pebbloop 52%, Pufflet 68%).
+        /// </summary>
+        public const int Level = 8;
         public const int KeeperHp = 120, KeeperAttack = 9, KeeperDefense = 10;
 
         static MoveData Move(string file, string name, Element element, int power, int accuracy, MoveAnimation animation)
