@@ -70,9 +70,9 @@ Shader "Diorama/Prop"
     // grows only while the realm's wind blows) for spinning pieces.
     float _RealmStill;
     float _WindSpin;
-    // Step 10f (WarmSpots): up to 8 rekindled places on the showing map (a village flame, a lantern, the forge): props
+    // Step 10f (WarmSpots): up to 12 (step 14c; was 8) rekindled places on the showing map (a village flame, a lantern, the forge): props
     // inside one burn and smoke as if restored while the realm is still cold. xy = map xz, z = radius (<= 0 = off), w = edge.
-    float4 _WarmSpots[8];
+    float4 _WarmSpots[12];
     // Per vertex / fragment: how warm this prop is from the spots (set at the top of each stage, 0 = none).
     static float sPropWarm;
 
@@ -82,7 +82,7 @@ Shader "Diorama/Prop"
         if (_RestoredSelf >= 0.0 || _WindowClip < 0.5) return 0.0;
         float2 m = DioramaMapPoint(UNITY_MATRIX_M._m03_m13_m23, _WindowClip).xz;
         float w = 0.0;
-        [unroll] for (int i = 0; i < 8; i++)
+        [unroll] for (int i = 0; i < 12; i++)
         {
             float4 s = _WarmSpots[i];
             if (s.z > 0.0) w = max(w, saturate((s.z - distance(m, s.xy)) / max(1e-4, s.w)));

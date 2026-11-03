@@ -763,16 +763,36 @@ MonoBehaviour:
     once: 1
     objective: 0
     priority: 2
-    note: 
+    note: 'step 14c: the arrival line, the trail ahead dark'
     target: 
     validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Cinderwood... it used to glow all year round.
+      text: Cinderwood... it used to glow all night.
+  - id: cw.arrive.lanterns
+    once: 0
+    objective: 1
+    priority: 2
+    note: "step 14c: four dead lanterns line the trail past the arrival; chip \"Touch\",
+      then \"Touch \xB7 Lanterns n/4\""
+    target: puzzle:cw.arrive
+    validWhile: 
+    lines:
     - speaker: 0
       speakerName: Spirit
-      text: The leaves have gone grey. It's so cold.
+      text: The lanterns went out. Touch one!
+  - id: cw.arrive.lanterns.done
+    once: 1
+    objective: 0
+    priority: 2
+    note: 'step 14c: the fire raced down all four, embers drift up'
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Look at it run! The forest remembers.
   - id: cinder.village.first
     once: 1
     objective: 0
@@ -1044,14 +1064,14 @@ MonoBehaviour:
     once: 0
     objective: 1
     priority: 2
-    note: lesson at the smoky hollow, once the village flame is rekindled; chip "Touch
-      them!"
+    note: 'lesson at the smoky hollow, once the village flame is rekindled; chip
+      "Lanterns n/6"; step 14c: short, the arrival taught it'
     target: puzzle:cw.hollow
     validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Smoke blocks the way. Touch the lanterns to light them!
+      text: Smoke! Light the lanterns again.
   - id: cw.lanterns.done
     once: 1
     objective: 0

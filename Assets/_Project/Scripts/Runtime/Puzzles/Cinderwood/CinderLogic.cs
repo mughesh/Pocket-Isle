@@ -84,6 +84,8 @@ namespace Diorama
     public class LanternChain
     {
         public float sweepWindow = 1.5f, raceStep = 0.15f, nudgeDelay = 0.5f;
+        /// <summary>Step 14c (Cinderwood's arrival lanterns): one touch or look + pinch sends the fire down the whole line.</summary>
+        public bool raceOnTouch;
         public readonly bool[] lit;
 
         readonly List<int> _queue = new List<int>();
@@ -140,6 +142,7 @@ namespace Diorama
             bool litNow = !lit[i];
             lit[i] = true;
             if (sweep) Race(_lastTouch, i);
+            else if (litNow && raceOnTouch && !Racing) RaceFrom(i);
             else if (litNow && Origin < 0) Origin = i;
             _lastTouch = i;
             _lastTouchAt = _time;
@@ -154,6 +157,11 @@ namespace Diorama
             lit[i] = true;
             if (litNow && Origin < 0) Origin = i;
             if (Racing) return litNow;
+            if (litNow && raceOnTouch)
+            {
+                RaceFrom(i);
+                return true;
+            }
             int next = i + 1 < lit.Length && !lit[i + 1] ? i + 1 : i - 1 >= 0 && !lit[i - 1] ? i - 1 : -1;
             if (next >= 0)
             {
@@ -162,6 +170,19 @@ namespace Diorama
                 _nextAt = _time + nudgeDelay;
             }
             return litNow;
+        }
+
+        /// <summary>The fire runs on from <paramref name="i"/>: the rest of the line ahead, then any behind it.</summary>
+        void RaceFrom(int i)
+        {
+            Origin = i;
+            _queue.Clear();
+            for (int k = i + 1; k < lit.Length; k++)
+                if (!lit[k]) _queue.Add(k);
+            for (int k = i - 1; k >= 0; k--)
+                if (!lit[k]) _queue.Add(k);
+            _queueStep = raceStep;
+            _nextAt = _time + raceStep;
         }
 
         void Race(int from, int to)

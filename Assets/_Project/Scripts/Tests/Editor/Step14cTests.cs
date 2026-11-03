@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Diorama.EditorTools;
 using NUnit.Framework;
 using UnityEditor;
+using UnityEngine;
 
 namespace Diorama.Tests
 {
@@ -79,6 +80,44 @@ namespace Diorama.Tests
         {
             var ids = System.Array.ConvertAll(GameState.QuickTowerSolved, p => p.id);
             CollectionAssert.IsSubsetOf(new[] { "gw.arrive", "gw.mill", "gw.kites", "gw.clouds", TowerDoor.TowerId }, ids);
+        }
+
+        [Test]
+        public void ArrivalLanterns_OneTouchRacesTheLine()
+        {
+            var c = new LanternChain(4) { raceOnTouch = true, raceStep = 0.15f };
+            Assert.IsTrue(c.Touch(1));
+            Assert.IsTrue(c.Racing);
+            var order = new List<int>();
+            for (int i = 0; i < 40 && !c.AllLit; i++)
+            {
+                int k = c.Tick(0.05f);
+                if (k >= 0) order.Add(k);
+            }
+            CollectionAssert.AreEqual(new[] { 2, 3, 0 }, order, "ahead first, then behind");
+            Assert.AreEqual(1, c.Origin);
+            // The hollow's own rule is unchanged: one touch lights one.
+            var h = new LanternChain(4);
+            h.Touch(1);
+            Assert.IsFalse(h.Racing);
+        }
+
+        [Test]
+        public void Cinderwood_FourLanternsPastTheArrival_TrailStillWalks()
+        {
+            var map = AssetDatabase.LoadAssetAtPath<WorldMap>(CinderwoodTools.MapPath);
+            Assert.IsNotNull(map);
+            Assert.AreEqual("cw.arrive", map.arrivalLine);
+            Assert.AreEqual(4, CinderwoodTools.ArriveLanterns.Length);
+            foreach (var t in CinderwoodTools.ArriveLanterns)
+            {
+                Assert.IsTrue(map.TryGetProp(map.PropAt(t.y, t.x), out var prop), $"lantern at c{t.x} r{t.y}");
+                Assert.AreEqual("StoneLantern", prop.recipe.name);
+                int d = Mathf.Abs(t.x - CinderwoodTools.Arrive.x) + Mathf.Abs(t.y - CinderwoodTools.Arrive.y);
+                Assert.That(d, Is.InRange(2, 8), "just past the arrival");
+            }
+            Assert.IsTrue(map.TryGetLandmark("lanterns", out var mark));
+            Assert.IsTrue(ExplorerPath.CanReach(map, CinderwoodTools.Arrive, mark, 400), "no blocking: the trail walks either way");
         }
 
         [Test]

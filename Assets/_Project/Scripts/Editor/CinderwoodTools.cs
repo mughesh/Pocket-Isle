@@ -53,6 +53,19 @@ namespace Diorama.EditorTools
         {
             new Vector2Int(30, 33), new Vector2Int(28, 34), new Vector2Int(31, 34), new Vector2Int(28, 35), new Vector2Int(31, 35), new Vector2Int(29, 36),
         };
+        /// <summary>
+        /// Step 14c: four dead stone lanterns lining the trail 2-6 tiles past the arrival, in order along it (the fire races
+        /// this way): Cinderwood's touch-to-light moment right after the portal. Free shoulder tiles, placed after every
+        /// random draw so the rest of the map doesn't re-roll.
+        /// </summary>
+        public static readonly Vector2Int[] ArriveLanternXY =
+        {
+            new Vector2Int(10, 7), new Vector2Int(13, 8), new Vector2Int(10, 9), new Vector2Int(12, 11),
+        };
+        public static Vector2Int[] ArriveLanterns => System.Array.ConvertAll(ArriveLanternXY, Tile);
+        /// <summary>The trail tile in the middle of the arrival lanterns (landmark).</summary>
+        public static readonly Vector2Int ArriveLanternMarkXY = new Vector2Int(11, 8);
+
         /// <summary>The trail tile just before the smoke on the village side (landmark, dev panel Go to).</summary>
         public static readonly Vector2Int HollowMarkXY = new Vector2Int(28, 32);
         // Step 10f: the forge's firebox (in the cliff line, just east of the bellows) and the ember vent beside it.
@@ -171,7 +184,7 @@ namespace Diorama.EditorTools
             map.startTile = Arrive;
             map.theme = PropKit.Theme("Cinderwood");
             map.realm = "cinderwood";
-            map.arrivalLine = "realm.cinderwood.first";
+            map.arrivalLine = "cw.arrive"; // step 14c: the arrival lanterns follow (was realm.cinderwood.first)
             map.propLegend = Legend();
             map.SetLayout(Text(_g));
             map.SetProps(Text(_p));
@@ -205,6 +218,7 @@ namespace Diorama.EditorTools
                 new Landmark { name = "temple", tile = Tile(DoorXY + Vector2Int.right), line = "cinder.temple.first", radius = 4 },
                 new Landmark { name = "ruins", tile = Tile(50, 52), line = "cinder.ruins.first", radius = 5 },
                 new Landmark { name = "hollow", tile = Tile(HollowMarkXY) }, // step 10f (its lesson line says the rest)
+                new Landmark { name = "lanterns", tile = Tile(ArriveLanternMarkXY) }, // step 14c: the arrival lanterns
                 new Landmark { name = "field", tile = Tile(38, 8) },
                 new Landmark { name = "glade", tile = Tile(37, 21) },
                 new Landmark { name = "grove", tile = Tile(51, 30) },
@@ -359,6 +373,13 @@ namespace Diorama.EditorTools
             CleanUnderProps();
             SealCutOff();
             ThinDeepForest();
+            ArrivalLanterns();
+        }
+
+        /// <summary>Step 14c: last of all (no random draws after it), so adding them moves nothing else.</summary>
+        static void ArrivalLanterns()
+        {
+            foreach (var l in ArriveLanternXY) Prop(l, KStoneLantern);
         }
 
         /// <summary>

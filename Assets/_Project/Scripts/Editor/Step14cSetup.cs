@@ -9,6 +9,8 @@ namespace Diorama.EditorTools
     /// Step 14c (Nov 3): Galewick first. A: the realm order's Keeper levels (Galeowl Lv 8, Hearthstag Lv 12, Tidemother
     /// unchanged; RealmOrderSim), all three gates open in builds, the script reimported. B: the Quick Journey goes to
     /// Galewick (gifts Toastling + Whirlby, per-starter levels from QuickJourneySim.SweepWind, the director's realm).
+    /// C: Cinderwood's arrival lanterns (rewrites the Cinderwood map: 4 stone lanterns past the arrival, nothing else
+    /// moves; "Arrival Lanterns", a LanternHollowPiece copied from the hollow's; the lesson and ghost move there).
     /// Safe to re-run.
     /// </summary>
     public static class Step14cSetup
@@ -28,6 +30,7 @@ namespace Diorama.EditorTools
             log.Append(NL + "  Script_v1 reimported");
             Order(log);
             Quick(log);
+            CinderArrival(log);
             var scene = EditorSceneManager.GetActiveScene();
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
@@ -68,6 +71,62 @@ namespace Diorama.EditorTools
             log.Append(NL + $"  Quick Journey: gifts {string.Join(" + ", System.Array.ConvertAll(config.giftSpecies, s => s != null ? s.name : "MISSING"))}, " +
                        $"Kilnpot 5/8, Pebbloop 8/9, Pufflet 8/7; director {(director != null && director.galewick != null ? "-> Galewick" : "MISSING")}");
         }
+
+        /// <summary>C: the arrival lanterns (map + piece); the hollow keeps a counter and a short line, no ghost.</summary>
+        static void CinderArrival(StringBuilder log)
+        {
+            CinderwoodTools.Write(log);
+            var pieces = Object.FindObjectsByType<LanternHollowPiece>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            var hollow = System.Array.Find(pieces, p => p.id == Step10fSetup.HollowId);
+            if (hollow == null)
+            {
+                log.Append(NL + "  arrival lanterns: no smoky hollow to copy (Set Up MR_Main (10f Cinderwood hands))");
+                return;
+            }
+            var arrive = System.Array.Find(pieces, p => p.id == ArriveLanternsId);
+            if (arrive == null)
+            {
+                var go = new GameObject("Arrival Lanterns");
+                Undo.RegisterCreatedObjectUndo(go, "Step 14c");
+                go.transform.SetParent(hollow.transform.parent, false);
+                arrive = go.AddComponent<LanternHollowPiece>();
+            }
+            Undo.RecordObject(arrive, "Step 14c");
+            EditorUtility.CopySerialized(hollow, arrive);
+            // Every field that differs, set explicitly (a re-run copies whatever the hollow has now).
+            arrive.id = ArriveLanternsId;
+            arrive.reach = 4;
+            arrive.lanterns = CinderwoodTools.ArriveLanterns;
+            arrive.smoke = new Vector2Int[0];
+            arrive.smokeRecipe = null;
+            arrive.firstSlot = ArriveFirstSlot;
+            arrive.spotRadius = 1.6f;
+            arrive.waitFor = "";
+            arrive.lessonLine = "cw.arrive.lanterns";
+            arrive.lessonChip = "Touch";
+            arrive.counterLabel = "Touch · Lanterns";
+            arrive.ghostClip = "poke";
+            arrive.ghostScale = 1f;
+            arrive.doneLine = "cw.arrive.lanterns.done";
+            arrive.raceOnTouch = true;
+            arrive.embersPerLantern = 8;
+            EditorUtility.SetDirty(arrive);
+
+            Undo.RecordObject(hollow, "Step 14c");
+            hollow.ghostClip = "";
+            hollow.lessonChip = "";
+            hollow.counterLabel = "Lanterns";
+            hollow.raceOnTouch = false;
+            hollow.embersPerLantern = 0;
+            EditorUtility.SetDirty(hollow);
+            log.Append(NL + $"  'Arrival Lanterns' ({ArriveLanternsId}): {arrive.lanterns.Length} lanterns from c{arrive.lanterns[0].x} r{arrive.lanterns[0].y}, " +
+                       $"one touch races the line, warm slots {arrive.firstSlot}-{arrive.firstSlot + arrive.lanterns.Length - 1} (radius {arrive.spotRadius} tiles), " +
+                       $"lesson {arrive.lessonLine} + ghost {arrive.ghostClip}, chip '{arrive.counterLabel} n/{arrive.lanterns.Length}'; hollow: no ghost, chip '{hollow.counterLabel}'");
+        }
+
+        public const string ArriveLanternsId = "cw.arrive";
+        /// <summary>WarmSpots slots 8-11 (Cinderwood's village 0, hollow 1-6, forge 7).</summary>
+        public const int ArriveFirstSlot = 8;
 
         /// <summary>A: Keeper levels for the Galewick-first order, every gate open in builds.</summary>
         static void Order(StringBuilder log)

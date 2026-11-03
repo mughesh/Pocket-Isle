@@ -46,6 +46,12 @@ namespace Diorama
 
         [Header("Chain (LanternChain)")]
         public float sweepWindow = 1.5f, raceStep = 0.15f, nudgeDelay = 0.5f;
+        [Tooltip("Step 14c (the arrival lanterns): one touch sends the fire down the whole line.")]
+        public bool raceOnTouch;
+
+        [Header("All lit, no smoke (step 14c arrival)")]
+        [Tooltip("Embers drifting up from every lantern once the line is lit.")]
+        public int embersPerLantern = 0;
 
         [Header("Warmth")]
         [Tooltip("WarmSpots slot of the first lantern; the rest follow.")]
@@ -98,6 +104,14 @@ namespace Diorama
 
         public override float FocusRadius => 0.5f * TileWorld;
 
+        /// <summary>Step 14c: lanterns lit of all (the chip's "Lanterns n/N").</summary>
+        public override bool CountObjective(out int done, out int total)
+        {
+            total = lanterns.Length;
+            done = _chain != null ? Count(_chain.Mask) : 0;
+            return true;
+        }
+
         /// <summary>The village flame first (or a restored realm): the lesson and the rings wait for it.</summary>
         protected override bool Available => string.IsNullOrEmpty(waitFor) || PuzzleState.IsSolved(waitFor) || RealmState.Restored >= 0.99f;
 
@@ -105,7 +119,7 @@ namespace Diorama
 
         protected override void Start()
         {
-            _chain = new LanternChain(lanterns.Length) { sweepWindow = sweepWindow, raceStep = raceStep, nudgeDelay = nudgeDelay };
+            _chain = new LanternChain(lanterns.Length) { sweepWindow = sweepWindow, raceStep = raceStep, nudgeDelay = nudgeDelay, raceOnTouch = raceOnTouch };
             _audio = gameObject.AddComponent<AudioSource>();
             _audio.playOnAwake = false;
             _audio.spatialBlend = 0f;
@@ -285,7 +299,8 @@ namespace Diorama
             var order = new List<int>();
             for (int i = 0; i < smoke.Length; i++) order.Add(i);
             order.Sort((x, y) => ((Vector2)smoke[x] - origin).sqrMagnitude.CompareTo(((Vector2)smoke[y] - origin).sqrMagnitude));
-            Debug.Log($"[LanternHollowPiece] {id}: all lanterns lit, the smoke burns off from lantern {_chain.Origin}.");
+            Debug.Log($"[LanternHollowPiece] {id}: all lanterns lit{(smoke.Length > 0 ? $", the smoke burns off from lantern {_chain.Origin}" : "")}.");
+            if (embersPerLantern > 0) StartCoroutine(Embers());
             // Off the map in one go (one island rebuild), the views roll each puff away.
             foreach (var t in smoke)
             {
@@ -325,6 +340,23 @@ namespace Diorama
             if (!string.IsNullOrEmpty(doneLine)) Dialogue.Say(doneLine);
             if (explorer != null) explorer.Cheer();
             MarkSolved(_chain.Mask);
+        }
+
+        /// <summary>Step 14c: the line is lit: embers drift up from every lantern for a couple of seconds (the arrival's aha).</summary>
+        IEnumerator Embers()
+        {
+            float tile = TileWorld;
+            for (int wave = 0; wave < 4; wave++)
+            {
+                if (fx != null && Here)
+                    for (int i = 0; i < lanterns.Length; i++)
+                    {
+                        var at = TopWorld(i) + island.transform.up * tile * 0.1f;
+                        fx.Burst(at, Mathf.Max(1, embersPerLantern / 2), new Color(1f, 0.6f + 0.15f * (wave % 2), 0.22f), tile * 0.35f, 1.8f, tile * 0.03f,
+                            island.transform.up * tile * 0.7f, -tile * 0.15f);
+                    }
+                yield return new WaitForSeconds(0.45f);
+            }
         }
 
         void QuietSolve()

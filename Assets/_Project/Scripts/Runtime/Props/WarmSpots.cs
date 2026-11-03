@@ -11,7 +11,8 @@ namespace Diorama
     /// </summary>
     public static class WarmSpots
     {
-        public const int Count = 8;
+        // Step 14c: 12 (Cinderwood's arrival lanterns take 8-11). Diorama/Prop's _WarmSpots array has the same size.
+        public const int Count = 12;
         static readonly int SpotsId = Shader.PropertyToID("_WarmSpots");
         static readonly Vector4[] _spots = new Vector4[Count];
         static bool _dirty = true;

@@ -149,9 +149,12 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
   - Spirit: Palm up and pinch with your left hand any time to pause.
 
 ## Cinderwood (fire)
-- `cw.arrive` · once
-  - Spirit: Cinderwood... it used to glow all year round.
-  - Spirit: The leaves have gone grey. It's so cold.
+- `cw.arrive` · once (step 14c: the arrival line, the trail ahead dark)
+  - Spirit: Cinderwood... it used to glow all night.
+- `cw.arrive.lanterns` · objective · → puzzle:cw.arrive (step 14c: four dead lanterns line the trail past the arrival; chip "Touch", then "Touch · Lanterns n/4")
+  - Spirit: The lanterns went out. Touch one!
+- `cw.arrive.lanterns.done` · once (step 14c: the fire raced down all four, embers drift up)
+  - Spirit: Look at it run! The forest remembers.
 - `cinder.village.first` · once · → landmark:plaza (step 9a: first time the explorer comes near the village plaza)
   - Spirit: A kiln village. The kilns are cold... everyone's gone quiet.
 - `cinder.springs.first` · once · → landmark:springs (first time near a pool)
@@ -198,8 +201,8 @@ Step 10f, Cinderwood's new hand moments (lesson lines stay pinned as a chip unti
   - Spirit: It's too weak to rest by. Warm it up first!
 - `cw.flame.done` · once (the flame rekindled: the warmth rolls over the plaza)
   - Spirit: It's burning! Look, the whole village is waking up.
-- `cw.lanterns` · objective · → puzzle:cw.hollow (lesson at the smoky hollow, once the village flame is rekindled; chip "Touch them!")
-  - Spirit: Smoke blocks the way. Touch the lanterns to light them!
+- `cw.lanterns` · objective · → puzzle:cw.hollow (lesson at the smoky hollow, once the village flame is rekindled; chip "Lanterns n/6"; step 14c: short, the arrival taught it)
+  - Spirit: Smoke! Light the lanterns again.
 - `cw.lanterns.done` · once (every lantern lit: the smoke burns off the path)
   - Spirit: The smoke's burning away! The path is clear.
 - `cw.ember` · objective · → puzzle:cw.ember (lesson at the forge's ember vent, before the bellows; chip "Pick it up!")
