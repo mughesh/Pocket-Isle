@@ -139,3 +139,24 @@ New game: Settings > New journey, or delete `save.json`.
 `14a_rim_socket_preview`, `14a_lodge_rim_preview`, `14a_galewick_arrival_clouds`, `14a_lilymere_stream_before` /
 `_raining` / `_bridging` / `_after`. The Spirit + sunrays over the ghost hand show in `14a_pinch_dots_one`. Standing
 vs seated spawn can't be shot flat (there's no head pose; it uses the seated default).
+
+## Nov 3 feedback (14b)
+
+Setup: **Setup > First Minute (14) > Set Up MR_Main (14b Nov 3 feedback)** (re-runs 14a's). Tests 246/246. No flat
+runs this time (XR init on): everything below is headset test pending.
+
+| Feedback | Change |
+|---|---|
+| Galewick sweep ghost is flat | The ghost hand is tilted ~35 deg, palm leaning into the sweep, like fanning air |
+| Wind ends almost with the hand | The ripple crosses in 1.4 s (was 0.75), a wider band, wind streaks and leaves ride along it; the whoosh fades with it |
+| Controls card bland, icons wrong | A row of runes (Walk, Keep going, Go there, Pick up, Move isle); picking one lights it, shows its line and plays its ghost hand over the island. Walk opens first |
+| Menu and Isling card overlap | The pod's Isling card can't open while the menu or settings are up, and closes when they open. The full menu redesign stays for the menu remake |
+| Lily pads on the shore, inside the mesh, rings misleading | 4 pads lie in the mud bed itself, either side of the crossing, no gold rings |
+| Brown bridge before and after | It was the cracked "gap" cover on the trail's tiles. Gone: the crossing is mud like the rest of the stream |
+| Rain on the shore confusing | The stream is an empty river: dark mud sunk ~9 mm below the banks (deeper than water). Palm down anywhere over it (ghost: the palm hover); the water spreads from under your hand, each pad floats when the water reaches it, all four drift onto the crossing as a bridge |
+
+Headset checks:
+1. Galewick arrival: the ghost hand tilts as it sweeps. A real sweep: the ripple and streaks keep crossing the meadow for about a second after your hand.
+2. Menu > Controls: five runes, Walk lit, a thumb ghost over the island. Pick each: its ghost plays. Back: the lesson ghost (if one was showing) comes back.
+3. Open the menu with a pod's card showing: the card goes.
+4. Lilymere (Dev > Travel > LM: stream): a sunken mud river across the path, four pads lying in it, no path tiles across, no rings. Palm down over it: water spreads, pads lift as it reaches them, "Pads n/4", then they drift onto the path's crossing. Walk across.

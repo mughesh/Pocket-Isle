@@ -54,10 +54,12 @@ never saved.
 - **Pinch lesson:** two dots under the line fill as you pinch; "Nice! Once more." after the first.
 - **The Spirit** hovers right over the thing to do, with gold rays round it while it teaches.
 - **Pods onto the rim:** bring a held pod near the rim: a ghost pod shows the socket it will go into; let go.
-- **Galewick:** two clouds block the path just past the arrival: sweep your open hand over the island.
-- **Lilymere:** a dried-up stream just past the arrival: hold your palm down over it to rain; the lily pads float into a
-  bridge. The old lily channel is a plank bridge now.
-- **Game menu:** Music On / Off.
+- **Galewick:** two clouds block the path just past the arrival: sweep your open hand over the island (tilted, like
+  fanning air). The wind ripples on across the meadow for a second after your hand.
+- **Lilymere:** an empty, muddy river just past the arrival with lily pads stuck in it: hold your palm down anywhere
+  over it to rain; the water spreads, the pads float, then gather on the path as a bridge. The old lily channel is a
+  plank bridge now.
+- **Game menu:** Music On / Off. **Controls** shows each gesture with a ghost hand over the island: pick one.
 - Things to watch: does the island ever appear off to the side, too high or too low? Did anything grab the island when
   you meant a pod? Is the Spirit ever in the way of what it points at?
 
