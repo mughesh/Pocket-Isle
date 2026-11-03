@@ -508,8 +508,8 @@ namespace Diorama
                     Heading("Quick Journey: jump to a point");
                     Add("Quick: start", () => state.QuickPreset(GameState.QuickStage.Start), null, true);
                     Add("Quick: at gift", () => state.QuickPreset(GameState.QuickStage.Gift), null, true);
-                    Add("Quick: at gate", () => state.QuickPreset(GameState.QuickStage.Gate), null, true);
-                    Add("Quick: at temple", () => state.QuickPreset(GameState.QuickStage.Temple), null, true);
+                    Add("Quick: at wind gate", () => state.QuickPreset(GameState.QuickStage.Gate), null, true);
+                    Add("Quick: at tower door", () => state.QuickPreset(GameState.QuickStage.Temple), null, true);
                     break;
                 case Tab.Tools:
                     Heading("Show");

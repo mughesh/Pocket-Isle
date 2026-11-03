@@ -2143,23 +2143,24 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: The road to Cinderwood is long. Take two friends with you!
+      text: The road to Galewick is windy. Take two friends with you!
   - id: quick.gate
     once: 1
     objective: 0
     priority: 2
-    note: 'right after the gift: the Spirit points at the fire gate'
-    target: gate:fire
+    note: 'right after the gift: the Spirit points at the wind gate'
+    target: gate:wind
     validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Bring back the fire shard!
+      text: Bring back the wind shard!
   - id: quick.end
     once: 1
     objective: 0
     priority: 2
-    note: the fire shard locks into the statue; then the Keep exploring / Title runes
+    note: the wind shard locks in, the statue whispers; then the Keep exploring /
+      See the ending / Title runes
     target: 
     validWhile: 
     lines:
@@ -2168,7 +2169,7 @@ MonoBehaviour:
       text: You woke the first piece of the world!
     - speaker: 0
       speakerName: Spirit
-      text: Thank you for playing the Quick Journey.
+      text: Two more realms are waiting.
   idleHints:
   - speaker: 0
     speakerName: Spirit

@@ -4813,7 +4813,7 @@ MonoBehaviour:
   fx: {fileID: 1078587927}
   runes: {fileID: 622588089}
   hub: {fileID: 11400000, guid: ab0469af29722704f949fec768f94b68, type: 2}
-  cinderwood: {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
+  galewick: {fileID: 11400000, guid: 1c0f5df7c1c50ad4789ffbf83b2addd2, type: 2}
 --- !u!1 &1291464261
 GameObject:
   m_ObjectHideFlags: 0

@@ -5,7 +5,7 @@ namespace Diorama
 {
     /// <summary>
     /// The Quick Journey's rules (step 9g): active only while the quick save slot plays. Systems ask here instead of
-    /// reading the config: the encounter chance, XP and rare weight in Cinderwood (<see cref="EncounterDirector"/>,
+    /// reading the config: the encounter chance, XP and rare weight in the quick realm (Galewick since step 14c; <see cref="EncounterDirector"/>,
     /// <see cref="EncounterTable"/>) and the lessons cut (<see cref="LessonRunner.Skip"/>). The pure overloads (explicit
     /// "quick" flag) are what the tests check. The route's timer lives in PlayerPrefs (opening start to the shard in the statue).
     /// </summary>
@@ -20,12 +20,15 @@ namespace Diorama
         /// <summary>The director that set <see cref="Config"/> (only it clears it).</summary>
         internal static UnityEngine.Object Owner { get; set; }
 
-        /// <summary>The explorer is in Cinderwood (outside or in the Forge Hall); set by the director every frame.</summary>
-        public static bool InCinderwood { get; internal set; }
+        /// <summary>The explorer is in the quick realm (Galewick, outside or in the tower hall); set by the director every frame.</summary>
+        public static bool InQuickRealm { get; internal set; }
+
+        /// <summary>Step 14c: the quick route is done (the wind shard home, the end card shown): the full adventure's guidance takes over.</summary>
+        public static bool Finished => PuzzleState.IsSolved(EndId);
 
         public static bool Active => Config != null && SaveSlots.Active == SaveSlot.Quick;
 
-        static bool Dials => InCinderwood && Active;
+        static bool Dials => InQuickRealm && Active;
 
         // ---- dials (live) ----
 

@@ -6,17 +6,18 @@ using UnityEngine.SceneManagement;
 namespace Diorama
 {
     /// <summary>
-    /// Runs the Quick Journey's own beats in the quick save slot (step 9g):
+    /// Runs the Quick Journey's own beats in the quick save slot (step 9g; a Galewick journey since step 14c):
     /// - The gift: once the lessons are done, back in the hub and calm, the Spirit says <c>quick.gift</c>, two pods fly
     ///   from it to the rim (<see cref="QuickJourneyConfig.giftSpecies"/> at the gift level), the starter and anything
-    ///   caught are raised to <see cref="QuickJourneyConfig.raiseTo"/>, then <c>quick.gate</c> sends the Spirit to the fire
+    ///   caught are raised to <see cref="QuickJourneyConfig.raiseTo"/>, then <c>quick.gate</c> sends the Spirit to the wind
     ///   gate (it glows gold). Saved as the puzzle <c>quick.gift</c>.
-    /// - The gold path: standing still a few seconds shows gold tiles toward the next goal (fire gate, log, forge door,
+    /// - Galewick: the ridge cloud bank is cleared already (the sweep was taught at the arrival).
+    /// - The gold path: standing still a few seconds shows gold tiles toward the next goal (wind gate, mill, kites, tower,
     ///   home gate with the shard, then the statue).
-    /// - The end: when the fire shard locks into the statue, <c>quick.end</c>, then Keep exploring / Title runes. Saved as
-    ///   the puzzle <c>quick.end</c>.
+    /// - The end: the wind shard locks into the statue, the statue whispers, the Spirit wonders, <c>quick.end</c>, then
+    ///   Keep exploring / See the ending / Title runes. Saved as the puzzle <c>quick.end</c>.
     /// - The timer (opening start to the shard in the statue), shown in the dev readout.
-    /// Also tells <see cref="QuickJourney"/> whether the explorer is in Cinderwood (the dials apply there).
+    /// Also tells <see cref="QuickJourney"/> whether the explorer is in Galewick (the dials apply there).
     /// </summary>
     public class QuickJourneyDirector : MonoBehaviour
     {
@@ -31,11 +32,21 @@ namespace Diorama
         public GameSave save;
         public SceneSwap swap;
         public BattleFx fx;
-        [Tooltip("The end's Keep exploring / Title runes.")]
+        [Tooltip("The end's Keep exploring / See the ending / Title runes.")]
         public RuneBoard runes;
-        public WorldMap hub, cinderwood;
+        [Tooltip("Step 14c: the quick realm (Galewick).")]
+        public WorldMap hub, galewick;
 
-        bool _gifting, _ending, _timing;
+        /// <summary>The quick realm's shard and the ridge cloud bank it skips.</summary>
+        public const string ShardId = ShardHolder.WindId, RidgeId = "gw.clouds";
+
+        /// <summary>The route through Galewick, in order: each puzzle and the landmark the gold path leads to.</summary>
+        public static readonly (string puzzle, string landmark)[] Route =
+        {
+            ("gw.mill", "mill"), ("gw.kites", "kites"), (TowerDoor.TowerId, "tower"),
+        };
+
+        bool _gifting, _ending, _timing, _previewing;
         float _calm, _still, _nextGold, _savedAt;
         Vector2Int _lastTile;
         Coroutine _flash;
@@ -69,7 +80,8 @@ namespace Diorama
             if (QuickJourney.Owner != this) return;
             QuickJourney.Owner = null;
             QuickJourney.Config = null;
-            QuickJourney.InCinderwood = false;
+            QuickJourney.InQuickRealm = false;
+            FinaleDirector.Moment -= OnFinaleMoment;
         }
 
         void OnApplicationPause(bool paused)
@@ -80,11 +92,12 @@ namespace Diorama
         void Update()
         {
             var outdoor = swap != null ? swap.Outdoor : island != null ? island.world : null;
-            QuickJourney.InCinderwood = outdoor != null && outdoor == cinderwood;
+            QuickJourney.InQuickRealm = outdoor != null && outdoor == galewick;
             if (!QuickJourney.Active) return;
             Timer();
             TryGift();
-            GoldHint();
+            Presolve();
+            if (!QuickJourney.Finished) GoldHint();
         }
 
         // ---- timer ----
@@ -109,6 +122,21 @@ namespace Diorama
         {
             _savedAt = Time.unscaledTime;
             PlayerPrefs.Save();
+        }
+
+        // ---- Galewick ----
+
+        CloudBankPiece _ridge;
+
+        /// <summary>Step 14c: the ridge's cloud bank is already blown away in the quick slot (the arrival taught the sweep).</summary>
+        void Presolve()
+        {
+            if (PuzzleState.IsSolved(RidgeId) || galewick == null) return;
+            if (_ridge == null)
+                foreach (var b in FindObjectsByType<CloudBankPiece>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                    if (b.id == RidgeId) _ridge = b;
+            if (_ridge != null) _ridge.Presolve("the Quick Journey");
+            else PuzzleState.Solve(RidgeId, 1);
         }
 
         // ---- the gift ----
@@ -238,14 +266,14 @@ namespace Diorama
             if (world == null) return null;
             if (world == hub)
             {
-                if (ShardHolder.HasFire) return Mark(world, "statue");
-                if (PuzzleState.IsSolved(ShardHolder.FireId)) return null;
-                int fire = world.gates.FindIndex(g => g.id == "fire");
-                return fire >= 0 ? GameState.NearestWalkable(world, world.gates[fire].Front(0)) : (Vector2Int?)null;
+                if (ShardHolder.Holds(ShardId)) return Mark(world, "statue");
+                if (PuzzleState.IsSolved(ShardId)) return null;
+                int wind = world.gates.FindIndex(g => g.id == "wind");
+                return wind >= 0 ? GameState.NearestWalkable(world, world.gates[wind].Front(0)) : (Vector2Int?)null;
             }
-            if (world == cinderwood)
+            if (world == galewick)
             {
-                if (ShardHolder.HasFire)
+                if (ShardHolder.Holds(ShardId))
                 {
                     Vector2Int? best = null;
                     foreach (var g in world.gates)
@@ -256,15 +284,21 @@ namespace Diorama
                     }
                     return best;
                 }
-                if (PuzzleState.IsSolved(ShardHolder.FireId)) return null;
-                // Step 10f: the smoky hollow blocks the way to the springs and the log until its lanterns are lit.
-                return Mark(world, PuzzleState.IsSolved(GameState.LogId) ? "temple" : PuzzleState.IsSolved("cw.hollow") || PastHollow(world) ? "log" : "hollow");
+                if (PuzzleState.IsSolved(ShardId)) return null;
+                // The arrival's puffs teach the sweep with their own gold.
+                if (!PuzzleState.IsSolved("gw.arrive")) return null;
+                return Mark(world, NextLandmark(PuzzleState.IsSolved));
             }
             return null;
         }
 
-        /// <summary>Step 10f: the log's trail is reachable from here (past the hollow already: an old save, a Temple preset).</summary>
-        bool PastHollow(WorldMap world) => Mark(world, "log") is Vector2Int log && explorer.CanReach(log);
+        /// <summary>The landmark of the first unsolved beat on the Galewick route (the tower once all are done) (pure).</summary>
+        public static string NextLandmark(System.Func<string, bool> solved)
+        {
+            foreach (var (puzzle, landmark) in Route)
+                if (!solved(puzzle)) return landmark;
+            return "tower";
+        }
 
         static Vector2Int? Mark(WorldMap world, string landmark) =>
             world.TryGetLandmark(landmark, out var t) ? GameState.NearestWalkable(world, t) : (Vector2Int?)null;
@@ -286,7 +320,7 @@ namespace Diorama
 
         void OnPuzzle(string id)
         {
-            if (id != ShardHolder.FireId || !PuzzleState.IsSolved(id) || !QuickJourney.Active || PuzzleState.IsSolved(QuickJourney.EndId) || _ending) return;
+            if (id != ShardId || !PuzzleState.IsSolved(id) || !QuickJourney.Active || PuzzleState.IsSolved(QuickJourney.EndId) || _ending) return;
             StartCoroutine(End());
         }
 
@@ -297,11 +331,11 @@ namespace Diorama
             {
                 QuickJourney.TimerDone = true;
                 SaveTimer();
-                Debug.Log($"[QuickJourney] Finished: the fire shard is in the statue after {QuickJourney.Format(QuickJourney.Seconds)}.");
+                Debug.Log($"[QuickJourney] Finished: the wind shard is in the statue after {QuickJourney.Format(QuickJourney.Seconds)}.");
             }
             yield return new WaitForSeconds(1.5f);
-            // The statue's own lines first.
-            for (float t = 0f; t < 25f && (Dialogue.IsTalking || Dialogue.IsPending("hub.shard.placed") || Dialogue.IsPending("hub.shard.more")); t += Time.deltaTime)
+            // The statue's own lines first: its whisper (heart.dream.wind), the Spirit's "Did the statue just... speak?".
+            for (float t = 0f; t < 30f && (Dialogue.IsTalking || StatueLinesPending()); t += Time.deltaTime)
                 yield return null;
             Dialogue.Say("quick.end");
             for (float t = 0f; t < 1.5f && !Dialogue.IsTalking; t += Time.deltaTime) yield return null;
@@ -311,21 +345,78 @@ namespace Diorama
             _ending = false;
         }
 
+        static readonly string[] StatueLines = { "heart.dream.wind", "spirit.dream.1", "hub.shard.placed", "hub.shard.more" };
+
+        static bool StatueLinesPending()
+        {
+            foreach (var id in StatueLines)
+                if (Dialogue.IsPending(id)) return true;
+            return false;
+        }
+
+        /// <summary>The end card's runes, left to right (tests).</summary>
+        public static readonly string[] EndRunes = { "Keep exploring", "See the ending", "Title" };
+
         void ShowEnd()
         {
             if (runes == null) return;
             runes.Clear();
             var size = new Vector2(0.1f, 0.04f);
-            var keep = runes.Add("Keep exploring", new Vector2(-0.055f, 0f), size, () =>
-            {
-                runes.Hide();
-                runes.Clear();
-                Debug.Log("[QuickJourney] Keep exploring.");
-            });
-            runes.Add("Title", new Vector2(0.055f, 0f), size, ToTitle);
+            var keep = runes.Add(EndRunes[0], new Vector2(-0.11f, 0f), size, KeepExploring);
+            runes.Add(EndRunes[1], new Vector2(0f, 0f), size, SeeTheEnding);
+            runes.Add(EndRunes[2], new Vector2(0.11f, 0f), size, ToTitle);
             runes.DefaultFocus = keep;
             runes.Show();
-            Debug.Log("[QuickJourney] End card: Keep exploring / Title.");
+            Debug.Log("[QuickJourney] End card: " + string.Join(" / ", EndRunes) + ".");
+        }
+
+        /// <summary>Every gate stays open; the dials stay in Galewick only; the Spirit's trail takes over, pointing to Cinderwood next.</summary>
+        void KeepExploring()
+        {
+            runes.Hide();
+            runes.Clear();
+            Debug.Log("[QuickJourney] Keep exploring: the full adventure's trail leads on (Cinderwood next).");
+            var trail = FindFirstObjectByType<SpiritTrail>();
+            if (trail != null) trail.Show("quick journey: keep exploring");
+        }
+
+        /// <summary>
+        /// The finale from the wake (as the dev panel's Finale: play from wake), on a copy: the quick save is written now and
+        /// then suspended, so nothing the finale does (shards placed, finale done, Hall of Fame) reaches it. Back to the title after.
+        /// </summary>
+        void SeeTheEnding()
+        {
+            runes.Hide();
+            runes.Clear();
+            _previewing = true;
+            FinaleDirector.Moment -= OnFinaleMoment;
+            FinaleDirector.Moment += OnFinaleMoment;
+            Debug.Log($"[QuickJourney] See the ending: {BeginEnding(save, () => FinaleDirector.DevPlay(false, false))} (the quick save is suspended).");
+        }
+
+        /// <summary>The quick save written once, then suspended before the finale starts: nothing it does reaches the save (tests).</summary>
+        public static string BeginEnding(GameSave save, System.Func<string> play)
+        {
+            if (save != null)
+            {
+                save.Save("quick journey: see the ending");
+                save.Suspended = true;
+            }
+            return play();
+        }
+
+        void OnFinaleMoment(string moment)
+        {
+            if (moment != "done" || !_previewing) return;
+            FinaleDirector.Moment -= OnFinaleMoment;
+            StartCoroutine(AfterEnding());
+        }
+
+        IEnumerator AfterEnding()
+        {
+            yield return new WaitForSeconds(4f);
+            Debug.Log("[QuickJourney] The ending is over: back to the title (the quick save as it was).");
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
 
         void ToTitle()

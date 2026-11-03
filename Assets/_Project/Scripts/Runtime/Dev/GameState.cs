@@ -419,10 +419,17 @@ namespace Diorama
 
         public enum QuickStage { Start, Gift, Gate, Temple }
 
+        /// <summary>Step 14c: the Galewick beats done at the Quick "temple" preset (the tower hall door), with their saved stages.</summary>
+        public static readonly (string id, int stage)[] QuickTowerSolved =
+        {
+            ("gw.arrive", 3), ("gw.mill", 1), ("gw.kites", 7), ("gw.clouds", 7), ("gw.tower", 1),
+        };
+
         /// <summary>
         /// Jumps into the quick slot at a stage of the route: Start = the opening from the shard; Gift = in the hub at the
-        /// first grass with the tutorial done (the gift comes); Gate = after the gift at the fire gate; Temple = Cinderwood at
-        /// the forge door with the log placed. Writes quick.json and reloads (like a relaunch).
+        /// first grass with the tutorial done (the gift comes); Gate = after the gift at the wind gate; Temple = Galewick at
+        /// the tower hall door, the arrival, mill, kites and tower done (step 14c: the quick realm is Galewick). Writes
+        /// quick.json and reloads (like a relaunch).
         /// </summary>
         public void QuickPreset(QuickStage stage)
         {
@@ -444,15 +451,15 @@ namespace Diorama
             if (stage != QuickStage.Gift && config != null)
                 foreach (var s in config.giftSpecies)
                     if (s != null) team.Add(new IslingInstance(s, gift));
-            var map = stage == QuickStage.Temple ? cinderwood : hub;
+            var map = stage == QuickStage.Temple ? galewick : hub;
             var tile = map != null ? map.startTile : Vector2Int.zero;
             if (stage == QuickStage.Gift && hub != null && hub.TryGetLandmark("firstGrass", out var grass)) tile = NearestWalkable(hub, grass + new Vector2Int(0, 2));
             if (stage == QuickStage.Gate && hub != null)
             {
-                int fire = hub.gates.FindIndex(g => g.id == "fire");
-                if (fire >= 0) tile = NearestWalkable(hub, hub.gates[fire].Front(0) + new Vector2Int(0, 1));
+                int wind = hub.gates.FindIndex(g => g.id == "wind");
+                if (wind >= 0) tile = NearestWalkable(hub, hub.gates[wind].Front(0) + new Vector2Int(0, 1));
             }
-            if (stage == QuickStage.Temple && cinderwood != null && cinderwood.TryGetLandmark("temple", out var door)) tile = NearestWalkable(cinderwood, door + new Vector2Int(0, 1));
+            if (stage == QuickStage.Temple && galewick != null && galewick.TryGetLandmark("tower", out var door)) tile = NearestWalkable(galewick, door + new Vector2Int(0, 1));
             var data = new SaveData
             {
                 party = SaveGame.ToSaved(team),
@@ -469,7 +476,9 @@ namespace Diorama
                 dominantHand = DominantHand.Saved,
             };
             if (stage != QuickStage.Gift) data.puzzles.Add(new SavedPuzzle { id = QuickJourney.GiftId, solved = true, stage = 1 });
-            if (stage == QuickStage.Temple) data.puzzles.Add(new SavedPuzzle { id = LogId, solved = true, stage = 2 });
+            if (stage == QuickStage.Temple)
+                foreach (var (id, done) in QuickTowerSolved)
+                    data.puzzles.Add(new SavedPuzzle { id = id, solved = true, stage = done });
             SaveGame.Write(Diorama.SaveSlots.PathOf(Diorama.SaveSlot.Quick), data);
             Debug.Log($"[GameState] Quick Journey preset: {stage} ({data.map} c{tile.x} r{tile.y}, {string.Join(", ", team.Select(c => $"{c.Name} Lv {c.level}"))}).");
             Reload();

@@ -48,7 +48,7 @@ namespace Diorama.EditorTools
             var p = Object.FindFirstObjectByType<Party>();
             if (p == null) return;
             Debug.Log($"[Step9gDebug] Party: {string.Join(", ", p.members.ConvertAll(c => $"{c.Name} Lv {c.level}"))}; quick {QuickJourney.Active}, " +
-                      $"in Cinderwood {QuickJourney.InCinderwood}, chance x{QuickJourney.EncounterChance(1f):0.##}, gift {PuzzleState.IsSolved(QuickJourney.GiftId)}, " +
+                      $"in Galewick {QuickJourney.InQuickRealm}, chance x{QuickJourney.EncounterChance(1f):0.##}, gift {PuzzleState.IsSolved(QuickJourney.GiftId)}, " +
                       $"timer {QuickJourney.Format(QuickJourney.Seconds)}{(QuickJourney.TimerDone ? " done" : "")}.");
         }
 

@@ -147,17 +147,18 @@ namespace Diorama.Tests
         }
 
         [Test]
-        public void Quick_Config_GivesSteambaraAndToastling_AtLv8()
+        public void Quick_Config_GivesToastlingAndWhirlby_ForGalewick()
         {
             var c = AssetDatabase.LoadAssetAtPath<QuickJourneyConfig>("Assets/_Project/Data/QuickJourney.asset");
             if (c == null) Assert.Inconclusive("Run Step9gSetup.QuickOnly first.");
-            CollectionAssert.AreEquivalent(new[] { "Steambara", "Toastling" }, System.Array.ConvertAll(c.giftSpecies, s => s != null ? s.name : null));
+            // Step 14c: a Galewick journey: fire beats wind, and a wind friend.
+            CollectionAssert.AreEquivalent(new[] { "Toastling", "Whirlby" }, System.Array.ConvertAll(c.giftSpecies, s => s != null ? s.name : null));
             Assert.AreEqual(8, c.giftLevel, "the default gift is Lv 8");
             foreach (var n in new[] { "Kilnpot", "Pebbloop", "Pufflet" })
             {
                 var s = AssetDatabase.LoadAssetAtPath<IslingSpecies>($"Assets/_Project/Data/Creatures/Species/{n}.asset");
                 var (gift, raise) = c.LevelsFor(s);
-                Assert.That(gift, Is.InRange(6, 10), $"{n} gift level");
+                Assert.That(gift, Is.InRange(5, 10), $"{n} gift level");
                 Assert.That(raise, Is.InRange(6, 11), $"{n} raise level");
             }
             Assert.Less(c.encounterRate, 1f);

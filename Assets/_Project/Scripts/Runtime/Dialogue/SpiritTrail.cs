@@ -93,7 +93,8 @@ namespace Diorama
             if (!Onboarding.Running) Show("tutorial done");
         }
 
-        bool Active => !QuickJourney.Active && explorer != null && island != null && island.world != null && !SceneSwap.IsBusy &&
+        // Step 14c: after the Quick Journey's end (Keep exploring) the full adventure's trail leads on.
+        bool Active => (!QuickJourney.Active || QuickJourney.Finished) && explorer != null && island != null && island.world != null && !SceneSwap.IsBusy &&
                        !SceneSwap.IsInside && !TitleScreen.Showing && !Opening.InProgress && !Onboarding.Running && !GameMenu.IsOpen &&
                        (encounters == null || !encounters.InBattle);
 

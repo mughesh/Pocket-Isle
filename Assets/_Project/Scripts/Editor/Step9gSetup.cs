@@ -197,10 +197,10 @@ namespace Diorama.EditorTools
             director.fx = Find<BattleFx>();
             director.runes = runes;
             director.hub = AssetDatabase.LoadAssetAtPath<WorldMap>("Assets/_Project/Data/WorldMap_StillIsle.asset");
-            director.cinderwood = AssetDatabase.LoadAssetAtPath<WorldMap>(CinderwoodTools.MapPath);
+            director.galewick = AssetDatabase.LoadAssetAtPath<WorldMap>(GalewickTools.MapPath); // step 14c: the quick realm
             EditorUtility.SetDirty(director);
             int missing = new Object[] { director.party, director.pods, director.spirit, director.explorer, director.encounters, director.onboarding,
-                director.save, director.swap, director.fx, director.hub, director.cinderwood }.Count(o => o == null);
+                director.save, director.swap, director.fx, director.hub, director.galewick }.Count(o => o == null);
             log.Append($"\n  Quick Journey: gifts {string.Join(" + ", config.giftSpecies.Select(s => s != null ? s.name : "MISSING"))} Lv {config.giftLevel}, " +
                        $"cuts {string.Join(", ", config.cutLessons)}; director {(missing == 0 ? "wired" : $"{missing} reference(s) MISSING")}.");
             DialogueTools.Import();

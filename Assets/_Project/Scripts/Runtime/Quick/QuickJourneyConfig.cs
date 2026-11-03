@@ -40,14 +40,14 @@ namespace Diorama
             return (giftLevel, raiseTo);
         }
 
-        [Header("Dials in Cinderwood")]
+        [Header("Dials in the quick realm (Galewick since step 14c)")]
         [Tooltip("x the tall-grass encounter chance.")]
         [Range(0f, 2f)] public float encounterRate = 0.5f;
         [Tooltip("x the win XP, on top of the normal curve.")]
         [Min(0f)] public float xpMultiplier = 2f;
         [Tooltip("x the weight of rare entries (0 = no rare surprises, so no rare-only detours).")]
         [Min(0f)] public float rareWeight = 0f;
-        [Tooltip("Gold tiles toward the next goal (log, forge door, home gate, statue) when the explorer stands still.")]
+        [Tooltip("Gold tiles toward the next goal (wind gate, mill, kites, tower, home gate, statue) when the explorer stands still.")]
         public bool goldPathHint = true;
         [Tooltip("Seconds standing still before the gold path shows, and between shows.")]
         public float goldPathAfter = 4f, goldPathEvery = 7f;
@@ -64,8 +64,13 @@ namespace Diorama
         [Tooltip("Seconds per tile walked (auto-walk 0.4; players stop and look around).")]
         public float walkSecondsPerTile = 0.5f;
         public float giftSeconds = 15f, gateSeconds = 6f;
-        public float logSeconds = 35f, forgeSeconds = 50f, keeperSeconds = 150f, statueSeconds = 30f;
-        [Tooltip("Spirit lines along the trail (arrival, village, springs) (s).")]
+        [Tooltip("Step 14c, Galewick: the arrival sweep, the mill flick, flying the kites (on top of the walk), tying them at the tower, the untangle (s).")]
+        public float arriveSeconds = 30f, millSeconds = 40f, kitesSeconds = 75f, towerSeconds = 30f, untangleSeconds = 60f;
+        [Tooltip("Galeowl: meeting, fight, shard (s).")]
+        public float keeperSeconds = 150f;
+        [Tooltip("The shard into the statue, the whisper, the end card (s).")]
+        public float statueSeconds = 40f;
+        [Tooltip("Spirit lines along the trail (arrival, village, mill, kites, ridge) (s).")]
         public float trailTalkSeconds = 25f;
     }
 }

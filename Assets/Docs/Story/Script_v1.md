@@ -415,14 +415,14 @@ The third shard wakes the statue: it becomes the Heart of the World. Walking, wi
 - `keeper.spar.bow` (after the friendly match, win or lose)
   - Spirit: What a match! It bows to you.
 
-## Quick Journey (step 9g, the quick save slot only)
+## Quick Journey (step 9g, the quick save slot only; a Galewick journey since step 14c)
 - `quick.gift` · once (after the capture lesson, in the hub; two pods fly from the Spirit to the rim)
-  - Spirit: The road to Cinderwood is long. Take two friends with you!
-- `quick.gate` · once · → gate:fire (right after the gift: the Spirit points at the fire gate)
-  - Spirit: Bring back the fire shard!
-- `quick.end` · once (the fire shard locks into the statue; then the Keep exploring / Title runes)
+  - Spirit: The road to Galewick is windy. Take two friends with you!
+- `quick.gate` · once · → gate:wind (right after the gift: the Spirit points at the wind gate)
+  - Spirit: Bring back the wind shard!
+- `quick.end` · once (the wind shard locks in, the statue whispers; then the Keep exploring / See the ending / Title runes)
   - Spirit: You woke the first piece of the world!
-  - Spirit: Thank you for playing the Quick Journey.
+  - Spirit: Two more realms are waiting.
 
 ## Idle hints (random, rare, only when nothing is happening for ~40 s)
 - Spirit: Your Islings get stronger every battle.

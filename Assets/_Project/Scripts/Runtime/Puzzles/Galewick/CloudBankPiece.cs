@@ -127,6 +127,15 @@ namespace Diorama
             base.OnDestroy();
         }
 
+        /// <summary>Step 14c: cleared without a gust (the Quick Journey skips the ridge: the arrival taught the sweep).</summary>
+        public void Presolve(string why)
+        {
+            if (IsSolved) return;
+            PuzzleState.Solve(id, AllMask);
+            ApplyState();
+            Debug.Log($"[CloudBankPiece] {id} cleared already ({why}).");
+        }
+
         protected override void ApplyState()
         {
             int mask = IsSolved ? AllMask : PuzzleState.Stage(id);

@@ -15,20 +15,20 @@ MonoBehaviour:
   cutLessons:
   - twoHands
   giftSpecies:
-  - {fileID: 11400000, guid: 081cd6bac15516a438300833ff827291, type: 2}
   - {fileID: 11400000, guid: fb46257ae3b4b0144a5861244b1b96f6, type: 2}
+  - {fileID: 11400000, guid: 91ad152bca44429478745c413344f1ed, type: 2}
   giftLevel: 8
   raiseTo: 8
   perStarter:
   - starter: {fileID: 11400000, guid: 4e0827bf455d6eb4c853967a75296d1d, type: 2}
-    giftLevel: 8
+    giftLevel: 5
     raiseTo: 8
   - starter: {fileID: 11400000, guid: 3e6a8bbe90a2d0447b3543119e52c28a, type: 2}
-    giftLevel: 7
-    raiseTo: 7
+    giftLevel: 8
+    raiseTo: 9
   - starter: {fileID: 11400000, guid: 11737ef7d2b67d84b8a98e2c3f8eeb9d, type: 2}
     giftLevel: 8
-    raiseTo: 10
+    raiseTo: 7
   encounterRate: 0.5
   xpMultiplier: 2
   rareWeight: 0
@@ -42,8 +42,11 @@ MonoBehaviour:
   walkSecondsPerTile: 0.5
   giftSeconds: 15
   gateSeconds: 6
-  logSeconds: 35
-  forgeSeconds: 50
+  arriveSeconds: 30
+  millSeconds: 40
+  kitesSeconds: 75
+  towerSeconds: 30
+  untangleSeconds: 60
   keeperSeconds: 150
   statueSeconds: 30
   trailTalkSeconds: 25

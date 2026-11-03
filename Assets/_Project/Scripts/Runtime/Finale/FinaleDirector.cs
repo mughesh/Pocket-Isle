@@ -985,9 +985,10 @@ namespace Diorama
 
         /// <summary>
         /// Dev panel (Story > Finale): the save edited to all three shards placed and the finale not done, back on the hub
-        /// in front of the statue; it plays from the wake, or (<paramref name="goodbye"/>) from the goodbye.
+        /// in front of the statue; it plays from the wake, or (<paramref name="goodbye"/>) from the goodbye. Step 14c: the
+        /// Quick Journey's See the ending passes <paramref name="persist"/> false (its save is suspended: nothing written).
         /// </summary>
-        public static string DevPlay(bool goodbye)
+        public static string DevPlay(bool goodbye, bool persist = true)
         {
             var f = Instance;
             if (f == null) return "no finale in this scene";
@@ -1007,7 +1008,7 @@ namespace Diorama
                 if (SceneSwap.IsInside) swap.ReturnNow();
                 swap.TravelNow(f.hub, front, new Vector2Int(0, -1));
             }
-            if (f.save != null) f.save.Save("dev: finale " + (goodbye ? "from the goodbye" : "from the wake"));
+            if (persist && f.save != null) f.save.Save("dev: finale " + (goodbye ? "from the goodbye" : "from the wake"));
             return goodbye ? "from the goodbye" : "from the wake";
         }
 

@@ -38,6 +38,50 @@ namespace Diorama.Tests
         }
 
         [Test]
+        public void QuickRoute_MillKitesTower_RidgeSkipped()
+        {
+            var solved = new HashSet<string>();
+            Assert.AreEqual("mill", QuickJourneyDirector.NextLandmark(solved.Contains));
+            solved.Add("gw.mill");
+            Assert.AreEqual("kites", QuickJourneyDirector.NextLandmark(solved.Contains));
+            solved.Add("gw.kites");
+            Assert.AreEqual("tower", QuickJourneyDirector.NextLandmark(solved.Contains), "no ridge stop: its clouds are cleared already");
+            Assert.AreEqual("gw.clouds", QuickJourneyDirector.RidgeId);
+            Assert.IsFalse(System.Array.Exists(QuickJourneyDirector.Route, r => r.puzzle == QuickJourneyDirector.RidgeId));
+            Assert.AreEqual(ShardHolder.WindId, QuickJourneyDirector.ShardId);
+        }
+
+        [Test]
+        public void QuickEnd_ThreeRunes()
+        {
+            CollectionAssert.AreEqual(new[] { "Keep exploring", "See the ending", "Title" }, QuickJourneyDirector.EndRunes);
+        }
+
+        [Test]
+        public void SeeTheEnding_SuspendsTheQuickSave_BeforeTheFinalePlays()
+        {
+            var go = new UnityEngine.GameObject("Save (test)");
+            go.SetActive(false);
+            var save = go.AddComponent<GameSave>();
+            bool suspendedWhenPlayed = false;
+            var r = QuickJourneyDirector.BeginEnding(save, () =>
+            {
+                suspendedWhenPlayed = save.Suspended;
+                return "played";
+            });
+            Assert.AreEqual("played", r);
+            Assert.IsTrue(suspendedWhenPlayed, "the finale's saves (shards placed, finale done) never reach the quick save");
+            UnityEngine.Object.DestroyImmediate(go);
+        }
+
+        [Test]
+        public void QuickPresets_TowerDoor_GalewickBeatsDone()
+        {
+            var ids = System.Array.ConvertAll(GameState.QuickTowerSolved, p => p.id);
+            CollectionAssert.IsSubsetOf(new[] { "gw.arrive", "gw.mill", "gw.kites", "gw.clouds", TowerDoor.TowerId }, ids);
+        }
+
+        [Test]
         public void KeeperLevels_ForTheGalewickFirstOrder()
         {
             Assert.AreEqual(8, ShardScaling.KeeperLevel(GaleowlKit.Level, 0, 2), "Galeowl at 0 shards");
