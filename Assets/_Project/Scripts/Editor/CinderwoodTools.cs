@@ -54,17 +54,17 @@ namespace Diorama.EditorTools
             new Vector2Int(30, 33), new Vector2Int(28, 34), new Vector2Int(31, 34), new Vector2Int(28, 35), new Vector2Int(31, 35), new Vector2Int(29, 36),
         };
         /// <summary>
-        /// Step 14c: four dead stone lanterns lining the trail 2-6 tiles past the arrival, in order along it (the fire races
-        /// this way): Cinderwood's touch-to-light moment right after the portal. Free shoulder tiles, placed after every
-        /// random draw so the rest of the map doesn't re-roll.
+        /// Nov 3 (Mugesh: the step 14c arrival lanterns were bland): a thorny vine across the 2-tile trail 3 rows past the
+        /// arrival, and trees either side of it on that row (the signpost at x9 already blocks), so it is the only way on.
+        /// The arrival plaza's ember vent (14, 4) burns it (VineBurnPiece). Placed after every random draw: nothing else moves.
         /// </summary>
-        public static readonly Vector2Int[] ArriveLanternXY =
-        {
-            new Vector2Int(10, 7), new Vector2Int(13, 8), new Vector2Int(10, 9), new Vector2Int(12, 11),
-        };
-        public static Vector2Int[] ArriveLanterns => System.Array.ConvertAll(ArriveLanternXY, Tile);
-        /// <summary>The trail tile in the middle of the arrival lanterns (landmark).</summary>
-        public static readonly Vector2Int ArriveLanternMarkXY = new Vector2Int(11, 8);
+        public static readonly Vector2Int[] VineXY = { new Vector2Int(11, 8), new Vector2Int(12, 8) };
+        public static readonly Vector2Int[] VineTreeXY = { new Vector2Int(10, 8), new Vector2Int(13, 8), new Vector2Int(14, 8), new Vector2Int(15, 8), new Vector2Int(16, 8) };
+        public static Vector2Int[] VineTiles => System.Array.ConvertAll(VineXY, Tile);
+        /// <summary>The arrival plaza's ember vent (Arrival()): the vine's ember.</summary>
+        public static readonly Vector2Int ArriveVentXY = new Vector2Int(14, 4);
+        /// <summary>The trail tile just before the vine (landmark).</summary>
+        public static readonly Vector2Int VineMarkXY = new Vector2Int(11, 7);
 
         /// <summary>The trail tile just before the smoke on the village side (landmark, dev panel Go to).</summary>
         public static readonly Vector2Int HollowMarkXY = new Vector2Int(28, 32);
@@ -135,7 +135,7 @@ namespace Diorama.EditorTools
         const char KGate = 'Z', KShrine = 'Y', KHut = 'h', KKiln = 'k', KPots = 'p', KWood = 'w', KLanternPost = 'l',
             KStoneLantern = 'n', KBush = 'b', KLog = 'o', KSign = 's', KLeaves = 'v', KCliff = 'c', KCliffB = 'C',
             KDoor = 'd', KBrazier = 'u', KRuin = 'r', KShards = 'x', KVent = 'e', KBellows = 'B', KPipe = 'i',
-            KFence = '-', KFenceTurned = '|', KCornerWS = '1', KCornerNW = '2', KCornerEN = '3', KCornerSE = '4', KSmoke = 'q', KFirebox = 'm';
+            KFence = '-', KFenceTurned = '|', KCornerWS = '1', KCornerNW = '2', KCornerEN = '3', KCornerSE = '4', KSmoke = 'q', KFirebox = 'm', KVine = 'V';
 
         // ---- generation state ----
         static char[,] _g, _p, _z; // [x, y]
@@ -169,6 +169,7 @@ namespace Diorama.EditorTools
                          "ReturnGate", HearthShrines.RecipeName, "ClayHut", "Kiln", "PotCluster", "Woodpile", "LanternPost",
                          "StoneLantern", "BerryBush", "FallenLog", "Signpost", "LeafPile", "CliffWall", "ForgeDoor", "Brazier",
                          "RuinedKiln", "PotShards", "EmberVent", "Fence", "FenceCorner", "Bellows", "ForgePipe", "SmokeCloud", "Firebox",
+                         PropKit.VineName,
                      })
             {
                 var r = PropKit.Load(name);
@@ -184,7 +185,7 @@ namespace Diorama.EditorTools
             map.startTile = Arrive;
             map.theme = PropKit.Theme("Cinderwood");
             map.realm = "cinderwood";
-            map.arrivalLine = "cw.arrive"; // step 14c: the arrival lanterns follow (was realm.cinderwood.first)
+            map.arrivalLine = "cw.arrive"; // step 14c (Nov 3: the vine's lesson follows; was realm.cinderwood.first)
             map.propLegend = Legend();
             map.SetLayout(Text(_g));
             map.SetProps(Text(_p));
@@ -218,7 +219,7 @@ namespace Diorama.EditorTools
                 new Landmark { name = "temple", tile = Tile(DoorXY + Vector2Int.right), line = "cinder.temple.first", radius = 4 },
                 new Landmark { name = "ruins", tile = Tile(50, 52), line = "cinder.ruins.first", radius = 5 },
                 new Landmark { name = "hollow", tile = Tile(HollowMarkXY) }, // step 10f (its lesson line says the rest)
-                new Landmark { name = "lanterns", tile = Tile(ArriveLanternMarkXY) }, // step 14c: the arrival lanterns
+                new Landmark { name = "vine", tile = Tile(VineMarkXY) }, // Nov 3: the arrival's vine (was the 14c lanterns)
                 new Landmark { name = "field", tile = Tile(38, 8) },
                 new Landmark { name = "glade", tile = Tile(37, 21) },
                 new Landmark { name = "grove", tile = Tile(51, 30) },
@@ -260,6 +261,7 @@ namespace Diorama.EditorTools
             Key(KShards, "PotShards");
             Key(KVent, "EmberVent");
             Key(KSmoke, "SmokeCloud");
+            Key(KVine, PropKit.VineName);
             Key(KFirebox, "Firebox");
             Key(KFence, "Fence");
             Key(KFenceTurned, "Fence", 0f, true);
@@ -373,13 +375,14 @@ namespace Diorama.EditorTools
             CleanUnderProps();
             SealCutOff();
             ThinDeepForest();
-            ArrivalLanterns();
+            ArrivalVine();
         }
 
-        /// <summary>Step 14c: last of all (no random draws after it), so adding them moves nothing else.</summary>
-        static void ArrivalLanterns()
+        /// <summary>Nov 3: last of all (no random draws after it), so adding it moves nothing else.</summary>
+        static void ArrivalVine()
         {
-            foreach (var l in ArriveLanternXY) Prop(l, KStoneLantern);
+            foreach (var t in VineTreeXY) Ground(t.x, t.y, IslandMap.Tree);
+            foreach (var v in VineXY) Prop(v, KVine);
         }
 
         /// <summary>
@@ -776,7 +779,7 @@ namespace Diorama.EditorTools
                 KWood => "Woodpile", KLanternPost => "LanternPost", KStoneLantern => "StoneLantern", KBush => "BerryBush",
                 KLog => "FallenLog", KSign => "Signpost", KLeaves => "LeafPile", KCliff or KCliffB => "CliffWall",
                 KDoor => "ForgeDoor", KBrazier => "Brazier", KRuin => "RuinedKiln", KShards => "PotShards", KVent => "EmberVent",
-                KBellows => "Bellows", KPipe => "ForgePipe", KSmoke => "SmokeCloud", KFirebox => "Firebox",
+                KBellows => "Bellows", KPipe => "ForgePipe", KSmoke => "SmokeCloud", KFirebox => "Firebox", KVine => PropKit.VineName,
                 KFence or KFenceTurned => "Fence", KCornerWS or KCornerNW or KCornerEN or KCornerSE => "FenceCorner",
                 _ => null,
             };
@@ -939,8 +942,10 @@ namespace Diorama.EditorTools
             var problems = new List<string>();
             if (map.Columns != Size || map.Rows != Size) problems.Add($"map is {map.Columns}x{map.Rows}, not {Size}x{Size}");
 
+            // Nov 3: the arrival's vine counts as burnt (it is the realm's first moment, right past the arrival).
             bool Walk(Vector2Int t, bool logOpen, bool hollowOpen) => map.CanWalk(t) || logOpen && IsLogTile(map, t) && IslandMap.IsWalkable(map.At(t)) ||
-                                                                      hollowOpen && IsHollowTile(t) && IslandMap.IsWalkable(map.At(t));
+                                                                      hollowOpen && IsHollowTile(t) && IslandMap.IsWalkable(map.At(t)) ||
+                                                                      System.Array.IndexOf(VineTiles, t) >= 0 && IslandMap.IsWalkable(map.At(t));
             HashSet<Vector2Int> Flood(bool logOpen, bool hollowOpen = true)
             {
                 var seen = new HashSet<Vector2Int>();

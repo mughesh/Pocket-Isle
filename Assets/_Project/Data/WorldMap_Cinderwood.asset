@@ -114,7 +114,7 @@ MonoBehaviour:
 
     XRFRRFFTRFGPPPPPFFPPPFFFPPPPGGGGGRGTTTFGGGGGRRGTGGGGFFFRFRFX
 
-    XFFRRFFFFGGPPGTTTFFFPPPPPRGGGGGGGRRGGGGGGGGGGGGGGGGFFFFRRFFX
+    XFFRRFFFFGFPPFFFFFFFPPPPPRGGGGGGGRRGGGGGGGGGGGGGGGGFFFFRRFFX
 
     XRRFRRFGGGGPPGTTTTFFFFFFFFGGGTTTGGGGGGGGGGGGGGGGGGGFFRFRFFFX
 
@@ -231,15 +231,15 @@ MonoBehaviour:
 
     ............v.............................e.................
 
-    ............n...............................................
+    ............................................................
 
     .............s................e.............................
 
-    ..........n.................................................
+    ............................................................
 
-    .........s...n..............................................
+    .........s.VV...............................................
 
-    ..........n..v............s...................e.............
+    .............v............s...................e.............
 
     .......Z....................................................
 
@@ -341,6 +341,10 @@ MonoBehaviour:
     yaw: 0
   - key: q
     recipe: {fileID: 11400000, guid: 8011fa5b8621e244bb7ae74db9c428bb, type: 2}
+    turned: 0
+    yaw: 0
+  - key: V
+    recipe: {fileID: 11400000, guid: ca96afe13fdfdc04a8b8915d36c85431, type: 2}
     turned: 0
     yaw: 0
   - key: m
@@ -581,8 +585,8 @@ MonoBehaviour:
     tile: {x: 28, y: 27}
     line: 
     radius: 0
-  - name: lanterns
-    tile: {x: 11, y: 51}
+  - name: vine
+    tile: {x: 11, y: 52}
     line: 
     radius: 0
   - name: field

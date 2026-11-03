@@ -1,0 +1,90 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 374f6b77629fa034d93d2a7945ac7885, type: 3}
+  m_Name: ThornVine
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.PropRecipe
+  pieces:
+  - shape: {fileID: 11400000, guid: 818fb49fe556f7f4781aafb50080b97f, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 0
+    motion: 1
+    motionAmount: 0.02
+    budgetWeight: 0
+  - shape: {fileID: 11400000, guid: 2be2b7e6be7dfa64b831316d88ba3d93, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 3
+    motion: 1
+    motionAmount: 0.02
+    budgetWeight: 0
+  - shape: {fileID: 11400000, guid: cca22f5217a10904abdd95189bf3f329, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 2
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 0
+  - shape: {fileID: 11400000, guid: 576e6bd993a6f0a46ae050c4a21f90d8, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 3
+    motion: 1
+    motionAmount: 0.04
+    budgetWeight: 0
+  palette:
+  - restored: {r: 0.38184318, g: 0.24760726, b: 0.17279455, a: 1}
+    unrestored: {r: 0.35686275, g: 0.22745098, b: 0.17254902, a: 1}
+    glow: 0
+  - restored: {r: 0.44898042, g: 0.31714636, b: 0.19990121, a: 1}
+    unrestored: {r: 0.41960785, g: 0.2901961, b: 0.2, a: 1}
+    glow: 0
+  - restored: {r: 0.31050983, g: 0.2624731, b: 0.22155297, a: 1}
+    unrestored: {r: 0.2901961, g: 0.24313726, b: 0.21176471, a: 1}
+    glow: 0
+  - restored: {r: 0.26802373, g: 0.3944314, b: 0.20317414, a: 1}
+    unrestored: {r: 0.24705882, g: 0.36862746, b: 0.2, a: 1}
+    glow: 0
+  - restored: {r: 1, g: 0.49926436, b: 0.13121575, a: 1}
+    unrestored: {r: 1, g: 0.47843137, b: 0.18039216, a: 1}
+    glow: 1.1
+  - restored: {r: 0.906353, g: 0.81739616, b: 0.68396086, a: 1}
+    unrestored: {r: 0.84705883, g: 0.78039217, b: 0.6509804, a: 1}
+    glow: 0
+  tips:
+    on: 0
+    onSlot: 0
+    tipSlot: 0
+    at: 0
+    byHeight: 0
+  spec: 0.15
+  outline: 0.02
+  footprint: {x: 1, y: 1}
+  blocksWalking: 1
+  randomYaw: 0
+  yawJitter: 8
+  scaleJitter: 0.08
+  resolution: 48
+  triangleBudget: 3400
+  bakedMesh: {fileID: 4300000, guid: 530fcfeaf159cc942b41a463f66782ab, type: 2}

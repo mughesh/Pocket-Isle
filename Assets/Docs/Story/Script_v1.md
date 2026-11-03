@@ -151,12 +151,14 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
   - Spirit: Palm up and pinch with your left hand any time to pause.
 
 ## Cinderwood (fire)
-- `cw.arrive` · once (step 14c: the arrival line, the trail ahead dark)
+- `cw.arrive` · once (step 14c: the arrival line; Nov 3: a thorny vine blocks the trail ahead)
   - Spirit: Cinderwood... it used to glow all night.
-- `cw.arrive.lanterns` · objective · → puzzle:cw.arrive (step 14c: four dead lanterns line the trail past the arrival; chip "Touch", then "Touch · Lanterns n/4")
-  - Spirit: The lanterns went out. Touch one!
-- `cw.arrive.lanterns.done` · once (step 14c: the fire raced down all four, embers drift up)
-  - Spirit: Look at it run! The forest remembers.
+- `cw.vine` · objective · → puzzle:cw.arrive (Nov 3: lesson at the arrival plaza's ember vent, the vine across the trail; chip "Pick it up!")
+  - Spirit: Thorns on the trail! Pick up that ember and drop it on them.
+- `cw.vine.tip` · objective · → vine (Nov 3: the ember picked up; the Spirit points at the vine, chip "Drop it on the vine!")
+  - Spirit: Now drop it on the vine!
+- `cw.vine.done` · once (Nov 3: the ember dropped on the vine: it burns away)
+  - Spirit: Whoosh! The way is open.
 - `cinder.village.first` · once · → landmark:plaza (step 9a: first time the explorer comes near the village plaza)
   - Spirit: A kiln village. The kilns are cold... everyone's gone quiet.
 - `cinder.springs.first` · once · → landmark:springs (first time near a pool)
@@ -208,7 +210,7 @@ Step 10f, Cinderwood's new hand moments (lesson lines stay pinned as a chip unti
 - `cw.lanterns.done` · once (every lantern lit: the smoke burns off the path)
   - Spirit: The smoke's burning away! The path is clear.
 - `cw.ember` · objective · → puzzle:cw.ember (lesson at the forge's ember vent, before the bellows; chip "Pick it up!")
-  - Spirit: Pick up the ember and drop it in the forge's mouth!
+  - Spirit: Another ember! Drop it in the forge's mouth.
 - `cw.ember.tip` · objective · → firebox (step 12b: the ember picked up; the Spirit points at the firebox, chip "Tip it in!")
   - Spirit: Now tip it into the forge's mouth!
 - `cw.forge.cold` · (the bellows pumped while the firebox is cold; at most every 8 s)
@@ -423,9 +425,13 @@ The third shard wakes the statue: it becomes the Heart of the World. Walking, wi
 ## Quick Journey (step 9g, the quick save slot only; a Galewick journey since step 14c)
 - `quick.gate` · once · → gate:wind (Nov 3: no gift; after the capture lesson, back in the hub: the Spirit points at the wind gate)
   - Spirit: Bring back the wind shard!
-- `quick.end` · once (the wind shard locks in, the statue whispers; then the Keep exploring / See the ending / Title runes)
+- `quick.end` · once (the wind shard locks in, the statue whispers; then the Keep exploring / See the ending / Title runes float in over the statue)
   - Spirit: You woke the first piece of the world!
   - Spirit: Two more realms are waiting.
+  - Spirit: Keep exploring, or peek at how it all ends?
+- `quick.ending.go` · once (Nov 3: See the ending picked; the fire and water shards appear and fly into the statue, then the finale)
+  - Spirit: Let's dream ahead... all the way to the end.
+  - Spirit: Imagine every shard found!
 
 ## Idle hints (random, rare, only when nothing is happening for ~40 s)
 - Spirit: Your Islings get stronger every battle.

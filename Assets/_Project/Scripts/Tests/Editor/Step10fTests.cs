@@ -188,6 +188,8 @@ namespace Diorama.Tests
             map.ClearRuntimeChanges();
             try
             {
+                // Nov 3: past the arrival's vine first (burnt).
+                foreach (var t in CinderwoodTools.VineTiles) map.SetPropOpen(t, true);
                 foreach (var t in CinderwoodTools.HollowTiles)
                 {
                     Assert.AreEqual("SmokeCloud", map.TryGetProp(map.PropAt(t.y, t.x), out var e) ? e.recipe.name : "none", $"smoke on c{t.x} r{t.y}");

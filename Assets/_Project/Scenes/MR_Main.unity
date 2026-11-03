@@ -744,6 +744,10 @@ MonoBehaviour:
   spiritGazeDegrees: 8
   maxViewAngle: 30
   aboveIslandMargin: 0.015
+  blipEvery: 4
+  blipGap: 0.12
+  blipVolume: 0.75
+  objectivesBlip: 1
 --- !u!4 &232676578
 Transform:
   m_ObjectHideFlags: 0
@@ -1574,7 +1578,7 @@ Transform:
   - {fileID: 694551495}
   - {fileID: 1066025592}
   - {fileID: 1605616301}
-  - {fileID: 791579458}
+  - {fileID: 1993867690}
   m_Father: {fileID: 1553131432}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &366644024
@@ -3181,92 +3185,6 @@ MonoBehaviour:
   coneWidth: 0.02
   beamLinger: 1.5
   island: {fileID: 270959109}
---- !u!1 &791579457
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 791579458}
-  - component: {fileID: 791579459}
-  m_Layer: 0
-  m_Name: Arrival Lanterns
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &791579458
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 791579457}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 359768277}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &791579459
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 791579457}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d48a563055e11104ea4f4b290a5e5ca6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Diorama.Runtime::Diorama.LanternHollowPiece
-  id: cw.arrive
-  map: {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
-  island: {fileID: 270959109}
-  window: {fileID: 270959113}
-  explorer: {fileID: 374318554}
-  grabGuard: {fileID: 270959111}
-  ghosts: {fileID: 1421177268}
-  fx: {fileID: 1078587927}
-  reach: 4
-  lessonLine: cw.arrive.lanterns
-  ghostClip: poke
-  ghostScale: 1
-  lessonChip: Touch
-  counterLabel: "Touch \xB7 Lanterns"
-  focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
-  markIntensity: 1.3
-  grabAssist: 0.08
-  lanterns:
-  - {x: 10, y: 52}
-  - {x: 13, y: 51}
-  - {x: 10, y: 50}
-  - {x: 12, y: 48}
-  smoke: []
-  smokeRecipe: {fileID: 0}
-  topHeight: 0.72
-  touchRadius: 0.04
-  waitFor: 
-  guideMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
-  ringSize: 0.9
-  ringLift: 0.2
-  orbSize: 0.35
-  sweepWindow: 1.5
-  raceStep: 0.15
-  nudgeDelay: 0.5
-  raceOnTouch: 1
-  embersPerLantern: 8
-  firstSlot: 8
-  spotRadius: 1.6
-  burnStep: 0.15
-  burnSeconds: 0.9
-  doneLine: cw.arrive.lanterns.done
-  volume: 0.7
 --- !u!1 &886928184
 GameObject:
   m_ObjectHideFlags: 0
@@ -4109,9 +4027,9 @@ MonoBehaviour:
   fx: {fileID: 1078587927}
   reach: 4
   lessonLine: cw.lanterns
-  ghostClip: 
+  ghostClip: poke
   ghostScale: 1
-  lessonChip: 
+  lessonChip: Touch them!
   counterLabel: Lanterns
   focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
   markIntensity: 1.3
@@ -4967,6 +4885,7 @@ MonoBehaviour:
   runes: {fileID: 622588089}
   hub: {fileID: 11400000, guid: ab0469af29722704f949fec768f94b68, type: 2}
   galewick: {fileID: 11400000, guid: 1c0f5df7c1c50ad4789ffbf83b2addd2, type: 2}
+  runesOverStatue: 0.035
 --- !u!1 &1291464261
 GameObject:
   m_ObjectHideFlags: 0
@@ -7273,6 +7192,87 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1954810186}
   m_Mesh: {fileID: 0}
+--- !u!1 &1993867689
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1993867690}
+  - component: {fileID: 1993867691}
+  m_Layer: 0
+  m_Name: Arrival Vine
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1993867690
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1993867689}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 359768277}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1993867691
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1993867689}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21815e2e6cd8aac43afbe14d5b3477ca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.VineBurnPiece
+  id: cw.arrive
+  map: {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
+  island: {fileID: 270959109}
+  window: {fileID: 270959113}
+  explorer: {fileID: 374318554}
+  grabGuard: {fileID: 270959111}
+  ghosts: {fileID: 1421177268}
+  fx: {fileID: 1078587927}
+  reach: 4
+  lessonLine: cw.vine
+  ghostClip: grab_drop
+  ghostScale: 1
+  lessonChip: Pick it up!
+  counterLabel: 
+  focusMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  markIntensity: 1.3
+  grabAssist: 0.08
+  vent: {x: 14, y: 55}
+  vine:
+  - {x: 11, y: 51}
+  - {x: 12, y: 51}
+  emberRecipe: {fileID: 11400000, guid: 9795bdddd41984243949039c59c11847, type: 2}
+  vineRecipe: {fileID: 11400000, guid: ca96afe13fdfdc04a8b8915d36c85431, type: 2}
+  emberSize: 0.34
+  ventHeight: 0.08
+  vineHeight: 0.4
+  grabRadius: 0.04
+  vineRadius: 0.07
+  vineAbove: 0.18
+  guideMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  ventRing: 0.9
+  vineRing: 1.6
+  burnSeconds: 1.6
+  tipLine: cw.vine.tip
+  tipChip: Drop it on the vine!
+  doneLine: cw.vine.done
+  volume: 0.7
 --- !u!1 &1994521897
 GameObject:
   m_ObjectHideFlags: 0

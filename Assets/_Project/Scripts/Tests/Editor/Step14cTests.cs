@@ -39,16 +39,18 @@ namespace Diorama.Tests
         }
 
         [Test]
-        public void QuickRoute_MillKitesTower_RidgeSkipped()
+        public void QuickRoute_MillKitesRidgeTower()
         {
             var solved = new HashSet<string>();
             Assert.AreEqual("mill", QuickJourneyDirector.NextLandmark(solved.Contains));
             solved.Add("gw.mill");
             Assert.AreEqual("kites", QuickJourneyDirector.NextLandmark(solved.Contains));
             solved.Add("gw.kites");
-            Assert.AreEqual("tower", QuickJourneyDirector.NextLandmark(solved.Contains), "no ridge stop: its clouds are cleared already");
+            // Nov 3 (Mugesh): the ridge clouds are back in the quick slot.
+            Assert.AreEqual("ridge", QuickJourneyDirector.NextLandmark(solved.Contains));
+            solved.Add("gw.clouds");
+            Assert.AreEqual("tower", QuickJourneyDirector.NextLandmark(solved.Contains));
             Assert.AreEqual("gw.clouds", QuickJourneyDirector.RidgeId);
-            Assert.IsFalse(System.Array.Exists(QuickJourneyDirector.Route, r => r.puzzle == QuickJourneyDirector.RidgeId));
             Assert.AreEqual(ShardHolder.WindId, QuickJourneyDirector.ShardId);
         }
 
@@ -100,24 +102,6 @@ namespace Diorama.Tests
             var h = new LanternChain(4);
             h.Touch(1);
             Assert.IsFalse(h.Racing);
-        }
-
-        [Test]
-        public void Cinderwood_FourLanternsPastTheArrival_TrailStillWalks()
-        {
-            var map = AssetDatabase.LoadAssetAtPath<WorldMap>(CinderwoodTools.MapPath);
-            Assert.IsNotNull(map);
-            Assert.AreEqual("cw.arrive", map.arrivalLine);
-            Assert.AreEqual(4, CinderwoodTools.ArriveLanterns.Length);
-            foreach (var t in CinderwoodTools.ArriveLanterns)
-            {
-                Assert.IsTrue(map.TryGetProp(map.PropAt(t.y, t.x), out var prop), $"lantern at c{t.x} r{t.y}");
-                Assert.AreEqual("StoneLantern", prop.recipe.name);
-                int d = Mathf.Abs(t.x - CinderwoodTools.Arrive.x) + Mathf.Abs(t.y - CinderwoodTools.Arrive.y);
-                Assert.That(d, Is.InRange(2, 8), "just past the arrival");
-            }
-            Assert.IsTrue(map.TryGetLandmark("lanterns", out var mark));
-            Assert.IsTrue(ExplorerPath.CanReach(map, CinderwoodTools.Arrive, mark, 400), "no blocking: the trail walks either way");
         }
 
         [Test]

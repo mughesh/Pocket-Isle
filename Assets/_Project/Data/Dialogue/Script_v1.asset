@@ -775,36 +775,48 @@ MonoBehaviour:
     once: 1
     objective: 0
     priority: 2
-    note: 'step 14c: the arrival line, the trail ahead dark'
+    note: 'step 14c: the arrival line; Nov 3: a thorny vine blocks the trail ahead'
     target: 
     validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
       text: Cinderwood... it used to glow all night.
-  - id: cw.arrive.lanterns
+  - id: cw.vine
     once: 0
     objective: 1
     priority: 2
-    note: "step 14c: four dead lanterns line the trail past the arrival; chip \"Touch\",
-      then \"Touch \xB7 Lanterns n/4\""
+    note: 'Nov 3: lesson at the arrival plaza''s ember vent, the vine across the
+      trail; chip "Pick it up!"'
     target: puzzle:cw.arrive
     validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: The lanterns went out. Touch one!
-  - id: cw.arrive.lanterns.done
+      text: Thorns on the trail! Pick up that ember and drop it on them.
+  - id: cw.vine.tip
+    once: 0
+    objective: 1
+    priority: 2
+    note: 'Nov 3: the ember picked up; the Spirit points at the vine, chip "Drop
+      it on the vine!"'
+    target: vine
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Now drop it on the vine!
+  - id: cw.vine.done
     once: 1
     objective: 0
     priority: 2
-    note: 'step 14c: the fire raced down all four, embers drift up'
+    note: 'Nov 3: the ember dropped on the vine: it burns away'
     target: 
     validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Look at it run! The forest remembers.
+      text: Whoosh! The way is open.
   - id: cinder.village.first
     once: 1
     objective: 0
@@ -1105,7 +1117,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Pick up the ember and drop it in the forge's mouth!
+      text: Another ember! Drop it in the forge's mouth.
   - id: cw.ember.tip
     once: 0
     objective: 1
@@ -2181,7 +2193,7 @@ MonoBehaviour:
     objective: 0
     priority: 2
     note: the wind shard locks in, the statue whispers; then the Keep exploring /
-      See the ending / Title runes
+      See the ending / Title runes float in over the statue
     target: 
     validWhile: 
     lines:
@@ -2191,6 +2203,24 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: Two more realms are waiting.
+    - speaker: 0
+      speakerName: Spirit
+      text: Keep exploring, or peek at how it all ends?
+  - id: quick.ending.go
+    once: 1
+    objective: 0
+    priority: 2
+    note: 'Nov 3: See the ending picked; the fire and water shards appear and fly
+      into the statue, then the finale'
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Let's dream ahead... all the way to the end.
+    - speaker: 0
+      speakerName: Spirit
+      text: Imagine every shard found!
   idleHints:
   - speaker: 0
     speakerName: Spirit
