@@ -16,8 +16,8 @@ namespace Diorama
         public const float MinCapWorld = 0.014f;
         /// <summary>The island's default scale (IslandPlacer.islandScale).</summary>
         public const float DefaultIslandScale = 0.6f;
-        /// <summary>Liberation Sans cap height per TMP 3D font size unit (measured: 0.0688).</summary>
-        public const float CapPerFont = 0.069f;
+        /// <summary>Liberation Sans cap height per TMP 3D font size unit (measured 0.0684-0.0691; a little under, so text lands at 14 mm or more).</summary>
+        public const float CapPerFont = 0.068f;
 
         /// <summary>The smallest font size for text under the island (island-local units).</summary>
         public static float IslandFont => MinCapWorld / DefaultIslandScale / CapPerFont;

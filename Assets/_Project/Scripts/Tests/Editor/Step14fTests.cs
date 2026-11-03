@@ -184,7 +184,7 @@ namespace Diorama.Tests
             foreach (var c in SettingsBoard.Controls)
             {
                 string plain = System.Text.RegularExpressions.Regex.Replace(c.text, "<[^>]+>", "");
-                float w = TextRule.Width(plain, RuneBoard.LabelFont * 0.9f);
+                float w = TextRule.Width(plain, RuneBoard.LabelFont);
                 Assert.LessOrEqual(w, width * 1.85f, $"{c.rune}: '{plain}' runs over two lines");
             }
         }

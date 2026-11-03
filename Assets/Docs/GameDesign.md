@@ -53,7 +53,24 @@ and restore the world. Each restored region docks onto your island.
   and after 12 s standing still with no objective; 20 s, or until arrival. A scene change drops queued chatter.
   Controls card (game menu and Settings): swipe, swipe twice + tap, look + pinch, pinch / grab.
 - Tap: stop while walking, hop when standing, fish when facing water.
-- Battle runes: poke or look + pinch; the panel faces you at battle start, drifts at most ±15°.
+- Battle runes: poke or look + pinch; the panel faces you at battle start, drifts at most ±15°. Step 14f: a 2 x 2 grid
+  (moves 1-2 on top, move 3 and Run below), the move's element on the tablet's inlay.
+- **Walk lessons (14f):** the last one is "Swipe to walk, tap to stop", done on any tap that stops a walk, arriving on
+  the gold tile ahead, or two finished swipe walks; it passes itself after 30 s. Swiping twice still walks on (the
+  Controls card shows it); no lesson teaches it (players saw no difference and could get stuck).
+- **Hand moments own their pinches (14f):** while Galeowl's untangle runs the explorer is held still; anywhere, a pinch
+  that starts within 8 cm of an active piece, or while one is held, never walks.
+- **Buttons (14f):** every button is a chunky carved stone tablet: rounded slab, moss on the top edge, the label carved
+  in and filled with warm cream, a dark rim and a soft shadow + faint warm halo so it never blends into a white wall or
+  a dark room. Looked at: grows, gold rim, label brightens. Pressed: sinks with a stone tap. Disabled: dim. The primary
+  action (Resume, Continue) is larger with a gold inlay. One shared mesh and material (instanced).
+- **The game menu (14f):** Resume (large, gold, first) · Controls · Settings · Title, a small speaker tablet in the
+  corner for music on / off, Dev only in QA builds, set apart. Title: Continue (its journey under it) · New journey ·
+  Settings.
+- **The text rule (14f):** every piece of world-space text has a cap height of at least 1.4 cm with the island at its
+  default size (about 1.5° at the default viewing distance) and grows with the island; high contrast (labels on tablets
+  6.4:1), a dark outline over the scene. Where a line can't fit, it is shortened or dropped (one knob:
+  `TextRule.MinCapWorld`).
 
 ## World structure
 - **The Still Isle (hub, neutral).** Where the game starts. A statue in the centre with 3 empty sockets,
@@ -637,7 +654,10 @@ it back with their own hand.
   3. **The goodbye in your palm:** an open hand palm up and the Spirit lands on it, glowing (chip: Lift it to the
      Heart). Within ~6 cm of the forehead it floats off into the setting with a soft chime ("Thank you, big one. For
      everything."). Look + pinch the Heart = it goes by itself. 30 s with nothing: "It's okay. Whenever you're ready."
-     It never forces it.
+     It never forces it. **Step 14f:** the forehead holds a **gold crystal** set in the stone, dull until now. As the
+     Spirit lifts off the palm it turns into light (the lantern dissolves into a bright gold mote, ~0.3 s), flies into
+     the crystal, and the crystal ignites (glow, a soft ring of light, the heartbeat). No lantern is ever seen in the
+     forehead. The Spark later comes out of the crystal.
   4. Its eyes open gold, the wings unfold, the crown blazes; the hub answers (the gates bloom with their element, the
      grass waves, warm motes rise into the room, a golden ring of light under the island): "Guardian. You carried the
      world in your hands."

@@ -252,7 +252,7 @@ namespace Diorama
             }))[0];
             float textY = RuneBoard.Above(0f, RuneBoard.TabletH, textH);
             runes.AddBacking(new Vector2(0f, textY), new Vector2(width + 0.02f, textH + 0.01f));
-            _controlText = runes.AddText("", new Vector2(0f, textY), RuneBoard.LabelFont * 0.9f, TextAlignmentOptions.Center, width);
+            _controlText = runes.AddText("", new Vector2(0f, textY), RuneBoard.LabelFont, TextAlignmentOptions.Center, width);
             _controlText.textWrappingMode = TextWrappingModes.Normal;
             _controlText.rectTransform.sizeDelta = new Vector2(width, textH);
             float yB = RuneBoard.Above(textY, textH, RuneBoard.TabletH);

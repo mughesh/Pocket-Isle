@@ -44,7 +44,17 @@ Each tab is split into groups under gold headings.
 Cheats (one-hit KO, invincible, wild battles off, rare x10, time and walk speed) last until the app closes. They are
 never saved.
 
-## 4. What's new in this build (step 14d, Nov 3 evening)
+## 4. What's new in this build (step 14f, Nov 3 night)
+
+- Every button is a mossy stone tablet; all text is much bigger. Look at a tablet: it grows with a gold rim. Pinch or poke:
+  it sinks with a stone tap.
+- Game menu: **Resume** (big, gold) on top, then Controls, Settings, Title. The little speaker tablet turns music on and off.
+- Battle moves are a 2 x 2 grid; the colour round each move is its element.
+- The last walk lesson is "Swipe to walk, tap to stop" and can't trap you (it passes itself after 30 s).
+- Untangling Galeowl never walks the explorer.
+- Finale: a gold crystal on the Heart's forehead; the Spirit turns to light and flies into it.
+
+## Earlier (step 14d, Nov 3 evening)
 
 - Walking is faster. The walk lesson: swipe any way until the dots fill, then swipe twice and **tap your thumb to stop**.
 - The shrine by the lessons stays shut until the tutorial is over.
