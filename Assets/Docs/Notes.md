@@ -1,10 +1,8 @@
-- Galewick - The hand swing ghost hands is flat facing the island surface and swinging. It should be slightly slanting like we usually hand blow air. Check that. 
-- the hand vlow effect could be more longer a little bit. Right now, the wind effect is ending almost instantly after the ahnd motion, makes it kind of abrupt. COuld look better if we could do it to look better feeling.
-- Controls option in the menu is bland. I think we can trigger the same ghost hands above the island for the selected control in the list. The icons u put there is also not even looking like the interaction to do. 
-- menu and the isling popup overlapping. And the menu does look weierd with bad organization. I guess we do this in the menu remake later ?
-- Lilly mere's starting interaction - the lily pads are over the shore and inside the mesh, couldnt see. I see a highlighter on each lily pad and though i should interact on them. Misleading. 
-- I actually see a brown bridge already before and after the rain interaction. And u making me to pour rain on the shore is also confusing. 
-- Let the river be a mud, with that inner dent to show the depth that it is not filled. Remove that brown bridge area, it confuses. Lets put the lilly pads in the mud area itself, visually seeable on them, scattered along the river area. One rain, the lily pads make it close together and form the bridge. 
-
-
-Others are working good. 
+- Character's speed should be more faster. 
+- except lily merere, the boards are not good. for galewick, the board is overlapped. Cinderwood board can look better as it looks unintresting.
+- The golden path is not showing up since we changed to galewick. Also in other realms.
+- The first swipe to move instruction might need a reork. The position of character when it is in the start, the left swipe only has one step movement. So I tend to swipe again, and it moves bit further but on the grass. And it still doesnt satisfy the swipe instruction. So I randomly swipe left and right few times to make it go. We should include the left and the right swipe and should be aware if the character is moved on that. I let u think in this. Also we are not teaching the user to tap the thumb to stop the character. Adding these are needed but also it increases the initial instructions too much. 
+- there is a high change the user enters the temple when doing the starting instructions as it is very near. Even I go in sometimes. Lets lock that untill the movements and islings are captured. 
+- I am not sure about the free gift. It gives sometimes the isling I already have, and sometimes it gives the isling that is not in that realm. I think we should not give gifts, and let them actually catch one. For the quick journey, we shall keep the difficulty a bit low, and let them respawn in the same realm's temple (it already works that way I guess)
+- we should increase the prominence of gaze glow on the portals, I dont feel like itgives enough signifier. Also, walking to it, or slose to it can trigger the portal walk. I dont want to aim my walk towards it. i feels like a friction.
+- Realm's name board, I only see it pop up in the galewick place. also would like to add some of our sound to it. It shall pop opn the center above the island, it is kind of lower and back right now. Some sound effect for this would be great. lets see if u can make it. 
