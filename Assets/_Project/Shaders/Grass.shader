@@ -56,6 +56,20 @@ Shader "Diorama/Grass"
             float4 _DioramaGust;
             float4 _DioramaGustFront;
             float4 _DioramaGustDir;
+            // Nov 3: a second band (a sweep back the other way while the first still crosses).
+            float4 _DioramaGust2;
+            float4 _DioramaGustFront2;
+            float4 _DioramaGustDir2;
+
+            // How much a gust band bends the blade at mapXZ (0..strength).
+            float GustAt(float2 mapXZ, float4 gust, float4 front)
+            {
+                if (front.z <= 0.001) return 0.0;
+                float along = dot(mapXZ - gust.xy, gust.zw) - front.x;
+                float behind = saturate(-along / max(1e-4, front.y * 3.0)); // a short wake behind the band
+                float band = exp(-along * along / max(1e-6, front.y * front.y));
+                return front.z * max(band, behind * exp(-behind * 2.0) * 0.6 * step(along, 0.0));
+            }
 
             struct Attributes
             {
@@ -105,16 +119,14 @@ Shader "Diorama/Grass"
                 world.y -= push * 0.35 * k;
 
                 // Step 10b: the gust front bends blades the way it blows and flattens them as it passes.
-                float gust = 0.0;
-                if (_DioramaGustFront.z > 0.001)
-                {
-                    float along = dot(mapBase.xz - _DioramaGust.xy, _DioramaGust.zw) - _DioramaGustFront.x;
-                    float behind = saturate(-along / max(1e-4, _DioramaGustFront.y * 3.0)); // a short wake behind the band
-                    float band = exp(-along * along / max(1e-6, _DioramaGustFront.y * _DioramaGustFront.y));
-                    gust = _DioramaGustFront.z * max(band, behind * exp(-behind * 2.0) * 0.6 * step(along, 0.0));
-                    world.xyz += _DioramaGustDir.xyz * gust * 0.95 * k;
-                    world.y -= gust * 0.45 * k;
-                }
+                float gust1 = GustAt(mapBase.xz, _DioramaGust, _DioramaGustFront);
+                float gust2 = GustAt(mapBase.xz, _DioramaGust2, _DioramaGustFront2);
+                float3 bend = _DioramaGustDir.xyz * gust1 + _DioramaGustDir2.xyz * gust2;
+                float bendLen = length(bend);
+                if (bendLen > 1.0) bend /= bendLen; // two bands crossing don't bend a blade twice as far
+                float gust = saturate(gust1 + gust2);
+                world.xyz += bend * 0.95 * k;
+                world.y -= gust * 0.45 * k;
 
                 // Battle clearing: blades bend away from its centre and shrink to a fifth of their height.
                 float clear = _WindowClip > 0.5 ? DioramaClearing(mapBase.xz) : 0.0;
