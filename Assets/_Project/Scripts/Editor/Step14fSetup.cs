@@ -100,7 +100,8 @@ namespace Diorama.EditorTools
                 {
                     "shard.wind" => ("Where the wind stopped", "The wind blows again"),
                     "shard.fire" => ("Where the fire went cold", "The fire burns again"),
-                    "shard.water" => ("Where the water froze", "The water flows again"),
+                    // Step 14g: nothing looks frozen on arrival; the stream bed is dry mud.
+                    "shard.water" => ("Where the water ran dry", "Where the water flows again"),
                     _ => (c.line, c.restoredLine),
                 };
                 if (c.line != line || c.restoredLine != restored) n++;

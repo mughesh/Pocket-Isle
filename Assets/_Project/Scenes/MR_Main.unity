@@ -5848,8 +5848,8 @@ MonoBehaviour:
     shard: shard.fire
   - map: {fileID: 11400000, guid: 62a4d08fb1efa974aa00c824d650dab0, type: 2}
     recipe: {fileID: 11400000, guid: eeec5be3f23adde4e8a1ebf8e3c2a0b7, type: 2}
-    line: Where the water froze
-    restoredLine: The water flows again
+    line: Where the water ran dry
+    restoredLine: Where the water flows again
     shard: shard.water
   - map: {fileID: 11400000, guid: ab0469af29722704f949fec768f94b68, type: 2}
     recipe: {fileID: 11400000, guid: 8f5540f6529aedd4db23c8c7491b3ee7, type: 2}

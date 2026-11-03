@@ -55,7 +55,7 @@ namespace Diorama
         public float riseSeconds = 0.6f, sinkSeconds = 0.6f;
 
         [Header("Line")]
-        [Tooltip("Unused since step 14f: the line is at the readable size (TextRule) under the card, wrapping in two lines at most.")]
+        [Tooltip("Unused since step 14g: the line is 55% of the name's size, under the plaque.")]
         public float lineSize = 0.1f;
         public Color lineColor = new Color(1f, 0.96f, 0.86f, 1f);
 
@@ -206,8 +206,7 @@ namespace Diorama
             var mesh = card.recipe.bakedMesh;
             _filter.sharedMesh = mesh;
             var b = mesh.bounds;
-            // Step 14f: the name's capitals at least the readable size (shape unit = a capital's height).
-            _scale = Mathf.Max(width / Mathf.Max(1e-4f, b.size.x), TextRule.IslandCap);
+            _scale = width / Mathf.Max(1e-4f, b.size.x);
             _meshT.localScale = Vector3.one * _scale;
             _meshT.localPosition = -b.center * _scale;
             _block.Clear();
@@ -216,18 +215,17 @@ namespace Diorama
             _block.SetFloat(RestoredSelfId, 1f);
             _block.SetFloat(ClearSinkId, 0f);
             _renderer.SetPropertyBlock(_block);
-            // The line on the board's lower band (shape units: CardLineY), just in front of the board.
+            // Step 14g (Mugesh, Nov 4): the line is secondary: about 55% of the name's capitals (a shape unit is a capital's
+            // height), right under the plaque, one line at the plaque's width (it may shrink a little to fit).
             _text.text = line;
             _text.gameObject.SetActive(!string.IsNullOrEmpty(line));
-            // Step 14f: the board's lower band was too small for a readable line: it sits under the card now, at the
-            // readable size (TextRule), wrapping at the card's width or 0.5 m (island scale 1), dark-outlined over the scene.
-            _text.enableAutoSizing = false;
-            // Nov 3 late (Mugesh: the line under the name was too big): secondary to the name.
-            _text.fontSize = TextRule.IslandFont * TextRule.Secondary;
-            _text.textWrappingMode = TextWrappingModes.Normal;
-            float wrap = Mathf.Max(width, 0.5f), lineH = _text.fontSize * 0.1f * 1.25f;
-            _text.rectTransform.sizeDelta = new Vector2(wrap, lineH * 2.2f);
-            _text.transform.localPosition = new Vector3(0f, (b.min.y - b.center.y) * _scale - lineH * 0.9f, (b.max.z - b.center.z) * _scale + 0.0015f);
+            float size = LineShare * _scale / CapPerFont;
+            _text.enableAutoSizing = true;
+            _text.fontSizeMax = size;
+            _text.fontSizeMin = size * 0.7f;
+            float lineH = size * 0.1f * 1.2f;
+            _text.rectTransform.sizeDelta = new Vector2(b.size.x * _scale * 1.05f, lineH);
+            _text.transform.localPosition = new Vector3(0f, (b.min.y - b.center.y) * _scale - lineH * 0.6f, (b.max.z - b.center.z) * _scale + 0.0015f);
             // TextMeshPro reads toward +X; the card faces +Z: turn the text round to face the same way.
             _text.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
             _yaw = HeadYaw();
@@ -237,8 +235,9 @@ namespace Diorama
             Place();
         }
 
-        /// <summary>The line's centre in the card's shape units (PropKit.CardLineY).</summary>
-        const float LineY = -0.62f;
+        /// <summary>Step 14g: the line's capitals as a share of the name's; TMP 3D cap height per font size unit.</summary>
+        const float LineShare = 0.55f, CapPerFont = 0.0688f;
+
 
         void Update()
         {

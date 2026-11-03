@@ -183,6 +183,63 @@ namespace Diorama.EditorTools
             Object.DestroyImmediate(m);
         }
 
+        /// <summary>Step 14g: arg "realm[,shot]": shows that realm's name card (as on arrival); with a shot name, shoots it 3 s later.</summary>
+        public static void Card()
+        {
+            var a = Arg.Split(',');
+            var card = Object.FindFirstObjectByType<RealmNameCard>();
+            if (card == null) return;
+            foreach (var c in card.cards)
+            {
+                if (c.map == null || !c.map.realm.ToString().Equals(a[0], System.StringComparison.OrdinalIgnoreCase)) continue;
+                // Travel there first (a dev spot on that map), then show it as a first visit (its line).
+                var map = c.map;
+                double wait = 0.0;
+                if (card.island.world != map)
+                {
+                    var g = Object.FindFirstObjectByType<GameState>();
+                    if (g != null)
+                        foreach (var s in g.Spots)
+                            if (s.map == map && !s.interior)
+                            {
+                                g.GoTo(s);
+                                wait = 4.0;
+                                break;
+                            }
+                }
+                double showAt = UnityEditor.EditorApplication.timeSinceStartup + wait;
+                UnityEditor.EditorApplication.CallbackFunction show = null;
+                show = () =>
+                {
+                    if (UnityEditor.EditorApplication.timeSinceStartup < showAt) return;
+                    UnityEditor.EditorApplication.update -= show;
+                    PuzzleState.SetStage(RealmNameCard.FlagId(map), 0);
+                    card.DebugShow(map);
+                };
+                UnityEditor.EditorApplication.update += show;
+                Debug.Log($"[Step14fDebug] Card {a[0]}: '{c.line}'.");
+                if (a.Length > 1)
+                {
+                    string name = a[1];
+                    double at = UnityEditor.EditorApplication.timeSinceStartup + wait + 3.0;
+                    UnityEditor.EditorApplication.CallbackFunction tick = null;
+                    tick = () =>
+                    {
+                        if (UnityEditor.EditorApplication.timeSinceStartup < at) return;
+                        UnityEditor.EditorApplication.update -= tick;
+                        var island = card.island;
+                        Vector3 p = island.transform.TransformPoint(card.RestLocal);
+                        Vector3 eye = p + island.transform.forward * 0.45f + Vector3.up * 0.05f;
+                        BattleDebug.Render($"Logs/BattleShots/{name}.png", eye, Quaternion.LookRotation(p - eye, Vector3.up));
+                        Debug.Log($"[Step14fDebug] Card shot {name}.png.");
+                    };
+                    UnityEditor.EditorApplication.update += tick;
+                }
+                return;
+            }
+            Debug.LogWarning($"[Step14fDebug] No card for '{a[0]}'.");
+        }
+
         /// <summary>Opens the game menu (arg "close" closes it).</summary>
         public static void Menu()
         {

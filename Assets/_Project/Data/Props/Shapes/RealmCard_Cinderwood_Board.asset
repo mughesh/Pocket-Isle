@@ -19,7 +19,7 @@ MonoBehaviour:
     mirrorX: 0
     a: {x: 0, y: 0.72499996, z: -0.1}
     b: {x: 0.07, y: 0, z: 0}
-    size: {x: 5.4350004, y: 0.56, z: 0.1}
+    size: {x: 5.6850004, y: 0.56, z: 0.1}
     rotation: {x: 0, y: 0, z: 0}
     bumps: 0
     bumpFrequency: 0
@@ -29,7 +29,7 @@ MonoBehaviour:
     mirrorX: 0
     a: {x: 0.05, y: -0.425, z: -0.1}
     b: {x: 0.07, y: 0, z: 0}
-    size: {x: 5.385, y: 0.56, z: 0.1}
+    size: {x: 5.635, y: 0.56, z: 0.1}
     rotation: {x: 0, y: 0, z: 0.8}
     bumps: 0
     bumpFrequency: 0
@@ -37,7 +37,7 @@ MonoBehaviour:
     blend: 1
     k: 0.08
     mirrorX: 0
-    a: {x: -5.4350004, y: 1.3, z: -0.1}
+    a: {x: -5.6850004, y: 1.3, z: -0.1}
     b: {x: 0, y: 0, z: 0}
     size: {x: 0.38, y: 0, z: 0}
     rotation: {x: 0, y: 0, z: 0}
@@ -47,7 +47,7 @@ MonoBehaviour:
     blend: 1
     k: 0.08
     mirrorX: 0
-    a: {x: 5.4350004, y: -1, z: -0.1}
+    a: {x: 5.6850004, y: -1, z: -0.1}
     b: {x: 0, y: 0, z: 0}
     size: {x: 0.32, y: 0, z: 0}
     rotation: {x: 0, y: 0, z: 0}

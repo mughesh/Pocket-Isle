@@ -66,7 +66,8 @@ namespace Diorama.EditorTools
                 p.position += new Vector3(shift, 0f, 0f);
                 pieces[i] = p;
             }
-            float halfW = width * 0.5f + 1.2f, top = 1.3f, bottom = -1.0f;
+            // Step 14g: a little more room at both ends (the emblem sat tight against the edge and read as a cut-off letter).
+            float halfW = width * 0.5f + 1.45f, top = 1.3f, bottom = -1.0f;
             var centre = new Vector3(shift + 0.39f, (top + bottom) * 0.5f, -0.1f);
             var half = new Vector3(halfW, (top - bottom) * 0.5f, 0.1f);
             Board(pieces, style, centre, half);
