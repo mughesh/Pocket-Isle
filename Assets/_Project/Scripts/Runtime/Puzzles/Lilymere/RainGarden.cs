@@ -14,10 +14,11 @@ namespace Diorama
     /// open (saved: stage = bloomed buds, solved = the path). The rain darkens the cracked sand under it for a while.
     /// Look + pinch-hold a bud: a tiny cloud rains on it by itself. A restored realm counts it as done.
     /// Step 14a, stream mode (<see cref="streamTiles"/> set: Lilymere's arrival stream): the "buds" are lily pads stuck
-    /// in the mud on one bank. Rain over the trickle swells it (its dry tiles turn to water over ~<see cref="swellSeconds"/>
-    /// of rain, spreading out from under the cloud), the pads lift and float as they fill, and once all float they drift
-    /// into a pad bridge across the trail (<see cref="bridgeSlots"/>; the crossing tiles turn to water and become
-    /// walkable). Old saves with <see cref="legacySolvedId"/> solved count it as solved.
+    /// in the stream's empty, sunken mud bed (Nov 3: scattered along it, no gold rings on them). Rain anywhere over the
+    /// stream swells it (its mud tiles turn to water over ~<see cref="swellSeconds"/> of rain, spreading out from under
+    /// the cloud); a pad lifts and floats once the water reaches its tile, and once all float they drift into a pad bridge
+    /// across the trail (<see cref="bridgeSlots"/>; the crossing tiles become walkable). Old saves with
+    /// <see cref="legacySolvedId"/> solved count it as solved.
     /// </summary>
     [DefaultExecutionOrder(-20)]
     public class RainGarden : HandPuzzle
@@ -104,12 +105,17 @@ namespace Diorama
         public override bool Busy => _cloud != null && _cloud.Holder >= 0 || _lookHold;
         protected override Vector2 HomeTile => gardenCenter;
         float Scale => grabGuard != null ? grabGuard.ScaleFactor : 1f;
+        /// <summary>One tile in island-local metres (map units), and the water's top under the cap in tiles.</summary>
+        float TileLocal => island != null && island.map != null ? Mathf.Max(1e-4f, island.map.tileSize) : 0.05f;
+        float WaterTiles => -IslandBuilder.WaterDrop / TileLocal;
 
         public override Vector3? FocusPoint
         {
             get
             {
                 if (!Here || IsSolved || _garden == null) return null;
+                // Nov 3: the stream itself is the target (rain on it), not the pads.
+                if (Stream) return MapToWorld(new Vector3(gardenCenter.x, 1.6f, gardenCenter.y));
                 for (int i = 0; i < buds.Length; i++)
                     if (!_garden.Bloomed(i)) return MapToWorld(new Vector3(buds[i].x, 1.6f, buds[i].y));
                 return null;
@@ -133,7 +139,8 @@ namespace Diorama
         {
             world = default;
             tiles = 1.3f;
-            if (_garden == null || i >= buds.Length || _garden.Bloomed(i) || _finishing) return false;
+            // Nov 3: no rings on the stream's pads (they read as "touch the pads"; the rain goes on the stream).
+            if (Stream || _garden == null || i >= buds.Length || _garden.Bloomed(i) || _finishing) return false;
             world = MapToWorld(new Vector3(buds[i].x, 0.05f, buds[i].y));
             return true;
         }
@@ -277,10 +284,18 @@ namespace Diorama
                 _gazed = -1;
                 _lookHold = false;
             }
-            if (_cloud.Raining && live) RainOnBuds(new Vector2(_cloudMap.x, _cloudMap.z), rainRadius, _cloud.Hard, Time.deltaTime);
+            if (_cloud.Raining && live && !Stream) RainOnBuds(new Vector2(_cloudMap.x, _cloudMap.z), rainRadius, _cloud.Hard, Time.deltaTime);
             if (_cloud.Raining && live && Stream && _swell < 1f)
                 SetSwell(_swell + Time.deltaTime * (_cloud.Hard ? 1.6f : 1f) / Mathf.Max(0.1f, swellSeconds), new Vector2(_cloudMap.x, _cloudMap.z));
-            if (_lookHold && _gazed >= 0) RainOnBud(_gazed, Time.deltaTime * softSeconds / Mathf.Max(0.1f, lookSeconds), false);
+            if (_lookHold && _gazed >= 0)
+            {
+                if (Stream && _swell < 1f) SetSwell(_swell + Time.deltaTime / Mathf.Max(0.1f, lookSeconds), buds[_gazed]);
+                else if (!Stream) RainOnBud(_gazed, Time.deltaTime * softSeconds / Mathf.Max(0.1f, lookSeconds), false);
+            }
+            // Nov 3: a stream pad lifts once the water reaches its tile (~0.7 s).
+            if (live && Stream)
+                for (int i = 0; i < buds.Length; i++)
+                    if (!_garden.Bloomed(i) && map.IsWet(PadTile(i))) RainOnBud(i, Time.deltaTime * 3f, false);
             if (!IsSolved && !_finishing && _garden.AllBloomed) StartCoroutine(Finish());
             Settle();
             Draw();
@@ -437,12 +452,13 @@ namespace Diorama
                 float pop = 1f + 0.35f * Mathf.Sin(_pop[i] * Mathf.PI);
                 if (Stream)
                 {
-                    // Step 14a: a pad stuck in the mud on the bank (tilted), lifting as it fills; afloat it bobs, then drifts
-                    // into its bridge slot.
-                    _budViews[i]?.Place(buds[i], 0.01f + 0.04f * wet, Quaternion.Euler(14f * (1f - wet) + sway, 40f * i, 8f * (1f - wet)), here && !bloomed, budScale);
+                    // Step 14a / Nov 3: a pad stuck flat-ish on the sunken mud floor (tilted a little), lifting as the water
+                    // reaches it; afloat it bobs on the water, then drifts into its bridge slot.
+                    float mud = -IslandBuilder.MudDrop / TileLocal + 0.015f, water = WaterTiles + 0.03f;
+                    _budViews[i]?.Place(buds[i], Mathf.Lerp(mud, water, wet), Quaternion.Euler(9f * (1f - wet) + sway, 40f * i, 6f * (1f - wet)), here && !bloomed, budScale);
                     var at = i < bridgeSlots.Length ? Vector2.Lerp(buds[i], bridgeSlots[i], Mathf.SmoothStep(0f, 1f, _bridge)) : buds[i];
-                    float bob = 0.015f * Mathf.Sin(Time.time * 1.8f + i * 1.3f);
-                    _stoneViews[i]?.Place(at, 0.03f + bob, Quaternion.Euler(0f, 30f * i + 25f * _bridge, 0f), here && bloomed, stoneScale * pop);
+                    float bob = 0.012f * Mathf.Sin(Time.time * 1.8f + i * 1.3f);
+                    _stoneViews[i]?.Place(at, water + bob, Quaternion.Euler(0f, 30f * i + 25f * _bridge, 0f), here && bloomed, stoneScale * pop);
                     continue;
                 }
                 _budViews[i]?.Place(buds[i], 0f, Quaternion.Euler(sway, 40f * i, 0f), here && !bloomed, budScale * (1f + 0.25f * wet));
@@ -497,6 +513,9 @@ namespace Diorama
         }
 
         Vector3 BudWorld(int i) => MapToWorld(new Vector3(buds[i].x, 0.4f, buds[i].y));
+
+        /// <summary>The map tile a stream pad lies on.</summary>
+        Vector2Int PadTile(int i) => new Vector2Int(Mathf.RoundToInt(buds[i].x), Mathf.RoundToInt(buds[i].y));
 
         /// <summary>The buds' middle (map tiles).</summary>
         public Vector2 BudsCenter

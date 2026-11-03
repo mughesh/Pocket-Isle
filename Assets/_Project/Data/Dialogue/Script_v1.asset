@@ -1498,14 +1498,15 @@ MonoBehaviour:
     once: 0
     objective: 1
     priority: 2
-    note: 'step 14a: the trickle stream by the arrival; chip "Palm down", then "Pads
-      n/3"'
+    note: 'step 14a: the empty stream by the arrival; chip "Palm down", then "Pads
+      n/4"'
     target: puzzle:lm.stream
     validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: The stream's almost dry... Hold your hand over it like a little cloud.
+      text: The stream's run dry, and the lily pads are stuck in the mud! Hold your
+        hand over it like a little cloud.
   - id: lm.arrive.stream.done
     once: 1
     objective: 0

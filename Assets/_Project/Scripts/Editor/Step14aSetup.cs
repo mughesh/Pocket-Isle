@@ -168,20 +168,22 @@ namespace Diorama.EditorTools
                 for (int y = LilymereTools.StreamY0; y <= LilymereTools.StreamY1; y++)
                 {
                     var t = LilymereTools.Tile(x, y);
+                    // Nov 3: the whole bed is mud, the crossing too (it swells with the rest; the pads bridge it).
+                    if (map.Raw(t.y, t.x) == IslandMap.Mud) bed.Add(t);
                     if (LilymereTools.IsStreamGate(x, y)) crossing.Add(t);
-                    else if (map.Raw(t.y, t.x) == IslandMap.DryBed) bed.Add(t);
                 }
             stream.streamTiles = bed.ToArray();
             stream.crossingTiles = crossing.ToArray();
-            stream.gapTiles = crossing.ToArray();
-            var mid = LilymereTools.MapPoint(new Vector2((LilymereTools.StreamX0 + LilymereTools.StreamX1) * 0.5f, (LilymereTools.StreamY0 + LilymereTools.StreamY1) * 0.5f));
-            stream.gardenCenter = mid;
-            stream.gardenRadius = new Vector2(8f, 3f);
+            stream.gapTiles = new Vector2Int[0];
+            // The ghost, the Spirit and the palm check centre on the stream at the crossing; the palm counts anywhere over it.
+            stream.gardenCenter = LilymereTools.MapPoint(new Vector2(11.5f, (LilymereTools.StreamY0 + LilymereTools.StreamY1) * 0.5f));
+            stream.gardenRadius = new Vector2((LilymereTools.StreamX1 - LilymereTools.StreamX0) * 0.5f + 1f, 2.2f);
+            stream.swellSeconds = 3.5f;
             stream.budRecipe = stream.stoneRecipe = PropKit.Load("LilyPad");
             stream.budScale = 1.3f;
             stream.stoneScale = 1.7f;
-            // The garden's own ghost before 14a (copying it on a re-run would copy the emptied one).
-            stream.ghostClip = "palm_sweep";
+            // Nov 3: the recorded palm-down hover (the sweep read as a gust). Set here: a re-run would copy the garden's emptied one.
+            stream.ghostClip = "palm_hover";
             stream.lessonLine = "lm.arrive.stream";
             stream.lessonChip = "Palm down";
             stream.counterLabel = "Palm down · Pads";
@@ -201,8 +203,8 @@ namespace Diorama.EditorTools
                 Undo.RecordObject(pads.gameObject, "Step 14a");
                 pads.gameObject.SetActive(false);
             }
-            log.Append(NL + $"  'Arrival Stream' (lm.stream): {bed.Count} stream tiles, {crossing.Count} crossing tiles, 3 pads on the south bank, " +
-                       $"lesson lm.arrive.stream + ghost {stream.ghostClip}, chip '{stream.counterLabel} n/3', old lm.pads counts; " +
+            log.Append(NL + $"  'Arrival Stream' (lm.stream): {bed.Count} stream tiles, {crossing.Count} crossing tiles, {stream.buds.Length} pads in the mud, " +
+                       $"lesson lm.arrive.stream + ghost {stream.ghostClip}, chip '{stream.counterLabel} n/{stream.buds.Length}', old lm.pads counts; " +
                        $"lily pad bridge {(pads != null ? "off (the channel is planks)" : "not found")}; garden: no ghost");
         }
     }

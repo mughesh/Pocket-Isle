@@ -25,6 +25,8 @@ namespace Diorama
         public const char HotSpring = 'H';
         /// <summary>Step 11a (Lilymere): a drained lagoon's bed, pale cracked sand. Not walkable; turns to water when the map rises (<see cref="WorldMap.SetRisen"/>).</summary>
         public const char DryBed = 'D';
+        /// <summary>Nov 3 (Lilymere's arrival stream): an empty river bed, dark mud sunk deeper than water. Not walkable; a swelling stream turns it to water (<see cref="WorldMap.SetWet"/>).</summary>
+        public const char Mud = 'M';
 
         public const string PrototypeLayout =
             "..GGGGGGGGGG..\n" +

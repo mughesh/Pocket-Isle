@@ -90,7 +90,9 @@ namespace Diorama
         // water, which sits CapSkirt lower, still shows above the column.
         const float ColumnDepth = 0.04f;
         const float CapSkirt = 0.005f;
-        const float WaterDrop = 0.005f;
+        public const float WaterDrop = 0.005f;
+        /// <summary>Nov 3: an empty river bed (<see cref="IslandMap.Mud"/>) sits this far under the cap: a dent below the water line, its top still above the column (metres).</summary>
+        public const float MudDrop = 0.009f;
         // Content this far below the cap is out of sight (tallest tree is about 0.11 m).
         const float SinkDepth = 0.12f;
         const int MaxInstancesPerDraw = 1023;
@@ -129,7 +131,7 @@ namespace Diorama
         MaterialPropertyBlock _flashProps;
 
         /// <summary>Which theme colour a batch takes (None = the material's own).</summary>
-        enum ThemeRole { None, Grass, TallGrass, Path, Water, HotSpring, Dirt, Underside, Trunk, LeavesLow, LeavesHigh, Rock, Blades, DryBed }
+        enum ThemeRole { None, Grass, TallGrass, Path, Water, HotSpring, Dirt, Underside, Trunk, LeavesLow, LeavesHigh, Rock, Blades, DryBed, Mud }
 
         /// <summary>Fixed to the island (footprint) or part of the scrolling map (content, grouped by map cell).</summary>
         sealed class Batch
@@ -542,6 +544,8 @@ namespace Diorama
                 { IslandMap.HotSpring, AddBatch(_capMesh, capHotSpring, true, ThemeRole.HotSpring) },
                 // Step 11a: the dry lagoon bed is a path cap in the theme's sand colour, sunk like water.
                 { IslandMap.DryBed, AddBatch(_capMesh, capPath, true, ThemeRole.DryBed) },
+                // Nov 3: the empty river bed is darker, wet mud, sunk deeper than water (the dent shows it isn't filled).
+                { IslandMap.Mud, AddBatch(_capMesh, capPath, true, ThemeRole.Mud) },
             };
             // Trees, rocks and the blocked border stand on grass. The border is drawn as forest.
             caps[IslandMap.Tree] = caps[IslandMap.Rock] = caps[IslandMap.Blocked] = caps[IslandMap.Grass];
@@ -553,7 +557,7 @@ namespace Diorama
             {
                 if (!caps.TryGetValue(ch, out var b)) return;
                 hasHotSpring |= ch == IslandMap.HotSpring;
-                float y = ch == IslandMap.Water || ch == IslandMap.HotSpring || ch == IslandMap.DryBed ? -WaterDrop : 0f;
+                float y = ch == IslandMap.Mud ? -MudDrop : ch == IslandMap.Water || ch == IslandMap.HotSpring || ch == IslandMap.DryBed ? -WaterDrop : 0f;
                 b.local.Add(Matrix4x4.Translate(MapPoint(new Vector2(c, r)) + Vector3.up * y));
                 TileCount++;
             });
@@ -1052,6 +1056,7 @@ namespace Diorama
             ThemeRole.Water => t.water,
             ThemeRole.HotSpring => t.hotSpring,
             ThemeRole.DryBed => t.dryBed,
+            ThemeRole.Mud => Color.Lerp(t.dryBed, new Color(0.3f, 0.21f, 0.14f, 1f), 0.55f),
             ThemeRole.Dirt => t.dirt,
             ThemeRole.Underside => t.underside,
             ThemeRole.Trunk => t.trunk,

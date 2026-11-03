@@ -38,10 +38,10 @@ namespace Diorama.EditorTools
         /// trail's crossing tiles (x 11..12).
         /// </summary>
         public const int StreamY0 = 8, StreamY1 = 9, StreamX0 = 5, StreamX1 = 18;
-        /// <summary>The pads' spots on the south bank (x, y; map tiles may be fractional).</summary>
-        public static readonly Vector2[] StreamPadsXY = { new Vector2(14.3f, 7f), new Vector2(15.3f, 6.85f), new Vector2(16.3f, 7.05f) };
-        /// <summary>Their bridge slots over the crossing (x, y).</summary>
-        public static readonly Vector2[] StreamBridgeXY = { new Vector2(11f, 8f), new Vector2(12f, 8.5f), new Vector2(11f, 9f) };
+        /// <summary>Nov 3: the pads stuck in the mud, scattered along the bed either side of the crossing (x, y; fractional).</summary>
+        public static readonly Vector2[] StreamPadsXY = { new Vector2(7.6f, 8.3f), new Vector2(9.4f, 8.75f), new Vector2(14.1f, 8.25f), new Vector2(15.9f, 8.7f) };
+        /// <summary>Their bridge slots: one on each of the crossing's four tiles (x, y).</summary>
+        public static readonly Vector2[] StreamBridgeXY = { new Vector2(11f, 8f), new Vector2(11f, 9f), new Vector2(12f, 8f), new Vector2(12f, 9f) };
         public static Vector2 MapPoint(Vector2 xy) => new Vector2(xy.x, Size - 1 - xy.y);
         /// <summary>The village shallows (an ellipse of water the trail crosses on a plank bridge).</summary>
         static readonly Vector2 ShallowsCenter = new Vector2(24f, 15f);
@@ -477,18 +477,24 @@ namespace Diorama.EditorTools
             foreach (var (x, y) in new[] { (5, 4), (16, 9) }) Prop(x, y, KReeds);
         }
 
-        /// <summary>Step 14a: the arrival stream's dry bed (the trail's tiles stay path: the crossing), a bare south bank for the pads.</summary>
+        /// <summary>
+        /// Step 14a: the arrival stream's bed. Nov 3: all of it is sunken mud (the trail's tiles too: no path across, the
+        /// pads are the only way), a bare south bank (kept so the layout around it doesn't re-roll).
+        /// </summary>
         static void Stream()
         {
             for (int x = StreamX0; x <= StreamX1; x++)
             {
                 for (int y = StreamY0; y <= StreamY1; y++)
-                    if (_g[x, y] != IslandMap.Path) _g[x, y] = IslandMap.DryBed;
+                    _g[x, y] = IslandMap.Mud;
                 // The muddy south bank where the pads are stuck: plain ground, no tall grass.
                 if (x >= 13 && x <= 17 && _g[x, StreamY0 - 1] == IslandMap.TallGrass) _g[x, StreamY0 - 1] = IslandMap.Grass;
             }
             foreach (var (x, y) in new[] { (6, 10), (17, 10) }) Prop(x, y, KReeds);
         }
+
+        /// <summary>A bed that fills with water: the lagoon's dry sand or the stream's mud.</summary>
+        static bool Bed(char ch) => ch == IslandMap.DryBed || ch == IslandMap.Mud;
 
         /// <summary>Step 14a: the trail's tiles over the arrival stream.</summary>
         public static bool IsStreamGate(int x, int y) => y >= StreamY0 && y <= StreamY1 && x >= StreamX0 && x <= StreamX1 && x >= 11 && x <= 12;
@@ -743,7 +749,7 @@ namespace Diorama.EditorTools
                 for (int dy = 0; dy < f.y; dy++)
                 {
                     var t = new Vector2Int(x + dx, y - dy);
-                    bool wet = In(t.x, t.y) && (_g[t.x, t.y] == IslandMap.Water || _g[t.x, t.y] == IslandMap.DryBed);
+                    bool wet = In(t.x, t.y) && (_g[t.x, t.y] == IslandMap.Water || Bed(_g[t.x, t.y]));
                     if (!In(t.x, t.y) || _p[t.x, t.y] != IslandMap.Empty || _covered.Contains(t) ||
                         wet && !OnWater.Contains(key) || !wet && OnWater.Contains(key) ||
                         _g[t.x, t.y] == IslandMap.Path && !OnPath.Contains(key))
@@ -757,7 +763,7 @@ namespace Diorama.EditorTools
             {
                 _covered.Add(t);
                 char ch = _g[t.x, t.y];
-                if (ch == IslandMap.Path || ch == IslandMap.Water || ch == IslandMap.DryBed) continue; // planks, stones and pads keep their ground
+                if (ch == IslandMap.Path || ch == IslandMap.Water || Bed(ch)) continue; // planks, stones and pads keep their ground
                 if (f != Vector2Int.one || ch == IslandMap.Tree || ch == IslandMap.Rock) _g[t.x, t.y] = IslandMap.Grass;
             }
             _p[x, y] = key;
@@ -778,7 +784,8 @@ namespace Diorama.EditorTools
         /// <summary>Walkable tiles the explorer could never reach become woods; tall grass crumbs under 4 tiles become grass.</summary>
         static void SealCutOff()
         {
-            bool Walkable(int x, int y) => In(x, y) && IslandMap.IsWalkable(_g[x, y]) && (!Blocks(x, y) || IsGate(x, y));
+            // Nov 3: the stream's crossing is mud until the pads bridge it; it still leads on.
+            bool Walkable(int x, int y) => In(x, y) && (IsStreamGate(x, y) || IslandMap.IsWalkable(_g[x, y]) && (!Blocks(x, y) || IsGate(x, y)));
             var seen = new HashSet<Vector2Int> { ArriveXY };
             var queue = new Queue<Vector2Int>();
             queue.Enqueue(ArriveXY);
@@ -842,7 +849,7 @@ namespace Diorama.EditorTools
                         for (int dy = -1; dy <= 1 && !near; dy++)
                         {
                             int nx = x + dx, ny = y + dy;
-                            near = In(nx, ny) && (IslandMap.IsWalkable(_g[nx, ny]) || _g[nx, ny] == IslandMap.Water || _g[nx, ny] == IslandMap.DryBed);
+                            near = In(nx, ny) && (IslandMap.IsWalkable(_g[nx, ny]) || _g[nx, ny] == IslandMap.Water || Bed(_g[nx, ny]));
                         }
                     if (near || _rnd.Next() >= 0.4f) continue;
                     _g[x, y] = IslandMap.Rock;
@@ -918,7 +925,8 @@ namespace Diorama.EditorTools
             {
                 var xy = new Vector2Int(t.x, Size - 1 - t.y);
                 if (closed != null && closed.Contains(xy)) return false;
-                return map.CanWalk(t) || IsGate(xy.x, xy.y) && IslandMap.IsWalkable(map.At(t));
+                // The stream's crossing is mud until the pads bridge it.
+                return map.CanWalk(t) || IsStreamGate(xy.x, xy.y) || IsGate(xy.x, xy.y) && IslandMap.IsWalkable(map.At(t));
             }
             HashSet<Vector2Int> Flood(ICollection<Vector2Int> closed)
             {

@@ -145,7 +145,16 @@ namespace Diorama.Tests
                     Assert.IsFalse(map.CanWalk(LilymereTools.Tile(x, y)), $"crossing x{x} y{y} shut until the pads float");
                 }
             var bed = LilymereTools.Tile(6, LilymereTools.StreamY0);
-            Assert.AreEqual(IslandMap.DryBed, map.Raw(bed.y, bed.x));
+            Assert.AreEqual(IslandMap.Mud, map.Raw(bed.y, bed.x));
+            // Nov 3: no path across: the crossing is mud too, and every pad lies in the bed.
+            var cross = LilymereTools.Tile(11, LilymereTools.StreamY0);
+            Assert.AreEqual(IslandMap.Mud, map.Raw(cross.y, cross.x));
+            foreach (var p in LilymereTools.StreamPadsXY)
+            {
+                var t = LilymereTools.Tile(Mathf.RoundToInt(p.x), Mathf.RoundToInt(p.y));
+                Assert.AreEqual(IslandMap.Mud, map.Raw(t.y, t.x), $"pad at {p} lies in the mud");
+            }
+            Assert.AreEqual(LilymereTools.StreamPadsXY.Length, LilymereTools.StreamBridgeXY.Length, "one bridge slot per pad");
             var plank = LilymereTools.Tile(LilymereTools.CrossingXY.x, LilymereTools.ChannelY0);
             Assert.IsTrue(map.CanWalk(plank), "the channel crossing is a plank bridge");
         }
@@ -154,7 +163,7 @@ namespace Diorama.Tests
         public void WorldMap_WetTilesReadAsWater_BridgedTilesWalk()
         {
             var map = ScriptableObject.CreateInstance<WorldMap>();
-            map.SetLayout("XXXX\nXDPX\nXXXX");
+            map.SetLayout("XXXXX\nXDPMX\nXXXXX");
             var bed = new Vector2Int(1, 1);
             var path = new Vector2Int(2, 1);
             Assert.AreEqual(IslandMap.DryBed, map.At(bed));
@@ -165,8 +174,13 @@ namespace Diorama.Tests
             Assert.IsFalse(map.CanWalk(path), "wet path is water");
             map.SetBridged(path, true);
             Assert.IsTrue(map.CanWalk(path), "the pad bridge walks");
+            var mud = new Vector2Int(3, 1);
+            Assert.IsFalse(map.CanWalk(mud), "mud doesn't walk");
+            map.SetWet(mud, true);
+            Assert.AreEqual(IslandMap.Water, map.At(mud));
             map.ClearRuntimeChanges();
             Assert.AreEqual(IslandMap.DryBed, map.At(bed));
+            Assert.AreEqual(IslandMap.Mud, map.At(mud));
             Assert.IsTrue(map.CanWalk(path));
             Object.DestroyImmediate(map);
         }

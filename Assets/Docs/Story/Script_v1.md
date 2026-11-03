@@ -288,8 +288,8 @@ Step 10d / 10e, the tower hall:
 - `realm.lilymere.first` · once · → landmark:firstGrass (first arrival in Lilymere)
   - Spirit: Lilymere... the lagoon used to reach right up to here.
   - Spirit: Half the water is gone, and nothing ripples.
-- `lm.arrive.stream` · objective · → puzzle:lm.stream (step 14a: the trickle stream by the arrival; chip "Palm down", then "Pads n/3")
-  - Spirit: The stream's almost dry... Hold your hand over it like a little cloud.
+- `lm.arrive.stream` · objective · → puzzle:lm.stream (step 14a: the empty stream by the arrival; chip "Palm down", then "Pads n/4")
+  - Spirit: The stream's run dry, and the lily pads are stuck in the mud! Hold your hand over it like a little cloud.
 - `lm.arrive.stream.done` · once (step 14a: the stream runs, the pads float into a bridge)
   - Spirit: Look, the pads are floating! A bridge, just for us.
 - `lm.village.first` · once · → landmark:village (first time near the stilt village)
