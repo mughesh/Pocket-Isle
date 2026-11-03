@@ -626,23 +626,29 @@ namespace Diorama
         int _blipAt;
         float _blipTime;
 
-        /// <summary>Typing ticks between blips (Mugesh, Oct 27: every 3 was too frequent, too many beats).</summary>
-        const int BlipEvery = 6;
-        /// <summary>And never closer than this (seconds), however fast the letters come.</summary>
-        const float BlipGap = 0.2f;
+        [Header("Typing voice (Nov 3)")]
+        [Tooltip("Typed characters between blips. Oct 27: 6 (every 3 felt too busy); Nov 3 (Mugesh: bring the robotic voice " +
+                 "back, it held focus, a little quieter than the first one): 4.")]
+        [Min(1)] public int blipEvery = 4;
+        [Tooltip("And never closer than this (seconds), however fast the letters come (Oct 27: 0.2).")]
+        public float blipGap = 0.12f;
+        [Tooltip("Blip volume (the first version: 1; Oct 27: 0.55).")]
+        [Range(0f, 1f)] public float blipVolume = 0.75f;
+        [Tooltip("Nov 3: objective cards (the lessons, the pinned goals) type with the voice too (Oct 27 made them silent).")]
+        public bool objectivesBlip = true;
 
         /// <summary>
-        /// A soft wordless voice blip while a line types: one every <see cref="BlipEvery"/> characters at most, quieter,
-        /// a gentle random pitch (Spirit and Keeper each their own voice). Objective cards and the Heart's whispers don't tick.
+        /// The Spirit's wordless robotic voice while a line types: one blip every <see cref="blipEvery"/> characters at most,
+        /// a gentle random pitch (Spirit and Keeper each their own voice). The Heart's whispers don't tick.
         /// </summary>
         void Blip(int shown)
         {
-            if (_chip || _heart || _objective || shown < _blipAt + BlipEvery || shown >= _chars || Time.time < _blipTime + BlipGap) return;
+            if (_chip || _heart || _objective && !objectivesBlip || shown < _blipAt + blipEvery || shown >= _chars || Time.time < _blipTime + blipGap) return;
             _blipAt = shown;
             _blipTime = Time.time;
             string id = _line.speaker == DialogueSpeaker.Keeper ? Diorama.Audio.AudioIds.VoiceKeeper : Diorama.Audio.AudioIds.SpiritBlip;
             var h = GameAudio.At(id, _root.position);
-            h.SetVolume(0.55f);
+            h.SetVolume(blipVolume);
             h.SetPitch(UnityEngine.Random.Range(0.94f, 1.06f));
         }
 

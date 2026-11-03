@@ -97,6 +97,12 @@ namespace Diorama
         /// <summary>Gold while nothing is looked at (Continue on the title); null = nothing is gold until looked at.</summary>
         public Rune DefaultFocus { get; set; }
 
+        /// <summary>
+        /// Nov 3: the board floats here (world point, the bottom row's centre) instead of over the near rim: the Quick
+        /// Journey's end over the statue, away from the rim the hands rest on. Null = the near rim. Cleared by <see cref="Clear"/>.
+        /// </summary>
+        public Func<Vector3?> Anchor { get; set; }
+
         public bool IsShown => _root != null && _root.gameObject.activeSelf;
 
         public IReadOnlyList<Rune> Runes => _runes;
@@ -147,6 +153,7 @@ namespace Diorama
             _hovered = _holding = null;
             _holdHand = -1;
             DefaultFocus = null;
+            Anchor = null;
             _min = _max = Vector2.zero;
         }
 
@@ -280,8 +287,8 @@ namespace Diorama
 
         // ---- show, hide ----
 
-        /// <summary>Shows the board facing the head; the runes pop in one after another.</summary>
-        public void Show()
+        /// <summary>Shows the board facing the head; the runes pop in one after another, <paramref name="stagger"/> s apart.</summary>
+        public void Show(float stagger = 0.05f)
         {
             bool was = IsShown;
             _root.gameObject.SetActive(true);
@@ -290,7 +297,7 @@ namespace Diorama
             {
                 var r = _runes[i];
                 if (!was) r.appear = 0f;
-                r.appearAt = Time.unscaledTime + i * 0.05f;
+                r.appearAt = Time.unscaledTime + i * stagger;
                 r.fill = 0f;
             }
             _hovered = _holding = null;
@@ -432,7 +439,8 @@ namespace Diorama
         {
             if (island == null || island.map == null) return;
             var b = island.LocalBounds;
-            _root.localPosition = new Vector3(b.center.x, island.map.capHeight, b.max.z) + offset;
+            var at = Anchor?.Invoke();
+            _root.localPosition = at.HasValue ? _root.parent.InverseTransformPoint(at.Value) : new Vector3(b.center.x, island.map.capHeight, b.max.z) + offset;
             var cam = Camera.main;
             if (cam != null)
             {

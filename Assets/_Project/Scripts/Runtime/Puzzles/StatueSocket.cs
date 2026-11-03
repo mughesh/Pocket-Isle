@@ -78,7 +78,7 @@ namespace Diorama
         MaterialPropertyBlock _block;
         Mesh _quad;
         int _hand = -1;
-        bool _flying;
+        bool _flying, _quiet;
         Vector3 _shardWorld, _grabOffset;
         float _pulse;
         bool _statueHidden;
@@ -303,8 +303,11 @@ namespace Diorama
             _pulse = 1f;
             float tile = TileWorld;
             GameAudio.At(Diorama.Audio.AudioIds.StatueSocket, SocketWorld);
-            GameAudio.Ui(Diorama.Audio.AudioIds.JingleShard);
-            Diorama.Audio.MusicDirector.Jingle(3f);
+            if (!_quiet)
+            {
+                GameAudio.Ui(Diorama.Audio.AudioIds.JingleShard);
+                Diorama.Audio.MusicDirector.Jingle(3f);
+            }
             if (fx != null)
             {
                 fx.Burst(SocketWorld, 40, shardColor, tile * 1.2f, 0.8f, tile * 0.05f);
@@ -318,6 +321,13 @@ namespace Diorama
             int placed = PlacedCount;
             Debug.Log($"[StatueSocket] {id} locks into the statue: {placed} / 3 placed.");
             yield return new WaitForSeconds(0.8f);
+            if (_quiet)
+            {
+                // Nov 3: the Quick Journey's dream ahead flies the other shards in without their whispers.
+                _quiet = false;
+                Placed?.Invoke(this, placed);
+                yield break;
+            }
             // Step 13: the statue whispers a memory (the Heart's voice), the Spirit answers; the third starts the finale.
             var lines = FinaleLogic.WhisperLines(id, placed);
             foreach (var line in lines) Dialogue.Say(line);
@@ -396,6 +406,18 @@ namespace Diorama
             Shake = 0f;
             Placed = null;
             HeartVoice = null;
+        }
+
+        /// <summary>
+        /// Nov 3 (the Quick Journey's See the ending): the held shard flies from the Spirit into its socket by itself, no
+        /// jingle, no whisper. False when it can't (not in the hub, not held).
+        /// </summary>
+        public bool FlyInQuiet()
+        {
+            if (!Here || IsSolved || !ShardHolder.Holds(id) || holder == null || _flying) return false;
+            _quiet = true;
+            StartCoroutine(Fly(holder.CupWorld(id), true));
+            return true;
         }
 
         /// <summary>Debug (bridge): the shard goes into the socket as if carried there.</summary>

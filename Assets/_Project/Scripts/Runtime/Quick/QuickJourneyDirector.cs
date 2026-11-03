@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Diorama.Audio;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -10,11 +11,13 @@ namespace Diorama
     /// - The send-off (no gift since Nov 3): once the lessons are done, back in the hub and calm, <c>quick.gate</c> sends
     ///   the Spirit to the wind gate and its trail shows the way. Saved as the puzzle <c>quick.gift</c> (stage 3).
     ///   Galeowl is easier in the quick slot instead (<see cref="QuickJourneyConfig.keeperLevelOffset"/>).
-    /// - Galewick: the ridge cloud bank is cleared already (the sweep was taught at the arrival).
-    /// - The gold path: standing still a few seconds shows gold tiles toward the next goal (wind gate, mill, kites, tower,
-    ///   home gate with the shard, then the statue).
-    /// - The end: the wind shard locks into the statue, the statue whispers, the Spirit wonders, <c>quick.end</c>, then
-    ///   Keep exploring / See the ending / Title runes. Saved as the puzzle <c>quick.end</c>.
+    /// - The gold path: the Spirit's trail toward the next goal (wind gate, mill, kites, the ridge clouds, tower, home gate
+    ///   with the shard, then the statue). Nov 3: the ridge clouds are back in the quick slot (14c had cleared them).
+    /// - The end: the wind shard locks into the statue, the statue whispers, the Spirit wonders, <c>quick.end</c> (its last
+    ///   line asks: keep exploring or see the end?), then Keep exploring / See the ending / Title runes float in over the
+    ///   statue (Nov 3: they sat over the near rim, where a resting hand could press one). Saved as the puzzle <c>quick.end</c>.
+    /// - See the ending (Nov 3): not a cut. The Spirit dreams ahead (<c>quick.ending.go</c>), the fire and water shards
+    ///   appear with it and fly into the statue one after the other, then the finale plays from the wake.
     /// - The timer (opening start to the shard in the statue), shown in the dev readout.
     /// Also tells <see cref="QuickJourney"/> whether the explorer is in Galewick (the dials apply there).
     /// </summary>
@@ -42,7 +45,7 @@ namespace Diorama
         /// <summary>The route through Galewick, in order: each puzzle and the landmark the gold path leads to.</summary>
         public static readonly (string puzzle, string landmark)[] Route =
         {
-            ("gw.mill", "mill"), ("gw.kites", "kites"), (TowerDoor.TowerId, "tower"),
+            ("gw.mill", "mill"), ("gw.kites", "kites"), (RidgeId, "ridge"), (TowerDoor.TowerId, "tower"),
         };
 
         bool _sending, _ending, _timing, _previewing;
@@ -92,7 +95,6 @@ namespace Diorama
             if (!QuickJourney.Active) return;
             Timer();
             TrySendOff();
-            Presolve();
         }
 
         // ---- timer ----
@@ -117,21 +119,6 @@ namespace Diorama
         {
             _savedAt = Time.unscaledTime;
             PlayerPrefs.Save();
-        }
-
-        // ---- Galewick ----
-
-        CloudBankPiece _ridge;
-
-        /// <summary>Step 14c: the ridge's cloud bank is already blown away in the quick slot (the arrival taught the sweep).</summary>
-        void Presolve()
-        {
-            if (PuzzleState.IsSolved(RidgeId) || galewick == null) return;
-            if (_ridge == null)
-                foreach (var b in FindObjectsByType<CloudBankPiece>(FindObjectsInactive.Include, FindObjectsSortMode.None))
-                    if (b.id == RidgeId) _ridge = b;
-            if (_ridge != null) _ridge.Presolve("the Quick Journey");
-            else PuzzleState.Solve(RidgeId, 1);
         }
 
         // ---- the send-off ----
@@ -259,6 +246,10 @@ namespace Diorama
         /// <summary>The end card's runes, left to right (tests).</summary>
         public static readonly string[] EndRunes = { "Keep exploring", "See the ending", "Title" };
 
+        [Header("The end (Nov 3)")]
+        [Tooltip("The end runes float this high over the statue's head (island-local metres).")]
+        public float runesOverStatue = 0.035f;
+
         void ShowEnd()
         {
             if (runes == null) return;
@@ -268,8 +259,24 @@ namespace Diorama
             runes.Add(EndRunes[1], new Vector2(0f, 0f), size, SeeTheEnding);
             runes.Add(EndRunes[2], new Vector2(0.11f, 0f), size, ToTitle);
             runes.DefaultFocus = keep;
-            runes.Show();
-            Debug.Log("[QuickJourney] End card: " + string.Join(" / ", EndRunes) + ".");
+            runes.Anchor = OverStatue;
+            var at = OverStatue();
+            if (at.HasValue)
+            {
+                GameAudio.At(AudioIds.CardRise, at.Value);
+                if (fx != null) fx.Burst(at.Value, 24, new Color(1f, 0.85f, 0.45f), TileWorld * 1.2f, 0.9f, TileWorld * 0.06f, island.transform.up * TileWorld * 0.6f);
+            }
+            runes.Show(0.18f);
+            Debug.Log("[QuickJourney] End card over the " + (at.HasValue ? "statue" : "near rim (no statue in view)") + ": " + string.Join(" / ", EndRunes) + ".");
+        }
+
+        float TileWorld => island != null && island.map != null ? island.map.tileSize * island.transform.lossyScale.x : 0.05f;
+
+        /// <summary>Over the statue's head (the Heart's voice point) while the hub shows; null = the near rim.</summary>
+        Vector3? OverStatue()
+        {
+            if (island == null || island.world != hub || StatueSocket.HeartVoice == null) return null;
+            return StatueSocket.HeartVoice.position + island.transform.up * runesOverStatue * island.transform.lossyScale.x;
         }
 
         /// <summary>Every gate stays open; the dials stay in Galewick only; the Spirit's trail takes over, pointing to Cinderwood next.</summary>
@@ -293,7 +300,43 @@ namespace Diorama
             _previewing = true;
             FinaleDirector.Moment -= OnFinaleMoment;
             FinaleDirector.Moment += OnFinaleMoment;
-            Debug.Log($"[QuickJourney] See the ending: {BeginEnding(save, () => FinaleDirector.DevPlay(false, false))} (the quick save is suspended).");
+            Debug.Log($"[QuickJourney] See the ending: {BeginEnding(save, () => { StartCoroutine(DreamAhead()); return "the Spirit dreams ahead"; })} (the quick save is suspended).");
+        }
+
+        /// <summary>The other two shards, in the order they fly into the statue.</summary>
+        public static readonly string[] DreamShards = { ShardHolder.FireId, ShardHolder.WaterId };
+
+        /// <summary>
+        /// Nov 3 (Mugesh: the cut to the finale looked awkward for a judge): the Spirit dreams ahead, the fire and water
+        /// shards appear with it, float out and fly into the statue one after the other (quiet: no jingle, no whispers),
+        /// one shard jingle, then the finale from the wake. The save is suspended already: none of this is kept.
+        /// </summary>
+        IEnumerator DreamAhead()
+        {
+            if (explorer != null) explorer.Locked = true;
+            Dialogue.Say("quick.ending.go");
+            for (float t = 0f; t < 1.5f && !Dialogue.IsTalking; t += Time.deltaTime) yield return null;
+            yield return new WaitForSeconds(1.2f);
+            foreach (var id in DreamShards)
+                if (!PuzzleState.IsSolved(id)) PuzzleState.SetStage(id, 1);
+            var from = spirit != null ? spirit.transform.position : island.transform.position;
+            if (fx != null) fx.Burst(from, 30, new Color(1f, 0.85f, 0.5f), TileWorld * 1.5f, 1f, TileWorld * 0.06f, island.transform.up * TileWorld * 0.5f);
+            GameAudio.At(AudioIds.CardRise, from);
+            Debug.Log("[QuickJourney] Dreaming ahead: the fire and water shards appear with the Spirit.");
+            yield return new WaitForSeconds(2.2f);
+            int flown = 0;
+            foreach (var id in DreamShards)
+            {
+                var socket = StatueSocket.FindById(id);
+                if (socket == null || !socket.FlyInQuiet()) continue;
+                flown++;
+                yield return new WaitForSeconds(1.7f);
+            }
+            if (flown > 0) GameAudio.Ui(AudioIds.JingleShard);
+            Debug.Log($"[QuickJourney] Dreaming ahead: {flown} shard(s) flew into the statue; the finale next.");
+            for (float t = 0f; t < 8f && Dialogue.IsTalking; t += Time.deltaTime) yield return null;
+            yield return new WaitForSeconds(0.8f);
+            Debug.Log($"[QuickJourney] The finale: {FinaleDirector.DevPlay(false, false)}.");
         }
 
         /// <summary>The quick save written once, then suspended before the finale starts: nothing it does reaches the save (tests).</summary>
