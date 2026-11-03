@@ -17,7 +17,7 @@ MonoBehaviour:
     blend: 0
     k: 0
     mirrorX: 0
-    a: {x: 3.35, y: 0.38, z: 0.1}
+    a: {x: 3.4299998, y: 0.38, z: 0.1}
     b: {x: 0, y: 0, z: 0}
     size: {x: 0.32, y: 0, z: 0}
     rotation: {x: 0, y: 0, z: 0}
@@ -27,8 +27,8 @@ MonoBehaviour:
     blend: 0
     k: 0.12
     mirrorX: 0
-    a: {x: 3.35, y: 0.4, z: 0.1}
-    b: {x: 3.35, y: 1.1, z: 0.1}
+    a: {x: 3.4299998, y: 0.4, z: 0.1}
+    b: {x: 3.4299998, y: 1.1, z: 0.1}
     size: {x: 0.28, y: 0.03, z: 0}
     rotation: {x: 0, y: 0, z: 0}
     bumps: 0

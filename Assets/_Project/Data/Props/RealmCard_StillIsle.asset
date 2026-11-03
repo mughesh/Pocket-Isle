@@ -15,7 +15,7 @@ MonoBehaviour:
   pieces:
   - shape: {fileID: 11400000, guid: 7688c9abeff7a7045a7c049b4acedccd, type: 2}
     part: {fileID: 0}
-    position: {x: -0.31, y: 0, z: 0}
+    position: {x: -0.39, y: 0, z: 0}
     rotation: {x: 0, y: 0, z: 0}
     scale: 1
     mirrorX: 0
@@ -25,7 +25,7 @@ MonoBehaviour:
     budgetWeight: 1
   - shape: {fileID: 11400000, guid: a7aedde1ab416874f8b3b203d49d75df, type: 2}
     part: {fileID: 0}
-    position: {x: -0.31, y: 0, z: 0}
+    position: {x: -0.39, y: 0, z: 0}
     rotation: {x: 0, y: 0, z: 0}
     scale: 1
     mirrorX: 0
@@ -35,7 +35,7 @@ MonoBehaviour:
     budgetWeight: 1
   - shape: {fileID: 11400000, guid: 93350435b5e634640bd1ac08296c57e3, type: 2}
     part: {fileID: 0}
-    position: {x: -0.31, y: 0, z: 0}
+    position: {x: -0.39, y: 0, z: 0}
     rotation: {x: 0, y: 0, z: 0}
     scale: 1
     mirrorX: 0
@@ -45,7 +45,7 @@ MonoBehaviour:
     budgetWeight: 1
   - shape: {fileID: 11400000, guid: c86c64f1d289fd340962626bb6e2459f, type: 2}
     part: {fileID: 0}
-    position: {x: -0.31, y: 0, z: 0}
+    position: {x: -0.39, y: 0, z: 0}
     rotation: {x: 0, y: 0, z: 0}
     scale: 1
     mirrorX: 0
@@ -55,7 +55,7 @@ MonoBehaviour:
     budgetWeight: 1
   - shape: {fileID: 11400000, guid: 43bea6a24348f0442976a482751edfb9, type: 2}
     part: {fileID: 0}
-    position: {x: -0.31, y: 0, z: 0}
+    position: {x: -0.39, y: 0, z: 0}
     rotation: {x: 0, y: 0, z: 0}
     scale: 1
     mirrorX: 0
@@ -65,7 +65,7 @@ MonoBehaviour:
     budgetWeight: 1
   - shape: {fileID: 11400000, guid: 37d93a3f9837e914992140c2f99128f8, type: 2}
     part: {fileID: 0}
-    position: {x: -0.31, y: 0, z: 0}
+    position: {x: -0.39, y: 0, z: 0}
     rotation: {x: 0, y: 0, z: 0}
     scale: 1
     mirrorX: 0
@@ -75,7 +75,7 @@ MonoBehaviour:
     budgetWeight: 1
   - shape: {fileID: 11400000, guid: bc4096f08ff04d34a943e8a5bd67411a, type: 2}
     part: {fileID: 0}
-    position: {x: -0.31, y: 0, z: 0}
+    position: {x: -0.39, y: 0, z: 0}
     rotation: {x: 0, y: 0, z: 0}
     scale: 1
     mirrorX: 0
@@ -85,7 +85,7 @@ MonoBehaviour:
     budgetWeight: 1
   - shape: {fileID: 11400000, guid: a8d903d5a622682498308ab7e5f93f0b, type: 2}
     part: {fileID: 0}
-    position: {x: -0.31, y: 0, z: 0}
+    position: {x: -0.39, y: 0, z: 0}
     rotation: {x: 0, y: 0, z: 0}
     scale: 1
     mirrorX: 0
@@ -95,7 +95,7 @@ MonoBehaviour:
     budgetWeight: 1
   - shape: {fileID: 11400000, guid: 9020b94a94087e045b42ad5106d73009, type: 2}
     part: {fileID: 0}
-    position: {x: -0.31, y: 0, z: 0}
+    position: {x: -0.39, y: 0, z: 0}
     rotation: {x: 0, y: 0, z: 0}
     scale: 1
     mirrorX: 0

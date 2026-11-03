@@ -111,7 +111,7 @@ namespace Diorama
                 if (!show) continue;
                 var mesh = _renderers[i].GetComponent<MeshFilter>().sharedMesh;
                 float scale = widthTiles * tile * z / Mathf.Max(1e-4f, mesh.bounds.size.x);
-                v.localPosition = ground + Vector3.up * ((signs[i].archTop + gapTiles) * tile * z);
+                v.localPosition = ground + Vector3.up * ((ArchTop(world, link, signs[i].archTop) + gapTiles) * tile * z);
                 v.localRotation = Quaternion.identity;
                 v.localScale = Vector3.one * scale;
                 bool lit = Lit == signs[i].gate;
@@ -129,6 +129,17 @@ namespace Diorama
                 }
                 _renderers[i].SetPropertyBlock(_block);
             }
+        }
+
+        /// <summary>
+        /// Nov 3 (Mugesh: the Galewick sign overlapped its arch): the top of the gate prop's own mesh (tiles: props bake in
+        /// tile units), never below <paramref name="least"/>.
+        /// </summary>
+        static float ArchTop(WorldMap world, GateLink link, float least)
+        {
+            if (world.TryGetProp(world.PropAt(link.tile.y, link.tile.x), out var prop) && prop.recipe != null && prop.recipe.bakedMesh != null)
+                return Mathf.Max(least, prop.recipe.bakedMesh.bounds.max.y);
+            return least;
         }
 
         bool IsOpen(string id)

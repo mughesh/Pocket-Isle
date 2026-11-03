@@ -54,9 +54,10 @@ namespace Diorama.EditorTools
 
             const float em = 1f, r = 0.12f, gap = 0.07f;
             float width = WordWidth(style.name, em, r, gap);
-            float emblemX = width * 0.5f + 0.62f;
+            // Nov 3 (Mugesh): the wind curl crowded the G; a little more room between emblem and name.
+            float emblemX = width * 0.5f + 0.78f;
             // The whole card centred on x = 0: the name shifts right (toward -X) by half the emblem's room.
-            float shift = -0.31f;
+            float shift = -0.39f;
             var pieces = new List<PropPiece>();
             Word(pieces, style.name, em, r, 0f, 0.12f, gap, PropSlot.Clay, style.name.Length * 7 + 3);
             for (int i = 0; i < pieces.Count; i++)
@@ -65,8 +66,8 @@ namespace Diorama.EditorTools
                 p.position += new Vector3(shift, 0f, 0f);
                 pieces[i] = p;
             }
-            float halfW = width * 0.5f + 1.05f, top = 1.3f, bottom = -1.0f;
-            var centre = new Vector3(shift + 0.31f, (top + bottom) * 0.5f, -0.1f);
+            float halfW = width * 0.5f + 1.2f, top = 1.3f, bottom = -1.0f;
+            var centre = new Vector3(shift + 0.39f, (top + bottom) * 0.5f, -0.1f);
             var half = new Vector3(halfW, (top - bottom) * 0.5f, 0.1f);
             Board(pieces, style, centre, half);
             Emblem(pieces, style, new Vector3(shift + emblemX, 0.5f, 0.1f));
@@ -93,11 +94,34 @@ namespace Diorama.EditorTools
             switch (style.emblem)
             {
                 case "fire":
-                    // Charred plank, ember edges: a glowing slab just larger and behind, showing as a rim of embers.
-                    pieces.Add(Weighted(PShape($"{n}_Board", Box(c, half, 0.08f, 0f)), PropSlot.Wood, 1.4f));
-                    pieces.Add(Weighted(PShape($"{n}_Embers", Box(c + new Vector3(0f, 0f, -0.05f), half + new Vector3(0.13f, 0.13f, -0.04f), 0.08f, 0f)),
+                {
+                    // Nov 3 (Mugesh: "uninteresting"): three charred planks, a little crooked, with fire glowing in the seams
+                    // between them and round the rim (a glowing slab behind), burnt bites out of two corners, embers smouldering
+                    // on the face and small flame tongues licking up over the top edge.
+                    float ph = half.y / 3f;
+                    var planks = new List<SdfPrimitive>();
+                    for (int k = 0; k < 3; k++)
+                    {
+                        float y = c.y + half.y - 2f * ph * (k + 0.5f);
+                        float dx = (k - 1) * 0.06f, tilt = (k - 1) * 0.6f;
+                        // Thick enough for the bake grid (cells ~0.14 units on a card this wide; thinner planks dropped out).
+                        planks.Add(Box(new Vector3(c.x + dx, y, c.z - 0.06f), new Vector3(half.x - 0.04f * k, ph - 0.035f, half.z + 0.06f), 0.07f, 0f, new Vector3(0f, 0f, tilt)));
+                    }
+                    // Burnt bites: the top-right and bottom-left corners eaten away.
+                    planks.Add(new SdfPrimitive { kind = SdfKind.Sphere, blend = SdfBlend.Subtract, a = c + new Vector3(-half.x, half.y, 0f), size = new Vector3(0.38f, 0f, 0f), k = 0.08f });
+                    planks.Add(new SdfPrimitive { kind = SdfKind.Sphere, blend = SdfBlend.Subtract, a = c + new Vector3(half.x, -half.y, 0f), size = new Vector3(0.32f, 0f, 0f), k = 0.08f });
+                    pieces.Add(Weighted(PShape($"{n}_Board", planks.ToArray()), PropSlot.Wood, 1.4f));
+                    pieces.Add(Weighted(PShape($"{n}_Embers", Box(c + new Vector3(0f, 0f, -0.16f), half + new Vector3(0.1f, 0.08f, 0.02f), 0.08f, 0f)),
                         PropSlot.Glow, 0.6f));
+                    // Smouldering spots at the board's ends (clear of the name and the line) and flame tongues over the top edge.
+                    var spots = new List<SdfPrimitive>();
+                    foreach (var (sx, sy, r) in new[] { (-0.93f, -0.55f, 0.15f), (0.93f, -0.6f, 0.14f), (-0.94f, 0.45f, 0.13f) })
+                        spots.Add(Ell(c + new Vector3(sx * half.x, sy * half.y, half.z - 0.02f), new Vector3(r * 1.6f, r, 0.07f), 0f));
+                    foreach (var (sx, hgt) in new[] { (-0.7f, 0.42f), (-0.25f, 0.3f), (0.3f, 0.38f), (0.75f, 0.26f) })
+                        spots.Add(Cone(c + new Vector3(sx * half.x, half.y - 0.05f, 0f), c + new Vector3(sx * half.x + 0.04f, half.y + hgt, 0f), 0.13f, 0.02f, 0f));
+                    pieces.Add(Weighted(PShape($"{n}_Fire", spots.ToArray()), PropSlot.Glow, 0.7f));
                     break;
+                }
                 case "water":
                     // Mossy stone tablet: rounder corners, moss on the top edge and one corner.
                     pieces.Add(Weighted(PShape($"{n}_Board", Box(c, half + new Vector3(0f, 0f, 0.03f), 0.22f, 0f)), PropSlot.Wood, 1.4f));
