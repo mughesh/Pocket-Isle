@@ -487,6 +487,7 @@ namespace Diorama
             if (galewick != null) sb.AppendLine($"Galewick restored: {Restored(galewick)}");
             sb.AppendLine($"Story: {string.Join(", ", PuzzleState.ToSaved().Select(p => $"{p.id} {(p.solved ? "solved" : $"stage {p.stage}")}"))}");
             sb.AppendLine($"In battle: {encounters != null && encounters.InBattle}");
+            sb.AppendLine($"Island placement: {IslandPlacer.LastPlacement}");
             sb.AppendLine($"Cheats: one-hit {DevCheats.OneHitKo}, invincible {DevCheats.Invincible}, wild off {DevCheats.WildOff}, rare x{DevCheats.RareBoost}, time x{Time.timeScale}");
             return sb.ToString();
         }

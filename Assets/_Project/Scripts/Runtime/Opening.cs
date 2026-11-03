@@ -253,32 +253,52 @@ namespace Diorama
             yield return WarmUp();
 
             // The shard drifts in and settles where the island will be.
+            // Step 14a: the shard rests on the (hidden) island's spot every frame, so a recenter or a follow glide that
+            // moves the island carries the shard along, and the island unfolds exactly where the shard is.
             _stage = Stage.Shard;
-            Vector3 rest = island.transform.position + Vector3.up * 0.06f;
-            MakeShard(rest + island.transform.rotation * driftFrom);
+            MakeShard(ShardRest + island.transform.rotation * driftFrom);
             _shardHum = AudioService.PlayLoop(AudioIds.ShardHum, _shard, 1.5f);
             Vector3 from = _shard.position;
             _spinSpeed = 0.6f;
             for (float t = 0f; t < driftSeconds; t += Time.deltaTime)
             {
                 float u = Mathf.SmoothStep(0f, 1f, t / driftSeconds);
-                MoveShard(Vector3.Lerp(from, rest, u) + Vector3.up * (0.12f * Mathf.Sin(u * Mathf.PI)), 0.6f);
+                MoveShard(Vector3.Lerp(from, ShardRest, u) + Vector3.up * (0.12f * Mathf.Sin(u * Mathf.PI)), 0.6f);
                 yield return null;
             }
 
-            // Waits for a hand (or gives in after a while). The touch lesson hints after a moment.
+            // Waits for a hand (or gives in after a while). The touch lesson hints after a moment. Until touched it
+            // follows the player: looked away by more than 35 deg, or sat down / stood up, for 1 s = it glides over.
             float waited = 0f;
             _shardWaiting = true;
+            var follow = new IslandPlacement.FollowCheck();
+            float placedEye = placer.TryHeadPose(out var eye0, out _, out _) ? eye0.y : float.NaN;
+            Coroutine glide = null;
             while (!_touched && waited < autoTouchSeconds)
             {
-                waited += Time.deltaTime;
+                // The wait restarts while it glides: the player gets the full time once it is in front of them again.
+                if (glide == null) waited += Time.deltaTime;
+                if (glide == null && placer.TryHeadPose(out var hp, out var hf, out var hu))
+                {
+                    if (float.IsNaN(placedEye)) placedEye = hp.y;
+                    if (follow.Feed(Time.time, hp, hf, hu, _shard.position, placedEye))
+                    {
+                        string why = IslandPlacement.YawOff(hp, hf, hu, _shard.position) > follow.maxYaw
+                            ? $"looked {IslandPlacement.YawOff(hp, hf, hu, _shard.position):0} deg away" : $"eyes moved {(hp.y - placedEye) * 100f:0} cm";
+                        placedEye = hp.y;
+                        follow.Reset();
+                        waited = 0f;
+                        glide = StartCoroutine(GlideIsland(why, () => glide = null));
+                    }
+                }
                 // The bob fades in so the hover carries on from the drift without a jump.
                 float bob = 0.008f * Mathf.Clamp01(waited / 1.2f);
-                MoveShard(rest + Vector3.up * (bob * Mathf.Sin(Time.time * 1.7f)), 0.35f);
+                MoveShard(ShardRest + Vector3.up * (bob * Mathf.Sin(Time.time * 1.7f)), 0.35f);
                 SetShardGlow(0.35f + 0.25f * Mathf.Sin(Time.time * 2.2f), 0.2f);
-                _touched = ShardTouched();
+                _touched = glide == null && ShardTouched();
                 yield return null;
             }
+            if (glide != null) StopCoroutine(glide);
             _shardWaiting = false;
             if (_touched) Onboarding.Mark("shardTouched");
             Debug.Log($"[Opening] Shard {(_touched ? "touched" : "unfolds by itself")} after {waited:0.0} s.");
@@ -427,6 +447,37 @@ namespace Diorama
         }
 
         // ---- shard ----
+
+        /// <summary>Where the shard hovers: just over the hidden island's pivot (the island lives in TrackingSpace).</summary>
+        Vector3 ShardRest => island.transform.position + Vector3.up * 0.06f;
+
+        /// <summary>Step 14a: the shard (with the hidden island under it) glides to the placement spot for the head now.</summary>
+        IEnumerator GlideIsland(string why, Action done)
+        {
+            if (!placer.TrySpot(out var to, out _))
+            {
+                // A frame first: the caller stores the coroutine after this runs to its first yield.
+                yield return null;
+                done();
+                yield break;
+            }
+            var space = island.transform.parent;
+            // In TrackingSpace terms, so a TrackingSpace move during the glide doesn't fight it.
+            Vector3 fromLocal = space != null ? space.InverseTransformPoint(island.transform.position) : island.transform.position;
+            Vector3 toLocal = space != null ? space.InverseTransformPoint(to.position) : to.position;
+            Quaternion fromRot = island.transform.rotation;
+            Debug.Log($"[Opening] Shard follows the player ({why}).");
+            const float seconds = 0.8f;
+            for (float t = 0f; t < seconds; t += Time.deltaTime)
+            {
+                float u = Mathf.SmoothStep(0f, 1f, t / seconds);
+                Vector3 local = Vector3.Lerp(fromLocal, toLocal, u) + Vector3.up * (0.04f * Mathf.Sin(u * Mathf.PI));
+                island.transform.SetPositionAndRotation(space != null ? space.TransformPoint(local) : local, Quaternion.Slerp(fromRot, to.rotation, u));
+                yield return null;
+            }
+            placer.Apply(new Pose(space != null ? space.TransformPoint(toLocal) : toLocal, to.rotation), $"shard follows ({why})");
+            done();
+        }
 
         void MakeShard(Vector3 at)
         {
