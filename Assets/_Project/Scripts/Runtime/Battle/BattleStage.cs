@@ -599,10 +599,9 @@ namespace Diorama
             GameAudio.At(o.effectiveness == Effectiveness.Super ? AudioIds.HitSuper : o.effectiveness == Effectiveness.NotVery || o.blocked ? AudioIds.HitWeak : AudioIds.HitNormal,
                 target.WorldCenter);
             hud.PopText(target.LocalTop + Vector3.up * 0.042f, $"-{o.amount}", Color.white);
-            // Step 14f: a line higher (the pops are at the readable size now and overlapped the damage number).
-            if (o.blocked) hud.PopText(target.LocalTop + Vector3.up * 0.095f, "Blocked!", new Color(1f, 0.7f, 0.3f), 0.75f, 1.4f);
-            else if (o.effectiveness == Effectiveness.Super) hud.PopText(target.LocalTop + Vector3.up * 0.095f, "Super effective!", SuperColor, 0.65f, 1.4f);
-            else if (o.effectiveness == Effectiveness.NotVery) hud.PopText(target.LocalTop + Vector3.up * 0.095f, "Not very effective", WeakColor, 0.65f, 1.4f);
+            if (o.blocked) hud.PopText(target.LocalTop + Vector3.up * 0.075f, "Blocked!", new Color(1f, 0.7f, 0.3f), 0.75f, 1.4f);
+            else if (o.effectiveness == Effectiveness.Super) hud.PopText(target.LocalTop + Vector3.up * 0.075f, "Super effective!", SuperColor, 0.65f, 1.4f);
+            else if (o.effectiveness == Effectiveness.NotVery) hud.PopText(target.LocalTop + Vector3.up * 0.075f, "Not very effective", WeakColor, 0.65f, 1.4f);
             if (o.shieldAbsorbed) DropShieldOf(o.side, true);
             StartCoroutine(Knockback(target, (target.tile - user.tile).normalized));
         }

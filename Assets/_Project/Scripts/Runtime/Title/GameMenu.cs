@@ -13,8 +13,8 @@ namespace Diorama
     /// Resume, Settings, Title (saves, then reloads into the returning title), and Dev in the Editor and QA builds (the
     /// dev panel; F2 still opens it directly). Not available during the opening before the starter is picked, on the
     /// title or during a scene swap; while the island is grabbed the press waits for the release.
-    /// Also says <c>menu.first</c> once the lessons are done (not in a battle). Step 14f: Resume, Controls, Settings,
-    /// Title on stone tablets, a speaker tablet for the music, Dev apart.
+    /// Also says <c>menu.first</c> once the lessons are done (not in a battle). Step 14g: one row of stone tablets at the
+    /// old rune size, the music on a speaker tablet; the Spirit keeps quiet while it is open (<see cref="Dialogue.Held"/>).
     /// </summary>
     public class GameMenu : MonoBehaviour
     {
@@ -118,30 +118,32 @@ namespace Diorama
             Debug.Log("[GameMenu] Open (paused).");
         }
 
-        /// <summary>
-        /// Step 14f, the simple menu: Resume (large, gold, first) over Controls, Settings, Title; a small speaker tablet in
-        /// the top corner turns the music on and off; Dev (Editor and QA builds only) set apart in the other corner.
-        /// </summary>
         void ShowRunes()
         {
+            // Step 14g: one row at the old rune size over the near rim: Resume (a little larger, gold inlay), Controls,
+            // Settings, Title, the speaker as a small square tablet at the end; Dev (Editor and QA builds) set apart.
             runes.Clear();
-            var bottom = new System.Collections.Generic.List<RuneBoard.Item>
+            var size = new Vector2(0.072f, 0.034f);
+            var big = new Vector2(0.08f, 0.038f);
+            const float gap = 0.008f, side = 0.034f, apart = 0.03f;
+            bool title = !FinaleDirector.Running; // step 13: the finale plays through; Title waits until it's done
+            float width = big.x + (title ? 3 : 2) * (size.x + gap) + gap + side;
+            float x = -width * 0.5f;
+            var resume = runes.Add("Resume", new Vector2(x + big.x * 0.5f, 0f), big, () => Close("Resume"));
+            resume.primary = true;
+            x += big.x + gap;
+            runes.Add("Controls", new Vector2(x + size.x * 0.5f, 0f), size, OpenControls);
+            x += size.x + gap;
+            runes.Add("Settings", new Vector2(x + size.x * 0.5f, 0f), size, OpenSettings);
+            x += size.x + gap;
+            if (title)
             {
-                new RuneBoard.Item("Controls", OpenControls),
-                new RuneBoard.Item("Settings", OpenSettings),
-            };
-            // Step 13: the finale plays through; Title waits until it's done.
-            if (!FinaleDirector.Running) bottom.Add(new RuneBoard.Item("Title", ToTitle));
-            runes.Row(0f, bottom.ToArray());
-            float half = RuneBoard.RowWidth(bottom.ToArray()) * 0.5f;
-            var top = new RuneBoard.Item("Resume", () => Close("Resume"), null, true);
-            float topY = RuneBoard.Above(0f, RuneBoard.TabletH, RuneBoard.RowHeight(top));
-            var resume = runes.Row(topY, top)[0];
-            float side = RuneBoard.TabletH;
-            runes.AddIcon(VolumeSettings.MusicOn ? "Music on" : "Music off", TabletKit.Speaker(VolumeSettings.MusicOn), new Vector2(half - side * 0.5f, topY), side, ToggleMusic);
+                runes.Add("Title", new Vector2(x + size.x * 0.5f, 0f), size, ToTitle);
+                x += size.x + gap;
+            }
+            runes.AddIcon(VolumeSettings.MusicOn ? "Music on" : "Music off", TabletKit.Speaker(VolumeSettings.MusicOn), new Vector2(x + side * 0.5f, 0f), side, ToggleMusic);
 #if UNITY_EDITOR || POCKET_DEV
-            var devSize = RuneBoard.Fit("Dev");
-            var dev = runes.Add("Dev", new Vector2(-half + devSize.x * 0.5f, topY), devSize, OpenDev);
+            var dev = runes.Add("Dev", new Vector2(-width * 0.5f - apart - 0.025f, 0f), new Vector2(0.05f, 0.028f), OpenDev);
             dev.tint = new Color(0.45f, 0.5f, 0.62f);
 #endif
             runes.DefaultFocus = resume;

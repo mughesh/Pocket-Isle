@@ -148,69 +148,29 @@ namespace Diorama.Tests
             Assert.AreNotEqual(on.vertexCount, off.vertexCount);
         }
 
-        // ---- A2: the readable text rule ----
+        // ---- step 14g: the old sizes, labels fit their tablets ----
 
         [Test]
-        public void TextRule_9mmCaps_AtTheDefaultIslandScale()
+        public void Tablets_Lighter_ForTheOldRuneSize()
         {
-            // Nov 3 late: 9 mm (14 mm made the menus far too big).
-            Assert.AreEqual(0.009f, TextRule.IslandFont * TextRule.CapPerFont * TextRule.DefaultIslandScale, 1e-4f);
-            Assert.AreEqual(0.009f, TextRule.WorldFont * TextRule.CapPerFont, 1e-4f);
-            Assert.AreEqual(0.09f / TextRule.CapPerFont / 0.6f / 10f, TextRule.IslandFont, 1e-3f);
-            Assert.AreEqual(TextRule.IslandFont, RuneBoard.LabelFont);
-            Assert.AreEqual(TextRule.IslandFont, TextRule.Island(0.11f));
-            Assert.AreEqual(0.5f, TextRule.Island(0.5f));
-            Assert.Greater(TextRule.Width("Settings", 0.34f), TextRule.Width("Set", 0.34f));
-            Assert.Greater(TextRule.Width("Settings", 0.34f, true), TextRule.Width("Settings", 0.34f));
+            // The smallest tablet (a 2.4 cm volume pebble) still has room for its rounded corners.
+            Assert.LessOrEqual(TabletKit.Corner * 2f, 0.024f);
+            Assert.LessOrEqual(TabletKit.Thickness, 0.004f);
         }
 
         [Test]
-        public void Tablets_FitTheirLabels()
+        public void RealmLines_Lilymere_RanDry()
         {
-            foreach (var label in new[] { "Resume", "Controls", "Settings", "Title", "Continue", "New journey", "Keep exploring" })
-            {
-                var s = RuneBoard.Fit(label);
-                Assert.Greater(s.x, TextRule.Width(label, RuneBoard.LabelFont, true), label);
-                Assert.Greater(s.y, RuneBoard.LabelFont * TextRule.CapPerFont * 2f, label);
-            }
-            var two = RuneBoard.Fit("Continue", "Quick journey", true);
-            Assert.Greater(two.y, RuneBoard.Fit("Continue", null, true).y, "a second line makes it taller");
-            Assert.Greater(RuneBoard.Fit("Resume", null, true).y, RuneBoard.Fit("Resume").y, "the primary is larger");
-        }
-
-        [Test]
-        public void ControlsLines_TwoLinesAtMost_AtTheReadableSize()
-        {
-            float width = RuneBoard.RowWidth(new RuneBoard.Item("Walk", null), new RuneBoard.Item("Keep going", null), new RuneBoard.Item("Go there", null));
-            foreach (var c in SettingsBoard.Controls)
-            {
-                string plain = System.Text.RegularExpressions.Regex.Replace(c.text, "<[^>]+>", "");
-                float w = TextRule.Width(plain, RuneBoard.LabelFont);
-                Assert.LessOrEqual(w, width * 1.85f, $"{c.rune}: '{plain}' runs over two lines");
-            }
-        }
-
-        [Test]
-        public void BattleRunes_EveryMoveName_FitsTheGrid()
-        {
-            foreach (var guid in AssetDatabase.FindAssets("t:MoveData"))
-            {
-                var m = AssetDatabase.LoadAssetAtPath<MoveData>(AssetDatabase.GUIDToAssetPath(guid));
-                if (m == null) continue;
-                Assert.LessOrEqual(RuneBoard.Fit(m.Name).x, 0.34f, $"'{m.Name}' makes the battle grid too wide");
-            }
-        }
-
-        [Test]
-        public void RealmLines_FitTwoLinesUnderTheCard()
-        {
-            var scene = UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene();
             var card = Object.FindFirstObjectByType<RealmNameCard>(FindObjectsInactive.Include);
-            if (card == null) Assert.Inconclusive($"no RealmNameCard in {scene.name}");
+            if (card == null) Assert.Inconclusive("no RealmNameCard in the open scene");
             foreach (var c in card.cards)
-                foreach (var line in new[] { c.line, c.restoredLine })
-                    if (!string.IsNullOrEmpty(line))
-                        Assert.LessOrEqual(TextRule.Width(line, TextRule.IslandFont, true), Mathf.Max(card.width, 0.5f) * 1.9f, line);
+                if (c.shard == "shard.water")
+                {
+                    Assert.AreEqual("Where the water ran dry", c.line);
+                    Assert.AreEqual("Where the water flows again", c.restoredLine);
+                    return;
+                }
+            Assert.Fail("no Lilymere card");
         }
     }
 }

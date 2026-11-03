@@ -168,80 +168,30 @@ namespace Diorama
             _min = _max = Vector2.zero;
         }
 
-        // ---- step 14f: readable labels, tablets sized to them ----
-
-        /// <summary>Every label's font size (the readable rule, <see cref="TextRule"/>); primary tablets a little bigger.</summary>
-        public static float LabelFont => TextRule.IslandFont;
-        public const float PrimaryScale = 1.12f;
-        /// <summary>A one-line tablet's height, the extra for a second line, the side padding and the gap between tablets.</summary>
-        public const float TabletH = 0.062f, LineH = 0.04f, PadX = 0.036f, Gap = 0.016f;
-
-        /// <summary>The tablet size that fits a label (bold) and an optional second line (regular).</summary>
-        public static Vector2 Fit(string label, string sub = null, bool primary = false)
+        /// <summary>A rune at <paramref name="center"/> (board-local metres). <paramref name="sub"/> = a small second line.</summary>
+        public Rune Add(string label, Vector2 center, Vector2 size, Action picked, string sub = null)
         {
-            float f = LabelFont * (primary ? PrimaryScale : 1f);
-            float w = Mathf.Max(TextRule.Width(label, f, true), string.IsNullOrEmpty(sub) ? 0f : TextRule.Width(sub, LabelFont)) + PadX;
-            float h = TabletH * (primary ? PrimaryScale : 1f) + (string.IsNullOrEmpty(sub) ? 0f : LineH);
-            return new Vector2(Mathf.Max(w, h * 1.3f), h);
-        }
-
-        /// <summary>One entry of a <see cref="Row"/>.</summary>
-        public struct Item
-        {
-            public string label, sub;
-            public Action picked;
-            public bool primary;
-            public Item(string label, Action picked, string sub = null, bool primary = false)
-            {
-                this.label = label;
-                this.picked = picked;
-                this.sub = sub;
-                this.primary = primary;
-            }
-        }
-
-        /// <summary>A centred row of tablets at height <paramref name="y"/> (their middles), each sized to its label.</summary>
-        public Rune[] Row(float y, params Item[] items)
-        {
-            var sizes = new Vector2[items.Length];
-            float total = -Gap;
-            for (int i = 0; i < items.Length; i++)
-            {
-                sizes[i] = Fit(items[i].label, items[i].sub, items[i].primary);
-                total += sizes[i].x + Gap;
-            }
-            var runes = new Rune[items.Length];
-            float x = -total * 0.5f;
-            for (int i = 0; i < items.Length; i++)
-            {
-                runes[i] = Add(items[i].label, new Vector2(x + sizes[i].x * 0.5f, y), sizes[i], items[i].picked, items[i].sub, items[i].primary);
-                x += sizes[i].x + Gap;
-            }
-            return runes;
-        }
-
-        /// <summary>The middle of a row of height <paramref name="above"/> stacked over one at <paramref name="y"/> of height <paramref name="below"/>.</summary>
-        public static float Above(float y, float below, float above) => y + below * 0.5f + Gap + above * 0.5f;
-
-        /// <summary>The tallest tablet of these labels (a row's height).</summary>
-        public static float RowHeight(params Item[] items)
-        {
-            float h = 0f;
-            foreach (var it in items) h = Mathf.Max(h, Fit(it.label, it.sub, it.primary).y);
-            return h;
-        }
-
-        /// <summary>The width a <see cref="Row"/> of these labels takes.</summary>
-        public static float RowWidth(params Item[] items)
-        {
-            float total = -Gap;
-            foreach (var it in items) total += Fit(it.label, it.sub, it.primary).x + Gap;
-            return total;
+            var r = new Rune { label = label, picked = picked, center = center, size = size };
+            var root = new GameObject($"Rune {label}").transform;
+            root.SetParent(_root, false);
+            root.localPosition = new Vector3(center.x, center.y, 0f);
+            r.root = root;
+            BuildPoke(r);
+            r.text = MakeText(r.tablet != null ? r.tablet.transform : r.visual, fontSize * Mathf.Clamp(size.y / 0.04f, 0.6f, 1.2f));
+            r.text.rectTransform.sizeDelta = new Vector2(size.x * 0.92f, size.y);
+            r.text.transform.localPosition = new Vector3(0f, 0f, -0.001f);
+            if (r.tablet != null) TabletKit.StyleLabel(r.text);
+            // Step 14g: the largest font that fits the tablet (never bigger than the pre-14f size).
+            TextRule.Fit(r.text, r.text.fontSize);
+            r.SetLabel(string.IsNullOrEmpty(sub) ? $"<b>{label}</b>" : $"<b>{label}</b>\n<size=75%>{sub}</size>");
+            _runes.Add(r);
+            Grow(center, size);
+            return r;
         }
 
         /// <summary>
-        /// A square tablet carrying a little picture instead of words (the speaker): <paramref name="label"/> names it for
-        /// the logs and the bridge. The picture is drawn with the tablet material in the label colour.
+        /// Step 14f: a small square tablet carrying a picture instead of words (the speaker); <paramref name="label"/> names
+        /// it for the logs and the bridge. The picture is drawn with the tablet material in the label colour.
         /// </summary>
         public Rune AddIcon(string label, Mesh icon, Vector2 center, float side, Action picked)
         {
@@ -268,32 +218,9 @@ namespace Diorama
             return r;
         }
 
-        /// <summary>A rune at <paramref name="center"/> (board-local metres). <paramref name="sub"/> = a second line.</summary>
-        public Rune Add(string label, Vector2 center, Vector2 size, Action picked, string sub = null, bool primary = false)
-        {
-            var r = new Rune { label = label, picked = picked, center = center, size = size, primary = primary };
-            var root = new GameObject($"Rune {label}").transform;
-            root.SetParent(_root, false);
-            root.localPosition = new Vector3(center.x, center.y, 0f);
-            r.root = root;
-            BuildPoke(r);
-            // Step 14f: every label at the readable size (the second line too); the tablet is sized to fit it (Fit).
-            r.text = MakeText(r.tablet != null ? r.tablet.transform : r.visual, LabelFont * (primary ? PrimaryScale : 1f));
-            r.text.rectTransform.sizeDelta = new Vector2(size.x * 0.96f, size.y);
-            r.text.lineSpacing = -12f;
-            r.text.transform.localPosition = new Vector3(0f, 0f, -0.001f);
-            if (r.tablet != null) TabletKit.StyleLabel(r.text);
-            r.SetLabel(string.IsNullOrEmpty(sub) ? $"<b>{label}</b>" : $"<b>{label}</b>\n<size={100f / (primary ? PrimaryScale : 1f):0}%>{sub}</size>");
-            _runes.Add(r);
-            Grow(center, size);
-            return r;
-        }
-
         /// <summary>A plain caption (row names, titles, the credits card).</summary>
         public TextMeshPro AddText(string text, Vector2 center, float font, TextAlignmentOptions align = TextAlignmentOptions.Center, float width = 0.3f)
         {
-            // Step 14f: never under the readable size.
-            font = TextRule.Island(font);
             var t = MakeText(_root, font);
             t.alignment = align;
             t.rectTransform.sizeDelta = new Vector2(width, font * 0.5f);
@@ -652,11 +579,12 @@ namespace Diorama
                 {
                     // The inlay: gold on the primary, the tint on a lit toggle or a coloured rune (Dev), else a plain groove.
                     bool tinted = r.tint != DefaultTint;
-                    var inlay = r.primary ? TabletKit.GoldInlay : r.selected ? Color.Lerp(r.tint, Gold, 0.5f) : r.tint;
-                    inlay.a = r.primary ? 1f : r.selected ? 0.95f : tinted ? 0.7f : 0f;
+                    var inlay = r.primary ? TabletKit.GoldInlay : r.selected ? Gold : r.tint;
+                    inlay.a = r.primary || r.selected ? 1f : tinted ? 0.7f : 0f;
                     r.tablet.inlay = inlay;
-                    r.tablet.Paint(r.hover, r.disabled ? 1f : 0f, r.fill, r.selected ? 0.35f : 0f);
-                    var c = Color.Lerp(TabletKit.LabelColor, TabletKit.LabelLit, Mathf.Max(r.hover, r.selected ? 0.6f : 0f));
+                    // Step 14g: a selected tablet (the chosen option, a lit volume pebble) is filled gold, its label dark.
+                    r.tablet.Paint(r.hover, r.disabled ? 1f : 0f, r.selected ? 1f : r.fill, 0f);
+                    var c = r.selected ? TabletKit.LabelOnGold : Color.Lerp(TabletKit.LabelColor, TabletKit.LabelLit, r.hover);
                     c.a = r.disabled ? 0.5f : 1f;
                     if (r.text != null && r.text.color != c) r.text.color = c;
                     continue;

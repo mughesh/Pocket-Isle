@@ -447,8 +447,25 @@ namespace Diorama
 
         bool IsQueuedOrShowing(string id) => _current.HasValue && _current.Value.trigger == id || _queue.Exists(q => q.trigger == id);
 
+        /// <summary>
+        /// Step 14g: the game menu or Settings is open: no line starts (the one showing goes back to the front of the
+        /// queue), idle hints wait; everything shows once they close.
+        /// </summary>
+        public static bool Held => GameMenu.IsOpen || SettingsBoard.IsOpen;
+
+        bool _held;
+
         void Next()
         {
+            if (Held)
+            {
+                if (_current.HasValue) _queue.Insert(0, _current.Value);
+                _current = null;
+                SetTarget(null);
+                if (bubble != null) bubble.Hide();
+                Speaking?.Invoke(null);
+                return;
+            }
             _current = null;
             SetTarget(null);
             // Lines that stopped applying while they waited are dropped.
@@ -569,6 +586,15 @@ namespace Diorama
                 Next();
             }
             if (kb != null && kb.anyKey.wasPressedThisFrame) _lastInput = Time.time;
+            // Step 14g: the menu or Settings opened: the line showing waits; closed: what waited shows.
+            bool held = Held;
+            if (held != _held)
+            {
+                _held = held;
+                Debug.Log(held ? "[Dialogue] Menu open: the Spirit keeps quiet." : "[Dialogue] Menu closed: lines go on.");
+                if (held && _current.HasValue || !held && !_current.HasValue) Next();
+            }
+            if (held) return;
             UpdateTarget();
             TryIdleHint();
         }

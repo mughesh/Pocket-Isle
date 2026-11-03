@@ -34,7 +34,6 @@ namespace Diorama
         public Vector3 offset = new Vector3(0f, 0.05f, 0.02f);
         [Tooltip("Where the row goes (added to the offset) when it would cover a creature.")]
         public Vector3 avoidOffset = new Vector3(0f, -0.05f, 0.035f);
-        [Tooltip("Unused since step 14f: the runes are a 2 x 2 grid of tablets sized to the longest move name (TextRule).")]
         public Vector2 runeSize = new Vector2(0.085f, 0.04f);
         public float spacing = 0.095f;
         public float fontSize = 0.11f;
@@ -69,7 +68,6 @@ namespace Diorama
             public Transform visual;
             public MeshRenderer plate;
             public TabletKit.View tablet;
-            public BoundsClipper clipper;
             public TextMeshPro label;
             public PokeInteractable poke;
             public Color tint;
@@ -109,7 +107,6 @@ namespace Diorama
             if (tabletMaterial == null) Debug.LogError("[BattleRunes] No tablet material (Set Up MR_Main (14f menus and fixes)): plain plates.", this);
             _quad = BattleHud.VerticalQuad();
             _block = new MaterialPropertyBlock();
-            _size = new Vector2(MinWidth, RuneBoard.TabletH);
             Build();
             Hide();
             Dialogue.RegisterTarget("runes", () => RunePoint(1), k => PulseRunes(0, 2, k));
@@ -159,7 +156,7 @@ namespace Diorama
             {
                 if (r == null || !r.shown || r.root == null) continue;
                 var p = r.root.position;
-                keep.Add(new Vector4(p.x, p.y, p.z, _size.x * 0.55f * r.root.lossyScale.x));
+                keep.Add(new Vector4(p.x, p.y, p.z, runeSize.x * 0.55f * r.root.lossyScale.x));
             }
         }
 
@@ -171,13 +168,13 @@ namespace Diorama
             {
                 var root = new GameObject($"Rune {i + 1}").transform;
                 root.SetParent(_row, false);
-                root.localPosition = RunePos(i);
+                root.localPosition = new Vector3(RuneX(i), 0f, 0f);
                 var rune = new Rune { root = root };
                 BuildPoke(rune, i, PlateSize(i));
                 _runes[i] = rune;
             }
-            _caption = MakeText(_row, RuneBoard.LabelFont);
-            _caption.transform.localPosition = new Vector3(0f, CaptionY, 0f);
+            _caption = MakeText(_row, captionFontSize);
+            _caption.transform.localPosition = new Vector3(0f, runeSize.y * 0.5f + 0.018f, 0f);
 
             var reticleGo = new GameObject("Gaze Reticle");
             reticleGo.transform.SetParent(_row, false);
@@ -201,43 +198,16 @@ namespace Diorama
         /// PokeInteractableVisual pushes it toward the base while a finger presses.
         /// The row's front faces the head along -Z, so the plane normal faces backward (-Z).
         /// </summary>
-        // ---- step 14f: a 2 x 2 grid at the readable size (a row of four was wider than the view) ----
+        /// <summary>Plate size: Run is narrower.</summary>
+        Vector2 PlateSize(int index) => index == RunIndex ? new Vector2(runeSize.x * runWidth, runeSize.y) : runeSize;
 
-        /// <summary>The narrowest a tablet gets; they widen to the longest move name shown.</summary>
-        const float MinWidth = 0.2f;
-        Vector2 _size;
-
-        /// <summary>Every tablet is the same size (moves and Run).</summary>
-        Vector2 PlateSize(int index) => _size;
-
-        /// <summary>Rune centre: moves 1 and 2 on top, move 3 and Run below (Run bottom right).</summary>
-        Vector3 RunePos(int index)
+        /// <summary>Rune centre along the row: three moves at <see cref="spacing"/>, Run tucked closer at the right end.</summary>
+        float RuneX(int index)
         {
-            float x = (index == 0 || index == 2 ? -0.5f : 0.5f) * (_size.x + RuneBoard.Gap);
-            float y = (index < 2 ? 0.5f : -0.5f) * (_size.y + RuneBoard.Gap);
-            return new Vector3(x, y, 0f);
-        }
-
-        float CaptionY => _size.y + RuneBoard.Gap * 0.5f + 0.035f;
-
-        /// <summary>Widens every tablet to fit these move names.</summary>
-        void Fit(MoveData[] moves)
-        {
-            float w = MinWidth;
-            if (moves != null)
-                foreach (var m in moves)
-                    if (m != null) w = Mathf.Max(w, RuneBoard.Fit(m.Name).x);
-            if (Mathf.Approximately(w, _size.x)) return;
-            _size.x = w;
-            for (int i = 0; i < _runes.Length; i++)
-            {
-                var r = _runes[i];
-                r.root.localPosition = RunePos(i);
-                if (r.clipper != null) r.clipper.Size = new Vector3(_size.x, _size.y, 0.02f);
-                if (r.tablet != null) r.tablet.size = _size;
-                if (r.label != null) r.label.rectTransform.sizeDelta = new Vector2(_size.x * 0.96f, _size.y);
-            }
-            _caption.transform.localPosition = new Vector3(0f, CaptionY, 0f);
+            float runGap = spacing - runeSize.x * (1f - runWidth) * 0.5f;
+            float width = 2f * spacing + runGap;
+            float x = index == RunIndex ? 2f * spacing + runGap : index * spacing;
+            return x - width * 0.5f;
         }
 
         void BuildPoke(Rune rune, int index, Vector2 size)
@@ -249,7 +219,6 @@ namespace Diorama
             plane.InjectAllPlaneSurface(PlaneSurface.NormalFacing.Backward, false);
             var clipper = surfaceGo.AddComponent<BoundsClipper>();
             clipper.Size = new Vector3(size.x, size.y, 0.02f);
-            rune.clipper = clipper;
             var clipped = surfaceGo.AddComponent<ClippedPlaneSurface>();
             clipped.InjectAllClippedPlaneSurface(plane, new IBoundsClipper[] { clipper });
             var poke = surfaceGo.AddComponent<PokeInteractable>();
@@ -266,9 +235,10 @@ namespace Diorama
             if (tabletMaterial != null)
             {
                 rune.tablet = TabletKit.Make(visual, tabletMaterial, size, Color.clear);
-                rune.label = MakeText(rune.tablet.transform, RuneBoard.LabelFont);
+                rune.label = MakeText(rune.tablet.transform, fontSize);
                 rune.label.rectTransform.sizeDelta = new Vector2(size.x * 0.92f, size.y);
                 TabletKit.StyleLabel(rune.label);
+                TextRule.Fit(rune.label, fontSize);
                 return;
             }
             var plateGo = new GameObject("Plate");
@@ -278,7 +248,7 @@ namespace Diorama
             rune.plate = plateGo.AddComponent<MeshRenderer>();
             rune.plate.sharedMaterial = hudMaterial;
             rune.plate.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            rune.label = MakeText(visual, RuneBoard.LabelFont);
+            rune.label = MakeText(visual, fontSize);
             rune.label.transform.localPosition = new Vector3(0f, 0f, -0.001f);
         }
 
@@ -322,7 +292,7 @@ namespace Diorama
         }
 
         /// <summary>Half the row width (rune centres to the outer edge).</summary>
-        float HalfRow => _size.x + RuneBoard.Gap * 0.5f;
+        float HalfRow => Mathf.Max(-RuneX(0) + runeSize.x * 0.5f, RuneX(RunIndex) + PlateSize(RunIndex).x * 0.5f);
 
         /// <summary>Battle start, no creature out yet: the row with only the Run rune.</summary>
         public void ShowRunOnly()
@@ -369,16 +339,14 @@ namespace Diorama
         {
             bool wasHidden = !gameObject.activeSelf;
             Open();
-            Fit(moves);
             for (int i = 0; i < 3; i++)
             {
                 var m = moves != null && i < moves.Length ? moves[i] : null;
                 var r = _runes[i];
                 r.usable = m != null;
                 r.tint = m != null ? ElementStyle.Of(m.element).main : Color.gray;
-                // Step 14f: the move's element shows as the inlay's colour; its "Water / Support" second line was dropped
-                // (it didn't fit at the readable size).
-                r.label.text = m != null ? $"<b>{m.Name}</b>" : "-";
+                string kind = m == null ? "" : m.kind == MoveKind.Support ? "Support" : m.element.ToString();
+                r.label.text = m != null ? $"<b>{m.Name}</b>\n<size=70%>{kind}</size>" : "-";
                 if (r.shown) r.appear = 0f; // re-pop with the new moves
                 r.shown = false;
                 SetShown(r, true, i * popStagger);
@@ -536,7 +504,7 @@ namespace Diorama
         bool Covers(Vector3 head, StageActor actor)
         {
             if (actor == null) return false;
-            float halfW = HalfRow, top = CaptionY + 0.03f, bottom = -(_size.y + RuneBoard.Gap * 0.5f);
+            float halfW = HalfRow, top = runeSize.y * 0.5f + 0.03f, bottom = -runeSize.y * 0.5f;
             var t = island.transform;
             Vector3[] points = { actor.WorldCenter, t.TransformPoint(actor.LocalTop), t.TransformPoint(actor.island.TileToLocal(actor.tile, actor.island.Content.capHeight + actor.baseLift)) };
             Vector3 o = _row.InverseTransformPoint(head);
@@ -567,7 +535,7 @@ namespace Diorama
             }
             Vector3 hit = o + d * (-o.z / d.z);
             float scale = _row.lossyScale.x;
-            bool near = Mathf.Abs(hit.x) < HalfRow + 0.05f && Mathf.Abs(hit.y) < _size.y * 2.5f;
+            bool near = Mathf.Abs(hit.x) < HalfRow + spacing && Mathf.Abs(hit.y) < runeSize.y * 2.5f;
             _reticle.enabled = near;
             if (near) _reticle.transform.localPosition = new Vector3(hit.x, hit.y, -0.002f / Mathf.Max(1e-4f, scale));
             // Gaze cone: each plate (at least the 4 cm minimum) grows by the cone's radius at the row; the one whose
@@ -580,7 +548,7 @@ namespace Diorama
             {
                 if (!_runes[i].shown) continue;
                 Vector3 p = hit - _runes[i].root.localPosition;
-                float hx = Mathf.Max(PlateSize(i).x * 0.5f, min), hy = Mathf.Max(_size.y * 0.5f, min);
+                float hx = Mathf.Max(PlateSize(i).x * 0.5f, min), hy = Mathf.Max(runeSize.y * 0.5f, min);
                 if (Mathf.Abs(p.x) > hx + cone || Mathf.Abs(p.y) > hy + cone) continue;
                 float score = Mathf.Max(Mathf.Abs(p.x) / hx, Mathf.Abs(p.y) / hy) * (i == _hovered ? HeadGaze.Sticky : 1f);
                 if (score < bestScore)
@@ -621,7 +589,7 @@ namespace Diorama
                 _block.SetColor(BackColorId, back);
                 _block.SetColor(BorderColorId, border);
                 _block.SetFloat(FillId, 0f);
-                _block.SetFloat(AspectId, PlateSize(i).x / _size.y);
+                _block.SetFloat(AspectId, PlateSize(i).x / runeSize.y);
                 _block.SetFloat(RadiusId, 0.3f);
                 _block.SetFloat(BorderId, 0.07f + 0.05f * r.hover + 0.04f * glow);
                 r.plate.SetPropertyBlock(_block);

@@ -304,7 +304,7 @@ namespace Diorama
         {
             bool all = Rosters(out var line);
             if (_collection == null) _collection = new StoneTablet("Collection card", island.transform, hudMaterial, island.gameObject.layer);
-            _collection.Set("Isling collection\n" + line, TextRule.IslandFont, 0.8f, new Vector2(0.02f, 0.014f));
+            _collection.Set("Isling collection\n" + line, 0.15f, 0.5f, new Vector2(0.02f, 0.014f));
             _collectionUntil = Time.time + collectionSeconds;
             heart.nod = 0f;
             StartCoroutine(Nod());
@@ -626,10 +626,8 @@ namespace Diorama
                 var who = Spawn(c, tile, false);
                 if (who != null)
                 {
-                    // Step 14f: at the readable size the cards would pile up: each shows while its Isling comes out.
-                    foreach (var (old, _) in _labels) old.Hide();
                     var card = new StoneTablet($"Hall of Fame card {i}", island.transform, hudMaterial, island.gameObject.layer);
-                    card.Set(FinaleLogic.Card(c.Name, c.level, c.metIn), TextRule.IslandFont, 0.5f, new Vector2(0.02f, 0.014f));
+                    card.Set(FinaleLogic.Card(c.Name, c.level, c.metIn), 0.07f, 0.1f, new Vector2(0.007f, 0.005f));
                     _labels.Add((card, who));
                     _labelHeight.Add(i % 2 == 0 ? cardHeight.x : cardHeight.y);
                     _cards.Add(card);
@@ -700,11 +698,12 @@ namespace Diorama
 
         void UpdateLabels()
         {
-            // Step 14f: only the newest Hall of Fame card shows.
-            int i = _labels.Count - 1;
-            if (i < 0) return;
-            var (card, who) = _labels[i];
-            if (who != null) card.Place(MapWorld(who.Tile, _labelHeight[i]), IslandScale, 1f);
+            for (int i = 0; i < _labels.Count; i++)
+            {
+                var (card, who) = _labels[i];
+                if (who == null) continue;
+                card.Place(MapWorld(who.Tile, _labelHeight[i]), IslandScale, 1f);
+            }
         }
 
         IEnumerator Credits()
@@ -716,7 +715,7 @@ namespace Diorama
             foreach (var text in credits)
             {
                 if (string.IsNullOrEmpty(text)) continue;
-                tablet.Set(text, TextRule.IslandFont, 0.62f, new Vector2(0.02f, 0.014f));
+                tablet.Set(text, 0.22f, 0.42f, new Vector2(0.02f, 0.014f));
                 Sfx(AudioIds.CreditsTablet, AudioIds.StatueSocket, island.transform.TransformPoint(new Vector3(0f, island.CapTopLocal, b.min.z)));
                 Debug.Log($"[FinaleDirector] Credits: {text.Replace('\n', ' ')}");
                 for (float t = 0f; t < tabletSeconds; t += Time.deltaTime)

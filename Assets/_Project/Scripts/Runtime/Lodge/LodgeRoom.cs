@@ -672,11 +672,9 @@ namespace Diorama
                 var go = new GameObject("Honeycomb Page");
                 go.transform.SetParent(island.transform, false);
                 _pageText = go.AddComponent<TMPro.TextMeshPro>();
-                _pageText.fontSize = TextRule.IslandFont;
+                _pageText.fontSize = 0.12f;
                 _pageText.alignment = TMPro.TextAlignmentOptions.Center;
-                _pageText.rectTransform.sizeDelta = new Vector2(0.14f, 0.04f);
-                _pageText.outlineWidth = 0.25f;
-                _pageText.outlineColor = new Color32(30, 24, 16, 255);
+                _pageText.rectTransform.sizeDelta = new Vector2(0.06f, 0.02f);
                 _pageText.fontStyle = TMPro.FontStyles.Bold;
                 _pageArrow = go.transform;
             }

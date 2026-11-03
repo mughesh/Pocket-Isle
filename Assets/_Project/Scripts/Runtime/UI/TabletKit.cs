@@ -16,15 +16,18 @@ namespace Diorama
     public static class TabletKit
     {
         /// <summary>Corner radius, bevel, thickness (m). The material's _Corner must match <see cref="Corner"/>.</summary>
-        public const float Corner = 0.007f, Bevel = 0.0018f, Thickness = 0.0065f;
+        // Step 14g: lighter for the pre-14f rune sizes (7 x 3.4 cm): a thinner slab, a narrower bevel, smaller moss and halo.
+        public const float Corner = 0.0045f, Bevel = 0.001f, Thickness = 0.0035f;
         /// <summary>Labels sit this far in front of the slab's back (in front of its face).</summary>
-        public const float LabelZ = -(Thickness + 0.0015f);
+        public const float LabelZ = -(Thickness + 0.001f);
         /// <summary>How far a press sinks the slab (m).</summary>
-        public const float Sink = 0.004f;
+        public const float Sink = 0.0025f;
 
         /// <summary>The carved label's fill (warm cream) and its carved edge.</summary>
         public static readonly Color LabelColor = new Color(0.97f, 0.91f, 0.75f);
         public static readonly Color LabelLit = new Color(1f, 0.96f, 0.82f);
+        /// <summary>Step 14g: a label on a gold-filled (selected) tablet.</summary>
+        public static readonly Color LabelOnGold = new Color(0.2f, 0.14f, 0.07f);
         public static readonly Color32 LabelEdge = new Color32(36, 28, 18, 255);
         /// <summary>The slab face as the shader draws it lit (sRGB, for the contrast check).</summary>
         public static readonly Color FaceColor = new Color(0.30f, 0.33f, 0.29f);
@@ -127,9 +130,9 @@ namespace Diorama
             float r = Corner;
             // The halo first (blends with what's behind), then the rim, the slab, the inlay, the moss.
             HaloRings(r);
-            Disk(r + 0.0016f, 0.0005f, new Color(0f, 0f, 0f, Rim));
+            Disk(r + 0.0011f, 0.0004f, new Color(0f, 0f, 0f, Rim));
             Slab(r);
-            Ring(r - 0.0032f - 0.0013f, r - 0.0032f, -Thickness - 0.0002f, new Color(1f, 1f, 1f, Inlay));
+            Ring(r - 0.0022f - 0.0009f, r - 0.0022f, -Thickness - 0.0002f, new Color(1f, 1f, 1f, Inlay));
             MossLumps(r);
             var m = new Mesh { name = "Tablet (shared)" };
             m.SetVertices(P);
@@ -205,13 +208,13 @@ namespace Diorama
 
         static void HaloRings(float r)
         {
-            const float dy = -0.0025f, z = 0.004f;
+            const float dy = -0.0016f, z = 0.003f;
             var back = Vector3.back;
             int c = V(new Vector3(0f, dy, z), back, new Color(1f, 0f, 0f, Halo), Vector2.zero);
             int a = AddRing(r, z, new Color(1f, 0f, 0f, Halo), d => back, dy);
-            int b = AddRing(r + 0.0028f, z, new Color(0.55f, 0.45f, 0f, Halo), d => back, dy);
-            int e = AddRing(r + 0.0065f, z, new Color(0f, 0.6f, 0f, Halo), d => back, dy);
-            int f = AddRing(r + 0.013f, z, new Color(0f, 0f, 0f, Halo), d => back, dy);
+            int b = AddRing(r + 0.0018f, z, new Color(0.55f, 0.45f, 0f, Halo), d => back, dy);
+            int e = AddRing(r + 0.004f, z, new Color(0f, 0.6f, 0f, Halo), d => back, dy);
+            int f = AddRing(r + 0.008f, z, new Color(0f, 0f, 0f, Halo), d => back, dy);
             Fan(c, a);
             Strip(b, a);
             Strip(e, b);
@@ -252,14 +255,14 @@ namespace Diorama
             // x along the top edge (-1..1 of the straight part), width, height (m).
             var lumps = new (float x, float w, float h)[]
             {
-                (-0.95f, 0.019f, 0.0055f), (-0.78f, 0.014f, 0.0042f), (-0.62f, 0.017f, 0.0050f), (-0.47f, 0.010f, 0.0032f),
-                (-0.12f, 0.011f, 0.0034f), (0.30f, 0.015f, 0.0045f), (0.48f, 0.020f, 0.0058f), (0.68f, 0.013f, 0.0040f),
+                (-0.95f, 0.0085f, 0.0022f), (-0.8f, 0.0065f, 0.0017f), (-0.66f, 0.0075f, 0.002f),
+                (0.3f, 0.0065f, 0.0018f), (0.5f, 0.009f, 0.0024f), (0.7f, 0.006f, 0.0016f),
             };
             int i = 0;
             foreach (var l in lumps)
             {
                 float shade = 0.85f + 0.3f * Hash(i++ * 3.1f);
-                Lump(new Vector2(l.x, 1f), new Vector3(0f, r - 0.0008f, -Thickness * 0.5f), l.w, l.h, Thickness * 1.15f,
+                Lump(new Vector2(l.x, 1f), new Vector3(0f, r - 0.0004f, -Thickness * 0.5f), l.w, l.h, Thickness * 1.1f,
                      new Color(shade, shade, shade, Moss));
             }
         }

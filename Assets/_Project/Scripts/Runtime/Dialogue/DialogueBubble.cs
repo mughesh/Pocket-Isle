@@ -497,15 +497,12 @@ namespace Diorama
             _text.text = text;
             _text.maxVisibleCharacters = 99999;
             _pointing = _line.speaker == DialogueSpeaker.Spirit && Dialogue.GetTarget(out _) == Dialogue.TargetState.Active;
-            // Step 14f: every line (chips and chatter too) at least the readable size (TextRule, world space); the wrap
-            // width grows with the objective line's size so lines break about where they did.
-            float wide = maxWidth * Mathf.Max(1f, TextRule.WorldFont / Mathf.Max(1e-4f, fontSize));
-            float width = chip ? wide : _pointing ? wide * sideWidth : wide;
+            float width = chip ? maxWidth : _pointing ? maxWidth * sideWidth : maxWidth;
             // Step 12a: objectives read bold behind a target icon; chatter is a little smaller and plain.
-            _text.fontSize = Mathf.Max(TextRule.WorldFont, chip ? fontSize * chipFontScale : _objective ? fontSize : fontSize * chatterScale);
+            _text.fontSize = chip ? fontSize * chipFontScale : _objective ? fontSize : fontSize * chatterScale;
             _text.fontStyle = _objective ? FontStyles.Bold : FontStyles.Normal;
             // Step 13: the Heart speaks a little larger, in warm brown-gold.
-            if (_heart && !chip) _text.fontSize = Mathf.Max(TextRule.WorldFont, fontSize) * heartFontScale;
+            if (_heart && !chip) _text.fontSize = fontSize * heartFontScale;
             _text.color = _heart ? heartText : outlineColor;
             bool target = _objective && !chip;
             if (target) width -= iconSize + padding.x * 0.6f;
@@ -514,9 +511,9 @@ namespace Diorama
             {
                 // At most sideMaxLines lines: shrink the text a little if it runs longer.
                 float lineHeight = _text.GetPreferredValues("Ag", width, 1f).y;
-                for (int i = 0; i < 6 && pref.y > lineHeight * (sideMaxLines + 0.4f) && _text.fontSize > TextRule.WorldFont; i++)
+                for (int i = 0; i < 6 && pref.y > lineHeight * (sideMaxLines + 0.4f); i++)
                 {
-                    _text.fontSize = Mathf.Max(TextRule.WorldFont, _text.fontSize * 0.94f);
+                    _text.fontSize *= 0.94f;
                     lineHeight = _text.GetPreferredValues("Ag", width, 1f).y;
                     pref = _text.GetPreferredValues(text, width, 1f);
                 }
@@ -673,7 +670,7 @@ namespace Diorama
                 return;
             }
             float t = Time.time - _shownAt;
-            _text.maxVisibleCharacters = _chip ? 99999 : Mathf.Min(_chars, Mathf.CeilToInt(t * CharsPerSecond));
+            _text.maxVisibleCharacters = _chip ? 99999 : WholeWords(Mathf.Min(_chars, Mathf.CeilToInt(t * CharsPerSecond)));
             if (_heart && !_chip) FadeLetters(t);
             Blip(_text.maxVisibleCharacters);
             _appear = Mathf.Min(1f, t / 0.15f);
@@ -686,6 +683,19 @@ namespace Diorama
             }
             GazePinch();
             if (_chipText != null) UpdateChip(t);
+        }
+
+        /// <summary>
+        /// Step 14g (Mugesh saw "Lilyme": the game paused mid-line when the headset lost focus): typing shows whole words,
+        /// rounding up to the end of the word being typed.
+        /// </summary>
+        int WholeWords(int shown)
+        {
+            var info = _text.textInfo;
+            if (info == null || shown <= 0 || shown >= info.characterCount) return shown;
+            int i = shown;
+            while (i < info.characterCount && !char.IsWhiteSpace(info.characterInfo[i].character)) i++;
+            return i;
         }
 
         /// <summary>Step 13: the Heart's letters fade in one after another instead of popping in.</summary>

@@ -10,11 +10,7 @@ namespace Diorama
     /// </summary>
     public class IslingCard
     {
-        // Step 14f: everything at the readable size (TextRule): name; level and element; HP bar and numbers; the XP bar
-        // (its "-> next level" label dropped); the three moves one per line; ATK / DEF / SPD.
-        const float Width = 0.48f, Pad = 0.02f;
-        static float Line => TextRule.IslandFont * 0.1f * 1.25f;
-        static float Height => Pad * 2f + Line * 7.6f;
+        const float Width = 0.15f, Height = 0.1f, Pad = 0.008f;
 
         static readonly int BackColorId = Shader.PropertyToID("_BackColor");
         static readonly int BorderColorId = Shader.PropertyToID("_BorderColor");
@@ -40,19 +36,18 @@ namespace Diorama
         {
             _root = new GameObject("Isling Card").transform;
             _root.SetParent(parent, false);
-            float top = Height * 0.5f - Pad, line = Line, font = TextRule.IslandFont;
-            float Y(float lines) => top - line * lines;
             _panel = Quad("Panel", hud, quad, new Vector2(Width, Height), Vector3.forward * 0.001f);
-            _title = Text("Title", font * 1.12f, new Vector3(0f, Y(0.55f), 0f), line * 2.1f);
-            _hpText = Text("HP Text", font, new Vector3(Width * 0.5f - Pad - 0.065f, Y(2.6f), 0f), line);
+            _hp = Quad("HP", hud, quad, new Vector2(Width - 2f * Pad - 0.03f, 0.008f), new Vector3(-0.015f, 0.015f, 0f));
+            // Step 9f: the next level at the XP bar's end ("→ 7").
+            _xp = Quad("XP", hud, quad, new Vector2(Width - 2f * Pad - 0.018f, 0.004f), new Vector3(-0.009f, 0.004f, 0f));
+            _next = Text("Next", 0.06f, new Vector3(Width * 0.5f - Pad - 0.008f, 0.004f, 0f));
+            _next.rectTransform.sizeDelta = new Vector2(0.02f, 0.01f);
+            _title = Text("Title", 0.1f, new Vector3(0f, Height * 0.5f - 0.016f, 0f));
+            _hpText = Text("HP Text", 0.065f, new Vector3(Width * 0.5f - Pad - 0.014f, 0.015f, 0f));
             _hpText.alignment = TextAlignmentOptions.Right;
-            _hpText.rectTransform.sizeDelta = new Vector2(0.13f, line);
-            _hp = Quad("HP", hud, quad, new Vector2(Width - 2f * Pad - 0.15f, 0.014f), new Vector3(-0.075f, Y(2.6f), 0f));
-            _xp = Quad("XP", hud, quad, new Vector2(Width - 2f * Pad, 0.008f), new Vector3(0f, Y(3.3f), 0f));
-            _next = Text("Next", font, new Vector3(0f, Y(3.3f), 0f), line);
-            _next.gameObject.SetActive(false);
-            _moves = Text("Moves", font, new Vector3(0f, Y(4.9f), 0f), line * 3f);
-            _stats = Text("Stats", font, new Vector3(0f, Y(6.9f), 0f), line);
+            _hpText.rectTransform.sizeDelta = new Vector2(0.03f, 0.012f);
+            _moves = Text("Moves", 0.07f, new Vector3(0f, -0.014f, 0f));
+            _stats = Text("Stats", 0.07f, new Vector3(0f, -Height * 0.5f + 0.016f, 0f));
             _root.gameObject.SetActive(false);
         }
 
@@ -69,7 +64,7 @@ namespace Diorama
             return r;
         }
 
-        TextMeshPro Text(string name, float size, Vector3 at, float boxHeight)
+        TextMeshPro Text(string name, float size, Vector3 at)
         {
             var go = new GameObject(name);
             go.transform.SetParent(_root, false);
@@ -81,7 +76,7 @@ namespace Diorama
             t.color = Color.white;
             t.outlineWidth = 0.2f;
             t.outlineColor = new Color32(20, 30, 25, 255);
-            t.rectTransform.sizeDelta = new Vector2(Width - 2f * Pad, boxHeight);
+            t.rectTransform.sizeDelta = new Vector2(Width - 2f * Pad, 0.016f);
             return t;
         }
 
@@ -96,25 +91,25 @@ namespace Diorama
             _root.localPosition = local + Vector3.up * (Height * 0.5f);
 
             var style = ElementStyle.Of(c.Element);
-            _title.text = $"<b>{c.Name}</b>\n<size=89%>Lv {c.level} · <color=#{ColorUtility.ToHtmlStringRGB(style.main)}>{c.Element}</color></size>";
+            _title.text = $"<b>{c.Name}</b>  <size=70%>Lv {c.level} · <color=#{ColorUtility.ToHtmlStringRGB(style.main)}>{c.Element}</color></size>";
             _hpText.text = $"{c.currentHp}/{c.MaxHp}";
             var moves = new System.Text.StringBuilder();
             foreach (var m in c.species.moves)
             {
                 if (m == null) continue;
-                if (moves.Length > 0) moves.Append("\n");
+                if (moves.Length > 0) moves.Append("  ");
                 var col = m.kind == MoveKind.Support ? new Color(0.85f, 0.85f, 0.8f) : ElementStyle.Of(m.element).main;
                 moves.Append($"<color=#{ColorUtility.ToHtmlStringRGB(col)}>{m.Name}</color>");
             }
             _moves.text = moves.ToString();
-            _stats.text = $"ATK <b>{c.Attack}</b>  DEF <b>{c.Defense}</b>  SPD <b>{c.Speed}</b>";
+            _stats.text = $"<size=85%>ATK</size> <b>{c.Attack}</b>   <size=85%>DEF</size> <b>{c.Defense}</b>   <size=85%>SPD</size> <b>{c.Speed}</b>";
 
             Paint(_panel, new Color(0.09f, 0.08f, 0.07f, 0.88f), new Color(0.79f, 0.6f, 0.26f, 1f), Width / Height, 0f, Color.clear, 0.12f, 0.03f);
             float hp = c.currentHp / (float)Mathf.Max(1, c.MaxHp);
             Paint(_hp, new Color(0.15f, 0.15f, 0.14f, 1f), new Color(0f, 0f, 0f, 0.6f), _hp.transform.localScale.x / _hp.transform.localScale.y, hp,
                 hp > 0.5f ? Green : hp > 0.25f ? Yellow : Red, 0.5f, 0.12f);
             float xp = progression != null ? progression.XpShare(c) : 0f;
-
+            _next.text = progression != null && c.level >= progression.levelCap ? "max" : $"→ {c.level + 1}";
             Paint(_xp, new Color(0.15f, 0.15f, 0.14f, 1f), new Color(0f, 0f, 0f, 0.5f), _xp.transform.localScale.x / _xp.transform.localScale.y, xp, Gold, 0.5f, 0.12f);
         }
 

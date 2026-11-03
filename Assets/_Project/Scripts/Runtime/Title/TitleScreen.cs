@@ -32,6 +32,7 @@ namespace Diorama
         /// <summary>The Settings rune: show the settings board, call the action when it closes (step 9g B wires it).</summary>
         public static event Action<Action> SettingsRequested;
 
+        static readonly Vector2 Wide = new Vector2(0.1f, 0.042f), Small = new Vector2(0.07f, 0.03f);
 
         SaveSlot? _picked;
         bool _continue;
@@ -97,19 +98,12 @@ namespace Diorama
             runes.Clear();
             var active = SaveSlots.Active;
             var other = SaveSlots.Other(active);
-            // Step 14f: Continue (large, gold, its journey under it) over New journey and Settings; the other journey under those.
-            float y = 0f, h = 0f;
+            var cont = runes.Add("Continue", new Vector2(-0.11f, 0f), Wide, () => _continue = true, SaveSlots.Label(active));
+            cont.primary = true;
+            runes.Add("New journey", new Vector2(0f, 0f), Wide, () => ShowSlotChoice(true));
+            runes.Add("Settings", new Vector2(0.1f, -0.004f), Small, OpenSettings);
             if (SaveSlots.Exists(other))
-            {
-                var or = new RuneBoard.Item($"or: {SaveSlots.Label(other)}", () => SwitchTo(other));
-                runes.Row(0f, or);
-                h = RuneBoard.RowHeight(or);
-            }
-            var middle = new[] { new RuneBoard.Item("New journey", () => ShowSlotChoice(true)), new RuneBoard.Item("Settings", OpenSettings) };
-            if (h > 0f) y = RuneBoard.Above(y, h, RuneBoard.RowHeight(middle));
-            runes.Row(y, middle);
-            var top = new RuneBoard.Item("Continue", () => _continue = true, SaveSlots.Label(active), true);
-            var cont = runes.Row(RuneBoard.Above(y, RuneBoard.RowHeight(middle), RuneBoard.RowHeight(top)), top)[0];
+                runes.Add($"or: {SaveSlots.Label(other)}", new Vector2(-0.11f, -0.042f), new Vector2(0.1f, 0.026f), () => SwitchTo(other));
             runes.DefaultFocus = cont;
             runes.Show();
         }
@@ -123,20 +117,14 @@ namespace Diorama
                 return;
             }
             runes.Clear();
-            // Step 14f: the two journeys side by side over Back (or Settings for a new player). "Hold to start over" became
-            // "Hold to restart" (it didn't fit at the readable size).
-            var bottom = restart ? new RuneBoard.Item("Back", ShowReturning) : new RuneBoard.Item("Settings", OpenSettings);
-            runes.Row(0f, bottom);
-            var pair = new[]
-            {
-                new RuneBoard.Item("Full adventure", () => Pick(SaveSlot.Adventure, restart), restart && SaveSlots.Exists(SaveSlot.Adventure) ? "Hold to restart" : null),
-                new RuneBoard.Item("Quick journey", () => Pick(SaveSlot.Quick, restart), restart && SaveSlots.Exists(SaveSlot.Quick) ? "Hold to restart" : "about 10 min"),
-            };
-            var two = runes.Row(RuneBoard.Above(0f, RuneBoard.TabletH, RuneBoard.RowHeight(pair)), pair);
-            var full = two[0];
-            var quick = two[1];
+            var full = runes.Add("Full adventure", new Vector2(-0.11f, 0f), Wide, () => Pick(SaveSlot.Adventure, restart),
+                restart && SaveSlots.Exists(SaveSlot.Adventure) ? "Hold to start over" : null);
+            var quick = runes.Add("Quick journey", new Vector2(0f, 0f), Wide, () => Pick(SaveSlot.Quick, restart),
+                restart && SaveSlots.Exists(SaveSlot.Quick) ? "Hold to start over" : "about 10 min");
             full.hold = restart && SaveSlots.Exists(SaveSlot.Adventure);
             quick.hold = restart && SaveSlots.Exists(SaveSlot.Quick);
+            if (restart) runes.Add("Back", new Vector2(0.1f, -0.004f), Small, ShowReturning);
+            else runes.Add("Settings", new Vector2(0.1f, -0.004f), Small, OpenSettings);
             runes.DefaultFocus = null;
             runes.Show();
         }

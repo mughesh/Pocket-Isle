@@ -25,7 +25,7 @@ Material:
     m_TexEnvs: []
     m_Ints: []
     m_Floats:
-    - _Corner: 0.007
+    - _Corner: 0.0045
     - _HaloDark: 0.5
     - _HaloLight: 0.42
     m_Colors:
