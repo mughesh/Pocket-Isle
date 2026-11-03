@@ -405,6 +405,8 @@ namespace Diorama
                 if (li == null || g.pod == null) continue;
                 bool held = g.grab != null && g.grab.IsHeld;
                 if (g.grab != null) g.grab.CanGrab = held || !li.Leaving && li.Grow > 0.9f && li != _onPedestal;
+                // Step 14a: near the rim, the socket it would swap into glows with a ghost pod.
+                if (held) pods.PreviewDrop(g.pod.transform.position);
                 if (held) continue;
                 g.pod.BaseScale = Vector3.one;
                 g.pod.transform.localPosition = li.LocalCenter;
@@ -425,7 +427,7 @@ namespace Diorama
         void OnIslingReleased(LodgeIsling li)
         {
             if (li == null || !_grabbers.TryGetValue(li, out var g) || g.pod == null) return;
-            int slot = pods.NearestSocket(g.pod.transform.position, dropDistance * WorldScale);
+            int slot = pods.NearestSocket(g.pod.transform.position, Mathf.Max(dropDistance * WorldScale, PodRack.RimSnapReach));
             int index = party.storage.IndexOf(li.Isling);
             if (slot >= 0 && index >= 0)
             {
@@ -457,7 +459,8 @@ namespace Diorama
                 StartCoroutine(pods.FlyHome(slot));
                 return;
             }
-            bool nearHome = (local - pods.HomeLocal(slot)).magnitude < dropDistance * 0.6f && vel.magnitude < 0.3f;
+            // Step 14a: a put-back within the rim's preview reach of its own socket flies home (it was ~2 cm).
+            bool nearHome = (island.transform.TransformPoint(local) - pods.HomeWorld(slot)).magnitude < PodRack.RimSnapReach && vel.magnitude < 0.3f;
             if (nearHome)
             {
                 StartCoroutine(pods.FlyHome(slot));

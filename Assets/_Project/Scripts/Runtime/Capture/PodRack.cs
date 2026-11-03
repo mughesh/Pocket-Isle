@@ -356,6 +356,7 @@ namespace Diorama
             if (!_laidOut) return;
             SyncParty();
             UpdateCradle();
+            UpdateDropPreview();
             for (int i = 0; i < _pods.Length; i++)
             {
                 var p = _pods[i];
@@ -363,6 +364,12 @@ namespace Diorama
                 var g = Grab(p);
                 bool held = g != null && g.IsHeld;
                 if (g != null) g.CanGrab = !p.Detached && (held || CanUse(i));
+                // Step 14a: a rim pod held in the lodge near its own socket previews the put-back.
+                if (held && LodgeMode && !InBattle && i < Party.Size && (HomeWorld(i) - p.transform.position).sqrMagnitude < RimSnapReach * RimSnapReach)
+                {
+                    _previewSlot = i;
+                    _previewFrame = Time.frameCount;
+                }
                 if (i < Party.Size)
                 {
                     _pop[i] = Mathf.MoveTowards(_pop[i], !Explore && CanUse(i) ? 1f : 0f, Time.deltaTime * 6f);
@@ -582,6 +589,61 @@ namespace Diorama
             float u = Time.time - _waveStart - slot * 0.08f;
             if (u > 2f && slot == Party.Size - 1) _waveStart = -1f;
             return u <= 0f || u >= 0.8f ? 0f : 1.6f * Mathf.Sin(u / 0.8f * Mathf.PI);
+        }
+
+        /// <summary>Step 14a: a held pod this close (world m) to a rim socket previews it, and dropped there flies in.</summary>
+        public const float RimSnapReach = 0.12f;
+
+        PodView _ghost;
+        int _previewSlot = -1, _previewFrame = -10;
+        float _previewShown;
+
+        /// <summary>
+        /// Step 14a: call every frame while a pod is held (starter pick, lodge swap, a put-back): the socket it would fly
+        /// into from <paramref name="heldWorld"/> (within <see cref="RimSnapReach"/>) glows with a ghost pod in it.
+        /// Returns that socket or -1. <paramref name="emptyOnly"/>: only the next empty socket counts (a starter).
+        /// </summary>
+        public int PreviewDrop(Vector3 heldWorld, bool emptyOnly = false)
+        {
+            int slot = emptyOnly ? NextEmptyWithin(heldWorld, RimSnapReach) : NearestSocket(heldWorld, RimSnapReach);
+            if (slot >= 0)
+            {
+                if (slot != _previewSlot) GameAudio.At(AudioIds.PodWiggle, HomeWorld(slot)).SetVolume(0.5f);
+                _previewSlot = slot;
+                _previewFrame = Time.frameCount;
+            }
+            return slot;
+        }
+
+        int NextEmptyWithin(Vector3 world, float maxWorld)
+        {
+            int next = Mathf.Min(Party.Size - 1, party.members.Count);
+            return (HomeWorld(next) - world).sqrMagnitude <= maxWorld * maxWorld ? next : -1;
+        }
+
+        /// <summary>The ghost pod in the previewed socket: grows in, glows and pulses; gone a moment after the preview stops.</summary>
+        void UpdateDropPreview()
+        {
+            bool on = _previewFrame >= Time.frameCount - 1 && _previewSlot >= 0;
+            _previewShown = Mathf.MoveTowards(_previewShown, on ? 1f : 0f, Time.deltaTime * 6f);
+            if (_previewShown <= 0f)
+            {
+                if (_ghost != null && _ghost.gameObject.activeSelf) _ghost.gameObject.SetActive(false);
+                return;
+            }
+            if (_ghost == null)
+            {
+                _ghost = Instantiate(podPrefab, island.transform, false);
+                _ghost.name = "Rim Drop Preview";
+                foreach (var c in _ghost.GetComponentsInChildren<Collider>(true)) c.enabled = false;
+                foreach (var g in _ghost.GetComponentsInChildren<PodGrab>(true)) g.enabled = false;
+            }
+            if (!_ghost.gameObject.activeSelf) _ghost.gameObject.SetActive(true);
+            _ghost.transform.localPosition = HomeLocal(Mathf.Clamp(_previewSlot, 0, Party.Size - 1));
+            _ghost.transform.localRotation = Quaternion.identity;
+            float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * 7f);
+            _ghost.BaseScale = Vector3.one * Mathf.SmoothStep(0f, 1f, _previewShown) * (1f + 0.08f * pulse);
+            _ghost.Glow = 0.9f + 0.6f * pulse;
         }
 
         /// <summary>

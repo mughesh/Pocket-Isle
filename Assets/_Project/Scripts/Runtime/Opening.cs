@@ -89,8 +89,8 @@ namespace Diorama
         public float podArcBow = 0.06f;
         [Tooltip("Smallest gap between floating pods (x a pod's diameter).")]
         public float podMinGap = 0.4f;
-        [Tooltip("A dropped pod picks a rim socket within this distance (world m).")]
-        public float dropReach = 0.12f;
+        [Tooltip("A dropped pod picks a rim socket within this distance (world m; step 14a: the rim's preview reach).")]
+        public float dropReach = PodRack.RimSnapReach;
 
         [Header("Statue")]
         [Tooltip("intro.statue when the explorer is within this many tiles of the statue's middle.")]
@@ -945,6 +945,8 @@ namespace Diorama
                 if (pod == null) continue;
                 var grab = pod.GetComponent<PodGrab>();
                 bool held = grab != null && grab.IsHeld;
+                // Step 14a: near the rim, the socket it would fly into glows with a ghost pod.
+                if (held) pods.PreviewDrop(pod.transform.position, true);
                 bool focus = i == _gazedPod && !held;
                 // Floating and held pods stay big; they shrink to rim size only as they snap into the socket (Choose).
                 float size = FloatScale * (focus ? podFocusGrow : 1f);
@@ -997,7 +999,7 @@ namespace Diorama
         {
             if (_chosen >= 0 || index >= _starterPods.Count || _starterPods[index] == null) return;
             var world = _starterPods[index].transform.position;
-            int socket = pods.NearestSocket(world, dropReach);
+            int socket = pods.NearestSocket(world, Mathf.Max(dropReach, PodRack.RimSnapReach));
             if (socket < 0)
             {
                 Debug.Log($"[Opening] {starters[index].name}'s pod dropped away from the rim: it floats back.");
@@ -1084,10 +1086,17 @@ namespace Diorama
             return _starterPods[Mathf.Abs(n) % _starterPods.Count];
         }
 
+        /// <summary>
+        /// Step 14a: the near corner on the dominant side (where the move ghost grabs; the Spirit parks over it). It was
+        /// the right edge's middle.
+        /// </summary>
         Vector3? RimPoint()
         {
             if (_stage != Stage.Move || island == null) return null;
-            return island.transform.TransformPoint(new Vector3(-island.FootprintHalfSize.x, island.CapTopLocal - 0.05f, 0f));
+            var half = island.FootprintHalfSize;
+            // Island +X is the player's left.
+            float x = DominantHand.Left ? half.x - 0.05f : -(half.x - 0.05f);
+            return island.transform.TransformPoint(new Vector3(x, island.CapTopLocal - 0.015f, half.y));
         }
 
         void Burst(Vector3 at, int count, Color color, float speed)
