@@ -1,0 +1,95 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb15570c66aa7e84ebdc3a6c27a865c7, type: 3}
+  m_Name: Logo_Still Isle_t1
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.SdfShape
+  primitives:
+  - kind: 5
+    blend: 0
+    k: 0
+    mirrorX: 0
+    a: {x: 2.0124168, y: 0.52692384, z: 0.12}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.4968963, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: -88.8274}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 5
+    blend: 0
+    k: 0.03
+    mirrorX: 0
+    a: {x: 2.0166373, y: 0.12277075, z: 0.12}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.14278643, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: -98.08343}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 5
+    blend: 0
+    k: 0.03
+    mirrorX: 0
+    a: {x: 2.0017815, y: 0.07504082, z: 0.12}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.14304738, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: -116.39883}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 5
+    blend: 0
+    k: 0.03
+    mirrorX: 0
+    a: {x: 1.9724274, y: 0.03370569, z: 0.12}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.14346924, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: -134.21448}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 5
+    blend: 0
+    k: 0.03
+    mirrorX: 0
+    a: {x: 1.931292, y: 0.0025915778, z: 0.12}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.14389586, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: -151.43694}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 5
+    blend: 0
+    k: 0.03
+    mirrorX: 0
+    a: {x: 1.8821836, y: -0.0154213775, z: 0.12}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.14417586, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: -168.18774}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 5
+    blend: 0
+    k: 0.03
+    mirrorX: 0
+    a: {x: 1.8296477, y: -0.018665772, z: 0.12}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.14421362, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: 175.26727}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 5
+    blend: 0
+    k: 0.03
+    mirrorX: 0
+    a: {x: 1.9820523, y: 0.5846678, z: 0.12}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.2926598, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: -178.82741}
+    bumps: 0
+    bumpFrequency: 0

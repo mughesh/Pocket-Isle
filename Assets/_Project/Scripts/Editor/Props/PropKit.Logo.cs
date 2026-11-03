@@ -154,6 +154,13 @@ namespace Diorama.EditorTools
             int index = 0;
             foreach (var (c, strokes, span, top) in glyphs)
             {
+                if (strokes.Count == 0)
+                {
+                    // Step 14c: a space ("Still Isle").
+                    x += span + 2f * r + gap;
+                    index++;
+                    continue;
+                }
                 float size = em * R(0.96f, 1.05f);
                 float lift = R(-0.03f, 0.04f);
                 float tilt = R(-4f, 4f) * Mathf.Deg2Rad;
@@ -240,6 +247,81 @@ namespace Diorama.EditorTools
                     l.AddRange(Arc(0.17f, 0.17f, 0.17f, 0.17f, 180f, 285f, 6));
                     s.Add(l);
                     span = 0.21f;
+                    break;
+                // Step 14c: the realm names (Galewick, Cinderwood, Lilymere, Still Isle, Home) in the logo's strokes.
+                case ' ':
+                    span = 0.3f;
+                    break;
+                case 'a':
+                    s.Add(Arc(0.27f, 0.3f, 0.27f, 0.3f, 0f, 360f, 16));
+                    s.Add(Line(0.56f, 0.62f, 0.56f, 0f));
+                    span = 0.58f;
+                    break;
+                case 'w':
+                    s.Add(Line(0f, 0.62f, 0.17f, 0f, 0.35f, 0.44f, 0.53f, 0f, 0.7f, 0.62f));
+                    span = 0.7f;
+                    break;
+                case 'i':
+                    s.Add(Line(0.06f, 0f, 0.06f, 0.62f));
+                    s.Add(Line(0.06f, 0.88f, 0.06f, 0.9f));
+                    span = 0.12f;
+                    break;
+                case 'n':
+                    s.Add(Line(0f, 0f, 0f, 0.62f));
+                    var arch = Arc(0.24f, 0.36f, 0.24f, 0.26f, 180f, 0f, 8);
+                    arch.Add(new Vector2(0.48f, 0f));
+                    s.Add(arch);
+                    span = 0.48f;
+                    break;
+                case 'd':
+                    s.Add(Arc(0.29f, 0.31f, 0.29f, 0.31f, 0f, 360f, 18));
+                    s.Add(Line(0.58f, 0f, 0.58f, 1f));
+                    span = 0.6f;
+                    break;
+                case 'r':
+                    s.Add(Line(0f, 0f, 0f, 0.62f));
+                    s.Add(Arc(0.26f, 0.36f, 0.26f, 0.24f, 180f, 55f, 6));
+                    span = 0.4f;
+                    break;
+                case 'y':
+                    s.Add(Line(0f, 0.62f, 0.25f, 0.06f));
+                    s.Add(Line(0.5f, 0.62f, 0.12f, -0.34f));
+                    span = 0.5f;
+                    break;
+                case 'm':
+                    s.Add(Line(0f, 0f, 0f, 0.62f));
+                    var hump = Arc(0.19f, 0.4f, 0.19f, 0.22f, 180f, 0f, 6);
+                    hump.Add(new Vector2(0.38f, 0f));
+                    s.Add(hump);
+                    var hump2 = Arc(0.57f, 0.4f, 0.19f, 0.22f, 180f, 0f, 6);
+                    hump2.Add(new Vector2(0.76f, 0f));
+                    s.Add(hump2);
+                    span = 0.76f;
+                    break;
+                case 'G':
+                    s.Add(Arc(0.43f, 0.5f, 0.43f, 0.5f, 40f, 320f, 16));
+                    s.Add(Line(0.5f, 0.45f, 0.84f, 0.45f, 0.84f, 0.12f));
+                    span = 0.86f;
+                    break;
+                case 'C':
+                    s.Add(Arc(0.43f, 0.5f, 0.43f, 0.5f, 45f, 315f, 16));
+                    span = 0.8f;
+                    break;
+                case 'L':
+                    s.Add(Line(0f, 1f, 0f, 0f, 0.52f, 0f));
+                    span = 0.52f;
+                    break;
+                case 'S':
+                    var big = Arc(0.3f, 0.75f, 0.28f, 0.25f, 25f, 270f, 10);
+                    big.AddRange(Arc(0.3f, 0.25f, 0.28f, 0.25f, 90f, -155f, 10).GetRange(1, 10));
+                    s.Add(big);
+                    span = 0.6f;
+                    break;
+                case 'H':
+                    s.Add(Line(0f, 0f, 0f, 1f));
+                    s.Add(Line(0.6f, 0f, 0.6f, 1f));
+                    s.Add(Line(0f, 0.5f, 0.6f, 0.5f));
+                    span = 0.6f;
                     break;
                 default: // I, with short bars top and bottom so it never reads as the "l" beside it
                     s.Add(Line(0.13f, 0f, 0.13f, 1f));

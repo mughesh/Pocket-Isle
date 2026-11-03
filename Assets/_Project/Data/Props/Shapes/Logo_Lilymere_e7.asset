@@ -1,0 +1,185 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb15570c66aa7e84ebdc3a6c27a865c7, type: 3}
+  m_Name: Logo_Lilymere_e7
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.SdfShape
+  primitives:
+  - kind: 5
+    blend: 0
+    k: 0
+    mirrorX: 0
+    a: {x: -2.6416194, y: 0.34433115, z: 0.12}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.38959214, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: 178.84775}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 5
+    blend: 0
+    k: 0.03
+    mirrorX: 0
+    a: {x: -2.9039679, y: 0.40173727, z: 0.12}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.17041428, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: 79.53976}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 5
+    blend: 0
+    k: 0.03
+    mirrorX: 0
+    a: {x: -2.8688521, y: 0.49907982, z: 0.12}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.16968976, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: 60.65531}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 5
+    blend: 0
+    k: 0.03
+    mirrorX: 0
+    a: {x: -2.8048997, y: 0.5779521, z: 0.12}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.16855566, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: 41.054195}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 5
+    blend: 0
+    k: 0.03
+    mirrorX: 0
+    a: {x: -2.7197294, y: 0.6289582, z: 0.12}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.16752775, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: 20.56714}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 5
+    blend: 0
+    k: 0.03
+    mirrorX: 0
+    a: {x: -2.6234868, y: 0.6460221, z: 0.12}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.16709942, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: -0.5509491}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 5
+    blend: 0
+    k: 0.03
+    mirrorX: 0
+    a: {x: -2.5276375, y: 0.62711096, z: 0.12}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.16748375, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: -21.68866}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 5
+    blend: 0
+    k: 0.03
+    mirrorX: 0
+    a: {x: -2.4435992, y: 0.57447755, z: 0.12}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.16848941, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: -42.22239}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 5
+    blend: 0
+    k: 0.03
+    mirrorX: 0
+    a: {x: -2.381384, y: 0.49439207, z: 0.12}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.16963229, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: -61.872547}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 5
+    blend: 0
+    k: 0.03
+    mirrorX: 0
+    a: {x: -2.3484025, y: 0.39639467, z: 0.12}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.17039098, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: -80.78758}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 5
+    blend: 0
+    k: 0.03
+    mirrorX: 0
+    a: {x: -2.3485842, y: 0.29215962, z: 0.12}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.17043512, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: -99.4043}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 5
+    blend: 0
+    k: 0.03
+    mirrorX: 0
+    a: {x: -2.381907, y: 0.19410405, z: 0.12}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.1697459, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: -118.25997}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 5
+    blend: 0
+    k: 0.03
+    mirrorX: 0
+    a: {x: -2.4444017, y: 0.11390899, z: 0.12}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.16862234, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: -137.81253}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 5
+    blend: 0
+    k: 0.03
+    mirrorX: 0
+    a: {x: -2.5286236, y: 0.061127886, z: 0.12}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.16757369, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: -158.25185}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 5
+    blend: 0
+    k: 0.03
+    mirrorX: 0
+    a: {x: -2.624539, y: 0.042048343, z: 0.12}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.16710211, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: -179.34843}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 5
+    blend: 0
+    k: 0.03
+    mirrorX: 0
+    a: {x: -2.7207222, y: 0.05894328, z: 0.12}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.16744183, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: 159.49646}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 5
+    blend: 0
+    k: 0.03
+    mirrorX: 0
+    a: {x: -2.8057153, y: 0.109800056, z: 0.12}
+    b: {x: 0.042, y: 0, z: 0}
+    size: {x: 0.16842361, y: 0.12, z: 0.11399999}
+    rotation: {x: 0, y: 0, z: 138.91684}
+    bumps: 0
+    bumpFrequency: 0

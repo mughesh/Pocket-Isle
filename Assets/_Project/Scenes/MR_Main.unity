@@ -151,6 +151,8 @@ Transform:
   m_Children:
   - {fileID: 299480874}
   - {fileID: 1997820029}
+  - {fileID: 1557685673}
+  - {fileID: 1163407142}
   m_Father: {fileID: 270959110}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &59714807
@@ -4712,6 +4714,67 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1542799535}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1163407141
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1163407142}
+  - component: {fileID: 1163407143}
+  m_Layer: 0
+  m_Name: Gate Signs
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1163407142
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1163407141}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 59714806}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1163407143
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1163407141}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2db729dbf04d81346bb5dce3feff87d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.GateSigns
+  island: {fileID: 270959109}
+  window: {fileID: 270959113}
+  gates: {fileID: 1858573327}
+  material: {fileID: 2100000, guid: 816769f54a1129a4992d139a9519d8a4, type: 2}
+  signs:
+  - gate: wind
+    recipe: {fileID: 11400000, guid: b1a8e518bdb01e548b0a24a6639b5d27, type: 2}
+    archTop: 0.85
+  - gate: fire
+    recipe: {fileID: 11400000, guid: a552e0f2e70046a4e9036f6ece67e3b9, type: 2}
+    archTop: 1.55
+  - gate: water
+    recipe: {fileID: 11400000, guid: eeec5be3f23adde4e8a1ebf8e3c2a0b7, type: 2}
+    archTop: 1.05
+  widthTiles: 2.1
+  gapTiles: 0.15
+  gold: {r: 1, g: 0.82, b: 0.3, a: 1}
 --- !u!1 &1196775046
 GameObject:
   m_ObjectHideFlags: 0
@@ -5798,6 +5861,87 @@ Transform:
   - {fileID: 2066182156}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1557685672
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1557685673}
+  - component: {fileID: 1557685674}
+  m_Layer: 0
+  m_Name: Realm Name Card
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1557685673
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1557685672}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 59714806}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1557685674
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1557685672}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dd687e8cb8983364fabcdd18ed334f47, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.RealmNameCard
+  island: {fileID: 270959109}
+  swap: {fileID: 221433162}
+  encounters: {fileID: 1499891275}
+  material: {fileID: 2100000, guid: 816769f54a1129a4992d139a9519d8a4, type: 2}
+  fx: {fileID: 1078587927}
+  cards:
+  - map: {fileID: 11400000, guid: 1c0f5df7c1c50ad4789ffbf83b2addd2, type: 2}
+    recipe: {fileID: 11400000, guid: b1a8e518bdb01e548b0a24a6639b5d27, type: 2}
+    line: The windmill highlands, where the wind stopped
+    restoredLine: The windmill highlands, where the wind blows again
+    shard: shard.wind
+  - map: {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
+    recipe: {fileID: 11400000, guid: a552e0f2e70046a4e9036f6ece67e3b9, type: 2}
+    line: The autumn forest, where the fire went cold
+    restoredLine: The autumn forest, where the fire burns again
+    shard: shard.fire
+  - map: {fileID: 11400000, guid: 62a4d08fb1efa974aa00c824d650dab0, type: 2}
+    recipe: {fileID: 11400000, guid: eeec5be3f23adde4e8a1ebf8e3c2a0b7, type: 2}
+    line: The lily lagoon, where the water froze
+    restoredLine: The lily lagoon, where the water flows again
+    shard: shard.water
+  - map: {fileID: 11400000, guid: ab0469af29722704f949fec768f94b68, type: 2}
+    recipe: {fileID: 11400000, guid: 8f5540f6529aedd4db23c8c7491b3ee7, type: 2}
+    line: Home
+    restoredLine: 
+    shard: 
+  width: 0.24
+  height: 0.17
+  far: 0.9
+  rise: 0.08
+  firstSeconds: 3
+  againSeconds: 1.5
+  waitMax: 10
+  riseSeconds: 0.6
+  sinkSeconds: 0.6
+  lineSize: 0.1
+  lineColor: {r: 1, g: 0.96, b: 0.86, a: 1}
 --- !u!1 &1583412946
 GameObject:
   m_ObjectHideFlags: 0

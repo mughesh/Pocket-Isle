@@ -121,6 +121,32 @@ namespace Diorama.Tests
         }
 
         [Test]
+        public void NameCard_FirstVisitLong_LaterShort_RestoredLineOnce()
+        {
+            int f = RealmNameCard.Plan(0, false, out bool line, out bool restored);
+            Assert.IsTrue(line, "first visit: name + line");
+            Assert.IsFalse(restored);
+            f = RealmNameCard.Plan(f, false, out line, out _);
+            Assert.IsFalse(line, "later: the name only (short)");
+            f = RealmNameCard.Plan(f, true, out line, out restored);
+            Assert.IsTrue(line && restored, "first visit after restoring: the restored line");
+            RealmNameCard.Plan(f, true, out line, out _);
+            Assert.IsFalse(line, "only once");
+        }
+
+        [Test]
+        public void RealmCards_Baked_UnderNineThousandTriangles()
+        {
+            foreach (var style in PropKit.RealmCards)
+            {
+                var r = PropKit.Load(style.asset);
+                if (r == null || r.bakedMesh == null) Assert.Inconclusive($"{style.asset} not baked (Set Up MR_Main (14c Galewick first)).");
+                Assert.LessOrEqual(r.bakedMesh.triangles.Length / 3, 9000, style.asset);
+                Assert.Greater(r.bakedMesh.bounds.size.x, r.bakedMesh.bounds.size.y * 2f, "a wide board");
+            }
+        }
+
+        [Test]
         public void KeeperLevels_ForTheGalewickFirstOrder()
         {
             Assert.AreEqual(8, ShardScaling.KeeperLevel(GaleowlKit.Level, 0, 2), "Galeowl at 0 shards");

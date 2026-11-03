@@ -1,0 +1,160 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 374f6b77629fa034d93d2a7945ac7885, type: 3}
+  m_Name: RealmCard_Galewick
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.PropRecipe
+  pieces:
+  - shape: {fileID: 11400000, guid: 0a20d05078a8b164da7186145c9d877c, type: 2}
+    part: {fileID: 0}
+    position: {x: -0.31, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 0
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 1
+  - shape: {fileID: 11400000, guid: 9d62fcd81dd5cdc47af9f7b5e2ed46e3, type: 2}
+    part: {fileID: 0}
+    position: {x: -0.31, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 0
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 1
+  - shape: {fileID: 11400000, guid: d3663d1d356be4e43be3c8838dcbfbb3, type: 2}
+    part: {fileID: 0}
+    position: {x: -0.31, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 0
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 1
+  - shape: {fileID: 11400000, guid: eaf06104128562c49be7e586cd152211, type: 2}
+    part: {fileID: 0}
+    position: {x: -0.31, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 0
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 1
+  - shape: {fileID: 11400000, guid: e16ad91c68bf5624fb8ec18d51bbeb12, type: 2}
+    part: {fileID: 0}
+    position: {x: -0.31, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 0
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 1
+  - shape: {fileID: 11400000, guid: 8cd117a51e9a3ef4db8a064951bb3035, type: 2}
+    part: {fileID: 0}
+    position: {x: -0.31, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 0
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 1
+  - shape: {fileID: 11400000, guid: 22cdfd76aea83ca49aaacb8ab5d69527, type: 2}
+    part: {fileID: 0}
+    position: {x: -0.31, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 0
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 1
+  - shape: {fileID: 11400000, guid: 4ab854876fdc90e4cb371849684d0546, type: 2}
+    part: {fileID: 0}
+    position: {x: -0.31, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 0
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 1
+  - shape: {fileID: 11400000, guid: 7362b163378dfab4eb4f82c5be88f54d, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 1
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 1.4
+  - shape: {fileID: 11400000, guid: 4b948b430dd3f6c41945b2bb2535ab37, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 2
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 0.3
+  - shape: {fileID: 11400000, guid: 7de9ee3d1dd7d00469c7bfa350189962, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 5
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 0.8
+  palette:
+  - restored: {r: 0.24705882, g: 0.68235296, b: 0.29803923, a: 1}
+    unrestored: {r: 0.24705882, g: 0.68235296, b: 0.29803923, a: 1}
+    glow: 0
+  - restored: {r: 0.7058824, g: 0.5137255, b: 0.32156864, a: 1}
+    unrestored: {r: 0.7058824, g: 0.5137255, b: 0.32156864, a: 1}
+    glow: 0
+  - restored: {r: 0.5411765, g: 0.36862746, b: 0.21176471, a: 1}
+    unrestored: {r: 0.5411765, g: 0.36862746, b: 0.21176471, a: 1}
+    glow: 0
+  - restored: {r: 0.49019608, g: 0.7294118, b: 0.2901961, a: 1}
+    unrestored: {r: 0.49019608, g: 0.7294118, b: 0.2901961, a: 1}
+    glow: 0
+  - restored: {r: 0.5411765, g: 0.36862746, b: 0.21176471, a: 1}
+    unrestored: {r: 0.5411765, g: 0.36862746, b: 0.21176471, a: 1}
+    glow: 0.6
+  - restored: {r: 0.43529412, g: 0.8235294, b: 0.47843137, a: 1}
+    unrestored: {r: 0.43529412, g: 0.8235294, b: 0.47843137, a: 1}
+    glow: 0.15
+  tips:
+    on: 0
+    onSlot: 0
+    tipSlot: 0
+    at: 0
+    byHeight: 0
+  spec: 0.3
+  outline: 0.05
+  footprint: {x: 1, y: 1}
+  blocksWalking: 0
+  randomYaw: 0
+  yawJitter: 0
+  scaleJitter: 0
+  resolution: 84
+  triangleBudget: 5200
+  bakedMesh: {fileID: 4300000, guid: fd8abaa99f2539044b906d90dce0fb44, type: 2}
