@@ -908,6 +908,7 @@ MonoBehaviour:
   island: {fileID: 270959109}
   grabGuard: {fileID: 270959111}
   hudMaterial: {fileID: 2100000, guid: 0656b6c4f92798e49a14cf09a2c6800e, type: 2}
+  tabletMaterial: {fileID: 2100000, guid: 7f2dc384d03ba1244a3a29afac016aeb, type: 2}
   offset: {x: 0, y: 0.05, z: 0.02}
   fontSize: 0.11
   maxDrift: 15
@@ -2050,6 +2051,7 @@ MonoBehaviour:
   island: {fileID: 270959109}
   grabGuard: {fileID: 270959111}
   hudMaterial: {fileID: 2100000, guid: 0656b6c4f92798e49a14cf09a2c6800e, type: 2}
+  tabletMaterial: {fileID: 2100000, guid: 7f2dc384d03ba1244a3a29afac016aeb, type: 2}
   offset: {x: 0, y: 0.05, z: 0.02}
   avoidOffset: {x: 0, y: 0.045, z: 0.045}
   runeSize: {x: 0.08, y: 0.04}
@@ -2824,6 +2826,7 @@ MonoBehaviour:
   island: {fileID: 270959109}
   grabGuard: {fileID: 270959111}
   hudMaterial: {fileID: 2100000, guid: 0656b6c4f92798e49a14cf09a2c6800e, type: 2}
+  tabletMaterial: {fileID: 2100000, guid: 7f2dc384d03ba1244a3a29afac016aeb, type: 2}
   offset: {x: 0, y: 0.05, z: 0.02}
   fontSize: 0.11
   maxDrift: 15
@@ -4314,6 +4317,7 @@ MonoBehaviour:
   island: {fileID: 270959109}
   grabGuard: {fileID: 270959111}
   hudMaterial: {fileID: 2100000, guid: 0656b6c4f92798e49a14cf09a2c6800e, type: 2}
+  tabletMaterial: {fileID: 2100000, guid: 7f2dc384d03ba1244a3a29afac016aeb, type: 2}
   offset: {x: 0, y: 0.120000005, z: 0.02}
   fontSize: 0.11
   maxDrift: 15
@@ -5834,18 +5838,18 @@ MonoBehaviour:
   cards:
   - map: {fileID: 11400000, guid: 1c0f5df7c1c50ad4789ffbf83b2addd2, type: 2}
     recipe: {fileID: 11400000, guid: b1a8e518bdb01e548b0a24a6639b5d27, type: 2}
-    line: The windmill highlands, where the wind stopped
-    restoredLine: The windmill highlands, where the wind blows again
+    line: Where the wind stopped
+    restoredLine: The wind blows again
     shard: shard.wind
   - map: {fileID: 11400000, guid: 3651f2898477a8745ab9a712531ce9ce, type: 2}
     recipe: {fileID: 11400000, guid: a552e0f2e70046a4e9036f6ece67e3b9, type: 2}
-    line: The autumn forest, where the fire went cold
-    restoredLine: The autumn forest, where the fire burns again
+    line: Where the fire went cold
+    restoredLine: The fire burns again
     shard: shard.fire
   - map: {fileID: 11400000, guid: 62a4d08fb1efa974aa00c824d650dab0, type: 2}
     recipe: {fileID: 11400000, guid: eeec5be3f23adde4e8a1ebf8e3c2a0b7, type: 2}
-    line: The lily lagoon, where the water froze
-    restoredLine: The lily lagoon, where the water flows again
+    line: Where the water froze
+    restoredLine: The water flows again
     shard: shard.water
   - map: {fileID: 11400000, guid: ab0469af29722704f949fec768f94b68, type: 2}
     recipe: {fileID: 11400000, guid: 8f5540f6529aedd4db23c8c7491b3ee7, type: 2}
@@ -7354,6 +7358,7 @@ MonoBehaviour:
   island: {fileID: 270959109}
   grabGuard: {fileID: 270959111}
   hudMaterial: {fileID: 2100000, guid: 0656b6c4f92798e49a14cf09a2c6800e, type: 2}
+  tabletMaterial: {fileID: 2100000, guid: 7f2dc384d03ba1244a3a29afac016aeb, type: 2}
   offset: {x: 0, y: 0.05, z: 0.02}
   fontSize: 0.11
   maxDrift: 15

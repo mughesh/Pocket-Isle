@@ -74,9 +74,12 @@ namespace Diorama
             quad.sharedMaterial = hudMaterial;
             quad.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
 
-            var label = MakeText(root, labelFontSize);
-            label.text = $"<b>{name}</b>  <size=80%>Lv {level}</size>";
-            label.transform.localPosition = new Vector3(0f, barSize.y * 0.5f + labelFontSize * 0.055f, 0f);
+            // Step 14f: the readable size; only the level fits over the bar (the two names overlapped between the
+            // creatures at that size: the caption and the lines name them).
+            float font = TextRule.Island(labelFontSize);
+            var label = MakeText(root, font);
+            label.text = LevelLabel(name, level);
+            label.transform.localPosition = new Vector3(0f, barSize.y * 0.5f + font * 0.055f, 0f);
 
             var bar = new Bar { root = root, quad = quad, label = label, actor = actor, max = Mathf.Max(1, max), shown = hp, target = hp };
             _bars.Add(bar);
@@ -134,7 +137,7 @@ namespace Diorama
         public void SetLevel(Bar bar, string name, int level, int hp, int max)
         {
             if (bar == null) return;
-            bar.label.text = $"<b>{name}</b>  <size=80%>Lv {level}</size>";
+            bar.label.text = LevelLabel(name, level);
             float share = bar.shown / Mathf.Max(1, bar.max);
             bar.max = Mathf.Max(1, max);
             bar.shown = share * bar.max;
@@ -157,13 +160,16 @@ namespace Diorama
             _pops.Clear();
         }
 
+        /// <summary>Step 14f: the label over a creature's HP bar.</summary>
+        static string LevelLabel(string name, int level) => $"<b>Lv {level}</b>";
+
         /// <summary>Text that rises and fades at an island-local point.</summary>
         public void PopText(Vector3 local, string text, Color color, float scale = 1f, float seconds = 0.9f)
         {
             var t = _freeText.Count > 0 ? _freeText[_freeText.Count - 1] : MakeText(transform, popFontSize);
             if (_freeText.Count > 0) _freeText.RemoveAt(_freeText.Count - 1);
             t.gameObject.SetActive(true);
-            t.fontSize = popFontSize * scale;
+            t.fontSize = TextRule.Island(popFontSize * scale);
             t.text = text;
             t.color = color;
             t.transform.localPosition = local;

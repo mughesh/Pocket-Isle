@@ -483,6 +483,12 @@ namespace Diorama.EditorTools
             Render(path, main.transform.position, main.transform.rotation);
         }
 
+        /// <summary>Step 14f: the next shots' background (the room behind passthrough) instead of the default grey.</summary>
+        internal static Color? Background;
+
+        /// <summary>Step 14f: the last shot's camera (the board shots project the tablets with it). Destroyed after.</summary>
+        internal static System.Action<Camera> AfterRender;
+
         internal static void Render(string path, Vector3 position, Quaternion rotation)
         {
             Directory.CreateDirectory(ShotDir);
@@ -495,7 +501,7 @@ namespace Diorama.EditorTools
             cam.fieldOfView = 55f;
             cam.nearClipPlane = 0.01f;
             cam.clearFlags = CameraClearFlags.SolidColor;
-            cam.backgroundColor = new Color(0.16f, 0.17f, 0.19f);
+            cam.backgroundColor = Background ?? new Color(0.16f, 0.17f, 0.19f);
             var rt = new RenderTexture(1280, 900, 24, RenderTextureFormat.ARGB32);
             cam.targetTexture = rt;
             cam.Render();
@@ -504,6 +510,7 @@ namespace Diorama.EditorTools
             tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
             RenderTexture.active = null;
             File.WriteAllBytes(path, tex.EncodeToPNG());
+            AfterRender?.Invoke(cam);
             Object.DestroyImmediate(tex);
             cam.targetTexture = null;
             Object.DestroyImmediate(rt);

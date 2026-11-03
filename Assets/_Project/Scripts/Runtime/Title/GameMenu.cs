@@ -13,7 +13,8 @@ namespace Diorama
     /// Resume, Settings, Title (saves, then reloads into the returning title), and Dev in the Editor and QA builds (the
     /// dev panel; F2 still opens it directly). Not available during the opening before the starter is picked, on the
     /// title or during a scene swap; while the island is grabbed the press waits for the release.
-    /// Also says <c>menu.first</c> once the lessons are done (not in a battle). Step 14a: a Music On / Off rune.
+    /// Also says <c>menu.first</c> once the lessons are done (not in a battle). Step 14f: Resume, Controls, Settings,
+    /// Title on stone tablets, a speaker tablet for the music, Dev apart.
     /// </summary>
     public class GameMenu : MonoBehaviour
     {
@@ -117,28 +118,32 @@ namespace Diorama
             Debug.Log("[GameMenu] Open (paused).");
         }
 
+        /// <summary>
+        /// Step 14f, the simple menu: Resume (large, gold, first) over Controls, Settings, Title; a small speaker tablet in
+        /// the top corner turns the music on and off; Dev (Editor and QA builds only) set apart in the other corner.
+        /// </summary>
         void ShowRunes()
         {
             runes.Clear();
-            var size = new Vector2(0.072f, 0.034f);
-            int n = 4;
-#if UNITY_EDITOR || POCKET_DEV
-            n = 5;
-#endif
-            float x0 = -(n - 1) * 0.04f;
-            var resume = runes.Add("Resume", new Vector2(x0, 0f), size, () => Close("Resume"));
-            runes.Add("Settings", new Vector2(x0 + 0.08f, 0f), size, OpenSettings);
-            runes.Add("Controls", new Vector2(x0 + 0.16f, 0f), size, OpenControls);
+            var bottom = new System.Collections.Generic.List<RuneBoard.Item>
+            {
+                new RuneBoard.Item("Controls", OpenControls),
+                new RuneBoard.Item("Settings", OpenSettings),
+            };
             // Step 13: the finale plays through; Title waits until it's done.
-            if (!FinaleDirector.Running) runes.Add("Title", new Vector2(x0 + 0.24f, 0f), size, ToTitle);
+            if (!FinaleDirector.Running) bottom.Add(new RuneBoard.Item("Title", ToTitle));
+            runes.Row(0f, bottom.ToArray());
+            float half = RuneBoard.RowWidth(bottom.ToArray()) * 0.5f;
+            var top = new RuneBoard.Item("Resume", () => Close("Resume"), null, true);
+            float topY = RuneBoard.Above(0f, RuneBoard.TabletH, RuneBoard.RowHeight(top));
+            var resume = runes.Row(topY, top)[0];
+            float side = RuneBoard.TabletH;
+            runes.AddIcon(VolumeSettings.MusicOn ? "Music on" : "Music off", TabletKit.Speaker(VolumeSettings.MusicOn), new Vector2(half - side * 0.5f, topY), side, ToggleMusic);
 #if UNITY_EDITOR || POCKET_DEV
-            var dev = runes.Add("Dev", new Vector2(x0 + 0.32f, 0f), size, OpenDev);
+            var devSize = RuneBoard.Fit("Dev");
+            var dev = runes.Add("Dev", new Vector2(-half + devSize.x * 0.5f, topY), devSize, OpenDev);
             dev.tint = new Color(0.45f, 0.5f, 0.62f);
 #endif
-            // Step 14a: Music On / Off on a row of its own under the others (the full menu redesign waits for the Quick
-            // Journey design).
-            var music = runes.Add(VolumeSettings.MusicOn ? "Music On" : "Music Off", new Vector2(0f, -0.045f), size, ToggleMusic);
-            if (!VolumeSettings.MusicOn) music.tint = new Color(0.4f, 0.4f, 0.42f);
             runes.DefaultFocus = resume;
             runes.Show();
         }

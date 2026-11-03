@@ -82,5 +82,134 @@ namespace Diorama.Tests
             int tris = r.bakedMesh != null ? r.bakedMesh.triangles.Length / 3 : 0;
             Assert.IsTrue(tris > 0 && tris <= 2000, $"{tris} tris");
         }
+
+        // ---- B: the tablets ----
+
+        [Test]
+        public void Tablet_SharedMesh_EveryPart_SmallAndFrontFacing()
+        {
+            var m = TabletKit.Build();
+            try
+            {
+                Assert.IsTrue(m.vertexCount > 100 && m.vertexCount < 2000, $"{m.vertexCount} vertices");
+                var colors = new System.Collections.Generic.List<Color>();
+                m.GetColors(colors);
+                foreach (float part in new[] { 0f, 0.25f, 0.5f, 0.75f, 1f })
+                    Assert.IsTrue(colors.Exists(c => Mathf.Abs(c.a - part) < 0.01f), $"part {part} missing");
+                // The face (normal -z) triangles wind clockwise seen from the front (-z): Unity's front faces. Stretched like
+                // the shader does (anchor x the half size less the corner) for a 10 x 4 cm tablet.
+                var anchors = new System.Collections.Generic.List<Vector2>();
+                m.GetUVs(1, anchors);
+                var v = m.vertices;
+                for (int i = 0; i < v.Length; i++) v[i] += (Vector3)(anchors[i] * new Vector2(0.05f - TabletKit.Corner, 0.02f - TabletKit.Corner));
+                var n = m.normals;
+                var t = m.triangles;
+                int facing = 0, backwards = 0;
+                for (int i = 0; i < t.Length; i += 3)
+                {
+                    if (n[t[i]].z > -0.99f || n[t[i + 1]].z > -0.99f || n[t[i + 2]].z > -0.99f) continue;
+                    Vector3 a = v[t[i]], b = v[t[i + 1]], c = v[t[i + 2]];
+                    float cross = (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+                    if (Mathf.Abs(cross) < 1e-12f) continue;
+                    if (cross < 0f) facing++;
+                    else backwards++;
+                }
+                Assert.Greater(facing, 50);
+                Assert.AreEqual(0, backwards, "front triangles wound the wrong way (culled)");
+            }
+            finally
+            {
+                Object.DestroyImmediate(m);
+            }
+        }
+
+        [Test]
+        public void Tablet_LabelOnFace_AtLeast4_5To1()
+        {
+            Assert.AreEqual(21f, TabletKit.Contrast(Color.white, Color.black), 0.01f);
+            Assert.AreEqual(1f, TabletKit.Contrast(Color.gray, Color.gray), 0.001f);
+            float c = TabletKit.Contrast(TabletKit.LabelColor, TabletKit.FaceColor);
+            Assert.GreaterOrEqual(c, 4.5f, $"label on the slab face {c:0.0}:1");
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(Step14fSetup.TabletMaterialPath);
+            if (mat == null) return;
+            Assert.IsTrue(mat.enableInstancing, "the tablets of a board draw as one");
+            Assert.AreEqual(TabletKit.Corner, mat.GetFloat("_Corner"), 1e-5f, "the shader's corner radius is the mesh's");
+            var face = mat.GetColor("_Stone");
+            Assert.GreaterOrEqual(TabletKit.Contrast(TabletKit.LabelColor, face), 4.5f, "the material's stone");
+        }
+
+        [Test]
+        public void Speaker_OnAndOff_Differ()
+        {
+            var on = TabletKit.Speaker(true);
+            var off = TabletKit.Speaker(false);
+            Assert.IsNotNull(on);
+            Assert.IsNotNull(off);
+            Assert.AreNotEqual(on.vertexCount, off.vertexCount);
+        }
+
+        // ---- A2: the readable text rule ----
+
+        [Test]
+        public void TextRule_14mmCaps_AtTheDefaultIslandScale()
+        {
+            Assert.AreEqual(0.014f, TextRule.IslandFont * TextRule.CapPerFont * TextRule.DefaultIslandScale, 1e-4f);
+            Assert.AreEqual(0.014f, TextRule.WorldFont * TextRule.CapPerFont, 1e-4f);
+            Assert.AreEqual(0.14f / TextRule.CapPerFont / 0.6f / 10f, TextRule.IslandFont, 1e-3f);
+            Assert.AreEqual(TextRule.IslandFont, RuneBoard.LabelFont);
+            Assert.AreEqual(TextRule.IslandFont, TextRule.Island(0.11f));
+            Assert.AreEqual(0.5f, TextRule.Island(0.5f));
+            Assert.Greater(TextRule.Width("Settings", 0.34f), TextRule.Width("Set", 0.34f));
+            Assert.Greater(TextRule.Width("Settings", 0.34f, true), TextRule.Width("Settings", 0.34f));
+        }
+
+        [Test]
+        public void Tablets_FitTheirLabels()
+        {
+            foreach (var label in new[] { "Resume", "Controls", "Settings", "Title", "Continue", "New journey", "Keep exploring" })
+            {
+                var s = RuneBoard.Fit(label);
+                Assert.Greater(s.x, TextRule.Width(label, RuneBoard.LabelFont, true), label);
+                Assert.Greater(s.y, RuneBoard.LabelFont * TextRule.CapPerFont * 2f, label);
+            }
+            var two = RuneBoard.Fit("Continue", "Quick journey", true);
+            Assert.Greater(two.y, RuneBoard.Fit("Continue", null, true).y, "a second line makes it taller");
+            Assert.Greater(RuneBoard.Fit("Resume", null, true).y, RuneBoard.Fit("Resume").y, "the primary is larger");
+        }
+
+        [Test]
+        public void ControlsLines_TwoLinesAtMost_AtTheReadableSize()
+        {
+            float width = RuneBoard.RowWidth(new RuneBoard.Item("Walk", null), new RuneBoard.Item("Keep going", null), new RuneBoard.Item("Go there", null));
+            foreach (var c in SettingsBoard.Controls)
+            {
+                string plain = System.Text.RegularExpressions.Regex.Replace(c.text, "<[^>]+>", "");
+                float w = TextRule.Width(plain, RuneBoard.LabelFont * 0.9f);
+                Assert.LessOrEqual(w, width * 1.85f, $"{c.rune}: '{plain}' runs over two lines");
+            }
+        }
+
+        [Test]
+        public void BattleRunes_EveryMoveName_FitsTheGrid()
+        {
+            foreach (var guid in AssetDatabase.FindAssets("t:MoveData"))
+            {
+                var m = AssetDatabase.LoadAssetAtPath<MoveData>(AssetDatabase.GUIDToAssetPath(guid));
+                if (m == null) continue;
+                Assert.LessOrEqual(RuneBoard.Fit(m.Name).x, 0.34f, $"'{m.Name}' makes the battle grid too wide");
+            }
+        }
+
+        [Test]
+        public void RealmLines_FitTwoLinesUnderTheCard()
+        {
+            var scene = UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene();
+            var card = Object.FindFirstObjectByType<RealmNameCard>(FindObjectsInactive.Include);
+            if (card == null) Assert.Inconclusive($"no RealmNameCard in {scene.name}");
+            foreach (var c in card.cards)
+                foreach (var line in new[] { c.line, c.restoredLine })
+                    if (!string.IsNullOrEmpty(line))
+                        Assert.LessOrEqual(TextRule.Width(line, TextRule.IslandFont, true), Mathf.Max(card.width, 0.5f) * 1.9f, line);
+        }
     }
 }

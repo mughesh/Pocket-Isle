@@ -55,7 +55,7 @@ namespace Diorama
         public float riseSeconds = 0.6f, sinkSeconds = 0.6f;
 
         [Header("Line")]
-        [Tooltip("TextMeshPro size at island scale 1 (it shrinks to fit the board's width).")]
+        [Tooltip("Unused since step 14f: the line is at the readable size (TextRule) under the card, wrapping in two lines at most.")]
         public float lineSize = 0.1f;
         public Color lineColor = new Color(1f, 0.96f, 0.86f, 1f);
 
@@ -206,7 +206,8 @@ namespace Diorama
             var mesh = card.recipe.bakedMesh;
             _filter.sharedMesh = mesh;
             var b = mesh.bounds;
-            _scale = width / Mathf.Max(1e-4f, b.size.x);
+            // Step 14f: the name's capitals at least the readable size (shape unit = a capital's height).
+            _scale = Mathf.Max(width / Mathf.Max(1e-4f, b.size.x), TextRule.IslandCap);
             _meshT.localScale = Vector3.one * _scale;
             _meshT.localPosition = -b.center * _scale;
             _block.Clear();
@@ -218,11 +219,14 @@ namespace Diorama
             // The line on the board's lower band (shape units: CardLineY), just in front of the board.
             _text.text = line;
             _text.gameObject.SetActive(!string.IsNullOrEmpty(line));
-            _text.enableAutoSizing = true;
-            _text.fontSizeMax = lineSize;
-            _text.fontSizeMin = lineSize * 0.45f;
-            _text.rectTransform.sizeDelta = new Vector2(b.size.x * _scale * 0.86f, 0.3f * _scale * 2f);
-            _text.transform.localPosition = new Vector3(0f, (LineY - b.center.y) * _scale, (b.max.z - b.center.z) * _scale + 0.0015f);
+            // Step 14f: the board's lower band was too small for a readable line: it sits under the card now, at the
+            // readable size (TextRule), wrapping at the card's width or 0.5 m (island scale 1), dark-outlined over the scene.
+            _text.enableAutoSizing = false;
+            _text.fontSize = TextRule.IslandFont;
+            _text.textWrappingMode = TextWrappingModes.Normal;
+            float wrap = Mathf.Max(width, 0.5f), lineH = TextRule.IslandFont * 0.1f * 1.25f;
+            _text.rectTransform.sizeDelta = new Vector2(wrap, lineH * 2.2f);
+            _text.transform.localPosition = new Vector3(0f, (b.min.y - b.center.y) * _scale - lineH * 0.9f, (b.max.z - b.center.z) * _scale + 0.0015f);
             // TextMeshPro reads toward +X; the card faces +Z: turn the text round to face the same way.
             _text.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
             _yaw = HeadYaw();

@@ -52,9 +52,8 @@ namespace Diorama
             _asking = true;
             Dialogue.Say("keeper.spar");
             runes.Clear();
-            var size = new Vector2(0.09f, 0.04f);
-            var yes = runes.Add("Spar?", new Vector2(-0.055f, 0f), size, Spar);
-            runes.Add("Not now", new Vector2(0.055f, 0f), size, NotNow);
+            var pair = runes.Row(0f, new RuneBoard.Item("Spar?", Spar), new RuneBoard.Item("Not now", NotNow));
+            var yes = pair[0];
             runes.DefaultFocus = yes;
             runes.Show();
             Debug.Log($"[KeeperRematch] {Name}: Spar? / Not now.");

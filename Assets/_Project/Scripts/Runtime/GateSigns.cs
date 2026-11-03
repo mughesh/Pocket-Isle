@@ -110,7 +110,8 @@ namespace Diorama
                 v.gameObject.SetActive(show);
                 if (!show) continue;
                 var mesh = _renderers[i].GetComponent<MeshFilter>().sharedMesh;
-                float scale = widthTiles * tile * z / Mathf.Max(1e-4f, mesh.bounds.size.x);
+                // Step 14f: never smaller than the readable size (the card's shape unit is a capital's height).
+                float scale = Mathf.Max(widthTiles * tile / Mathf.Max(1e-4f, mesh.bounds.size.x), TextRule.IslandCap) * z;
                 v.localPosition = ground + Vector3.up * ((ArchTop(world, link, signs[i].archTop) + gapTiles) * tile * z);
                 v.localRotation = Quaternion.identity;
                 v.localScale = Vector3.one * scale;

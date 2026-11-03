@@ -254,10 +254,11 @@ namespace Diorama
         {
             if (runes == null) return;
             runes.Clear();
-            var size = new Vector2(0.1f, 0.04f);
-            var keep = runes.Add(EndRunes[0], new Vector2(-0.11f, 0f), size, KeepExploring);
-            runes.Add(EndRunes[1], new Vector2(0f, 0f), size, SeeTheEnding);
-            runes.Add(EndRunes[2], new Vector2(0.11f, 0f), size, ToTitle);
+            // Step 14f: a column at the readable size (a row was wider than the statue's view).
+            float step = RuneBoard.TabletH + RuneBoard.Gap;
+            runes.Row(0f, new RuneBoard.Item(EndRunes[2], ToTitle));
+            runes.Row(step, new RuneBoard.Item(EndRunes[1], SeeTheEnding));
+            var keep = runes.Row(2f * step, new RuneBoard.Item(EndRunes[0], KeepExploring))[0];
             runes.DefaultFocus = keep;
             runes.Anchor = OverStatue;
             var at = OverStatue();
