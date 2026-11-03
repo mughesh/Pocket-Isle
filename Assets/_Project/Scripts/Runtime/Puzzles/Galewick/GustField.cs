@@ -35,8 +35,10 @@ namespace Diorama
 
         [Header("Ripple (island-local metres)")]
         [Tooltip("How long the band takes to cross the island at full strength (seconds; weaker gusts are slower).")]
-        public float crossSeconds = 0.75f;
-        public float bandWidth = 0.07f;
+        public float crossSeconds = 1.4f;
+        public float bandWidth = 0.1f;
+        [Tooltip("Nov 3: wind streaks ride the band across the island every this many seconds (0 = only the burst at the hand).")]
+        public float trailEvery = 0.06f;
         [Tooltip("Sails turn this much extra per gust at full strength (radians).")]
         public float spinNudge = 1.2f;
         [Tooltip("The whoosh of a gust at full strength (weaker gusts are quieter and a little lower).")]
@@ -58,7 +60,7 @@ namespace Diorama
         float _cross;
         AudioSource _audio;
         LoopAnchor _sweep;
-        float _sweepPeak, _sweepFrom;
+        float _sweepPeak, _sweepFrom, _trailAt;
 
         bool Active => island != null && map != null && island.world == map && !SceneSwap.IsInside && !SceneSwap.IsBusy &&
                        (window == null || !window.IsZoomed) && (encounters == null || !encounters.InBattle) && !GamePause.IsPaused;
@@ -172,6 +174,35 @@ namespace Diorama
             Shader.SetGlobalVector(GustFrontId, new Vector4(_front / zoom, bandWidth / zoom, _strength * fade, 0f));
             var worldDir = island.transform.TransformDirection(new Vector3(_dir.x, 0f, _dir.y)).normalized;
             Shader.SetGlobalVector(GustDirId, new Vector4(worldDir.x, worldDir.y, worldDir.z, 0f));
+            Trail(fade);
+        }
+
+        /// <summary>
+        /// Nov 3: streaks and a leaf or two along the band's front while it crosses, so the wind keeps travelling after
+        /// the hand has gone (it ended almost with the sweep before).
+        /// </summary>
+        void Trail(float fade)
+        {
+            if (fx == null || trailEvery <= 0f || Time.time < _trailAt) return;
+            _trailAt = Time.time + trailEvery;
+            float scale = island.transform.lossyScale.x;
+            float tile = island.map.tileSize * island.Zoom * scale;
+            var half = island.FootprintHalfSize;
+            var perp = new Vector2(-_dir.y, _dir.x);
+            float across = Mathf.Abs(perp.x) * half.x + Mathf.Abs(perp.y) * half.y;
+            var worldDir = island.transform.TransformDirection(new Vector3(_dir.x, 0f, _dir.y)).normalized;
+            float strength = _strength * Mathf.Lerp(0.4f, 1f, fade);
+            for (int i = 0; i < 2; i++)
+            {
+                var p = _origin + _dir * _front + perp * UnityEngine.Random.Range(-across, across);
+                var local = new Vector3(p.x, island.CapTopLocal + 0.012f + UnityEngine.Random.Range(0f, 0.02f), p.y);
+                if (!island.FootprintContains(local)) continue;
+                var at = island.transform.TransformPoint(local);
+                fx.Burst(at, 2, new Color(1f, 1f, 1f, 0.45f * fade + 0.1f), tile * 0.2f, 0.6f, tile * 0.025f, worldDir * tile * 7f * strength);
+                if (UnityEngine.Random.value < 0.25f)
+                    fx.Burst(at, 1, UnityEngine.Random.value < 0.5f ? new Color(0.62f, 0.8f, 0.36f) : new Color(0.9f, 0.78f, 0.38f), tile * 0.3f, 0.9f,
+                        tile * 0.04f, worldDir * tile * 5f * strength + Vector3.up * tile * 0.6f, tile * 2f);
+            }
         }
 
         void Streaks()
@@ -185,7 +216,7 @@ namespace Diorama
                 float along = (i - 1) * 0.07f;
                 var local = new Vector3(_origin.x + _dir.x * along, island.CapTopLocal + 0.02f + 0.015f * (i % 3), _origin.y + _dir.y * along);
                 var at = island.transform.TransformPoint(local);
-                fx.Burst(at, 4, new Color(1f, 1f, 1f, 0.55f), tile * 0.25f, 0.45f, tile * 0.03f, worldDir * tile * 9f * _strength);
+                fx.Burst(at, 4, new Color(1f, 1f, 1f, 0.55f), tile * 0.25f, 0.7f, tile * 0.03f, worldDir * tile * 9f * _strength);
                 if (i % 2 == 0)
                     fx.Burst(at, 2, i % 4 == 0 ? new Color(0.62f, 0.8f, 0.36f) : new Color(0.9f, 0.78f, 0.38f), tile * 0.4f, 0.8f, tile * 0.045f,
                         worldDir * tile * 6f * _strength + Vector3.up * tile * 0.8f, tile * 2f);

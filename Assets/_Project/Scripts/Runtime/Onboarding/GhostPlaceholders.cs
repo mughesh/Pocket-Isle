@@ -320,10 +320,11 @@ namespace Diorama
                 }
                 case "palm_sweep":
                 {
-                    // Oct 27: the gust. A flat open hand, palm down, sweeps fast across over the island, then lifts back.
+                    // Oct 27: the gust. An open hand sweeps fast across over the island, then lifts back. Nov 3: tilted
+                    // like fanning air (about 35 degrees, the palm leaning into the sweep to the left), not flat.
                     seconds = 2.2f;
                     keyTime = 0.35f;
-                    Vector3 f = Vector3.forward, d = Vector3.up;
+                    Vector3 f = Vector3.forward, d = new Vector3(0.57f, 0.82f, 0f);
                     return new List<Key>
                     {
                         Open(0f, new Vector3(0.14f, 0.07f, 0f), f, d, 0.08f), Open(0.22f, new Vector3(0.14f, 0.04f, 0f), f, d, 0.08f),

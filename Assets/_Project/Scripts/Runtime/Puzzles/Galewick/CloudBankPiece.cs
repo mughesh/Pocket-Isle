@@ -334,7 +334,8 @@ namespace Diorama
             Debug.Log($"[CloudBankPiece] {id}: the wind wakes: a gust ripples across the meadow.");
             // Map north (toward the far edge) is island-local -Z; start at the near edge.
             gusts.Blow(new Vector2(0f, half.y), new Vector2(0f, -1f), 1f, "arrival clouds cleared", false);
-            yield return new WaitForSeconds(0.9f);
+            // Nov 3: after the first band has crossed (gusts cross slower now, ~1.4 s).
+            yield return new WaitForSeconds(1.5f);
             if (gusts != null && Here) gusts.Blow(new Vector2(half.x, half.y * 0.5f), new Vector2(-0.6f, -0.8f), 0.7f, "arrival clouds cleared (second)", false);
         }
 
