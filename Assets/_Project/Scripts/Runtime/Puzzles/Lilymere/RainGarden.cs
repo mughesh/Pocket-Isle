@@ -452,13 +452,17 @@ namespace Diorama
                 float pop = 1f + 0.35f * Mathf.Sin(_pop[i] * Mathf.PI);
                 if (Stream)
                 {
-                    // Step 14a / Nov 3: a pad stuck flat-ish on the sunken mud floor (tilted a little), lifting as the water
-                    // reaches it; afloat it bobs on the water, then drifts into its bridge slot.
-                    float mud = -IslandBuilder.MudDrop / TileLocal + 0.015f, water = WaterTiles + 0.03f;
-                    _budViews[i]?.Place(buds[i], Mathf.Lerp(mud, water, wet), Quaternion.Euler(9f * (1f - wet) + sway, 40f * i, 6f * (1f - wet)), here && !bloomed, budScale);
+                    // Step 14a / Nov 3: a pad lying on the sunken mud floor (tilted a little), lifting as the water reaches it;
+                    // afloat it bobs on the water, then drifts into its bridge slot. Heights put the mesh's underside on the
+                    // surface (the pad hangs ~0.1 tile below its pivot: placed by the pivot it sat in the mud / under water).
+                    float mud = -IslandBuilder.MudDrop / TileLocal, water = WaterTiles;
+                    float budBottom = _budViews[i] != null ? _budViews[i].Bottom * budScale : 0f;
+                    float stoneBottom = _stoneViews[i] != null ? _stoneViews[i].Bottom * stoneScale * pop : 0f;
+                    _budViews[i]?.Place(buds[i], Mathf.Lerp(mud + 0.005f, water + 0.01f, wet) - budBottom,
+                        Quaternion.Euler(6f * (1f - wet) + sway, 40f * i, 4f * (1f - wet)), here && !bloomed, budScale);
                     var at = i < bridgeSlots.Length ? Vector2.Lerp(buds[i], bridgeSlots[i], Mathf.SmoothStep(0f, 1f, _bridge)) : buds[i];
-                    float bob = 0.012f * Mathf.Sin(Time.time * 1.8f + i * 1.3f);
-                    _stoneViews[i]?.Place(at, water + bob, Quaternion.Euler(0f, 30f * i + 25f * _bridge, 0f), here && bloomed, stoneScale * pop);
+                    float bob = 0.008f * (1f + Mathf.Sin(Time.time * 1.8f + i * 1.3f));
+                    _stoneViews[i]?.Place(at, water + 0.01f + bob - stoneBottom, Quaternion.Euler(0f, 30f * i + 25f * _bridge, 0f), here && bloomed, stoneScale * pop);
                     continue;
                 }
                 _budViews[i]?.Place(buds[i], 0f, Quaternion.Euler(sway, 40f * i, 0f), here && !bloomed, budScale * (1f + 0.25f * wet));

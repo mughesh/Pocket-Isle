@@ -46,6 +46,8 @@ namespace Diorama
 
         public PropRecipe Recipe => _recipe;
         public bool Visible => _renderer != null && _renderer.enabled;
+        /// <summary>The mesh's lowest point under its pivot, in shape units (tiles at scale 1); 0 without a mesh.</summary>
+        public float Bottom => _filter != null && _filter.sharedMesh != null ? _filter.sharedMesh.bounds.min.y : 0f;
 
         public PropView(string name, IslandBuilder island, PropRecipe recipe)
         {
