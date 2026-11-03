@@ -89,6 +89,31 @@ namespace Diorama
             Changed?.Invoke(bus);
         }
 
+        const string MusicLastKey = "Music.last";
+
+        /// <summary>
+        /// Step 14a, the game menu's Music On / Off rune: off = the Music bus at 0 (its level remembered), on = the last
+        /// level again (the default when it was never set above 0). Saved like the levels.
+        /// </summary>
+        public static bool MusicOn
+        {
+            get => Level(Music) > 0;
+            set
+            {
+                if (value == MusicOn) return;
+                if (!value)
+                {
+                    PlayerPrefs.SetInt(MusicLastKey, Level(Music));
+                    SetLevel(Music, 0);
+                }
+                else
+                {
+                    int last = PlayerPrefs.GetInt(MusicLastKey, DefaultLevel);
+                    SetLevel(Music, last > 0 ? last : DefaultLevel);
+                }
+            }
+        }
+
         /// <summary>0..1 for an AudioSource or mixer (level / 4).</summary>
         public static float Volume(string bus) => Level(bus) / (float)MaxLevel;
     }

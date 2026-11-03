@@ -13,7 +13,7 @@ namespace Diorama
     /// Resume, Settings, Title (saves, then reloads into the returning title), and Dev in the Editor and QA builds (the
     /// dev panel; F2 still opens it directly). Not available during the opening before the starter is picked, on the
     /// title or during a scene swap; while the island is grabbed the press waits for the release.
-    /// Also says <c>menu.first</c> once the lessons are done (not in a battle).
+    /// Also says <c>menu.first</c> once the lessons are done (not in a battle). Step 14a: a Music On / Off rune.
     /// </summary>
     public class GameMenu : MonoBehaviour
     {
@@ -57,6 +57,11 @@ namespace Diorama
                 TryOpen();
             }
             if (IsOpen && island != null) island.clearingDim = Mathf.Max(_dimBefore, dim);
+            if (_reshow)
+            {
+                _reshow = false;
+                if (IsOpen) ShowRunes();
+            }
             Hint();
         }
 
@@ -130,9 +135,23 @@ namespace Diorama
             var dev = runes.Add("Dev", new Vector2(x0 + 0.32f, 0f), size, OpenDev);
             dev.tint = new Color(0.45f, 0.5f, 0.62f);
 #endif
+            // Step 14a: Music On / Off on a row of its own under the others (the full menu redesign waits for the Quick
+            // Journey design).
+            var music = runes.Add(VolumeSettings.MusicOn ? "Music On" : "Music Off", new Vector2(0f, -0.045f), size, ToggleMusic);
+            if (!VolumeSettings.MusicOn) music.tint = new Color(0.4f, 0.4f, 0.42f);
             runes.DefaultFocus = resume;
             runes.Show();
         }
+
+        void ToggleMusic()
+        {
+            VolumeSettings.MusicOn = !VolumeSettings.MusicOn;
+            Debug.Log($"[GameMenu] Music {(VolumeSettings.MusicOn ? "on" : "off")}.");
+            // Rebuilt next frame: not from inside the rune's own pick.
+            _reshow = true;
+        }
+
+        bool _reshow;
 
         public void Close(string why)
         {
