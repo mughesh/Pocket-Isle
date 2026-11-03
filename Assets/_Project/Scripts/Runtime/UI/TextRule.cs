@@ -5,7 +5,8 @@ namespace Diorama
 {
     /// <summary>
     /// Step 14f (Mugesh: tiny text on boards is unreadable): one rule for every piece of world-space text. Cap height at
-    /// least <see cref="MinCapWorld"/> (1.4 cm, about 1.5 degrees at the default viewing distance) with the island at its
+    /// least <see cref="MinCapWorld"/> (9 mm, about 1 degree at the default viewing distance; Nov 3 late, Mugesh: the
+    /// first 14 mm made the menus far too big) with the island at its
     /// default scale, growing with the island. TextMeshPro (3D) draws a cap height of about <see cref="CapPerFont"/> per
     /// font size unit with Liberation Sans, so text under the island needs at least <see cref="IslandFont"/> and text in
     /// world space (not under the island) <see cref="WorldFont"/>. High contrast with its background; a dark outline when
@@ -13,7 +14,7 @@ namespace Diorama
     /// </summary>
     public static class TextRule
     {
-        public const float MinCapWorld = 0.014f;
+        public const float MinCapWorld = 0.009f;
         /// <summary>The island's default scale (IslandPlacer.islandScale).</summary>
         public const float DefaultIslandScale = 0.6f;
         /// <summary>Liberation Sans cap height per TMP 3D font size unit (measured 0.0684-0.0691; a little under, so text lands at 14 mm or more).</summary>
@@ -27,6 +28,9 @@ namespace Diorama
 
         /// <summary>The smallest capital height for text under the island (island-local metres: baked letters).</summary>
         public static float IslandCap => MinCapWorld / DefaultIslandScale;
+
+        /// <summary>Secondary text (a realm card's line under its name): this share of the rule.</summary>
+        public const float Secondary = 0.8f;
 
         /// <summary>Raises a font size under the island to the rule.</summary>
         public static float Island(float size) => Mathf.Max(size, IslandFont);

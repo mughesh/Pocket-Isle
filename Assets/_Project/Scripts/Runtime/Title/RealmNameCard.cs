@@ -222,9 +222,10 @@ namespace Diorama
             // Step 14f: the board's lower band was too small for a readable line: it sits under the card now, at the
             // readable size (TextRule), wrapping at the card's width or 0.5 m (island scale 1), dark-outlined over the scene.
             _text.enableAutoSizing = false;
-            _text.fontSize = TextRule.IslandFont;
+            // Nov 3 late (Mugesh: the line under the name was too big): secondary to the name.
+            _text.fontSize = TextRule.IslandFont * TextRule.Secondary;
             _text.textWrappingMode = TextWrappingModes.Normal;
-            float wrap = Mathf.Max(width, 0.5f), lineH = TextRule.IslandFont * 0.1f * 1.25f;
+            float wrap = Mathf.Max(width, 0.5f), lineH = _text.fontSize * 0.1f * 1.25f;
             _text.rectTransform.sizeDelta = new Vector2(wrap, lineH * 2.2f);
             _text.transform.localPosition = new Vector3(0f, (b.min.y - b.center.y) * _scale - lineH * 0.9f, (b.max.z - b.center.z) * _scale + 0.0015f);
             // TextMeshPro reads toward +X; the card faces +Z: turn the text round to face the same way.

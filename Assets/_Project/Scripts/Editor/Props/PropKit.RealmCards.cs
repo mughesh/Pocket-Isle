@@ -95,24 +95,19 @@ namespace Diorama.EditorTools
             {
                 case "fire":
                 {
-                    // Nov 3 (Mugesh: "uninteresting"): three charred planks, a little crooked, with fire glowing in the seams
-                    // between them and round the rim (a glowing slab behind), burnt bites out of two corners, embers smouldering
-                    // on the face and small flame tongues licking up over the top edge.
-                    float ph = half.y / 3f;
-                    var planks = new List<SdfPrimitive>();
-                    for (int k = 0; k < 3; k++)
+                    // Nov 3 late (Mugesh: "kind of off"): the glowing slab behind the planks read as a flat yellow picture
+                    // frame. Now two charred planks like the other wooden cards (the lower one a little crooked), burnt bites
+                    // out of two corners, a few embers smouldering at the ends and small flame tongues over the top edge.
+                    float ph = half.y * 0.5f - 0.015f;
+                    var planks = new List<SdfPrimitive>
                     {
-                        float y = c.y + half.y - 2f * ph * (k + 0.5f);
-                        float dx = (k - 1) * 0.06f, tilt = (k - 1) * 0.6f;
-                        // Thick enough for the bake grid (cells ~0.14 units on a card this wide; thinner planks dropped out).
-                        planks.Add(Box(new Vector3(c.x + dx, y, c.z - 0.06f), new Vector3(half.x - 0.04f * k, ph - 0.035f, half.z + 0.06f), 0.07f, 0f, new Vector3(0f, 0f, tilt)));
-                    }
+                        Box(c + new Vector3(0f, half.y * 0.5f, 0f), new Vector3(half.x, ph, half.z), 0.07f, 0f),
+                        Box(c + new Vector3(0.05f, -half.y * 0.5f, 0f), new Vector3(half.x - 0.05f, ph, half.z), 0.07f, 0.02f, new Vector3(0f, 0f, 0.8f)),
+                    };
                     // Burnt bites: the top-right and bottom-left corners eaten away.
                     planks.Add(new SdfPrimitive { kind = SdfKind.Sphere, blend = SdfBlend.Subtract, a = c + new Vector3(-half.x, half.y, 0f), size = new Vector3(0.38f, 0f, 0f), k = 0.08f });
                     planks.Add(new SdfPrimitive { kind = SdfKind.Sphere, blend = SdfBlend.Subtract, a = c + new Vector3(half.x, -half.y, 0f), size = new Vector3(0.32f, 0f, 0f), k = 0.08f });
                     pieces.Add(Weighted(PShape($"{n}_Board", planks.ToArray()), PropSlot.Wood, 1.4f));
-                    pieces.Add(Weighted(PShape($"{n}_Embers", Box(c + new Vector3(0f, 0f, -0.16f), half + new Vector3(0.1f, 0.08f, 0.02f), 0.08f, 0f)),
-                        PropSlot.Glow, 0.6f));
                     // Smouldering spots at the board's ends (clear of the name and the line) and flame tongues over the top edge.
                     var spots = new List<SdfPrimitive>();
                     foreach (var (sx, sy, r) in new[] { (-0.93f, -0.55f, 0.15f), (0.93f, -0.6f, 0.14f), (-0.94f, 0.45f, 0.13f) })

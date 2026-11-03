@@ -151,11 +151,12 @@ namespace Diorama.Tests
         // ---- A2: the readable text rule ----
 
         [Test]
-        public void TextRule_14mmCaps_AtTheDefaultIslandScale()
+        public void TextRule_9mmCaps_AtTheDefaultIslandScale()
         {
-            Assert.AreEqual(0.014f, TextRule.IslandFont * TextRule.CapPerFont * TextRule.DefaultIslandScale, 1e-4f);
-            Assert.AreEqual(0.014f, TextRule.WorldFont * TextRule.CapPerFont, 1e-4f);
-            Assert.AreEqual(0.14f / TextRule.CapPerFont / 0.6f / 10f, TextRule.IslandFont, 1e-3f);
+            // Nov 3 late: 9 mm (14 mm made the menus far too big).
+            Assert.AreEqual(0.009f, TextRule.IslandFont * TextRule.CapPerFont * TextRule.DefaultIslandScale, 1e-4f);
+            Assert.AreEqual(0.009f, TextRule.WorldFont * TextRule.CapPerFont, 1e-4f);
+            Assert.AreEqual(0.09f / TextRule.CapPerFont / 0.6f / 10f, TextRule.IslandFont, 1e-3f);
             Assert.AreEqual(TextRule.IslandFont, RuneBoard.LabelFont);
             Assert.AreEqual(TextRule.IslandFont, TextRule.Island(0.11f));
             Assert.AreEqual(0.5f, TextRule.Island(0.5f));

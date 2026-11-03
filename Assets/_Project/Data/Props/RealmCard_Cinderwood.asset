@@ -123,16 +123,6 @@ MonoBehaviour:
     motion: 0
     motionAmount: 0
     budgetWeight: 1.4
-  - shape: {fileID: 11400000, guid: 8301f21218b0a304f9ad9ec225518e23, type: 2}
-    part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0}
-    scale: 1
-    mirrorX: 0
-    slot: 4
-    motion: 0
-    motionAmount: 0
-    budgetWeight: 0.6
   - shape: {fileID: 11400000, guid: c625c7792dff06a45b4131be7abb1ec6, type: 2}
     part: {fileID: 0}
     position: {x: 0, y: 0, z: 0}

@@ -110,8 +110,9 @@ namespace Diorama
                 v.gameObject.SetActive(show);
                 if (!show) continue;
                 var mesh = _renderers[i].GetComponent<MeshFilter>().sharedMesh;
-                // Step 14f: never smaller than the readable size (the card's shape unit is a capital's height).
-                float scale = Mathf.Max(widthTiles * tile / Mathf.Max(1e-4f, mesh.bounds.size.x), TextRule.IslandCap) * z;
+                // Nov 3 late (Mugesh: the Cinderwood sign was off): sized by the arch, not floored at the text rule (the
+                // floor made the longest name about 3.5 tiles wide over a 1.5-tile arch). It is a sign, read up close.
+                float scale = widthTiles * tile / Mathf.Max(1e-4f, mesh.bounds.size.x) * z;
                 v.localPosition = ground + Vector3.up * ((ArchTop(world, link, signs[i].archTop) + gapTiles) * tile * z);
                 v.localRotation = Quaternion.identity;
                 v.localScale = Vector3.one * scale;
