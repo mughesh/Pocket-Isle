@@ -109,7 +109,7 @@ MonoBehaviour:
     objective: 1
     priority: 1
     note: 'step 9h, after `intro.arrive`: the ghost pinches beside your own hand'
-    target: 
+    target: ghost
     validWhile: tutorial
     lines:
     - speaker: 0
@@ -120,7 +120,7 @@ MonoBehaviour:
     objective: 1
     priority: 1
     note: 'step 14a: after the first of the two pinches; chip "Pinch again"'
-    target: 
+    target: ghost
     validWhile: tutorial
     lines:
     - speaker: 0

@@ -437,9 +437,9 @@ namespace Diorama
                 float pop = 1f + 0.35f * Mathf.Sin(_pop[i] * Mathf.PI);
                 if (Stream)
                 {
-                    // Step 14a: a pad stuck in the mud (tilted, half sunk), lifting as it fills; afloat it bobs, then drifts
+                    // Step 14a: a pad stuck in the mud on the bank (tilted), lifting as it fills; afloat it bobs, then drifts
                     // into its bridge slot.
-                    _budViews[i]?.Place(buds[i], -0.04f + 0.04f * wet, Quaternion.Euler(14f * (1f - wet) + sway, 40f * i, 8f * (1f - wet)), here && !bloomed, budScale);
+                    _budViews[i]?.Place(buds[i], 0.01f + 0.04f * wet, Quaternion.Euler(14f * (1f - wet) + sway, 40f * i, 8f * (1f - wet)), here && !bloomed, budScale);
                     var at = i < bridgeSlots.Length ? Vector2.Lerp(buds[i], bridgeSlots[i], Mathf.SmoothStep(0f, 1f, _bridge)) : buds[i];
                     float bob = 0.015f * Mathf.Sin(Time.time * 1.8f + i * 1.3f);
                     _stoneViews[i]?.Place(at, 0.03f + bob, Quaternion.Euler(0f, 30f * i + 25f * _bridge, 0f), here && bloomed, stoneScale * pop);

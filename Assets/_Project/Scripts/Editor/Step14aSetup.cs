@@ -180,6 +180,8 @@ namespace Diorama.EditorTools
             stream.budRecipe = stream.stoneRecipe = PropKit.Load("LilyPad");
             stream.budScale = 1.3f;
             stream.stoneScale = 1.7f;
+            // The garden's own ghost before 14a (copying it on a re-run would copy the emptied one).
+            stream.ghostClip = "palm_sweep";
             stream.lessonLine = "lm.arrive.stream";
             stream.lessonChip = "Palm down";
             stream.counterLabel = "Palm down · Pads";

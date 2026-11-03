@@ -33,9 +33,9 @@ One lesson at a time (Data/Onboarding/Onboarding_Main). The first line comes whe
 the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at the chip or the Spirit opens it again); the
 `.again` line only comes if the line was closed (its condition paused it). Shard, move and starter use the Opening lines above; send out, pick a move and catch use
 `pod.first`, `battle.first` and `capture.first` below.
-- `lesson.pinch` · objective · while tutorial (step 9h, after `intro.arrive`: the ghost pinches beside your own hand)
+- `lesson.pinch` · objective · while tutorial · → ghost (step 9h, after `intro.arrive`: the ghost pinches beside your own hand)
   - Spirit: Tap your thumb and finger together. Like this!
-- `lesson.pinch.once` · objective · while tutorial (step 14a: after the first of the two pinches; chip "Pinch again")
+- `lesson.pinch.once` · objective · while tutorial · → ghost (step 14a: after the first of the two pinches; chip "Pinch again")
   - Spirit: Nice! Once more.
 - `lesson.pinch.done` (step 14a: the pinch lesson's praise)
   - Spirit: Perfect!

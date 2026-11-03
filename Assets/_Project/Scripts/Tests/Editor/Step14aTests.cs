@@ -1,11 +1,13 @@
+using Diorama.EditorTools;
 using NUnit.Framework;
+using UnityEditor;
 using UnityEngine;
 
 namespace Diorama.Tests
 {
     /// <summary>
     /// Step 14a: the placement rule (seated, standing, looking down / up, floor clamp, recenter shifts), the settled-pose
-    /// wait and the shard's follow check.
+    /// wait and the shard's follow check; the realm arrival moments (Galewick's puffs, Lilymere's stream, wet / bridged tiles).
     /// </summary>
     public class Step14aTests
     {
@@ -112,6 +114,61 @@ namespace Diorama.Tests
             Assert.IsFalse(f.Feed(3f, head + Vector3.up * 0.2f, Vector3.forward, Vector3.up, shard, 1.2f));
             Assert.IsTrue(f.Feed(4f, head + Vector3.up * 0.2f, Vector3.forward, Vector3.up, shard, 1.2f));
             Assert.IsFalse(IslandPlacement.FollowCheck.IsOff(head + Vector3.up * 0.1f, Vector3.forward, Vector3.up, shard, 1.2f, 35f, 0.15f));
+        }
+
+        [Test]
+        public void Galewick_TwoArrivalPuffsOnTheTrail_PastTheArrival()
+        {
+            var map = AssetDatabase.LoadAssetAtPath<WorldMap>(GalewickTools.MapPath);
+            Assert.IsNotNull(map);
+            foreach (var xy in GalewickTools.ArriveCloudXY)
+            {
+                var t = GalewickTools.Tile(xy);
+                Assert.AreEqual(IslandMap.Path, map.Raw(t.y, t.x), $"x{xy.x} y{xy.y} is trail");
+                Assert.IsFalse(map.CanWalk(t), $"x{xy.x} y{xy.y} blocked by its puff");
+                Assert.IsTrue(GalewickTools.IsGate(xy.x, xy.y));
+                Assert.That(xy.y - GalewickTools.ArriveXY.y, Is.InRange(2, 4), "2-4 tiles past the arrival");
+            }
+            Assert.IsEmpty(GalewickTools.Check(map, new System.Text.StringBuilder()));
+        }
+
+        [Test]
+        public void Lilymere_StreamGatesTheArrival_ChannelIsPlanks()
+        {
+            var map = AssetDatabase.LoadAssetAtPath<WorldMap>(LilymereTools.MapPath);
+            Assert.IsNotNull(map);
+            Assert.IsEmpty(LilymereTools.Check(map, new System.Text.StringBuilder()));
+            for (int x = 11; x <= 12; x++)
+                for (int y = LilymereTools.StreamY0; y <= LilymereTools.StreamY1; y++)
+                {
+                    Assert.IsTrue(LilymereTools.IsStreamGate(x, y));
+                    Assert.IsFalse(map.CanWalk(LilymereTools.Tile(x, y)), $"crossing x{x} y{y} shut until the pads float");
+                }
+            var bed = LilymereTools.Tile(6, LilymereTools.StreamY0);
+            Assert.AreEqual(IslandMap.DryBed, map.Raw(bed.y, bed.x));
+            var plank = LilymereTools.Tile(LilymereTools.CrossingXY.x, LilymereTools.ChannelY0);
+            Assert.IsTrue(map.CanWalk(plank), "the channel crossing is a plank bridge");
+        }
+
+        [Test]
+        public void WorldMap_WetTilesReadAsWater_BridgedTilesWalk()
+        {
+            var map = ScriptableObject.CreateInstance<WorldMap>();
+            map.SetLayout("XXXX\nXDPX\nXXXX");
+            var bed = new Vector2Int(1, 1);
+            var path = new Vector2Int(2, 1);
+            Assert.AreEqual(IslandMap.DryBed, map.At(bed));
+            map.SetWet(bed, true);
+            Assert.AreEqual(IslandMap.Water, map.At(bed));
+            Assert.IsFalse(map.CanWalk(bed));
+            map.SetWet(path, true);
+            Assert.IsFalse(map.CanWalk(path), "wet path is water");
+            map.SetBridged(path, true);
+            Assert.IsTrue(map.CanWalk(path), "the pad bridge walks");
+            map.ClearRuntimeChanges();
+            Assert.AreEqual(IslandMap.DryBed, map.At(bed));
+            Assert.IsTrue(map.CanWalk(path));
+            Object.DestroyImmediate(map);
         }
     }
 }

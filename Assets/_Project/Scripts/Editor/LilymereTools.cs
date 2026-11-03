@@ -39,7 +39,7 @@ namespace Diorama.EditorTools
         /// </summary>
         public const int StreamY0 = 8, StreamY1 = 9, StreamX0 = 5, StreamX1 = 18;
         /// <summary>The pads' spots on the south bank (x, y; map tiles may be fractional).</summary>
-        public static readonly Vector2[] StreamPadsXY = { new Vector2(14f, 7f), new Vector2(15.3f, 6.8f), new Vector2(16.6f, 7.1f) };
+        public static readonly Vector2[] StreamPadsXY = { new Vector2(14.3f, 7f), new Vector2(15.3f, 6.85f), new Vector2(16.3f, 7.05f) };
         /// <summary>Their bridge slots over the crossing (x, y).</summary>
         public static readonly Vector2[] StreamBridgeXY = { new Vector2(11f, 8f), new Vector2(12f, 8.5f), new Vector2(11f, 9f) };
         public static Vector2 MapPoint(Vector2 xy) => new Vector2(xy.x, Size - 1 - xy.y);

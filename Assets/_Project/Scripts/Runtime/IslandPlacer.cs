@@ -214,7 +214,9 @@ namespace Diorama
             var space = Space;
             var head = Head;
             if (space == null || head == null) return;
-            if (_haveLast && !_starting)
+            // Jumps only count with a live headset: in flat Play the seat camera moves the "head" itself, and following it
+            // re-placed the island every frame (it climbed out of sight).
+            if (_haveLast && !_starting && XRSettings.isDeviceActive && Time.unscaledTime - _lastRecenter > 2f)
             {
                 float spaceMove = (space.position - _lastSpacePos).magnitude, spaceTurn = Quaternion.Angle(space.rotation, _lastSpaceRot);
                 bool tracked = head.localPosition.sqrMagnitude > 1e-4f && _lastHeadLocal.sqrMagnitude > 1e-4f;

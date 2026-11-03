@@ -30,7 +30,8 @@ namespace Diorama.Tests
         {
             var map = Load();
             Assert.AreEqual("galewick", map.realm);
-            Assert.AreEqual("realm.galewick.first", map.arrivalLine);
+            // Step 14a: the arrival line leads into the arrival clouds' objective.
+            Assert.AreEqual("gw.arrive", map.arrivalLine);
             Assert.AreEqual("kites", map.ZoneAt(GalewickTools.Tile(GalewickTools.KiteXY[0])));
             Assert.AreEqual("fire", map.ZoneAt(GalewickTools.Tile(48, 15)));
             Assert.AreNotEqual(map.grassTable, map.GrassTableAt(GalewickTools.Tile(48, 15)));

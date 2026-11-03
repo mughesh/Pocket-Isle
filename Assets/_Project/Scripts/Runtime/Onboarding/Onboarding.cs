@@ -388,7 +388,9 @@ namespace Diorama
         {
             if (string.IsNullOrEmpty(l.line)) return;
             bool talking = Dialogue.IsPending(l.line) || !string.IsNullOrEmpty(l.again) && Dialogue.IsPending(l.again) ||
-                           !string.IsNullOrEmpty(l.help) && Dialogue.IsPending(l.help) || HandsMissing;
+                           !string.IsNullOrEmpty(l.help) && Dialogue.IsPending(l.help) || HandsMissing ||
+                           // Step 14a: the pinch lesson's "Nice! Once more." is its line now.
+                           l.id == pinchLesson && !string.IsNullOrEmpty(pinchOnceLine) && Dialogue.IsPending(pinchOnceLine);
             if (!string.IsNullOrEmpty(l.help) && !_helped && _runner.Teaching >= l.helpAfter)
             {
                 // The help line takes the lesson line's place (and stays).
