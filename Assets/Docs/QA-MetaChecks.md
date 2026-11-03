@@ -9,7 +9,7 @@ The competition asks for: **fully usable with hands from start to end**, comfort
 (performance, app lifecycle, tracking, comfort). These sections follow those.
 
 ## 1. Hands only, start to end (most important)
-- [ ] Put the controllers away. Play from launch to the first battle, catch, and into Cinderwood **without touching a
+- [ ] Put the controllers away. Play from launch to the first battle, catch, and into Galewick (the first realm since Nov 3) **without touching a
       controller**. Note any moment you got stuck or had to guess what to do.
 - [ ] Every button and menu can be used with hands (title runes, game menu, settings, battle runes, lodge).
 - [ ] The game menu opens with the left palm-up pinch, every time.

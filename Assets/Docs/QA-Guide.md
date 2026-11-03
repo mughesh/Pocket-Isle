@@ -44,7 +44,21 @@ Each tab is split into groups under gold headings.
 Cheats (one-hit KO, invincible, wild battles off, rare x10, time and walk speed) last until the app closes. They are
 never saved.
 
-## 4. What's new in this build (step 14a, Nov 3: the first minute)
+## 4. What's new in this build (step 14c, Nov 3: Galewick first)
+
+- **Galewick is the first realm now.** After the tutorial the Spirit's trail points to the **wind gate** (the sign over
+  it glows gold), then Cinderwood, then Lilymere. Every gate is open; you can still go anywhere.
+- **Gate signs** over the three hub gates: the realm's name and emblem.
+- **Name cards:** entering a realm a carved sign rises over the far side of the island with its name and a line, then
+  sinks. Shorter (name only) on later visits.
+- **Cinderwood:** four dark lanterns just past the arrival: touch one and the fire runs down all of them.
+- **Quick Journey** goes to Galewick: two friends (Toastling + Whirlby), the ridge clouds are already gone, the end comes
+  when the wind shard is in the statue: **Keep exploring / See the ending / Title**. See the ending plays the finale and
+  goes back to the title without finishing your quick save.
+- Things to watch: is any name card in the way of something you need to do? Are the gate signs readable from where you
+  sit? Is Galeowl too hard or too easy as the first Keeper?
+
+## Earlier (step 14a, Nov 3: the first minute)
 
 - **Where the island appears:** in front of you, about 30 cm under your eyes, once your head is still. Before you touch
   the shard, look away or stand up / sit down: after a second it glides back in front of you. Meta's recenter (hold the

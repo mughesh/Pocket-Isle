@@ -210,6 +210,11 @@ island's own props through **warm spots** (a circle in which glows burn, smoke r
   flicker) through the restoration wave. Quick Journey keeps them.
 - Virtual light only: the ember's glow is on the ember and its halo, not on the real room or the hand.
 
+- **Arrival lanterns (step 14c):** four dead stone lanterns line the trail 2-6 tiles past the arrival. `cw.arrive`
+  "Cinderwood... it used to glow all night.", then "The lanterns went out. Touch one!" (chip Touch, Lanterns n/4, poke
+  ghost). One touch (or look + pinch) sends the fire down all four, the glow spreads round them, embers drift up. The
+  smoky hollow keeps a Lanterns counter and a short line, no ghost.
+
 ### Keeper and shard as built (step 9c, Oct 26)
 - **Hearthstag**: Fire Keeper, **Lv 10, base HP 110 (HP 154 = 2.75x a normal Lv 10), atk 10, def 11, spd 8** (step 9f
   balance, `KeeperSim`: a Lv 8 team of 3 with Steambara, Water leading, wins ~80% with Kilnpot, ~62% with Pufflet, ~93%
@@ -278,25 +283,41 @@ amber with a light top band and a dark lower band, "Isle" grass green with a cre
 dot a small glowing lantern. Hand-made: uneven heights, a small tilt per letter. The lantern pulses, two specks drift,
 the base bobs. 9.8k triangles, 4 draws.
 
-### Quick Journey as built (step 9g, Oct 26)
+### Realm order (step 14c, Nov 3): Galewick first
+- The Spirit's trail and the hub's guidance point to the **wind gate first**, then Cinderwood, then Lilymere
+  (`SpiritTrail.HubOrder`); any open gate still works, and all three are open in builds.
+- Keeper levels for that order (`RealmOrderSim`: starter + the realm's shield-breaking visitor + one trail catch,
+  grass x1.5): Galeowl Lv 8 at 0 shards (was 9; the Galewick fire patch one level up, Toastling 7-9), Hearthstag Lv 12
+  (was 10, so Lv 14 at the usual one shard), Tidemother Lv 9 (13 at two shards, unchanged). Win %: Galeowl 100 / 54 / 68,
+  Hearthstag 53 / 91 / 44, Tidemother 50 / 65 / 98 (Kilnpot / Pebbloop / Pufflet). The spread per starter is the element
+  matchup (the starter that breaks the shield wins easily), not levels. A Cinderwood-first player now meets Hearthstag Lv 12.
+
+### Quick Journey as built v2 (step 14c, Nov 3: a Galewick journey; v1 was Cinderwood, step 9g)
 - Same game, its own slot, dials in `Data/QuickJourney.asset` (`QuickJourneyConfig`), applied only in the quick slot.
-- **Lessons:** all hand-verb lessons stay (shard, move, starter, walk, look, grass, send, rune, catch). Cut: `stop`
-  (thumb tap to stop) and `twoHands` (turn / resize with both hands): both are off the route.
-- **The gift:** once the lessons are done, back in the hub and calm: `quick.gift` ("The road to Cinderwood is long. Take
-  two friends with you!"), two pods fly from the Spirit to the rim (Steambara + Toastling), the starter and any catch
-  are raised, then `quick.gate` ("Bring back the fire shard!") sends the Spirit to the fire gate (gold). Levels are per
-  starter from the Keeper sim: Kilnpot gifts Lv 8, raised to 8; Pebbloop 7 / 7; Pufflet 8 / raised to 10.
-- **Cinderwood dials:** encounters x0.5, win XP x2 on top of the curve, no rare entries (no rare-only detours). Gold
-  tiles show the way to the next goal (fire gate, log, forge door, home gate with the shard, statue) after 4 s standing
-  still.
-- **End:** the fire shard locks into the statue: `quick.end` ("You woke the first piece of the world!" / "Thank you for
-  playing the Quick Journey."), then **Keep exploring** / **Title** runes.
-- **Keeper sim (quick team, 1000 fights per starter):** Kilnpot 75%, Pebbloop 82%, Pufflet 81%. One shared level can't
-  do it: all Lv 8 = 74 / 95 / 52%, all Lv 9 = 99 / 100 / 97% (Steambara leads the fight, so the gifts' level matters most).
-- **Dry run** (Tools > Pocket Isle > Quick Journey Dry Run, 0.5 s per tile, 45 s per battle): 10:00. Opening + lessons
-  3:32, gift to gate 0:33, trail 1:06, log 0:35, forge 0:55, Keeper 2:30, statue 0:47. The per-beat seconds are
-  estimates in the config; the real route time comes from the timer in the dev readout (opening start to the shard
-  in the statue).
+- **Opening and lessons unchanged** (judges learn every interaction). Cut: `twoHands` only.
+- **The gift:** after the capture lesson, in the hub: `quick.gift` ("The road to Galewick is windy. Take two friends
+  with you!"), Toastling + Whirlby fly to the rim, the starter is raised; `quick.gate` ("Bring back the wind shard!")
+  sends the Spirit to the wind gate. Per starter (QuickJourneySim, Galeowl Lv 8): Kilnpot gifts Lv 5 / raised 8 (80%),
+  Pebbloop 8 / 9 (74%), Pufflet 8 / 7 (76%). Toastling leads the fight: fire breaks the Gust Wall.
+- **Galewick:** arrival sweep, mill flick, kites, tower, untangle, Galeowl. The ridge cloud bank is cleared already
+  (`CloudBankPiece.Presolve`: the sweep was taught at the arrival). Dials in Galewick only: encounters x0.5, XP x2, no
+  rares, gold tiles after 4 s standing still (wind gate, mill, kites, tower, home gate, statue).
+- **End:** the wind shard locks in, the statue whispers (`heart.dream.wind`), the Spirit: "Did the statue just...
+  speak?", then `quick.end` ("You woke the first piece of the world!" / "Two more realms are waiting.") and three
+  runes: **Keep exploring** (the full adventure's trail takes over, Cinderwood next), **See the ending** (the finale
+  from the wake with the quick save written once and then suspended, so it is never marked finished; back to the title
+  after), **Title**.
+- **Dry run** (Tools > Pocket Isle > Quick Journey > Dry Run): **13:00, over the 12:00 target**; per-beat table and
+  options in `Run-14c.md` (waiting on Mugesh before anything else is cut).
+
+### Realm name cards and gate signs (step 14c)
+- Entering a realm (or coming home) a carved card rises over the island's far half, after the arrival line: the name in
+  the logo's chunky strokes, the element emblem, one line under it (first visit, 3 s); later visits the name only
+  (1.5 s); the first visit after the shard is taken shows the restored line once. Galewick: wooden plank, "The windmill
+  highlands, where the wind stopped"; Cinderwood: charred plank with ember edges, "The autumn forest, where the fire went
+  cold"; Lilymere: mossy stone tablet, "The lily lagoon, where the water froze"; Still Isle: warm plank, "Home".
+  `RealmNameCard`, baked cards `Data/Props/RealmCard_*` (PropKit.RealmCards, 6.5-8.2k tris each).
+- Hub gate signs (`GateSigns`): the same card, small, over each gate arch; gold on the gate the trail points to.
 
 ## The objective rule (step 11d, Oct 27 headset notes)
 Mugesh kept finding tasks by accident. One rule now covers every hand moment in all three realms:
