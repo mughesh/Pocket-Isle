@@ -12,6 +12,9 @@ namespace Diorama
     /// light both their sides. Step 8e: only the parts of the frame over the grab zone light up (with the pods active,
     /// never the strip in front of them). It fades out over <see cref="fadeSeconds"/> once the hand leaves, stays
     /// hidden during scene swaps, and pulses while a lesson hints at the rim (<see cref="IslandHandle.HintGlow"/>).
+    /// Step 14a: it shows the handles only: a bracket over each of the four corners (always faintly there, like a notched
+    /// corner piece; white when a hand is within <see cref="showDistance"/>, gold while held) and, while exploring, a line
+    /// along the front lip under the pods. The rest of the frame is gone.
     /// </summary>
     [DefaultExecutionOrder(200)] // after the island has moved this frame
     public class IslandGrabFrame : MonoBehaviour
@@ -34,8 +37,14 @@ namespace Diorama
         [Header("Look")]
         [Tooltip("Ribbon width (world m): near, hover, held.")]
         public Vector3 width = new Vector3(0.003f, 0.0045f, 0.005f);
-        [Tooltip("A pinch point or palm this close to the grab zone (world m) fades the frame in.")]
-        public float showDistance = 0.1f;
+        [Tooltip("A pinch point or palm this close to a handle (world m) lights it.")]
+        public float showDistance = 0.06f;
+        [Tooltip("Step 14a: the corner brackets' level with no hand near (subtle, always there).")]
+        [Range(0f, 1f)] public float idleLevel = 0.18f;
+        [Tooltip("Corner bracket length along each edge (island-local m; the handle's corner size).")]
+        public float bracketLength = 0.1f;
+        [Tooltip("The lip line sits this far under the pods' line (world m), on the base's front face.")]
+        public float lipLineBelowPods = 0.03f;
         [Tooltip("Frame points this far from the grab zone (world m) stay dark (the strip in front of active pods).")]
         public float zoneFeather = 0.012f;
         [Tooltip("Along the frame, the glow falls off this far from the point nearest the hand (world m).")]
@@ -47,8 +56,8 @@ namespace Diorama
         [Range(0f, 2f)] public float grabbedLevel = 1.1f;
         public Color color = new Color(0.95f, 0.97f, 1f);
         [Tooltip("Held: the frame tints toward this.")]
-        public Color grabbedColor = new Color(1f, 0.82f, 0.45f);
-        [Range(0f, 1f)] public float grabbedTint = 0.45f;
+        public Color grabbedColor = new Color(1f, 0.78f, 0.3f);
+        [Range(0f, 1f)] public float grabbedTint = 0.85f;
         public float fadeInSeconds = 0.12f;
         public float fadeSeconds = 0.3f;
 
@@ -63,6 +72,8 @@ namespace Diorama
 
         readonly HandState[] _hands = new HandState[2];
         readonly List<Vector3> _local = new List<Vector3>();
+        readonly List<bool> _isHandle = new List<bool>();
+        readonly List<Vector3> _lipWorld = new List<Vector3>();
         readonly List<Vector3> _world = new List<Vector3>();
         readonly List<Vector3> _verts = new List<Vector3>();
         readonly List<Color> _colors = new List<Color>();
@@ -101,7 +112,8 @@ namespace Diorama
             float any = 0f;
             for (int h = 0; h < 2; h++) any = Mathf.Max(any, Track(ref _hands[h], h == 0, hidden, dt));
             _hint = Mathf.MoveTowards(_hint, hidden ? 0f : handle.HintGlow, dt * 4f);
-            if (any <= 0.002f && _hint <= 0.002f) return;
+            // The corner brackets always show a little (once the island has grown).
+            if (hidden || any <= 0.002f && _hint <= 0.002f && idleLevel <= 0.002f) return;
             Draw();
         }
 
@@ -113,7 +125,7 @@ namespace Diorama
             Vector3? fake = !left && DebugPalm != null ? DebugPalm() : null;
             if (!hidden && fake.HasValue)
             {
-                float d = handle.DistanceToZone(fake.Value);
+                float d = handle.DistanceToHandles(fake.Value);
                 near = d < showDistance ? 1f - Mathf.SmoothStep(0f, 1f, d / showDistance) : 0f;
                 hover = d <= 0.005f ? 1f : 0f;
                 s.closest = fake.Value;
@@ -123,10 +135,10 @@ namespace Diorama
                 held = handle.IsHandGrabbing(left) ? 1f : 0f;
                 // The nearer of the pinch point and the palm (pinch and palm grabs both work).
                 Vector3 probe = palm;
-                float d = handle.DistanceToZone(palm);
+                float d = handle.DistanceToHandles(palm);
                 if (IslandHandle.TryGetPinchPoint(hand, out var pinch))
                 {
-                    float dp = handle.DistanceToZone(pinch);
+                    float dp = handle.DistanceToHandles(pinch);
                     if (dp < d)
                     {
                         d = dp;
@@ -157,8 +169,20 @@ namespace Diorama
             var t = island.transform;
             _world.Clear();
             foreach (var p in _local) _world.Add(t.TransformPoint(p));
+            _lipWorld.Clear();
+            if (handle.LipActive)
+            {
+                // The lip line: along the front face under the pods, between the corner brackets.
+                var half = island.FootprintHalfSize;
+                var front = t.TransformPoint(new Vector3(0f, 0f, half.y));
+                front.y = handle.PodLineY - lipLineBelowPods;
+                float y = t.InverseTransformPoint(front).y;
+                float x = half.x - bracketLength;
+                for (int i = 0; i <= sideSegments; i++)
+                    _lipWorld.Add(t.TransformPoint(new Vector3(Mathf.Lerp(x, -x, i / (float)sideSegments), y, half.y + outset)));
+            }
 
-            // Each hand's nearest point on the frame: its glow centres there.
+            // Each hand's nearest point on the handles: its glow centres there.
             var nearest = new Vector3[2];
             for (int h = 0; h < 2; h++) nearest[h] = NearestOnFrame(_hands[h].closest);
             float pulse = _hint * (0.55f + 0.45f * Mathf.Sin(Time.time * 4f));
@@ -171,43 +195,9 @@ namespace Diorama
             _colors.Clear();
             _uvs.Clear();
             _tris.Clear();
-            int n = _world.Count;
             Vector3 eye = cam.transform.position;
-            for (int i = 0; i < n; i++)
-            {
-                Vector3 p = _world[i];
-                Vector3 tangent = _world[(i + 1) % n] - _world[(i - 1 + n) % n];
-                Vector3 side = Vector3.Cross(tangent, eye - p);
-                side = side.sqrMagnitude > 1e-10f ? side.normalized * (w * 0.5f) : Vector3.up * (w * 0.5f);
-                float level = pulse * 0.6f;
-                for (int h = 0; h < 2; h++)
-                {
-                    var s = _hands[h];
-                    if (s.near <= 0.001f) continue;
-                    float along = (p - nearest[h]).magnitude / Mathf.Max(0.001f, nearSpread);
-                    float local = farLevel + (1f - farLevel) * Mathf.Exp(-along * along);
-                    float peak = Mathf.Lerp(nearLevel, hoverLevel, s.hover);
-                    // Held: the whole frame solid.
-                    float handLevel = Mathf.Lerp(local * peak, grabbedLevel, s.held) * s.near;
-                    level = Mathf.Max(level, handLevel);
-                }
-                // Only over the grab zone (with the pods active, the strip in front of them stays dark).
-                level *= 1f - Mathf.SmoothStep(0f, 1f, handle.DistanceToZone(p) / Mathf.Max(0.001f, zoneFeather * t.lossyScale.x));
-                var c = new Color(tint.r, tint.g, tint.b, level);
-                _verts.Add(p - side);
-                _verts.Add(p + side);
-                _colors.Add(c);
-                _colors.Add(c);
-                _uvs.Add(new Vector2(0f, 0f));
-                _uvs.Add(new Vector2(0f, 1f));
-                int a = i * 2, b = ((i + 1) % n) * 2;
-                _tris.Add(a);
-                _tris.Add(b);
-                _tris.Add(a + 1);
-                _tris.Add(a + 1);
-                _tris.Add(b);
-                _tris.Add(b + 1);
-            }
+            Strip(_world, true, _isHandle, nearest, pulse, w, tint, eye, idleLevel);
+            if (_lipWorld.Count > 1) Strip(_lipWorld, false, null, nearest, pulse, w, tint, eye, 0f);
             _mesh.Clear();
             _mesh.SetVertices(_verts);
             _mesh.SetColors(_colors);
@@ -218,14 +208,58 @@ namespace Diorama
                 _mesh, 0, Matrix4x4.identity);
         }
 
+        /// <summary>Adds one ribbon (a closed loop masked to the handle points, or an open line) to the mesh.</summary>
+        void Strip(List<Vector3> pts, bool closed, List<bool> mask, Vector3[] nearest, float pulse, float w, Color tint, Vector3 eye, float idle)
+        {
+            int n = pts.Count, first = _verts.Count;
+            for (int i = 0; i < n; i++)
+            {
+                Vector3 p = pts[i];
+                Vector3 tangent = pts[closed ? (i + 1) % n : Mathf.Min(i + 1, n - 1)] - pts[closed ? (i - 1 + n) % n : Mathf.Max(i - 1, 0)];
+                Vector3 side = Vector3.Cross(tangent, eye - p);
+                side = side.sqrMagnitude > 1e-10f ? side.normalized * (w * 0.5f) : Vector3.up * (w * 0.5f);
+                float level = Mathf.Max(idle, pulse * 0.6f);
+                for (int h = 0; h < 2; h++)
+                {
+                    var s = _hands[h];
+                    if (s.near <= 0.001f) continue;
+                    float along = (p - nearest[h]).magnitude / Mathf.Max(0.001f, nearSpread);
+                    float local = farLevel + (1f - farLevel) * Mathf.Exp(-along * along);
+                    float peak = Mathf.Lerp(nearLevel, hoverLevel, s.hover);
+                    // Held: every handle solid.
+                    float handLevel = Mathf.Lerp(local * peak, grabbedLevel, s.held) * s.near;
+                    level = Mathf.Max(level, handLevel);
+                }
+                // Only the handles light (the corner brackets; the lip line is all handle).
+                if (mask != null && !mask[i]) level = 0f;
+                var c = new Color(tint.r, tint.g, tint.b, level);
+                _verts.Add(p - side);
+                _verts.Add(p + side);
+                _colors.Add(c);
+                _colors.Add(c);
+                _uvs.Add(new Vector2(0f, 0f));
+                _uvs.Add(new Vector2(0f, 1f));
+                if (!closed && i == n - 1) continue;
+                int a = first + i * 2, b = first + ((i + 1) % n) * 2;
+                _tris.Add(a);
+                _tris.Add(b);
+                _tris.Add(a + 1);
+                _tris.Add(a + 1);
+                _tris.Add(b);
+                _tris.Add(b + 1);
+            }
+        }
+
         Vector3 NearestOnFrame(Vector3 p)
         {
             Vector3 best = p;
             float bestSq = float.MaxValue;
             int n = _world.Count;
-            for (int i = 0; i < n; i++)
+            for (int i = 0; i < n + _lipWorld.Count - 1; i++)
             {
-                Vector3 a = _world[i], b = _world[(i + 1) % n], ab = b - a;
+                bool lip = i >= n;
+                if (!lip && !_isHandle[i]) continue;
+                Vector3 a = lip ? _lipWorld[i - n] : _world[i], b = lip ? _lipWorld[i - n + 1] : _world[(i + 1) % n], ab = b - a;
                 float k = ab.sqrMagnitude > 1e-10f ? Mathf.Clamp01(Vector3.Dot(p - a, ab) / ab.sqrMagnitude) : 0f;
                 Vector3 q = a + ab * k;
                 float d = (q - p).sqrMagnitude;
@@ -265,6 +299,9 @@ namespace Diorama
                 var to = new Vector3(b.center.x + next.x + Mathf.Cos(na) * r, height, b.center.z + next.y + Mathf.Sin(na) * r);
                 for (int i = 1; i < sideSegments; i++) _local.Add(Vector3.Lerp(from, to, i / (float)sideSegments));
             }
+            // Step 14a: the corner brackets are the points within bracketLength of a corner along both edges' lines.
+            _isHandle.Clear();
+            foreach (var p in _local) _isHandle.Add(Mathf.Abs(p.x) > hx - bracketLength && Mathf.Abs(p.z) > hz - bracketLength);
         }
     }
 }

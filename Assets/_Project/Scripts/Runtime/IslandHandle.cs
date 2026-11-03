@@ -24,6 +24,10 @@ namespace Diorama
     /// One hand: the island follows the hand, turning around it. Two hands: uniform scale around the hands' midpoint,
     /// scale clamped relative to the placer's scale; no manual yaw.
     /// Also reports which hands are busy with the island so microgestures can ignore them.
+    /// Step 14a: only the handles grab: the four corners (always, plain grabs) and the front lip (the near face of the
+    /// base at least <see cref="lipBelowPods"/> under the pods' centre line; Explore only, and a look elsewhere needs the
+    /// short hover first). A pinch point or palm within a pod's radius (+ <see cref="podClearance"/>) never grabs: the
+    /// pods win. Everywhere else on the rim, pinches go to pods and objects. Two hands = any two handles.
     /// </summary>
     [RequireComponent(typeof(Grabbable))]
     public class IslandHandle : MonoBehaviour, ITransformer, IGameObjectFilter
@@ -68,6 +72,14 @@ namespace Diorama
         [Tooltip("Corners (island-local m from each corner, along both edges): plain grabs, no grab-or-select rule; a hand within cornerReach of the shell there can always grab.")]
         public float cornerSize = 0.1f;
         public float cornerReach = 0.03f;
+
+        [Header("Handles (step 14a)")]
+        [Tooltip("The front lip grabs only this far (world m) or more below the rim pods' centre line.")]
+        public float lipBelowPods = 0.02f;
+        [Tooltip("The lip is the near face: within this far in from the front edge (island-local m).")]
+        public float lipDepth = 0.05f;
+        [Tooltip("A pinch point or palm this close to a pod's surface (world m) is the pod's, never the island's.")]
+        public float podClearance = 0.01f;
 
         IGrabbable _grabbable;
         Grabbable _grabbableComponent;
@@ -296,7 +308,7 @@ namespace Diorama
         {
             bool active = PodsActive;
             if (!force && (active == _podsActive || IsGrabbed)) return;
-            if (!force || !_modeLogged) Debug.Log($"[IslandHandle] Mode: {(active ? "pods active (grab the back, sides and front corners)" : "explore (grab anywhere on the base)")}.");
+            if (!force || !_modeLogged) Debug.Log($"[IslandHandle] Mode: {(active ? "pods active (grab the corners)" : "explore (grab the corners or the front lip)")}.");
             _modeLogged = true;
             _podsActive = active;
             if (podStripColliders != null)
@@ -321,6 +333,76 @@ namespace Diorama
                 if (c != null && c.enabled && (c.ClosestPoint(p) - p).sqrMagnitude <= margin) return true;
             return false;
         }
+
+        /// <summary>Which island handle a point is on (step 14a).</summary>
+        public enum Zone { None, Corner, Lip }
+
+        public Zone ZoneAt(Vector3 p)
+        {
+            if (NearPod(p)) return Zone.None;
+            if (InCorner(p)) return Zone.Corner;
+            return !_podsActive && OnLip(p) ? Zone.Lip : Zone.None;
+        }
+
+        /// <summary>World height of the rim pods' centre line (the cap top when there are no pods).</summary>
+        public float PodLineY
+        {
+            get
+            {
+                if (pods != null && pods.podPrefab != null) return pods.HomeWorld(0).y;
+                return island != null ? island.transform.TransformPoint(new Vector3(0f, island.CapTopLocal, 0f)).y : 0f;
+            }
+        }
+
+        /// <summary>The near face of the base under the pods (not the corners; in the shell).</summary>
+        bool OnLip(Vector3 p)
+        {
+            if (island == null) return false;
+            var local = island.transform.InverseTransformPoint(p);
+            var half = island.FootprintHalfSize;
+            if (local.z < half.y - lipDepth || Mathf.Abs(local.x) > half.x - cornerSize) return false;
+            if (p.y > PodLineY - lipBelowPods) return false;
+            return InZone(p);
+        }
+
+        bool NearPod(Vector3 p)
+        {
+            if (pods == null || pods.podPrefab == null || island == null) return false;
+            float r = pods.podPrefab.radius * island.transform.lossyScale.x + podClearance;
+            for (int i = 0; i < Party.Size; i++)
+            {
+                var pod = pods.Pod(i);
+                if (pod != null && pod.isActiveAndEnabled && (pod.transform.position - p).sqrMagnitude < r * r) return true;
+            }
+            return false;
+        }
+
+        /// <summary>Distance (world m) to the nearest handle (the corner posts and, exploring, the lip): the frame lights by it.</summary>
+        public float DistanceToHandles(Vector3 p)
+        {
+            if (island == null) return float.MaxValue;
+            var t = island.transform;
+            var local = t.InverseTransformPoint(p);
+            var half = island.FootprintHalfSize;
+            float cap = island.CapTopLocal, depth = 0.08f / Mathf.Max(1e-4f, t.lossyScale.x);
+            float best = float.MaxValue;
+            // Corner posts: the base's vertical corner edges, from the cap down.
+            for (int i = 0; i < 4; i++)
+            {
+                var c = new Vector3(i % 2 == 0 ? half.x : -half.x, Mathf.Clamp(local.y, cap - depth, cap), i < 2 ? half.y : -half.y);
+                best = Mathf.Min(best, (t.TransformPoint(c) - p).magnitude);
+            }
+            if (!_podsActive)
+            {
+                float lipTop = t.InverseTransformPoint(new Vector3(p.x, PodLineY - lipBelowPods, p.z)).y;
+                var l = new Vector3(Mathf.Clamp(local.x, -(half.x - cornerSize), half.x - cornerSize), Mathf.Clamp(local.y, cap - depth, lipTop), half.y);
+                best = Mathf.Min(best, (t.TransformPoint(l) - p).magnitude);
+            }
+            return best;
+        }
+
+        /// <summary>The front lip is a handle now (Explore mode).</summary>
+        public bool LipActive => !_podsActive;
 
         /// <summary>Near one of the base's corners and the grab shell: grabs there are plain ISDK grabs (Mugesh, Oct 26).</summary>
         bool InCorner(Vector3 p)
@@ -355,8 +437,12 @@ namespace Diorama
             Vector3 pinchPoint = default, palmPoint = default;
             bool hasPinch = tracked && TryGetPinchPoint(hand, out pinchPoint);
             bool hasPalm = tracked && HandLookup.TryGetJoint(hand, HandJointId.HandPalm, out palmPoint);
-            bool corner = hasPinch && InCorner(pinchPoint) || hasPalm && InCorner(palmPoint);
-            bool inZone = corner || hasPinch && InZone(pinchPoint) || hasPalm && InZone(palmPoint);
+            // Step 14a: only the handles (corners, front lip); a pod in reach of the pinch point always wins.
+            var zp = hasPinch ? ZoneAt(pinchPoint) : Zone.None;
+            var zh = hasPalm ? ZoneAt(palmPoint) : Zone.None;
+            bool podFirst = hasPinch && NearPod(pinchPoint);
+            bool corner = !podFirst && (zp == Zone.Corner || zh == Zone.Corner);
+            bool inZone = corner || !podFirst && (zp == Zone.Lip || zh == Zone.Lip);
             if (inZone && !s.inZone) s.zoneSince = Time.time;
             s.inZone = inZone;
             bool pinching = tracked && hand.GetIndexFingerIsPinching();
@@ -370,9 +456,10 @@ namespace Diorama
                 if (pinching && (Application.isEditor || Debug.isDebugBuild))
                 {
                     string side = h == 0 ? "L" : "R";
-                    s.last = s.grab ? $"pinch {side}: GRAB ({(corner ? "corner" : $"in the shell {inFor:0.00} s")}{(gaze ? ", gaze on a target away from the hand" : "")})"
-                           : inZone ? $"pinch {side}: select (gaze on a target away from the hand, in the shell only {inFor:0.00} s < {grabHoverSeconds:0.00})"
-                           : $"pinch {side}: select (pinch point outside the shell)";
+                    s.last = s.grab ? $"pinch {side}: GRAB ({(corner ? "corner" : $"front lip {inFor:0.00} s")}{(gaze ? ", gaze on a target away from the hand" : "")})"
+                           : inZone ? $"pinch {side}: select (gaze on a target away from the hand, on the lip only {inFor:0.00} s < {grabHoverSeconds:0.00})"
+                           : podFirst ? $"pinch {side}: select (a pod is in reach: pods win)"
+                           : $"pinch {side}: select (not on a handle)";
                     Debug.Log($"[IslandHandle] {s.last}, {(_podsActive ? "pods active" : "explore")}.");
                 }
             }
