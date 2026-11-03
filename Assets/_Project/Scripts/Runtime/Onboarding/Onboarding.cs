@@ -67,7 +67,15 @@ namespace Diorama
         {
             "shardTouched", "islandGrabbed", "starterPicked", "walked3", "stopped", "gazeWalk", "walkedOn",
             "grassBattle", "sentOut", "moveUsed", "podThrown", "wonOrCaught", "battleFailed", "twoHandGrab", "pinched",
+            // Nov 3 (Mugesh: one swipe moved one tile, then into the grass, and the lesson never counted it): tiles really
+            // walked by swipes, any way; a tap that stops a walk-on; three walk-ons (the stop lesson never blocks).
+            "swipeWalked", "tapStopped", "walkedOn3",
         };
+
+        /// <summary>Nov 3: the walk lesson's id and how many tiles swipes must really walk (any direction).</summary>
+        public const string WalkLesson = "walk", FarLesson = "far";
+        [Tooltip("Nov 3: tiles the explorer must really walk by swiping (any direction) in the walk lesson.")]
+        [Min(1)] public int swipeTiles = 4;
 
         static Onboarding _instance;
 
@@ -186,6 +194,8 @@ namespace Diorama
             if (_runner == null) return;
             // Step 12a: the stop lesson became the walk-on lesson (it teaches the tap too).
             if (lessonId == "stop") lessonId = "far";
+            // Nov 3: the turn lesson went (the walk lesson counts real tiles now, any way).
+            if (lessonId == "turn") lessonId = "far";
             // Step 9h moved the two-hands lesson into the opening: a save that waited for it at the end is done.
             if (finished || lessonId == "twoHands")
             {
@@ -250,16 +260,27 @@ namespace Diorama
         {
             if (_runner == null || !_runner.IsRunning) return;
             if (++_steps >= walkSteps) _runner.Mark("walked3");
+            // A tile walked by a swipe (a smart step or a walk-on), not by look + pinch (that walks to a destination).
+            if (_runner.Current != null && _runner.Current.id == WalkLesson && !explorer.Destination.HasValue)
+            {
+                _swipeTiles++;
+                Dialogue.SetProgress(Mathf.Min(_swipeTiles, swipeTiles), swipeTiles);
+                if (_swipeTiles >= swipeTiles) _runner.Mark("swipeWalked");
+            }
         }
 
         void OnStopped()
         {
-            if (_runner != null && _runner.IsRunning) _runner.Mark("stopped");
+            if (_runner == null || !_runner.IsRunning) return;
+            _runner.Mark("stopped");
+            if (_runner.Current != null && _runner.Current.id == FarLesson && _walkOns > 0) _runner.Mark("tapStopped");
         }
 
         void OnSwiped(bool walkOn)
         {
-            if (walkOn && _runner != null && _runner.IsRunning) _runner.Mark("walkedOn");
+            if (!walkOn || _runner == null || !_runner.IsRunning) return;
+            _runner.Mark("walkedOn");
+            if (_runner.Current != null && _runner.Current.id == FarLesson && ++_walkOns >= 3) _runner.Mark("walkedOn3");
         }
 
         /// <summary>Step 12a: a smart step stops on the lesson's gold tile.</summary>
@@ -372,6 +393,7 @@ namespace Diorama
             _helped = false;
             _lineAway = 0f;
             _smartAtShow = explorer != null ? explorer.SmartStepsTaken : 0;
+            _swipeTiles = _walkOns = 0;
             if (!string.IsNullOrEmpty(l.goldTileRule)) PickSmartGoldTile(l.goldTileRule);
             else if (l.goldTileSteps > 0) PickGoldTile(l.goldTileSteps);
             if (!string.IsNullOrEmpty(l.goldPath) && _goldPath == null) _goldPath = StartCoroutine(GoldPath(l));
@@ -382,6 +404,7 @@ namespace Diorama
                 Dialogue.Pin(new[] { l.line, l.again, l.help, script.handsLine, pinch ? pinchOnceLine : null }, l.chip);
                 // Step 14a: a counted lesson shows its progress dots (two pinches).
                 if (pinch) Dialogue.SetProgress(0, pinchCount);
+                else if (l.id == WalkLesson) Dialogue.SetProgress(0, swipeTiles);
                 Dialogue.Repeat(l.line);
             }
             LessonShown?.Invoke(l);
@@ -586,7 +609,7 @@ namespace Diorama
         // ---- the gold tile's look (step 12a) ----
 
         GoldMarks _goldMarks;
-        int _smartAtShow;
+        int _smartAtShow, _swipeTiles, _walkOns;
 
         void LateUpdate()
         {

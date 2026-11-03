@@ -43,18 +43,18 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
   - Spirit: Grab the rocky edge and slide it.
 - `lesson.starter.again` · objective · → starterPods
   - Spirit: Look at one and pinch, or grab it.
-- `lesson.walk` · objective · while canWalk · → ghost
-  - Spirit: Swipe your thumb along your finger to take a few steps.
+- `lesson.walk` · objective · while canWalk · → ghost (Nov 3: any direction, dots count 4 tiles walked)
+  - Spirit: Swipe your thumb left, right or forward to walk.
 - `lesson.walk.again` · objective · while canWalk · → ghost
-  - Spirit: Swipe toward the gold tile. Like this!
+  - Spirit: Swipe any way. Watch your explorer go!
 - `lesson.walk.turn` · objective · while canWalk · → ghost (step 12a)
   - Spirit: The path turns. Swipe again!
 - `lesson.walk.turn.again` · objective · while canWalk · → ghost
   - Spirit: Swipe, and I'll follow the path.
-- `lesson.walk.far` · objective · while canWalk · → ghost (step 12a)
-  - Spirit: Swipe twice quickly to keep walking. Tap to stop.
+- `lesson.walk.far` · objective · while canWalk · → ghost (step 12a; Nov 3: done when a tap stops the walk)
+  - Spirit: Swipe twice quickly to keep walking. Then tap your thumb to stop!
 - `lesson.walk.far.again` · objective · while canWalk · → ghost
-  - Spirit: Two quick swipes to keep going. A tap stops.
+  - Spirit: Two quick swipes to go, one tap to stop.
 - `lesson.walk.help` · objective · while canWalk · → ghost
   - Spirit: Or look at a spot and pinch.
 - `lesson.stop` · while canWalk · → ghost

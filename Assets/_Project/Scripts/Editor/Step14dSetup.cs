@@ -31,6 +31,8 @@ namespace Diorama.EditorTools
             var log = new StringBuilder("[Step14d] MR_Main set up:");
             DialogueTools.Import();
             log.Append(NL + "  Script_v1 reimported (shrine.later, quick.gate send-off, the walk lessons)");
+            var lessons = Step8bSetup.WriteLessons();
+            log.Append(NL + $"  lessons rewritten ({lessons.lessons.Count}): walk counts 4 tiles really walked, far ends on a tap stop, no turn lesson");
             var explorer = Object.FindFirstObjectByType<GestureTestPiece>(FindObjectsInactive.Include);
             if (explorer != null)
             {

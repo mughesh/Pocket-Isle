@@ -5232,6 +5232,7 @@ MonoBehaviour:
   goldMaterial: {fileID: 2100000, guid: dc3915bdb04a1cb4eb4760821e23e7b7, type: 2}
   fx: {fileID: 1078587927}
   sparkleColor: {r: 1, g: 0.82, b: 0.35, a: 1}
+  swipeTiles: 4
 --- !u!4 &1380201672
 Transform:
   m_ObjectHideFlags: 0

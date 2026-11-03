@@ -179,22 +179,18 @@ namespace Diorama.EditorTools
                 },
                 // Step 12a: smart steps. A gold tile 3-4 tiles ahead on the path (the smart step stops on it), then one round
                 // a corner, then a long stretch for two quick swipes (it never blocks: 3 smart steps also finish it).
+                // Nov 3 (Mugesh's headset notes): no gold tile to find; swipes any way until the explorer has really walked 4
+                // tiles (dots count them), then walk on and tap to stop (the tap was never taught). The turn lesson went.
                 new LessonData
                 {
-                    id = "walk", line = "lesson.walk", chip = "Swipe", again = "lesson.walk.again", help = "lesson.walk.help", helpAfter = 30f,
-                    startWhen = "canWalk", delay = 1.5f, doneWhen = "atGoldTile | smartSteps4", goldTileRule = "ahead",
+                    id = Onboarding.WalkLesson, line = "lesson.walk", chip = "Swipe", again = "lesson.walk.again", help = "lesson.walk.help", helpAfter = 30f,
+                    startWhen = "canWalk", delay = 1.5f, doneWhen = "swipeWalked",
                     ghost = "thumb_swipe_forward", place = GhostPlace.AboveIsland, target = "ghost", ghostScale = 0.6f,
                 },
                 new LessonData
                 {
-                    id = "turn", line = "lesson.walk.turn", chip = "Swipe again", again = "lesson.walk.turn.again", startWhen = "canWalk", delay = 0.8f,
-                    doneWhen = "atGoldTile | smartSteps3", goldTileRule = "turn",
-                    ghost = "thumb_swipe_forward", place = GhostPlace.AboveIsland, target = "ghost", ghostScale = 0.6f,
-                },
-                new LessonData
-                {
-                    id = "far", line = "lesson.walk.far", chip = "Swipe twice", again = "lesson.walk.far.again", startWhen = "canWalk", delay = 0.8f,
-                    doneWhen = "atGoldTile | smartSteps3", goldTileRule = "far",
+                    id = Onboarding.FarLesson, line = "lesson.walk.far", chip = "Swipe twice, tap", again = "lesson.walk.far.again", startWhen = "canWalk", delay = 0.8f,
+                    doneWhen = "tapStopped | walkedOn3",
                     ghost = Step12aSetup.SwipeTwiceClip, place = GhostPlace.AboveIsland, target = "ghost", ghostScale = 0.6f,
                 },
                 new LessonData

@@ -151,7 +151,7 @@ MonoBehaviour:
     helpAfter: 30
     startWhen: canWalk
     delay: 1.5
-    doneWhen: atGoldTile | smartSteps4
+    doneWhen: swipeWalked
     validWhile: 
     skipAfter: 0
     failWhen: 
@@ -167,43 +167,17 @@ MonoBehaviour:
     ghostSpread: 0
     goldPath: 
     goldTileSteps: 0
-    goldTileRule: ahead
-    tutorialGrass: 0
-  - id: turn
-    line: lesson.walk.turn
-    again: lesson.walk.turn.again
-    chip: Swipe again
-    help: 
-    helpAfter: 30
-    startWhen: canWalk
-    delay: 0.8
-    doneWhen: atGoldTile | smartSteps3
-    validWhile: 
-    skipAfter: 0
-    failWhen: 
-    rewindTo: 
-    praise: 1
-    ghost: thumb_swipe_forward
-    place: 2
-    target: ghost
-    source: 
-    targetLift: 0
-    ghostScale: 0.6
-    bothHands: 0
-    ghostSpread: 0
-    goldPath: 
-    goldTileSteps: 0
-    goldTileRule: turn
+    goldTileRule: 
     tutorialGrass: 0
   - id: far
     line: lesson.walk.far
     again: lesson.walk.far.again
-    chip: Swipe twice
+    chip: Swipe twice, tap
     help: 
     helpAfter: 30
     startWhen: canWalk
     delay: 0.8
-    doneWhen: atGoldTile | smartSteps3
+    doneWhen: tapStopped | walkedOn3
     validWhile: 
     skipAfter: 0
     failWhen: 
@@ -219,7 +193,7 @@ MonoBehaviour:
     ghostSpread: 0
     goldPath: 
     goldTileSteps: 0
-    goldTileRule: far
+    goldTileRule: 
     tutorialGrass: 0
   - id: look
     line: lesson.look
