@@ -19,6 +19,8 @@ namespace Diorama.Audio
         public const string BellowsPump = "bellows.pump";
         public const string BrazierLight = "brazier.light";
         public const string BrazierWarm = "brazier.warm";
+        public const string CardRise = "card.rise";
+        public const string CardSink = "card.sink";
         public const string CatchAppear = "catch.appear";
         public const string CatchDazed = "catch.dazed";
         public const string CatchHit = "catch.hit";

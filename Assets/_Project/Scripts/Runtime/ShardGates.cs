@@ -14,6 +14,9 @@ namespace Diorama
     /// gives a soft bump and the Spirit's <c>gate.sealed</c> line. Lines: a gate's first-seen line the first time it comes
     /// into the window, the arrival line of the map you travel to.
     /// Dialogue targets: <c>gate:fire</c> (any gate id) and <c>gate:last</c> (the gate last bumped or entered).
+    /// Nov 3 (Mugesh: aiming the walk into the arch was friction): stepping onto an open gate's front tiles heading for it,
+    /// or coming to a stop there, goes through too (not on the tile you arrived on until you've left it). A gazed portal
+    /// glows much brighter and pulses.
     /// </summary>
     public class ShardGates : MonoBehaviour
     {
@@ -31,6 +34,10 @@ namespace Diorama
         public GalewickConfig galewick;
         [Tooltip("Step 11a: the well (water) gate stays sealed in builds until Lilymere is finished (LilymereConfig.open).")]
         public LilymereConfig lilymere;
+        [Tooltip("Nov 3: standing still this long on an open gate's front tile goes through.")]
+        public float stopToEnter = 0.35f;
+        [Tooltip("Nov 3: a gazed portal's brightness (was 1.25) and its pulse.")]
+        public float gazeIntensity = 2.3f, gazePulse = 0.35f;
 
         static readonly int ColorId = Shader.PropertyToID("_Color");
         static readonly int ShapeId = Shader.PropertyToID("_Shape");
@@ -64,8 +71,8 @@ namespace Diorama
             public Look look;
             public Transform quad;
             public MeshRenderer renderer;
-            public float bump;
-            public bool seen;
+            public float bump, gaze;
+            public bool seen, armed;
             public AudioHandle hum;
         }
 
@@ -73,6 +80,8 @@ namespace Diorama
         readonly bool[] _wasPinching = { true, true };
         WorldMap _scanned;
         int _gazed = -1, _pending = -1, _last = -1;
+        float _stoodFor;
+        Vector2Int _lastStepFrom;
         bool _entering;
         Mesh _quad;
         MaterialPropertyBlock _block;
@@ -124,6 +133,7 @@ namespace Diorama
             }
             _portals.Clear();
             _gazed = _pending = _last = -1;
+            _lastStepFrom = explorer.Tile;
             if (_scanned == null) return;
             foreach (var link in _scanned.gates)
             {
@@ -161,7 +171,11 @@ namespace Diorama
                 if (c.HasValue) FocusHighlight.Hover(c.Value, 1.1f * island.map.tileSize * island.Zoom * island.transform.lossyScale.x);
             }
             for (int i = 0; i < _portals.Count; i++) UpdatePortal(i, outside);
-            if (outside) UpdatePinch();
+            if (outside)
+            {
+                UpdatePinch();
+                UpdateNear();
+            }
         }
 
         Vector2 Center(GateLink g) => g.tile + new Vector2(0.5f, 0f);
@@ -204,7 +218,9 @@ namespace Diorama
             _block.SetFloat(ArchStartId, look.archStart);
             _block.SetFloat(SealedId, IsOpen(p.link) ? 0f : 1f);
             _block.SetFloat(BumpId, p.bump);
-            _block.SetFloat(IntensityId, _gazed == i ? 1.25f : 1f);
+            p.gaze = Mathf.MoveTowards(p.gaze, _gazed == i ? 1f : 0f, Time.deltaTime * 6f);
+            float pulse = 1f + gazePulse * Mathf.Sin(Time.time * 6f) * p.gaze;
+            _block.SetFloat(IntensityId, Mathf.Lerp(1f, gazeIntensity, p.gaze) * pulse);
             p.renderer.SetPropertyBlock(_block);
         }
 
@@ -248,6 +264,32 @@ namespace Diorama
 
         bool AtFront(GateLink g, Vector2Int tile) => tile == g.Front(0) || tile == g.Front(1);
 
+        /// <summary>
+        /// Nov 3: an open gate's front tile goes through when the explorer stops on it (or steps on heading in, OnStep); a
+        /// gate is armed only once the explorer is off its front tiles (the arrival tile is one).
+        /// </summary>
+        void UpdateNear()
+        {
+            bool still = !explorer.Locked && !explorer.Destination.HasValue && explorer.Heading == Vector2Int.zero && !_entering && _pending < 0;
+            int on = -1;
+            for (int i = 0; i < _portals.Count; i++)
+            {
+                var p = _portals[i];
+                bool here = AtFront(p.link, explorer.Tile);
+                if (!here) p.armed = true;
+                else if (p.armed && IsOpen(p.link) && !Hidden(i)) on = i;
+            }
+            _stoodFor = on >= 0 && still ? _stoodFor + Time.deltaTime : 0f;
+            if (on < 0 || _stoodFor < stopToEnter) return;
+            _stoodFor = 0f;
+            Debug.Log($"[ShardGates] Stopped in front of the {_portals[on].link.id} gate: through.");
+            Use(on);
+        }
+
+        /// <summary>True when stepping onto <paramref name="tile"/> from <paramref name="from"/> heads into gate <paramref name="g"/> (pure).</summary>
+        public static bool StepsIn(GateLink g, Vector2Int from, Vector2Int tile) =>
+            (tile == g.Front(0) || tile == g.Front(1)) && tile - from == Vector2Int.down;
+
         /// <summary>Open, and (step 10a) the wind gate only while Galewick is allowed (the Editor, or a build after 10d).</summary>
         public bool IsOpen(GateLink g) => g.Open && (g.id != "wind" || galewick == null || galewick.IsOpen) &&
                                           (g.id != "water" || lilymere == null || lilymere.IsOpen);
@@ -284,6 +326,18 @@ namespace Diorama
 
         void OnStep(Vector2Int tile)
         {
+            // Nov 3: walking onto a front tile heading for the arch goes through, no need to bump into it.
+            if (_pending < 0 && !_entering && Outside)
+                for (int k = 0; k < _portals.Count; k++)
+                {
+                    var p = _portals[k];
+                    if (!p.armed || !IsOpen(p.link) || Hidden(k) || !StepsIn(p.link, _lastStepFrom, tile)) continue;
+                    Debug.Log($"[ShardGates] Walked up to the {p.link.id} gate: through.");
+                    _lastStepFrom = tile;
+                    Use(k);
+                    return;
+                }
+            _lastStepFrom = tile;
             if (_pending < 0 || _pending >= _portals.Count) return;
             if (explorer.Destination.HasValue && explorer.Destination.Value != tile) return;
             int i = _pending;
@@ -310,6 +364,7 @@ namespace Diorama
             if (Hidden(i)) return;
             _last = i;
             var p = _portals[i];
+            p.armed = false;
             if (!IsOpen(p.link))
             {
                 p.bump = 1f;

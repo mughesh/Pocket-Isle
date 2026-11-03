@@ -119,6 +119,8 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
   - Spirit: A Hearth Shrine! Warm your hand over the flame.
 - `shrine.near` · once · while !tutorial · → shrine (step 8c: first time the explorer stands next to one)
   - Spirit: Warm your hand over the flame.
+- `shrine.later` · → shrine (Nov 3: the shrine is locked until the tutorial is over: pinching it or a palm over it)
+  - Spirit: We'll rest there later. Let's find a friend first!
 - `lodge.first` · once · → lodgeCenter (first time inside the Hearth Lodge; the lodge hint chain starts, step 7c)
   - Spirit: This is the Hearth Lodge. Islings you've caught rest here.
 - `lodge.inspect` · once · → lodgeIsling (chain 2: waits for an inspect, comes back after 15 s)
@@ -419,9 +421,7 @@ The third shard wakes the statue: it becomes the Heart of the World. Walking, wi
   - Spirit: What a match! It bows to you.
 
 ## Quick Journey (step 9g, the quick save slot only; a Galewick journey since step 14c)
-- `quick.gift` · once (after the capture lesson, in the hub; two pods fly from the Spirit to the rim)
-  - Spirit: The road to Galewick is windy. Take two friends with you!
-- `quick.gate` · once · → gate:wind (right after the gift: the Spirit points at the wind gate)
+- `quick.gate` · once · → gate:wind (Nov 3: no gift; after the capture lesson, back in the hub: the Spirit points at the wind gate)
   - Spirit: Bring back the wind shard!
 - `quick.end` · once (the wind shard locks in, the statue whispers; then the Keep exploring / See the ending / Title runes)
   - Spirit: You woke the first piece of the world!

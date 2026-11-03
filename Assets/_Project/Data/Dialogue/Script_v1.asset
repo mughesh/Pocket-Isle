@@ -602,6 +602,18 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: Warm your hand over the flame.
+  - id: shrine.later
+    once: 0
+    objective: 0
+    priority: 1
+    note: 'Nov 3: the shrine is locked until the tutorial is over: pinching it or
+      a palm over it'
+    target: shrine
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: We'll rest there later. Let's find a friend first!
   - id: lodge.first
     once: 1
     objective: 0
@@ -2152,23 +2164,12 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: What a match! It bows to you.
-  - id: quick.gift
-    once: 1
-    objective: 0
-    priority: 2
-    note: after the capture lesson, in the hub; two pods fly from the Spirit to the
-      rim
-    target: 
-    validWhile: 
-    lines:
-    - speaker: 0
-      speakerName: Spirit
-      text: The road to Galewick is windy. Take two friends with you!
   - id: quick.gate
     once: 1
     objective: 0
     priority: 2
-    note: 'right after the gift: the Spirit points at the wind gate'
+    note: 'Nov 3: no gift; after the capture lesson, back in the hub: the Spirit
+      points at the wind gate'
     target: gate:wind
     validWhile: 
     lines:

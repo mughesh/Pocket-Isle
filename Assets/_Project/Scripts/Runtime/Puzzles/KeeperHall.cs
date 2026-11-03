@@ -478,6 +478,8 @@ namespace Diorama
             explorer.Locked = false;
             // Step 10a: Keepers grow with the other realms' shards the player holds.
             int level = ShardScaling.KeeperLevel(keeperLevel, ownShard);
+            // Nov 3: easier in the Quick Journey (no gift any more; its realm only).
+            level = QuickJourney.KeeperLevel(level);
             var fight = new EncounterDirector.KeeperFight
             {
                 keeper = new IslingInstance(keeperSpecies, level),

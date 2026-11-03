@@ -166,6 +166,7 @@ namespace Diorama
         IslandMap OutdoorMap => swap != null && swap.Outdoor != null ? swap.Outdoor : island.Content;
 
         bool Outside => !SceneSwap.IsInside && !SceneSwap.IsBusy;
+        float _lockedSaidAt = -99f;
 
         static Vector2 Center(Vector2Int shrine) => shrine + new Vector2(0.5f, 0.5f);
 
@@ -443,6 +444,17 @@ namespace Diorama
         {
             if (index < 0 || index >= _shrines.Count || _entering || !Outside) return;
             var s = _shrines[index];
+            if (!Onboarding.Finished)
+            {
+                // Nov 3 (Mugesh): the hub's shrine is right by the lessons, and look + pinch practice walked people in.
+                Debug.Log($"[HearthShrines] {how} on the shrine c{s.x} r{s.y}: locked until the tutorial is done.");
+                if (Time.time - _lockedSaidAt > 12f)
+                {
+                    _lockedSaidAt = Time.time;
+                    Dialogue.Say("shrine.later");
+                }
+                return;
+            }
             if (Dormant(index))
             {
                 Debug.Log($"[HearthShrines] {how} on the shrine c{s.x} r{s.y}: its flame is nearly out (rekindle it first).");

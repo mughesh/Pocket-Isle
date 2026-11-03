@@ -443,14 +443,12 @@ namespace Diorama
                 Reload();
                 return;
             }
-            var config = QuickJourney.Config;
             var lead = party != null && party.members.Count > 0 ? party.members[0].species : registry != null ? registry.Find("Kilnpot") : null;
-            var (gift, raise) = config != null ? config.LevelsFor(lead) : (8, 8);
+            // Nov 3: no gift; the starter at about the level it reaches by then (QuickJourneySim) and the tutorial catch.
             var team = new List<IslingInstance>();
-            if (lead != null) team.Add(new IslingInstance(lead, stage == QuickStage.Gift ? 6 : raise));
-            if (stage != QuickStage.Gift && config != null)
-                foreach (var s in config.giftSpecies)
-                    if (s != null) team.Add(new IslingInstance(s, gift));
+            if (lead != null) team.Add(new IslingInstance(lead, stage == QuickStage.Temple ? 9 : 6));
+            var tutorial = registry != null ? registry.Find("Toastling") : null;
+            if (tutorial != null) team.Add(new IslingInstance(tutorial, stage == QuickStage.Temple ? 5 : 4));
             var map = stage == QuickStage.Temple ? galewick : hub;
             var tile = map != null ? map.startTile : Vector2Int.zero;
             if (stage == QuickStage.Gift && hub != null && hub.TryGetLandmark("firstGrass", out var grass)) tile = NearestWalkable(hub, grass + new Vector2Int(0, 2));

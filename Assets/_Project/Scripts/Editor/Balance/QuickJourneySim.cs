@@ -7,21 +7,20 @@ using UnityEngine;
 namespace Diorama.EditorTools
 {
     /// <summary>
-    /// Step 9g, a Galewick journey since step 14c: the Quick Journey on paper. <see cref="Keeper"/> walks the quick route
-    /// with the config's dials (the gift team: the starter raised to <see cref="QuickJourneyConfig.raiseTo"/> plus the two
-    /// gifts; Galewick encounters x <see cref="QuickJourneyConfig.encounterRate"/>, XP x
-    /// <see cref="QuickJourneyConfig.xpMultiplier"/>, no rares) and fights Galeowl at 0 shards, per starter. Target 75-85%
-    /// for every starter. <see cref="DryRun"/> estimates the route time per beat from tile counts, walk speed, encounter
-    /// rate and the config's per-beat seconds. Target 12 min or less.
+    /// Step 9g, a Galewick journey since step 14c, no gift since Nov 3: the Quick Journey on paper. <see cref="Keeper"/>
+    /// walks the quick route with the config's dials (Galewick encounters x <see cref="QuickJourneyConfig.encounterRate"/>,
+    /// XP x <see cref="QuickJourneyConfig.xpMultiplier"/>, no rares) and fights Galeowl at 0 shards plus
+    /// <see cref="QuickJourneyConfig.keeperLevelOffset"/>, per starter, with the party a quick player has: the starter
+    /// (fights every battle), the tutorial's Toastling (Lv 3, benched: fire breaks the Gust Wall) and the first Galewick
+    /// catch half the time. Target 75-85%. <see cref="DryRun"/> estimates the route time per beat. Target 12 min or less.
     /// </summary>
     public static class QuickJourneySim
     {
         public const string ConfigPath = "Assets/_Project/Data/QuickJourney.asset";
         const string HubPath = "Assets/_Project/Data/WorldMap_StillIsle.asset";
         const string Keeper_ = "Galeowl";
-
-        /// <summary>The wind friends the gift could be (step 14c: picked by <see cref="SweepWind"/>).</summary>
-        public static readonly string[] WindGifts = { "Kitelet", "Whirlby", "Samarling", "Vanehare" };
+        const string Tutorial = "Toastling";
+        const int TutorialLevel = 3;
 
         /// <summary>The Galewick legs: arrival to the tower (the ridge's clouds are cleared already in the quick slot).</summary>
         static readonly string[] GalewickStops = { "start", "firstGrass", "plaza", "mill", "kites", "ridge", "tower" };
@@ -33,12 +32,10 @@ namespace Diorama.EditorTools
 
         public struct Result
         {
-            public int giftLevel;
+            public int keeperLevel;
             public float arrival, arrivalP10, arrivalP90;
             public float battlesHub, battlesRealm;
             public Dictionary<string, float> win;
-            public float Min => win.Count > 0 ? win.Values.Min() : 0f;
-            public float Max => win.Count > 0 ? win.Values.Max() : 0f;
         }
 
         // ---- Keeper ----
@@ -52,62 +49,28 @@ namespace Diorama.EditorTools
                 Debug.LogError($"[QuickSim] {ConfigPath} missing (Step9gSetup.QuickOnly).");
                 return;
             }
-            var gifts = config.giftSpecies.Where(s => s != null).ToList();
-            var log = new StringBuilder($"[QuickSim] Keeper ({Keeper_} Lv {GaleowlKit.Level}, 0 shards) vs the quick team: the starter (raised, fights the trail) + " +
-                                        $"{string.Join(" + ", gifts.Select(s => s.name))} (gift level, benched; the fire one leads: it breaks the Gust Wall). " +
-                                        $"Galewick: encounters x{config.encounterRate}, XP x{config.xpMultiplier}, rares x{config.rareWeight}.\n");
-            log.Append("| Starter | Gift Lv | Raised to | Starter at Galeowl (p10 / mean / p90) | Battles hub / Galewick | Win |\n|---|---|---|---|---|---|\n");
-            foreach (var n in KeeperSim.Starters)
+            var log = new StringBuilder($"[QuickSim] Keeper ({Keeper_}, base Lv {GaleowlKit.Level}, 0 shards) vs a quick party: the starter + the tutorial {Tutorial} " +
+                                        $"(Lv {TutorialLevel}) + the first Galewick catch half the time. Galewick: encounters x{config.encounterRate}, XP x{config.xpMultiplier}, " +
+                                        $"rares x{config.rareWeight}; config offset {config.keeperLevelOffset:+0;-0}.\n");
+            log.Append("| Offset | Galeowl Lv | Starter arrives (p10 / mean / p90) | Battles hub / Galewick | Kilnpot | Pebbloop | Pufflet |\n|---|---|---|---|---|---|---|\n");
+            foreach (int offset in new[] { 0, -1, -2, -3, -4 })
             {
-                var (gift, raise) = config.LevelsFor(KeeperSim.Load(n));
-                var r = Run(config, gifts, gift, raise, 600, 1000, 5, n);
-                log.Append($"| {n} | {gift} | {raise} | {r.arrivalP10:0} / {r.arrival:0.0} / {r.arrivalP90:0} | {r.battlesHub:0.0} / {r.battlesRealm:0.0} | " +
-                           $"{(r.win.TryGetValue(n, out float w) ? w : 0f):P0} |\n");
+                var r = Run(config, offset, 600, 1000);
+                log.Append($"| {offset:+0;-0;0}{(offset == config.keeperLevelOffset ? " (config)" : "")} | {r.keeperLevel} | {r.arrivalP10:0} / {r.arrival:0.0} / {r.arrivalP90:0} | " +
+                           $"{r.battlesHub:0.0} / {r.battlesRealm:0.0} |");
+                foreach (var n in KeeperSim.Starters) log.Append($" {(r.win.TryGetValue(n, out float w) ? w : 0f):P0} |");
+                log.Append('\n');
             }
             Debug.Log(log.ToString());
         }
 
-        /// <summary>Step 14c: Toastling + each wind friend, win % per starter over gift level x the starter's raised level.</summary>
-        public static void SweepWind()
+        /// <summary>The quick route, then Galeowl fights per starter at its base level + <paramref name="offset"/>.</summary>
+        public static Result Run(QuickJourneyConfig config, int offset, int trailRuns, int fights, int seed = 5, string only = null)
         {
-            var config = Config;
-            var toast = KeeperSim.Load("Toastling");
-            if (config == null || toast == null) return;
-            var log = new StringBuilder($"[QuickSim] Wind gift sweep vs {Keeper_} Lv {GaleowlKit.Level}: Toastling + the wind friend at the gift level (rows), the starter raised to (columns).\n");
-            foreach (var wind in WindGifts)
-            {
-                var w = KeeperSim.Load(wind);
-                if (w == null) continue;
-                var gifts = new List<IslingSpecies> { toast, w };
-                foreach (var name in KeeperSim.Starters)
-                {
-                    log.Append($"{wind} / {name}:");
-                    for (int g = 6; g <= 9; g++)
-                    {
-                        log.Append($" | gift {g}:");
-                        for (int s = 6; s <= 9; s++) log.Append($" {Run(config, gifts, g, s, 0, 300, 5, name).win[name] * 100f,3:0}");
-                    }
-                    log.Append('\n');
-                }
-            }
-            Debug.Log(log.ToString());
-        }
-
-        /// <summary>Bridge: one starter with the config's gifts at given levels; Temp/ClaudeBridge/arg.txt "Kilnpot,6,7" (starter, gift, raised).</summary>
-        public static void Try()
-        {
-            var a = System.IO.File.ReadAllText("Temp/ClaudeBridge/arg.txt").Split(',');
-            var config = Config;
-            var r = Run(config, config.giftSpecies.Where(s => s != null).ToList(), int.Parse(a[1]), int.Parse(a[2]), 600, 1000, 5, a[0]);
-            Debug.Log($"[QuickSim] Try {a[0]} gift {a[1]} raised {a[2]}: arrives {r.arrival:0.0}, win {r.win[a[0]]:P0}");
-        }
-
-        /// <summary>The quick route with the gifts at <paramref name="giftLevel"/>: arrival levels, then Galeowl fights per starter.</summary>
-        public static Result Run(QuickJourneyConfig config, List<IslingSpecies> gifts, int giftLevel, int starterLevel, int trailRuns, int fights, int seed = 5,
-            string only = null)
-        {
-            var result = new Result { giftLevel = giftLevel, win = new Dictionary<string, float>() };
+            int keeperLevel = Mathf.Max(1, GaleowlKit.Level + offset);
+            var result = new Result { keeperLevel = keeperLevel, win = new Dictionary<string, float>() };
             var keeper = KeeperSim.Load(Keeper_);
+            var tutorial = KeeperSim.Load(Tutorial);
             var chart = KeeperSim.Chart;
             var prog = Progression;
             var hub = Hub;
@@ -125,15 +88,20 @@ namespace Diorama.EditorTools
                 int wins = 0;
                 for (int i = 0; i < fights; i++)
                 {
-                    // The trail (resampled per fight so the arrival level varies like real runs).
-                    var me = new IslingInstance(starter, starterLevel > 0 ? starterLevel : giftLevel);
+                    var me = new IslingInstance(starter, 5);
+                    // The tutorial battle and the catch lesson (Lv 3, scripted).
+                    Diorama.Progression.AddXp(me, prog.Reward(3, false), prog);
+                    Diorama.Progression.AddXp(me, prog.Reward(3, false), prog);
                     int since = 0;
-                    bh += Walk(hub, hubPath, me, prog, 1f, 1f, rnd, ref since);
-                    br += Walk(gale, realmPath, me, prog, config.encounterRate, config.xpMultiplier, rnd, ref since);
+                    IslingInstance caught = null;
+                    bool wantsCatch = rnd.Next() < 0.5f;
+                    bh += Walk(hub, hubPath, me, prog, 1f, 1f, rnd, ref since, ref caught, false);
+                    br += Walk(gale, realmPath, me, prog, config.encounterRate, config.xpMultiplier, rnd, ref since, ref caught, wantsCatch);
                     if (i < trailRuns) arrivals.Add(me.level);
                     var party = new List<IslingInstance> { new IslingInstance(starter, me.level) };
-                    foreach (var g in gifts) party.Add(new IslingInstance(g, giftLevel));
-                    if (KeeperSim.Fight(party, new IslingInstance(keeper, GaleowlKit.Level), chart, seed * 7919 + i, out _) == BattleResult.Won) wins++;
+                    if (tutorial != null) party.Add(new IslingInstance(tutorial, TutorialLevel));
+                    if (caught != null) party.Add(caught);
+                    if (KeeperSim.Fight(party, new IslingInstance(keeper, keeperLevel), chart, seed * 7919 + i, out _) == BattleResult.Won) wins++;
                 }
                 result.win[name] = wins / (float)Mathf.Max(1, fights);
             }
@@ -160,8 +128,13 @@ namespace Diorama.EditorTools
             return wind >= 0 ? hub.gates[wind].Front(0) : hub.startTile;
         }
 
-        /// <summary>One walk along <paramref name="path"/>: 3 grace steps after a battle, then 12.5% x rate per tall-grass step; no rares; the walker wins and gets XP x scale.</summary>
-        static int Walk(WorldMap map, List<Vector2Int> path, IslingInstance me, ProgressionConfig prog, float rate, float xpScale, SeededRandom rnd, ref int since)
+        /// <summary>
+        /// One walk along <paramref name="path"/>: 3 grace steps after a battle, then 12.5% x rate per tall-grass step; no rares
+        /// in the quick realm; the walker wins and gets XP x scale. With <paramref name="wantsCatch"/> the first wild met is
+        /// caught instead (no XP, benched at its level).
+        /// </summary>
+        static int Walk(WorldMap map, List<Vector2Int> path, IslingInstance me, ProgressionConfig prog, float rate, float xpScale, SeededRandom rnd, ref int since,
+            ref IslingInstance caught, bool wantsCatch)
         {
             int battles = 0;
             foreach (var t in path)
@@ -173,11 +146,15 @@ namespace Diorama.EditorTools
                 if (table == null) continue;
                 IslingInstance wild = null;
                 bool rare = true;
-                // Rares are off in the quick realm: roll again (the hub keeps them, a few % only).
                 for (int k = 0; k < 6 && rare && rate < 1f; k++) table.Roll(rnd, out wild, out rare);
                 if (rate >= 1f) table.Roll(rnd, out wild, out rare);
                 if (wild == null) continue;
                 battles++;
+                if (wantsCatch && caught == null)
+                {
+                    caught = wild;
+                    continue;
+                }
                 Diorama.Progression.AddXp(me, Mathf.Max(1, Mathf.RoundToInt(prog.Reward(wild.level, rare) * xpScale)), prog);
             }
             return battles;
@@ -226,7 +203,7 @@ namespace Diorama.EditorTools
             {
                 new Beat { name = "Opening + lessons", seconds = config.openingSeconds + config.lessonSeconds + 1.5f * config.battleSeconds,
                     how = $"opening {config.openingSeconds:0} s, lessons {config.lessonSeconds:0} s, tutorial battle {1.5f * config.battleSeconds:0} s" },
-                new Beat { name = "Gift", seconds = config.giftSeconds, how = "two pods, the levels raised, quick.gate" },
+                new Beat { name = "Send-off", seconds = config.giftSeconds, how = "quick.gate, the trail to the wind gate" },
                 new Beat { name = "To the wind gate", seconds = giftWalk * walk + r.battlesHub * config.battleSeconds + config.gateSeconds,
                     how = $"{giftWalk} tiles, {r.battlesHub:0.0} battles, gate {config.gateSeconds:0} s" },
                 new Beat { name = "Arrival sweep", seconds = config.arriveSeconds, how = "two cloud puffs on the path" },
@@ -255,8 +232,7 @@ namespace Diorama.EditorTools
                 Debug.LogError("[QuickSim] Config or maps missing (Step9gSetup.QuickOnly).");
                 return;
             }
-            var gifts = config.giftSpecies.Where(s => s != null).ToList();
-            var r = Run(config, gifts, config.giftLevel, config.raiseTo, 300, 300);
+            var r = Run(config, config.keeperLevelOffset, 300, 300);
             var rows = Beats(config, hub, gale, r);
             float total = rows.Sum(x => x.seconds);
             var log = new StringBuilder($"[QuickSim] Quick Journey dry run, Galewick ({config.walkSecondsPerTile:0.0} s per tile, battle {config.battleSeconds:0} s): " +

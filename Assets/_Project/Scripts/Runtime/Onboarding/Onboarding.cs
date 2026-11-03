@@ -87,6 +87,9 @@ namespace Diorama
         public LessonRunner Runner => _runner;
         public LessonData Current => _runner != null && _runner.State == LessonRunner.Phase.Teaching ? _runner.Current : null;
         public bool IsFinished => _runner != null && _runner.IsFinished;
+
+        /// <summary>Nov 3: the tutorial is over (moves, look, grass, the first catch); true with no tutorial in the scene.</summary>
+        public static bool Finished => _instance == null || _instance.IsFinished;
         /// <summary>The saved id of the lesson the player is on (null when finished or not started).</summary>
         public string CurrentId => _runner != null && _runner.IsRunning && _runner.Current != null ? _runner.Current.id : null;
         public bool HandsMissing { get; private set; }

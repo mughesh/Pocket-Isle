@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Diorama.Audio;
 using TMPro;
 using UnityEngine;
 
@@ -39,11 +40,11 @@ namespace Diorama
         public Card[] cards = new Card[0];
 
         [Header("Placement (island-local metres at island scale 1)")]
-        public float width = 0.24f;
-        [Tooltip("Card centre this high over the island's top surface.")]
-        public float height = 0.17f;
+        public float width = 0.26f;
+        [Tooltip("Card centre this high over the island's top surface. Nov 3 (Mugesh): centred and higher (it sat low at the back, behind Cinderwood's trees).")]
+        public float height = 0.25f;
         [Tooltip("Toward the far rim: 0 = the island's middle, 1 = the far edge.")]
-        [Range(0f, 1.2f)] public float far = 0.9f;
+        [Range(0f, 1.2f)] public float far = 0.1f;
         [Tooltip("It rises from this far below its spot (and sinks back there).")]
         public float rise = 0.08f;
 
@@ -151,13 +152,16 @@ namespace Diorama
             string arrival = card.map.arrivalLine;
             float waited = 0f;
             yield return new WaitForSeconds(0.4f);
-            while (waited < waitMax && (!Calm || Dialogue.IsTalking || !string.IsNullOrEmpty(arrival) && Dialogue.IsPending(arrival)))
+            // Only the arrival line itself: an objective pinned right after it stays up the whole moment (Nov 3: the card
+            // waited for it and came 10 s late in Cinderwood and Lilymere).
+            while (waited < waitMax && (!Calm || !string.IsNullOrEmpty(arrival) && Dialogue.IsPending(arrival)))
             {
                 waited += Time.deltaTime;
                 yield return null;
             }
             if (!Calm || island.world != card.map)
             {
+                Debug.Log($"[RealmNameCard] {card.map.realm}: skipped ({(island.world != card.map ? "left the map" : "not calm: a battle, the menu, a swap or the finale")}).");
                 _run = null;
                 yield break;
             }
@@ -169,6 +173,7 @@ namespace Diorama
             float hold = withLine && !string.IsNullOrEmpty(line) ? firstSeconds : againSeconds;
             Debug.Log($"[RealmNameCard] {card.map.realm}: '{(string.IsNullOrEmpty(line) ? "(name only)" : line)}' for {hold:0.#} s (waited {waited:0.0} s for the arrival line).");
             Setup(card, line);
+            Sound(AudioIds.CardRise, AudioIds.LogoRise);
             Showing = true;
             ShowingRealm = card.map.realm;
             for (float t = 0f; t < riseSeconds; t += Time.deltaTime)
@@ -182,6 +187,7 @@ namespace Diorama
             _lift = 0f;
             Sparkle(18);
             for (float t = 0f; t < hold && Calm && island.world == card.map; t += Time.deltaTime) yield return null;
+            Sound(AudioIds.CardSink, null);
             for (float t = 0f; t < sinkSeconds; t += Time.deltaTime)
             {
                 float u = Mathf.SmoothStep(0f, 1f, t / sinkSeconds);
@@ -263,6 +269,14 @@ namespace Diorama
             Vector3 toHead = island.transform.InverseTransformPoint(cam.transform.position) - RestLocal;
             toHead.y = 0f;
             return toHead.sqrMagnitude < 1e-6f ? _yaw : Mathf.Atan2(toHead.x, toHead.z) * Mathf.Rad2Deg;
+        }
+
+        /// <summary>Its own cue (card.rise / card.sink, made Nov 3), the logo's as a stand-in when it isn't there.</summary>
+        void Sound(string id, string fallback)
+        {
+            var at = _pivot != null ? _pivot.position : island.transform.position;
+            if (AudioService.Has(id)) GameAudio.At(id, at);
+            else if (!string.IsNullOrEmpty(fallback)) GameAudio.At(fallback, at);
         }
 
         void Sparkle(int count)

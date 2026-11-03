@@ -58,6 +58,14 @@ namespace Diorama
 
         /// <summary>The gift's puzzle stage when it was skipped (a realm visited first).</summary>
         public const int GiftSkipped = 2;
+        /// <summary>Nov 3: the send-off that replaced the gift (no Islings given).</summary>
+        public const int SentOff = 3;
+
+        /// <summary>Nov 3: the quick realm's Keeper this many levels off (negative = easier) in the quick slot (pure).</summary>
+        public static int KeeperLevel(int level, bool quick, bool quickRealm, QuickJourneyConfig c) =>
+            quick && quickRealm && c != null ? Mathf.Max(1, level + c.keeperLevelOffset) : level;
+
+        public static int KeeperLevel(int level) => KeeperLevel(level, Active, InQuickRealm, Config);
 
         public static bool SkipsLesson(string id, bool quick, QuickJourneyConfig c) =>
             quick && c != null && c.cutLessons != null && Array.IndexOf(c.cutLessons, id) >= 0;

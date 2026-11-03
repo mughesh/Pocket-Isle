@@ -31,6 +31,7 @@ namespace Diorama.Audio.EditorTools
             Supporting();
             Ambience();
             AudioD();
+            Step14();
             _list = null;
         }
 

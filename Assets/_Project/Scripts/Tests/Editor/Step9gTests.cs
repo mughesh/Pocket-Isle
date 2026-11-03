@@ -147,20 +147,15 @@ namespace Diorama.Tests
         }
 
         [Test]
-        public void Quick_Config_GivesToastlingAndWhirlby_ForGalewick()
+        public void Quick_Config_NoGift_EasierKeeperInTheQuickRealmOnly()
         {
             var c = AssetDatabase.LoadAssetAtPath<QuickJourneyConfig>("Assets/_Project/Data/QuickJourney.asset");
             if (c == null) Assert.Inconclusive("Run Step9gSetup.QuickOnly first.");
-            // Step 14c: a Galewick journey: fire beats wind, and a wind friend.
-            CollectionAssert.AreEquivalent(new[] { "Toastling", "Whirlby" }, System.Array.ConvertAll(c.giftSpecies, s => s != null ? s.name : null));
-            Assert.AreEqual(8, c.giftLevel, "the default gift is Lv 8");
-            foreach (var n in new[] { "Kilnpot", "Pebbloop", "Pufflet" })
-            {
-                var s = AssetDatabase.LoadAssetAtPath<IslingSpecies>($"Assets/_Project/Data/Creatures/Species/{n}.asset");
-                var (gift, raise) = c.LevelsFor(s);
-                Assert.That(gift, Is.InRange(5, 10), $"{n} gift level");
-                Assert.That(raise, Is.InRange(6, 11), $"{n} raise level");
-            }
+            // Nov 3: no gift; Galeowl a little easier in the quick slot, in Galewick only.
+            Assert.Less(c.keeperLevelOffset, 0);
+            Assert.AreEqual(8 + c.keeperLevelOffset, QuickJourney.KeeperLevel(8, true, true, c));
+            Assert.AreEqual(8, QuickJourney.KeeperLevel(8, false, true, c), "full adventure unchanged");
+            Assert.AreEqual(12, QuickJourney.KeeperLevel(12, true, false, c), "other realms unchanged");
             Assert.Less(c.encounterRate, 1f);
             Assert.Greater(c.xpMultiplier, 1f);
         }

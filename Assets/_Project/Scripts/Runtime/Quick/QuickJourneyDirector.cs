@@ -7,10 +7,9 @@ namespace Diorama
 {
     /// <summary>
     /// Runs the Quick Journey's own beats in the quick save slot (step 9g; a Galewick journey since step 14c):
-    /// - The gift: once the lessons are done, back in the hub and calm, the Spirit says <c>quick.gift</c>, two pods fly
-    ///   from it to the rim (<see cref="QuickJourneyConfig.giftSpecies"/> at the gift level), the starter and anything
-    ///   caught are raised to <see cref="QuickJourneyConfig.raiseTo"/>, then <c>quick.gate</c> sends the Spirit to the wind
-    ///   gate (it glows gold). Saved as the puzzle <c>quick.gift</c>.
+    /// - The send-off (no gift since Nov 3): once the lessons are done, back in the hub and calm, <c>quick.gate</c> sends
+    ///   the Spirit to the wind gate and its trail shows the way. Saved as the puzzle <c>quick.gift</c> (stage 3).
+    ///   Galeowl is easier in the quick slot instead (<see cref="QuickJourneyConfig.keeperLevelOffset"/>).
     /// - Galewick: the ridge cloud bank is cleared already (the sweep was taught at the arrival).
     /// - The gold path: standing still a few seconds shows gold tiles toward the next goal (wind gate, mill, kites, tower,
     ///   home gate with the shard, then the statue).
@@ -46,18 +45,15 @@ namespace Diorama
             ("gw.mill", "mill"), ("gw.kites", "kites"), (TowerDoor.TowerId, "tower"),
         };
 
-        bool _gifting, _ending, _timing, _previewing;
-        float _calm, _still, _nextGold, _savedAt;
-        Vector2Int _lastTile;
-        Coroutine _flash;
-        readonly List<Vector2Int> _path = new List<Vector2Int>();
+        bool _sending, _ending, _timing, _previewing;
+        float _calm, _savedAt;
 
         void Awake()
         {
             QuickJourney.Config = config;
             QuickJourney.Owner = this;
             if (config == null) Debug.LogError("[QuickJourney] No config (Set Up MR_Main (9g title, menus, quick)): no Quick Journey dials.", this);
-            // The pause hint waits until the gift has been given.
+            // The pause hint waits until the send-off.
             GameMenu.HoldHint = () => QuickJourney.Active && !PuzzleState.IsSolved(QuickJourney.GiftId);
         }
 
@@ -95,9 +91,8 @@ namespace Diorama
             QuickJourney.InQuickRealm = outdoor != null && outdoor == galewick;
             if (!QuickJourney.Active) return;
             Timer();
-            TryGift();
+            TrySendOff();
             Presolve();
-            if (!QuickJourney.Finished) GoldHint();
         }
 
         // ---- timer ----
@@ -139,126 +134,46 @@ namespace Diorama
             else PuzzleState.Solve(RidgeId, 1);
         }
 
-        // ---- the gift ----
+        // ---- the send-off ----
 
-        /// <summary>Step 12b: into a realm before the gift came: it's skipped for good (no two Islings arriving later).</summary>
+        /// <summary>Into a realm before the send-off: it's skipped for good.</summary>
         void OnTravelled(WorldMap to)
         {
-            if (!QuickJourney.Active || _gifting || PuzzleState.IsSolved(QuickJourney.GiftId) || to == null || to == hub) return;
+            if (!QuickJourney.Active || _sending || PuzzleState.IsSolved(QuickJourney.GiftId) || to == null || to == hub) return;
             PuzzleState.Solve(QuickJourney.GiftId, QuickJourney.GiftSkipped);
-            Debug.Log($"[QuickJourney] Into {to.name} before the gift: the gift is skipped.");
+            Debug.Log($"[QuickJourney] Into {to.name} before the send-off: skipped.");
         }
 
-        void TryGift()
+        void TrySendOff()
         {
-            bool ready = !_gifting && QuickJourney.GiftAllowed(QuickJourney.Active, PuzzleState.IsSolved(QuickJourney.GiftId), false) &&
+            bool ready = !_sending && QuickJourney.GiftAllowed(QuickJourney.Active, PuzzleState.IsSolved(QuickJourney.GiftId), false) &&
                          onboarding != null && onboarding.IsFinished &&
                          island.world == hub && (swap == null || !swap.Inside) && !SceneSwap.IsBusy && !Opening.InProgress &&
                          !TitleScreen.Showing && !GameMenu.IsOpen && (encounters == null || !encounters.InBattle) &&
                          !explorer.Locked && !Dialogue.IsTalking && party.members.Count > 0;
             _calm = ready ? _calm + Time.deltaTime : 0f;
-            if (_calm >= 2f) StartCoroutine(Gift());
+            if (_calm >= 2f) StartCoroutine(SendOff());
         }
 
-        IEnumerator Gift()
+        /// <summary>
+        /// Nov 3 (Mugesh): no gift any more (it gave Islings you had, or ones from another realm): the Spirit sends you off
+        /// to the wind gate and you catch your own friends on the way; the quick slot keeps Galeowl easier instead
+        /// (<see cref="QuickJourneyConfig.keeperLevelOffset"/>). Saved as the puzzle <c>quick.gift</c> (stage 3 = sent off).
+        /// </summary>
+        IEnumerator SendOff()
         {
-            _gifting = true;
+            _sending = true;
             _calm = 0f;
-            explorer.Locked = true;
-            Debug.Log("[QuickJourney] The gift: two friends for the road.");
-            Dialogue.Say("quick.gift");
-            for (float t = 0f; t < 1.5f && !Dialogue.IsTalking; t += Time.deltaTime) yield return null;
-            yield return new WaitForSeconds(1f);
-            var (giftLevel, raiseTo) = Levels();
-            foreach (var s in config.giftSpecies)
-            {
-                if (s == null) continue;
-                var gift = new IslingInstance(s, giftLevel);
-                yield return Fly(gift);
-                yield return new WaitForSeconds(0.25f);
-            }
-            foreach (var c in party.members)
-                Raise(c, raiseTo);
-            foreach (var c in party.storage)
-                Raise(c, raiseTo);
-            party.NotifyChanged();
-            PuzzleState.Solve(QuickJourney.GiftId, 1);
-            for (float t = 0f; t < 12f && Dialogue.IsTalking; t += Time.deltaTime) yield return null;
+            PuzzleState.Solve(QuickJourney.GiftId, QuickJourney.SentOff);
             Dialogue.Say("quick.gate");
-            explorer.Locked = false;
-            _gifting = false;
-            Debug.Log($"[QuickJourney] Gift given: {string.Join(", ", party.members.ConvertAll(c => $"{c.Name} Lv {c.level}"))}.");
+            Debug.Log("[QuickJourney] Send-off: the Spirit points at the wind gate.");
+            yield return new WaitForSeconds(1.5f);
+            var trail = FindFirstObjectByType<SpiritTrail>();
+            if (trail != null) trail.Show("quick journey: send-off");
+            _sending = false;
         }
 
-        /// <summary>The gift level and raise level for this party's starter (the config's per-starter tuning).</summary>
-        (int gift, int raise) Levels()
-        {
-            foreach (var c in party.members)
-                if (c != null && config.perStarter != null)
-                    foreach (var t in config.perStarter)
-                        if (t.starter != null && (t.starter == c.species || t.starter.evolvesTo == c.species)) return (t.giftLevel, t.raiseTo);
-            return (config.giftLevel, config.raiseTo);
-        }
-
-        static void Raise(IslingInstance c, int level)
-        {
-            if (c == null || c.level >= level) return;
-            c.level = level;
-            c.xp = 0;
-            c.Heal();
-        }
-
-        /// <summary>A pod with the gift flies from the Spirit to the next free rim socket, then the Isling joins the party.</summary>
-        IEnumerator Fly(IslingInstance gift)
-        {
-            int slot = Mathf.Min(party.members.Count, Party.Size - 1);
-            PodView pod = null;
-            if (pods != null && pods.podPrefab != null && spirit != null)
-            {
-                pod = Instantiate(pods.podPrefab, island.transform, false);
-                pod.name = $"Gift Pod {gift.Name}";
-                GameAudio.On(Diorama.Audio.AudioIds.GiftPods, pod.transform);
-                pod.Show(gift);
-                var grab = pod.GetComponent<PodGrab>();
-                if (grab != null) grab.enabled = false;
-                Vector3 from = spirit.transform.position, to = pods.HomeWorld(slot);
-                float s = island.transform.lossyScale.x;
-                for (float t = 0f; t < 0.9f; t += Time.deltaTime)
-                {
-                    float u = Mathf.SmoothStep(0f, 1f, t / 0.9f);
-                    pod.transform.position = Vector3.Lerp(from, to, u) + Vector3.up * (0.06f * s * Mathf.Sin(u * Mathf.PI));
-                    pod.BaseScale = Vector3.one * Mathf.Lerp(0.3f, 1f, Mathf.Clamp01(t / 0.4f));
-                    yield return null;
-                }
-                Destroy(pod.gameObject);
-                if (fx != null) fx.Burst(to, 14, RuneBoard.Gold, 0.05f * s, 0.9f, 0.004f * s, Vector3.up * 0.05f);
-            }
-            party.Add(gift);
-            party.NotifyChanged();
-        }
-
-        // ---- the gold path ----
-
-        void GoldHint()
-        {
-            if (config == null || !config.goldPathHint || !PuzzleState.IsSolved(QuickJourney.GiftId) || explorer.Locked || !explorer.CanMove ||
-                explorer.Destination.HasValue || SceneSwap.IsBusy || swap != null && swap.Inside || GameMenu.IsOpen || TitleScreen.Showing ||
-                encounters != null && encounters.InBattle || explorer.Tile != _lastTile)
-            {
-                _still = 0f;
-                _lastTile = explorer.Tile;
-                return;
-            }
-            _still += Time.deltaTime;
-            if (_still < config.goldPathAfter || Time.time < _nextGold || _flash != null) return;
-            _nextGold = Time.time + config.goldPathEvery;
-            var world = island.world;
-            var goal = NextGoal(world);
-            // Nothing to show right next to the goal (the puzzle there has its own hints).
-            if (!goal.HasValue || !ExplorerPath.Find(world, explorer.Tile, goal.Value, _path, 400) || _path.Count <= 2) return;
-            _flash = StartCoroutine(Flash(new List<Vector2Int>(_path)));
-            Debug.Log($"[QuickJourney] Gold path: {Mathf.Min(_path.Count, config.goldPathTiles)} of {_path.Count} tiles toward c{goal.Value.x} r{goal.Value.y}.");
-        }
+        // ---- the route (the Spirit's trail shows it in the quick slot too, since Nov 3) ----
 
         /// <summary>Where the route goes next from here (null = nowhere: the journey is done or not on a route map).</summary>
         public Vector2Int? NextGoal(WorldMap world)
@@ -302,19 +217,6 @@ namespace Diorama
 
         static Vector2Int? Mark(WorldMap world, string landmark) =>
             world.TryGetLandmark(landmark, out var t) ? GameState.NearestWalkable(world, t) : (Vector2Int?)null;
-
-        IEnumerator Flash(List<Vector2Int> path)
-        {
-            var from = explorer.Tile;
-            int n = Mathf.Min(path.Count, config.goldPathTiles);
-            for (int i = 0; i < n; i++)
-            {
-                if (explorer.Tile != from) break;
-                island.FlashTile(path[i], 0.4f);
-                yield return new WaitForSeconds(0.1f);
-            }
-            _flash = null;
-        }
 
         // ---- the end ----
 

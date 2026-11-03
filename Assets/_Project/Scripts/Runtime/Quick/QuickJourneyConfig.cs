@@ -14,33 +14,9 @@ namespace Diorama
         [Tooltip("Lesson ids skipped in the quick slot (every lesson that teaches a hand verb stays).")]
         public string[] cutLessons = { "twoHands" };
 
-        [Header("The gift (after the capture lesson, in the hub)")]
-        public IslingSpecies[] giftSpecies = new IslingSpecies[2];
-        [Min(1)] public int giftLevel = 8;
-        [Tooltip("The starter and any caught Isling are raised to at least this level.")]
-        [Min(1)] public int raiseTo = 8;
-        [Tooltip("Per starter (the Keeper sim's 75-85% band): the gifts' level and the level the party is raised to. " +
-                 "A starter not listed uses Gift Level / Raise To.")]
-        public StarterTuning[] perStarter = new StarterTuning[0];
-
-        [System.Serializable]
-        public struct StarterTuning
-        {
-            public IslingSpecies starter;
-            [Min(1)] public int giftLevel;
-            [Min(1)] public int raiseTo;
-        }
-
-        /// <summary>The gift level and raise level for a party whose starter is <paramref name="starter"/> (or its evolution).</summary>
-        public (int gift, int raise) LevelsFor(IslingSpecies starter)
-        {
-            if (starter != null && perStarter != null)
-                foreach (var t in perStarter)
-                    if (t.starter != null && (t.starter == starter || t.starter.evolvesTo == starter)) return (t.giftLevel, t.raiseTo);
-            return (giftLevel, raiseTo);
-        }
-
         [Header("Dials in the quick realm (Galewick since step 14c)")]
+        [Tooltip("Nov 3 (no gift any more): the quick realm's Keeper is this many levels off in the quick slot (negative = easier).")]
+        public int keeperLevelOffset = -2;
         [Tooltip("x the tall-grass encounter chance.")]
         [Range(0f, 2f)] public float encounterRate = 0.5f;
         [Tooltip("x the win XP, on top of the normal curve.")]

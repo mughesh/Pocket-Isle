@@ -42,8 +42,7 @@ namespace Diorama.EditorTools
         }
 
         /// <summary>
-        /// B: the quick gifts and levels (QuickJourneySim.SweepWind, Galeowl Lv 8: Kilnpot gift 5 / raised 8, Pebbloop 8 / 9,
-        /// Pufflet 8 / 7; Toastling leads: fire breaks the Gust Wall) and the director's quick realm.
+        /// B: the director's quick realm (the gift went on Nov 3: Step14dSetup sets Galeowl's quick offset instead).
         /// </summary>
         static void Quick(StringBuilder log)
         {
@@ -53,17 +52,6 @@ namespace Diorama.EditorTools
                 log.Append(NL + "  Quick Journey config MISSING (Step9gSetup.QuickOnly)");
                 return;
             }
-            IslingSpecies S(string n) => KeeperSim.Load(n);
-            config.giftSpecies = new[] { S("Toastling"), S("Whirlby") };
-            config.giftLevel = 8;
-            config.raiseTo = 8;
-            config.perStarter = new[]
-            {
-                new QuickJourneyConfig.StarterTuning { starter = S("Kilnpot"), giftLevel = 5, raiseTo = 8 },
-                new QuickJourneyConfig.StarterTuning { starter = S("Pebbloop"), giftLevel = 8, raiseTo = 9 },
-                new QuickJourneyConfig.StarterTuning { starter = S("Pufflet"), giftLevel = 8, raiseTo = 7 },
-            };
-            EditorUtility.SetDirty(config);
             var director = Object.FindFirstObjectByType<QuickJourneyDirector>(FindObjectsInactive.Include);
             if (director != null)
             {
@@ -71,8 +59,7 @@ namespace Diorama.EditorTools
                 director.galewick = AssetDatabase.LoadAssetAtPath<WorldMap>(GalewickTools.MapPath);
                 EditorUtility.SetDirty(director);
             }
-            log.Append(NL + $"  Quick Journey: gifts {string.Join(" + ", System.Array.ConvertAll(config.giftSpecies, s => s != null ? s.name : "MISSING"))}, " +
-                       $"Kilnpot 5/8, Pebbloop 8/9, Pufflet 8/7; director {(director != null && director.galewick != null ? "-> Galewick" : "MISSING")}");
+            log.Append(NL + $"  Quick Journey: director {(director != null && director.galewick != null ? "-> Galewick" : "MISSING")}");
         }
 
         /// <summary>C: the arrival lanterns (map + piece); the hollow keeps a counter and a short line, no ghost.</summary>

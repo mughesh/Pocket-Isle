@@ -9,7 +9,10 @@ namespace Diorama
     /// Keeper's door, else the return gate; in the hub the statue while a shard is held, else the next realm gate whose
     /// shard isn't home yet. It shows after the tutorial's last lesson, on entering a realm, after standing still
     /// <see cref="stillSeconds"/> with no objective pinned, and when the Spirit is poked; it fades on reaching the goal or
-    /// after <see cref="showSeconds"/>. The quick slot keeps its own gold path (<see cref="QuickJourneyDirector"/>).
+    /// after <see cref="showSeconds"/>. Nov 3 (Mugesh: "the golden path is not showing up"): every realm's arrival moment
+    /// sits by the portal, so arriving showed nothing and the trail only came back after 12 s standing still. It now also
+    /// shows a moment after any hand moment is solved, and the quick slot uses it too (its old tile flash is gone; there it
+    /// waits the config's gold path seconds).
     /// </summary>
     public class SpiritTrail : MonoBehaviour
     {
@@ -21,8 +24,10 @@ namespace Diorama
         [Tooltip("Diorama/GoldMark (Materials/GoldMark).")]
         public Material material;
 
-        [Tooltip("Seconds standing still with no objective before the trail shows.")]
+        [Tooltip("Seconds standing still with no objective before the trail shows (the quick slot: its config's gold path seconds).")]
         public float stillSeconds = 12f;
+        [Tooltip("Seconds after a hand moment is solved before the trail shows the way on (its done line first).")]
+        public float afterSolved = 2.5f;
         [Tooltip("Seconds the trail stays up.")]
         public float showSeconds = 20f;
         [Tooltip("Tiles of trail shown ahead of the explorer.")]
@@ -55,7 +60,8 @@ namespace Diorama
 
         GoldMarks _marks;
         readonly List<Vector2Int> _path = new List<Vector2Int>();
-        float _shownAt = -99f, _pathAt = -99f, _still;
+        float _shownAt = -99f, _pathAt = -99f, _still, _solvedAt = -99f;
+        string _afterSolved;
         Vector2Int _lastTile;
         Vector2Int? _goal;
         HandPuzzle[] _pieces;
@@ -72,6 +78,16 @@ namespace Diorama
             var swap = FindFirstObjectByType<SceneSwap>();
             if (swap != null) swap.TravelFinished += OnTravelled;
             if (onboarding != null) onboarding.LessonEnded += OnLessonEnded;
+            _pieces = FindObjectsByType<HandPuzzle>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var p in _pieces)
+                if (p != null) p.Solved += OnSolved;
+        }
+
+        void OnSolved(HandPuzzle p)
+        {
+            if (p is StatueSocket) return;
+            _solvedAt = Time.time;
+            _afterSolved = p.id;
         }
 
         void OnDestroy()
@@ -80,6 +96,9 @@ namespace Diorama
             var swap = FindFirstObjectByType<SceneSwap>();
             if (swap != null) swap.TravelFinished -= OnTravelled;
             if (onboarding != null) onboarding.LessonEnded -= OnLessonEnded;
+            if (_pieces != null)
+                foreach (var p in _pieces)
+                    if (p != null) p.Solved -= OnSolved;
             if (_marks != null) _marks.Destroy();
         }
 
@@ -93,8 +112,7 @@ namespace Diorama
             if (!Onboarding.Running) Show("tutorial done");
         }
 
-        // Step 14c: after the Quick Journey's end (Keep exploring) the full adventure's trail leads on.
-        bool Active => (!QuickJourney.Active || QuickJourney.Finished) && explorer != null && island != null && island.world != null && !SceneSwap.IsBusy &&
+        bool Active => explorer != null && island != null && island.world != null && !SceneSwap.IsBusy &&
                        !SceneSwap.IsInside && !TitleScreen.Showing && !Opening.InProgress && !Onboarding.Running && !GameMenu.IsOpen &&
                        (encounters == null || !encounters.InBattle);
 
@@ -177,7 +195,13 @@ namespace Diorama
             bool idle = Active && Dialogue.CurrentObjective == null && !Showing && explorer.Tile == _lastTile && !explorer.Destination.HasValue && explorer.Heading == Vector2Int.zero;
             _still = idle ? _still + Time.deltaTime : 0f;
             _lastTile = explorer.Tile;
-            if (_still >= stillSeconds)
+            if (_afterSolved != null && Time.time - _solvedAt >= afterSolved && Active && !Dialogue.IsTalking)
+            {
+                Show($"{_afterSolved} solved");
+                _afterSolved = null;
+            }
+            float still = QuickJourney.Active && QuickJourney.Config != null ? QuickJourney.Config.goldPathAfter : stillSeconds;
+            if (_still >= still)
             {
                 _still = 0f;
                 Show("standing still");

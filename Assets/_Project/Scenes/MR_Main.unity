@@ -1859,10 +1859,10 @@ MonoBehaviour:
   moveMode: 0
   startTile: {x: 10, y: 7}
   cubeSize: 0.018
-  walkSeconds: 0.4
-  runSeconds: 0.2
-  smartSeconds: 0.4
-  continuousSeconds: 0.4
+  walkSeconds: 0.28
+  runSeconds: 0.15
+  smartSeconds: 0.28
+  continuousSeconds: 0.28
   smartTiles: 5
   doubleSwipeSeconds: 0.45
   maxPathSteps: 40
@@ -1981,6 +1981,7 @@ MonoBehaviour:
   onboarding: {fileID: 1380201671}
   material: {fileID: 2100000, guid: dc3915bdb04a1cb4eb4760821e23e7b7, type: 2}
   stillSeconds: 12
+  afterSolved: 2.5
   showSeconds: 20
   maxTiles: 14
   tileSize: 0.78
@@ -5931,9 +5932,9 @@ MonoBehaviour:
     line: Home
     restoredLine: 
     shard: 
-  width: 0.24
-  height: 0.17
-  far: 0.9
+  width: 0.26
+  height: 0.25
+  far: 0.1
   rise: 0.08
   firstSeconds: 3
   againSeconds: 1.5
@@ -6933,6 +6934,9 @@ MonoBehaviour:
   grabGuard: {fileID: 270959111}
   galewick: {fileID: 11400000, guid: 03d1dafe75ab9fc41b8a1faba99e63e4, type: 2}
   lilymere: {fileID: 11400000, guid: b038c9eac3f90d8479112fc4f7802bce, type: 2}
+  stopToEnter: 0.35
+  gazeIntensity: 2.3
+  gazePulse: 0.35
 --- !u!4 &1858573328
 Transform:
   m_ObjectHideFlags: 0

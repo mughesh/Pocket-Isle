@@ -159,17 +159,6 @@ namespace Diorama.EditorTools
                 AssetDatabase.CreateAsset(config, QuickJourneySim.ConfigPath);
                 log.Append("\n  Created Data/QuickJourney.asset.");
             }
-            if (config.giftSpecies == null || config.giftSpecies.Length < 2 || config.giftSpecies.All(s => s == null))
-                config.giftSpecies = new[] { KeeperSim.Load(KeeperSim.Helper), KeeperSim.Load("Toastling") };
-            // The Keeper sim's 75-85% band per starter (QuickJourneySim.Sweep, Oct 26): Steambara leads the fight, so the
-            // gifts' level matters most; Pebbloop (Water) needs less, Pufflet more.
-            if (config.perStarter == null || config.perStarter.Length == 0)
-                config.perStarter = new[]
-                {
-                    new QuickJourneyConfig.StarterTuning { starter = KeeperSim.Load("Kilnpot"), giftLevel = 8, raiseTo = 8 },
-                    new QuickJourneyConfig.StarterTuning { starter = KeeperSim.Load("Pebbloop"), giftLevel = 7, raiseTo = 7 },
-                    new QuickJourneyConfig.StarterTuning { starter = KeeperSim.Load("Pufflet"), giftLevel = 8, raiseTo = 10 },
-                };
             EditorUtility.SetDirty(config);
 
             var island = Find<IslandBuilder>();
@@ -201,7 +190,7 @@ namespace Diorama.EditorTools
             EditorUtility.SetDirty(director);
             int missing = new Object[] { director.party, director.pods, director.spirit, director.explorer, director.encounters, director.onboarding,
                 director.save, director.swap, director.fx, director.hub, director.galewick }.Count(o => o == null);
-            log.Append($"\n  Quick Journey: gifts {string.Join(" + ", config.giftSpecies.Select(s => s != null ? s.name : "MISSING"))} Lv {config.giftLevel}, " +
+            log.Append($"\n  Quick Journey: Keeper {config.keeperLevelOffset:+0;-0} levels, " +
                        $"cuts {string.Join(", ", config.cutLessons)}; director {(missing == 0 ? "wired" : $"{missing} reference(s) MISSING")}.");
             DialogueTools.Import();
         }
