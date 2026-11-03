@@ -331,8 +331,12 @@ Mugesh kept finding tasks by accident. One rule now covers every hand moment in 
 - Look: unrestored water still and a little grey; restored water ripples and sparkles (Toon `_Ripple` on the island's
   water caps only), lotus open (the Lotus prop's flower only shows once restored).
 - Hub **well (water) gate** <-> Lilymere; builds keep it sealed (`LilymereConfig.open` = false). Dev panel LM: spots.
-- Hand moments (11b): **lily pad bridge** (push three drifting pads with a fingertip into three slots across the
-  crossing; drag 0.8, snap 0.6 tiles; look + pinch steers one in), **rain hand** (palm down within 40 deg, 5-25 cm over
+- **Arrival stream (step 14a, replaces the lily pad bridge):** 3 tiles past the arrival a thin trickle (dry bed) crosses
+  the trail from woods to woods, three lily pads stuck in the mud on its south bank. Palm down over it = rain: the stream
+  swells to water in ~2 s, each pad rained on lifts and floats ("Pads n/3"), and all three drift into a pad bridge over
+  the trail. It teaches the rain gesture right after the portal ("The stream's almost dry... Hold your hand over it like
+  a little cloud."). The channel crossing is a plain plank bridge now; old saves with the pads solved count it solved.
+- Hand moments (11b): ~~lily pad bridge~~ (off since 14a), **rain hand** (palm down within 40 deg, 5-25 cm over
   the garden for 0.6 s = a cloud under the palm that rains; wiggle the fingers to rain harder; five buds bloom into lotus
   stepping stones in 2 s / 1 s hard; look + pinch-hold rains on one bud), **scoop and pour** (cup a hand palm up, dip it
   in the lagoon's inlet by the causeway, lift: a wobbly ball of water; tip it over the stone basin to pour, anywhere else
@@ -368,6 +372,10 @@ Mugesh kept finding tasks by accident. One rule now covers every hand moment in 
   across all the grass, streaks, mills twitch; works anywhere in Galewick), **cloud bank** (3 puffs on the ridge path,
   about 3 gusts each, look + pinch-hold also works), **tower** (arrive with 3 kites: they tie onto the crown, vanes
   turn, the door opens). Each teaches itself once with a pinned chip (Flick! / Pull it up! / Wave!) and a ghost.
+- **Arrival clouds (step 14a):** two cloud puffs sit on the trail 3-4 tiles past the arrival. "Galewick... the air isn't
+  moving at all." then "Clouds are stuck on the path. Sweep your hand to get the wind going!" (chip "Sweep · Clouds n/2",
+  the sweep ghost). Clearing them sends a big gust rippling across the whole meadow in view. The ridge's cloud bank
+  keeps its counter and a short line, no ghost (the player knows the sweep by then).
 - Wind roster (10c): Kitelet -> Kitewyrm, Whirlby -> Windwhirl, Samarling -> Samaroak, Vanehare -> Compasshare (Lv 16),
   Zeppelope -> Skyshiplope (rare, Lv 18); Pufflet -> Nimbulpaca, Pebbloop -> Riverloom (Lv 14). Tables ~70% wind, ~30% fire
   visitors, Zeppelope 5% in the rare pocket.
@@ -556,6 +564,25 @@ before the action is done, pinch never taught):**
   a door tile exits only when the step was aimed out (a swipe toward the door, or a tap / look + pinch on it). Battles:
   the explorer turns to face the wild Isling; the Spirit waits beside the near rim on the non-dominant side; its bubble
   never sinks into the island.
+
+**First-minute polish (step 14a, Nov 3; from Mugesh's notes after his trip):**
+- **Spawn and recenter:** every placement (the shard, the island, the menu's Recenter, Meta's recenter) waits for a
+  settled head (0.5 s within 1 cm / 1.5 deg, TrackingSpace still) and uses one rule: yaw-only forward, 45 cm out, the
+  island's top 30 cm under the eyes (never above 15 cm under them, never below 55 cm over a known floor). Before it is
+  touched the shard follows the player (looked > 35 deg away or sat down / stood up > 15 cm, for 1 s = it glides over);
+  the island unfolds exactly where the shard is. Recenter = Meta's event, the OpenXR reference space change, or a
+  TrackingSpace / head jump; a safety net re-places once if the island ends > 40 deg off or > 0.8 m away. Nothing else
+  moves the island on its own. Every placement is logged and goes into bug reports.
+- **Island handles:** grab only at the four corners (a faint bracket each, white when a hand is within 6 cm, gold held)
+  or the front lip under the pods (exploring only). Pods always win near them; elsewhere on the rim pinches go to pods
+  and objects. Two hands = any two handles.
+- **Pinch lesson:** two progress dots under the line; the first pinch = a bigger gold burst, a chime, "Nice! Once
+  more." (chip "Pinch again"); the second = "Perfect!".
+- **The Spirit teaches from the spot:** while a lesson or objective teaches it parks just above the interaction point
+  (over the ghost hand or the thing to touch, a little toward the player) with soft gold sunrays round it; plain chatter
+  has no rays.
+- **Pods onto the rim:** a held pod within 12 cm of the rim previews the socket it will fly into (a ghost pod).
+- **Music On / Off** in the game menu (saved).
 
 ## Finale (step 13: the Heart wakes; no final battle)
 Everything happens on the hub at the game's normal scale. Modelled on how creature games end (a hall of fame, credits,

@@ -44,7 +44,24 @@ Each tab is split into groups under gold headings.
 Cheats (one-hit KO, invincible, wild battles off, rare x10, time and walk speed) last until the app closes. They are
 never saved.
 
-## 4. What's new in this build (step 13, Oct 28: the finale)
+## 4. What's new in this build (step 14a, Nov 3: the first minute)
+
+- **Where the island appears:** in front of you, about 30 cm under your eyes, once your head is still. Before you touch
+  the shard, look away or stand up / sit down: after a second it glides back in front of you. Meta's recenter (hold the
+  Meta button) re-places the island, also over Link.
+- **Grabbing the island:** only at its **four corners** (a faint bracket; it lights white near your hand, gold while
+  held) or the **front lip** under the pod row. Pinching near a pod gives you the pod, never the island.
+- **Pinch lesson:** two dots under the line fill as you pinch; "Nice! Once more." after the first.
+- **The Spirit** hovers right over the thing to do, with gold rays round it while it teaches.
+- **Pods onto the rim:** bring a held pod near the rim: a ghost pod shows the socket it will go into; let go.
+- **Galewick:** two clouds block the path just past the arrival: sweep your open hand over the island.
+- **Lilymere:** a dried-up stream just past the arrival: hold your palm down over it to rain; the lily pads float into a
+  bridge. The old lily channel is a plank bridge now.
+- **Game menu:** Music On / Off.
+- Things to watch: does the island ever appear off to the side, too high or too low? Did anything grab the island when
+  you meant a pod? Is the Spirit ever in the way of what it points at?
+
+## Earlier (step 13, Oct 28: the finale)
 
 - **The statue talks:** each shard you put in makes it whisper a memory (a gold-white bubble with no tail), and it
   wakes a little: eyes glow after one, it breathes after two.
