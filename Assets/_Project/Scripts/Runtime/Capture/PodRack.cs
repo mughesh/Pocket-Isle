@@ -403,9 +403,17 @@ namespace Diorama
                 if (_card.Visible && ((island.transform.position - _cardIslandPos).sqrMagnitude > 0.02f * 0.02f ||
                                       Quaternion.Angle(island.transform.rotation, _cardIslandRot) > 4f))
                     CloseCard();
+                // Nov 3: the menu's runes sit over the pods; the card overlapped them.
+                if (_card.Visible && MenuUp)
+                {
+                    _card.Hide();
+                    Debug.Log("[PodRack] Card closed (the menu opened).");
+                }
                 _card.Tick();
             }
         }
+
+        static bool MenuUp => GameMenu.IsOpen || SettingsBoard.IsOpen;
 
         Vector3 _cardIslandPos;
         Quaternion _cardIslandRot;
@@ -845,7 +853,7 @@ namespace Diorama
         void ShowCard(int slot, string how)
         {
             var p = _pods[slot];
-            if (_card == null || p == null || p.Isling == null) return;
+            if (_card == null || p == null || p.Isling == null || MenuUp) return;
             if (_card.Visible && _card.Showing == p.Isling && how == "gaze + pinch")
             {
                 _card.Hide();

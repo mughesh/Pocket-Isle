@@ -21,17 +21,37 @@ namespace Diorama
         [Tooltip("Credits: lines shown at once; longer credits scroll up a line every few seconds.")]
         public int creditLines = 7;
         public float creditSeconds = 2.2f;
-        [Tooltip("Step 12a: Diorama/Glyph (Materials/Glyph) for the Controls card's drawn glyphs.")]
+        [Tooltip("Step 12a: Diorama/Glyph (Materials/Glyph). Unused since Nov 3 (the Controls card shows ghost hands).")]
         public Material glyphMaterial;
+        [Tooltip("Nov 3: the Controls card plays the picked control's ghost hand over the island.")]
+        public GhostHands ghosts;
 
-        /// <summary>Step 12a: the Controls card's rows (glyph, text).</summary>
-        public static readonly string[] ControlsRows =
+        /// <summary>One control on the Controls card: its rune, the line under the runes, the ghost clip and its size.</summary>
+        public struct Control
         {
-            "<b>Swipe</b> your thumb along your finger: a few steps",
-            "<b>Swipe twice</b> quickly: keep walking. <b>Tap</b>: stop",
-            "<b>Look</b> at a spot and <b>pinch</b>: go there",
-            "<b>Pinch</b> or <b>grab</b> things on the island",
+            public string rune, text, clip;
+            public float scale;
+            public Control(string rune, string text, string clip, float scale)
+            {
+                this.rune = rune;
+                this.text = text;
+                this.clip = clip;
+                this.scale = scale;
+            }
+        }
+
+        /// <summary>Step 12a, Nov 3: the Controls card's controls, in order.</summary>
+        public static readonly Control[] Controls =
+        {
+            new Control("Walk", "<b>Swipe</b> your thumb along your finger: a few steps", "thumb_swipe_forward", 0.6f),
+            new Control("Keep going", "<b>Swipe twice</b> quickly: keep walking. <b>Tap</b>: stop", "thumb_swipe_twice_tap", 0.6f),
+            new Control("Go there", "<b>Look</b> at a spot and <b>pinch</b>: go there", "pinch", 0.6f),
+            new Control("Pick up", "<b>Pinch</b> things on the island to pick them up", "pinch_drop", 0.9f),
+            new Control("Move isle", "<b>Grab</b> a corner to move the island. Two hands: turn and resize", "grab_rim_slide", 0.9f),
         };
+
+        TextMeshPro _controlText;
+        readonly List<RuneBoard.Rune> _controlRunes = new List<RuneBoard.Rune>();
 
         public static bool IsOpen { get; private set; }
 
@@ -73,6 +93,7 @@ namespace Diorama
             if (!IsOpen) return;
             IsOpen = false;
             _creditText = null;
+            StopControlGhost();
             runes.Hide();
             runes.Clear();
             Debug.Log("[Settings] Closed.");
@@ -186,28 +207,54 @@ namespace Diorama
             Debug.Log("[Settings] Controls card.");
         }
 
+        /// <summary>
+        /// Nov 3: one row of control runes over the near rim, the picked one lit with its line under the row, and its
+        /// ghost hand playing over the island (the drawn glyphs didn't look like the gestures). Kept low so the ghost
+        /// above the island stays in view.
+        /// </summary>
         void BuildControls(Action back)
         {
             runes.Clear();
             _creditText = null;
-            const float rowH = 0.05f, glyph = 0.048f;
-            int n = ControlsRows.Length;
-            float top = 0.03f + n * rowH;
-            runes.AddBacking(new Vector2(0f, 0.025f + n * rowH * 0.5f + 0.012f), new Vector2(0.36f, n * rowH + 0.07f));
-            runes.AddText("<b>Controls</b>", new Vector2(0f, top + 0.006f), runes.fontSize * 1.1f);
+            _controlRunes.Clear();
+            int n = Controls.Length;
+            var size = new Vector2(0.078f, 0.034f);
+            const float step = 0.083f;
             for (int i = 0; i < n; i++)
             {
-                float y = top - (i + 0.75f) * rowH;
-                runes.AddImage(ControlsGlyphs.Get(i), glyphMaterial, new Vector2(-0.145f, y), new Vector2(glyph, glyph));
-                var t = runes.AddText(ControlsRows[i], new Vector2(0.03f, y), runes.fontSize * 0.82f, TextAlignmentOptions.Left, 0.27f);
-                t.textWrappingMode = TextWrappingModes.Normal;
-                t.alignment = TextAlignmentOptions.MidlineLeft;
-                t.rectTransform.sizeDelta = new Vector2(0.27f, rowH);
+                int k = i;
+                _controlRunes.Add(runes.Add(Controls[i].rune, new Vector2((i - (n - 1) * 0.5f) * step, 0.012f), size, () => PickControl(k)));
             }
-            if (glyphMaterial == null) Debug.LogError("[Settings] No glyph material (Set Up MR_Main (12a walking)): the Controls card has no pictures.", this);
-            var b = runes.Add("Back", new Vector2(0f, 0f), Wide, () => back());
+            runes.AddBacking(new Vector2(0f, -0.026f), new Vector2(n * step + 0.01f, 0.03f));
+            _controlText = runes.AddText("", new Vector2(0f, -0.026f), runes.fontSize * 0.82f, TextAlignmentOptions.Center, n * step);
+            _controlText.textWrappingMode = TextWrappingModes.Normal;
+            _controlText.rectTransform.sizeDelta = new Vector2(n * step, 0.03f);
+            if (ghosts == null) Debug.LogError("[Settings] No ghost hands (Set Up MR_Main (14b)): the Controls card can't show the gestures.", this);
+            var b = runes.Add("Back", new Vector2(0f, -0.064f), Wide, () =>
+            {
+                StopControlGhost();
+                back();
+            });
             b.tint = new Color(0.62f, 0.55f, 0.4f);
+            runes.DefaultFocus = _controlRunes[0];
+            PickControl(0);
             runes.Show();
+        }
+
+        void PickControl(int i)
+        {
+            var c = Controls[i];
+            for (int k = 0; k < _controlRunes.Count; k++) _controlRunes[k].selected = k == i;
+            if (_controlText != null) _controlText.text = c.text;
+            if (ghosts != null) ghosts.BeginPreview(c.clip, GhostPlace.AboveIsland, c.scale);
+            Debug.Log($"[Settings] Controls: {c.rune} (ghost {c.clip}).");
+        }
+
+        void StopControlGhost()
+        {
+            _controlText = null;
+            _controlRunes.Clear();
+            if (ghosts != null) ghosts.EndPreview();
         }
 
         // ---- credits ----

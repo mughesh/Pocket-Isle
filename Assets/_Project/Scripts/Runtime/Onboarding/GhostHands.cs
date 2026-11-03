@@ -240,6 +240,34 @@ namespace Diorama
 
         public void Hide() => _showing = false;
 
+        Request _beforePreview;
+        bool _hadBeforePreview;
+
+        /// <summary>
+        /// Nov 3: the Controls card's demo. Plays a clip over the island (on unscaled time: the menu pauses the game) and
+        /// keeps lessons from replacing it; <see cref="EndPreview"/> puts back whatever was showing before.
+        /// </summary>
+        public void BeginPreview(string clip, GhostPlace place, float scale)
+        {
+            if (!previewing)
+            {
+                _beforePreview = _request;
+                _hadBeforePreview = _showing;
+            }
+            previewing = true;
+            Show(clip, place, null, scale, DominantHand.Left, false);
+        }
+
+        public void EndPreview()
+        {
+            if (!previewing) return;
+            previewing = false;
+            var r = _beforePreview;
+            if (_hadBeforePreview) Show(r.clip, r.place, r.target, r.scale, r.left, r.both, r.spread, r.source, r.lift);
+            else Hide();
+            _hadBeforePreview = false;
+        }
+
         GhostHandClip Find(string name)
         {
             var recorded = library != null ? library.Find(name) : null;
@@ -252,7 +280,7 @@ namespace Diorama
         /// <summary>Debug shots: holds the clip at this point (0..1), fully visible. Negative = plays normally.</summary>
         [System.NonSerialized] public float debugFreeze = -1f;
 
-        void LateUpdate() => Tick(Time.deltaTime);
+        void LateUpdate() => Tick(previewing ? Time.unscaledDeltaTime : Time.deltaTime);
 
         /// <summary>Debug: the right ghost's skeleton wiring and where its thumb and index tips are now.</summary>
         public string DebugInfo()
