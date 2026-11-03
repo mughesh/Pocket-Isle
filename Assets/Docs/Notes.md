@@ -1,0 +1,20 @@
+- For some reason, after doing wind realm first and coming out, I am getting 2 more islings as a gift. We dont need that. 
+- Focus mode kind of view for the lotus pads is awesome. I think we can have similar focus lock for all the hand interaction magics we have. 
+- In the fire door's forge interaction, the lanterns text is position just on the forge, it is fully hidden. After taking the ember, I dont see where to place it. 
+- The places without water are shown too bright white. It shall be something of a water drought area. Showing my hand with clouds over that actualy merged the coouds color to the ground. 
+- Missing rain audio. will need to synthesize audios for lillymore (seperate task)
+- The path of clouds in the wind realm, it looks like the clouds are floating on the road. Also it doesnt have any motion, makes it looks bad. That path should also be bit widened. It is ver hard to walk there. The corner bush placed there is very anoying and hides half of the road. 
+- There is no water in the lotus pad area. it is just white. 
+- If a user dies, let them respawn in that realm's lodge instead of the one they last visited. 
+- Instructions of lantern, we should make some different in the text color or something. There are important instruction that talks about the current objective. and then there are also filler texts. We need to make sure there is a difference. Maybe the imporant ones can be red ? or something better. I let you think on this. 
+- Also, these instructions for current interactions should be staying until that instruction goes away. we should be able to poke or select the lantern so it will repeat the current active instruction. 
+- water picking with two hands, ghost hands need improvement. and it is not animating to the point of drop. 
+- The point of drop and the water fall as you say, doesnt look like one. Even for me, I couldnt grasp that I am pouring water for breaking ice. Should we try something like mountains and a empty bowl kind of dent over it, and the waterfall on that is frozen. That dent is where we pour the water. How hard is this ?
+- Water on the hand can be more than just a ball. it looks like a small ball, and only on one hand. If this is too hard, we can do a full fist grab to pick and pour water. 
+- instructions are somtimes not getting upto speed. for eg, i did the forge door too fast, and the instructions were still going on while I am already inside. 
+- Kite picking up, it is sometime not easy to pick. grab is not registering many times. 
+- grabbing the shards are still hard to do many times.
+- Shard of the air can be green. no need for 2 blue shards. 
+- out door of temple should be named or something. It doesnt look like a door to go out. just an arch kind of thing many fail to notice. 
+- There is no direction of the game on what to do. for anyone who is not a gamer or anything, they tend to be clueless on what to do after the tutorials. We should be guiding them to the gates, maye similar glowing tiles that we use to navigate user to walk into the grass ? that glow needs to be more prominent. it tends to blend color witht he normal tile color. 
+- LEt the dev panel bit higher and placed to the right of the island. also add a close button to it. It needs a rework. It has too many buttons to click. categorize them, add scroll if needed. Even for me I dont understand which button is for what. 

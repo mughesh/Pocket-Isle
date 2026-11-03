@@ -31,6 +31,12 @@ here** and gets done in the polish days (Nov 13–14), most valuable first. Add 
 | Oct 26 | **Guided ghost recorder** (Mugesh's idea) | Dev panel "Ghost" tab walks through each lesson: "Record this next: <lesson>", Ready, 3-2-1, records while he does the real action, stops when the lesson's done event fires, preview, Keep / Redo; clips saved with their source / target anchors so the 9h retarget applies. Nov 3, only for clips that still look wrong after 9h |
 | Oct 26 | Quick Journey 10-minute design pass | Separate design session |
 
+## Fix on Nov 3 (from headset tests)
+
+| Added | Item | Notes |
+|---|---|---|
+| Oct 27 | **Spirit's bubble wavers up and down**, sometimes floating far above the Spirit (seen in Cinderwood with the dev panel and game menu open: "Smoke blocks the way..." hung high top-left, detached from the Spirit) | Likely two clamps fighting (9h `KeepAboveIsland` / `KeepClear` spheres from the open panels, the pinned lesson chip) or the anchor following the Spirit's bob. Fix: one resolver, a hard max distance from the Spirit, smoothing with hysteresis so it never oscillates frame to frame; ignore panels' KeepClear while the game menu pauses. Verify with dev panel + menu open. Screenshot: `Notes-img/bubble-wavers-oct27.png` |
+
 ## Lodge life (do with scene filler props)
 
 | Added | Item | Notes |

@@ -1,0 +1,9 @@
+- new golden border text panel sometimes feel blocky
+- The panel interupting button press. I am unable to select it easily. This happens in many other cases as well. 
+- walking golden step's image looks good but it is revered
+- the golden path shows the direction, but it could be on the road itself instead of showing the shortest path. It goes too odd of a route. 
+- Clouds on the path is too high. It could be on the road itslef. 
+- your road remodel of the cloud road looks like it blocked th road. 
+- every temple's entry door is default bright, hiding the character. No need to show them glow in the temples as it highlights the wrong motive at this point. Also, we can keep the door on the right.
+- lillymere and the wind area has the same color pallete. Any way we can change it to some kind of a blue shade for the lilymere, that doenst look too bad considering the water bodies. ? I also feel it will look unnatural. I let you think onthis. 
+- new walking looks good, but it should be bit faster. The pinch to wak has a speed, lets keep tha same to this as well. 
