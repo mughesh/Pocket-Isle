@@ -285,6 +285,11 @@ has no clips (logged once by `GameAudio`). Loops ride on `LoopAnchor` (a child o
 | Finale crack / heartbeat / wings / chimes / gates / tablets | `heart.crack`, `heart.beat` loop (wake to Hall of Fame end), `heart.wings`, `spark.chime`, `gates.bloom`, `credits.tablet` (FinaleDirector) | |
 | The finale's music | `music.finale` slot (empty) | Mugesh's track |
 | The Heart's voice | `heart.hum` once per whisper (DialogueBubble.Show) | |
+| Journal open / close (step 14h) | placeholder `menu.open` / `menu.close` (JournalBoard) | `journal.open` (stone book), `journal.close` |
+| Journal page (element tablets) | placeholder `lodge.page` | `journal.page` |
+| Journal portrait poke | `ui.pebble` | |
+| New Isling toast | placeholder `spark.chime` (JournalToast) | `journal.new` soft chime |
+| Glowing pod (ready to evolve) | none | `evo.ready` soft loop on the pod (GrowthDirector / PodRack.DueSlot) |
 
 Bridge: `exec:Diorama.Audio.EditorTools.StepDTools.Synth` / `.ImportGen` / `.Cries` / `.Scope` (Logs/audioD-scope.md);
 `exec:Diorama.EditorTools.AudioHookupDebug.Voices` (every busy voice), `.PlayTest` (cue id in arg.txt), `.LilyReset`.

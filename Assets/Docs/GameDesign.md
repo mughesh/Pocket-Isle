@@ -483,6 +483,29 @@ when the log or the forge door is solved.
 | **Embercrane -> Pyrecrane** (rare) | 16 | field 5, springs 5 (rare) | Flame Wing / Ember Puff / Puff Up |
 - Glazegolem / Kilngolem read as rare: deep teal glaze, gold kintsugi cracks that glow and pulse.
 
+## Growth loop (step 14h, Nov 4)
+Catch Islings, the **Journal** fills ("12 / 46"), they **grow and evolve in your palm** (each new form is a new entry), and a
+bigger team beats a **Keeper tuned to your team**. 46 Islings: 20 Fire, 14 Water, 12 Wind (Keepers and the Spirit don't count).
+- **Evolution:** a party Isling at its evolve level is "due" (never saved). Its rim pod glows gold, and when calm the Spirit says
+  "{name} is glowing... it's ready to grow!" (chip Hold it). Grab the pod and turn your hand palm up: it opens on your palm and
+  the Isling evolves there with the full show (cry, gold name, card), then curls back into its pod. Look + pinch the pod, or 6 s
+  held without a palm up, also work. One at a time. On the battle pad it evolves as before.
+- **The first Keeper's thanks:** if your starter hasn't evolved when the first Keeper is calmed, that Keeper thanks it and it
+  becomes ready (once per save).
+- **The Journal:** a stone book over the island (menu > Journal, or the book on the lodge pedestal).
+  - Header: Found N / 46, plus Fire, Water and Wind pages with counts.
+  - Caught Islings in colour with your best one's level, seen ones dimmed, unseen ones black silhouettes with where they live.
+  - Poke a portrait for its card.
+  - Every new entry pops a "New Isling!" tag.
+  - The Heart's collection card reads the same data.
+- **Temples and Keepers:** with fewer Islings than most guardians bring (Galewick 4, others 6), the Spirit warns and asks Go in /
+  Not yet; it never blocks. The Keeper's level follows your team (its three strongest, and how many of the three slots are filled)
+  within -6 / +3 of its usual level, by 3/4 of each level, so levelling up always helps. Tuned with KeeperTeamSim: about 70% with
+  4 Islings at the expected level, 95%+ with 6 well levelled.
+- **Readable battles:** on the battle pads an Isling is scaled down so the near one never hides the wild one from your eyes and
+  none is over 1.3x its opponent (Keepers excepted).
+- **Game menu (14h):** Resume, Journal, Settings and the speaker; Controls and Title live in Settings.
+
 ## Core loop
 explore → tall grass encounter → battle → capture → party / Hearth Lodge → Temple Keeper → shard → statue
 

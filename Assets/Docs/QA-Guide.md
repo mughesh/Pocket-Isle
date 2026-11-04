@@ -44,7 +44,17 @@ Each tab is split into groups under gold headings.
 Cheats (one-hit KO, invincible, wild battles off, rare x10, time and walk speed) last until the app closes. They are
 never saved.
 
-## 4. What's new in this build (step 14f, Nov 3 night)
+## 4. What's new in this build (step 14h, Nov 4)
+
+- The menu is shorter: Resume, **Journal**, Settings, the speaker. Controls and Title are inside Settings.
+- **Journal:** every Isling you've met or caught; poke a portrait for its card. Also on the lodge pedestal.
+- **Evolution:** a pod glowing gold is ready. Grab it and turn your hand palm up: it evolves on your palm.
+  Dev > Team > "Make lead ready to evolve" to try it.
+- Big evolved Islings shrink a little on the battle pad so you can always see the wild one.
+- Temple doors no longer block a small team: the Spirit warns, then Go in / Not yet. Keepers match your team's strength.
+- Finale: "Lift me up to the gold crystal on its forehead"; a dotted gold arc shows the way.
+
+## Earlier (step 14f, Nov 3 night)
 
 - Every button is a mossy stone tablet; all text is much bigger. Look at a tablet: it grows with a gold rim. Pinch or poke:
   it sinks with a stone tap.
