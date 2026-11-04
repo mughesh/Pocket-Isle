@@ -352,6 +352,11 @@ namespace Diorama.EditorTools
                 if (_finished) return;
                 _finished = true;
                 EditorApplication.update -= Tick;
+                // The cheats are statics: left on, they'd leak into the next Play and the EditMode tests.
+                DevCheats.Invincible = false;
+                DevCheats.OneHitKo = false;
+                DevCheats.WildOff = false;
+                Dialogue.CleanHints = false;
                 Application.logMessageReceived -= OnLog;
                 if (Current != null && _index < _beats.Count)
                     for (int i = _index; i < _beats.Count; i++)
