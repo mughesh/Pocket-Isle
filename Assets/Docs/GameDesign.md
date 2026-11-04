@@ -483,13 +483,31 @@ when the log or the forge door is solved.
 | **Embercrane -> Pyrecrane** (rare) | 16 | field 5, springs 5 (rare) | Flame Wing / Ember Puff / Puff Up |
 - Glazegolem / Kilngolem read as rare: deep teal glaze, gold kintsugi cracks that glow and pulse.
 
+## Rules from step 14j (Nov 4 night)
+- **Grab rule (replaces 14i's hold to grab, which Mugesh couldn't use):** a plain pinch or palm grab on a handle (the four
+  corners; the front lip under the pods while exploring; pods always win). **What you see is what grabs:** the zone hugs the
+  glowing line, **at most 1.2 cm outside it** (world), **2.1 cm in** over the rock (`grabInside` 0.035 island-local), in a
+  height band from 1.2 cm over the cap down to 7.2 cm under it; the lip only 2 cm or more under the pods. A pinch is judged by
+  its **pinch point only** (the palm counts only for a palm grab). The handles light bright only while the hand is really in
+  the zone. Pure rule: `GrabZone`. Lessons, chips and the Controls card say **"Grab a corner"**; the move and two-hands
+  lessons run in both slots and wait 45 s.
+- **Layout rule (every board):** tablets in a row sit **at least 8 mm apart** (island scale 1) and still 2 mm apart while one
+  grows on hover; a tablet's halo reaches 3.5 mm, so neighbours' halos never meet. `TabletLayout.Row` lays rows out to it;
+  every board checks itself when its layout changes (Editor and dev builds log any pair too close; bridge
+  `Step14jDebug.Layouts`). The lodge Journal tablet sits left of the whole socket band with a clear gap. Unseen Journal
+  entries are flat dark slate silhouettes (no shading).
+- **Battle label rule:** a name + HP bar sits **above the actor's full visual bounds** (body, parts, aura, flames, shield)
+  with a small gap, is **drawn on top** of every model and effect on a dark backing plate, and stays inside the view (clamped
+  under 86% of its height). The near Isling's label sits **beside its pad** on the near side, away from the explorer (it is
+  seen from behind). Readable battles (`PadFit`): no actor over 1.3x the other (Keepers exempt), and the near one's top stays
+  under the line from the eyes to the wild one at 5% of its height; re-checked every 0.3 s from a per-spawn measure.
+- **See-through rule:** when something on the map stands between the head and the explorer, island content on that line
+  dissolves in a soft dithered circle about 2 tiles across round the explorer (0.2 s in and out), never at or below its feet;
+  the explorer's outline turns gold meanwhile. Every map and interior. Done in the shared window clip (no extra pass); the
+  tile check costs 0.004 ms.
+
 ## Rules from step 14i (Nov 4 evening)
-- **Grab rule:** the island is grabbed only by **pinch (or fist) and hold** on a handle (the four corners; the front lip while
-  exploring): a gold ring fills over 0.6 s (`IslandHandle.grabHoldSeconds`), 0.3 s for the second hand. Released early =
-  nothing (that pinch never walks or selects); moving > 4 cm cancels. Never arms when the gaze is on something selectable away
-  from the hand as the pinch starts, or with the hand below the island's base (a hand resting on an armrest). Lessons, chips,
-  the Controls card and ghosts all say and show **"Pinch and hold a corner"**. The move and two-hands lessons run in both slots
-  and wait 45 s.
+- **Grab rule:** superseded by step 14j (the hold to grab was reverted).
 - **Board rule:** menus, Settings, the Journal (and its card), Controls, battle moves and the lodge card face the head **once**
   when they open (yaw, plus a pitch toward the eyes) and then stay world-locked. They turn again only when the head has been
   more than 30 deg away for 1 s **and** no hand is within 15 cm (`BoardFacing`). No drifting, no billboarding.
@@ -511,7 +529,7 @@ bigger team beats a **Keeper tuned to your team**. 46 Islings: 20 Fire, 14 Water
   becomes ready (once per save).
 - **The Journal:** a stone book over the island (menu > Journal, or the book on the lodge pedestal).
   - Header: Found N / 46, plus Fire, Water and Wind pages with counts.
-  - Caught Islings in colour with your best one's level, seen ones dimmed, unseen ones black silhouettes with where they live.
+  - Caught Islings in colour with your best one's level, seen ones dimmed, unseen ones flat dark silhouettes with where they live.
   - Poke a portrait for its card.
   - Every new entry pops a "New Isling!" tag.
   - The Heart's collection card reads the same data.
@@ -600,7 +618,7 @@ explore → tall grass encounter → battle → capture → party / Hearth Lodge
 drifts in from ~1.5 m and settles where the island will be. Touch it (fingertip, palm, or look + pinch); after 3 s the
 Spirit's `intro.shard`, after 6 s it unfolds by itself. It cracks open with light, the base grows out of it, the tiles
 rise from the middle, the explorer pops up and hops twice. A spark leaves the statue and becomes the Spirit
-(`intro.arrive`). `lesson.move` ("Pinch and hold a corner...", step 14i; was `intro.world`) makes the rim glow and waits for a grab or 45 s, then `lesson.twoHands`. Three glass pods rise from the statue
+(`intro.arrive`). `lesson.move` ("Grab a corner...", step 14i/14j; was `intro.world`) makes the rim glow and waits for a grab or 45 s, then `lesson.twoHands`. Three glass pods rise from the statue
 and float over the front half (Kilnpot left, Pebbloop middle, Pufflet right, as the player sees them): looking at one
 makes it grow and wiggle and the Spirit names it; drop it on the rim or look + pinch to pick (no confirm), the others
 sink back into the statue. Then `intro.explorer` and a gold run of tiles toward the first grass. Nothing saves before the
@@ -610,7 +628,7 @@ Flat Editor: launch to walking about 45 s (10 s of it waits for a head pose that
 **Lessons (step 8b, `Onboarding`, data `Data/Onboarding/Onboarding_Main`):** one at a time; each waits for its moment,
 says its line (a shorter reminder every 10 s), shows a ghost hand doing the gesture, and on done plays a soft chime and
 the Spirit's praise (Nice! / Just like that! / Perfect!). Order: touch the shard (hint after 3 s, opens by itself at 6 s),
-move the island (pinch and hold a corner, skips after 45 s; then two hands, step 14i), pick a starter (look, grab, drop on the rim), walk 3 tiles (thumb swipe demo
+move the island (grab a corner, skips after 45 s; then two hands, step 14i), pick a starter (look, grab, drop on the rim), walk 3 tiles (thumb swipe demo
 above the island, the Spirit beside it; after 30 s "Or look at a spot and pinch."), stop (thumb tap), look + pinch the gold
 tile, follow the gold tiles to the tutorial grass (always the scripted Toastling Lv 3), toss the pod in (auto send-out
 waits 20 s in the tutorial and doesn't earn praise), pick a move, flick the cradle pod once the wild one is in the red,

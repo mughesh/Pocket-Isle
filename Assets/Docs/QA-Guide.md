@@ -91,11 +91,16 @@ never saved.
 - **Where the island appears:** in front of you, about 30 cm under your eyes, once your head is still. Before you touch
   the shard, look away or stand up / sit down: after a second it glides back in front of you. Meta's recenter (hold the
   Meta button) re-places the island, also over Link.
-- **Grabbing the island (step 14i): pinch and hold a corner** (or the front lip under the pod row). A gold ring fills round
-  your fingers in about half a second; full = you're holding it (a soft click, the bracket turns gold). Let go early and
-  nothing happens; slide your hand away while it fills and it cancels. Your second hand joins faster (a third of a second)
-  to turn or resize. A hand resting below the island, or a pinch while you look at something else, never grabs.
-  Pinching near a pod gives you the pod, never the island.
+- **Grabbing the island (step 14j): pinch or grab a corner** (or the front lip under the pod row) right on the glowing
+  line. The corner lights up bright when your fingers are really on it: that's when a pinch grabs. A pinch more than about
+  1.5 cm outside the line does nothing. Second hand on another corner: turn and resize. Pinching near a pod gives you the
+  pod, never the island.
+- **Boards (step 14j):** tablets never touch; the Journal's unseen Islings are flat dark shapes; the lodge's Journal tablet
+  sits left of the pods with a gap.
+- **Battle labels (step 14j):** the wild Isling's and the Keeper's name + HP bar float above everything (flames, shield) on a
+  dark plate, always readable; yours sits beside your pad on the side away from the explorer.
+- **See-through (step 14j):** when trees or a building hide the explorer, the ones in front fade in a soft circle and the
+  explorer gets a thin gold outline.
 - **Pinch lesson:** two dots under the line fill as you pinch; "Nice! Once more." after the first.
 - **The Spirit** hovers right over the thing to do, with gold rays round it while it teaches.
 - **Pods onto the rim:** bring a held pod near the rim: a ghost pod shows the socket it will go into; let go.
