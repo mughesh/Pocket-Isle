@@ -262,7 +262,11 @@ namespace Diorama
             }
         }
 
-        bool AtFront(GateLink g, Vector2Int tile) => tile == g.Front(0) || tile == g.Front(1);
+        /// <summary>Step 14k: the walk-up rule: the row in front of the gate's two tiles, the front diagonals too (<see cref="WalkUp.Front"/>).</summary>
+        public static bool AtFront(GateLink g, Vector2Int tile) => WalkUp.Front(tile, Footprint(g));
+
+        /// <summary>A gate's footprint: its two tiles.</summary>
+        public static RectInt Footprint(GateLink g) => new RectInt(g.tile.x, g.tile.y, 2, 1);
 
         /// <summary>
         /// Nov 3: an open gate's front tile goes through when the explorer stops on it (or steps on heading in, OnStep); a
@@ -288,7 +292,7 @@ namespace Diorama
 
         /// <summary>True when stepping onto <paramref name="tile"/> from <paramref name="from"/> heads into gate <paramref name="g"/> (pure).</summary>
         public static bool StepsIn(GateLink g, Vector2Int from, Vector2Int tile) =>
-            (tile == g.Front(0) || tile == g.Front(1)) && tile - from == Vector2Int.down;
+            AtFront(g, tile) && tile - from == Vector2Int.down;
 
         /// <summary>Open, and (step 10a) the wind gate only while Galewick is allowed (the Editor, or a build after 10d).</summary>
         public bool IsOpen(GateLink g) => g.Open && (g.id != "wind" || galewick == null || galewick.IsOpen) &&

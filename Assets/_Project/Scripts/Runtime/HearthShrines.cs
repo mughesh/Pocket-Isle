@@ -405,11 +405,22 @@ namespace Diorama
             b.ringRenderer.SetPropertyBlock(_block);
         }
 
-        static bool IsTouching(Vector2Int s, Vector2Int tile)
-        {
-            int dx = tile.x - s.x, dy = tile.y - s.y;
-            return dx >= -1 && dx <= 2 && dy >= -1 && dy <= 2 && !(dx >= 0 && dx <= 1 && dy >= 0 && dy <= 1);
-        }
+        /// <summary>
+        /// Step 14k: the shared walk-up rule (<see cref="WalkUp"/>): any tile within one of the shrine as you see it,
+        /// diagonals too. Mugesh (Cinderwood): standing on the path in front of it did nothing, one row closer worked. The
+        /// shrine's front steps cover the row in front of its 2 x 2 tiles, so that row (walkable, on the steps) is part of
+        /// what you see: the footprint is 2 x 3 and the step row itself counts.
+        /// </summary>
+        public static bool IsTouching(Vector2Int s, Vector2Int tile) => WalkUp.Distance(tile, Footprint(s)) <= 1 && !OnBody(s, tile);
+
+        /// <summary>A shrine as you see it from its anchor (top-left) tile: its 2 x 2 body and the row of front steps.</summary>
+        public static RectInt Footprint(Vector2Int s) => new RectInt(s.x, s.y, 2, 3);
+
+        /// <summary>On the shrine's 2 x 2 body (not walkable anyway).</summary>
+        static bool OnBody(Vector2Int s, Vector2Int t) => t.x >= s.x && t.x <= s.x + 1 && t.y >= s.y && t.y <= s.y + 1;
+
+        /// <summary>The shrine anchors on this map (bridge: the walk-up audit).</summary>
+        public IReadOnlyList<Vector2Int> Anchors => _shrines;
 
         int GazedShrine()
         {

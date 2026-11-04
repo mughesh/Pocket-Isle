@@ -211,4 +211,47 @@ namespace Diorama.Tests
             Assert.IsNull(d.CurrentTrigger, "and doesn't come back");
         }
     }
+
+    /// <summary>Step 14k F: every walk-up trigger fires from any tile within one of what you see, diagonals too.</summary>
+    public class Step14kWalkUpTests
+    {
+        [Test]
+        public void Next_IncludesDiagonals_NotTwoAway()
+        {
+            var fp = new RectInt(10, 10, 2, 2);
+            Assert.IsTrue(WalkUp.Next(new Vector2Int(9, 9), fp), "diagonal");
+            Assert.IsTrue(WalkUp.Next(new Vector2Int(12, 12), fp), "other diagonal");
+            Assert.IsTrue(WalkUp.Next(new Vector2Int(11, 12), fp), "in front");
+            Assert.IsFalse(WalkUp.Next(new Vector2Int(11, 13), fp), "two in front");
+            Assert.IsFalse(WalkUp.Next(new Vector2Int(10, 10), fp), "on it");
+            int n = 0;
+            foreach (var _ in WalkUp.Ring(fp)) n++;
+            Assert.AreEqual(12, n, "a 2 x 2 has 12 tiles round it");
+        }
+
+        [Test]
+        public void Shrine_FromThePathInFrontOfItsSteps()
+        {
+            var s = new Vector2Int(24, 26); // Cinderwood's village shrine: body r26..27, steps r28, the path r29
+            Assert.IsTrue(HearthShrines.IsTouching(s, new Vector2Int(24, 29)), "the path row (Mugesh's row)");
+            Assert.IsTrue(HearthShrines.IsTouching(s, new Vector2Int(23, 29)), "its diagonal");
+            Assert.IsTrue(HearthShrines.IsTouching(s, new Vector2Int(26, 29)), "the other diagonal");
+            Assert.IsTrue(HearthShrines.IsTouching(s, new Vector2Int(25, 28)), "on the steps");
+            Assert.IsTrue(HearthShrines.IsTouching(s, new Vector2Int(23, 25)), "behind, diagonal");
+            Assert.IsFalse(HearthShrines.IsTouching(s, new Vector2Int(24, 30)), "two rows out");
+            Assert.IsFalse(HearthShrines.IsTouching(s, new Vector2Int(24, 26)), "the body");
+        }
+
+        [Test]
+        public void Gate_FrontDiagonals()
+        {
+            var g = new GateLink { tile = new Vector2Int(7, 53) };
+            Assert.IsTrue(ShardGates.AtFront(g, new Vector2Int(6, 54)), "front-left diagonal");
+            Assert.IsTrue(ShardGates.AtFront(g, new Vector2Int(9, 54)), "front-right diagonal");
+            Assert.IsFalse(ShardGates.AtFront(g, new Vector2Int(10, 54)), "two along");
+            Assert.IsFalse(ShardGates.AtFront(g, new Vector2Int(7, 55)), "two in front");
+            Assert.IsTrue(ShardGates.StepsIn(g, new Vector2Int(9, 55), new Vector2Int(9, 54)), "walking up onto the diagonal");
+            Assert.IsFalse(ShardGates.StepsIn(g, new Vector2Int(10, 54), new Vector2Int(9, 54)), "passing along the row");
+        }
+    }
 }

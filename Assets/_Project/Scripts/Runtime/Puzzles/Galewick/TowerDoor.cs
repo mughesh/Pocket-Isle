@@ -108,10 +108,11 @@ namespace Diorama
             Debug.Log($"[TowerDoor] Wind tower door {(_isOpen ? "open" : "shut")}.");
         }
 
-        bool AtFront(Vector2Int t)
+        /// <summary>Step 14k: the walk-up rule: the front tiles and the front diagonals (one more each side).</summary>
+        public bool AtFront(Vector2Int t)
         {
             foreach (var f in front)
-                if (f == t) return true;
+                if (t.y == f.y && Mathf.Abs(t.x - f.x) <= 1) return true;
             return false;
         }
 

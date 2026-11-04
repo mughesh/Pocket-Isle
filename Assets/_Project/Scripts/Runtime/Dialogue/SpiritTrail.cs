@@ -162,7 +162,7 @@ namespace Diorama
                 if (p == null || p.map != world || p.IsSolved || p is StatueSocket || p is KeeperUntangle || !p.WalkStopWanted) continue;
                 // Already at one: its own gold marks lead.
                 if (p.InReach(explorer.Tile)) return null;
-                var t = GameState.NearestWalkable(world, Vector2Int.RoundToInt(p.Home));
+                var t = TrailEnd(world, p);
                 int d = Mathf.Abs(t.x - explorer.Tile.x) + Mathf.Abs(t.y - explorer.Tile.y);
                 if (d < bestDist && ExplorerPath.CanReach(world, explorer.Tile, t, 400))
                 {
@@ -171,6 +171,34 @@ namespace Diorama
                 }
             }
             return best ?? Mark(world, realm.door);
+        }
+
+        /// <summary>
+        /// Step 14k: the trail ends on a tile that starts the moment (in its reach), the one nearest the explorer: the
+        /// nearest walkable tile to its home could be behind it or (a 2 x 2 shrine's centre rounds onto it) out of reach.
+        /// </summary>
+        Vector2Int TrailEnd(WorldMap world, HandPuzzle p) => TrailEnd(world, p, explorer.Tile);
+
+        public static Vector2Int TrailEnd(WorldMap world, HandPuzzle p, Vector2Int from)
+        {
+            var home = Vector2Int.RoundToInt(p.Home);
+            Vector2Int? best = null;
+            int bestD = int.MaxValue;
+            for (int dy = -3; dy <= 3; dy++)
+                for (int dx = -3; dx <= 3; dx++)
+                {
+                    var t = home + new Vector2Int(dx, dy);
+                    if (t.x < 0 || t.y < 0 || t.x >= world.Columns || t.y >= world.Rows || !world.CanWalk(t) || !p.InReach(t)) continue;
+                    // Prefer the tiles next to it (the nearest ring), then the one nearest the explorer.
+                    int ring = Mathf.Max(Mathf.Abs(dx), Mathf.Abs(dy));
+                    int d = ring * 1000 + Mathf.Abs(t.x - from.x) + Mathf.Abs(t.y - from.y);
+                    if (d < bestD)
+                    {
+                        bestD = d;
+                        best = t;
+                    }
+                }
+            return best ?? GameState.NearestWalkable(world, home);
         }
 
         Vector2Int? HomeGate(WorldMap world)
