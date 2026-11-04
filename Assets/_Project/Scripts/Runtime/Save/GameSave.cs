@@ -179,12 +179,12 @@ namespace Diorama
                 case SaveGame.ReadResult.NoSave:
                     Debug.Log($"[GameSave] No save at {SavePath}: new game ({Describe(party.members)}).");
                     PuzzleState.Restore(null);
-                    NoteParty();
+                    // Step 14i: not NoteParty: the scene's placeholder party isn't caught (the opening clears it; the starter
+                    // counts through OnPartyChanged).
                     break;
                 case SaveGame.ReadResult.Bad:
                     Debug.LogWarning($"[GameSave] The save was unreadable ({problem}): renamed to {SaveGame.BadFileName}, new game.");
                     PuzzleState.Restore(null);
-                    NoteParty();
                     break;
                 default:
                     Apply(data);
