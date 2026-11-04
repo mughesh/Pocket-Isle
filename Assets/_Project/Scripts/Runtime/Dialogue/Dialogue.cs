@@ -59,6 +59,43 @@ namespace Diorama
             public string target;
             public string validWhile;
             public bool objective;
+            public string context;
+            public LineKind kind;
+        }
+
+        // ---- step 14k: lines in context ----
+
+        string _place;
+        float _placeSince = -999f;
+
+        /// <summary>Step 14k: no idle hint this soon after arriving somewhere (the place's intro and objectives come first).</summary>
+        public float idleAfterArrival = 8f;
+
+        /// <summary>A queued line still belongs here (its context holds now).</summary>
+        static bool InPlace(Queued q) => Places.Holds(q.context);
+
+        static string Describe(Queued q) => $"{q.trigger} ({q.kind}, in {(string.IsNullOrEmpty(q.context) ? "any" : q.context)})";
+
+        /// <summary>Tracks the place; logs each change (the flat pass reads it).</summary>
+        void TrackPlace()
+        {
+            string now = Places.Now;
+            if (now == _place) return;
+            Debug.Log($"[Dialogue] Place: {_place ?? "-"} -> {now}.");
+            _place = now;
+            _placeSince = Time.time;
+        }
+
+        /// <summary>The pinned lesson applies here (one of its triggers' contexts holds): otherwise it doesn't block other lines.</summary>
+        bool PinActive()
+        {
+            if (_pinned.Count == 0 || script == null) return false;
+            foreach (var id in _pinned)
+            {
+                var t = script.Find(id);
+                if (t == null || Places.Holds(t.context)) return true;
+            }
+            return false;
         }
 
         static readonly Dictionary<string, Target> _targets = new Dictionary<string, Target>();
@@ -392,11 +429,31 @@ namespace Diorama
                 if (_notNow.Add(id)) Debug.Log($"[Dialogue] {id}: not now ({t.validWhile}).");
                 return;
             }
+            // Step 14k: a line only plays where it belongs (a "once" line stays unsaid and can come where it does).
+            if (!Places.Holds(t.context) && !force)
+            {
+                Debug.Log($"[Dialogue] {id}: not here (in {t.context}; now {Places.Now}{(encounters != null && encounters.InBattle ? ", battle" : "")}).");
+                return;
+            }
             _notNow.Remove(id);
             if (IsQueuedOrShowing(id) && !force) return;
             _said.Add(id);
             bool pinned = _pinned.Contains(id);
-            if (_pinned.Count > 0)
+            if (_pinned.Count > 0 && !pinned && t.kind == LineKind.Intro)
+            {
+                // Step 14k: a place's welcome comes before the lesson's standing line, which comes back right after it.
+                int first = 0;
+                foreach (var line in t.lines) _queue.Insert(first++, Make(line, t, id));
+                var lesson = _lesson != null ? script.Find(_lesson) : null;
+                bool lessonHere = lesson != null && Places.Holds(lesson.context);
+                if (lessonHere && lesson.lines.Count > 0 && !_queue.Exists(q => q.trigger == _lesson))
+                    _queue.Insert(first, Make(lesson.lines[lesson.lines.Count - 1], lesson, _lesson));
+                Debug.Log($"[Dialogue] {id}: the place's intro, before the lesson.");
+                if (!_current.HasValue) Next();
+                else if (bubble != null) bubble.FinishSoon();
+                return;
+            }
+            if (_pinned.Count > 0 && PinActive())
             {
                 if (pinned)
                 {
@@ -421,14 +478,23 @@ namespace Diorama
                 else if (bubble != null) bubble.FinishSoon();
             }
             int at = _queue.FindIndex(q => q.priority < t.priority);
+            // Step 14k: a place's intro goes ahead of every story and filler line (only objectives and intros stay in front);
+            // a story or filler line showing ends once it has been readable.
+            if (t.kind == LineKind.Intro)
+            {
+                at = _queue.FindIndex(q => q.kind != LineKind.Objective && q.kind != LineKind.Intro);
+                if (_current.HasValue && _current.Value.kind != LineKind.Objective && _current.Value.kind != LineKind.Intro && bubble != null &&
+                    !_pinned.Contains(_current.Value.trigger)) bubble.FinishSoon();
+            }
             if (at < 0) at = _queue.Count;
             foreach (var line in t.lines) _queue.Insert(at++, Make(line, t, id));
-            Debug.Log($"[Dialogue] {id}: {t.lines.Count} line(s){(t.once ? ", once" : "")}.");
+            Debug.Log($"[Dialogue] {id}: {t.lines.Count} line(s){(t.once ? ", once" : "")}, {t.kind}, in {(string.IsNullOrEmpty(t.context) ? "any" : t.context)}.");
             if (!_current.HasValue) Next();
         }
 
         static Queued Make(DialogueLine line, DialogueTrigger t, string id) =>
-            new Queued { line = Filled(line), priority = t.priority, trigger = id, target = t.target, validWhile = t.validWhile, objective = t.objective };
+            new Queued { line = Filled(line), priority = t.priority, trigger = id, target = t.target, validWhile = t.validWhile, objective = t.objective,
+                         context = t.context, kind = t.objective ? LineKind.Objective : t.kind };
 
         // ---- Step 14h: {name} in a line ----
 
@@ -497,8 +563,21 @@ namespace Diorama
             SetTarget(null);
             // Lines that stopped applying while they waited are dropped.
             while (_queue.Count > 0 && !GameConditions.Check(_queue[0].validWhile)) Drop(0, "no longer applies");
-            // While a lesson teaches only its own lines show; the others keep waiting.
-            int next = _pinned.Count == 0 ? (_queue.Count > 0 ? 0 : -1) : _queue.FindIndex(q => _pinned.Contains(q.trigger));
+            // Step 14k: and lines that don't belong here any more (not delayed: dropped). A pinned lesson's own line waits
+            // for its place instead (the lesson shows it again there).
+            for (int i = _queue.Count - 1; i >= 0; i--)
+                if (!_pinned.Contains(_queue[i].trigger) && !InPlace(_queue[i])) Drop(i, $"not here, now {Places.Now}");
+            // While a lesson teaches (here) only its own lines and a place's intro show; the others keep waiting. A
+            // lesson that doesn't apply here (the grass lesson in the lodge) doesn't hold anything up.
+            bool pin = PinActive();
+            int next = _queue.FindIndex(q => InPlace(q) && (pin ? _pinned.Contains(q.trigger) || q.kind == LineKind.Intro : !_pinned.Contains(q.trigger)));
+            // Filler waits until the place's intro and any objective have shown.
+            if (next >= 0 && _queue[next].kind == LineKind.Filler)
+            {
+                int first = _queue.FindIndex(q => InPlace(q) && (q.kind == LineKind.Intro || q.kind == LineKind.Objective) &&
+                                                  (!pin || _pinned.Contains(q.trigger) || q.kind == LineKind.Intro) && (pin || !_pinned.Contains(q.trigger)));
+                if (first >= 0) next = first;
+            }
             if (next < 0)
             {
                 if (bubble != null) bubble.Hide();
@@ -510,6 +589,8 @@ namespace Diorama
             _current = q;
             _shown.Add(q.trigger);
             _lastInput = Time.time;
+            bool inBattle = encounters != null && encounters.InBattle;
+            Debug.Log($"[Dialogue] Show {Describe(q)} at {Places.Now}{(inBattle ? ", battle" : "")}: \"{q.line.text}\"");
             SetTarget(q.target);
             var anchor = AnchorFor(q.line.speaker);
             // The lesson's last line stays (pinned) until the lesson is done.
@@ -606,10 +687,18 @@ namespace Diorama
             bool swapping = SceneSwap.IsBusy;
             if (swapping && !_wasSwapping) Expire("scene swap");
             _wasSwapping = swapping;
+            TrackPlace();
             if (_current.HasValue && !GameConditions.Check(_current.Value.validWhile))
             {
                 Debug.Log($"[Dialogue] {_current.Value.trigger} closed: {_current.Value.validWhile} stopped holding.");
                 DropTrigger(_current.Value.trigger, "condition ended");
+                Next();
+            }
+            else if (_current.HasValue && !InPlace(_current.Value) && !swapping)
+            {
+                // Step 14k: the line showing doesn't belong where the player is now.
+                Debug.Log($"[Dialogue] {_current.Value.trigger} closed: not here (in {_current.Value.context}; now {Places.Now}).");
+                DropTrigger(_current.Value.trigger, "left its place");
                 Next();
             }
             if (kb != null && kb.anyKey.wasPressedThisFrame) _lastInput = Time.time;
@@ -633,12 +722,19 @@ namespace Diorama
             if (GameSettings.FewerHints) return;
             if (Time.time - _lastInput < idleSeconds || Time.time - _lastIdle < idleGap) return;
             if (encounters != null && encounters.InBattle || explorer != null && explorer.Locked || Onboarding.Running) return;
+            // Step 14k: not right after arriving (the place's intro and objectives first), and only hints valid here.
+            if (Time.time - _placeSince < idleAfterArrival || SceneSwap.IsBusy) return;
             _lastIdle = Time.time;
-            int i = UnityEngine.Random.Range(0, script.idleHints.Count);
-            if (i == _lastHint && script.idleHints.Count > 1) i = (i + 1) % script.idleHints.Count;
+            var here = new List<int>();
+            for (int k = 0; k < script.idleHints.Count; k++)
+                if (Places.Holds(script.idleHints[k].context)) here.Add(k);
+            if (here.Count == 0) return;
+            int pick = UnityEngine.Random.Range(0, here.Count);
+            if (here[pick] == _lastHint && here.Count > 1) pick = (pick + 1) % here.Count;
+            int i = here[pick];
             _lastHint = i;
-            _queue.Add(new Queued { line = script.idleHints[i], priority = 0, trigger = "idle" });
-            Debug.Log("[Dialogue] idle hint.");
+            _queue.Add(new Queued { line = script.idleHints[i], priority = 0, trigger = "idle", context = script.idleHints[i].context, kind = LineKind.Filler });
+            Debug.Log($"[Dialogue] idle hint ({here.Count} valid at {Places.Now}).");
             Next();
         }
 
@@ -672,6 +768,13 @@ namespace Diorama
             _current = null;
             SetTarget(null);
             if (bubble != null) bubble.Hide();
+        }
+
+        /// <summary>Step 14k bridge: forgets that these "once" lines were said (the flat pass hears the intros again).</summary>
+        public static void DebugForget(params string[] ids)
+        {
+            if (_instance == null) return;
+            foreach (var id in ids) _instance._said.Remove(id);
         }
 
         /// <summary>Fires an idle hint now (debug).</summary>

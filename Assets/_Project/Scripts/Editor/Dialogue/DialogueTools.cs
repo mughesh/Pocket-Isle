@@ -64,9 +64,18 @@ namespace Diorama.EditorTools
                     ParseFlags(current, tm.Groups[2].Value, n, warnings);
                     continue;
                 }
+                // Step 14k: an idle hint carries its context in front: "- [in outside & !battle] Spirit: text".
+                string hintContext = null;
+                var hc = HintContext.Match(line);
+                if (hc.Success)
+                {
+                    hintContext = hc.Groups[1].Value.Trim();
+                    line = "- " + hc.Groups[2].Value;
+                }
                 var sm = SpeakerLine.Match(line);
                 if (!sm.Success) continue;
                 var dl = Line(sm.Groups[1].Value, sm.Groups[2].Value);
+                if (hintContext != null) dl.context = hintContext == "any" ? "" : hintContext;
                 if (indented && current != null) current.lines.Add(dl);
                 else if (!indented && section.StartsWith("Idle")) asset.idleHints.Add(dl);
                 else warnings.Append($"\n  line {n}: speaker line outside a trigger, ignored");
@@ -90,6 +99,10 @@ namespace Diorama.EditorTools
         static readonly Regex TargetFlag = new Regex(@"·?\s*→\s*([A-Za-z][\w:,]*(?:\.\w+)*)");
         static readonly Regex WhileFlag = new Regex(@"·\s*while\s+([!\w.&| ]+)");
         static readonly Regex ObjectiveFlag = new Regex(@"·\s*objective\b");
+        // Step 14k: "· in lodge", "· in outside & !battle" (the line's context) and "· intro" / "· story" / "· filler".
+        static readonly Regex InFlag = new Regex(@"·\s*in\s+([!\w.&| ]+?)(?=\s*(?:·|\(|:|$))");
+        static readonly Regex KindFlag = new Regex(@"·\s*(intro|story|filler)\b");
+        static readonly Regex HintContext = new Regex(@"^- \[in ([^\]]+)\]\s*(.+)$");
 
         /// <summary>
         /// After the id: "· once", "· once (note)", "· once: Spirit: text", "· Spirit: text", or nothing, plus an optional
@@ -102,7 +115,23 @@ namespace Diorama.EditorTools
             if (objective.Success)
             {
                 t.objective = true;
+                t.kind = LineKind.Objective;
                 rest = rest.Remove(objective.Index, objective.Length);
+            }
+            var where = InFlag.Match(rest);
+            if (where.Success)
+            {
+                string c = where.Groups[1].Value.Trim();
+                t.context = c == "any" ? "" : c;
+                rest = rest.Remove(where.Index, where.Length);
+            }
+            else warnings.Append($"\n  line {n} ({t.id}): no '· in <place>' context");
+            var kind = KindFlag.Match(rest);
+            if (kind.Success)
+            {
+                if (!t.objective)
+                    t.kind = kind.Groups[1].Value == "intro" ? LineKind.Intro : kind.Groups[1].Value == "filler" ? LineKind.Filler : LineKind.Story;
+                rest = rest.Remove(kind.Index, kind.Length);
             }
             var when = WhileFlag.Match(rest);
             if (when.Success)

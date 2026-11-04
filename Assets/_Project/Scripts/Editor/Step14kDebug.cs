@@ -92,6 +92,87 @@ namespace Diorama.EditorTools
             Debug.Log(sb.ToString());
         }
 
+        // ---- C: lines in context ----
+
+        static void Go(string label)
+        {
+            var s = Object.FindFirstObjectByType<GameState>();
+            if (s == null) return;
+            foreach (var spot in s.Spots)
+                if (spot.label == label)
+                {
+                    s.GoTo(spot);
+                    return;
+                }
+            Debug.LogWarning($"[Step14kDebug] No spot '{label}'.");
+        }
+
+        static void Idle()
+        {
+            var d = Object.FindFirstObjectByType<Dialogue>();
+            if (d != null) d.DebugIdle();
+        }
+
+        /// <summary>
+        /// The flat pass: hub -> lodge -> Cinderwood -> the Forge Hall -> a wild battle, the intros forgotten first; an idle
+        /// hint asked for in each place, and a few lines fired in the wrong place. Every line shown logs "[Dialogue] Show ...".
+        /// About 100 s. Back up the Editor save first (Editor Play writes it).
+        /// </summary>
+        public static void Pass()
+        {
+            Dialogue.DebugForget("lodge.first", "lodge.first.empty", "lodge.inspect", "lodge.take", "lodge.leave", "lodge.exit", "lodge.toss",
+                "lodge.inspect.one", "cw.arrive", "realm.cinderwood.first", "cinder.hall.first", "cinder.keeper.first", "hub.return.first",
+                "tut.grass", "pod.first", "battle.first", "menu.first", "cinder.village.first");
+            double t0 = EditorApplication.timeSinceStartup;
+            var steps = new List<(double, System.Action)>();
+            void At(double s, string what, System.Action act) => steps.Add((t0 + s, () =>
+            {
+                Debug.Log($"[Step14kDebug] Pass {s:0} s: {what} (place {Places.Now}).");
+                act();
+            }));
+            At(0, "hub: to the shrine", () => Go("Hub: shrine"));
+            At(10, "hub: idle hint", Idle);
+            At(14, "hub: lodge and Cinderwood lines fired here", () =>
+            {
+                Dialogue.Say("lodge.first");
+                Dialogue.Say("cw.arrive");
+            });
+            At(18, "enter the lodge", BattleDebug.EnterLodge);
+            At(24, "lodge: grass and hub lines fired here", () =>
+            {
+                Dialogue.Say("tut.grass");
+                Dialogue.Say("hub.return.first");
+                Dialogue.Say("gate.fire.first");
+            });
+            At(32, "lodge: idle hint", Idle);
+            At(38, "leave the lodge", BattleDebug.LeaveLodge);
+            At(44, "travel to Cinderwood", () => Go("CW: arrival"));
+            At(56, "Cinderwood: idle hint", Idle);
+            At(58, "Cinderwood: lodge and hub lines fired here", () =>
+            {
+                Dialogue.Say("lodge.last");
+                Dialogue.Say("hub.return.first");
+            });
+            At(62, "into the Forge Hall", () => Go("Forge Hall"));
+            At(74, "hall: idle hint, a Cinderwood map line", () =>
+            {
+                Idle();
+                Dialogue.Say("cinder.village.first");
+            });
+            At(80, "out to the village", () => Go("CW: village"));
+            At(90, "wild battle", BattleDebug.Grass);
+            At(100, "battle: idle hint, a map line", () =>
+            {
+                Idle();
+                Dialogue.Say("menu.first");
+                Dialogue.Say("lodge.last");
+                Dialogue.Say("gate.sealed");
+            });
+            At(108, "run", BattleDebug.Run);
+            At(116, "done", () => { });
+            Schedule(steps);
+        }
+
         internal static void Schedule(List<(double at, System.Action act)> steps)
         {
             EditorApplication.CallbackFunction tick = null;

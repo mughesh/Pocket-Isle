@@ -14,7 +14,15 @@ namespace Diorama
         [Tooltip("Name as written in the script (Spirit, Hearthstag, Heart).")]
         public string speakerName;
         [TextArea(1, 3)] public string text;
+        [Tooltip("Step 14k, idle hints only: where this hint may be picked (a place expression, see DialogueTrigger.context). Empty = anywhere.")]
+        public string context;
     }
+
+    /// <summary>
+    /// Step 14k: what a line is for. Objective = a task or lesson; Intro = a place's welcome (goes first when you arrive);
+    /// Story = a line tied to something happening; Filler = idle chatter (only after the place's intro and objectives).
+    /// </summary>
+    public enum LineKind { Story, Objective, Intro, Filler }
 
     /// <summary>All lines one trigger id says, in order.</summary>
     [Serializable]
@@ -33,6 +41,10 @@ namespace Diorama
         public string target;
         [Tooltip("Only shown while this holds (GameConditions: battle, swap, canWalk, encounters, ...; ! & |). The bubble closes as soon as it stops holding, and a battle or scene swap starting drops it unless it still holds. Empty = always.")]
         public string validWhile;
+        [Tooltip("Step 14k: where the line belongs (a GameConditions expression over the places: hub, realm, cinderwood, galewick, lilymere, lodge, hall, outside, inside, battle). It only shows while this holds; queued and out of place = dropped. Empty or 'any' = anywhere. Script: \"· in lodge\".")]
+        public string context;
+        [Tooltip("Step 14k: objective, intro (a place's welcome: goes first), story or filler. Script: \"· intro\" etc.; objective from \"· objective\".")]
+        public LineKind kind;
         public List<DialogueLine> lines = new List<DialogueLine>();
     }
 

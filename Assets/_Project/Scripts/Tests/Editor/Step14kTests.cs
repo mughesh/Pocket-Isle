@@ -89,4 +89,126 @@ namespace Diorama.Tests
             Assert.AreEqual(0.017f, GrabZone.DistanceToHandles(RightCorner(s, 0.02f), s), 0.002f, "2 cm out = 1.7 cm past the slack");
         }
     }
+
+    /// <summary>Step 14k C: the Spirit's lines play in context (place + kind).</summary>
+    public class Step14kDialogueTests
+    {
+        readonly System.Collections.Generic.List<Object> _made = new System.Collections.Generic.List<Object>();
+        bool _battle;
+
+        [SetUp]
+        public void SetUp()
+        {
+            GameConditions.Reset();
+            _battle = false;
+            GameConditions.Register("battle", () => _battle);
+            Places.Override = "hub";
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            foreach (var o in _made)
+                if (o != null) Object.DestroyImmediate(o);
+            _made.Clear();
+            GameConditions.Reset();
+            Places.Override = null;
+        }
+
+        Dialogue Make()
+        {
+            var script = ScriptableObject.CreateInstance<DialogueScript>();
+            _made.Add(script);
+            DialogueTrigger T(string id, string context, LineKind kind, bool once = false) => new DialogueTrigger
+            {
+                id = id, priority = 1, context = context, kind = kind, objective = kind == LineKind.Objective, once = once,
+                lines = new System.Collections.Generic.List<DialogueLine> { new DialogueLine { text = id + " line" } },
+            };
+            script.triggers.Add(T("lesson.grass", "outside & !battle", LineKind.Objective));
+            script.triggers.Add(T("lodge.first", "lodge", LineKind.Intro, true));
+            script.triggers.Add(T("chatter", "", LineKind.Filler));
+            script.triggers.Add(T("hub.story", "hub", LineKind.Story, true));
+            script.triggers.Add(T("hub.story2", "hub", LineKind.Story));
+            script.triggers.Add(T("lodge.task", "lodge", LineKind.Objective));
+            var go = new GameObject("Dialogue 14k Test");
+            _made.Add(go);
+            var d = go.AddComponent<Dialogue>();
+            d.script = script;
+            return d;
+        }
+
+        [Test]
+        public void Places_Read()
+        {
+            Places.Override = "galewick";
+            Assert.IsTrue(Places.Holds("realm"));
+            Assert.IsTrue(Places.Holds("outside & !battle"));
+            Assert.IsFalse(Places.Holds("hub"));
+            Assert.IsFalse(Places.Holds("lodge | hall"));
+            Places.Override = "hall";
+            Assert.IsTrue(Places.Holds("inside"));
+            Assert.IsFalse(Places.Holds("realm"));
+            Assert.IsTrue(Places.Holds(""), "no context = anywhere");
+        }
+
+        [Test]
+        public void ALineOutOfPlace_IsRefused_AndCanComeLater()
+        {
+            var d = Make();
+            Places.Override = "lodge";
+            d.Fire("hub.story", false);
+            Assert.IsNull(d.CurrentTrigger, "a hub line in the lodge");
+            Assert.IsFalse(Dialogue.HasSaid("hub.story"), "the once line stays unsaid");
+            Places.Override = "hub";
+            d.Fire("hub.story", false);
+            Assert.AreEqual("hub.story", d.CurrentTrigger);
+        }
+
+        [Test]
+        public void LessonFromOutside_DoesntBlockTheLodgeIntro()
+        {
+            var d = Make();
+            d.PinLines(new[] { "lesson.grass" }, "Grass");
+            d.Fire("lesson.grass", false);
+            Assert.AreEqual("lesson.grass", d.CurrentTrigger);
+            Places.Override = "lodge";
+            d.Fire("lodge.first", false);
+            d.DebugFinishLine();
+            Assert.AreEqual("lodge.first", d.CurrentTrigger, "the lodge's intro, not the grass lesson");
+        }
+
+        [Test]
+        public void Intro_GoesBeforeFiller_FillerWaitsForObjectives()
+        {
+            var d = Make();
+            Places.Override = "lodge";
+            d.Fire("chatter", false);
+            Assert.AreEqual("chatter", d.CurrentTrigger);
+            d.Fire("hub.story2", false); // not here: refused
+            d.Fire("chatter", true);     // queued filler
+            d.Fire("lodge.task", false);
+            d.Fire("lodge.first", false);
+            d.DebugFinishLine();
+            Assert.AreEqual("lodge.first", d.CurrentTrigger, "the place's intro first");
+            d.DebugFinishLine();
+            Assert.AreEqual("lodge.task", d.CurrentTrigger, "then the objective, though the filler was queued before it");
+            d.DebugFinishLine();
+            Assert.AreEqual("chatter", d.CurrentTrigger, "filler last");
+        }
+
+        [Test]
+        public void QueuedLines_LeftBehind_AreDropped()
+        {
+            var d = Make();
+            d.Fire("hub.story", false);
+            d.Fire("hub.story2", false);
+            Assert.AreEqual("hub.story", d.CurrentTrigger);
+            Places.Override = "cinderwood";
+            d.DebugFinishLine();
+            Assert.IsNull(d.CurrentTrigger, "the hub line queued before travelling is dropped, not delayed");
+            Places.Override = "hub";
+            d.DebugFinishLine();
+            Assert.IsNull(d.CurrentTrigger, "and doesn't come back");
+        }
+    }
 }
