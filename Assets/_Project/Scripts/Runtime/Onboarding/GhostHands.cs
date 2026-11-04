@@ -59,8 +59,6 @@ namespace Diorama
         public float struggleScale = 1.2f;
         [Tooltip("Gaze dot size (m).")]
         public float dotSize = 0.012f;
-        [Tooltip("Step 14i: island-grab clips pinch, hold this long while the gold ring fills (the real hold to grab), then move.")]
-        public float holdRingSeconds = 0.6f;
 
         const int JointCount = (int)HandJointId.HandEnd;
         static readonly int AlphaId = Shader.PropertyToID("_Alpha");
@@ -357,10 +355,7 @@ namespace Diorama
             }
 
             float speed = Mathf.Lerp(1f, struggleSpeed, _struggle) * Mathf.Max(0.05f, _clip.speed);
-            // Step 14i: island grabs pause on the pinch while the ring fills, like the real hold.
-            var held = GrabOf(_clip);
-            float hold = HoldsIsland(_clip) && held.has ? holdRingSeconds : 0f;
-            float loopLength = _clip.Duration / speed + _clip.holdEnd + hold;
+            float loopLength = _clip.Duration / speed + _clip.holdEnd;
             _time += dt;
             if (_time >= loopLength)
             {
@@ -369,13 +364,7 @@ namespace Diorama
                 if (_loops == struggleLoops && _showing) Debug.Log($"[GhostHands] {_request.clip}: {struggleLoops} loops without the lesson done: slower and bigger.");
             }
             _struggle = Mathf.MoveTowards(_struggle, _loops >= struggleLoops ? 1f : 0f, dt);
-            float raw = _time * speed, holdClip = hold * speed, ring = -1f;
-            if (hold > 0f && raw >= held.grab)
-            {
-                if (raw < held.grab + holdClip) ring = (raw - held.grab) / Mathf.Max(1e-4f, holdClip);
-                raw = raw < held.grab + holdClip ? held.grab : raw - holdClip;
-            }
-            float t = Mathf.Min(raw, _clip.Duration);
+            float t = Mathf.Min(_time * speed, _clip.Duration);
             float loopFade = Mathf.SmoothStep(0f, 1f, _time / 0.15f) * Mathf.SmoothStep(0f, 1f, (loopLength - _time) / 0.2f);
             if (debugFreeze >= 0f)
             {
@@ -422,32 +411,8 @@ namespace Diorama
 
             _keyWorld = point;
             _keyValid = true;
-            if (ring >= 0f && debugFreeze < 0f) HoldRing(point, ring, alpha);
             UpdateDot(point, t / Mathf.Max(0.01f, _clip.Duration), alpha);
             Spark(grab, t, point, alpha, scale);
-        }
-
-        /// <summary>Step 14i: the clips that grab the island (they show the hold ring).</summary>
-        static bool HoldsIsland(GhostHandClip c) => c != null && c.clipName == "grab_rim_slide";
-
-        /// <summary>Step 14i: the gold hold ring where the ghost pinches the island (each corner for two hands).</summary>
-        void HoldRing(Vector3 point, float fill, float alpha)
-        {
-            if (_request.place == GhostPlace.RimCorners)
-            {
-                foreach (bool left in new[] { true, false })
-                {
-                    var c = CornerOf(left);
-                    if (c.HasValue) IslandGrabFrame.Ring(c.Value, fill, alpha);
-                }
-                return;
-            }
-            if (!string.IsNullOrEmpty(_request.source) && Dialogue.TryGetTarget(_request.source, out var st) && st.point != null)
-            {
-                var sp = st.point();
-                if (sp.HasValue) point = sp.Value;
-            }
-            IslandGrabFrame.Ring(point, fill, alpha);
         }
 
         /// <summary>Step 11d: a pinch ghost's thumb and index close: a tiny gold spark at the pinch (where it grabs).</summary>

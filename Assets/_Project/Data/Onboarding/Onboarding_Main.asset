@@ -68,7 +68,7 @@ MonoBehaviour:
   - id: move
     line: lesson.move
     again: lesson.move.again
-    chip: Hold a corner
+    chip: Grab a corner
     help: 
     helpAfter: 30
     startWhen: opening.move

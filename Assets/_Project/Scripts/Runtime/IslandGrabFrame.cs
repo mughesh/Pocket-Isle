@@ -15,8 +15,8 @@ namespace Diorama
     /// Step 14a: it shows the handles only: a bracket over each of the four corners (always faintly there, like a notched
     /// corner piece; white when a hand is within <see cref="showDistance"/>, gold while held) and, while exploring, a line
     /// along the front lip under the pods. The rest of the frame is gone.
-    /// Step 14i: hold to grab: a gold ring fills around the handle while a hand arms the grab (<see cref="IslandHandle.TryGetArm"/>);
-    /// lesson ghosts show the same ring through <see cref="Ring"/>.
+    /// Step 14j: what you see is what grabs: the handles light up bright only while the hand is really in the grab zone
+    /// (<see cref="IslandHandle.InGrabZone"/>); the glow before that is by the distance to the zone.
     /// </summary>
     [DefaultExecutionOrder(200)] // after the island has moved this frame
     public class IslandGrabFrame : MonoBehaviour
@@ -63,14 +63,6 @@ namespace Diorama
         public float fadeInSeconds = 0.12f;
         public float fadeSeconds = 0.3f;
 
-        [Header("Hold ring (step 14i)")]
-        [Tooltip("The arming ring's radius and ribbon width (world m).")]
-        public float ringRadius = 0.018f;
-        public float ringWidth = 0.004f;
-        [Range(8, 64)] public int ringSegments = 40;
-        [Tooltip("The empty part of the ring (alpha).")]
-        [Range(0f, 1f)] public float ringTrack = 0.15f;
-
         struct HandState
         {
             public float near, hover, held;
@@ -89,20 +81,8 @@ namespace Diorama
         readonly List<Color> _colors = new List<Color>();
         readonly List<Vector2> _uvs = new List<Vector2>();
         readonly List<int> _tris = new List<int>();
-        Mesh _mesh, _ringMesh;
+        Mesh _mesh;
         Vector2 _builtFor;
-
-        struct RingRequest
-        {
-            public Vector3 point;
-            public float fill, alpha;
-        }
-
-        static readonly List<RingRequest> _rings = new List<RingRequest>();
-
-        /// <summary>Step 14i: draws a hold ring this frame (a lesson ghost's hold); fill 0..1.</summary>
-        public static void Ring(Vector3 world, float fill, float alpha = 1f) =>
-            _rings.Add(new RingRequest { point = world, fill = Mathf.Clamp01(fill), alpha = Mathf.Clamp01(alpha) });
         float _hint;
 
         void Start()
@@ -115,26 +95,15 @@ namespace Diorama
             }
             _mesh = new Mesh { name = "Island Grab Frame" };
             _mesh.MarkDynamic();
-            _ringMesh = new Mesh { name = "Island Hold Rings" };
-            _ringMesh.MarkDynamic();
         }
 
         void OnDestroy()
         {
             if (_mesh != null) Destroy(_mesh);
-            if (_ringMesh != null) Destroy(_ringMesh);
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void ResetStatics()
-        {
-            DebugPalm = null;
-            DebugArm = null;
-            _rings.Clear();
-        }
-
-        /// <summary>Bridge checks without hands: a fake arming ring (world point, fill), null = off.</summary>
-        public static System.Func<(Vector3, float)?> DebugArm;
+        static void ResetStatics() => DebugPalm = null;
 
         bool Hidden => SceneSwap.IsBusy || handle.ScaleFactor < 0.3f; // the opening: the island hasn't grown yet
 
@@ -145,79 +114,9 @@ namespace Diorama
             float any = 0f;
             for (int h = 0; h < 2; h++) any = Mathf.Max(any, Track(ref _hands[h], h == 0, hidden, dt));
             _hint = Mathf.MoveTowards(_hint, hidden ? 0f : handle.HintGlow, dt * 4f);
-            DrawRings(hidden);
             // The corner brackets always show a little (once the island has grown).
             if (hidden || any <= 0.002f && _hint <= 0.002f && idleLevel <= 0.002f) return;
             Draw();
-        }
-
-        /// <summary>Step 14i: the arming rings (each hand's, the ghosts' and the bridge's), facing the eye.</summary>
-        void DrawRings(bool hidden)
-        {
-            if (!hidden)
-            {
-                for (int h = 0; h < 2; h++)
-                    if (handle.TryGetArm(h == 0, out var p, out var f)) Ring(p, f);
-                var fake = DebugArm != null ? DebugArm() : null;
-                if (fake.HasValue) Ring(fake.Value.Item1, fake.Value.Item2);
-            }
-            var cam = Camera.main;
-            if (hidden || _rings.Count == 0 || cam == null)
-            {
-                _rings.Clear();
-                return;
-            }
-            _verts.Clear();
-            _colors.Clear();
-            _uvs.Clear();
-            _tris.Clear();
-            Vector3 eye = cam.transform.position;
-            float s = island.transform.lossyScale.x / 0.6f;
-            foreach (var r in _rings)
-            {
-                Vector3 n = (eye - r.point).normalized;
-                Vector3 up = Vector3.Cross(n, Vector3.Cross(Vector3.up, n)).normalized;
-                if (up.sqrMagnitude < 1e-6f) up = Vector3.forward;
-                Vector3 right = Vector3.Cross(up, n);
-                Vector3 c = r.point + n * 0.004f;
-                // The track (full, faint) and the gold fill clockwise from the top.
-                Arc(c, up, right, ringRadius * s, ringWidth * s * 0.7f, 1f, new Color(color.r, color.g, color.b, ringTrack * r.alpha));
-                if (r.fill > 0.001f) Arc(c + n * 0.0005f, up, right, ringRadius * s, ringWidth * s * 1.6f, r.fill, new Color(grabbedColor.r, grabbedColor.g * 0.9f, grabbedColor.b * 0.5f, 1.6f * r.alpha));
-            }
-            _rings.Clear();
-            _ringMesh.Clear();
-            _ringMesh.SetVertices(_verts);
-            _ringMesh.SetColors(_colors);
-            _ringMesh.SetUVs(0, _uvs);
-            _ringMesh.SetTriangles(_tris, 0);
-            _ringMesh.RecalculateBounds();
-            Graphics.RenderMesh(new RenderParams(material) { layer = island.gameObject.layer, shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off },
-                _ringMesh, 0, Matrix4x4.identity);
-        }
-
-        void Arc(Vector3 c, Vector3 up, Vector3 right, float radius, float w, float fill, Color col)
-        {
-            int n = Mathf.Max(2, Mathf.CeilToInt(ringSegments * fill));
-            int first = _verts.Count;
-            for (int i = 0; i <= n; i++)
-            {
-                float a = fill * Mathf.PI * 2f * i / n;
-                Vector3 dir = up * Mathf.Cos(a) + right * Mathf.Sin(a);
-                _verts.Add(c + dir * (radius - w * 0.5f));
-                _verts.Add(c + dir * (radius + w * 0.5f));
-                _colors.Add(col);
-                _colors.Add(col);
-                _uvs.Add(new Vector2(0f, 0f));
-                _uvs.Add(new Vector2(0f, 1f));
-                if (i == n) continue;
-                int a0 = first + i * 2, b0 = a0 + 2;
-                _tris.Add(a0);
-                _tris.Add(b0);
-                _tris.Add(a0 + 1);
-                _tris.Add(a0 + 1);
-                _tris.Add(b0);
-                _tris.Add(b0 + 1);
-            }
         }
 
         /// <summary>Eases one hand's near / hover / held levels; returns how much it lights the frame.</summary>
@@ -230,7 +129,7 @@ namespace Diorama
             {
                 float d = handle.DistanceToHandles(fake.Value);
                 near = d < showDistance ? 1f - Mathf.SmoothStep(0f, 1f, d / showDistance) : 0f;
-                hover = d <= 0.005f ? 1f : 0f;
+                hover = d <= 0.0005f ? 1f : 0f;
                 s.closest = fake.Value;
             }
             else if (!hidden && HandLookup.TryGetJoint(hand, HandJointId.HandPalm, out var palm))
@@ -251,7 +150,7 @@ namespace Diorama
                 if (d < showDistance)
                 {
                     near = 1f - Mathf.SmoothStep(0f, 1f, d / showDistance);
-                    hover = handle.IsHandHovering(left) || d <= 0.005f ? 1f : 0f;
+                    hover = handle.InGrabZone(left) ? 1f : 0f;
                 }
                 if (near > 0f || held > 0f) s.closest = probe;
             }

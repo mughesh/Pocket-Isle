@@ -14,8 +14,8 @@ namespace Diorama
     /// Step 8e: pinch or palm. Two modes: Explore (the whole skirt, the front pod strip too; the rim pods are inert) and
     /// Pods active (battles and the lodge: the pods can be grabbed, so the strip in front of them is not grab zone).
     /// Every pinch is resolved once, as it starts: an island grab only when the pinch point (or palm) is in the shell,
-    /// and (step 14i) never when the gaze is on something selectable away from the hand at that moment: that is a look +
-    /// pinch (gaze select). The ISDK grab asks
+    /// and, if the gaze is on something selectable at that moment, only when the hand had been in the shell for
+    /// <see cref="grabHoverSeconds"/> first; otherwise it is a look + pinch (gaze select). The ISDK grab asks
     /// <see cref="Filter"/>, the gaze systems ask <see cref="IsHandBusy"/>, so both always agree.
     /// The island always stays level (parallel to the floor).
     /// Its front (+Z: the Spirit, runes and pods side) always turns to face the head (yaw only, head position projected
@@ -28,11 +28,10 @@ namespace Diorama
     /// base at least <see cref="lipBelowPods"/> under the pods' centre line; Explore only, and a look elsewhere needs the
     /// short hover first). A pinch point or palm within a pod's radius (+ <see cref="podClearance"/>) never grabs: the
     /// pods win. Everywhere else on the rim, pinches go to pods and objects. Two hands = any two handles.
-    /// Step 14i (Mugesh rests his hand on the armrest and pinches near a corner): hold to grab. A pinch or fist on a handle
-    /// arms the grab and a gold ring fills there (<see cref="grabHoldSeconds"/>, <see cref="joinHoldSeconds"/> for the second
-    /// hand); full = <see cref="GrabHold"/> hands the island to that hand's ISDK grab (ForceSelect, released when the hand
-    /// opens). The ISDK's own pinch-start grab never happens (<see cref="Filter"/> waits for a filled ring). Guards: a gaze
-    /// on something away from the hand when the pinch starts, or a hand below the island's base, never arms.
+    /// Step 14j: the step 14i hold to grab is reverted (Mugesh couldn't grab at all); the plain grab is back with a tight
+    /// zone (<see cref="GrabZone"/>): at most <see cref="grabOutside"/> world m outside the glowing line, <see cref="grabInside"/>
+    /// in over the rock, between <see cref="grabBandTop"/> and <see cref="grabBandBottom"/>. A pinch is judged by its pinch
+    /// point only (the palm counts only for a palm grab).
     /// </summary>
     [RequireComponent(typeof(Grabbable))]
     public class IslandHandle : MonoBehaviour, ITransformer, IGameObjectFilter
@@ -70,28 +69,29 @@ namespace Diorama
         public EncounterDirector encounters;
         [Tooltip("Grab shell over the front pod strip: grab zone while exploring, off while the pods are active.")]
         public Collider[] podStripColliders;
-        [Header("Hold to grab (step 14i)")]
-        [Tooltip("A pinch (or fist) on a handle arms the grab; the gold ring fills over this long, then the island is held.")]
-        public float grabHoldSeconds = 0.6f;
-        [Tooltip("The second hand joins a held island with this shorter hold (resize, turn).")]
-        public float joinHoldSeconds = 0.3f;
-        [Tooltip("Moving the hand this far (world m) while the ring fills cancels the arm.")]
-        public float armCancelDistance = 0.04f;
-        [Tooltip("A fist: the middle and ring fingertips this close to the palm (world m).")]
-        public float fistReach = 0.055f;
+        [Tooltip("Gaze on something selectable away from the hand: a pinch on the lip is a grab only after the hand was in the zone this long (s).")]
+        public float grabHoverSeconds = 0.15f;
         [Tooltip("The gaze target counts as 'away from the hand' beyond this distance from the pinch point (world m); nearer, the player is looking at what they grab.")]
         public float gazeAwayDistance = 0.15f;
-        [Tooltip("A pinch point or palm this close to the shell counts as in it (world m), except over the play area.")]
-        public float zoneMargin = 0.01f;
-        [Tooltip("Corners (island-local m from each corner, along both edges): plain grabs, no grab-or-select rule; a hand within cornerReach of the shell there can always grab.")]
+        [Tooltip("Corners (island-local m from each corner, along both edges; the corner brackets): plain grabs, no grab-or-select rule.")]
         public float cornerSize = 0.1f;
-        public float cornerReach = 0.03f;
+
+        [Header("Grab zone (step 14j: what you see is what grabs)")]
+        [Tooltip("The glowing frame (its line's outset and corner radius); found at Start when empty.")]
+        public IslandGrabFrame frame;
+        [Tooltip("Reach outside the glowing line (world m).")]
+        public float grabOutside = 0.012f;
+        [Tooltip("Depth inside the line, over the rock (island-local m; the ISDK shell is 0.04 deep).")]
+        public float grabInside = 0.035f;
+        [Tooltip("Height band (island-local y): the cap top is about +0.006, the shell spans +0.012..-0.13.")]
+        public float grabBandTop = 0.02f;
+        public float grabBandBottom = -0.12f;
+        [Tooltip("A pinch point counts as a pinch (not a palm grab) at this index pinch strength.")]
+        [Range(0f, 1f)] public float pinchStrengthForPoint = 0.4f;
 
         [Header("Handles (step 14a)")]
         [Tooltip("The front lip grabs only this far (world m) or more below the rim pods' centre line.")]
         public float lipBelowPods = 0.02f;
-        [Tooltip("The lip is the near face: within this far in from the front edge (island-local m).")]
-        public float lipDepth = 0.05f;
         [Tooltip("A pinch point or palm this close to a pod's surface (world m) is the pod's, never the island's.")]
         public float podClearance = 0.01f;
 
@@ -109,19 +109,16 @@ namespace Diorama
         bool _turning;
         float _turnSeconds, _offFor;
 
-        /// <summary>One hand's pinch resolution (step 14i: hold to grab). Intent = on a handle now (not gripping).</summary>
+        /// <summary>One hand's pinch resolution. Grab = the current intent while not pinching, frozen once a pinch starts.</summary>
         struct PinchState
         {
             public int frame;
-            public bool intent, palmPoint, forced;
-            public float heldSince;
+            public bool pinching, grab, inZone;
+            public float zoneSince;
             public string last;
-            public Vector3 point;
         }
 
         readonly PinchState[] _pinch = new PinchState[2];
-        readonly GrabHold[] _hold = { new GrabHold(), new GrabHold() };
-        readonly HandGrabInteractor[] _interactors = new HandGrabInteractor[2];
         readonly Dictionary<GameObject, int> _interactorSide = new Dictionary<GameObject, int>();
         bool _podsActive, _modeLogged;
 
@@ -153,6 +150,7 @@ namespace Diorama
             if (pods == null || encounters == null) Debug.LogError("[IslandHandle] No pod rack / encounters (Set Up MR_Main (8e)): always in Explore mode.", this);
             ApplyMode(true);
             if (ghosts == null) ghosts = FindFirstObjectByType<GhostHands>();
+            if (frame == null) frame = FindFirstObjectByType<IslandGrabFrame>();
             if (placer != null) placer.Placed += LogFacing;
             // The base skirt's front middle (the two-hands tip); the grab frame glows, no gold sphere.
             Dialogue.RegisterTarget("islandRim", () =>
@@ -361,30 +359,38 @@ namespace Diorama
 
         // ---- pinch: grab or select ----
 
-        /// <summary>A point is in the grab shell (within <see cref="zoneMargin"/> of an enabled zone collider), never over the play area.</summary>
-        public bool InZone(Vector3 p)
-        {
-            if (rimColliders == null) return false;
-            if (island != null)
-            {
-                var local = island.transform.InverseTransformPoint(p);
-                var half = island.FootprintHalfSize;
-                if (Mathf.Abs(local.x) < half.x && Mathf.Abs(local.z) < half.y && local.y > island.CapTopLocal - 0.003f) return false;
-            }
-            float margin = zoneMargin * zoneMargin;
-            foreach (var c in rimColliders)
-                if (c != null && c.enabled && (c.ClosestPoint(p) - p).sqrMagnitude <= margin) return true;
-            return false;
-        }
-
         /// <summary>Which island handle a point is on (step 14a).</summary>
         public enum Zone { None, Corner, Lip }
 
+        /// <summary>Step 14j: the grab zone's shape now (the frame line, the island's scale, the mode).</summary>
+        public GrabZone.Shape ZoneShape
+        {
+            get
+            {
+                var t = island.transform;
+                return new GrabZone.Shape
+                {
+                    half = island.FootprintHalfSize,
+                    capTop = island.CapTopLocal,
+                    lineOutset = frame != null ? frame.outset : 0.008f,
+                    lineRadius = frame != null ? frame.cornerRadius : 0.03f,
+                    scale = Mathf.Max(1e-4f, t.lossyScale.x),
+                    outsideWorld = grabOutside,
+                    insideLocal = grabInside,
+                    bandTop = grabBandTop,
+                    bandBottom = grabBandBottom,
+                    cornerSize = cornerSize,
+                    lipTop = t.InverseTransformPoint(new Vector3(t.position.x, PodLineY - lipBelowPods, t.position.z)).y,
+                    lipActive = !_podsActive,
+                };
+            }
+        }
+
         public Zone ZoneAt(Vector3 p)
         {
-            if (NearPod(p)) return Zone.None;
-            if (InCorner(p)) return Zone.Corner;
-            return !_podsActive && OnLip(p) ? Zone.Lip : Zone.None;
+            if (island == null || NearPod(p)) return Zone.None;
+            var k = GrabZone.Classify(island.transform.InverseTransformPoint(p), ZoneShape);
+            return k == GrabZone.Kind.Corner ? Zone.Corner : k == GrabZone.Kind.Lip ? Zone.Lip : Zone.None;
         }
 
         /// <summary>World height of the rim pods' centre line (the cap top when there are no pods).</summary>
@@ -397,17 +403,6 @@ namespace Diorama
             }
         }
 
-        /// <summary>The near face of the base under the pods (not the corners; in the shell).</summary>
-        bool OnLip(Vector3 p)
-        {
-            if (island == null) return false;
-            var local = island.transform.InverseTransformPoint(p);
-            var half = island.FootprintHalfSize;
-            if (local.z < half.y - lipDepth || Mathf.Abs(local.x) > half.x - cornerSize) return false;
-            if (p.y > PodLineY - lipBelowPods) return false;
-            return InZone(p);
-        }
-
         bool NearPod(Vector3 p)
         {
             if (pods == null || pods.podPrefab == null || island == null) return false;
@@ -415,50 +410,20 @@ namespace Diorama
             for (int i = 0; i < Party.Size; i++)
             {
                 var pod = pods.Pod(i);
-                if (pod != null && pod.isActiveAndEnabled && (pod.transform.position - p).sqrMagnitude < r * r) return true;
+                if (pod != null && pod.isActiveAndEnabled && GrabZone.PodWins(p, pod.transform.position, r)) return true;
             }
             return false;
         }
 
-        /// <summary>Distance (world m) to the nearest handle (the corner posts and, exploring, the lip): the frame lights by it.</summary>
+        /// <summary>Distance (world m) to the nearest handle zone (0 inside it): the frame lights by it.</summary>
         public float DistanceToHandles(Vector3 p)
         {
             if (island == null) return float.MaxValue;
-            var t = island.transform;
-            var local = t.InverseTransformPoint(p);
-            var half = island.FootprintHalfSize;
-            float cap = island.CapTopLocal, depth = 0.08f / Mathf.Max(1e-4f, t.lossyScale.x);
-            float best = float.MaxValue;
-            // Corner posts: the base's vertical corner edges, from the cap down.
-            for (int i = 0; i < 4; i++)
-            {
-                var c = new Vector3(i % 2 == 0 ? half.x : -half.x, Mathf.Clamp(local.y, cap - depth, cap), i < 2 ? half.y : -half.y);
-                best = Mathf.Min(best, (t.TransformPoint(c) - p).magnitude);
-            }
-            if (!_podsActive)
-            {
-                float lipTop = t.InverseTransformPoint(new Vector3(p.x, PodLineY - lipBelowPods, p.z)).y;
-                var l = new Vector3(Mathf.Clamp(local.x, -(half.x - cornerSize), half.x - cornerSize), Mathf.Clamp(local.y, cap - depth, lipTop), half.y);
-                best = Mathf.Min(best, (t.TransformPoint(l) - p).magnitude);
-            }
-            return best;
+            return GrabZone.DistanceToHandles(island.transform.InverseTransformPoint(p), ZoneShape);
         }
 
         /// <summary>The front lip is a handle now (Explore mode).</summary>
         public bool LipActive => !_podsActive;
-
-        /// <summary>Near one of the base's corners and the grab shell: grabs there are plain ISDK grabs (Mugesh, Oct 26).</summary>
-        bool InCorner(Vector3 p)
-        {
-            if (island == null || rimColliders == null) return false;
-            var local = island.transform.InverseTransformPoint(p);
-            var half = island.FootprintHalfSize;
-            if (Mathf.Abs(local.x) < half.x - cornerSize || Mathf.Abs(local.z) < half.y - cornerSize) return false;
-            float reach = cornerReach * cornerReach;
-            foreach (var c in rimColliders)
-                if (c != null && c.enabled && (c.ClosestPoint(p) - p).sqrMagnitude <= reach) return true;
-            return false;
-        }
 
         /// <summary>Between the thumb and index tips (where a pinch closes).</summary>
         public static bool TryGetPinchPoint(IHand hand, out Vector3 point)
@@ -475,118 +440,40 @@ namespace Diorama
             ref var s = ref _pinch[h];
             if (s.frame == Time.frameCount) return;
             s.frame = Time.frameCount;
-            var hold = _hold[h];
-            hold.holdSeconds = grabHoldSeconds;
-            hold.joinSeconds = joinHoldSeconds;
-            hold.cancelDistance = armCancelDistance;
             var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
             bool tracked = hand != null && hand.IsTrackedDataValid;
             Vector3 pinchPoint = default, palmPoint = default;
             bool hasPinch = tracked && TryGetPinchPoint(hand, out pinchPoint);
             bool hasPalm = tracked && HandLookup.TryGetJoint(hand, HandJointId.HandPalm, out palmPoint);
-            // Step 14a: only the handles (corners, front lip); a pod in reach of the pinch point always wins.
+            // Step 14j: a pinch is judged by its pinch point only; the palm counts only for a palm grab (index not
+            // pinching). Step 14a: only the handles (corners, front lip); a pod in reach of the pinch point always wins.
+            bool pinchy = hasPinch && hand.GetFingerPinchStrength(HandFinger.Index) >= pinchStrengthForPoint;
             var zp = hasPinch ? ZoneAt(pinchPoint) : Zone.None;
-            var zh = hasPalm ? ZoneAt(palmPoint) : Zone.None;
+            var zh = hasPalm && !pinchy ? ZoneAt(palmPoint) : Zone.None;
             bool podFirst = hasPinch && NearPod(pinchPoint);
             bool corner = !podFirst && (zp == Zone.Corner || zh == Zone.Corner);
-            bool onHandle = corner || !podFirst && (zp == Zone.Lip || zh == Zone.Lip);
+            bool inZone = corner || !podFirst && (zp == Zone.Lip || zh == Zone.Lip);
+            if (inZone && !s.inZone) s.zoneSince = Time.time;
+            s.inZone = inZone;
             bool pinching = tracked && hand.GetIndexFingerIsPinching();
-            bool fist = tracked && hasPalm && !pinching && IsFist(hand, palmPoint);
-            bool grip = pinching || fist;
-            bool wasGripping = hold.Gripping;
-            // The point the ring tracks (chosen as the grip starts): the pinch point when it's on a handle, else the palm.
-            if (!wasGripping) s.palmPoint = !pinching || zp == Zone.None && zh != Zone.None;
-            Vector3 point = s.palmPoint ? palmPoint : pinchPoint;
-            s.point = point;
-            // Step 14i guards: a look + pinch at something away from the hand, and a hand resting below the island.
-            bool gazeAway = hasPinch && GazeTarget.TryGet(out var gazePoint) && (gazePoint - pinchPoint).magnitude > gazeAwayDistance;
-            bool below = island != null && (hasPalm ? palmPoint : pinchPoint).y < island.transform.TransformPoint(new Vector3(0f, IslandBuilder.BaseBottomLocal, 0f)).y;
-            s.intent = onHandle && !below;
-            var before = hold.State;
-            float scale = island != null ? island.transform.lossyScale.x : 1f;
-            var local = island != null ? island.transform.InverseTransformPoint(point) : point;
-            bool filled = hold.Step(grip, onHandle, gazeAway, below, IsHandGrabbing(h != 0), local, scale, Time.unscaledDeltaTime);
-            if (filled) Take(h, point);
-            // The island let go (or the forced grab never took): wait for the hand to open.
-            if (hold.State == GrabHoldState.Held && s.forced && !IsHandGrabbing(h == 0) && Time.unscaledTime - s.heldSince > 0.3f)
+            if (!s.pinching || !pinching)
             {
-                Debug.LogWarning($"[IslandHandle] {(h == 0 ? "Left" : "Right")} hand: the grab didn't take (or ended): waiting for the hand to open.");
-                hold.Drop();
+                // Free, or a pinch starting now: decide (the decision holds while the pinch lasts). Only a gaze target
+                // away from the hand competes (looking at the edge you grab is not a look + pinch elsewhere).
+                bool gaze = hasPinch && GazeTarget.TryGet(out var gazePoint) && (gazePoint - pinchPoint).magnitude > gazeAwayDistance;
+                float inFor = inZone ? Time.time - s.zoneSince : 0f;
+                s.grab = corner || inZone && (!gaze || inFor >= grabHoverSeconds);
+                if (pinching && (Application.isEditor || Debug.isDebugBuild))
+                {
+                    string side = h == 0 ? "L" : "R";
+                    s.last = s.grab ? $"pinch {side}: GRAB ({(corner ? "corner" : $"front lip {inFor:0.00} s")}{(gaze ? ", gaze on a target away from the hand" : "")})"
+                           : inZone ? $"pinch {side}: select (gaze on a target away from the hand, on the lip only {inFor:0.00} s < {grabHoverSeconds:0.00})"
+                           : podFirst ? $"pinch {side}: select (a pod is in reach: pods win)"
+                           : $"pinch {side}: select (not on a handle: {(hasPinch ? DistanceToHandles(pinchPoint) * 100f : -1f):0.0} cm away)";
+                    Debug.Log($"[IslandHandle] {s.last}, {(_podsActive ? "pods active" : "explore")}.");
+                }
             }
-            if (!grip && s.forced) Release(h);
-            if (hold.State == before) return;
-            if (!Application.isEditor && !Debug.isDebugBuild) return;
-            string side = h == 0 ? "L" : "R";
-            string what = podFirst ? "a pod is in reach: pods win" : hold.Why;
-            s.last = hold.State switch
-            {
-                GrabHoldState.Arming => $"{(fist ? "fist" : "pinch")} {side}: ARMING on the {(corner ? "corner" : "front lip")} ({(hold.Join ? joinHoldSeconds : grabHoldSeconds):0.0} s{(hold.Join ? ", joining" : "")})",
-                GrabHoldState.Held => $"{side}: GRAB ({hold.Why})",
-                GrabHoldState.Cancelled => $"{side}: cancelled ({hold.Why}): this pinch goes nowhere",
-                GrabHoldState.Select => $"pinch {side}: select ({what})",
-                _ => before == GrabHoldState.Arming ? $"{side}: let go before the ring filled: nothing happens" : $"{side}: open",
-            };
-            if (hold.State == GrabHoldState.Select && !onHandle) return; // ordinary pinches elsewhere: no log spam
-            if (hold.State != GrabHoldState.Idle || before == GrabHoldState.Arming)
-                Debug.Log($"[IslandHandle] {s.last}, {(_podsActive ? "pods active" : "explore")}.");
-        }
-
-        bool IsFist(IHand hand, Vector3 palm)
-        {
-            float r = fistReach * fistReach;
-            return HandLookup.TryGetJoint(hand, HandJointId.HandMiddleTip, out var m) && (m - palm).sqrMagnitude < r &&
-                   HandLookup.TryGetJoint(hand, HandJointId.HandRingTip, out var ring) && (ring - palm).sqrMagnitude < r;
-        }
-
-        HandGrabInteractor InteractorFor(int h)
-        {
-            if (_interactors[h] != null) return _interactors[h];
-            var want = h == 0 ? Handedness.Left : Handedness.Right;
-            foreach (var i in FindObjectsByType<HandGrabInteractor>(FindObjectsSortMode.None))
-                if (i != null && i.Hand != null && i.Hand.Handedness == want) return _interactors[h] = i;
-            return null;
-        }
-
-        /// <summary>The ring filled: hand the island to this hand's ISDK grab (it lets go when the hand opens).</summary>
-        void Take(int h, Vector3 point)
-        {
-            var i = InteractorFor(h);
-            if (i == null || rimInteractable == null)
-            {
-                Debug.LogError($"[IslandHandle] No {(h == 0 ? "left" : "right")} HandGrabInteractor (or rim interactable): the hold can't grab.", this);
-                _hold[h].Drop();
-                return;
-            }
-            ref var s = ref _pinch[h];
-            s.forced = true;
-            s.heldSince = Time.unscaledTime;
-            i.ForceSelect(rimInteractable, true);
-            GameAudio.At(AudioIds.UiPebble, point);
-        }
-
-        void Release(int h)
-        {
-            ref var s = ref _pinch[h];
-            s.forced = false;
-            var i = InteractorFor(h);
-            if (i != null) i.ForceRelease();
-        }
-
-        /// <summary>Step 14i: the hand's arming ring (where, 0..1), for the grab frame; false when not arming.</summary>
-        public bool TryGetArm(bool leftHand, out Vector3 point, out float fill)
-        {
-            int h = leftHand ? 0 : 1;
-            Resolve(h);
-            point = _pinch[h].point;
-            fill = _hold[h].Fill;
-            return _hold[h].State == GrabHoldState.Arming;
-        }
-
-        /// <summary>Step 14i: this hand's hold state (the dev readout, bridge checks).</summary>
-        public GrabHoldState HoldState(bool leftHand)
-        {
-            Resolve(leftHand ? 0 : 1);
-            return _hold[leftHand ? 0 : 1].State;
+            s.pinching = pinching;
         }
 
         /// <summary>ISDK interactor filter on the rim grab: may this interactor's hand grab the island now?</summary>
@@ -600,9 +487,16 @@ namespace Diorama
             }
             if (h < 0) return true;
             if (IsHandGrabbing(h == 0)) return true;
-            // Step 14i: only a filled ring grabs (the ISDK's own pinch-start select never does).
             Resolve(h);
-            return _hold[h].State == GrabHoldState.Held;
+            return _pinch[h].grab;
+        }
+
+        /// <summary>Step 14j: this hand's pinch point (or palm, for a palm grab) is in the grab zone now: the frame's bright hover.</summary>
+        public bool InGrabZone(bool leftHand)
+        {
+            int h = leftHand ? 0 : 1;
+            Resolve(h);
+            return _pinch[h].inZone;
         }
 
         /// <summary>The island's size against where it was placed (two-hand resize): 1 = as placed.</summary>
@@ -648,9 +542,7 @@ namespace Diorama
             if (_heldElsewhere[leftHand ? 0 : 1] >= Time.frameCount - 1) return true;
             int h = leftHand ? 0 : 1;
             Resolve(h);
-            // Step 14i: arming, held or cancelled pinches are the island's; an open hand on a handle (not resting below) too.
-            var hold = _hold[h];
-            return hold.Busy || !hold.Gripping && _pinch[h].intent;
+            return _pinch[h].grab;
         }
 
         static readonly int[] _heldElsewhere = { -10, -10 };

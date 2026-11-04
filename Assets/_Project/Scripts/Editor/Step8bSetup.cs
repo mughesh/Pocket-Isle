@@ -157,10 +157,10 @@ namespace Diorama.EditorTools
                 },
                 new LessonData
                 {
-                    id = "move", line = "lesson.move", chip = "Hold a corner", again = "lesson.move.again", startWhen = "opening.move", validWhile = "opening.move",
+                    id = "move", line = "lesson.move", chip = "Grab a corner", again = "lesson.move.again", startWhen = "opening.move", validWhile = "opening.move",
                     // Step 8e: a pinch on the side of the base (pinch or palm both grab the island).
                     // Step 9h: the ghost grabs the near rim's corner on the dominant side (was the base's side).
-                    // Step 14i: waits 45 s (12 s timed out before a first-time player managed the hold).
+                    // Step 14i: waits 45 s (12 s timed out for a first-time player).
                     doneWhen = "islandGrabbed", skipAfter = 45f, ghost = "grab_rim_slide", place = GhostPlace.AtTarget, source = "rimCorner",
                 },
                 new LessonData

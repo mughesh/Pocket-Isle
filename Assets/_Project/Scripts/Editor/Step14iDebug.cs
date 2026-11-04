@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Diorama.EditorTools
 {
-    /// <summary>Bridge hooks for step 14i (Play mode): the hold ring, the island-lesson ghosts, facing, shots.</summary>
+    /// <summary>Bridge hooks for step 14i (Play mode): the island-lesson ghosts, facing, shots.</summary>
     public static class Step14iDebug
     {
         const string ArgFile = "Temp/ClaudeBridge/arg.txt";
@@ -18,18 +18,6 @@ namespace Diorama.EditorTools
             var island = Island;
             var half = island.FootprintHalfSize;
             return island.transform.TransformPoint(new Vector3(right ? half.x : -half.x, island.CapTopLocal - 0.02f, half.y));
-        }
-
-        /// <summary>A fake arming ring on the near-right corner (arg = fill 0..1; empty = off).</summary>
-        public static void Ring()
-        {
-            if (!float.TryParse(Arg, out float fill))
-            {
-                IslandGrabFrame.DebugArm = null;
-                return;
-            }
-            IslandGrabFrame.DebugArm = () => (Corner(true), fill);
-            Debug.Log($"[Step14iDebug] Ring at the near-right corner, {fill:0.00}.");
         }
 
         /// <summary>The move lesson's ghost (one hand on the dominant corner) or, arg "two", the two-hands ghost.</summary>
@@ -98,7 +86,7 @@ namespace Diorama.EditorTools
         {
             var h = Object.FindFirstObjectByType<IslandHandle>();
             if (h == null) return;
-            Debug.Log($"[Step14iDebug] Facing error {h.FacingError():0.0} deg; hold L {h.HoldState(true)}, R {h.HoldState(false)}.");
+            Debug.Log($"[Step14iDebug] Facing error {h.FacingError():0.0} deg.");
         }
 
         /// <summary>Turns the island off the head by arg degrees (default 12) to watch the idle re-face.</summary>
