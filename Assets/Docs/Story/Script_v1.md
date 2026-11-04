@@ -115,6 +115,10 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
 - `party.full` · once: Spirit: Your pods are full. New friends will wait for you at the Hearth Lodge.
 - `evolve.first` · once · → nearPad (first evolution)
   - Spirit: Look at that! They've grown into something new.
+- `evolve.ready` · objective · → evolvePod (step 14h: a pod Isling is ready to evolve and it's calm; pinned until it evolves, chip "Hold it"; {name} = its name)
+  - Spirit: {name} is glowing... it's ready to grow!
+- `evolve.done` (step 14h: after an evolution in the palm; {name} = the new form)
+  - Spirit: {name}! So strong now.
 - `shrine.first` · once · while !tutorial · → shrine (first time a shrine comes into the window)
   - Spirit: A Hearth Shrine! Warm your hand over the flame.
 - `shrine.near` · once · while !tutorial · → shrine (step 8c: first time the explorer stands next to one)
@@ -288,6 +292,15 @@ Step 10d / 10e, the tower hall:
   - Spirit: The wind shard! Grab it.
 - `gw.restored` · once (the restoration wave from the tower)
   - Spirit: Feel that? Galewick is breathing again!
+
+Step 14h, the first Keeper's thanks (once per save: the first Keeper calmed, back on the realm map after the wave; only
+if the starter hasn't evolved; the starter becomes ready to evolve, `{name}` = the starter):
+- `keeper.thanks.evolve.wind` (Galeowl)
+  - Galeowl: Your friend fought so bravely... let the wind lift it higher.
+- `keeper.thanks.evolve.fire` (Hearthstag)
+  - Hearthstag: {name} has a fierce little spark... let my fire help it grow.
+- `keeper.thanks.evolve.water` (Tidemother)
+  - Tidemother: {name} never gave up... let the tide carry it higher.
 
 ## Lilymere (water, step 11a)
 - `gate.water.first` · once · → gate:water (first time the well gate comes into the window, once it leads somewhere)

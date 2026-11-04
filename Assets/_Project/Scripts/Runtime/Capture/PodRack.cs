@@ -130,6 +130,60 @@ namespace Diorama
         /// <summary>A slot to highlight (a lodge selection), or -1.</summary>
         public int SelectedSlot { get; set; } = -1;
 
+        /// <summary>
+        /// Step 14h: the pod whose Isling is ready to evolve (GrowthDirector), or -1. It glows gold and pulses, and while
+        /// exploring it alone can be grabbed (grab it and turn the hand palm up) or looked at + pinched (<see cref="DuePicked"/>).
+        /// </summary>
+        public int DueSlot { get; set; } = -1;
+
+        /// <summary>Step 14h: look + pinch on the glowing <see cref="DueSlot"/> pod (exploring).</summary>
+        public event Action<int> DuePicked;
+
+        int _claimed = -1;
+
+        /// <summary>
+        /// Step 14h: the evolution takes pod <paramref name="slot"/> out of the rack: a hand holding it lets go (no fly home),
+        /// the rack stops placing it and its tiny Isling stays as it is until <see cref="ReturnClaimed"/>.
+        /// </summary>
+        public bool Claim(int slot)
+        {
+            var p = Pod(slot);
+            if (p == null || slot >= Party.Size) return false;
+            _claimed = slot;
+            _evolvingSlot = slot;
+            p.Detached = true;
+            var g = Grab(p);
+            if (g != null) g.CanGrab = false;
+            if (_card != null) _card.Hide();
+            return true;
+        }
+
+        public bool IsHeld(int slot)
+        {
+            var p = Pod(slot);
+            var g = p != null ? Grab(p) : null;
+            return g != null && g.IsHeld;
+        }
+
+        /// <summary>Step 14h: the claimed pod shows its creature as it is now and flies back to its socket.</summary>
+        public IEnumerator ReturnClaimed(int slot)
+        {
+            _claimed = -1;
+            var p = Pod(slot);
+            if (p != null && party.At(slot) != null) p.Show(party.At(slot));
+            _evolvingSlot = -1;
+            if (p != null) yield return FlyHome(slot, 0.6f);
+        }
+
+        /// <summary>Step 14h: the stats card for a creature at a moving point (the palm), for <paramref name="seconds"/>.</summary>
+        public void ShowCardFor(IslingInstance c, Func<Vector3?> where, float seconds)
+        {
+            if (_card == null || c == null || MenuUp) return;
+            _card.Show(c, where, seconds);
+            _cardIslandPos = island.transform.position;
+            _cardIslandRot = island.transform.rotation;
+        }
+
         public bool AnyHeld
         {
             get
@@ -372,7 +426,7 @@ namespace Diorama
                 }
                 if (i < Party.Size)
                 {
-                    _pop[i] = Mathf.MoveTowards(_pop[i], !Explore && CanUse(i) ? 1f : 0f, Time.deltaTime * 6f);
+                    _pop[i] = Mathf.MoveTowards(_pop[i], (!Explore || i == DueSlot) && CanUse(i) ? 1f : 0f, Time.deltaTime * 6f);
                     p.Grabbable = _pop[i];
                 }
                 if (!p.Detached && !held)
@@ -384,9 +438,9 @@ namespace Diorama
                 p.IslingOut = i == ActiveSlot;
                 float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * 6f);
                 p.Glow = i == CradleSlot ? (CradlePulse ? 0.9f + 0.6f * pulse : CradleGlow ? 0.8f : 0f)
-                    : Mathf.Max(Mathf.Max(i == GlowSlot || i == SelectedSlot ? 1f : 0f, WaveGlow(i)), XpGlow(i));
-                // Step 9h: gold = act on this now (the lead pod to send out, the armed cradle pod).
-                p.Actionable = i == GlowSlot || i == CradleSlot && (CradleGlow || CradlePulse) ? 1f : 0f;
+                    : Mathf.Max(Mathf.Max(i == GlowSlot || i == SelectedSlot ? 1f : i == DueSlot ? 0.7f + 0.8f * pulse : 0f, WaveGlow(i)), XpGlow(i));
+                // Step 9h: gold = act on this now (the lead pod to send out, the armed cradle pod; 14h: ready to evolve).
+                p.Actionable = i == GlowSlot || i == DueSlot || i == CradleSlot && (CradleGlow || CradlePulse) ? 1f : 0f;
                 if (!p.Detached && !held) p.SetGrabDiameter(i == CradleSlot ? cradleGrabSize : _partyGrab * FocusScale(i));
             }
             for (int i = 0; i < Party.Size; i++)
@@ -466,7 +520,7 @@ namespace Diorama
         /// <summary>Can this pod be grabbed or picked right now?</summary>
         bool CanUse(int slot)
         {
-            if (!InBattle) return LodgeMode && slot < Party.Size && party.At(slot) != null;
+            if (!InBattle) return slot < Party.Size && party.At(slot) != null && (LodgeMode || slot == DueSlot && slot != _claimed);
             if (slot == CradleSlot) return CradleGrab && CradleVisible;
             return PartyGrab && slot != ActiveSlot && party.CanFight(slot);
         }
@@ -482,9 +536,16 @@ namespace Diorama
         {
             int slot = SlotOf(p);
             if (slot < 0) return;
+            // Step 14h: the evolution took it (palm up): it stays where it is.
+            if (slot == _claimed)
+            {
+                p.Detached = true;
+                Debug.Log($"[PodRack] {p.name} let go into the evolution.");
+                return;
+            }
             var t = island.transform;
             Vector3 pos = t.InverseTransformPoint(p.transform.position), vel = t.InverseTransformVector(velocityWorld);
-            bool usable = CanUse(slot) && Thrown != null;
+            bool usable = InBattle && CanUse(slot) && Thrown != null;
             Debug.Log($"[PodRack] Released {p.name} at {velocityWorld.magnitude:0.00} m/s{(usable ? "" : " (not usable now: back to its socket)")}.");
             p.Detached = true;
             if (LodgeMode && !InBattle && slot < Party.Size && LodgeDropped != null)
@@ -753,6 +814,11 @@ namespace Diorama
                 {
                     if (!InBattle && PickHandler != null && PickHandler(target)) { }
                     else if (_gazed < 0) { }
+                    else if (!InBattle && _gazed == DueSlot && DuePicked != null)
+                    {
+                        Debug.Log($"[PodRack] Gaze + pinch on the glowing {_pods[_gazed].name}: evolve it.");
+                        DuePicked(_gazed);
+                    }
                     else if (InBattle)
                     {
                         Debug.Log($"[PodRack] Gaze + pinch ({(left ? "left" : "right")}) on {_pods[_gazed].name}.");
@@ -785,6 +851,8 @@ namespace Diorama
                     if (_pods[i] != null && _pods[i].Isling == _card.Showing && !_pods[i].Detached) focus = i;
             if (focus < 0 && _gazed >= 0 && _gazed < Party.Size) focus = _gazed;
             if (focus < 0 && !Explore) focus = NearestToHands();
+            // Step 14h: a hand reaching for the glowing pod while exploring grows it (easier to grab).
+            if (focus < 0 && Explore && DueSlot >= 0 && NearestToHands() == DueSlot) focus = DueSlot;
             if (focus >= 0)
             {
                 if (focus != _bigSlot) Debug.Log($"[PodRack] Pod {focus + 1} grows (gaze, hand or card).");
@@ -875,7 +943,7 @@ namespace Diorama
             if (rim == null) return;
             bool reaching = false;
             // Step 8e: only while pods can be grabbed (battle, lodge); exploring, the strip in front of them is grab zone.
-            if ((InBattle && (PartyGrab || CradleGrab) || LodgeMode && !InBattle) && rim.SelectingInteractors.Count == 0)
+            if ((InBattle && (PartyGrab || CradleGrab) || LodgeMode && !InBattle || Explore && DueSlot >= 0) && rim.SelectingInteractors.Count == 0)
                 for (int h = 0; h < 2 && !reaching; h++)
                 {
                     var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
@@ -1002,59 +1070,6 @@ namespace Diorama
                 yield return null;
             }
             if (t != null) t.localRotation = Quaternion.identity;
-        }
-
-        /// <summary>
-        /// The pod creature evolves in its pod (outside battles): the pod grows and glows white, its tiny creature swaps
-        /// between the two forms faster and faster (about 2 s), then a burst. Applies <see cref="Progression.Evolve"/>.
-        /// </summary>
-        public IEnumerator EvolveInPod(int slot)
-        {
-            var c = party.At(slot);
-            var p = Pod(slot);
-            if (!Progression.CanEvolve(c)) yield break;
-            var from = c.species;
-            var to = from.evolvesTo;
-            if (p == null || to.Prefab == null)
-            {
-                Progression.Evolve(c);
-                yield break;
-            }
-            _evolvingSlot = slot;
-            string oldName = c.Name;
-            for (float t = 0f; t < 0.4f; t += Time.deltaTime)
-            {
-                if (p == null) break;
-                p.Pulse = t / 0.4f;
-                yield return null;
-            }
-            float[] holds = { 0.5f, 0.42f, 0.34f, 0.26f, 0.2f, 0.14f, 0.1f };
-            bool showNew = false;
-            foreach (float h in holds)
-            {
-                showNew = !showNew;
-                if (p != null) p.ShowSpecies(showNew ? to : from);
-                yield return new WaitForSeconds(h);
-            }
-            Progression.Evolve(c);
-            if (p != null)
-            {
-                p.Show(c);
-                if (fx != null)
-                {
-                    fx.Burst(p.transform.position, 24, Color.white, World(0.04f), 0.5f, World(0.004f));
-                    fx.Burst(p.transform.position, 16, new Color(1f, 0.84f, 0.35f), World(0.03f), 0.7f, World(0.003f), Vector3.up * World(0.02f));
-                }
-                for (float t = 0f; t < 0.5f; t += Time.deltaTime)
-                {
-                    if (p == null) break;
-                    p.Pulse = 1f - t / 0.5f;
-                    yield return null;
-                }
-                if (p != null) p.Pulse = 0f;
-            }
-            _evolvingSlot = -1;
-            Debug.Log($"[PodRack] {oldName} evolved into {to.displayName} in pod {slot + 1}.");
         }
 
         /// <summary>Removes a (detached) party pod at once; the rack makes pods again for whatever the slots hold now.</summary>

@@ -580,6 +580,29 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: Look at that! They've grown into something new.
+  - id: evolve.ready
+    once: 0
+    objective: 1
+    priority: 1
+    note: 'step 14h: a pod Isling is ready to evolve and it''s calm; pinned until
+      it evolves, chip "Hold it"; {name} = its name'
+    target: evolvePod
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: '{name} is glowing... it''s ready to grow!'
+  - id: evolve.done
+    once: 0
+    objective: 0
+    priority: 1
+    note: 'step 14h: after an evolution in the palm; {name} = the new form'
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: '{name}! So strong now.'
   - id: shrine.first
     once: 1
     objective: 0
@@ -1513,6 +1536,39 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: Feel that? Galewick is breathing again!
+  - id: keeper.thanks.evolve.wind
+    once: 0
+    objective: 0
+    priority: 2
+    note: Galeowl
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 1
+      speakerName: Galeowl
+      text: Your friend fought so bravely... let the wind lift it higher.
+  - id: keeper.thanks.evolve.fire
+    once: 0
+    objective: 0
+    priority: 2
+    note: Hearthstag
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 1
+      speakerName: Hearthstag
+      text: '{name} has a fierce little spark... let my fire help it grow.'
+  - id: keeper.thanks.evolve.water
+    once: 0
+    objective: 0
+    priority: 2
+    note: Tidemother
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 1
+      speakerName: Tidemother
+      text: '{name} never gave up... let the tide carry it higher.'
   - id: gate.water.first
     once: 1
     objective: 0

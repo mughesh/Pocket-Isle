@@ -226,12 +226,35 @@ namespace Diorama
             if (c == null) return;
             SetLevel(c, c.level + delta);
             Saved($"lead to Lv {c.level}");
+            if (GrowthDirector.Instance != null) GrowthDirector.Instance.EvolveDue();
+        }
+
+        /// <summary>
+        /// Step 14h: the lead (or the first pod Isling that can evolve) to its evolve level: its pod glows and the Spirit
+        /// says so. Returns a status line.
+        /// </summary>
+        public string LeadReadyToEvolve()
+        {
+            IslingInstance c = party.Lead;
+            if (c == null || c.species == null || c.species.evolvesTo == null)
+                foreach (var m in party.members)
+                    if (m != null && m.species != null && m.species.evolvesTo != null)
+                    {
+                        c = m;
+                        break;
+                    }
+            if (!Progression.MakeReady(c)) return "No pod Isling can evolve.";
+            party.NotifyChanged();
+            if (GrowthDirector.Instance != null) GrowthDirector.Instance.EvolveDue();
+            Saved($"{c.Name} ready to evolve (Lv {c.level})");
+            return $"{c.Name} is ready to evolve: its pod glows.";
         }
 
         public void AllLevels(int level)
         {
             foreach (var c in party.members) SetLevel(c, level);
             Saved($"party to Lv {level}");
+            if (GrowthDirector.Instance != null) GrowthDirector.Instance.EvolveDue();
         }
 
         static void SetLevel(IslingInstance c, int level)
@@ -268,6 +291,7 @@ namespace Diorama
             if (species == null) return;
             int slot = party.Add(new IslingInstance(species, level));
             Saved($"{species.displayName} Lv {level} {(slot >= 0 ? $"in pod {slot + 1}" : "in storage")}");
+            if (GrowthDirector.Instance != null) GrowthDirector.Instance.EvolveDue();
         }
 
         public void ClearStorage()

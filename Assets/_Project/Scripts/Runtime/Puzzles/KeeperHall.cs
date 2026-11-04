@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Diorama.Audio;
 using Oculus.Interaction.Input;
 using UnityEngine;
@@ -870,6 +871,34 @@ namespace Diorama
             yield return new WaitForSeconds(waveSeconds * 0.5f + 0.2f);
             if (realm != null) realm.Remember(realmMap, 1f);
             if (save != null) save.Save($"{realmName} restored", true);
+            yield return Thanks();
+        }
+
+        /// <summary>
+        /// Step 14h: the first Keeper calmed (once per save, either slot), back on the realm map after the wave and the
+        /// return gate: if the starter's line hasn't evolved, this Keeper thanks it (its own voice) and the starter becomes
+        /// ready to evolve (its pod glows; GrowthDirector does the rest).
+        /// </summary>
+        IEnumerator Thanks()
+        {
+            if (PuzzleState.IsSolved(KeeperThanks.Flag)) yield break;
+            var party = FindFirstObjectByType<Party>();
+            if (party == null) yield break;
+            for (float t = 0f; t < 10f && (Dialogue.IsTalking || SceneSwap.IsBusy); t += Time.deltaTime) yield return null;
+            yield return new WaitForSeconds(0.6f);
+            var opening = FindFirstObjectByType<Opening>(FindObjectsInactive.Include);
+            var starters = opening != null ? opening.starters : FinaleDirector.Instance != null ? FinaleDirector.Instance.starters : null;
+            var c = KeeperThanks.Apply(PuzzleState.IsSolved, id => PuzzleState.Solve(id, 1), party.members, party.storage, starters, out int was);
+            if (c == null)
+            {
+                Debug.Log($"[KeeperHall] {KeeperName} calmed first: the starter has already evolved (or isn't here), no thanks line.");
+                yield break;
+            }
+            party.NotifyChanged();
+            Dialogue.SetVar("name", c.Name);
+            Dialogue.Say(KeeperThanks.Line(ownShard));
+            Debug.Log($"[KeeperHall] {KeeperName} thanks {c.Name}: Lv {was} -> {c.level}, ready to evolve into {c.species.evolvesTo.displayName}.");
+            if (save != null) save.Save("keeper thanks");
         }
 
         // ---- calmed: poke for a snort ----
@@ -925,5 +954,47 @@ namespace Diorama
 
         /// <summary>Debug (bridge): the shard is in front of the player.</summary>
         public bool ShardWaiting => _phase == Phase.Shard && _shardHovering;
+    }
+
+    /// <summary>Step 14h: the first calmed Keeper's thanks: the starter becomes ready to evolve (pure parts, tested).</summary>
+    public static class KeeperThanks
+    {
+        /// <summary>Puzzle flag: the thanks happened (once per save).</summary>
+        public const string Flag = "keeper.thanks";
+
+        /// <summary>The Keeper's line for its shard ("shard.wind" -> "keeper.thanks.evolve.wind").</summary>
+        public static string Line(string shard) =>
+            "keeper.thanks.evolve." + (!string.IsNullOrEmpty(shard) && shard.StartsWith("shard.") ? shard.Substring(6) : "wind");
+
+        /// <summary>
+        /// Once per save (<paramref name="isSolved"/> / <paramref name="solve"/> keep the <see cref="Flag"/>): the starter
+        /// whose line hasn't evolved becomes ready to evolve. Returns it (its level before in <paramref name="was"/>), or null.
+        /// </summary>
+        public static IslingInstance Apply(Func<string, bool> isSolved, Action<string> solve, IList<IslingInstance> pods,
+            IList<IslingInstance> storage, IList<IslingSpecies> starters, out int was)
+        {
+            was = 0;
+            if (isSolved(Flag)) return null;
+            solve(Flag);
+            var c = Starter(pods, storage, starters);
+            if (c == null) return null;
+            was = c.level;
+            Progression.MakeReady(c);
+            return c;
+        }
+
+        /// <summary>
+        /// The starter (an Isling whose species is one of <paramref name="starters"/>, so its line hasn't evolved yet),
+        /// pods first, then storage; null when there is none.
+        /// </summary>
+        public static IslingInstance Starter(IList<IslingInstance> pods, IList<IslingInstance> storage, IList<IslingSpecies> starters)
+        {
+            if (starters == null) return null;
+            foreach (var list in new[] { pods, storage })
+                if (list != null)
+                    foreach (var c in list)
+                        if (c != null && c.species != null && c.species.evolvesTo != null && starters.Contains(c.species)) return c;
+            return null;
+        }
     }
 }

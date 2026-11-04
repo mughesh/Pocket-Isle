@@ -401,6 +401,7 @@ namespace Diorama
                     Add("All Lv 5", () => state.AllLevels(5));
                     Add("All Lv 10", () => state.AllLevels(10));
                     Add("All Lv 15", () => state.AllLevels(15));
+                    Add("Make lead ready to evolve", () => Status(state.LeadReadyToEvolve()));
                     Heading("Ready-made team");
                     Add("Team of 3, Lv 8", () => state.PresetTeam(8));
                     Add("Team of 3, Lv 10", () => state.PresetTeam(10));

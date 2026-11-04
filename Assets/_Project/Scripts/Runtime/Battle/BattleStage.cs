@@ -985,6 +985,9 @@ namespace Diorama
             });
             nu.grow = 1f;
             nu.View.SetFlash(0f);
+            // Step 14h: the new form's cry.
+            _playerCry = AudioIds.Cry(SpeciesRegistry.IdOf(next));
+            Cry(nu, _playerCry);
             nu.View.Hop();
             hud.SetLevel(_playerBar, c.Name, c.level, c.currentHp, c.MaxHp);
             hud.PopText(nu.LocalTop + Vector3.up * 0.03f, c.Name + "!", Gold, 1.2f, 1.4f);

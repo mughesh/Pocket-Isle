@@ -300,8 +300,8 @@ namespace Diorama
 
         // ---- modes ----
 
-        /// <summary>Battles (encounter start to zoom-out) and the lodge: the rim pods can be grabbed.</summary>
-        public bool PodsActive => encounters != null && encounters.InBattle || pods != null && (pods.InBattle || pods.LodgeMode);
+        /// <summary>Battles (encounter start to zoom-out), the lodge and (14h) a pod ready to evolve: the rim pods can be grabbed.</summary>
+        public bool PodsActive => encounters != null && encounters.InBattle || pods != null && (pods.InBattle || pods.LodgeMode || pods.DueSlot >= 0);
 
         /// <summary>Switches the pod strip's grab shell with the mode. Never mid-grab: a held island keeps its zone until let go.</summary>
         void ApplyMode(bool force)

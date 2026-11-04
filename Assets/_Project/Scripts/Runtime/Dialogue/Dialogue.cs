@@ -428,7 +428,34 @@ namespace Diorama
         }
 
         static Queued Make(DialogueLine line, DialogueTrigger t, string id) =>
-            new Queued { line = line, priority = t.priority, trigger = id, target = t.target, validWhile = t.validWhile, objective = t.objective };
+            new Queued { line = Filled(line), priority = t.priority, trigger = id, target = t.target, validWhile = t.validWhile, objective = t.objective };
+
+        // ---- Step 14h: {name} in a line ----
+
+        static readonly Dictionary<string, string> _vars = new Dictionary<string, string>();
+
+        /// <summary>
+        /// Sets <c>{key}</c> for the lines queued from now on ("{name} is glowing..."). Set it right before
+        /// <see cref="Say"/>: a line takes the value when it is queued.
+        /// </summary>
+        public static void SetVar(string key, string value)
+        {
+            if (!string.IsNullOrEmpty(key)) _vars[key] = value ?? string.Empty;
+        }
+
+        /// <summary>The text with every <c>{key}</c> set by <see cref="SetVar"/> filled in (unknown ones stay as written).</summary>
+        public static string Fill(string text)
+        {
+            if (string.IsNullOrEmpty(text) || text.IndexOf('{') < 0) return text;
+            foreach (var kv in _vars) text = text.Replace("{" + kv.Key + "}", kv.Value);
+            return text;
+        }
+
+        static DialogueLine Filled(DialogueLine line)
+        {
+            if (line == null || string.IsNullOrEmpty(line.text) || line.text.IndexOf('{') < 0) return line;
+            return new DialogueLine { speaker = line.speaker, speakerName = line.speakerName, text = Fill(line.text) };
+        }
 
         /// <summary>Queues a trigger's lines in front of everything (the praise after a lesson).</summary>
         void FireFirst(string id)
