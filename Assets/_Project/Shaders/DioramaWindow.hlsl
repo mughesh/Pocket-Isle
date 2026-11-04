@@ -32,6 +32,16 @@ float4   _DioramaHighlightColor;
 float4   _DioramaHover;
 float4   _DioramaHoverColor;
 
+// Step 14j: always see the explorer (ExplorerSeeThrough). Island content between the head and the explorer, inside a
+// cone around that line (a soft circle round the explorer on screen), dissolves (dithered cut-out) by the amount; never
+// at or below the explorer's feet, never within the keep-out in front of it. All island-local.
+float4   _DioramaSeeThrough;     // xyz explorer chest, w amount 0..1
+float4   _DioramaSeeThroughEye;  // xyz eye, w cut radius at the explorer
+float4   _DioramaSeeThroughMisc; // x lowest y cut (feet + margin), y keep-out in front of the explorer along the line
+// ...and while it was hidden the explorer's outline turns gold: objects whose origin is inside this sphere (world).
+float4   _DioramaSeen;
+float4   _DioramaSeenColor;
+
 float DioramaInSphere(float4 sphere, float3 originWS)
 {
     if (sphere.w <= 0.0) return 0.0;
@@ -50,8 +60,10 @@ float2 DioramaFocusAmounts(float3 originWS)
 float3 DioramaOutlineFocus(float3 col, float3 originWS, out float widthScale)
 {
     float2 k = DioramaFocusAmounts(originWS);
-    widthScale = 1.0 + 1.3 * k.x + 0.45 * k.y;
+    float seen = DioramaInSphere(_DioramaSeen, originWS) * _DioramaSeenColor.a * (1.0 - k.x);
+    widthScale = 1.0 + 1.3 * k.x + 0.45 * k.y + 0.25 * seen;
     col = lerp(col, _DioramaHoverColor.rgb, k.y);
+    col = lerp(col, _DioramaSeenColor.rgb, seen);
     return lerp(col, _DioramaHighlightColor.rgb, k.x);
 }
 
@@ -142,11 +154,37 @@ float3 DioramaWindowVertex(float3 positionWS, float on, float3 originWS, out flo
     return DioramaWindowVertexSink(positionWS, on, originWS, 0.0, islandPos);
 }
 
+float DioramaDitherHash(float3 p)
+{
+    p = frac(p * 0.3183099 + 0.1);
+    p *= 17.0;
+    return frac(p.x * p.y * p.z * (p.x + p.y + p.z));
+}
+
+// Step 14j: the see-through cut (see _DioramaSeeThrough). A few ALU per fragment, no extra pass.
+void DioramaSeeThroughClip(float3 islandPos)
+{
+    float amount = _DioramaSeeThrough.w;
+    if (amount <= 0.001 || islandPos.y <= _DioramaSeeThroughMisc.x) return;
+    float3 e = _DioramaSeeThroughEye.xyz;
+    float3 d = _DioramaSeeThrough.xyz - e;
+    float len = length(d);
+    if (len < 1e-4) return;
+    d /= len;
+    float3 v = islandPos - e;
+    float t = dot(v, d);
+    if (t <= 0.0 || t >= len - _DioramaSeeThroughMisc.y) return;
+    float r = _DioramaSeeThroughEye.w * t / len;
+    float k = (1.0 - smoothstep(r * 0.55, r, length(v - d * t))) * amount;
+    clip(DioramaDitherHash(floor(islandPos * 1400.0)) - k);
+}
+
 void DioramaWindowClip(float3 islandPos, float on)
 {
     if (on < 0.5) return;
     clip(islandPos.y - _DioramaWindow.x);
     clip(DioramaEdgeDistance(islandPos.xz));
+    DioramaSeeThroughClip(islandPos);
 }
 
 #endif

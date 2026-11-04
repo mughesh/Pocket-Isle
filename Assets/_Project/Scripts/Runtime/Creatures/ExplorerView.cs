@@ -55,6 +55,8 @@ namespace Diorama
             if (_armL == null || _armR == null || _legL == null || _legR == null || _lantern == null)
                 Debug.LogError("[ExplorerView] Explorer parts missing (re-run Step9fSetup.Explorer).", this);
             _nextGlance = Time.time + 3f;
+            // Step 14j: always see the explorer (props between the head and it dissolve; gold outline while hidden).
+            if (GetComponent<ExplorerSeeThrough>() == null) gameObject.AddComponent<ExplorerSeeThrough>();
         }
 
         Transform Find(string name, out Quaternion baseRotation)

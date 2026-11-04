@@ -240,6 +240,40 @@ namespace Diorama.EditorTools
                       $"wild feet {wf.ToString("F3")} h {wh:0.000} x{wild.fit:0.00} (grow {wild.grow:0.00}): allowed near {allowed:0.000} (fit {allowed / Mathf.Max(1e-5f, nh):0.00}).");
         }
 
+        /// <summary>The explorer see-through: arg "off" / "on"; logs hidden, amount and the check's CPU time.</summary>
+        public static void Explorer()
+        {
+            if (Arg == "off") ExplorerSeeThrough.DebugOff = true;
+            else if (Arg == "on") ExplorerSeeThrough.DebugOff = false;
+            var e = Object.FindFirstObjectByType<ExplorerSeeThrough>();
+            Debug.Log($"[Step14jDebug] Explorer see-through {(ExplorerSeeThrough.DebugOff ? "OFF" : "on")}: " +
+                      (e != null ? $"hidden {e.Hidden}, amount {e.Amount:0.00}, check {ExplorerSeeThrough.LastMs:0.000} ms" : "no explorer"));
+        }
+
+        /// <summary>A close-up of the explorer along the head's sightline, 12 cm from it (arg = name).</summary>
+        public static void ExplorerShot()
+        {
+            var e = Object.FindFirstObjectByType<ExplorerView>();
+            var island = Object.FindFirstObjectByType<IslandBuilder>();
+            if (e == null || island == null) return;
+            // From the head toward the explorer, 12 cm short of it (a close-up along the same sightline).
+            var cam = Camera.main;
+            Vector3 target = e.transform.position + Vector3.up * 0.01f;
+            Vector3 eye = cam != null ? target + (cam.transform.position - target).normalized * 0.12f : target + Vector3.up * 0.1f;
+            BattleDebug.Render($"Logs/BattleShots/{(string.IsNullOrEmpty(Arg) ? "14j_explorer" : Arg)}.png", eye, Quaternion.LookRotation(e.transform.position - eye, Vector3.up));
+            Debug.Log($"[Step14jDebug] Explorer shot {Arg}.png.");
+        }
+
+        /// <summary>Teleports the explorer to a tile of the current map (arg "column,row").</summary>
+        public static void Teleport()
+        {
+            var a = Arg.Split(',');
+            var g = GameState.Instance;
+            if (g == null || g.explorer == null || a.Length < 2) return;
+            g.explorer.Teleport(new Vector2Int(int.Parse(a[0]), int.Parse(a[1])));
+            Debug.Log($"[Step14jDebug] Teleported to {Arg}.");
+        }
+
         static void Schedule(List<(double at, System.Action act)> steps)
         {
             EditorApplication.CallbackFunction tick = null;

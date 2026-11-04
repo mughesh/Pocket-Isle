@@ -222,6 +222,31 @@ namespace Diorama
             }
         }
 
+        /// <summary>
+        /// Step 14j: how tall what stands on a map tile is (map metres above the cap): a tree, or a prop whose footprint
+        /// covers it (anchors up to 3 tiles back). 0 for open ground. For the explorer see-through check.
+        /// </summary>
+        public float ObstacleTop(Vector2Int tile)
+        {
+            var content = Content;
+            if (content == null || map == null) return 0f;
+            float t = map.tileSize, top = 0f;
+            char ch = content.At(tile.y, tile.x);
+            if (ch == IslandMap.Tree || ch == IslandMap.Blocked)
+                top = ThemeTree != null ? ThemeTree.bakedMesh.bounds.max.y * t * 1.25f : 0.09f;
+            if (world == null) return top;
+            for (int dr = 0; dr <= 3; dr++)
+                for (int dc = 0; dc <= 3; dc++)
+                {
+                    int r = tile.y - dr, c = tile.x - dc;
+                    if (!world.TryGetProp(world.PropAt(r, c), out var e) || e.recipe == null || e.recipe.bakedMesh == null) continue;
+                    var f = WorldMap.FootprintOf(e);
+                    if (dc >= f.x || dr >= f.y || world.IsPropHidden(new Vector2Int(c, r))) continue;
+                    top = Mathf.Max(top, e.recipe.bakedMesh.bounds.max.y * t * (1f + e.recipe.scaleJitter));
+                }
+            return top;
+        }
+
         /// <summary>Marks every island for a rebuild (after props are baked).</summary>
         public static void RebuildAll()
         {
