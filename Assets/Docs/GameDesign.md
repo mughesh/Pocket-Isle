@@ -483,6 +483,23 @@ when the log or the forge door is solved.
 | **Embercrane -> Pyrecrane** (rare) | 16 | field 5, springs 5 (rare) | Flame Wing / Ember Puff / Puff Up |
 - Glazegolem / Kilngolem read as rare: deep teal glaze, gold kintsugi cracks that glow and pulse.
 
+## Rules from step 14i (Nov 4 evening)
+- **Grab rule:** the island is grabbed only by **pinch (or fist) and hold** on a handle (the four corners; the front lip while
+  exploring): a gold ring fills over 0.6 s (`IslandHandle.grabHoldSeconds`), 0.3 s for the second hand. Released early =
+  nothing (that pinch never walks or selects); moving > 4 cm cancels. Never arms when the gaze is on something selectable away
+  from the hand as the pinch starts, or with the hand below the island's base (a hand resting on an armrest). Lessons, chips,
+  the Controls card and ghosts all say and show **"Pinch and hold a corner"**. The move and two-hands lessons run in both slots
+  and wait 45 s.
+- **Board rule:** menus, Settings, the Journal (and its card), Controls, battle moves and the lodge card face the head **once**
+  when they open (yaw, plus a pitch toward the eyes) and then stay world-locked. They turn again only when the head has been
+  more than 30 deg away for 1 s **and** no hand is within 15 cm (`BoardFacing`). No drifting, no billboarding.
+- **Island facing:** the island's front points along the line from its centre to the head (yaw only) after every placement,
+  recenter and release; idle, it re-faces at > 6 deg for 1.5 s (smooth; never while held, zoomed in a battle or while a lesson
+  ghost demonstrates). Placement logs the yaw error.
+- **Path rule (every map):** straight legs with right-angle turns, each leg 3+ tiles, no one-tile jogs, the main trail 2 wide.
+  Hand-moment spots, gates, shrines and landmarks don't move (Cinderwood's smoke hollow keeps its steps on purpose).
+  `StraightPaths` turns the generators' waypoints into legs; `PathAudit` measures every map.
+
 ## Growth loop (step 14h, Nov 4)
 Catch Islings, the **Journal** fills ("12 / 46"), they **grow and evolve in your palm** (each new form is a new entry), and a
 bigger team beats a **Keeper tuned to your team**. 46 Islings: 20 Fire, 14 Water, 12 Wind (Keepers and the Spirit don't count).
@@ -583,7 +600,7 @@ explore → tall grass encounter → battle → capture → party / Hearth Lodge
 drifts in from ~1.5 m and settles where the island will be. Touch it (fingertip, palm, or look + pinch); after 3 s the
 Spirit's `intro.shard`, after 6 s it unfolds by itself. It cracks open with light, the base grows out of it, the tiles
 rise from the middle, the explorer pops up and hops twice. A spark leaves the statue and becomes the Spirit
-(`intro.arrive`). `intro.world` makes the rim glow and waits for a grab or 12 s. Three glass pods rise from the statue
+(`intro.arrive`). `lesson.move` ("Pinch and hold a corner...", step 14i; was `intro.world`) makes the rim glow and waits for a grab or 45 s, then `lesson.twoHands`. Three glass pods rise from the statue
 and float over the front half (Kilnpot left, Pebbloop middle, Pufflet right, as the player sees them): looking at one
 makes it grow and wiggle and the Spirit names it; drop it on the rim or look + pinch to pick (no confirm), the others
 sink back into the statue. Then `intro.explorer` and a gold run of tiles toward the first grass. Nothing saves before the
@@ -593,7 +610,7 @@ Flat Editor: launch to walking about 45 s (10 s of it waits for a head pose that
 **Lessons (step 8b, `Onboarding`, data `Data/Onboarding/Onboarding_Main`):** one at a time; each waits for its moment,
 says its line (a shorter reminder every 10 s), shows a ghost hand doing the gesture, and on done plays a soft chime and
 the Spirit's praise (Nice! / Just like that! / Perfect!). Order: touch the shard (hint after 3 s, opens by itself at 6 s),
-move the island (rim, skips after 12 s), pick a starter (look, grab, drop on the rim), walk 3 tiles (thumb swipe demo
+move the island (pinch and hold a corner, skips after 45 s; then two hands, step 14i), pick a starter (look, grab, drop on the rim), walk 3 tiles (thumb swipe demo
 above the island, the Spirit beside it; after 30 s "Or look at a spot and pinch."), stop (thumb tap), look + pinch the gold
 tile, follow the gold tiles to the tutorial grass (always the scripted Toastling Lv 3), toss the pod in (auto send-out
 waits 20 s in the tutorial and doesn't earn praise), pick a move, flick the cradle pod once the wild one is in the red,
@@ -611,7 +628,7 @@ tracked for 3 s the Spirit says "Show me your hands!" while both ghost hands ris
 before the action is done, pinch never taught):**
 - **One instruction at a time, and it stays.** While a lesson teaches, the Spirit parks beside its target and the
   lesson line stays up (`Dialogue.Pin`). After ~6 s the bubble shrinks to a **hint chip** (a short verb + a small hand:
-  "Grab the edge", "Pinch!", "Look + pinch", "Toss the pod"...) that stays until the lesson is done; looking at the chip
+  "Hold a corner", "Pinch!", "Look + pinch", "Toss the pod"...) that stays until the lesson is done; looking at the chip
   or the Spirit opens the full line again. On done: the chime and the praise, the chip goes, the next lesson. No other
   line replaces a lesson line: story lines wait until it is done; idle hints are off during the tutorial.
 - **Reading pace:** every line stays at least 1.5 s + 0.06 s a character after it is typed in; a more important line

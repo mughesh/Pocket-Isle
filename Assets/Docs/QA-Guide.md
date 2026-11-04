@@ -91,8 +91,11 @@ never saved.
 - **Where the island appears:** in front of you, about 30 cm under your eyes, once your head is still. Before you touch
   the shard, look away or stand up / sit down: after a second it glides back in front of you. Meta's recenter (hold the
   Meta button) re-places the island, also over Link.
-- **Grabbing the island:** only at its **four corners** (a faint bracket; it lights white near your hand, gold while
-  held) or the **front lip** under the pod row. Pinching near a pod gives you the pod, never the island.
+- **Grabbing the island (step 14i): pinch and hold a corner** (or the front lip under the pod row). A gold ring fills round
+  your fingers in about half a second; full = you're holding it (a soft click, the bracket turns gold). Let go early and
+  nothing happens; slide your hand away while it fills and it cancels. Your second hand joins faster (a third of a second)
+  to turn or resize. A hand resting below the island, or a pinch while you look at something else, never grabs.
+  Pinching near a pod gives you the pod, never the island.
 - **Pinch lesson:** two dots under the line fill as you pinch; "Nice! Once more." after the first.
 - **The Spirit** hovers right over the thing to do, with gold rays round it while it teaches.
 - **Pods onto the rim:** bring a held pod near the rim: a ghost pod shows the socket it will go into; let go.
@@ -219,7 +222,7 @@ never saved.
 
 - **No room-scan prompt** on a new headset (the island just floats when the headset has no room scan).
 - **Instructions stay** until you do them: after a few seconds the Spirit's bubble shrinks to a small chip with a hand
-  ("Grab the edge", "Pinch!"); look at the chip or the Spirit to read the full line again. Lines stay up longer.
+  ("Hold a corner", "Pinch!"); look at the chip or the Spirit to read the full line again. Lines stay up longer.
 - **Shorter opening**, and a new **pinch lesson** right after the Spirit arrives (a ghost hand pinches beside your own
   hand; each pinch sparkles; two pinches and you move on).
 - **Pods you can use now have a gold rim**; the one you look at or touch turns white and grows a little.

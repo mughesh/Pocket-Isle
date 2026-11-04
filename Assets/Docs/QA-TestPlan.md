@@ -67,7 +67,7 @@ panel. Note for each step whether you knew what to do **without** reading ahead:
 | Launch | **No room-scan prompt**, no permission pop-up; the island appears and floats |
 | Every Spirit line | Short; stays up long enough to read; the next one never cuts it off |
 | Pinch lesson (after "Hello, big one!") | A ghost hand pinches **beside your own hand**; each pinch sparkles gold; two pinches and it moves on |
-| Each lesson's hint | After a few seconds it shrinks to a small chip with a hand ("Grab the edge", "Pinch!"); it stays until you do it; looking at it or the Spirit opens the full line |
+| Each lesson's hint | After a few seconds it shrinks to a small chip with a hand ("Hold a corner", "Pinch!"); it stays until you do it; looking at it or the Spirit opens the full line |
 | Island move | The ghost grabs the **near corner of the rim on your main-hand side** |
 | Starter pick | All three pods have a **gold rim**; the one you look at turns white, grows and wiggles; the ghost grabs the pod you look at (or each in turn) and sets it on the rim |
 | First battle | Your explorer faces the wild Isling; the Spirit is off to the side (not in front of the Islings); the ghost grabs your lead pod (gold) and lets go over the pad |
