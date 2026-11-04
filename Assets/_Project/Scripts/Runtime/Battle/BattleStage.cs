@@ -162,15 +162,15 @@ namespace Diorama
             // Island-local: heights in map metres times the zoom.
             Vector3 eye = t.InverseTransformPoint(cam.transform.position);
             Vector3 nearFeet = island.TileToLocal(_player.tile, Cap + _player.baseLift), wildFeet = island.TileToLocal(_wild.tile, Cap + _wild.baseLift);
-            _player.Measure(out float nearH, out _);
-            _wild.Measure(out float wildH, out float wildC);
-            float share = wildH > 1e-5f ? wildC / wildH : 0.5f;
-            var r = PadFit.Fit(eye, nearFeet, nearH, wildFeet, wildH, share, _wildKeeper);
+            _player.MeasureCached(out float nearH, out _);
+            _wild.MeasureCached(out float wildH, out _);
+            var r = PadFit.Fit(eye, nearFeet, nearH, wildFeet, wildH, _wildKeeper);
+            bool changed = Mathf.Abs(_player.fitTarget - r.near) > 0.03f || Mathf.Abs(_wild.fitTarget - r.wild) > 0.03f;
             _player.fitTarget = r.near;
             _wild.fitTarget = r.wild;
             if (snap && _player.grow <= 0.001f) _player.fit = r.near;
             if (snap && _wild.grow <= 0.001f) _wild.fit = r.wild;
-            if (r.near < 0.999f || r.wild < 0.999f)
+            if ((snap || changed) && (r.near < 0.999f || r.wild < 0.999f))
                 Debug.Log($"[BattleStage] Pad fit: near {_player.name} x{r.near:0.00} (drawn {nearH:0.000}), wild {_wild.name} x{r.wild:0.00} (drawn {wildH:0.000})" +
                           $"{(r.sightline ? " (sightline)" : "")}{(r.ratio ? " (1.3x rule)" : "")}.");
         }
@@ -179,8 +179,17 @@ namespace Diorama
         public void ShowPlayerBar(IslingInstance player)
         {
             hud.RemoveBar(_playerBar);
-            _playerBar = hud.AddBar(_player, player.Name, player.level, player.currentHp, player.MaxHp);
+            // Step 14j: the near one's label sits beside its pad (seen from behind, over its head it hid the wild one).
+            _playerBar = hud.AddBar(_player, player.Name, player.level, player.currentHp, player.MaxHp, PadRadiusLocal(_playerPad));
             if (progression != null) hud.SetXp(_playerBar, progression.XpShare(player));
+        }
+
+        /// <summary>Step 14j: a pad's radius, island-local (0 without one).</summary>
+        float PadRadiusLocal(BattlePad pad)
+        {
+            if (pad == null || island == null) return 0f;
+            float tile = (island.TileToLocal(pad.tile + Vector2.right, Cap) - island.TileToLocal(pad.tile, Cap)).magnitude;
+            return pad.widthTiles * tile * 0.5f;
         }
 
         /// <summary>Island-local point on top of a pad (where a thrown pod lands).</summary>
@@ -795,6 +804,8 @@ namespace Diorama
             if (shield == null || shield.transform == null || !shield.transform.gameObject.activeSelf || user == null) return;
             shield.transform.localPosition = user.LocalCenter;
             shield.transform.localScale = Vector3.one * (user.Height * 0.72f * Zoom * size);
+            // Step 14j: its label clears the shield.
+            if (shield.renderer != null && !user.attached.Contains(shield.renderer)) user.attached.Add(shield.renderer);
         }
 
         void DropShieldOf(BattleSide side, bool pop)
@@ -808,6 +819,8 @@ namespace Diorama
             if (slot == null) return;
             var item = slot;
             slot = null;
+            if (_player != null) _player.attached.Remove(item.renderer);
+            if (_wild != null) _wild.attached.Remove(item.renderer);
             if (pop && isActiveAndEnabled) StartCoroutine(PopShield(item));
             else fx.Release(item);
         }
@@ -841,9 +854,17 @@ namespace Diorama
             fx.Release(ring);
         }
 
+        float _refitAt;
+
         void LateUpdate()
         {
             LowHp();
+            // Step 14j: re-fit while both stand on their pads (the battle zoom and the head move after the spawn fit).
+            if (_player != null && _wild != null && _player.grow > 0.9f && _wild.grow > 0.9f && Time.time >= _refitAt)
+            {
+                _refitAt = Time.time + 0.3f;
+                FitPads(false);
+            }
             if (_playerShield != null && _player != null) PlaceShieldIdle(_playerShield, _player);
             if (_wildShield != null && _wild != null) PlaceShieldIdle(_wildShield, _wild);
         }

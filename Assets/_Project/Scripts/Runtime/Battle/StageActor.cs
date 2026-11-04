@@ -35,6 +35,54 @@ namespace Diorama
 
         public CreatureView View { get; private set; }
 
+        /// <summary>Step 14j: renderers drawn on it that aren't its children (a raised shield): its label clears them too.</summary>
+        public readonly System.Collections.Generic.List<Renderer> attached = new System.Collections.Generic.List<Renderer>();
+
+        Renderer[] _renderers;
+        float _renderersAt = -1f;
+
+        /// <summary>
+        /// Step 14j: the world top of everything drawn on it right now: body, parts, aura, flames, smoke (its children)
+        /// and <see cref="attached"/> fx. False when nothing is drawn.
+        /// </summary>
+        public bool TryGetVisualTop(out float top)
+        {
+            bool any = TryGetVisualBounds(out var b);
+            top = any ? b.max.y : float.MinValue;
+            return any;
+        }
+
+        /// <summary>Step 14j: the world bounds of everything drawn on it right now (see <see cref="TryGetVisualTop"/>).</summary>
+        public bool TryGetVisualBounds(out Bounds bounds)
+        {
+            bounds = default;
+            // Children change (fury flames and smoke are built after spawning): re-list now and then.
+            if (_renderers == null || Time.time - _renderersAt > 0.5f)
+            {
+                _renderers = GetComponentsInChildren<Renderer>(false);
+                _renderersAt = Time.time;
+            }
+            bool any = false;
+            foreach (var r in _renderers) Add(r, ref bounds, ref any);
+            foreach (var r in attached) Add(r, ref bounds, ref any);
+            return any;
+        }
+
+        static void Add(Renderer r, ref Bounds bounds, ref bool any)
+        {
+            if (r == null || !r.enabled || !r.gameObject.activeInHierarchy) return;
+            if (r is ParticleSystemRenderer)
+            {
+                var ps = r.GetComponent<ParticleSystem>();
+                if (ps == null || ps.particleCount == 0) return;
+            }
+            var b = r.bounds;
+            if (b.size.sqrMagnitude < 1e-12f) return;
+            if (any) bounds.Encapsulate(b);
+            else bounds = b;
+            any = true;
+        }
+
         /// <summary>Step 14h: height at grow 1 with the pad fit (map metres).</summary>
         public float Height => View.height * fit;
 
@@ -78,10 +126,10 @@ namespace Diorama
         /// feet and its centre's height. <see cref="CreatureView.height"/> is the rig's nominal height and misses
         /// antlers, lamps and crests (the readable-battle rule needs the real top). The island stays level.
         /// </summary>
-        public void Measure(out float height, out float center)
+        public bool Measure(out float height, out float center)
         {
             height = center = 0f;
-            if (island == null || island.Content == null) return;
+            if (island == null || island.Content == null) return false;
             var scale = transform.localScale;
             transform.localScale = squash * island.Zoom;
             float feet = transform.position.y, s = Mathf.Max(1e-5f, island.transform.lossyScale.y);
@@ -99,10 +147,31 @@ namespace Diorama
             {
                 height = View.height * island.Zoom;
                 center = View.centerHeight * island.Zoom;
-                return;
+                return false;
             }
             height = Mathf.Max(1e-4f, (b.max.y - feet) / s);
             center = Mathf.Clamp((b.center.y - feet) / s, 0f, height);
+            return true;
+        }
+
+        float _measuredH, _measuredC, _measuredZoom;
+        bool _measured;
+
+        /// <summary>
+        /// Step 14j: <see cref="Measure"/> once per spawn, scaled with the zoom since (the battle re-fits every 0.3 s and
+        /// a fresh measure jitters 20% with the idle animation: the fit pumped).
+        /// </summary>
+        public void MeasureCached(out float height, out float center)
+        {
+            if (!_measured || island == null)
+            {
+                // Cached only once something is drawn (a pod still opening falls back to the nominal height).
+                _measured = Measure(out _measuredH, out _measuredC);
+                _measuredZoom = island != null ? Mathf.Max(1e-5f, island.Zoom) : 1f;
+            }
+            float k = island != null ? island.Zoom / _measuredZoom : 1f;
+            height = _measuredH * k;
+            center = _measuredC * k;
         }
 
         /// <summary>Yaw that faces from one map point to another (columns run toward -X, rows toward +Z).</summary>
