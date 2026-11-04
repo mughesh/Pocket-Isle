@@ -74,9 +74,17 @@ namespace Diorama
 
         void OnDestroy() => IsOpen = false;
 
-        /// <summary>Shows the board; <paramref name="closed"/> runs on Back.</summary>
-        public void Open(Action closed)
+        Action _toTitle;
+
+        /// <summary>
+        /// Shows the board; <paramref name="closed"/> runs on Back. Step 14h: from the game menu, <paramref name="toTitle"/>
+        /// adds a small Title tablet by the heading (the menu keeps only Resume, Journal, Settings).
+        /// </summary>
+        public void Open(Action closed) => Open(closed, null);
+
+        public void Open(Action closed, Action toTitle)
         {
+            _toTitle = toTitle;
             if (runes == null)
             {
                 Debug.LogError("[Settings] No rune board (Set Up MR_Main (9g title, menus, quick)).", this);
@@ -111,6 +119,16 @@ namespace Diorama
             float top = 7f * RowGap;
             runes.AddBacking(new Vector2(0f, top * 0.5f + 0.004f), new Vector2(0.37f, top + 0.06f));
             runes.AddText("<b>Settings</b>", new Vector2(0f, top + 0.004f), runes.fontSize * 1.1f);
+            if (_toTitle != null)
+            {
+                var toTitle = _toTitle;
+                var t = runes.Add("Title", new Vector2(0.135f, top + 0.004f), new Vector2(0.06f, 0.026f), () =>
+                {
+                    Close();
+                    toTitle();
+                });
+                t.tint = new Color(0.62f, 0.55f, 0.4f);
+            }
             Volume("Music", VolumeSettings.Music, top - RowGap);
             Volume("Effects", VolumeSettings.Sfx, top - 2f * RowGap);
             Volume("Ambience", VolumeSettings.Ambience, top - 3f * RowGap);

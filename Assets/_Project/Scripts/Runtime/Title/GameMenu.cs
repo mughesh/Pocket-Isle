@@ -120,27 +120,23 @@ namespace Diorama
 
         void ShowRunes()
         {
-            // Step 14g: one row at the old rune size over the near rim: Resume (a little larger, gold inlay), Controls,
-            // Settings, Title, the speaker as a small square tablet at the end; Dev (Editor and QA builds) set apart.
+            // Step 14g: one row at the old rune size over the near rim. Step 14h (Mugesh: too many buttons): only the main
+            // choices: Resume (a little larger, gold inlay), Journal, Settings, the speaker as a small square tablet at the
+            // end; Controls and Title live in Settings; Dev (Editor and QA builds) set apart.
             runes.Clear();
             var size = new Vector2(0.072f, 0.034f);
             var big = new Vector2(0.08f, 0.038f);
             const float gap = 0.008f, side = 0.034f, apart = 0.03f;
-            bool title = !FinaleDirector.Running; // step 13: the finale plays through; Title waits until it's done
-            float width = big.x + (title ? 3 : 2) * (size.x + gap) + gap + side;
+            float width = big.x + 2f * (size.x + gap) + gap + side;
             float x = -width * 0.5f;
             var resume = runes.Add("Resume", new Vector2(x + big.x * 0.5f, 0f), big, () => Close("Resume"));
             resume.primary = true;
             x += big.x + gap;
-            runes.Add("Controls", new Vector2(x + size.x * 0.5f, 0f), size, OpenControls);
+            // Step 14h: the Isling Journal.
+            runes.Add("Journal", new Vector2(x + size.x * 0.5f, 0f), size, OpenJournal);
             x += size.x + gap;
             runes.Add("Settings", new Vector2(x + size.x * 0.5f, 0f), size, OpenSettings);
             x += size.x + gap;
-            if (title)
-            {
-                runes.Add("Title", new Vector2(x + size.x * 0.5f, 0f), size, ToTitle);
-                x += size.x + gap;
-            }
             runes.AddIcon(VolumeSettings.MusicOn ? "Music on" : "Music off", TabletKit.Speaker(VolumeSettings.MusicOn), new Vector2(x + side * 0.5f, 0f), side, ToggleMusic);
 #if UNITY_EDITOR || POCKET_DEV
             var dev = runes.Add("Dev", new Vector2(-width * 0.5f - apart - 0.025f, 0f), new Vector2(0.05f, 0.028f), OpenDev);
@@ -166,6 +162,7 @@ namespace Diorama
             IsOpen = false;
             GameAudio.Ui(Diorama.Audio.AudioIds.MenuClose);
             if (settings != null && SettingsBoard.IsOpen) settings.Close();
+            if (JournalBoard.IsOpen && JournalBoard.Instance != null) JournalBoard.Instance.Close();
             runes.Hide();
             runes.Clear();
             if (island != null) island.clearingDim = _dimBefore;
@@ -178,21 +175,30 @@ namespace Diorama
         {
             if (settings == null) return;
             runes.Hide();
+            // Step 13: the finale plays through; Title waits until it's done.
             settings.Open(() =>
+            {
+                if (IsOpen) runes.Show();
+            }, FinaleDirector.Running ? null : (System.Action)ToTitle);
+        }
+
+        /// <summary>Step 14h: the Isling Journal, back to the menu on Close.</summary>
+        void OpenJournal()
+        {
+            var j = JournalBoard.Ensure(runes);
+            if (j == null) return;
+            runes.Hide();
+            j.Open(() =>
             {
                 if (IsOpen) runes.Show();
             });
         }
 
-        /// <summary>Step 12a: the How to play card.</summary>
-        void OpenControls()
+        /// <summary>Step 14h (bridge): opens the menu, then the Journal.</summary>
+        public void DebugOpenJournal()
         {
-            if (settings == null) return;
-            runes.Hide();
-            settings.OpenControls(() =>
-            {
-                if (IsOpen) runes.Show();
-            });
+            if (!IsOpen) TryOpen();
+            if (IsOpen) OpenJournal();
         }
 
         void ToTitle()

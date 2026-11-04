@@ -101,6 +101,44 @@ namespace Diorama.EditorTools
             EditorApplication.update += tick;
         }
 
+        /// <summary>
+        /// The Journal: arg "open" (menu, then Journal), "fire|water|wind", "pick N" (grid cell), "close", "lodge" (the
+        /// pedestal book), "shot NAME" (from the seated head at the board).
+        /// </summary>
+        public static void Journal()
+        {
+            var a = Arg.Split(' ');
+            var j = JournalBoard.Instance;
+            switch (a[0])
+            {
+                case "open":
+                    BattleDebug.SeatCamera();
+                    var menu = Object.FindFirstObjectByType<GameMenu>();
+                    if (menu != null) menu.DebugOpenJournal();
+                    break;
+                case "fire": if (j != null) j.DebugElement(Element.Fire); break;
+                case "water": if (j != null) j.DebugElement(Element.Water); break;
+                case "wind": if (j != null) j.DebugElement(Element.Wind); break;
+                case "pick": if (j != null && a.Length > 1) j.DebugPick(int.Parse(a[1])); break;
+                case "close": if (j != null) j.Close(); break;
+                case "lodge":
+                    var book = Object.FindFirstObjectByType<LodgeJournalBook>();
+                    if (book != null) book.Open("bridge");
+                    else Debug.LogWarning("[Step14hDebug] No lodge book (enter the lodge first).");
+                    break;
+                case "shot":
+                    var g = Growth;
+                    if (g == null || a.Length < 2) return;
+                    // From the seated head the board faced (BattleDebug.SeatCamera holds the camera there).
+                    var cam = Camera.main;
+                    var board = j != null && JournalBoard.IsOpen ? j.runes.Root : g.pods.island.transform;
+                    Vector3 eye = cam != null ? cam.transform.position : Eye(g), look = board.position + board.up * 0.15f;
+                    BattleDebug.Render($"Logs/BattleShots/{a[1]}.png", eye, Quaternion.LookRotation(look - eye, Vector3.up));
+                    Debug.Log($"[Step14hDebug] Shot {a[1]}.png.");
+                    break;
+            }
+        }
+
         /// <summary>Which pod is due, whether the show runs, the pinned objective.</summary>
         public static void State()
         {

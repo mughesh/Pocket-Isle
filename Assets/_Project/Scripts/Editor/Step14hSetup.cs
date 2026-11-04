@@ -22,7 +22,9 @@ namespace Diorama.EditorTools
             }
             var log = new StringBuilder("[Step14h] MR_Main set up:");
             DialogueTools.Import();
-            log.Append(NL + "  Script_v1 reimported (evolve.ready, evolve.done, keeper.thanks.evolve.*)");
+            log.Append(NL + "  Script_v1 reimported (evolve.ready, evolve.done, keeper.thanks.evolve.*, journal.first)");
+            JournalBake.Bake();
+            log.Append(NL + "  Journal baked (portraits atlas, Resources/JournalData)");
 
             // The GrowthDirector finds its pop text (BattleHud) at runtime: no scene change for A.
             AssetDatabase.SaveAssets();

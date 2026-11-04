@@ -29,6 +29,9 @@ namespace Diorama
 
         public Transform transform => _root;
 
+        /// <summary>Step 14h: the panel's size (m, before the Place scale).</summary>
+        public Vector2 Size => _size;
+
         public StoneTablet(string name, Transform parent, Material hud, int layer)
         {
             _root = new GameObject(name).transform;

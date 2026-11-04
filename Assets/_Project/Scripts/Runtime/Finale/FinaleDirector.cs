@@ -266,7 +266,8 @@ namespace Diorama
         bool Rosters(out string line)
         {
             _rosterAt = Time.time + 2f;
-            var caught = new HashSet<string>(save != null ? save.Caught : (IEnumerable<string>)new string[0]);
+            // Step 14h: the Journal's caught set (one source of truth with the Journal and its toast).
+            var caught = new HashSet<string>(Journal.CaughtIds());
             var parts = new List<(string, int, int)>();
             bool all = true;
             for (int i = 0; i < 3; i++)
@@ -306,7 +307,9 @@ namespace Diorama
         {
             bool all = Rosters(out var line);
             if (_collection == null) _collection = new StoneTablet("Collection card", island.transform, hudMaterial, island.gameObject.layer);
-            _collection.Set("Isling collection\n" + line, 0.15f, 0.5f, new Vector2(0.02f, 0.014f));
+            var data = JournalData.Load();
+            string found = data != null ? $"Found {Journal.Found(data.entries, Journal.CaughtIds())} / {Journal.Total(data.entries)}" : "Isling collection";
+            _collection.Set("Isling Journal  ·  " + found + "\n" + line, 0.15f, 0.5f, new Vector2(0.02f, 0.014f));
             _collectionUntil = Time.time + collectionSeconds;
             heart.nod = 0f;
             StartCoroutine(Nod());

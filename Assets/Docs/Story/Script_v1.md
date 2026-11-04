@@ -119,6 +119,8 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
   - Spirit: {name} is glowing... it's ready to grow!
 - `evolve.done` (step 14h: after an evolution in the palm; {name} = the new form)
   - Spirit: {name}! So strong now.
+- `journal.first` · once · while !tutorial (step 14h: the first "New Isling!" toast)
+  - Spirit: Every Isling you meet goes in your Journal. Open the menu to see it!
 - `shrine.first` · once · while !tutorial · → shrine (first time a shrine comes into the window)
   - Spirit: A Hearth Shrine! Warm your hand over the flame.
 - `shrine.near` · once · while !tutorial · → shrine (step 8c: first time the explorer stands next to one)

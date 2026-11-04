@@ -478,7 +478,7 @@ namespace Diorama
         /// Step 14g: the game menu or Settings is open: no line starts (the one showing goes back to the front of the
         /// queue), idle hints wait; everything shows once they close.
         /// </summary>
-        public static bool Held => GameMenu.IsOpen || SettingsBoard.IsOpen;
+        public static bool Held => GameMenu.IsOpen || SettingsBoard.IsOpen || JournalBoard.IsOpen;
 
         bool _held;
 

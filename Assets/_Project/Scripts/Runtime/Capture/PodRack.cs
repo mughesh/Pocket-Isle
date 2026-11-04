@@ -467,7 +467,7 @@ namespace Diorama
             }
         }
 
-        static bool MenuUp => GameMenu.IsOpen || SettingsBoard.IsOpen;
+        static bool MenuUp => GameMenu.IsOpen || SettingsBoard.IsOpen || JournalBoard.IsOpen;
 
         Vector3 _cardIslandPos;
         Quaternion _cardIslandRot;

@@ -603,6 +603,17 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: '{name}! So strong now.'
+  - id: journal.first
+    once: 1
+    objective: 0
+    priority: 1
+    note: 'step 14h: the first "New Isling!" toast'
+    target: 
+    validWhile: '!tutorial'
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Every Isling you meet goes in your Journal. Open the menu to see it!
   - id: shrine.first
     once: 1
     objective: 0

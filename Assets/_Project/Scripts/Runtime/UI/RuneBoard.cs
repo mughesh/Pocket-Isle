@@ -115,6 +115,20 @@ namespace Diorama
 
         public bool IsShown => _root != null && _root.gameObject.activeSelf;
 
+        /// <summary>Step 14h: the board's face (local x right, y up, -z toward the player); a picture grid hangs off it.</summary>
+        public Transform Root => _root;
+
+        /// <summary>Step 14h: an empty child on the board (removed by <see cref="Clear"/>); <paramref name="size"/> grows the board's area.</summary>
+        public Transform AddPart(string name, Vector2 center, Vector2 size)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(_root, false);
+            go.transform.localPosition = new Vector3(center.x, center.y, -0.002f);
+            _extras.Add(go);
+            Grow(center, size);
+            return go.transform;
+        }
+
         public IReadOnlyList<Rune> Runes => _runes;
 
         void Awake()

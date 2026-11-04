@@ -215,5 +215,107 @@ namespace Diorama.Tests
                 Assert.That(r.wild, Is.InRange(PadFit.MinFit, 1f));
             }
         }
+
+        // ---- D: the Journal ----
+
+        [Test]
+        public void Journal_StatesAndLines()
+        {
+            var big = Species("Big", Element.Water);
+            var small = Species("Small", Element.Water, big, 12);
+            var e = new JournalData.Entry { species = small, hint = "Lilymere, the pond" };
+            var eb = new JournalData.Entry { species = big, from = small };
+            var caught = new HashSet<string>();
+            var seen = new HashSet<string>();
+            Assert.AreEqual(Journal.State.Unseen, Journal.StateOf(small, caught, seen));
+            Assert.AreEqual("???", Journal.NameLine(e, Journal.State.Unseen));
+            Assert.AreEqual("Lilymere, the pond", Journal.StatusLine(e, Journal.State.Unseen, 0, caught));
+            Assert.AreEqual("???", Journal.StatusLine(eb, Journal.State.Unseen, 0, caught), "its base isn't caught yet");
+            Assert.AreEqual("Rare", Journal.StatusLine(new JournalData.Entry { species = small, hint = "Rare" }, Journal.State.Unseen, 0, caught));
+            Assert.AreEqual("A starter", Journal.StatusLine(new JournalData.Entry { species = small }, Journal.State.Unseen, 0, caught));
+
+            seen.Add("Small");
+            Assert.AreEqual(Journal.State.Seen, Journal.StateOf(small, caught, seen));
+            Assert.AreEqual("Small", Journal.NameLine(e, Journal.State.Seen));
+            Assert.AreEqual("Seen", Journal.StatusLine(e, Journal.State.Seen, 0, caught));
+
+            caught.Add("Small");
+            Assert.AreEqual(Journal.State.Caught, Journal.StateOf(small, caught, seen), "caught wins over seen");
+            var owned = new List<IslingInstance> { new IslingInstance(small, 7), new IslingInstance(small, 11) };
+            Assert.AreEqual("Lv 11", Journal.StatusLine(e, Journal.State.Caught, Journal.BestLevel(small, owned), caught), "its best one");
+            Assert.AreEqual("Caught", Journal.StatusLine(e, Journal.State.Caught, 0, caught), "none with the player now");
+            Assert.AreEqual("Evolves from Small", Journal.StatusLine(eb, Journal.State.Unseen, 0, caught), "once the base is caught");
+            Assert.AreEqual("New Isling! Toastling · 13 / 46", Journal.ToastLine("Toastling", 13, 46));
+        }
+
+        [Test]
+        public void Journal_CountsAndOldSaves()
+        {
+            var fire = Species("F1", Element.Fire);
+            var water = Species("W1", Element.Water);
+            var wind = Species("A1", Element.Wind);
+            var entries = new List<JournalData.Entry>
+            {
+                new JournalData.Entry { species = fire }, new JournalData.Entry { species = water }, new JournalData.Entry { species = wind },
+            };
+            var caught = new HashSet<string>();
+            // An old save: the pods and the lodge count as caught, nothing as seen.
+            int added = Journal.Migrate(caught, new[] { new IslingInstance(fire, 5), new IslingInstance(wind, 9), new IslingInstance(fire, 3) });
+            Assert.AreEqual(2, added);
+            Assert.AreEqual(2, Journal.Found(entries, caught));
+            Assert.AreEqual(3, Journal.Total(entries));
+            Assert.AreEqual(1, Journal.Found(entries, caught, Element.Fire));
+            Assert.AreEqual(0, Journal.Found(entries, caught, Element.Water));
+            Assert.AreEqual(0, Journal.Migrate(caught, new[] { new IslingInstance(fire, 5) }), "nothing twice");
+        }
+
+        [Test]
+        public void Journal_Order_LinesTogether_ElementsInOrder()
+        {
+            var b2 = Species("B2", Element.Fire);
+            var b1 = Species("B1", Element.Fire, b2, 14);
+            var w = Species("W", Element.Water);
+            var a = Species("A", Element.Wind);
+            var keeper = Species("K", Element.Wind);
+            keeper.keeper = true;
+            var spirit = Species(Journal.SpiritId, Element.Neutral);
+            var order = Journal.Order(new[] { a, b2, w, keeper, b1, spirit });
+            CollectionAssert.AreEqual(new[] { b1, b2, w, a }, order, "Fire (base, then its form), Water, Wind; no Keeper, no Spirit");
+        }
+
+        [Test]
+        public void Journal_Hints_FromTheTables()
+        {
+            var s = Species("S");
+            var r = Species("R");
+            var grass = ScriptableObject.CreateInstance<EncounterTable>();
+            grass.entries = new[] { new EncounterTable.Entry { species = s, weight = 1f }, new EncounterTable.Entry { species = r, weight = 0.1f, rare = true } };
+            _made.Add(grass);
+            var tables = new List<(string, string, EncounterTable)> { ("Galewick", "kite field", grass) };
+            Assert.AreEqual("Galewick, kite field", Journal.Hint(s, tables));
+            Assert.AreEqual("Rare", Journal.Hint(r, tables));
+            Assert.IsNull(Journal.Hint(Species("Nowhere"), tables));
+        }
+
+        [Test]
+        public void Journal_Baked_46Islings_20_14_12()
+        {
+            var data = Resources.Load<JournalData>(JournalData.ResourcePath);
+            if (data == null) Assert.Inconclusive("Bake the Journal (Tools > Pocket Isle > Journal > Bake Journal).");
+            Assert.AreEqual(46, Journal.Total(data.entries));
+            Assert.AreEqual(20, Journal.Total(data.entries, Element.Fire));
+            Assert.AreEqual(14, Journal.Total(data.entries, Element.Water));
+            Assert.AreEqual(12, Journal.Total(data.entries, Element.Wind));
+            Assert.IsNotNull(data.atlas);
+            Assert.IsNotNull(data.portraitMaterial);
+            var cells = new HashSet<int>();
+            foreach (var e in data.entries)
+            {
+                Assert.IsTrue(Journal.InJournal(e.species), e.species.name);
+                Assert.IsTrue(cells.Add(e.cell), $"{e.species.name}: a cell of its own");
+                Assert.Less(e.cell, data.columns * data.rows);
+                if (e.from == null) Assert.IsFalse(string.IsNullOrEmpty(e.hint) && e.species.name != "Kilnpot", $"{e.species.name} has a home");
+            }
+        }
     }
 }

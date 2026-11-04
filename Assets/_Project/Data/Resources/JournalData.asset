@@ -1,0 +1,203 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e648b2a7eee03b48b36f2cb4b27f643, type: 3}
+  m_Name: JournalData
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.JournalData
+  entries:
+  - species: {fileID: 11400000, guid: 585d9fc9cb136354b9c9a3eec138bfb2, type: 2}
+    from: {fileID: 0}
+    cell: 0
+    hint: Galewick, the warm field
+  - species: {fileID: 11400000, guid: e8216c644c642f243b9695b347727e28, type: 2}
+    from: {fileID: 11400000, guid: 585d9fc9cb136354b9c9a3eec138bfb2, type: 2}
+    cell: 1
+    hint: 
+  - species: {fileID: 11400000, guid: 6c99248502b7abb499fe09f692813d79, type: 2}
+    from: {fileID: 0}
+    cell: 2
+    hint: Cinderwood, the glade
+  - species: {fileID: 11400000, guid: cf5f1d1f4df13fe499df0f36434d2e06, type: 2}
+    from: {fileID: 11400000, guid: 6c99248502b7abb499fe09f692813d79, type: 2}
+    cell: 3
+    hint: 
+  - species: {fileID: 11400000, guid: c83d34536ca6d6c468180c164437c61b, type: 2}
+    from: {fileID: 0}
+    cell: 4
+    hint: Galewick, the village
+  - species: {fileID: 11400000, guid: 6670d437b2d600f46b99b02f24a66b40, type: 2}
+    from: {fileID: 11400000, guid: c83d34536ca6d6c468180c164437c61b, type: 2}
+    cell: 5
+    hint: 
+  - species: {fileID: 11400000, guid: 8daccdc828815e049b974338e5a2368e, type: 2}
+    from: {fileID: 0}
+    cell: 6
+    hint: Rare
+  - species: {fileID: 11400000, guid: e0bf67e2c7ccdc746804cf592989702b, type: 2}
+    from: {fileID: 11400000, guid: 8daccdc828815e049b974338e5a2368e, type: 2}
+    cell: 7
+    hint: 
+  - species: {fileID: 11400000, guid: c1473e635e7776940a34b25e7b53b532, type: 2}
+    from: {fileID: 0}
+    cell: 8
+    hint: Rare
+  - species: {fileID: 11400000, guid: e163c6002098afa4ea9295b9d4055e5a, type: 2}
+    from: {fileID: 11400000, guid: c1473e635e7776940a34b25e7b53b532, type: 2}
+    cell: 9
+    hint: 
+  - species: {fileID: 11400000, guid: bf28c73db405a224da137bbcb4724879, type: 2}
+    from: {fileID: 0}
+    cell: 10
+    hint: the Still Isle, tall grass
+  - species: {fileID: 11400000, guid: d1eca71a0e226844a9ba1fe6e8a21398, type: 2}
+    from: {fileID: 11400000, guid: bf28c73db405a224da137bbcb4724879, type: 2}
+    cell: 11
+    hint: 
+  - species: {fileID: 11400000, guid: 4e0827bf455d6eb4c853967a75296d1d, type: 2}
+    from: {fileID: 0}
+    cell: 12
+    hint: 
+  - species: {fileID: 11400000, guid: dee1246386885fe4692153f955a5bf48, type: 2}
+    from: {fileID: 11400000, guid: 4e0827bf455d6eb4c853967a75296d1d, type: 2}
+    cell: 13
+    hint: 
+  - species: {fileID: 11400000, guid: 145b535be59a83343a76aaed5434324f, type: 2}
+    from: {fileID: 0}
+    cell: 14
+    hint: Cinderwood, the forest
+  - species: {fileID: 11400000, guid: d29c3a843fbf8ec4ba0bfd09274a05da, type: 2}
+    from: {fileID: 11400000, guid: 145b535be59a83343a76aaed5434324f, type: 2}
+    cell: 15
+    hint: 
+  - species: {fileID: 11400000, guid: fb46257ae3b4b0144a5861244b1b96f6, type: 2}
+    from: {fileID: 0}
+    cell: 16
+    hint: the Still Isle, tall grass
+  - species: {fileID: 11400000, guid: 44d82e91744f67e4a993758eede3bbb1, type: 2}
+    from: {fileID: 11400000, guid: fb46257ae3b4b0144a5861244b1b96f6, type: 2}
+    cell: 17
+    hint: 
+  - species: {fileID: 11400000, guid: e7c3963a9c30b4e42bc8e0dffffc34f3, type: 2}
+    from: {fileID: 0}
+    cell: 18
+    hint: the Still Isle, tall grass
+  - species: {fileID: 11400000, guid: 1aef1af9fe20cb64aad07a7dd1e50e38, type: 2}
+    from: {fileID: 11400000, guid: e7c3963a9c30b4e42bc8e0dffffc34f3, type: 2}
+    cell: 19
+    hint: 
+  - species: {fileID: 11400000, guid: 9d0b96f4b666ba9409b8762d7be430a6, type: 2}
+    from: {fileID: 0}
+    cell: 20
+    hint: Rare
+  - species: {fileID: 11400000, guid: 5af7e2459d76d994faf3cb21c19ab077, type: 2}
+    from: {fileID: 11400000, guid: 9d0b96f4b666ba9409b8762d7be430a6, type: 2}
+    cell: 21
+    hint: 
+  - species: {fileID: 11400000, guid: b7d1af41a829c864fad45e1fc9d58676, type: 2}
+    from: {fileID: 0}
+    cell: 22
+    hint: Lilymere, the village
+  - species: {fileID: 11400000, guid: 15d688f3572879b43b60a1eb55e870ae, type: 2}
+    from: {fileID: 11400000, guid: b7d1af41a829c864fad45e1fc9d58676, type: 2}
+    cell: 23
+    hint: 
+  - species: {fileID: 11400000, guid: 79789efc31efcef45840a9b796d9f05e, type: 2}
+    from: {fileID: 0}
+    cell: 24
+    hint: Lilymere, the village
+  - species: {fileID: 11400000, guid: 4e3ae98ee510b4a49b88fc39cc4234ea, type: 2}
+    from: {fileID: 11400000, guid: 79789efc31efcef45840a9b796d9f05e, type: 2}
+    cell: 25
+    hint: 
+  - species: {fileID: 11400000, guid: d85f2f7ff27f11e4f81e1539211ce6e6, type: 2}
+    from: {fileID: 0}
+    cell: 26
+    hint: Lilymere, the village
+  - species: {fileID: 11400000, guid: 4daabec223230c445a57cfd4d6c31740, type: 2}
+    from: {fileID: 11400000, guid: d85f2f7ff27f11e4f81e1539211ce6e6, type: 2}
+    cell: 27
+    hint: 
+  - species: {fileID: 11400000, guid: 3e6a8bbe90a2d0447b3543119e52c28a, type: 2}
+    from: {fileID: 0}
+    cell: 28
+    hint: Cinderwood, the water
+  - species: {fileID: 11400000, guid: d9c9db8fd0434424ca4f3ca07dee545e, type: 2}
+    from: {fileID: 11400000, guid: 3e6a8bbe90a2d0447b3543119e52c28a, type: 2}
+    cell: 29
+    hint: 
+  - species: {fileID: 11400000, guid: b8766df0ae633cc40bcdeefb6c093d64, type: 2}
+    from: {fileID: 0}
+    cell: 30
+    hint: Lilymere, the channel
+  - species: {fileID: 11400000, guid: ec14b228ecec3074090d997a9fbeb209, type: 2}
+    from: {fileID: 11400000, guid: b8766df0ae633cc40bcdeefb6c093d64, type: 2}
+    cell: 31
+    hint: 
+  - species: {fileID: 11400000, guid: 081cd6bac15516a438300833ff827291, type: 2}
+    from: {fileID: 0}
+    cell: 32
+    hint: Cinderwood, the grove
+  - species: {fileID: 11400000, guid: 1ca6f4d7aed6b3e4e8b44c1de52ce56d, type: 2}
+    from: {fileID: 11400000, guid: 081cd6bac15516a438300833ff827291, type: 2}
+    cell: 33
+    hint: 
+  - species: {fileID: 11400000, guid: e1054a36995581d4fb04d178172c417b, type: 2}
+    from: {fileID: 0}
+    cell: 34
+    hint: Galewick, the village
+  - species: {fileID: 11400000, guid: 13c71d3916127774fbe8e2433e1f674a, type: 2}
+    from: {fileID: 11400000, guid: e1054a36995581d4fb04d178172c417b, type: 2}
+    cell: 35
+    hint: 
+  - species: {fileID: 11400000, guid: 11737ef7d2b67d84b8a98e2c3f8eeb9d, type: 2}
+    from: {fileID: 0}
+    cell: 36
+    hint: Galewick, the arrival meadow
+  - species: {fileID: 11400000, guid: 2d1665ea492ffc145b3f25e70ce75ad5, type: 2}
+    from: {fileID: 11400000, guid: 11737ef7d2b67d84b8a98e2c3f8eeb9d, type: 2}
+    cell: 37
+    hint: 
+  - species: {fileID: 11400000, guid: d7a7d38225e334e46badc0bd0188948b, type: 2}
+    from: {fileID: 0}
+    cell: 38
+    hint: Galewick, kite field
+  - species: {fileID: 11400000, guid: 928c56b6ea390ed4eb5950e43b5dd99b, type: 2}
+    from: {fileID: 11400000, guid: d7a7d38225e334e46badc0bd0188948b, type: 2}
+    cell: 39
+    hint: 
+  - species: {fileID: 11400000, guid: 00f77a932360d8041a63e5d3c6a824fa, type: 2}
+    from: {fileID: 0}
+    cell: 40
+    hint: Galewick, the village
+  - species: {fileID: 11400000, guid: f153f243408217343b2997c77202dfe1, type: 2}
+    from: {fileID: 11400000, guid: 00f77a932360d8041a63e5d3c6a824fa, type: 2}
+    cell: 41
+    hint: 
+  - species: {fileID: 11400000, guid: 91ad152bca44429478745c413344f1ed, type: 2}
+    from: {fileID: 0}
+    cell: 42
+    hint: Galewick, the village
+  - species: {fileID: 11400000, guid: 0bb228a54b4d65749a92e21149222659, type: 2}
+    from: {fileID: 11400000, guid: 91ad152bca44429478745c413344f1ed, type: 2}
+    cell: 43
+    hint: 
+  - species: {fileID: 11400000, guid: 8a337f73f2670bc4ead246250b9f6253, type: 2}
+    from: {fileID: 0}
+    cell: 44
+    hint: Rare
+  - species: {fileID: 11400000, guid: d0a2d7345b8d55142bef973f5458bf4c, type: 2}
+    from: {fileID: 11400000, guid: 8a337f73f2670bc4ead246250b9f6253, type: 2}
+    cell: 45
+    hint: 
+  atlas: {fileID: 2800000, guid: 889ef1d7c3973c54e81b7062d8aba9aa, type: 3}
+  portraitMaterial: {fileID: 2100000, guid: 1e95c26ed2cc0f342822aeb7a2ebe8c2, type: 2}
+  columns: 8
+  rows: 8

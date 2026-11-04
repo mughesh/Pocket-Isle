@@ -77,6 +77,12 @@ namespace Diorama
                 return;
             }
             if (encounters != null) encounters.IsCaught = s => s != null && _caught.Contains(SpeciesRegistry.IdOf(s));
+            // Step 14h: the Journal reads these sets (one source of truth: the Journal, its toast, the Heart's card).
+            Journal.CaughtIds = () => _caught;
+            Journal.SeenIds = () => encounters != null ? encounters.Seen : (ICollection<string>)Array.Empty<string>();
+            Journal.Owned = () => party.members.Concat(party.storage);
+            Progression.Evolved += OnEvolved;
+            JournalToast.Ensure(explorer != null ? explorer.island : null);
             Load();
             _ready = true;
             PuzzleState.Changed += OnPuzzleChanged;
@@ -101,6 +107,7 @@ namespace Diorama
 
         void OnDestroy()
         {
+            Progression.Evolved -= OnEvolved;
             PuzzleState.Changed -= OnPuzzleChanged;
             if (shrines != null) shrines.Rested -= OnRested;
             if (encounters != null)
@@ -122,8 +129,16 @@ namespace Diorama
             // Step 13: where it was met, for the Hall of Fame cards.
             var world = swap != null ? swap.Outdoor : explorer != null && explorer.island != null ? explorer.island.world : null;
             if (c != null && string.IsNullOrEmpty(c.metIn)) c.metIn = FinaleLogic.RealmName(world != null ? world.realm : null);
-            _caught.Add(SpeciesRegistry.IdOf(c.species));
+            if (_caught.Add(SpeciesRegistry.IdOf(c.species))) Journal.RaiseNewEntry(c.species);
             Save("catch");
+        }
+
+        /// <summary>Step 14h: an evolved form counts as caught (a new Journal entry, its toast).</summary>
+        void OnEvolved(IslingInstance c, IslingSpecies from)
+        {
+            if (c == null || c.species == null) return;
+            if (_caught.Add(SpeciesRegistry.IdOf(c.species))) Journal.RaiseNewEntry(c.species);
+            Save($"{from.displayName} evolved into {c.species.displayName}");
         }
 
         void OnBattleEnded(BattleResult result) => Save($"battle {result}");
@@ -263,11 +278,11 @@ namespace Diorama
                       $"puzzles {PuzzleState.Describe()}.");
         }
 
-        /// <summary>Everything in the pods and storage counts as caught (the starter too).</summary>
+        /// <summary>Everything in the pods and storage counts as caught (the starter too; step 14h: old saves' Journal).</summary>
         void NoteParty()
         {
-            foreach (var c in party.members.Concat(party.storage))
-                if (c != null && c.species != null) _caught.Add(SpeciesRegistry.IdOf(c.species));
+            int added = Journal.Migrate(_caught, party.members.Concat(party.storage));
+            if (added > 0) Debug.Log($"[GameSave] {added} species from the pods and the lodge count as caught (Journal).");
         }
 
         static string Describe(List<IslingInstance> list) =>

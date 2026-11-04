@@ -99,7 +99,7 @@ namespace Diorama
 
         /// <summary>Pods may glow and be grabbed for evolving: no battle, not the lodge, no finale, no scene change, no tutorial.</summary>
         bool Available => !encounters.InBattle && !pods.InBattle && !pods.LodgeMode && !FinaleDirector.Running && !SceneSwap.IsBusy &&
-                          !Onboarding.Running && !GameMenu.IsOpen;
+                          !Onboarding.Running && !GameMenu.IsOpen && !JournalBoard.IsOpen;
 
         /// <summary>The Spirit may start the "ready" line: available, no menu, no other lesson pinned.</summary>
         bool Calm => Available && !Dialogue.Held && (!Dialogue.IsPinned || Dialogue.CurrentObjective == ReadyLine);

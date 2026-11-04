@@ -116,6 +116,7 @@ namespace Diorama
             }
             _quad = BattleHud.VerticalQuad();
             _card = new IslingCard(hudMaterial, _quad, island.transform);
+            LodgeJournalBook.Ensure(this); // step 14h: the Journal on the pedestal
             _block = new MaterialPropertyBlock();
             MakeDoorRing();
             if (beaconMaterial == null) Debug.LogError("[LodgeRoom] No beacon material: the door arch shows no ring when looked at (Set Up MR_Main (7c)).", this);
@@ -147,7 +148,10 @@ namespace Diorama
             if (_quad != null) Destroy(_quad);
         }
 
-        Vector3 PedestalTopLocal => island.TileToLocal(pedestalTile, Cap + pedestalTop * Tile);
+        public Vector3 PedestalTopLocal => island.TileToLocal(pedestalTile, Cap + pedestalTop * Tile);
+
+        /// <summary>Step 14h: one tile in island-local units at the current zoom.</summary>
+        public float TileLocal => Tile * island.Zoom;
 
         /// <summary>The room Isling nearest the explorer (not on the pedestal, not held), for the inspect hint.</summary>
         Vector3? NearestWanderer()
