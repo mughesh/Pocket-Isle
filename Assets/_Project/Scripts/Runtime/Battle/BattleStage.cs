@@ -477,6 +477,115 @@ namespace Diorama
             var gold = new Color(1f, 0.84f, 0.35f);
             fx.Burst(world, 30, gold, World(0.05f), 0.8f, World(0.004f), Vector3.up * World(0.03f));
             hud.PopText(island.transform.InverseTransformPoint(world) + Vector3.up * 0.03f, text, gold, 0.9f, 1.4f);
+            if (PolishConfig.BattleFeelOn) StartCoroutine(CatchStars(world));
+        }
+
+        // ---- Nov 5: battle feel (PolishConfig.battleFeel) ----
+
+        /// <summary>The element's own touch on a hit: fire sparks fly up, water splashes a ring on the ground, wind swirls, neutral kicks up dust.</summary>
+        void ElementHit(StageActor target, Element element)
+        {
+            Vector3 at = target.WorldCenter;
+            Vector3 feet = island.transform.TransformPoint(island.TileToLocal(target.tile, Cap));
+            Vector3 up = island.transform.up;
+            switch (element)
+            {
+                case Element.Fire:
+                    fx.Burst(at, 16, new Color(1f, 0.55f, 0.15f), World(0.035f), 0.7f, World(0.0025f), up * World(0.07f));
+                    fx.Burst(at, 8, new Color(1f, 0.9f, 0.5f), World(0.05f), 0.4f, World(0.002f), up * World(0.05f));
+                    break;
+                case Element.Water:
+                    StartCoroutine(Splash(feet, new Color(0.55f, 0.85f, 1f)));
+                    fx.Burst(at, 14, new Color(0.6f, 0.88f, 1f), World(0.04f), 0.6f, World(0.003f), up * World(0.04f), World(0.25f));
+                    break;
+                case Element.Wind:
+                    for (int i = 0; i < 12; i++)
+                    {
+                        float a = i / 12f * Mathf.PI * 2f;
+                        Vector3 r = island.transform.rotation * new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a));
+                        Vector3 tangent = Vector3.Cross(up, r);
+                        fx.Burst(at + r * World(0.022f) + up * World(0.006f * (i % 3)), 1, new Color(0.85f, 1f, 0.92f), World(0.004f), 0.55f, World(0.0025f),
+                            tangent * World(0.09f) + up * World(0.02f));
+                    }
+                    break;
+                default:
+                    fx.Burst(feet + up * World(0.004f), 12, new Color(0.72f, 0.66f, 0.58f), World(0.03f), 0.75f, World(0.005f), up * World(0.012f));
+                    break;
+            }
+        }
+
+        /// <summary>A flat ring spreading on the ground under the target (water).</summary>
+        IEnumerator Splash(Vector3 feet, Color color)
+        {
+            var ring = fx.Get(BattleFx.Shape.Ring);
+            ring.Set(color, Color.white, 1f);
+            yield return Tween(0.45f, p =>
+            {
+                ring.transform.SetPositionAndRotation(feet + island.transform.up * World(0.002f), island.transform.rotation);
+                ring.transform.localScale = Vector3.one * (TileSize * Zoom * (0.15f + 0.9f * p));
+                ring.SetAlpha((1f - p) * 0.9f);
+            });
+            fx.Release(ring);
+        }
+
+        /// <summary>Super effective: a gold ring flashes out round the target (facing the player).</summary>
+        IEnumerator GoldFlash(Vector3 world)
+        {
+            var gold = new Color(1f, 0.82f, 0.3f);
+            var ring = fx.Get(BattleFx.Shape.Ring);
+            ring.Set(gold, Color.white, 1f, 1.4f);
+            var cam = Camera.main;
+            fx.Burst(world, 12, gold, World(0.06f), 0.45f, World(0.003f));
+            // Real time: it flashes during the hit-stop.
+            for (float t = 0f; t < 0.4f; t += Time.deltaTime)
+            {
+                float p = t / 0.4f;
+                ring.transform.position = world;
+                if (cam != null) ring.transform.rotation = Quaternion.FromToRotation(Vector3.up, cam.transform.position - world);
+                ring.transform.localScale = Vector3.one * (TileSize * Zoom * (0.2f + 0.6f * Mathf.Sqrt(p)));
+                ring.SetAlpha(1f - p * p);
+                yield return null;
+            }
+            fx.Release(ring);
+        }
+
+        /// <summary>A catch: the pod clicks shut (a tight white ring, the pod's return click), then three gold stars pop up in an arc.</summary>
+        IEnumerator CatchStars(Vector3 world)
+        {
+            var cam = Camera.main;
+            var snap = fx.Get(BattleFx.Shape.Ring);
+            snap.Set(Color.white, Color.white, 1f, 1.6f);
+            GameAudio.At(AudioIds.PodReturn, world);
+            yield return Tween(0.15f, p =>
+            {
+                snap.transform.position = world;
+                if (cam != null) snap.transform.rotation = Quaternion.FromToRotation(Vector3.up, cam.transform.position - world);
+                snap.transform.localScale = Vector3.one * (TileSize * Zoom * (0.22f - 0.12f * p));
+                snap.SetAlpha(1f - p);
+            });
+            fx.Release(snap);
+            var gold = new Color(1f, 0.85f, 0.3f);
+            var stars = new BattleFx.Item[3];
+            Vector3 up = cam != null ? cam.transform.up : Vector3.up, right = cam != null ? cam.transform.right : Vector3.right;
+            for (int i = 0; i < 3; i++)
+            {
+                stars[i] = fx.Get(BattleFx.Shape.Orb);
+                stars[i].Set(Color.white, gold, 1f, 1.4f, 1f, 0.1f);
+            }
+            yield return Tween(0.65f, p =>
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    float lag = Mathf.Clamp01(p * 1.3f - i * 0.12f);
+                    float s = Mathf.Sin(lag * Mathf.PI);
+                    Vector3 dir = up * 1f + right * ((i - 1) * 0.9f);
+                    stars[i].transform.position = world + dir * World(0.045f) * EaseOutBack(Mathf.Min(1f, lag * 1.6f));
+                    stars[i].transform.localScale = Vector3.one * World(0.007f) * s;
+                    stars[i].SetAlpha(s);
+                    if (lag > 0f && lag < 0.1f) fx.Burst(stars[i].transform.position, 2, gold, World(0.02f), 0.4f, World(0.002f));
+                }
+            });
+            foreach (var s in stars) fx.Release(s);
         }
 
         // ---- turns ----
@@ -646,6 +755,15 @@ namespace Diorama
             if (o.blocked) hud.PopText(target.LocalTop + Vector3.up * 0.075f, "Blocked!", new Color(1f, 0.7f, 0.3f), 0.75f, 1.4f);
             else if (o.effectiveness == Effectiveness.Super) hud.PopText(target.LocalTop + Vector3.up * 0.075f, "Super effective!", SuperColor, 0.65f, 1.4f);
             else if (o.effectiveness == Effectiveness.NotVery) hud.PopText(target.LocalTop + Vector3.up * 0.075f, "Not very effective", WeakColor, 0.65f, 1.4f);
+            if (PolishConfig.BattleFeelOn)
+            {
+                ElementHit(target, o.move != null ? o.move.element : Element.Neutral);
+                if (o.effectiveness == Effectiveness.Super && !o.blocked)
+                {
+                    _hitStopUntil = Time.time + PolishConfig.Get().hitStop;
+                    StartCoroutine(GoldFlash(target.WorldCenter));
+                }
+            }
             if (o.shieldAbsorbed) DropShieldOf(o.side, true);
             StartCoroutine(Knockback(target, (target.tile - user.tile).normalized));
         }
@@ -1083,14 +1201,19 @@ namespace Diorama
 
         // ---- helpers ----
 
+        /// <summary>Nov 5: a super-effective hit holds the stage's tweens this long (hit-stop); the rest of the game runs on.</summary>
+        static float _hitStopUntil;
+
+        static float StageDelta => Time.time < _hitStopUntil ? 0f : Time.deltaTime;
+
         static IEnumerator Wait(float seconds)
         {
-            for (float t = 0f; t < seconds; t += Time.deltaTime) yield return null;
+            for (float t = 0f; t < seconds; t += StageDelta) yield return null;
         }
 
         static IEnumerator Tween(float seconds, Action<float> step, Action done = null)
         {
-            for (float t = 0f; t < seconds; t += Time.deltaTime)
+            for (float t = 0f; t < seconds; t += StageDelta)
             {
                 step(t / seconds);
                 yield return null;

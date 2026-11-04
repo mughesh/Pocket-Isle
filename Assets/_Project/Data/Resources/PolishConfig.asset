@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85ebc694cae9a154782cd6d65e01fc72, type: 3}
+  m_Name: PolishConfig
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.PolishConfig
+  ambientLife: 1
+  critterMaterial: {fileID: 2100000, guid: 38824f11671b6fd499e7c9e1a35dcef9, type: 2}
+  fadedShare: 0.35
+  hubButterflies: 3
+  cinderwoodFireflies: 14
+  lilymereDragonflies: 2
+  galewickBirdEvery: {x: 10, y: 22}
+  lilymereSparkles: 10
+  battleFeel: 1
+  hitStop: 0.04
+  restoreWave: 1
+  waveLifts: 70

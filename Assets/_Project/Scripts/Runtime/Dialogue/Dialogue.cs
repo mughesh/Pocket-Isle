@@ -121,6 +121,12 @@ namespace Diorama
         /// <summary>Raised when a line starts (speaker) and when the bubble closes (null): the Spirit perks up while talking.</summary>
         public static event Action<DialogueSpeaker?> Speaking;
 
+        /// <summary>
+        /// Nov 5 (dev panel Tools > Clean hints, for recording video): no idle hints and no filler chatter. Objectives, intros,
+        /// story lines and the lesson chips are untouched. Not saved.
+        /// </summary>
+        public static bool CleanHints;
+
         /// <summary>Trigger ids already said (once triggers). Step 7 saves and restores these.</summary>
         public static IEnumerable<string> Said => _instance != null ? _instance._said : Array.Empty<string>();
 
@@ -435,6 +441,11 @@ namespace Diorama
                 Debug.Log($"[Dialogue] {id}: not here (in {t.context}; now {Places.Now}{(encounters != null && encounters.InBattle ? ", battle" : "")}).");
                 return;
             }
+            if (CleanHints && !force && !t.objective && t.kind == LineKind.Filler)
+            {
+                Debug.Log($"[Dialogue] {id}: filler, skipped (clean hints).");
+                return;
+            }
             _notNow.Remove(id);
             if (IsQueuedOrShowing(id) && !force) return;
             _said.Add(id);
@@ -719,7 +730,7 @@ namespace Diorama
         {
             if (script == null || script.idleHints.Count == 0 || _current.HasValue || _queue.Count > 0) return;
             // Step 9g: Settings > Spirit hints > Fewer.
-            if (GameSettings.FewerHints) return;
+            if (GameSettings.FewerHints || CleanHints) return;
             if (Time.time - _lastInput < idleSeconds || Time.time - _lastIdle < idleGap) return;
             if (encounters != null && encounters.InBattle || explorer != null && explorer.Locked || Onboarding.Running) return;
             // Step 14k: not right after arriving (the place's intro and objectives first), and only hints valid here.

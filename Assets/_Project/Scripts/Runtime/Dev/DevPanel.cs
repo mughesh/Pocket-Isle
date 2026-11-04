@@ -523,6 +523,10 @@ namespace Diorama
                     Add(() => $"FPS: {OnOff(_fpsOn)}", () => _fpsOn = !_fpsOn, () => _fpsOn);
                     Add(() => $"Readouts: {OnOff(DevReadout.Shown)}", () => DevReadout.Shown = !DevReadout.Shown, () => DevReadout.Shown);
                     Add(() => $"Labels: {OnOff(DebugLabels.Visible)}", () => DebugLabels.Visible = !DebugLabels.Visible, () => DebugLabels.Visible);
+                    // Nov 5: recording a video (QA build): no dev readouts, labels or FPS; no idle chatter.
+                    Heading("Video");
+                    Add(() => $"Video mode: {OnOff(VideoMode)}", () => SetVideoMode(!VideoMode), () => VideoMode);
+                    Add(() => $"Clean hints: {OnOff(Dialogue.CleanHints)}", () => Dialogue.CleanHints = !Dialogue.CleanHints, () => Dialogue.CleanHints);
                     Heading("Speed");
                     Add(() => $"Time x{Time.timeScale:0}", () => Time.timeScale = Time.timeScale >= 4f ? 1f : Time.timeScale * 2f, () => Time.timeScale > 1f);
                     Add(() => $"Walk x2: {OnOff(_walkFast)}", ToggleWalk, () => _walkFast);
@@ -801,10 +805,32 @@ namespace Diorama
 
         // ---- every frame ----
 
+        /// <summary>
+        /// Nov 5: video mode (Tools > Video mode): the FPS counter, the dev readouts and the debug labels stay off while it's on
+        /// (turning one on does nothing until video mode is off). The game's own UI is untouched. Not saved.
+        /// </summary>
+        public static bool VideoMode { get; private set; }
+
+        void SetVideoMode(bool on)
+        {
+            VideoMode = on;
+            if (on) HideDevVisuals();
+            Status(on ? "Video mode: dev readouts, labels and FPS hidden." : "Video mode off.");
+            Debug.Log($"[DevPanel] Video mode {(on ? "on" : "off")}.");
+        }
+
+        void HideDevVisuals()
+        {
+            _fpsOn = false;
+            if (DevReadout.Shown) DevReadout.Shown = false;
+            if (DebugLabels.Visible) DebugLabels.Visible = false;
+        }
+
         void Update()
         {
             if (_root == null) return;
             if (OpenPressed()) SetOpen(!_open);
+            if (VideoMode) HideDevVisuals();
             UpdateFps();
             if (!_open)
             {
