@@ -9,6 +9,10 @@ namespace Diorama
     /// dissolves in a soft circle about <see cref="radiusTiles"/> x 2 tiles across round the explorer (a dithered cut-out
     /// in DioramaWindow.hlsl, no extra pass), eased in and out over <see cref="fadeSeconds"/>, and the explorer's outline
     /// turns gold. Never cuts at or below its feet. Added by <see cref="ExplorerView"/>; every map and interior.
+    /// Step 14k (Mugesh: the cut looked odd): a ghost, not a hole: the props in that circle keep about a third of their
+    /// surface on an even screen pattern with a pale edge glow and a pale outline (DioramaWindow.hlsl DioramaGhost*), so
+    /// their shape stays. And in tall grass: blades within <see cref="grassRadiusTiles"/> of the explorer on the player's
+    /// side lie down (Grass.shader, DioramaGrassSee), always, on the map and in the battle zoom.
     /// </summary>
     [RequireComponent(typeof(CreatureView))]
     public class ExplorerSeeThrough : MonoBehaviour
@@ -23,12 +27,16 @@ namespace Diorama
         [Tooltip("How far toward the head the line is checked (tiles).")]
         [SerializeField] float checkTiles = 5f;
         [SerializeField] Color gold = new Color(1f, 0.8f, 0.3f, 1f);
+        [Tooltip("Step 14k: grass within this many tiles of the explorer, on the player's side, lies down.")]
+        [SerializeField] float grassRadiusTiles = 1.1f;
 
         static readonly int SeeThroughId = Shader.PropertyToID("_DioramaSeeThrough");
         static readonly int EyeId = Shader.PropertyToID("_DioramaSeeThroughEye");
         static readonly int MiscId = Shader.PropertyToID("_DioramaSeeThroughMisc");
         static readonly int SeenId = Shader.PropertyToID("_DioramaSeen");
         static readonly int SeenColorId = Shader.PropertyToID("_DioramaSeenColor");
+        static readonly int GrassSeeId = Shader.PropertyToID("_DioramaGrassSee");
+        static readonly int GrassSeeEyeId = Shader.PropertyToID("_DioramaGrassSeeEye");
 
         CreatureView _view;
         IslandBuilder _island;
@@ -57,6 +65,7 @@ namespace Diorama
             _hidden = false;
             Shader.SetGlobalVector(SeeThroughId, Vector4.zero);
             Shader.SetGlobalVector(SeenId, Vector4.zero);
+            Shader.SetGlobalVector(GrassSeeId, Vector4.zero);
         }
 
         void LateUpdate()
@@ -91,6 +100,10 @@ namespace Diorama
             Shader.SetGlobalVector(MiscId, new Vector4(feet.y + feetMarginTiles * tileL, keepOutTiles * tileL, 0f, 0f));
             float worldTile = tileL * it.lossyScale.x;
             Shader.SetGlobalVector(SeenId, _amount > 0.001f ? (Vector4)it.TransformPoint(chest) + new Vector4(0f, 0f, 0f, worldTile * 0.6f) : Vector4.zero);
+            // Step 14k: the grass round the explorer on the player's side lies down (always, not only when hidden).
+            bool grass = !DebugOff && _view.isActiveAndEnabled && !SceneSwap.IsInside;
+            Shader.SetGlobalVector(GrassSeeId, grass ? new Vector4(transform.position.x, transform.position.y, transform.position.z, worldTile * grassRadiusTiles) : Vector4.zero);
+            Shader.SetGlobalVector(GrassSeeEyeId, cam.transform.position);
             var c = gold;
             c.a = _amount;
             Shader.SetGlobalVector(SeenColorId, c.linear);

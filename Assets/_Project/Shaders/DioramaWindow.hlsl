@@ -161,22 +161,51 @@ float DioramaDitherHash(float3 p)
     return frac(p.x * p.y * p.z * (p.x + p.y + p.z));
 }
 
-// Step 14j: the see-through cut (see _DioramaSeeThrough). A few ALU per fragment, no extra pass.
-void DioramaSeeThroughClip(float3 islandPos)
+// Step 14j: the see-through region (see _DioramaSeeThrough). A few ALU per fragment, no extra pass.
+// Step 14k: a ghost, not a hole: returns how much this point is "in front of the explorer" (0..1, soft edge, eased);
+// the clips below thin it to DIORAMA_GHOST_KEEP of its fragments.
+float DioramaGhostAmount(float3 islandPos)
 {
     float amount = _DioramaSeeThrough.w;
-    if (amount <= 0.001 || islandPos.y <= _DioramaSeeThroughMisc.x) return;
+    if (amount <= 0.001 || islandPos.y <= _DioramaSeeThroughMisc.x) return 0.0;
     float3 e = _DioramaSeeThroughEye.xyz;
     float3 d = _DioramaSeeThrough.xyz - e;
     float len = length(d);
-    if (len < 1e-4) return;
+    if (len < 1e-4) return 0.0;
     d /= len;
     float3 v = islandPos - e;
     float t = dot(v, d);
-    if (t <= 0.0 || t >= len - _DioramaSeeThroughMisc.y) return;
+    if (t <= 0.0 || t >= len - _DioramaSeeThroughMisc.y) return 0.0;
     float r = _DioramaSeeThroughEye.w * t / len;
-    float k = (1.0 - smoothstep(r * 0.55, r, length(v - d * t))) * amount;
-    clip(DioramaDitherHash(floor(islandPos * 1400.0)) - k);
+    return (1.0 - smoothstep(r * 0.55, r, length(v - d * t))) * amount;
+}
+
+// About a third of a ghosted surface stays (it reads as ~33% opacity with its edge glow).
+#define DIORAMA_GHOST_KEEP 0.33
+
+// Ordered 4 x 4 threshold at a pixel (0..1): an even screen pattern, not sand.
+float DioramaBayer(float2 pixel)
+{
+    uint2 p = uint2(pixel) & 3u;
+    // Bayer 4 x 4 from the 2 x 2 one, no table: b(x, y) = 4 b2(x, y) + b2(x / 2, y / 2).
+    uint2 lo = p & 1u, hi = p >> 1;
+    uint b2lo = (lo.x ^ lo.y) * 2u + lo.y, b2hi = (hi.x ^ hi.y) * 2u + hi.y;
+    return (float(b2lo * 4u + b2hi) + 0.5) / 16.0;
+}
+
+// Thins a ghosted fragment to `keep` of the pattern (k = DioramaGhostAmount).
+void DioramaGhostClip(float k, float2 pixel, float keep)
+{
+    if (k <= 0.001) return;
+    clip(DioramaBayer(pixel) - k * (1.0 - keep));
+}
+
+// Shaders without the pixel position (eyes, creature pieces, the drift): the same thinning on a 3D hash.
+void DioramaSeeThroughClip(float3 islandPos)
+{
+    float k = DioramaGhostAmount(islandPos);
+    if (k <= 0.001) return;
+    clip(DioramaDitherHash(floor(islandPos * 1400.0)) - k * (1.0 - DIORAMA_GHOST_KEEP));
 }
 
 void DioramaWindowClip(float3 islandPos, float on)
@@ -185,6 +214,41 @@ void DioramaWindowClip(float3 islandPos, float on)
     clip(islandPos.y - _DioramaWindow.x);
     clip(DioramaEdgeDistance(islandPos.xz));
     DioramaSeeThroughClip(islandPos);
+}
+
+// Step 14k: the window clip with the ghost on an even screen pattern; `ghost` = how ghosted (for the edge glow).
+void DioramaWindowClipGhost(float3 islandPos, float on, float2 pixel, float keep, out float ghost)
+{
+    ghost = 0.0;
+    if (on < 0.5) return;
+    clip(islandPos.y - _DioramaWindow.x);
+    clip(DioramaEdgeDistance(islandPos.xz));
+    ghost = DioramaGhostAmount(islandPos);
+    DioramaGhostClip(ghost, pixel, keep);
+}
+
+// The ghost's soft cool edge glow: the silhouette (rim) lights up so the shape stays readable.
+float3 DioramaGhostGlow(float3 col, float ghost, float rim)
+{
+    return lerp(col, col * 0.8 + float3(0.78, 0.9, 1.0) * (0.06 + 0.7 * rim), ghost);
+}
+
+// Step 14k: the grass round the explorer on the player's side lies down (ExplorerSeeThrough sets these, world space):
+// xyz the explorer's feet, w the radius (about a tile); the eye's xyz (w unused).
+float4 _DioramaGrassSee;
+float4 _DioramaGrassSeeEye;
+
+// 0..1: how much a blade at this base (world) lies down.
+float DioramaGrassSee(float3 baseWS)
+{
+    float r = _DioramaGrassSee.w;
+    if (r <= 0.0) return 0.0;
+    float2 toBlade = baseWS.xz - _DioramaGrassSee.xz;
+    float dist = length(toBlade);
+    float2 toEye = _DioramaGrassSeeEye.xz - _DioramaGrassSee.xz;
+    float facing = dot(toBlade / max(dist, 1e-5), toEye / max(length(toEye), 1e-5));
+    float side = max(smoothstep(-0.35, 0.25, facing), 1.0 - smoothstep(r * 0.3, r * 0.55, dist)); // the player's side, and at its feet
+    return (1.0 - smoothstep(r * 0.7, r * 1.05, dist)) * side;
 }
 
 #endif

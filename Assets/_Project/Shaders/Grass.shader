@@ -137,6 +137,16 @@ Shader "Diorama/Grass"
                     world.xz += normalize(away + 0.0001) * clear * 0.5 * k;
                 }
 
+                // Step 14k: always see the explorer in tall grass: blades within about a tile of it, on the player's
+                // side (and at its feet), lie down to a fifth of their height, leaning away from it.
+                float see = _WindowClip > 0.5 ? DioramaGrassSee(base) : 0.0;
+                if (see > 0.0)
+                {
+                    float2 away = base.xz - _DioramaGrassSee.xz;
+                    world = base + (world - base) * lerp(1.0, 0.2, see);
+                    world.xz += normalize(away + 0.0001) * see * 0.35 * k;
+                }
+
                 world = DioramaWindowVertex(world, _WindowClip, UNITY_MATRIX_M._m03_m13_m23, o.islandPos);
                 o.positionCS = TransformWorldToHClip(world);
                 o.h = h;

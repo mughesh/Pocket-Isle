@@ -300,7 +300,9 @@ Shader "Diorama/Prop"
             {
                 UNITY_SETUP_INSTANCE_ID(i);
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
-                DioramaWindowClip(i.islandPos, _WindowClip);
+                // Step 14k: in front of the explorer, a ghost (a third of it, with an edge glow), not a hole.
+                float ghost;
+                DioramaWindowClipGhost(i.islandPos, _WindowClip, i.positionCS.xy, DIORAMA_GHOST_KEEP, ghost);
                 sPropWarm = i.warm;
 
                 float3 c;
@@ -324,6 +326,7 @@ Shader "Diorama/Prop"
                 // Burning lights get a soft halo at their silhouette when restored.
                 col += c * glow * rim * 0.9 * PropLit() * step(abs(round(i.paint.x) - 4.0), 0.5);
                 if (_WindowClip > 0.5) col = DioramaFocus(col, DioramaMapPoint(i.positionWS, _WindowClip).xz);
+                col = DioramaGhostGlow(col, ghost, rim);
                 return float4(col, 1.0);
             }
             ENDHLSL
@@ -380,7 +383,9 @@ Shader "Diorama/Prop"
             float4 frag(Varyings i) : SV_Target
             {
                 UNITY_SETUP_INSTANCE_ID(i);
-                DioramaWindowClip(i.islandPos, _WindowClip);
+                // Step 14k: a ghosted prop keeps more of its outline, lit pale: the shape stays readable.
+                float ghost;
+                DioramaWindowClipGhost(i.islandPos, _WindowClip, i.positionCS.xy, 0.6, ghost);
                 sPropWarm = i.warm;
                 float3 c;
                 float glow;
@@ -391,6 +396,7 @@ Shader "Diorama/Prop"
                 if (_WindowClip > 0.5) col = DioramaFocus(col, DioramaMapPoint(i.positionWS, _WindowClip).xz);
                 col = lerp(col, _DioramaHoverColor.rgb, i.focus.y);
                 col = lerp(col, _DioramaHighlightColor.rgb, i.focus.x);
+                col = lerp(col, float3(0.85, 0.95, 1.0), ghost * 0.85);
                 return float4(col, 1.0);
             }
             ENDHLSL
@@ -434,7 +440,8 @@ Shader "Diorama/Prop"
             half frag(Varyings i) : SV_Target
             {
                 UNITY_SETUP_INSTANCE_ID(i);
-                DioramaWindowClip(i.islandPos, _WindowClip);
+                float ghost;
+                DioramaWindowClipGhost(i.islandPos, _WindowClip, i.positionCS.xy, DIORAMA_GHOST_KEEP, ghost);
                 return 0;
             }
             ENDHLSL
