@@ -41,7 +41,7 @@ namespace Diorama.EditorTools
                 // The icon: the logo square, a little margin.
                 var c = bounds.center;
                 float size = Mathf.Max(bounds.size.x, bounds.size.y);
-                var eye = c + new Vector3(0f, size * 0.18f, size * 2.6f);
+                var eye = c + new Vector3(0f, size * 0.22f, size * 3.1f);
                 var icon = RenderOver(eye, c, 1024, 1024, 1 << layer, 21f, null);
                 Directory.CreateDirectory(IconDir);
                 foreach (int s in Sizes)
@@ -62,12 +62,12 @@ namespace Diorama.EditorTools
                     Vector3 front = Vector3.ProjectOnPlane(t.forward, Vector3.up).normalized;
                     Vector3 centre = t.TransformPoint(new Vector3(0f, island.CapTopLocal, 0f));
                     float w = island.FootprintHalfSize.x * t.lossyScale.x * 2f;
-                    Vector3 islandEye = centre + front * w * 1.05f + Vector3.up * w * 0.62f;
+                    Vector3 islandEye = centre + front * w * 1.25f + Vector3.up * w * 0.85f;
                     int all = ~(1 << layer);
                     var art = RenderOver(islandEye, centre - Vector3.up * w * 0.08f + Vector3.up * w * 0.1f, 1920, 1080, all, 38f, null);
                     // The logo, transparent, then over the upper middle of the art.
                     var logoArt = RenderAlpha(eye, c, 900, 900, 1 << layer, 21f, out var alpha);
-                    Paste(art, logoArt, alpha, new RectInt(510, 1080 - 470, 900, 900), 0.52f);
+                    Paste(art, logoArt, alpha, new RectInt(510, 1080 - 230 - 450, 900, 900), 0.46f);
                     File.WriteAllBytes(KeyArtPath, art.EncodeToPNG());
                     Object.DestroyImmediate(art);
                     Object.DestroyImmediate(logoArt);
@@ -139,7 +139,6 @@ namespace Diorama.EditorTools
             }
             Part(mesh, logo.recipe);
             if (baseMesh != null) Part(baseMesh, logo.baseRecipe);
-            root.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
             bounds = new Bounds(at, b.size * scale);
             return root;
         }

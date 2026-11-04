@@ -278,7 +278,7 @@ namespace Diorama
             int n = 0;
             foreach (var c in _critters)
             {
-                float size = (c.kind == Kind.Bird ? 0.7f : c.kind == Kind.Dragonfly ? 0.32f : 0.3f) * tile;
+                float size = (c.kind == Kind.Bird ? 1.0f : c.kind == Kind.Dragonfly ? 0.5f : 0.55f) * tile;
                 float show = c.fade >= 0f ? c.fade : Mathf.Clamp01(1f + c.fade);
                 Vector3 dir = c.vel.sqrMagnitude > 1e-10f ? c.vel : Vector3.forward;
                 dir.y *= 0.3f;
