@@ -51,7 +51,19 @@ namespace Diorama
             var f = Facing(headForward, headUp);
             var p = headPos + f * rule.distance;
             p.y = TopHeight(headPos.y, floorY, rule) - topAbovePivot;
-            return new Pose(p, Quaternion.LookRotation(-f, Vector3.up));
+            return new Pose(p, FaceHead(p, headPos, f));
+        }
+
+        /// <summary>
+        /// Step 14i: the island's yaw: its front (+Z) along the line from its centre to the head (level), not along the
+        /// head's forward. <paramref name="fallback"/> (horizontal, toward the island) when the head is right over it.
+        /// </summary>
+        public static Quaternion FaceHead(Vector3 islandCenter, Vector3 headPos, Vector3 fallback)
+        {
+            var to = headPos - islandCenter;
+            to.y = 0f;
+            if (to.sqrMagnitude < 1e-6f) to = -fallback;
+            return Quaternion.LookRotation(to.normalized, Vector3.up);
         }
 
         /// <summary>Head yaw away from a point (degrees, 0..180).</summary>

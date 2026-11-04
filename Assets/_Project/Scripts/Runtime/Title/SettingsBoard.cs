@@ -47,7 +47,7 @@ namespace Diorama
             new Control("Keep going", "<b>Swipe twice</b> quickly: keep walking. <b>Tap</b>: stop", "thumb_swipe_twice_tap", 0.6f),
             new Control("Go there", "<b>Look</b> at a spot and <b>pinch</b>: go there", "pinch", 0.6f),
             new Control("Pick up", "<b>Pinch</b> things on the island to pick them up", "pinch_drop", 0.9f),
-            new Control("Move isle", "<b>Grab</b> a corner to move the island. Two hands: turn and resize", "grab_rim_slide", 0.9f),
+            new Control("Move isle", "<b>Pinch and hold</b> a corner to move the island. Two hands: turn and resize", "grab_rim_slide", 0.9f),
         };
 
         TextMeshPro _controlText;

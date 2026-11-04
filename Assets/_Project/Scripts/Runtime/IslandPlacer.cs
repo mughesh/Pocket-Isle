@@ -335,7 +335,7 @@ namespace Diorama
                 var fwd = IslandPlacement.Facing(space.forward, space.up);
                 var p = space.TransformPoint(new Vector3(0f, seatedEyeHeight, 0f)) + fwd * distance;
                 p.y = space.TransformPoint(new Vector3(0f, seatedEyeHeight - topBelowEye, 0f)).y - TopAbovePivot;
-                pose = new Pose(p, Quaternion.LookRotation(-fwd, Vector3.up));
+                pose = new Pose(p, IslandPlacement.FaceHead(p, space.TransformPoint(new Vector3(0f, seatedEyeHeight, 0f)), fwd));
                 source = "seated default (no head pose)";
                 Status = source;
             }
