@@ -91,16 +91,21 @@ never saved.
 - **Where the island appears:** in front of you, about 30 cm under your eyes, once your head is still. Before you touch
   the shard, look away or stand up / sit down: after a second it glides back in front of you. Meta's recenter (hold the
   Meta button) re-places the island, also over Link.
-- **Grabbing the island (step 14j): pinch or grab a corner** (or the front lip under the pod row) right on the glowing
-  line. The corner lights up bright when your fingers are really on it: that's when a pinch grabs. A pinch more than about
-  1.5 cm outside the line does nothing. Second hand on another corner: turn and resize. Pinching near a pod gives you the
-  pod, never the island.
+- **Grabbing the island (step 14k): pinch or grab a corner from the glowing line inward**, over the rim (about 3.5 cm
+  deep; the corner shows a soft glowing strip there). Outside the line nothing grabs: pinches there walk and select. Second
+  hand on another corner: turn and resize. Pinching near a pod gives you the pod, never the island.
+- **Journal (step 14k):** 12 portraits a page, bigger names and hints. Poke a portrait, or point your hand at it (a thin ray
+  and dot) and pinch. Looking + pinching does nothing there. Portraits and every menu tablet pop (bigger, lifted, white
+  rim) when a finger comes close.
 - **Boards (step 14j):** tablets never touch; the Journal's unseen Islings are flat dark shapes; the lodge's Journal tablet
   sits left of the pods with a gap.
-- **Battle labels (step 14j):** the wild Isling's and the Keeper's name + HP bar float above everything (flames, shield) on a
-  dark plate, always readable; yours sits beside your pad on the side away from the explorer.
-- **See-through (step 14j):** when trees or a building hide the explorer, the ones in front fade in a soft circle and the
-  explorer gets a thin gold outline.
+- **The Spirit (step 14k)** talks about where you are: in the lodge you hear the lodge's welcome first, never grass tips.
+- **Lodge (step 14k):** no pedestal. Poke an Isling: it hops and its card shows above it (6 s, or until you walk).
+- **Battle labels (step 14k):** names and HP bars sit at the creatures' feet, in front of each pad, bigger, on a dark plate.
+- **See-through (step 14k):** trees or buildings in front of the explorer turn into a pale see-through ghost (shape kept),
+  and tall grass round the explorer on your side lies down.
+- **Shrines, gates, doors (step 14k):** they react from any tile next to them, diagonals too (for a shrine: the path in
+  front of its steps).
 - **Pinch lesson:** two dots under the line fill as you pinch; "Nice! Once more." after the first.
 - **The Spirit** hovers right over the thing to do, with gold rays round it while it teaches.
 - **Pods onto the rim:** bring a held pod near the rim: a ghost pod shows the socket it will go into; let go.

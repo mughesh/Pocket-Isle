@@ -483,7 +483,40 @@ when the log or the forge door is solved.
 | **Embercrane -> Pyrecrane** (rare) | 16 | field 5, springs 5 (rare) | Flame Wing / Ember Puff / Puff Up |
 - Glazegolem / Kilngolem read as rare: deep teal glaze, gold kintsugi cracks that glow and pulse.
 
+## Rules from step 14k (Nov 4, late night)
+- **Grab band (replaces 14j's zone round the line):** a pinch or palm grab on a corner (or the front lip under the pods while
+  exploring; pods always win) counts in a **band from the glowing line inward**: 3.5 cm (world) in over the rim, at the cap's
+  height too, up to 2.5 cm over the cap and down the rock face. **Nothing outside the line** (only 3 mm of tracking slack):
+  that's where walking and selecting pinches happen. The glow shows the band (a soft strip lying on the rim at the corners).
+  `IslandHandle.grabInward / grabPastLine / grabAboveCap`; the ISDK shell boxes are widened at Start to hold it.
+- **Journal input and text:** 4 x 3 portraits a page (pages, not smaller text); names, hints (up to 2 lines), help, header and
+  card all bigger. **Poke, or point the hand ray and pinch**; no look + pinch on the Journal. Help line: "Poke a portrait, or
+  point and pinch."
+- **Hover (every board tablet and Journal portrait):** a fingertip near it (or a hand ray on it) makes it grow 10%, lift 4 mm
+  toward you and get a **white rim** (the focus look); it settles back when the finger leaves. The press glow stays gold.
+- **Line context rule:** every Spirit line has a **context** (where it's valid: hub, realm / cinderwood / galewick /
+  lilymere, lodge, hall, outside, battle, combined with `&` / `|` / `!`) and a **kind** (objective, intro, story, filler),
+  tagged in `Script_v1.md` as `· in <context> · <kind>` (idle hints `[in <context>]`). A line only shows where its context
+  holds now; out-of-place lines are refused (a "once" line stays unsaid) and queued ones are **dropped, not delayed**. A
+  place's **intro goes first** (ahead of story and filler; a lesson's line comes back after it); **filler waits** until the
+  place's intro and objectives have shown, and idle hints come only from lines valid here, never in the first 8 s after
+  arriving. A lesson that doesn't apply where you are (the grass lesson in the lodge) holds nothing up.
+- **Lodge cards (no pedestal):** poke an Isling (or look + pinch): it hops in place, turns to you and its card shows above
+  it; poke again to close, another to switch; the card closes after 6 s or when the explorer walks. Swaps by grabbing only.
+- **See-through: a ghost, not a hole.** Props between the head and the explorer keep about a third of their surface on an
+  even screen pattern with a pale edge glow and a pale outline, so their shape stays; the explorer keeps its gold outline.
+  Off in battles. **Tall grass** within about a tile of the explorer on your side (and at its feet) lies down, always.
+- **Walk-up trigger rule:** anything you "stand next to" (shrines, gates, the tower and temple doors, hand moments) fires from
+  **any tile within one of what you see, diagonals too** (`WalkUp`). A shrine counts its front steps (2 x 3); gates and doors
+  you walk into count their front row and its diagonals; hand moments their reach. The Spirit's trail always ends on a tile
+  that fires the thing it leads to (`Step14kDebug.WalkUpAudit` checks every map).
+- **Battle label rule (replaces 14j's):** every name + HP bar sits **at the bottom: just in front of its actor's pad, at pad
+  level**, facing you, 35% bigger, drawn on top on the dark plate. The near Isling's in front of its pad (over the runes'
+  caption if they'd meet); the wild / Keeper's between the pads, sliding sideways only as far as needed to clear the near
+  Isling on screen.
+
 ## Rules from step 14j (Nov 4 night)
+- (Grab zone, battle labels and the see-through cut below are superseded by step 14k.)
 - **Grab rule (replaces 14i's hold to grab, which Mugesh couldn't use):** a plain pinch or palm grab on a handle (the four
   corners; the front lip under the pods while exploring; pods always win). **What you see is what grabs:** the zone hugs the
   glowing line, **at most 1.2 cm outside it** (world), **2.1 cm in** over the rock (`grabInside` 0.035 island-local), in a
