@@ -13,6 +13,11 @@ namespace Diorama
     /// <see cref="barGap"/>, is drawn on top of everything (depth test off, late queue) on a dark backing plate, and stays
     /// under the top of the view (<see cref="maxViewportY"/>). The near actor's label (seen from behind) sits beside its
     /// pad on the near side, away from the explorer, so it never covers the wild one.
+    /// Step 14k (Mugesh: too high and too small, Hearthstag's floated far above): every label sits at the bottom, just in
+    /// front of its actor's pad at pad level (its plate's bottom on the pad), facing the player, <see cref="labelScale"/>
+    /// bigger, still on top on the dark plate. The near Isling's label in front of its pad (toward the runes); the wild /
+    /// Keeper's in front of its pad, between the pads, sliding sideways only as far as needed to clear the near Isling on
+    /// screen (checked every <see cref="clearCheckSeconds"/>).
     /// </summary>
     public class BattleHud : MonoBehaviour
     {
@@ -31,8 +36,17 @@ namespace Diorama
         [Tooltip("The dark plate behind a label (name + bars), island-local metres of padding.")]
         public Vector2 platePadding = new Vector2(0.008f, 0.005f);
         public Color plateColor = new Color(0.04f, 0.05f, 0.05f, 0.62f);
-        [Tooltip("The near actor's label: this far (island-local m) out from its pad's edge, on the side away from the explorer.")]
-        public float besideGap = 0.01f;
+        [Header("Step 14k: labels at the feet")]
+        [Tooltip("Labels this much bigger than the sizes above (name, bars, plate).")]
+        public float labelScale = 1.35f;
+        [Tooltip("A label stands this far (island-local m) in front of its pad's edge...")]
+        public float footGap = 0.006f;
+        [Tooltip("...its plate's bottom this far over the pad's top (island-local m).")]
+        public float footLift = 0.002f;
+        [Tooltip("A label's bottom edge stays over this much of the view's height (0..1).")]
+        [Range(0f, 0.4f)] public float minViewportY = 0.06f;
+        [Tooltip("How often the wild label re-checks that it clears the near Isling on screen (s).")]
+        public float clearCheckSeconds = 0.25f;
 
         public class Bar
         {
@@ -46,9 +60,14 @@ namespace Diorama
             public float xp = -1f; // 0..1, -1 = no XP bar
             /// <summary>Step 14j: the backing plate; beside the pad (near actor) with this pad radius (island-local).</summary>
             public MeshRenderer plate;
-            public bool beside;
+            /// <summary>Step 14k: the near Isling's label (the wild / Keeper's keeps clear of that actor).</summary>
+            public bool near;
             public float padRadius, top;
             public bool topSet;
+            /// <summary>Step 14k: the pad's radius now (island-local; the battle zoom changes it); null = <see cref="padRadius"/>.</summary>
+            public System.Func<float> padRadiusNow;
+            /// <summary>Step 14k: sideways slide (island-local x) that keeps the wild label off the near Isling.</summary>
+            public float shift, shiftTarget, checkedAt = -1f;
         }
 
         class Pop
@@ -71,7 +90,6 @@ namespace Diorama
         MaterialPropertyBlock _block;
         Mesh _quad;
         Material _plateMat, _barMat, _textMat;
-        Transform _explorer;
 
         static readonly int BackColorId = Shader.PropertyToID("_BackColor");
         static readonly int ZTestId = Shader.PropertyToID("_ZTest");
@@ -104,10 +122,10 @@ namespace Diorama
         }
 
         /// <summary>
-        /// An HP bar with name and level for <paramref name="actor"/>. Step 14j: <paramref name="besidePadRadius"/> &gt; 0
-        /// = the near actor: the label sits beside its pad (that radius, island-local) instead of over its head.
+        /// An HP bar with name and level for <paramref name="actor"/>, in front of its pad (<paramref name="padRadius"/>,
+        /// island-local, or <paramref name="padRadiusNow"/> live). <paramref name="near"/> = the party's Isling.
         /// </summary>
-        public Bar AddBar(StageActor actor, string name, int level, int hp, int max, float besidePadRadius = 0f)
+        public Bar AddBar(StageActor actor, string name, int level, int hp, int max, float padRadius = 0f, bool near = false, System.Func<float> padRadiusNow = null)
         {
             var root = new GameObject($"HP {name}").transform;
             root.SetParent(transform, false);
@@ -126,8 +144,10 @@ namespace Diorama
             label.fontSharedMaterial = TextOnTop(label);
 
             var bar = new Bar { root = root, quad = quad, label = label, actor = actor, max = Mathf.Max(1, max), shown = hp, target = hp };
-            bar.beside = besidePadRadius > 0f;
-            bar.padRadius = besidePadRadius;
+            bar.near = near;
+            bar.padRadius = padRadius;
+            bar.padRadiusNow = padRadiusNow;
+            root.localScale = Vector3.one * labelScale;
             bar.plate = MakePlate(root);
             _bars.Add(bar);
             Paint(bar);
@@ -252,60 +272,124 @@ namespace Diorama
             }
         }
 
+        /// <summary>Step 14k: the plate's bottom and top (root-local, before <see cref="labelScale"/>) and half width.</summary>
+        void PlateExtents(out float bottom, out float top, out float halfW)
+        {
+            float xpH = barSize.y * xpBarHeight + 0.0012f;
+            bottom = -barSize.y * 0.5f - xpH - platePadding.y;
+            top = barSize.y * 0.5f + labelFontSize * 0.11f + platePadding.y;
+            halfW = barSize.x * 0.5f + platePadding.x;
+        }
+
         /// <summary>
-        /// Step 14j: where a label goes: over the actor's full visual top (the near actor: beside its pad), clamped under
-        /// the top of the view. Its top eases up at once and settles down slowly (smoke and flames flicker).
+        /// Step 14k: where a label goes: just in front of its actor's pad, its plate's bottom at pad level, facing the head
+        /// (<see cref="Face"/>); the wild / Keeper's slides sideways off the near Isling on screen. Kept inside the view.
         /// </summary>
         void Place(Bar b, Camera cam)
         {
             var a = b.actor;
             var island = a.island;
-            if (island == null || island.Content == null)
+            if (island == null || island.Content == null || cam == null)
             {
                 b.root.localPosition = a.LocalTop + Vector3.up * barGap;
                 return;
             }
             var it = island.transform;
-            float scale = Mathf.Max(1e-5f, it.lossyScale.y);
-            Vector3 world;
-            if (b.beside)
+            float scale = Mathf.Max(1e-5f, it.lossyScale.y) * labelScale;
+            PlateExtents(out float bottom, out float top, out float halfW);
+            float padR = b.padRadiusNow != null ? b.padRadiusNow() : b.padRadius;
+            Vector3 feet = island.TileToLocal(a.tile, island.Content.capHeight + a.baseLift);
+            Vector3 up = cam.transform.up;
+            Vector3 At(float shift) => it.TransformPoint(feet + new Vector3(shift, footLift, padR + footGap)) + up * (-bottom * scale);
+
+            if (!b.near && Time.time - b.checkedAt >= clearCheckSeconds)
             {
-                // Beside the pad on the near side (+Z faces the player), on the side away from the explorer.
-                Vector3 feet = island.TileToLocal(a.tile, island.Content.capHeight + a.baseLift);
-                float side = 1f;
-                if (_explorer == null)
-                {
-                    var ev = FindFirstObjectByType<ExplorerView>();
-                    if (ev != null) _explorer = ev.transform;
-                }
-                if (_explorer != null && it.InverseTransformPoint(_explorer.position).x > feet.x) side = -1f;
-                float half = barSize.x * 0.5f + platePadding.x;
-                // Clear the pad and the body (a wide one, e.g. Tidemother's fins, overhangs its pad).
-                float body = a.TryGetVisualBounds(out var vb) ? Mathf.Max(vb.extents.x, vb.extents.z) / scale : 0f;
-                float reach = Mathf.Max(b.padRadius, body);
-                Vector3 local = feet + new Vector3(side * (reach + besideGap + half), labelFontSize * 0.1f, b.padRadius * 0.6f);
-                world = it.TransformPoint(local);
+                b.checkedAt = Time.time;
+                b.shiftTarget = ClearShift(cam, At, halfW * scale, (top - bottom) * 0.5f * scale, (top + bottom) * 0.5f * scale);
             }
-            else
-            {
-                float top = a.TryGetVisualTop(out float t) ? t : it.TransformPoint(a.LocalTop).y;
-                if (!b.topSet || top > b.top) b.top = top;
-                else b.top = Mathf.MoveTowards(b.top, top, Time.deltaTime * 0.04f * scale);
-                b.topSet = true;
-                world = it.TransformPoint(a.LocalTop);
-                // The bar's bottom edge (the XP bar's, when there is one) clears the top by the gap.
-                float below = barSize.y * 0.5f + (b.xpQuad != null ? barSize.y * xpBarHeight + 0.0012f : 0f) + platePadding.y;
-                world.y = b.top + (barGap * 0.5f + below) * scale;
-            }
-            // Keep it in view: its top edge under maxViewportY of the view's height.
-            if (cam != null)
-            {
-                float above = (barSize.y * 0.5f + labelFontSize * 0.11f + platePadding.y) * scale;
-                Vector3 v = cam.WorldToViewportPoint(world + cam.transform.up * above);
-                if (v.z > 0f && v.y > maxViewportY)
-                    world = cam.ViewportToWorldPoint(new Vector3(v.x, maxViewportY, v.z)) - cam.transform.up * above;
-            }
+            b.shift = b.near ? 0f : b.checkedAt < 0f ? b.shiftTarget : Mathf.MoveTowards(b.shift, b.shiftTarget, Time.deltaTime * 0.6f);
+            Vector3 world = At(b.shift);
+            // Keep it in view: its top under maxViewportY, its bottom over minViewportY.
+            float above = top * scale, below = -bottom * scale;
+            Vector3 v = cam.WorldToViewportPoint(world + up * above);
+            if (v.z > 0f && v.y > maxViewportY) world = cam.ViewportToWorldPoint(new Vector3(v.x, maxViewportY, v.z)) - up * above;
+            v = cam.WorldToViewportPoint(world - up * below);
+            if (v.z > 0f && v.y < minViewportY) world = cam.ViewportToWorldPoint(new Vector3(v.x, minViewportY, v.z)) + up * below;
+            // The near label rises over the caption above the runes rather than sit on it.
+            if (b.near) world = ClearCaption(cam, world, halfW * scale, above, below);
             b.root.position = world;
+        }
+
+        BattleRunes _runes;
+
+        /// <summary>Step 14k: lifts a label (along the view's up) until it clears the runes' caption on screen.</summary>
+        Vector3 ClearCaption(Camera cam, Vector3 world, float halfW, float above, float below)
+        {
+            if (_runes == null) _runes = FindFirstObjectByType<BattleRunes>();
+            var cap = _runes != null ? _runes.Caption : null;
+            if (cap == null || !cap.gameObject.activeInHierarchy || string.IsNullOrEmpty(cap.text)) return world;
+            var r = cap.GetComponent<Renderer>();
+            if (r == null || !r.enabled) return world;
+            var cr = ScreenRect(cam, r.bounds);
+            if (!cr.HasValue) return world;
+            var clear = cr.Value;
+            clear.yMax += 0.015f; // a little air over the caption
+            cr = clear;
+            Vector3 up = cam.transform.up, right = cam.transform.right;
+            for (int k = 0; k < 40; k++)
+            {
+                Vector3 lo = cam.WorldToViewportPoint(world - right * halfW - up * below);
+                Vector3 hi = cam.WorldToViewportPoint(world + right * halfW + up * above);
+                var label = Rect.MinMaxRect(Mathf.Min(lo.x, hi.x), Mathf.Min(lo.y, hi.y), Mathf.Max(lo.x, hi.x), Mathf.Max(lo.y, hi.y));
+                if (!label.Overlaps(cr.Value)) break;
+                world += up * ((above + below) * 0.1f);
+            }
+            return world;
+        }
+
+        /// <summary>
+        /// Step 14k: the smallest sideways slide (island-local x, either way, up to 0.3) that keeps the wild label's screen
+        /// rectangle off the near Isling's drawn bounds; 0 when it's clear where it is.
+        /// </summary>
+        float ClearShift(Camera cam, System.Func<float, Vector3> at, float halfW, float halfH, float midUp)
+        {
+            StageActor nearActor = null;
+            foreach (var o in _bars)
+                if (o.near && o.actor != null) nearActor = o.actor;
+            if (nearActor == null || !nearActor.TryGetVisualBounds(out var nb)) return 0f;
+            var r = ScreenRect(cam, nb);
+            if (!r.HasValue) return 0f;
+            var rect = r.Value;
+            Vector3 right = cam.transform.right, up = cam.transform.up;
+            for (int k = 0; k <= 30; k++)
+                for (int s = 0; s < 2; s++)
+                {
+                    if (k == 0 && s == 1) continue;
+                    float shift = (s == 0 ? 1f : -1f) * k * 0.01f;
+                    Vector3 c = at(shift) + up * midUp;
+                    Vector3 lo = cam.WorldToViewportPoint(c - right * halfW - up * halfH);
+                    Vector3 hi = cam.WorldToViewportPoint(c + right * halfW + up * halfH);
+                    var label = Rect.MinMaxRect(Mathf.Min(lo.x, hi.x), Mathf.Min(lo.y, hi.y), Mathf.Max(lo.x, hi.x), Mathf.Max(lo.y, hi.y));
+                    if (!label.Overlaps(rect)) return shift;
+                }
+            return 0.3f;
+        }
+
+        /// <summary>A world box's rectangle on screen (viewport units), null when behind the camera.</summary>
+        static Rect? ScreenRect(Camera cam, Bounds bb)
+        {
+            float x0 = float.MaxValue, y0 = float.MaxValue, x1 = float.MinValue, y1 = float.MinValue;
+            for (int i = 0; i < 8; i++)
+            {
+                var p = bb.center + Vector3.Scale(bb.extents, new Vector3((i & 1) == 0 ? -1f : 1f, (i & 2) == 0 ? -1f : 1f, (i & 4) == 0 ? -1f : 1f));
+                var v = cam.WorldToViewportPoint(p);
+                if (v.z <= 0f) return null;
+                x0 = Mathf.Min(x0, v.x);
+                y0 = Mathf.Min(y0, v.y);
+                x1 = Mathf.Max(x1, v.x);
+                y1 = Mathf.Max(y1, v.y);
+            }
+            return Rect.MinMaxRect(x0, y0, x1, y1);
         }
 
         /// <summary>Step 14j: the dark plate behind a label's name and bars.</summary>

@@ -398,6 +398,9 @@ namespace Diorama
             Paint();
         }
 
+        /// <summary>Step 14k: the caption over the runes (the near label keeps clear of it).</summary>
+        public TextMeshPro Caption => _caption;
+
         public void SetCaption(string text)
         {
             if (_caption != null) _caption.text = text;

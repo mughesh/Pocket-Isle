@@ -40,6 +40,7 @@ namespace Diorama
 
         CreatureView _view;
         IslandBuilder _island;
+        EncounterDirector _encounters;
         float _amount;
         bool _hidden;
 
@@ -89,7 +90,10 @@ namespace Diorama
             Vector3 eye = it.InverseTransformPoint(cam.transform.position);
 
             Vector2Int by = default;
-            bool hidden = !DebugOff && Blocked(chest, eye, tileL, cap, out by);
+            // Step 14k: never in a battle (the near Isling stands between the head and the explorer: it would ghost).
+            if (_encounters == null) _encounters = FindFirstObjectByType<EncounterDirector>();
+            bool battle = _encounters != null && _encounters.InBattle;
+            bool hidden = !DebugOff && !battle && Blocked(chest, eye, tileL, cap, out by);
             if (hidden != _hidden && (Application.isEditor || Debug.isDebugBuild))
                 Debug.Log(hidden ? $"[ExplorerSeeThrough] The explorer is hidden (tile {by}): see-through on." : "[ExplorerSeeThrough] The explorer is in view again: see-through off.");
             _hidden = hidden;

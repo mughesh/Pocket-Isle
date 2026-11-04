@@ -143,7 +143,8 @@ namespace Diorama
         public void ShowWildBar(IslingInstance wild)
         {
             hud.RemoveBar(_wildBar);
-            _wildBar = hud.AddBar(_wild, wild.Name, wild.level, wild.currentHp, wild.MaxHp);
+            // Step 14k: in front of its pad (between the pads), clear of the near Isling.
+            _wildBar = hud.AddBar(_wild, wild.Name, wild.level, wild.currentHp, wild.MaxHp, 0f, false, () => PadRadiusLocal(_wildPad));
         }
 
         bool _wildKeeper;
@@ -179,8 +180,8 @@ namespace Diorama
         public void ShowPlayerBar(IslingInstance player)
         {
             hud.RemoveBar(_playerBar);
-            // Step 14j: the near one's label sits beside its pad (seen from behind, over its head it hid the wild one).
-            _playerBar = hud.AddBar(_player, player.Name, player.level, player.currentHp, player.MaxHp, PadRadiusLocal(_playerPad));
+            // Step 14k: the near one's label in front of its pad, toward the runes.
+            _playerBar = hud.AddBar(_player, player.Name, player.level, player.currentHp, player.MaxHp, 0f, true, () => PadRadiusLocal(_playerPad));
             if (progression != null) hud.SetXp(_playerBar, progression.XpShare(player));
         }
 
