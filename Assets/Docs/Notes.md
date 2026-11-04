@@ -1,4 +1,7 @@
-- The level of the temple creatures is set to too low I believe. I think we should keep a limit for the minimum number of islings to be carried by the user to enter the tower. For the galewick, the minimum should be 4. And the others it could be 6.
-- Finale is good. The gold crystal on the statue forehead change is good. Would be better if the gold can look radiating, or glowing. it looks blank bright yellow.
-- The menu buttons can be bit spacious. U can see in this image how cloase they are. 
-- the recenter position for island, it can be little bit further from the user. it is very close to the belly now. Other fixes are good. 
+- The journal button on the lodge looks too odd in the middle of the room. Let it be shown to the left of the pods in the rim. only when the user is in the lodge. 
+- The journal board looks good but selecting that is not giving me much of information. A small line in the bottom, but it is nothing. I thought it could be mmore than that.
+- the board is very sensitive to my head rotation. So when I try to touh the button, a slight head movement makes it slightly turn a bit, it is annoying kind of. 
+- About the island itself, Sometimes I feel like the it is slightly not facing me. Like litely tilted along its y axis. If i grab and position it exactly in front of me, it is ok. 
+- I think we removed the tutorial for grab and scale the island. Why ?
+- I still have the grab vs pinch conflict. I am resting my hand on the armrest and pinching. and it is near the grab corner, making it grab. The only solution I have now is, to keep the grab as a hold grab instad of a simple grab. User will need to hold pinch on that rail for 2-3 seconds to grab it. This way we wont have the conflict. But it might still calculate if the user is trying to grab the rail or pinch. Grab holding should show a visual signifier for the user. Also we might need to change the instructions and ghost hands of this. This is a lot of change. What else can we do about this ?
+- There are places in the map where the movement is hard because of crooked paths, looks unnecessary to me like in this image.
