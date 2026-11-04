@@ -5,7 +5,7 @@ namespace Diorama
 {
     /// <summary>
     /// A stored Isling living in the Hearth Lodge (its baked prefab, outlines on): wanders tile to tile with slow hops,
-    /// idles, now and then dozes by the hearth or on a cushion, and hops onto the pedestal when inspected. Stands on the
+    /// idles, now and then dozes by the hearth or on a cushion, and hops in place when poked (step 14k: no pedestal). Stands on the
     /// lodge map like a map creature (scrolls, scales with the zoom, sinks with the scene swap). Driven by
     /// <see cref="LodgeRoom"/>.
     /// </summary>
@@ -16,7 +16,8 @@ namespace Diorama
         public IslingInstance Isling { get; private set; }
         public CreatureView View { get; private set; }
         public Vector2Int Tile => _tile;
-        public bool OnPedestal { get; private set; }
+        /// <summary>Step 14k: its card shows (it stays put, facing the player).</summary>
+        public bool Inspected { get; private set; }
         /// <summary>0..1 size (pops in and out).</summary>
         public float Grow { get; set; }
         /// <summary>Hidden while it is curled into a pod in a hand.</summary>
@@ -56,20 +57,17 @@ namespace Diorama
             _growTarget = 0f;
         }
 
-        /// <summary>Hops onto the pedestal tile (standing on its top) or back down to <paramref name="down"/>.</summary>
-        public void ToPedestal(Vector2Int pedestal, float topLift)
+        /// <summary>Step 14k (no pedestal): poked, it hops in place and turns to the player while its card shows; off = it wanders again.</summary>
+        public void Inspect(bool on)
         {
-            Wake();
-            MoveTo(pedestal, topLift);
-            OnPedestal = true;
-            _yawTarget = 0f;
-        }
-
-        public void OffPedestal(Vector2Int down)
-        {
-            MoveTo(down, 0f);
-            OnPedestal = false;
-            _nextHop = Time.time + Random.Range(2f, 4f);
+            if (on)
+            {
+                Wake();
+                View.Hop();
+                _yawTarget = 0f;
+            }
+            else _nextHop = Time.time + Random.Range(2f, 4f);
+            Inspected = on;
         }
 
         /// <summary>Puts it on a tile at once (a pod dropped on the floor) and pops it in.</summary>
@@ -79,7 +77,7 @@ namespace Diorama
             _moveStart = -1f;
             Grow = 0f;
             Hidden = false;
-            OnPedestal = false;
+            Inspected = false;
             _lift = _liftTo = 0f;
             View.Hop();
         }
@@ -112,7 +110,7 @@ namespace Diorama
                 return;
             }
             if (_sleepUntil >= 0f && Time.time >= _sleepUntil) Wake();
-            if (OnPedestal || Hidden || Asleep || View.IsHopping || _room == null) return;
+            if (Inspected || Hidden || Asleep || View.IsHopping || _room == null) return;
             if (Noticed) _nextHop = Mathf.Max(_nextHop, Time.time + 1f);
             if (Time.time < _nextHop) return;
             _nextHop = Time.time + Random.Range(2.5f, 6f);

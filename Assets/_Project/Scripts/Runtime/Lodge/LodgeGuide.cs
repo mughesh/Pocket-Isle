@@ -8,7 +8,7 @@ namespace Diorama
     /// (<see cref="FocusHighlight"/>): while a step waits, its target pulses softly now and then.
     /// Two chains, picked on the first visit (step 8c):
     /// Lodge with Islings: 1. lodge.first (room) → 2. lodge.inspect (nearest wandering Isling) until one is inspected →
-    /// 3. lodge.take (the pedestal Isling, then a rim socket) until one joins the pods → 4. lodge.leave (a rim pod) until
+    /// 3. lodge.take (the inspected Isling, then a rim socket; step 14k: no pedestal) until one joins the pods → 4. lodge.leave (a rim pod) until
     /// one is let go → 5. lodge.exit (the door arch), after step 4 or <see cref="exitAfterSeconds"/>, until the player leaves.
     /// Empty lodge (the usual first visit: the caught Isling rides in the rim pods): 1. lodge.first.empty → 2. lodge.toss
     /// (a rim pod, ghost toss) until one is let go → 3. lodge.inspect.one (it) → 4. lodge.take → 5. lodge.exit. With a
@@ -42,7 +42,7 @@ namespace Diorama
         {
             name = "lodge with Islings",
             steps = new[] { "lodge.first", "lodge.inspect", "lodge.take", "lodge.leave", "lodge.exit" },
-            targets = new[] { "lodgeCenter", "lodgeIsling", "pedestal", "rimPod", "lodgeDoor" },
+            targets = new[] { "lodgeCenter", "lodgeIsling", "lodgeInspected", "rimPod", "lodgeDoor" },
             waits = new[] { null, "inspect", "swap", "deposit", null },
             ghosts = new string[5],
             giveUp = 3,
@@ -52,7 +52,7 @@ namespace Diorama
         {
             name = "empty lodge",
             steps = new[] { "lodge.first.empty", "lodge.toss", "lodge.inspect.one", "lodge.take", "lodge.exit" },
-            targets = new[] { "lodgeCenter", "rimPod", "lodgeIsling", "pedestal", "lodgeDoor" },
+            targets = new[] { "lodgeCenter", "rimPod", "lodgeIsling", "lodgeInspected", "lodgeDoor" },
             waits = new[] { null, "deposit", "inspect", "swap", null },
             ghosts = new[] { null, "grab_toss", null, null, null },
             giveUp = 1,
@@ -187,7 +187,7 @@ namespace Diorama
             if (ghosts != null && ghosts.ClipName != null && !ghosts.previewing) ghosts.Hide();
         }
 
-        /// <summary>After lodge.take's line, the gold moves on from the pedestal to the rim socket ("then").</summary>
+        /// <summary>After lodge.take's line, the gold moves on from the inspected Isling to the rim socket ("then").</summary>
         void OnLineDone()
         {
             if (Steps[_step] == "lodge.take" && !_socketPhase)

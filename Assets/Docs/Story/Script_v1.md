@@ -3,7 +3,7 @@
 Lantern Spirit = **Spirit**. The creatures are **Islings** (never "creature" in a line). Bubbles are short: one idea per line, ≤ ~70 characters.
 Format: `trigger_id` · speaker · lines (shown in order). **once** = only the first time.
 Optional `· → target` (before the lines): the Spirit flies to that anchor while saying them and it pulses
-(`leadPod`, `cradle`, `runes`, `nearPad`, `wildPad`, `shrine`, `lodgeCenter`, `pedestal`, `lodgeIsling`, `rimSocket`, `rimPod`,
+(`leadPod`, `cradle`, `runes`, `nearPad`, `wildPad`, `shrine`, `lodgeCenter`, `lodgeInspected` (14k, was `pedestal`), `lodgeIsling`, `rimSocket`, `rimPod`,
 `lodgeDoor`, `tile:x,y`, step 8: `shard`, `rim`, `starterPods`, `landmark:name` (WorldMap landmarks: `statue`, `firstGrass`, `pond`), `gate:fire` / `gate:water` / `gate:wind` /
 `gate:home`, `gate:last`, step 8b: `ghost` (beside the ghost hand above the island), `goldTile`, step 8c: `shardFront`, `nearestRune`, `islandRim`). No target = it stays home. The target glows gold and the Spirit shines its lantern on it (step 7c).
 Optional `· while <condition>` (step 8b): the line only shows while it holds and closes the moment it stops
@@ -131,7 +131,7 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
   - Spirit: This is the Hearth Lodge. Islings you've caught rest here.
 - `lodge.inspect` · in lodge · story · once · → lodgeIsling (chain 2: waits for an inspect, comes back after 15 s)
   - Spirit: Look at one and pinch to see how it's doing.
-- `lodge.take` · in lodge · story · once · → pedestal (chain 3, after the first inspect; then the gold moves to a rim socket)
+- `lodge.take` · in lodge · story · once · → lodgeInspected (chain 3, after the first inspect; then the gold moves to a rim socket)
   - Spirit: Pick it up and set it in a pod on the rim to bring it along.
 - `lodge.leave` · in lodge · story · once · → rimPod (chain 4, after the first swap)
   - Spirit: To leave one here, toss its pod onto the floor.

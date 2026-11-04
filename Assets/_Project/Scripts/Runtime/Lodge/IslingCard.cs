@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Diorama
 {
     /// <summary>
-    /// The full card for an Isling on the lodge pedestal: name, level, element, HP bar, XP bar, its three moves in their
+    /// The full card for a poked lodge Isling (step 14k: above it, no pedestal): name, level, element, HP bar, XP bar, its three moves in their
     /// element colours, and ATK / DEF / SPD. A panel facing the head; sizes in island-local metres. Plain object owned by
     /// <see cref="LodgeRoom"/>.
     /// </summary>

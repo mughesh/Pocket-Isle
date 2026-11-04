@@ -41,7 +41,7 @@ MonoBehaviour:
 
     ........
 
-    ....Q...
+    ........
 
     ........
 
@@ -69,10 +69,6 @@ MonoBehaviour:
     yaw: 0
   - key: c
     recipe: {fileID: 11400000, guid: 94457f9c1fcd6284b87512db13f54ad8, type: 2}
-    turned: 0
-    yaw: 0
-  - key: Q
-    recipe: {fileID: 11400000, guid: bdba4db0d16f3d04abaadb4ddb42ac60, type: 2}
     turned: 0
     yaw: 0
   - key: D

@@ -43,10 +43,9 @@ namespace Diorama.Tests
             Assert.AreEqual(entry + Vector2Int.up, walkIn, "one row toward the player");
             Assert.IsTrue(lodge.CanWalk(entry));
             Assert.IsTrue(lodge.CanWalk(walkIn));
-            var pedestal = new LodgeRoomDefaults().pedestal;
+            // Step 14k: the pedestal is gone.
             foreach (var t in new[] { entry, walkIn })
             {
-                Assert.AreNotEqual(pedestal, t, "never on the pedestal");
                 CollectionAssert.DoesNotContain(LodgeTools.DoorTiles, t, "never on the door");
                 CollectionAssert.DoesNotContain(LodgeTools.CushionTiles, t, "no cushion on the walk in");
             }
@@ -77,7 +76,7 @@ namespace Diorama.Tests
         class LodgeRoomDefaults
         {
             public readonly Vector2Int[] doorTiles, cozyTiles;
-            public readonly Vector2Int outward, pedestal;
+            public readonly Vector2Int outward;
 
             public LodgeRoomDefaults()
             {
@@ -89,7 +88,6 @@ namespace Diorama.Tests
                     doorTiles = r.doorTiles;
                     cozyTiles = r.cozyTiles;
                     outward = r.doorOutward;
-                    pedestal = r.pedestalTile;
                 }
                 finally
                 {

@@ -103,7 +103,7 @@ namespace Diorama
         Vector3 RimSpot()
         {
             var pods = _lodge.pods;
-            if (pods == null) return _lodge.PedestalTopLocal;
+            if (pods == null) return _lodge.RoomCenterLocal;
             var home = pods.HomeLocal(0);
             if (!pods.SocketBandLocal(out float minX, out float maxX, out _)) return home;
             float hw = Size.x / 0.6f * 0.5f;

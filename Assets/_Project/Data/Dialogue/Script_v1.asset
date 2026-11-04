@@ -856,7 +856,7 @@ MonoBehaviour:
     objective: 0
     priority: 1
     note: chain 3, after the first inspect; then the gold moves to a rim socket
-    target: pedestal
+    target: lodgeInspected
     validWhile: 
     context: lodge
     kind: 0

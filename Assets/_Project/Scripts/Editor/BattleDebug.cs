@@ -66,18 +66,11 @@ namespace Diorama.EditorTools
 
         static LodgeRoom Room => Object.FindFirstObjectByType<LodgeRoom>();
 
-        /// <summary>Lodge: the first room Isling hops onto the pedestal (its card shows).</summary>
+        /// <summary>Lodge: the first room Isling hops in place and its card shows (step 14k: no pedestal).</summary>
         public static void LodgeInspect()
         {
             var r = Room;
             if (r != null) r.Inspect(r.First);
-        }
-
-        /// <summary>Lodge: the pedestal Isling swaps with rim pod 2 (look + pinch path).</summary>
-        public static void LodgeSwapPod2()
-        {
-            var r = Room;
-            if (r != null) Debug.Log($"[BattleDebug] Pedestal swap with pod 2: {r.DebugPedestalSwap(1)}");
         }
 
         /// <summary>Lodge: rim pod 2 dropped on the floor (into the room).</summary>
@@ -377,7 +370,7 @@ namespace Diorama.EditorTools
         }
 
         /// <summary>Fires a targeted line (ignoring once) to see the gold focus, beam, Spirit and bubble placement.</summary>
-        public static void SayPedestal() => SayForced("lodge.take");
+        public static void SayTake() => SayForced("lodge.take");
         public static void SayLeadPod() => SayForced("lodge.last");
         public static void SayShrine() => SayForced("shrine.first");
 

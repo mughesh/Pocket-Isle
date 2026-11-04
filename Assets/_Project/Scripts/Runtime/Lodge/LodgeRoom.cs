@@ -10,13 +10,13 @@ namespace Diorama
     /// <see cref="maxInRoom"/> stored Islings live in the room (<see cref="LodgeIsling"/>); the rest sleep in the
     /// honeycomb, six cells a page (a small page arrow beside it when there are more; poke it or look + pinch).
     /// What the hands can do:
-    /// - look + pinch (or poke) an Isling: it hops onto the pedestal and its full card shows (pinch elsewhere closes it);
+    /// - poke an Isling (or look + pinch it): it hops in place and its full card shows above it, facing you (step 14k: no
+    ///   pedestal); poke it again to close, another to switch; the card closes after <see cref="cardSeconds"/> or when you walk;
     /// - look + pinch a honeycomb pod: that Isling comes out into the room (the one that has wandered longest goes to sleep);
     /// - grab an Isling (it curls into a pod) and drop it on a rim socket: empty = joins the party, full = swap (the rim
     ///   Isling pops out into the room); dropped anywhere else it pops back out on the floor;
     /// - grab a rim pod and drop or toss it on the floor: that Isling joins the room (never the last one: it wobbles and
     ///   the Spirit says so);
-    /// - with an Isling on the pedestal, look + pinch a rim pod (or the empty socket) = the same swap;
     /// - walk out onto either door tile (a swipe toward it or a tap / look + pinch on it, <see cref="AimedOut"/>) or look +
     ///   pinch the door arch: back outside.
     /// </summary>
@@ -35,9 +35,8 @@ namespace Diorama
         public IslandHandle grabGuard;
 
         [Header("Room (lodge tiles)")]
-        public Vector2Int pedestalTile = new Vector2Int(4, 5);
-        [Tooltip("Pedestal top above the floor (prop tile units).")]
-        public float pedestalTop = 0.5f;
+        [Tooltip("Step 14k: an inspected Isling's card closes after this long (s), or when the explorer walks.")]
+        public float cardSeconds = 6f;
         [Tooltip("Step 9i: on the back wall (row 0), right of the hearth; hands never reach there.")]
         public Vector2Int[] doorTiles = { new Vector2Int(5, 0), new Vector2Int(6, 0) };
         [Tooltip("Door arch height (prop tile units; matches PropKit's LodgeDoor).")]
@@ -81,7 +80,8 @@ namespace Diorama
         readonly int[] _poked = { -1, -1 };
         IslingCard _card;
         Mesh _quad;
-        LodgeIsling _onPedestal, _gazed;
+        LodgeIsling _inspected, _gazed;
+        float _cardUntil;
         int _gazedComb = -1, _gazeId = -1, _page;
         bool _gazedDoor, _gazedPage;
         const int CombId = 100, DoorId = 200, PageId = 300; // gaze pick ids
@@ -97,7 +97,7 @@ namespace Diorama
 
         public bool Active => swap != null && swap.Inside && swap.Interior == lodge;
 
-        /// <summary>The player did something in the lodge: "inspect" (pedestal), "swap" (an Isling joined the pods), "deposit" (a rim pod let go). LodgeGuide listens.</summary>
+        /// <summary>The player did something in the lodge: "inspect" (a card), "swap" (an Isling joined the pods), "deposit" (a rim pod let go). LodgeGuide listens.</summary>
         public event System.Action<string> Acted;
 
         float Tile => island.map.tileSize;
@@ -116,7 +116,7 @@ namespace Diorama
             }
             _quad = BattleHud.VerticalQuad();
             _card = new IslingCard(hudMaterial, _quad, island.transform);
-            LodgeJournalBook.Ensure(this); // step 14h: the Journal on the pedestal
+            LodgeJournalBook.Ensure(this); // step 14h: the Journal tablet on the rim
             _block = new MaterialPropertyBlock();
             MakeDoorRing();
             if (beaconMaterial == null) Debug.LogError("[LodgeRoom] No beacon material: the door arch shows no ring when looked at (Set Up MR_Main (7c)).", this);
@@ -127,7 +127,9 @@ namespace Diorama
             explorer.OnStep += OnStep;
             // The room as a whole has no outline to light (a tiny focus sphere): the beam alone points into it.
             Dialogue.RegisterTarget("lodgeCenter", () => Active ? island.transform.TransformPoint(island.TileToLocal(new Vector2(3.5f, 3.5f), Cap + 0.4f * Tile)) : (Vector3?)null, k => { }, () => 0.0001f);
-            Dialogue.RegisterTarget("pedestal", () => Active ? island.transform.TransformPoint(PedestalTopLocal) : (Vector3?)null, k => { }, () => 0.75f * TileWorld);
+            // Step 14k: the Isling whose card shows (else the last one looked at), for lodge.take.
+            Dialogue.RegisterTarget("lodgeInspected", () => Active && _inspected != null && !_inspected.Leaving ? island.transform.TransformPoint(_inspected.LocalCenter) : NearestWanderer(),
+                k => { }, () => 0.5f * TileWorld);
             Dialogue.RegisterTarget("lodgeIsling", NearestWanderer, k => { }, () => 0.5f * TileWorld);
             Dialogue.RegisterTarget("lodgeDoor", () => Active ? DoorWorld(0.3f) : (Vector3?)null, k => { }, () => 0.9f * TileWorld);
             // Loaded inside before this Start ran.
@@ -148,12 +150,13 @@ namespace Diorama
             if (_quad != null) Destroy(_quad);
         }
 
-        public Vector3 PedestalTopLocal => island.TileToLocal(pedestalTile, Cap + pedestalTop * Tile);
+        /// <summary>Step 14k: the middle of the room's floor (island-local).</summary>
+        public Vector3 RoomCenterLocal => island.TileToLocal(new Vector2(3.5f, 3.5f), Cap);
 
         /// <summary>Step 14h: one tile in island-local units at the current zoom.</summary>
         public float TileLocal => Tile * island.Zoom;
 
-        /// <summary>The room Isling nearest the explorer (not on the pedestal, not held), for the inspect hint.</summary>
+        /// <summary>The room Isling nearest the explorer (not the inspected one), for the inspect hint.</summary>
         Vector3? NearestWanderer()
         {
             if (this == null || !Active) return null;
@@ -161,7 +164,7 @@ namespace Diorama
             float bestSq = float.MaxValue;
             foreach (var li in _islings)
             {
-                if (li == null || li.Leaving || li.Hidden || li == _onPedestal) continue;
+                if (li == null || li.Leaving || li.Hidden || li == _inspected) continue;
                 float d = (island.LocalToTile(li.LocalCenter) - explorer.Tile).sqrMagnitude;
                 if (d < bestSq)
                 {
@@ -176,7 +179,6 @@ namespace Diorama
         {
             if (map != lodge || !enabled) return;
             pods.LodgeMode = true;
-            pods.PickHandler = OnRimPicked;
             // Walked in through the back door (not a save loaded inside): face the player now, one step in once the
             // room has risen (OnSwapFinished).
             _walkIn = swap.Busy && IsDoor(explorer.Tile + doorOutward);
@@ -215,7 +217,6 @@ namespace Diorama
                 _comb[k] = null;
             }
             pods.LodgeMode = false;
-            if (pods.PickHandler == OnRimPicked) pods.PickHandler = null;
             pods.SetExternalGaze(this, false);
             pods.SelectedSlot = -1;
             if (_doorRing != null) _doorRing.gameObject.SetActive(false);
@@ -229,8 +230,7 @@ namespace Diorama
             Sync();
             UpdateGrabbers();
             UpdateInput();
-            if (_onPedestal != null && _card.Visible)
-                _card.Show(_onPedestal.Isling, progression, PedestalTopLocal + Vector3.up * (_onPedestal.View.height * island.Zoom + 0.012f));
+            UpdateCard();
         }
 
         // ---- who is where ----
@@ -251,7 +251,7 @@ namespace Diorama
                 int index = storage.IndexOf(li.Isling);
                 if (index >= 0 && index < inRoom) continue;
                 if (_grabbers.TryGetValue(li, out var g) && g.grab != null && g.grab.IsHeld) continue;
-                if (li == _onPedestal) Close();
+                if (li == _inspected) Close();
                 li.Leave();
                 DropGrabber(li);
                 _islings.RemoveAt(i);
@@ -319,10 +319,10 @@ namespace Diorama
             MakeGrabber(li);
         }
 
-        /// <summary>A walkable floor tile nobody stands on (not the pedestal, door or the explorer's).</summary>
+        /// <summary>A walkable floor tile nobody stands on (not the door or the explorer's).</summary>
         public bool CanStand(Vector2Int tile, LodgeIsling who)
         {
-            if (!lodge.CanWalk(tile) || tile == pedestalTile || tile == explorer.Tile) return false;
+            if (!lodge.CanWalk(tile) || tile == explorer.Tile) return false;
             foreach (var d in doorTiles) if (d == tile) return false;
             foreach (var other in _islings)
                 if (other != null && other != who && !other.Leaving && other.Covers(tile)) return false;
@@ -408,7 +408,7 @@ namespace Diorama
                 var g = kv.Value;
                 if (li == null || g.pod == null) continue;
                 bool held = g.grab != null && g.grab.IsHeld;
-                if (g.grab != null) g.grab.CanGrab = held || !li.Leaving && li.Grow > 0.9f && li != _onPedestal;
+                if (g.grab != null) g.grab.CanGrab = held || !li.Leaving && li.Grow > 0.9f;
                 // Step 14a: near the rim, the socket it would swap into glows with a ghost pod.
                 if (held) pods.PreviewDrop(g.pod.transform.position);
                 if (held) continue;
@@ -422,7 +422,7 @@ namespace Diorama
         void OnIslingGrabbed(LodgeIsling li)
         {
             if (li == null || !_grabbers.TryGetValue(li, out var g)) return;
-            if (li == _onPedestal) Close();
+            if (li == _inspected) Close();
             li.Hidden = true;
             ShowPod(g, true);
             Debug.Log($"[LodgeRoom] Picked up {li.Isling.Name}: it curls into a pod.");
@@ -498,9 +498,6 @@ namespace Diorama
             OnRimDropped(slot, island.TileToLocal(new Vector2(3.5f, 4f), Cap + Tile), Vector3.down);
         }
 
-        /// <summary>Testing: as if the pedestal Isling was swapped with a look + pinch on rim pod <paramref name="slot"/>.</summary>
-        public bool DebugPedestalSwap(int slot) => OnRimPicked(slot);
-
         IEnumerator Refuse(int slot)
         {
             Debug.Log("[LodgeRoom] The last Isling in the pods stays.");
@@ -509,39 +506,44 @@ namespace Diorama
             Dialogue.Say("lodge.last");
         }
 
-        /// <summary>Look + pinch on a rim pod or the empty socket: with an Isling on the pedestal, swap it in.</summary>
-        bool OnRimPicked(int slot)
-        {
-            if (!Active || _onPedestal == null) return false;
-            var li = _onPedestal;
-            int index = party.storage.IndexOf(li.Isling);
-            var outgoing = party.At(slot);
-            Close();
-            if (index < 0 || !party.SwapWithStorage(index, slot)) return true;
-            Acted?.Invoke("swap");
-            _spawnHint = FreeTileNear(pedestalTile + Vector2Int.down);
-            Burst(pods.HomeWorld(slot));
-            Debug.Log($"[LodgeRoom] Look + pinch: {li.Isling.Name} into pod {slot + 1}{(outgoing != null ? $", {outgoing.Name} out into the room" : "")}.");
-            return true;
-        }
-
         // ---- inspect, honeycomb, door ----
 
-        /// <summary>Hops an Isling onto the pedestal and shows its card (again = close). Also BattleDebug.</summary>
+        /// <summary>
+        /// Step 14k: the Isling hops in place, turns to you and its card shows above it (again = close, another = switch).
+        /// The card closes after <see cref="cardSeconds"/> or when the explorer walks. Also BattleDebug.
+        /// </summary>
         public void Inspect(LodgeIsling li)
         {
             if (li == null) return;
-            if (li == _onPedestal)
+            if (li == _inspected)
             {
                 Close();
                 return;
             }
             Close();
-            _onPedestal = li;
-            li.ToPedestal(pedestalTile, pedestalTop * Tile);
-            _card.Show(li.Isling, progression, PedestalTopLocal + Vector3.up * (li.View.height * island.Zoom + 0.012f));
-            Debug.Log($"[LodgeRoom] {li.Isling.Name} on the pedestal.");
+            _inspected = li;
+            li.Inspect(true);
+            _cardUntil = Time.time + cardSeconds;
+            _card.Show(li.Isling, progression, CardSpot(li));
+            Debug.Log($"[LodgeRoom] {li.Isling.Name}: hops, card above it ({cardSeconds:0} s or until you walk).");
             Acted?.Invoke("inspect");
+        }
+
+        /// <summary>The card's spot: above the Isling's head (island-local).</summary>
+        Vector3 CardSpot(LodgeIsling li) => li.transform.localPosition + Vector3.up * (li.View.height * li.transform.localScale.y + 0.012f);
+
+        /// <summary>Keeps the card over its Isling; closes it when its time is up, the explorer walks or the Isling goes.</summary>
+        void UpdateCard()
+        {
+            if (_inspected == null) return;
+            string why = _inspected.Leaving || _inspected.Hidden ? "it left" : Time.time > _cardUntil ? $"{cardSeconds:0} s" : explorer.Destination.HasValue ? "walking" : null;
+            if (why != null)
+            {
+                Debug.Log($"[LodgeRoom] {_inspected.Isling.Name}'s card closes ({why}).");
+                Close();
+                return;
+            }
+            if (_card.Visible) _card.Show(_inspected.Isling, progression, CardSpot(_inspected));
         }
 
         /// <summary>The first room Isling (BattleDebug).</summary>
@@ -549,8 +551,8 @@ namespace Diorama
 
         public void Close()
         {
-            if (_onPedestal != null) _onPedestal.OffPedestal(FreeTileNear(pedestalTile + Vector2Int.down));
-            _onPedestal = null;
+            if (_inspected != null) _inspected.Inspect(false);
+            _inspected = null;
             if (_card != null) _card.Hide();
         }
 
@@ -560,11 +562,11 @@ namespace Diorama
             int index = maxInRoom + _page * Cells.Length + k;
             if (index >= party.storage.Count) return;
             var c = party.storage[index];
-            // The Isling that has wandered longest (not on the pedestal, not held) takes the sleeper's cell.
+            // The Isling that has wandered longest (not the inspected one, not held) takes the sleeper's cell.
             LodgeIsling oldest = null;
             foreach (var li in _islings)
             {
-                if (li == null || li.Leaving || li == _onPedestal || _grabbers.TryGetValue(li, out var g) && g.grab != null && g.grab.IsHeld) continue;
+                if (li == null || li.Leaving || li == _inspected || _grabbers.TryGetValue(li, out var g) && g.grab != null && g.grab.IsHeld) continue;
                 float since = _since.TryGetValue(li, out float t) ? t : 0f;
                 if (oldest == null || since < (_since.TryGetValue(oldest, out float o) ? o : 0f)) oldest = li;
             }
@@ -579,6 +581,7 @@ namespace Diorama
 
         void OnStep(Vector2Int tile)
         {
+            if (Active && _inspected != null) Close(); // step 14k: walking closes the card
             if (!Active || !IsDoor(tile)) return;
             var dest = explorer.Destination;
             if (!AimedOut(explorer.LastStep, doorOutward, explorer.Heading, dest.HasValue && IsDoor(dest.Value)))
@@ -776,7 +779,8 @@ namespace Diorama
                         float r = 0.4f * Tile * island.Zoom * WorldScale;
                         if ((island.transform.TransformPoint(li.LocalCenter) - tip).sqrMagnitude < r * r) poked = i;
                     }
-                if (poked >= 0 && poked != _poked[h] && _islings[poked] != _onPedestal) Inspect(_islings[poked]);
+                // Step 14k: poke again closes its card, another switches.
+                if (poked >= 0 && poked != _poked[h]) Inspect(_islings[poked]);
                 _poked[h] = poked;
                 bool pagePoke = tracked && _pageArrow != null && _pageArrow.gameObject.activeSelf &&
                                 (tip - _pageArrow.position).sqrMagnitude < Sq(0.3f * TileWorld);

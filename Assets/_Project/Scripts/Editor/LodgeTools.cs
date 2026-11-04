@@ -68,8 +68,8 @@ namespace Diorama.EditorTools
         /// <summary>
         /// The room: back wall of arches with the honeycomb pod wall (left), the hearth (centre) and the door arch (right,
         /// turned to face the player), side walls on the back half (turned), a rug in the middle, cushions off the door
-        /// walk, the pedestal front centre, the front edge open. Writes and bakes the props. Keep LodgeRoom's tiles
-        /// (pedestal, door, cushions) in sync.
+        /// walk, the front edge open (step 14k: no pedestal; a poked Isling's card shows above it). Writes and bakes the
+        /// props. Keep LodgeRoom's tiles (door, cushions) in sync.
         /// </summary>
         static void WriteProps(WorldMap lodge, StringBuilder log)
         {
@@ -80,7 +80,7 @@ namespace Diorama.EditorTools
             {
                 Entry('w', recipes["LodgeWall"]), Entry('v', recipes["LodgeWall"], true), Entry('E', recipes["LodgeHearth"]),
                 Entry('C', recipes["LodgeHoneycomb"]), Entry('U', recipes["LodgeRug"]), Entry('c', recipes["LodgeCushion"]),
-                Entry('Q', recipes["LodgePedestal"]), Entry('D', recipes["LodgeDoor"], false, 180f),
+                Entry('D', recipes["LodgeDoor"], false, 180f),
             };
             // 8 x 8, row 0 = back. Multi-tile props: the key sits on their top-left tile.
             string grid =
@@ -89,11 +89,11 @@ namespace Diorama.EditorTools
                 "vc.....v\n" +
                 "v..U..cv\n" +
                 "........\n" +
-                "....Q...\n" +
+                "........\n" +
                 "........\n" +
                 "........";
             lodge.SetProps(grid);
-            log.Append($"\n  lodge props: {recipes.Count} written and baked (wall, hearth, honeycomb, rug, cushion, pedestal, door)");
+            log.Append($"\n  lodge props: {recipes.Count} written and baked (wall, hearth, honeycomb, rug, cushion, door)");
         }
 
         static PropLegend Entry(char key, PropRecipe recipe, bool turned = false, float yaw = 0f) =>
