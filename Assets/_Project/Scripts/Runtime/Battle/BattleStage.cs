@@ -123,7 +123,12 @@ namespace Diorama
             if (pad != null) actor.baseLift = pad.TopLift;
             actor.Snap();
             if (side == BattleSide.Player) _player = actor;
-            else _wild = actor;
+            else
+            {
+                _wild = actor;
+                _wildKeeper = creature.species != null && creature.species.keeper;
+            }
+            FitPads(true);
             if (side == BattleSide.Player) _playerCry = AudioIds.Cry(SpeciesRegistry.IdOf(creature.species));
             else _wildCry = AudioIds.Cry(SpeciesRegistry.IdOf(creature.species));
             return actor;
@@ -139,6 +144,35 @@ namespace Diorama
         {
             hud.RemoveBar(_wildBar);
             _wildBar = hud.AddBar(_wild, wild.Name, wild.level, wild.currentHp, wild.MaxHp);
+        }
+
+        bool _wildKeeper;
+
+        /// <summary>
+        /// Step 14h: readable battles (<see cref="PadFit"/>): with both actors on their pads, scales them down if the near one
+        /// would hide the wild one from the player's eyes, or one is over 1.3x the other. <paramref name="snap"/> = at once
+        /// (an actor just spawned, still hidden); otherwise it eases.
+        /// </summary>
+        void FitPads(bool snap)
+        {
+            if (_player == null || _wild == null) return;
+            var cam = Camera.main;
+            if (cam == null) return;
+            var t = island.transform;
+            // Island-local: heights in map metres times the zoom.
+            Vector3 eye = t.InverseTransformPoint(cam.transform.position);
+            Vector3 nearFeet = island.TileToLocal(_player.tile, Cap + _player.baseLift), wildFeet = island.TileToLocal(_wild.tile, Cap + _wild.baseLift);
+            _player.Measure(out float nearH, out _);
+            _wild.Measure(out float wildH, out float wildC);
+            float share = wildH > 1e-5f ? wildC / wildH : 0.5f;
+            var r = PadFit.Fit(eye, nearFeet, nearH, wildFeet, wildH, share, _wildKeeper);
+            _player.fitTarget = r.near;
+            _wild.fitTarget = r.wild;
+            if (snap && _player.grow <= 0.001f) _player.fit = r.near;
+            if (snap && _wild.grow <= 0.001f) _wild.fit = r.wild;
+            if (r.near < 0.999f || r.wild < 0.999f)
+                Debug.Log($"[BattleStage] Pad fit: near {_player.name} x{r.near:0.00} (drawn {nearH:0.000}), wild {_wild.name} x{r.wild:0.00} (drawn {wildH:0.000})" +
+                          $"{(r.sightline ? " (sightline)" : "")}{(r.ratio ? " (1.3x rule)" : "")}.");
         }
 
         /// <summary>HP bar for the party creature on the field (after a switch).</summary>
@@ -282,7 +316,7 @@ namespace Diorama
                 var water = ElementStyle.Of(Element.Water);
                 Vector2 from = waterTile.Value, to = a.tile;
                 fx.Burst(WorldAt(from, 0.004f), 24, water.burst, World(0.06f), 0.6f, World(0.004f), Vector3.up * World(0.08f));
-                float h = a.View.height, rest = a.baseLift;
+                float h = a.Height, rest = a.baseLift;
                 a.grow = 1f;
                 yield return Tween(0.6f, p =>
                 {
@@ -302,7 +336,7 @@ namespace Diorama
                 yield return Tween(0.3f, p =>
                 {
                     a.grow = EaseOutBack(p);
-                    a.lift = a.View.height * 0.5f * Mathf.Sin(p * Mathf.PI);
+                    a.lift = a.Height * 0.5f * Mathf.Sin(p * Mathf.PI);
                 });
                 a.grow = 1f;
                 a.lift = 0f;
@@ -316,7 +350,7 @@ namespace Diorama
         {
             var a = _player;
             if (a == null) yield break;
-            Vector3 c = WorldAt(a.tile, a.View.centerHeight);
+            Vector3 c = WorldAt(a.tile, a.CenterHeight);
             GameAudio.At(AudioIds.PodOpen, c);
             StartCoroutine(CryLater(a, _playerCry, 0.3f));
             fx.Burst(c, 26, new Color(1f, 0.88f, 0.54f), World(0.05f), 0.5f, World(0.004f), Vector3.up * World(0.02f));
@@ -630,7 +664,7 @@ namespace Diorama
             GameAudio.At(ElementCue("move.shoot.", move.element), user.WorldCenter);
             Vector2 dir = (target.tile - user.tile).normalized;
             Vector2 from = user.tile + dir * 0.35f, to = target.tile;
-            float h0 = user.View.centerHeight, h1 = target.View.centerHeight;
+            float h0 = user.CenterHeight, h1 = target.CenterHeight;
             var orb = fx.Get(BattleFx.Shape.Orb);
             orb.Set(style.core, style.edge, 1f, 1f, 1f, move.element == Element.Water ? 0.12f : 0.35f);
             const float radius = 0.007f; // map metres
@@ -671,7 +705,7 @@ namespace Diorama
 
         IEnumerator Slam(StageActor user, StageActor target, ElementStyle style, Action impact)
         {
-            float top = user.View.height * 0.8f;
+            float top = user.Height * 0.8f;
             yield return Tween(0.26f, p => user.lift = Mathf.Sin(p * Mathf.PI * 0.5f) * top);
             yield return Tween(0.11f, p => user.lift = top * (1f - p * p));
             user.lift = 0f;
@@ -760,7 +794,7 @@ namespace Diorama
         {
             if (shield == null || shield.transform == null || !shield.transform.gameObject.activeSelf || user == null) return;
             shield.transform.localPosition = user.LocalCenter;
-            shield.transform.localScale = Vector3.one * (user.View.height * 0.72f * Zoom * size);
+            shield.transform.localScale = Vector3.one * (user.Height * 0.72f * Zoom * size);
         }
 
         void DropShieldOf(BattleSide side, bool pop)
@@ -818,7 +852,7 @@ namespace Diorama
         void PlaceShieldIdle(BattleFx.Item shield, StageActor user)
         {
             shield.transform.localPosition = user.LocalCenter;
-            float target = user.View.height * 0.72f * Zoom;
+            float target = user.Height * 0.72f * Zoom;
             if (shield.transform.localScale.x > target * 0.98f) shield.transform.localScale = Vector3.one * target;
         }
 
@@ -948,8 +982,12 @@ namespace Diorama
             nu.yaw = old.yaw;
             nu.baseLift = old.baseLift;
             nu.grow = 0f;
+            var was = _player;
+            _player = nu;
+            FitPads(true);
+            _player = was;
             nu.Snap();
-            float same = old.View.height / Mathf.Max(1e-4f, nu.View.height);
+            float same = old.Height / Mathf.Max(1e-4f, nu.Height);
 
             var rise = AudioService.PlayLoop(AudioIds.EvoRise, old.transform, 0.3f);
             yield return Tween(0.5f, p => old.View.SetFlash(p));

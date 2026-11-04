@@ -34,6 +34,73 @@ namespace Diorama.EditorTools
             g.AddSpecies(s, a.Length > 1 && int.TryParse(a[1], out int lv) ? lv : 5);
         }
 
+        /// <summary>
+        /// Section C shots: arg "eyeUp,eyeBack,wild,Species1,Species2,...": each species in pod 1 (Lv 30) on the near pad
+        /// against the small wild one, the camera held at a seated head (metres above / behind the island centre);
+        /// shot 14h_pad_&lt;species&gt;.png, then it runs. One every 14 s.
+        /// </summary>
+        public static void PadShots()
+        {
+            var a = Arg.Split(',');
+            if (a.Length < 4) return;
+            float up = float.Parse(a[0], System.Globalization.CultureInfo.InvariantCulture);
+            float back = float.Parse(a[1], System.Globalization.CultureInfo.InvariantCulture);
+            var g = GameState.Instance;
+            var wild = g.registry.Find(a[2]);
+            var steps = new List<(double at, System.Action act)>();
+            double t0 = EditorApplication.timeSinceStartup;
+            for (int i = 3; i < a.Length; i++)
+            {
+                string id = a[i];
+                double t = t0 + (i - 3) * 14.0;
+                steps.Add((t, () =>
+                {
+                    var s = g.registry.Find(id);
+                    if (s == null || wild == null) return;
+                    g.party.members[0] = new IslingInstance(s, 30);
+                    g.party.NotifyChanged();
+                    bool ok = g.encounters.DebugEncounter(new IslingInstance(wild, 5));
+                    Debug.Log($"[Step14hDebug] Pad shot {id} vs {wild.displayName}: {(ok ? "battle" : "refused")}.");
+                }));
+                steps.Add((t + 4.0, () => BattleDebug.SwitchNext()));
+                steps.Add((t + 8.5, () =>
+                {
+                    var cam = Camera.main;
+                    if (cam != null) BattleDebug.Render($"Logs/BattleShots/14h_pad_{id.ToLowerInvariant()}.png", cam.transform.position, cam.transform.rotation);
+                    Debug.Log($"[Step14hDebug] Shot 14h_pad_{id.ToLowerInvariant()}.png.");
+                }));
+                steps.Add((t + 9.5, () => BattleDebug.Run()));
+            }
+            void Hold()
+            {
+                var cam = Camera.main;
+                var island = g != null && g.explorer != null ? g.explorer.island : null;
+                if (cam == null || island == null) return;
+                var tr = island.transform;
+                Vector3 front = Vector3.ProjectOnPlane(tr.forward, Vector3.up).normalized;
+                cam.transform.position = tr.position + front * back + Vector3.up * up;
+                cam.transform.LookAt(tr.position);
+            }
+            EditorApplication.CallbackFunction tick = null;
+            tick = () =>
+            {
+                if (!EditorApplication.isPlaying)
+                {
+                    EditorApplication.update -= tick;
+                    return;
+                }
+                Hold();
+                while (steps.Count > 0 && EditorApplication.timeSinceStartup >= steps[0].at)
+                {
+                    var act = steps[0].act;
+                    steps.RemoveAt(0);
+                    act();
+                }
+                if (steps.Count == 0) EditorApplication.update -= tick;
+            };
+            EditorApplication.update += tick;
+        }
+
         /// <summary>Which pod is due, whether the show runs, the pinned objective.</summary>
         public static void State()
         {

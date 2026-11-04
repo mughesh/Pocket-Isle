@@ -167,5 +167,53 @@ namespace Diorama.Tests
             Assert.AreEqual("keeper.thanks.evolve.fire", KeeperThanks.Line("shard.fire"));
             Assert.AreEqual("keeper.thanks.evolve.water", KeeperThanks.Line("shard.water"));
         }
+
+        // ---- C: readable battles ----
+
+        static readonly Vector3 NearFeet = new Vector3(0f, 0f, 0.1f), WildFeet = new Vector3(0f, 0f, -0.15f);
+
+        [Test]
+        public void PadFit_TallNearIsling_1_3xItsOpponent()
+        {
+            var r = PadFit.Fit(new Vector3(0f, 1f, 0.3f), NearFeet, 0.09f, WildFeet, 0.04f, 0.5f, false);
+            Assert.IsTrue(r.ratio);
+            Assert.AreEqual(1.3f * 0.04f / 0.09f, r.near, 1e-4f);
+            Assert.AreEqual(1f, r.wild);
+            var same = PadFit.Fit(new Vector3(0f, 1f, 0.3f), NearFeet, 0.04f, WildFeet, 0.045f, 0.5f, false);
+            Assert.AreEqual(1f, same.near, "close sizes stay");
+            Assert.AreEqual(1f, same.wild);
+        }
+
+        [Test]
+        public void PadFit_LowEyes_NearTopUnderTheSightline()
+        {
+            Vector3 eye = new Vector3(0f, 0.08f, 0.6f);
+            var r = PadFit.Fit(eye, NearFeet, 0.05f, WildFeet, 0.05f, 0.5f, false);
+            Assert.IsTrue(r.sightline);
+            Assert.Less(r.near, 1f);
+            float allowed = PadFit.AllowedNearHeight(eye, NearFeet, WildFeet, 0.05f * r.wild, 0.5f);
+            Assert.LessOrEqual(0.05f * r.near, allowed + 1e-5f, "its top stays under the line, margin included");
+            // From high above (looking down) nothing needs to shrink.
+            var top = PadFit.Fit(new Vector3(0f, 0.6f, 0.4f), NearFeet, 0.05f, WildFeet, 0.05f, 0.5f, false);
+            Assert.AreEqual(1f, top.near);
+            Assert.IsFalse(top.sightline);
+            Assert.IsTrue(float.IsPositiveInfinity(PadFit.AllowedNearHeight(new Vector3(0f, -0.1f, 0.6f), NearFeet, WildFeet, 0.05f, 0.5f)), "eyes below: no rule");
+        }
+
+        [Test]
+        public void PadFit_WildSide_KeepersExempt_NeverBelowTheFloor()
+        {
+            Vector3 eye = new Vector3(0f, 1f, 0.3f);
+            var wild = PadFit.Fit(eye, NearFeet, 0.04f, WildFeet, 0.15f, 0.5f, false);
+            Assert.AreEqual(PadFit.MinFit, wild.wild, 1e-4f, "a huge wild one shrinks, never below the floor");
+            var keeper = PadFit.Fit(eye, NearFeet, 0.04f, WildFeet, 0.15f, 0.5f, true);
+            Assert.AreEqual(1f, keeper.wild, "a Keeper towers");
+            for (float h = 0.02f; h < 0.2f; h += 0.01f)
+            {
+                var r = PadFit.Fit(new Vector3(0f, 0.12f, 0.6f), NearFeet, h, WildFeet, 0.04f, 0.5f, false);
+                Assert.That(r.near, Is.InRange(PadFit.MinFit, 1f));
+                Assert.That(r.wild, Is.InRange(PadFit.MinFit, 1f));
+            }
+        }
     }
 }
