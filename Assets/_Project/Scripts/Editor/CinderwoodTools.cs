@@ -95,6 +95,14 @@ namespace Diorama.EditorTools
             new Vector2(35.5f, 44.5f), new Vector2(29.5f, 45.5f), new Vector2(23.5f, 42.5f), new Vector2(20.5f, 44.5f),
             new Vector2(20.5f, 47.5f), new Vector2(17.5f, 50.5f), new Vector2(20.5f, 54.5f),
         };
+        /// <summary>
+        /// Step 14i (Mugesh: the trail zig-zagged one tile at a time, e.g. by the hot springs): the trail as drawn: straight
+        /// legs with right-angle turns, none shorter than 3 tiles (<see cref="StraightPaths"/>). Segment 8 (the village to
+        /// the springs through the smoky hollow) keeps its authored steps: the smoke tiles are a hand moment.
+        /// </summary>
+        static readonly Vector2[] Line = StraightPaths.Trail(Trail, keep: new[] { 8 });
+        /// <summary>Step 14i: the longest straight leg the check allows (straight legs replace the winding trail).</summary>
+        const int MaxLeg = 20;
         static readonly Vector2Int[][] SidePaths =
         {
             new[] { new Vector2Int(13, 9), new Vector2Int(17, 10), new Vector2Int(21, 8), new Vector2Int(27, 9) },     // ember field
@@ -351,14 +359,14 @@ namespace Diorama.EditorTools
             for (int x = 1; x < Size - 1; x++)
                 for (int y = 1; y < Size - 1; y++)
                 {
-                    float d = DistToPolyline(new Vector2(x, y), Trail);
+                    float d = DistToPolyline(new Vector2(x, y), Line);
                     if (d < 0.95f) _g[x, y] = IslandMap.Path;
                     else if (d < 2.0f && (_g[x, y] == IslandMap.Tree || _g[x, y] == IslandMap.Rock)) _g[x, y] = IslandMap.Grass;
                 }
+            // Step 14i: side paths in straight legs too.
             foreach (var path in SidePaths)
-                for (int i = 0; i + 1 < path.Length; i++)
-                    foreach (var t in Walk4(path[i], path[i + 1]))
-                        _g[t.x, t.y] = IslandMap.Path;
+                foreach (var t in StraightPaths.Side(path))
+                    _g[t.x, t.y] = IslandMap.Path;
 
             Arrival();
             Field();
@@ -442,7 +450,7 @@ namespace Diorama.EditorTools
 
         static void Field()
         {
-            foreach (var (x, y, rx, ry) in new[] { (30.5f, 5f, 2.4f, 1.8f), (36f, 10.5f, 2.1f, 1.3f), (44f, 5f, 2.1f, 1.5f), (47f, 11f, 1.8f, 1.5f), (38.5f, 4f, 1.3f, 1.1f) })
+            foreach (var (x, y, rx, ry) in new[] { (30.5f, 5f, 2.2f, 1.7f), (36f, 10.5f, 2.1f, 1.3f), (44f, 5f, 2.1f, 1.5f), (47f, 11f, 1.8f, 1.5f), (38.5f, 4f, 1.3f, 1.1f) })
                 Patch(x, y, rx, ry);
             foreach (var t in new[] { (33, 8), (34, 8), (33, 9), (44, 9), (45, 9), (40, 12), (28, 11), (48, 4) }) Ground(t.Item1, t.Item2, IslandMap.Rock);
             foreach (var (x, y) in new[] { (30, 10), (46, 7), (38, 2), (42, 12) }) Prop(x, y, KVent);
@@ -1011,9 +1019,9 @@ namespace Diorama.EditorTools
             int small = patches.Count(p => p < 6), big = patches.Count(p => p > 20);
             if (big > 0) problems.Add($"{big} tall grass patch(es) over 20 tiles: {string.Join(", ", patches.Where(p => p > 20))}");
 
-            // Trail: no straight run over 10 tiles (8 directions, sampled per tile along the centre line).
+            // Trail: step 14i: straight legs, none over MaxLeg tiles (was: no straight run over 10 on a winding trail).
             int longest = LongestStraight();
-            if (longest > 10) problems.Add($"a straight trail run of {longest} tiles (max 10)");
+            if (longest > MaxLeg) problems.Add($"a straight trail run of {longest} tiles (max {MaxLeg})");
 
             // Something every ~8 tiles along the trail: a prop, tall grass, a rock, a pool within 3 tiles.
             int gap = LongestFeatureGap(map);
@@ -1078,14 +1086,14 @@ namespace Diorama.EditorTools
         static List<Vector2> TrailSamples()
         {
             var list = new List<Vector2>();
-            for (int i = 0; i + 1 < Trail.Length; i++)
+            for (int i = 0; i + 1 < Line.Length; i++)
             {
-                var a = Trail[i];
-                var b = Trail[i + 1];
+                var a = Line[i];
+                var b = Line[i + 1];
                 int n = Mathf.Max(1, Mathf.CeilToInt((b - a).magnitude));
                 for (int k = 0; k < n; k++) list.Add(Vector2.Lerp(a, b, k / (float)n));
             }
-            list.Add(Trail[Trail.Length - 1]);
+            list.Add(Line[Line.Length - 1]);
             return list;
         }
 
@@ -1096,14 +1104,14 @@ namespace Diorama.EditorTools
         static int LongestStraight()
         {
             float best = 0f;
-            for (int i = 0; i + 1 < Trail.Length; i++)
-                for (int j = i + 1; j < Trail.Length; j++)
+            for (int i = 0; i + 1 < Line.Length; i++)
+                for (int j = i + 1; j < Line.Length; j++)
                 {
-                    Vector2 a = Trail[i], ab = Trail[j] - a;
+                    Vector2 a = Line[i], ab = Line[j] - a;
                     bool straight = true;
                     for (int k = i + 1; k < j && straight; k++)
                     {
-                        var v = Trail[k] - a;
+                        var v = Line[k] - a;
                         straight = Mathf.Abs(v.x * ab.y - v.y * ab.x) / ab.magnitude <= 0.8f;
                     }
                     if (!straight) break;

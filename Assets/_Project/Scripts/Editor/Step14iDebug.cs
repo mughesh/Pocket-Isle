@@ -78,6 +78,21 @@ namespace Diorama.EditorTools
             Debug.Log($"[Step14iDebug] Shot {name}.png.");
         }
 
+        /// <summary>Travels to a Dev panel spot (arg = its label, e.g. "CW: springs").</summary>
+        public static void Go()
+        {
+            var s = Object.FindFirstObjectByType<GameState>();
+            if (s == null) return;
+            foreach (var spot in s.Spots)
+                if (spot.label == Arg)
+                {
+                    s.GoTo(spot);
+                    Debug.Log($"[Step14iDebug] Going to {Arg}.");
+                    return;
+                }
+            Debug.LogWarning($"[Step14iDebug] No spot '{Arg}'.");
+        }
+
         /// <summary>Logs the island's yaw error against the line to the head, and each hand's hold state.</summary>
         public static void Facing()
         {

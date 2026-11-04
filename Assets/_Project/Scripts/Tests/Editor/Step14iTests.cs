@@ -186,6 +186,37 @@ namespace Diorama.Tests
         }
 
         [Test]
+        public void Paths_StraightLegs_NoShortJogs_KeptSegmentsStay()
+        {
+            var pts = new[]
+            {
+                new Vector2(11.5f, 3.5f), new Vector2(11.5f, 9.5f), new Vector2(8.5f, 14.5f), new Vector2(9.5f, 19.5f),
+                new Vector2(14.5f, 22.5f), new Vector2(13.5f, 27.5f), new Vector2(17.5f, 30.5f), new Vector2(20.5f, 36.5f),
+            };
+            var legs = EditorTools.StraightPaths.Trail(pts, keep: new[] { 6 });
+            Assert.AreEqual(pts[0], legs[0]);
+            Assert.AreEqual(pts[pts.Length - 1], legs[legs.Length - 1], "the last waypoint is exact");
+            int kept = 0;
+            for (int i = 0; i + 1 < legs.Length; i++)
+            {
+                var d = legs[i + 1] - legs[i];
+                bool axis = Mathf.Abs(d.x) < 1e-4f || Mathf.Abs(d.y) < 1e-4f;
+                if (!axis)
+                {
+                    kept++;
+                    Assert.AreEqual(pts[6], legs[i], "only the kept segment is diagonal");
+                    continue;
+                }
+                bool firstOrLast = i == 0 || i + 1 == legs.Length - 1;
+                if (!firstOrLast && legs[i + 1] != pts[6]) Assert.GreaterOrEqual(d.magnitude, 3f - 1e-4f, $"leg {i}: {legs[i]} to {legs[i + 1]}");
+            }
+            Assert.AreEqual(1, kept);
+            var side = EditorTools.StraightPaths.Side(new[] { new Vector2Int(13, 9), new Vector2Int(17, 10), new Vector2Int(21, 8), new Vector2Int(27, 9) });
+            for (int i = 0; i + 1 < side.Count; i++) Assert.AreEqual(1, Mathf.Abs(side[i + 1].x - side[i].x) + Mathf.Abs(side[i + 1].y - side[i].y), "4-connected");
+            Assert.AreEqual(new Vector2Int(27, 9), side[side.Count - 1]);
+        }
+
+        [Test]
         public void Facing_FrontPointsAlongTheLineToTheHead_NotTheHeadForward()
         {
             // Head at the origin looking 30 deg right; the island placed in front of the gaze, but the head then shifts.
