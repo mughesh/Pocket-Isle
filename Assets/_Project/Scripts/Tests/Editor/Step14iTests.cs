@@ -142,6 +142,50 @@ namespace Diorama.Tests
         }
 
         [Test]
+        public void Journal_EveryIslingHasAShortLine()
+        {
+            var data = UnityEditor.AssetDatabase.LoadAssetAtPath<JournalData>("Assets/_Project/Data/Resources/JournalData.asset") ?? JournalData.Load();
+            Assert.IsNotNull(data, "JournalData baked");
+            Assert.AreEqual(46, data.entries.Count);
+            foreach (var e in data.entries)
+            {
+                string line = JournalLore.Line(e.species);
+                Assert.IsFalse(string.IsNullOrEmpty(line), $"{e.species.name} has a line");
+                Assert.LessOrEqual(line.Length, JournalLore.MaxLength, $"{e.species.name}: '{line}'");
+            }
+        }
+
+        [Test]
+        public void Journal_MatchupsFollowTheTypeChart()
+        {
+            foreach (var e in Journal.Elements)
+            {
+                Assert.IsTrue(TypeChart.Beats(e, JournalLore.StrongAgainst(e)), $"{e} strong");
+                Assert.IsTrue(TypeChart.Beats(JournalLore.WeakAgainst(e), e), $"{e} weak");
+            }
+        }
+
+        [Test]
+        public void Journal_ChainRunsBaseFirst_WithLevels_AndHidesUnknownForms()
+        {
+            var a = ScriptableObject.CreateInstance<IslingSpecies>();
+            var b = ScriptableObject.CreateInstance<IslingSpecies>();
+            a.displayName = "Alpha";
+            b.displayName = "Beta";
+            a.evolvesTo = b;
+            a.evolveLevel = 16;
+            var chain = JournalLore.Chain(b, s => s == b ? a : null);
+            Assert.AreEqual(2, chain.Count);
+            Assert.AreEqual(a, chain[0].species);
+            Assert.AreEqual(16, chain[0].evolveLevel);
+            Assert.AreEqual(0, chain[1].evolveLevel);
+            Assert.AreEqual("Alpha  › Lv 16 ›  ???", JournalLore.ChainLine(chain, s => s == a));
+            Assert.AreEqual("Doesn't evolve", JournalLore.ChainLine(JournalLore.Chain(b, s => null), s => true));
+            Object.DestroyImmediate(a);
+            Object.DestroyImmediate(b);
+        }
+
+        [Test]
         public void Facing_FrontPointsAlongTheLineToTheHead_NotTheHeadForward()
         {
             // Head at the origin looking 30 deg right; the island placed in front of the gaze, but the head then shifts.

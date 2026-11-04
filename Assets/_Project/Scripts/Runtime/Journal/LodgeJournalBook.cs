@@ -6,8 +6,9 @@ using UnityEngine;
 namespace Diorama
 {
     /// <summary>
-    /// Step 14h: a stone book leaning on the front of the Hearth Lodge's pedestal: poke it (or look at it and pinch) and
-    /// the Isling Journal opens (the explorer waits while it is open). Made at runtime by the lodge; shown only inside.
+    /// Step 14h: a Journal tablet in the Hearth Lodge: poke it (or look at it and pinch) and the Isling Journal opens (the
+    /// explorer waits while it is open). Made at runtime by the lodge; shown only inside. Step 14i (Mugesh: the book in the
+    /// middle of the room was in the way): a small tablet on the near rim, just left of the pods.
     /// </summary>
     public class LodgeJournalBook : MonoBehaviour
     {
@@ -60,10 +61,10 @@ namespace Diorama
             if (_slab == null && shown) Build();
             if (_slab != null && _slab.renderer.gameObject.activeSelf != shown) _slab.renderer.gameObject.SetActive(shown);
             if (!shown || _slab == null) return;
-            // Leaning back on the pedestal's front edge, facing the player's side of the island.
-            // Island +Z is the player's side; the slab's face is its -Z: turned round, then its top leans away.
-            transform.localPosition = _lodge.PedestalTopLocal + new Vector3(0f, -0.1f * _lodge.TileLocal, 0.55f * _lodge.TileLocal);
-            transform.localRotation = Quaternion.Euler(0f, 180f, 0f) * Quaternion.Euler(35f, 0f, 0f);
+            // Step 14i: on the near rim, left of the pods (the player's left is island +X), one pod step past the last one.
+            // Island +Z is the player's side; the slab's face is its -Z: turned round, then its top leans back a little.
+            transform.localPosition = RimSpot();
+            transform.localRotation = Quaternion.Euler(0f, 180f, 0f) * Quaternion.Euler(15f, 0f, 0f);
             // World size = Size at the default island scale (0.6), growing with the island.
             transform.localScale = Vector3.one / 0.6f;
             _slab.Paint(_hover, 0f, 0f, 0.5f + 0.5f * Mathf.Sin(Time.time * 2.5f));
@@ -89,6 +90,22 @@ namespace Diorama
         }
 
         IslandBuilder island => _lodge.island;
+
+        /// <summary>Island-local: one pod step beyond the leftmost rim pod (seen from the player), at the pods' height.</summary>
+        Vector3 RimSpot()
+        {
+            var pods = _lodge.pods;
+            if (pods == null) return _lodge.PedestalTopLocal;
+            Vector3 left = pods.HomeLocal(0), right = left;
+            for (int i = 1; i < Party.Size; i++)
+            {
+                var p = pods.HomeLocal(i);
+                if (p.x > left.x) left = p;
+                if (p.x < right.x) right = p;
+            }
+            float step = Party.Size > 1 ? Mathf.Abs(left.x - right.x) / (Party.Size - 1) : 0.08f;
+            return left + new Vector3(Mathf.Max(step, Size.x / 0.6f * 0.75f) * 1.1f, 0f, 0f);
+        }
 
         /// <summary>Opens the Journal (also the bridge).</summary>
         public void Open(string how)

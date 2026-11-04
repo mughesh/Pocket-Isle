@@ -12,7 +12,10 @@ namespace Diorama
     /// Step 14h: the Isling Journal, a stone book floating over the island like the settings board (old-size rules, the
     /// island visible round it): "Isling Journal", "Found 12 / 46", a tablet per element with its count (Fire, Water,
     /// Wind), a 5 x 4 grid of portraits (caught: full colour, name, "Lv N"; seen: dimmed, name, "Seen"; unseen: a black
-    /// silhouette, "???", where it lives or how it evolves) and a card line for the one poked or looked at + pinched.
+    /// silhouette, "???", where it lives or how it evolves). Step 14i: poking a portrait (or look + pinch) opens a detail
+    /// card beside the book on the same board: a slowly turning 3D model (the portrait if only seen, a silhouette if
+    /// unseen), name, element badge, strong / weak vs, where it lives, the evolution line, its moves, your best one's level
+    /// and how many you have, and a one-line description (<see cref="JournalLore"/>). Poke it again to close the card.
     /// The portraits are one mesh (one draw); each grid row's labels are one text.
     /// Made at runtime next to the game menu's board (<see cref="Ensure"/>): nothing in the scene to wire.
     /// </summary>
@@ -27,6 +30,7 @@ namespace Diorama
         const float CellX = 0.066f, CellY = 0.072f, Pic = 0.046f, GridBottom = 0.1f, Width = 0.37f;
         static readonly Vector2 Tab = new Vector2(0.074f, 0.03f);
         const float TabStep = 0.086f;
+        const float CardW = 0.25f, CardGap = 0.014f, ModelHeight = 0.075f;
 
         JournalData _data;
         Element _element = Element.Fire;
@@ -35,6 +39,8 @@ namespace Diorama
         Mesh _mesh;
         Transform _grid;
         TextMeshPro _card;
+        Transform _model;
+        Mesh _cardMesh;
         Action _closed;
         int _hover = -1, _picked = -1;
         readonly bool[] _wasPinching = { true, true };
@@ -70,6 +76,7 @@ namespace Diorama
             if (Instance == this) Instance = null;
             IsOpen = false;
             if (_mesh != null) Destroy(_mesh);
+            if (_cardMesh != null) Destroy(_cardMesh);
         }
 
         // ---- open, close ----
@@ -103,6 +110,7 @@ namespace Diorama
             runes.Clear();
             _grid = null;
             _card = null;
+            _model = null;
             Debug.Log("[Journal] Closed.");
             var c = _closed;
             _closed = null;
@@ -171,6 +179,8 @@ namespace Diorama
 
             _grid = runes.AddPart("Portraits", Vector2.zero, new Vector2(Width, top));
             BuildGrid(caught);
+            _model = null;
+            if (_picked >= 0 && _picked < _shown.Count) BuildCard(_data.entries[_shown[_picked]], caught, bookCenter, bookSize);
             runes.Show(0.02f);
             _built = Time.unscaledTime;
         }
@@ -296,22 +306,143 @@ namespace Diorama
             return $"<pos={Mathf.Clamp(left / width * 100f, 0f, 100f):0.##}%>";
         }
 
-        string CardText()
+        string CardText() => _picked < 0 || _picked >= _shown.Count
+            ? "<color=#D8C99A>Poke a portrait, or look at one and pinch.</color>"
+            : "<color=#D8C99A>Poke it again to close its card.</color>";
+
+        static string Hex(Color c) => "#" + ColorUtility.ToHtmlStringRGB(c);
+
+        static string ElementWord(Element e) => $"<color={Hex(Color.Lerp(ElementStyle.Of(e).main, Color.white, 0.35f))}><b>{e}</b></color>";
+
+        /// <summary>Step 14i: the detail card beside the book (same board, same facing).</summary>
+        void BuildCard(JournalData.Entry e, ICollection<string> caught, Vector2 bookCenter, Vector2 bookSize)
         {
-            if (_picked < 0 || _picked >= _shown.Count) return "<color=#D8C99A>Poke a portrait, or look at one and pinch.</color>";
-            var e = _data.entries[_shown[_picked]];
-            var caught = Journal.CaughtIds();
-            var state = Journal.StateOf(e.species, caught, Journal.SeenIds());
             var s = e.species;
-            string home = e.from != null ? $"Evolves from {(Known(e.from, caught) ? e.from.displayName : "???")}" : string.IsNullOrEmpty(e.hint) ? "A starter" : $"Lives in {e.hint}";
+            var seen = Journal.SeenIds();
+            var state = Journal.StateOf(s, caught, seen);
+            float cx = Width * 0.5f + CardGap + CardW * 0.5f;
+            var size = new Vector2(CardW, bookSize.y);
+            var slabPart = runes.AddPart("Card", new Vector2(cx, bookCenter.y), size);
+            slabPart.localPosition = new Vector3(cx, bookCenter.y, 0.008f);
+            if (runes.tabletMaterial != null) TabletKit.Make(slabPart, runes.tabletMaterial, size, TabletKit.GoldInlay * 0.8f).Paint(0f, 0.35f, 0f, 0f);
+            else runes.AddBacking(new Vector2(cx, bookCenter.y), size);
+            float top = bookCenter.y + size.y * 0.5f, left = cx - CardW * 0.5f + 0.014f, inner = CardW - 0.028f;
+
+            // The picture: a turning model when caught, the portrait when seen, a silhouette when not.
+            float picY = top - 0.012f - ModelHeight * 0.5f;
+            if (state == Journal.State.Caught && s.Prefab != null) MakeModel(s, new Vector2(cx, picY - ModelHeight * 0.45f));
+            else CardPortrait(e, state, new Vector2(cx, picY));
+
+            string name = state == Journal.State.Unseen ? "???" : s.displayName;
+            var title = runes.AddText($"<b>{name}</b>", new Vector2(cx, picY - ModelHeight * 0.5f - 0.016f), runes.fontSize * 1.0f, TextAlignmentOptions.Center, inner);
+            title.textWrappingMode = TextWrappingModes.NoWrap;
+            // Element badge: a small tablet with its face in the element's colour (not a button).
+            var badgeAt = new Vector2(cx, picY - ModelHeight * 0.5f - 0.042f);
+            var badgeSize = new Vector2(0.06f, 0.022f);
+            var badgePart = runes.AddPart("Element badge", badgeAt, badgeSize);
+            if (runes.tabletMaterial != null)
+            {
+                var badge = TabletKit.Make(badgePart, runes.tabletMaterial, badgeSize, ElementStyle.Of(s.element).burst);
+                var face = ElementStyle.Of(s.element).main;
+                face.a = 0.85f;
+                badge.face = face;
+                badge.Paint(0f, 0f, 0f, 0f);
+            }
+            var badgeText = runes.AddText($"<b>{s.element}</b>", badgeAt, runes.fontSize * 0.7f, TextAlignmentOptions.Center, badgeSize.x);
+            TabletKit.StyleLabel(badgeText);
+            // In front of the badge tablet (which sits at the part's depth), as a rune's label sits on its tablet.
+            badgeText.transform.localPosition = new Vector3(badgeAt.x, badgeAt.y, badgePart.localPosition.z + TabletKit.LabelZ);
+
+            var sb = new StringBuilder();
+            string where = e.from != null ? null : string.IsNullOrEmpty(e.hint) ? "A starter" : e.hint == "Rare" ? "tall grass (rare)" : e.hint;
             if (state == Journal.State.Unseen)
-                return $"<b>???</b>  ·  {s.element}\n{(e.from != null ? (Known(e.from, caught) ? home : "Evolves from an Isling you haven't found yet") : e.hint == "Rare" ? "A rare Isling" : home)}";
-            var moves = new List<string>();
-            if (s.moves != null)
-                foreach (var m in s.moves)
-                    if (m != null) moves.Add(m.Name);
-            string evo = s.evolvesTo != null ? $"  ·  Evolves at Lv {s.evolveLevel}" : "";
-            return $"<b>{s.displayName}</b>  ·  {s.element}  ·  {home}{evo}\n<color=#D8C99A>{string.Join(", ", moves)}</color>";
+            {
+                // Unseen: the hint only.
+                if (e.from != null) sb.Append(Known(e.from, caught) ? $"Evolves from {e.from.displayName}" : "Evolves from an Isling you haven't found yet");
+                else sb.Append(where == "A starter" ? "A starter" : $"Lives in {where}");
+            }
+            else
+            {
+                sb.Append($"Strong vs {ElementWord(JournalLore.StrongAgainst(s.element))}   Weak vs {ElementWord(JournalLore.WeakAgainst(s.element))}\n");
+                if (where != null) sb.Append($"<color=#D8C99A>Lives in</color> {where}\n");
+                else sb.Append($"<color=#D8C99A>Evolves from</color> {(Known(e.from, caught) ? e.from.displayName : "???")}\n");
+                var chain = JournalLore.Chain(s, x => _data.IndexOf(x) >= 0 ? _data.entries[_data.IndexOf(x)].from : null);
+                sb.Append($"<color=#D8C99A>Evolves</color> {JournalLore.ChainLine(chain, x => Journal.StateOf(x, caught, seen) != Journal.State.Unseen)}\n");
+                if (state == Journal.State.Caught)
+                {
+                    sb.Append("<color=#D8C99A>Moves</color> ");
+                    var moves = new List<string>();
+                    if (s.moves != null)
+                        foreach (var m in s.moves)
+                            if (m != null) moves.Add($"{m.Name} <size=80%>{ElementWord(m.element)}</size>");
+                    sb.Append(string.Join(", ", moves)).Append('\n');
+                    int best = Journal.BestLevel(s, Journal.Owned()), have = 0;
+                    foreach (var c in Journal.Owned())
+                        if (c != null && c.species == s) have++;
+                    sb.Append(best > 0 ? $"Your best: <b>Lv {best}</b>   Caught ×{have}\n" : "Caught (none with you now)\n");
+                }
+                else sb.Append("<color=#D8C99A>Catch one to learn its moves.</color>\n");
+                sb.Append($"<i>{JournalLore.Line(s)}</i>");
+            }
+            float bodyTop = picY - ModelHeight * 0.5f - 0.058f, bodyBottom = bookCenter.y - size.y * 0.5f + 0.012f;
+            var body = runes.AddText(sb.ToString(), new Vector2(left + inner * 0.5f, (bodyTop + bodyBottom) * 0.5f), runes.fontSize * 0.9f, TextAlignmentOptions.TopLeft, inner);
+            body.textWrappingMode = TextWrappingModes.Normal;
+            body.rectTransform.sizeDelta = new Vector2(inner, bodyTop - bodyBottom);
+            body.enableAutoSizing = true;
+            body.fontSizeMin = runes.fontSize * 0.6f;
+            body.fontSizeMax = runes.fontSize * 0.9f;
+            body.paragraphSpacing = 6f;
+        }
+
+        /// <summary>A portrait (seen) or silhouette (unseen) in place of the model.</summary>
+        void CardPortrait(JournalData.Entry e, Journal.State state, Vector2 at)
+        {
+            var part = runes.AddPart("Card portrait", at, new Vector2(ModelHeight, ModelHeight));
+            if (_cardMesh == null) _cardMesh = new Mesh { name = "Journal Card Portrait" };
+            _cardMesh.Clear();
+            var r = _data.CellRect(e.cell);
+            float h = ModelHeight * 0.5f;
+            _cardMesh.SetVertices(new List<Vector3> { new Vector3(-h, -h, 0f), new Vector3(-h, h, 0f), new Vector3(h, h, 0f), new Vector3(h, -h, 0f) });
+            _cardMesh.SetUVs(0, new List<Vector2> { new Vector2(r.xMin, r.yMin), new Vector2(r.xMin, r.yMax), new Vector2(r.xMax, r.yMax), new Vector2(r.xMax, r.yMin) });
+            Color tint = state == Journal.State.Seen ? new Color(0.8f, 0.8f, 0.8f, 1f) : new Color(0.02f, 0.02f, 0.03f, 0.92f);
+            _cardMesh.SetColors(new List<Color> { tint, tint, tint, tint });
+            _cardMesh.SetTriangles(new[] { 0, 1, 2, 0, 2, 3 }, 0);
+            _cardMesh.RecalculateBounds();
+            part.gameObject.AddComponent<MeshFilter>().sharedMesh = _cardMesh;
+            var mr = part.gameObject.AddComponent<MeshRenderer>();
+            mr.sharedMaterial = _data.portraitMaterial;
+            mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        }
+
+        /// <summary>The Isling's baked model, fitted to the card and turning slowly (Update).</summary>
+        void MakeModel(IslingSpecies s, Vector2 feet)
+        {
+            var part = runes.AddPart("Card model", feet, new Vector2(ModelHeight, ModelHeight));
+            part.localPosition = new Vector3(feet.x, feet.y, -0.03f);
+            var go = Instantiate(s.Prefab, part, false);
+            go.name = $"Journal {s.displayName}";
+            foreach (var t in go.GetComponentsInChildren<Transform>(true)) t.gameObject.layer = runes.gameObject.layer;
+            // Fit by the drawn bounds (in the part's space): height ModelHeight, feet on the spot.
+            go.transform.localPosition = Vector3.zero;
+            go.transform.localRotation = Quaternion.identity;
+            go.transform.localScale = Vector3.one;
+            bool any = false;
+            Bounds b = default;
+            foreach (var r in go.GetComponentsInChildren<Renderer>())
+            {
+                if (r is ParticleSystemRenderer) continue;
+                if (!any) b = r.bounds;
+                else b.Encapsulate(r.bounds);
+                any = true;
+            }
+            if (!any) return;
+            float worldH = Mathf.Max(1e-4f, b.size.y), wantWorld = ModelHeight * part.lossyScale.y;
+            float k = wantWorld / worldH;
+            go.transform.localScale = Vector3.one * k;
+            // Re-centre: bounds were measured at scale 1 from the part's origin.
+            Vector3 offsetLocal = part.InverseTransformVector(new Vector3(b.center.x - part.position.x, b.min.y - part.position.y, b.center.z - part.position.z)) * k;
+            go.transform.localPosition = -offsetLocal;
+            _model = part;
         }
 
         static bool Known(IslingSpecies s, ICollection<string> caught) => caught != null && caught.Contains(SpeciesRegistry.IdOf(s));
@@ -321,8 +452,8 @@ namespace Diorama
             if (cell < 0 || cell >= _shown.Count) return;
             _picked = cell == _picked ? -1 : cell;
             GameAudio.Ui(AudioIds.UiPebble);
-            if (_card != null) _card.text = CardText();
-            BuildGrid(Journal.CaughtIds());
+            // Step 14i: the card is part of the board: rebuild it (the board keeps its facing).
+            Build();
             Debug.Log($"[Journal] {(_picked >= 0 ? _data.entries[_shown[cell]].species.name : "card closed")} ({how}).");
         }
 
@@ -336,7 +467,10 @@ namespace Diorama
 
         void Update()
         {
-            if (!IsOpen || _grid == null || runes.Root == null || Time.unscaledTime - _built < 0.3f) return;
+            if (!IsOpen || _grid == null || runes.Root == null) return;
+            // Step 14i: the card's model turns slowly (about one turn in 12 s).
+            if (_model != null) _model.localRotation = Quaternion.Euler(0f, Time.unscaledTime * 30f, 0f);
+            if (Time.unscaledTime - _built < 0.3f) return;
             var root = runes.Root;
             int hover = -1;
             if (HeadGaze.TryGetRay(out var ray))
