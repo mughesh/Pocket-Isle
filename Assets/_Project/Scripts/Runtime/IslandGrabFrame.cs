@@ -56,6 +56,10 @@ namespace Diorama
         [Range(0f, 1f)] public float nearLevel = 0.55f;
         [Range(0f, 2f)] public float hoverLevel = 1f;
         [Range(0f, 2f)] public float grabbedLevel = 1.1f;
+        [Tooltip("Step 14k: the grab band (from the line inward over the rim) glows at this share of the line's level.")]
+        [Range(0f, 1f)] public float bandLevel = 0.4f;
+        [Tooltip("Step 14k: the band lies this far above the cap top (island-local m).")]
+        public float bandLift = 0.004f;
         public Color color = new Color(0.95f, 0.97f, 1f);
         [Tooltip("Held: the frame tints toward this.")]
         public Color grabbedColor = new Color(1f, 0.78f, 0.3f);
@@ -75,6 +79,7 @@ namespace Diorama
         readonly HandState[] _hands = new HandState[2];
         readonly List<Vector3> _local = new List<Vector3>();
         readonly List<bool> _isHandle = new List<bool>();
+        readonly List<float> _levels = new List<float>();
         readonly List<Vector3> _lipWorld = new List<Vector3>();
         readonly List<Vector3> _world = new List<Vector3>();
         readonly List<Vector3> _verts = new List<Vector3>();
@@ -198,7 +203,9 @@ namespace Diorama
             _uvs.Clear();
             _tris.Clear();
             Vector3 eye = cam.transform.position;
+            _levels.Clear();
             Strip(_world, true, _isHandle, nearest, pulse, w, tint, eye, idleLevel);
+            Band(tint);
             if (_lipWorld.Count > 1) Strip(_lipWorld, false, null, nearest, pulse, w, tint, eye, 0f);
             _mesh.Clear();
             _mesh.SetVertices(_verts);
@@ -234,6 +241,7 @@ namespace Diorama
                 }
                 // Only the handles light (the corner brackets; the lip line is all handle).
                 if (mask != null && !mask[i]) level = 0f;
+                if (closed) _levels.Add(level);
                 var c = new Color(tint.r, tint.g, tint.b, level);
                 _verts.Add(p - side);
                 _verts.Add(p + side);
@@ -249,6 +257,47 @@ namespace Diorama
                 _tris.Add(a + 1);
                 _tris.Add(b);
                 _tris.Add(b + 1);
+            }
+        }
+
+        /// <summary>
+        /// Step 14k: the grab band, a flat soft strip lying on the rim from the line inward (the zone's depth), lit like the
+        /// line above it (corner brackets only) at <see cref="bandLevel"/>. The shader's core sits on the line (uv 0.5) and
+        /// fades out at the band's inner edge (uv 1).
+        /// </summary>
+        void Band(Color tint)
+        {
+            if (bandLevel <= 0f || _levels.Count != _local.Count) return;
+            var t = island.transform;
+            float depth = handle.grabInward / Mathf.Max(1e-4f, t.lossyScale.x);
+            float y = island.CapTopLocal + bandLift;
+            int n = _local.Count, first = _verts.Count;
+            var half = island.FootprintHalfSize;
+            float ix = Mathf.Max(0f, half.x + outset - depth), iz = Mathf.Max(0f, half.y + outset - depth);
+            for (int i = 0; i < n; i++)
+            {
+                Vector3 p = _local[i], tan = _local[(i + 1) % n] - _local[(i - 1 + n) % n];
+                var inward = new Vector3(tan.z, 0f, -tan.x).normalized;
+                if (Vector3.Dot(inward, new Vector3(p.x, 0f, p.z)) > 0f) inward = -inward;
+                p.y = y;
+                // The inner edge: the line's rectangle shrunk by the depth (a corner arc tighter than the depth meets in a point).
+                Vector3 q = p + inward * depth;
+                q.x = Mathf.Clamp(q.x, -ix, ix);
+                q.z = Mathf.Clamp(q.z, -iz, iz);
+                var c = new Color(tint.r, tint.g, tint.b, _levels[i] * bandLevel);
+                _verts.Add(t.TransformPoint(p));
+                _verts.Add(t.TransformPoint(q));
+                _colors.Add(c);
+                _colors.Add(c);
+                _uvs.Add(new Vector2(0f, 0.5f));
+                _uvs.Add(new Vector2(0f, 1f));
+                int a = first + i * 2, b = first + ((i + 1) % n) * 2;
+                _tris.Add(a);
+                _tris.Add(a + 1);
+                _tris.Add(b);
+                _tris.Add(a + 1);
+                _tris.Add(b + 1);
+                _tris.Add(b);
             }
         }
 

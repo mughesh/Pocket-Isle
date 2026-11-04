@@ -79,12 +79,13 @@ namespace Diorama
         [Header("Grab zone (step 14j: what you see is what grabs)")]
         [Tooltip("The glowing frame (its line's outset and corner radius); found at Start when empty.")]
         public IslandGrabFrame frame;
-        [Tooltip("Reach outside the glowing line (world m).")]
-        public float grabOutside = 0.012f;
-        [Tooltip("Depth inside the line, over the rock (island-local m; the ISDK shell is 0.04 deep).")]
-        public float grabInside = 0.035f;
-        [Tooltip("Height band (island-local y): the cap top is about +0.006, the shell spans +0.012..-0.13.")]
-        public float grabBandTop = 0.02f;
+        [Tooltip("Step 14k: slack past the glowing line (world m; tracking jitter only: nothing outside the line grabs).")]
+        public float grabPastLine = 0.003f;
+        [Tooltip("Step 14k: the band's depth from the line inward, over the rim (world m).")]
+        public float grabInward = 0.035f;
+        [Tooltip("Step 14k: the band reaches this far above the cap top (world m: a pinch on the rim's top closes above it).")]
+        public float grabAboveCap = 0.025f;
+        [Tooltip("Bottom of the band (island-local y; the shell reaches -0.13).")]
         public float grabBandBottom = -0.12f;
         [Tooltip("A pinch point counts as a pinch (not a palm grab) at this index pinch strength.")]
         [Range(0f, 1f)] public float pinchStrengthForPoint = 0.4f;
@@ -151,6 +152,7 @@ namespace Diorama
             ApplyMode(true);
             if (ghosts == null) ghosts = FindFirstObjectByType<GhostHands>();
             if (frame == null) frame = FindFirstObjectByType<IslandGrabFrame>();
+            WidenShell();
             if (placer != null) placer.Placed += LogFacing;
             // The base skirt's front middle (the two-hands tip); the grab frame glows, no gold sphere.
             Dialogue.RegisterTarget("islandRim", () =>
@@ -158,6 +160,39 @@ namespace Diorama
                 if (island == null) return null;
                 return island.transform.TransformPoint(new Vector3(0f, island.CapTopLocal - 0.05f, island.FootprintHalfSize.y));
             }, k => HintGlow = k, () => 0f);
+        }
+
+        /// <summary>
+        /// Step 14k: the ISDK shell boxes (step 8e: 4 cm inside the base edge, top 1.2 cm over the cap) grow inward and up
+        /// to hold the inward band at the smallest island size; <see cref="Filter"/> keeps only the band. Trigger boxes: no
+        /// raycast uses them (tile gaze and pokes have their own surfaces).
+        /// </summary>
+        void WidenShell()
+        {
+            if (rimColliders == null || island == null) return;
+            var half = island.FootprintHalfSize;
+            float minScale = Mathf.Max(0.05f, (placer != null ? placer.islandScale : transform.localScale.x) * minScaleFactor);
+            float edgeIn = grabInward / minScale - (frame != null ? frame.outset : 0.008f) + 0.005f; // local m inside the base edge
+            float top = island.CapTopLocal + grabAboveCap / minScale + 0.005f;
+            int widened = 0;
+            foreach (var c in rimColliders)
+            {
+                if (!(c is BoxCollider b)) continue;
+                Vector3 min = b.center - b.size * 0.5f, max = b.center + b.size * 0.5f;
+                max.y = Mathf.Max(max.y, top);
+                if (Mathf.Abs(Mathf.Abs(b.center.z) - half.y) < 0.01f)
+                {
+                    if (b.center.z > 0f) min.z = Mathf.Min(min.z, half.y - edgeIn);
+                    else max.z = Mathf.Max(max.z, -half.y + edgeIn);
+                }
+                else if (b.center.x > 0f) min.x = Mathf.Min(min.x, half.x - edgeIn);
+                else max.x = Mathf.Max(max.x, -half.x + edgeIn);
+                b.center = (min + max) * 0.5f;
+                b.size = max - min;
+                widened++;
+            }
+            Debug.Log($"[IslandHandle] Step 14k grab band: {grabInward * 100f:0.0} cm in from the line, {grabPastLine * 1000f:0} mm slack outside, " +
+                      $"up to {grabAboveCap * 100f:0.0} cm over the cap; {widened} shell boxes widened to {edgeIn:0.000} local inside the edge, top {top:0.000}.");
         }
 
         // ---- ITransformer ----
@@ -375,9 +410,9 @@ namespace Diorama
                     lineOutset = frame != null ? frame.outset : 0.008f,
                     lineRadius = frame != null ? frame.cornerRadius : 0.03f,
                     scale = Mathf.Max(1e-4f, t.lossyScale.x),
-                    outsideWorld = grabOutside,
-                    insideLocal = grabInside,
-                    bandTop = grabBandTop,
+                    outsideWorld = grabPastLine,
+                    insideWorld = grabInward,
+                    bandTop = island.CapTopLocal + grabAboveCap / Mathf.Max(1e-4f, t.lossyScale.x),
                     bandBottom = grabBandBottom,
                     cornerSize = cornerSize,
                     lipTop = t.InverseTransformPoint(new Vector3(t.position.x, PodLineY - lipBelowPods, t.position.z)).y,

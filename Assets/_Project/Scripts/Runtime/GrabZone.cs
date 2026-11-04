@@ -10,6 +10,9 @@ namespace Diorama
     /// the footprint above the cap). Corners: within <see cref="Shape.cornerSize"/> of a corner along both edges (the
     /// corner brackets); the lip: the front face between the corners, below <see cref="Shape.lipTop"/>.
     /// Replaces the step 8e collider shell + reach (up to ~5 cm out, and the palm counted during a pinch: ~10 cm).
+    /// Step 14k: a band **inward** only: from the line (plus <see cref="Shape.outsideWorld"/>, a few mm of tracking slack)
+    /// <see cref="Shape.insideWorld"/> world m in over the rim, at the cap's height too (14j cut everything above the cap,
+    /// so only the line itself grabbed). Outside the line is where walking and selecting pinches happen: never a grab.
     /// </summary>
     public static class GrabZone
     {
@@ -23,7 +26,7 @@ namespace Diorama
             public float lineRadius;    // its corner radius (local)
             public float scale;         // island lossy scale (local -> world)
             public float outsideWorld;  // reach outside the line (world m)
-            public float insideLocal;   // depth inside the line (local m)
+            public float insideWorld;   // depth inside the line (world m; step 14k: was local)
             public float bandTop, bandBottom; // local y
             public float cornerSize;    // local m along each edge
             public float lipTop;        // local y: the lip grabs below this
@@ -44,13 +47,15 @@ namespace Diorama
         public static bool OverPlayArea(Vector3 local, in Shape s) =>
             Mathf.Abs(local.x) < s.half.x && Mathf.Abs(local.z) < s.half.y && local.y > s.capTop - 0.003f;
 
-        /// <summary>In the band around the line (any side), ignoring corner / lip.</summary>
+        /// <summary>The band's depth inside the line, island-local m.</summary>
+        public static float InsideLocal(in Shape s) => s.insideWorld / Mathf.Max(1e-4f, s.scale);
+
+        /// <summary>In the band from the line inward (step 14k: above the cap too, up to bandTop), ignoring corner / lip.</summary>
         public static bool InBand(Vector3 local, in Shape s)
         {
-            if (OverPlayArea(local, s)) return false;
             if (local.y > s.bandTop || local.y < s.bandBottom) return false;
             float d = LineDistance(local, s);
-            return d <= s.outsideWorld / Mathf.Max(1e-4f, s.scale) && d >= -s.insideLocal;
+            return d <= s.outsideWorld / Mathf.Max(1e-4f, s.scale) && d >= -InsideLocal(s);
         }
 
         public static bool IsCorner(Vector3 local, in Shape s) =>
@@ -60,8 +65,9 @@ namespace Diorama
         {
             if (!InBand(local, s)) return Kind.None;
             if (IsCorner(local, s)) return Kind.Corner;
-            bool front = local.z > 0f && Mathf.Abs(local.x) <= s.half.x - s.cornerSize && LineDistance(local, s) >= -s.insideLocal &&
-                         local.z > s.half.y - s.insideLocal;
+            float inside = InsideLocal(s);
+            bool front = local.z > 0f && Mathf.Abs(local.x) <= s.half.x - s.cornerSize && LineDistance(local, s) >= -inside &&
+                         local.z > s.half.y - inside;
             return s.lipActive && front && local.y <= s.lipTop ? Kind.Lip : Kind.None;
         }
 
@@ -73,13 +79,13 @@ namespace Diorama
         {
             float sc = Mathf.Max(1e-4f, s.scale);
             float best = float.MaxValue;
-            float outLocal = s.outsideWorld / sc;
+            float outLocal = s.outsideWorld / sc, inLocal = InsideLocal(s);
             // Vertical gap to the band (the lip's band ends at lipTop).
             float bottom = s.bandBottom;
             float Gap(float top) => local.y > top ? local.y - top : local.y < bottom ? bottom - local.y : 0f;
             // Horizontal gap to the ring between -inside and +outside of the line.
             float d = LineDistance(local, s);
-            float ring = d > outLocal ? d - outLocal : d < -s.insideLocal ? -s.insideLocal - d : 0f;
+            float ring = d > outLocal ? d - outLocal : d < -inLocal ? -inLocal - d : 0f;
             // Along the edge, the gap to the nearest corner region / the lip span.
             float cx = Mathf.Max(0f, s.half.x - s.cornerSize - Mathf.Abs(local.x));
             float cz = Mathf.Max(0f, s.half.y - s.cornerSize - Mathf.Abs(local.z));
@@ -88,13 +94,12 @@ namespace Diorama
             best = Mathf.Min(best, corner);
             if (s.lipActive)
             {
-                float lipZ = local.z < s.half.y - s.insideLocal ? s.half.y - s.insideLocal - local.z : 0f;
+                float lipZ = local.z < s.half.y - inLocal ? s.half.y - inLocal - local.z : 0f;
                 float lipRing = Mathf.Max(ring, lipZ);
                 float lx = Mathf.Max(0f, Mathf.Abs(local.x) - (s.half.x - s.cornerSize));
                 float lip = new Vector3(lipRing, Gap(Mathf.Min(s.bandTop, s.lipTop)), lx).magnitude;
                 best = Mathf.Min(best, lip);
             }
-            if (OverPlayArea(local, s)) best = Mathf.Max(best, local.y - (s.capTop - 0.003f));
             return best * sc;
         }
     }
