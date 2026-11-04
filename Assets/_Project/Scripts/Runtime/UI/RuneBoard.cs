@@ -36,13 +36,14 @@ namespace Diorama
         public Vector3 offset = new Vector3(0f, 0.05f, 0.02f);
         public float fontSize = 0.11f;
 
-        [Header("Facing")]
-        [Tooltip("The board faces the head when shown, then drifts at most this far (degrees, yaw).")]
-        public float maxDrift = 15f;
-        public float driftSpeed = 1.5f;
-        [Tooltip("Nov 3: the head this far round the island from where the board was faced (a recenter, the island re-placed " +
-                 "while it showed) faces it at the head again (degrees).")]
-        public float refaceAngle = 35f;
+        [Header("Facing (step 14i: face once, then world-locked)")]
+        [Tooltip("The head this far round from the board's facing (degrees)...")]
+        public float turnAwayAngle = 30f;
+        [Tooltip("...for this long (s), with no hand within handClear of the board, faces it at the head again.")]
+        public float turnAwaySeconds = 1f;
+        public float handClear = 0.15f;
+        [Tooltip("The re-face turn's easing (s).")]
+        public float turnSeconds = 0.4f;
         public float maxTilt = 40f;
 
         [Header("Press")]
@@ -103,7 +104,8 @@ namespace Diorama
         Rune _hovered, _holding;
         int _holdHand = -1;
         readonly bool[] _wasPinching = { true, true };
-        float _baseYaw, _yaw, _tilt;
+        float _yaw, _tilt, _tiltTarget;
+        readonly BoardFacing _facing = new BoardFacing();
         Vector2 _min, _max;
 
         /// <summary>Gold while nothing is looked at (Continue on the title); null = nothing is gold until looked at.</summary>
@@ -366,7 +368,8 @@ namespace Diorama
             }
             _hovered = _holding = null;
             for (int h = 0; h < 2; h++) _wasPinching[h] = true; // a pinch already held doesn't count
-            Place(true);
+            // Step 14i: faces the head when it opens; a rebuild while showing (the music toggle) keeps its facing.
+            Place(!was);
             Paint();
         }
 
@@ -505,8 +508,10 @@ namespace Diorama
         }
 
         /// <summary>
-        /// Keeps the board above the middle of the near rim. It faces the head when shown, then only drifts within
-        /// <see cref="maxDrift"/>, and pitches back so its face points at the eyes (as the battle runes do).
+        /// Keeps the board above the middle of the near rim. Step 14i: it faces the head (yaw, and pitches back toward the
+        /// eyes) once when shown, then stays world-locked with the island; it turns to the head again only after the head
+        /// has been more than <see cref="turnAwayAngle"/> round for <see cref="turnAwaySeconds"/> with no hand within
+        /// <see cref="handClear"/> (<see cref="BoardFacing"/>), never while it is being touched.
         /// </summary>
         void Place(bool snap)
         {
@@ -524,23 +529,26 @@ namespace Diorama
                 {
                     float headYaw = Mathf.Atan2(away.x, away.z) * Mathf.Rad2Deg;
                     float tilt = Mathf.Clamp(Mathf.Atan2(below, away.magnitude) * Mathf.Rad2Deg, 0f, maxTilt);
+                    _facing.reFaceAngle = turnAwayAngle;
+                    _facing.reFaceSeconds = turnAwaySeconds;
                     if (snap)
                     {
-                        _baseYaw = _yaw = headYaw;
-                        _tilt = tilt;
+                        _facing.Open(headYaw);
+                        _yaw = headYaw;
+                        _tilt = _tiltTarget = tilt;
                     }
-                    else if (Mathf.Abs(Mathf.DeltaAngle(_baseYaw, headYaw)) > refaceAngle)
+                    else
                     {
-                        // Nov 3: the island moved under the board (recenter, startup placement): it stayed facing the old
-                        // spot, crossways or away. Face the head again (turn there at once when it was far off).
-                        Debug.Log($"[RuneBoard] {name}: the head is {Mathf.DeltaAngle(_baseYaw, headYaw):0} deg round from the board's facing: facing it again.");
-                        if (Mathf.Abs(Mathf.DeltaAngle(_yaw, headYaw)) > 60f) _yaw = headYaw;
-                        _baseYaw = headYaw;
+                        bool handNear = BoardFacing.NearestHand(_root, _min, _max) < handClear;
+                        if (_facing.Step(headYaw, handNear, Time.unscaledDeltaTime))
+                        {
+                            Debug.Log($"[RuneBoard] {name}: the head turned away for {turnAwaySeconds:0.#} s, no hand near: facing it again.");
+                            _tiltTarget = tilt;
+                        }
+                        float k = 1f - Mathf.Exp(-Time.unscaledDeltaTime * 3f / Mathf.Max(0.01f, turnSeconds));
+                        _yaw = Mathf.LerpAngle(_yaw, _facing.Yaw, k);
+                        _tilt = Mathf.Lerp(_tilt, _tiltTarget, k);
                     }
-                    float target = _baseYaw + Mathf.Clamp(Mathf.DeltaAngle(_baseYaw, headYaw), -maxDrift, maxDrift);
-                    float k = 1f - Mathf.Exp(-Time.unscaledDeltaTime * driftSpeed);
-                    _yaw = Mathf.LerpAngle(_yaw, target, k);
-                    _tilt = Mathf.Lerp(_tilt, tilt, k);
                 }
             }
             _root.rotation = island.transform.rotation * Quaternion.Euler(_tilt, _yaw, 0f);

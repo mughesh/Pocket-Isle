@@ -129,6 +129,7 @@ namespace Diorama
         public void Hide()
         {
             _shown = false;
+            _faced = false;
             Showing = null;
         }
 
@@ -142,9 +143,28 @@ namespace Diorama
             _root.localScale = Vector3.one * Mathf.SmoothStep(0f, 1f, _appear);
             var cam = Camera.main;
             if (cam == null) return;
+            // Step 14i: faces the head as it appears, then stays (re-faces only when the head turned away, no hand near).
             Vector3 away = _root.position - cam.transform.position;
-            if (away.sqrMagnitude > 1e-8f) _root.rotation = Quaternion.LookRotation(away, Vector3.up);
+            Vector3 flat = new Vector3(away.x, 0f, away.z);
+            if (flat.sqrMagnitude < 1e-8f) return;
+            float headYaw = Mathf.Atan2(flat.x, flat.z) * Mathf.Rad2Deg;
+            float pitch = Mathf.Atan2(-away.y, flat.magnitude) * Mathf.Rad2Deg;
+            bool first = !_faced;
+            if (!_faced)
+            {
+                _facing.Open(headYaw);
+                _faced = true;
+                _pitch = pitch;
+            }
+            else if (_facing.Step(headYaw, BoardFacing.NearestHand(_root, new Vector2(-0.08f, -0.06f), new Vector2(0.08f, 0.06f)) < _facing.handClear, Time.deltaTime))
+                _pitch = pitch;
+            var want = Quaternion.Euler(_pitch, _facing.Yaw, 0f);
+            _root.rotation = first ? want : Quaternion.Slerp(_root.rotation, want, 1f - Mathf.Exp(-Time.deltaTime * 8f));
         }
+
+        readonly BoardFacing _facing = new BoardFacing();
+        bool _faced;
+        float _pitch;
 
         public void Destroy()
         {

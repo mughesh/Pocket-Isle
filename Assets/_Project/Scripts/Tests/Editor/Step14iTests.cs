@@ -124,6 +124,24 @@ namespace Diorama.Tests
         }
 
         [Test]
+        public void Boards_FaceOnce_ThenStay_UntilTheHeadTurnsAwayWithNoHandNear()
+        {
+            var f = new BoardFacing();
+            f.Open(10f);
+            for (int i = 0; i < 100; i++) Assert.IsFalse(f.Step(35f, false, Dt), "25 deg off: never turns (no drift)");
+            Assert.AreEqual(10f, f.Yaw);
+            for (int i = 0; i < 100; i++) Assert.IsFalse(f.Step(60f, true, Dt), "a hand near: never turns, however long");
+            int turned = 0;
+            for (int i = 0; i < 25; i++) if (f.Step(60f, false, Dt)) turned++;
+            Assert.AreEqual(1, turned, "50 deg off for 1 s, hands away: faces the head once");
+            Assert.AreEqual(60f, f.Yaw);
+            // A glance away shorter than a second doesn't count.
+            for (int i = 0; i < 15; i++) Assert.IsFalse(f.Step(120f, false, Dt));
+            Assert.IsFalse(f.Step(60f, false, Dt));
+            for (int i = 0; i < 15; i++) Assert.IsFalse(f.Step(120f, false, Dt), "the timer restarted when the head came back");
+        }
+
+        [Test]
         public void Facing_FrontPointsAlongTheLineToTheHead_NotTheHeadForward()
         {
             // Head at the origin looking 30 deg right; the island placed in front of the gaze, but the head then shifts.

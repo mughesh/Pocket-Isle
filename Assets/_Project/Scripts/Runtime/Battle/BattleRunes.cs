@@ -40,10 +40,9 @@ namespace Diorama
         public float captionFontSize = 0.12f;
 
         [Header("Facing")]
-        [Tooltip("The row faces the head's direction at battle start, then drifts at most this far (degrees, yaw).")]
-        public float maxDrift = 15f;
-        [Tooltip("How fast it drifts toward the head (1/s).")]
-        public float driftSpeed = 1.5f;
+        [Tooltip("Step 14i: the row faces the head at battle start, then stays; it faces it again only when the head has been " +
+                 "this far round (degrees) for a second with no hand within 15 cm.")]
+        public float turnAwayAngle = 30f;
         [Tooltip("The row pitches back so its face points at the eyes, clamped to this (degrees).")]
         public float maxTilt = 40f;
 
@@ -98,7 +97,8 @@ namespace Diorama
         readonly bool[] _wasPinching = new bool[2];
         StageActor _avoidA, _avoidB;
         float _avoid;
-        float _baseYaw, _yaw, _tilt;
+        float _yaw, _tilt, _tiltTarget;
+        readonly BoardFacing _facing = new BoardFacing();
         bool _loggedPokeHover, _loggedPokeSelect, _reportedInteractors;
 
         void Awake()
@@ -459,7 +459,7 @@ namespace Diorama
 
         /// <summary>
         /// Keeps the row above the middle of the near rim (the side toward the player). It faces the head's direction
-        /// at battle start (yaw on the island), then only drifts within <see cref="maxDrift"/>; it pitches back so its face
+        /// at battle start (yaw on the island), then stays (step 14i, <see cref="BoardFacing"/>); it pitches back so its face
         /// points at the eyes (0 to <see cref="maxTilt"/>).
         /// </summary>
         void PlaceRow(bool snap)
@@ -480,15 +480,25 @@ namespace Diorama
                     float headYaw = Mathf.Atan2(away.x, away.z) * Mathf.Rad2Deg;
                     // Head above the row = positive pitch (top leans away, face turns up to the eyes).
                     float tilt = Mathf.Clamp(Mathf.Atan2(below, away.magnitude) * Mathf.Rad2Deg, 0f, maxTilt);
+                    _facing.reFaceAngle = turnAwayAngle;
                     if (snap)
                     {
-                        _baseYaw = _yaw = headYaw;
-                        _tilt = tilt;
+                        _facing.Open(headYaw);
+                        _yaw = headYaw;
+                        _tilt = _tiltTarget = tilt;
                     }
-                    float target = _baseYaw + Mathf.Clamp(Mathf.DeltaAngle(_baseYaw, headYaw), -maxDrift, maxDrift);
-                    float k = 1f - Mathf.Exp(-Time.deltaTime * driftSpeed);
-                    _yaw = Mathf.LerpAngle(_yaw, target, k);
-                    _tilt = Mathf.Lerp(_tilt, tilt, k);
+                    else
+                    {
+                        bool handNear = BoardFacing.NearestHand(_row, new Vector2(-0.16f, -0.02f), new Vector2(0.16f, 0.14f)) < _facing.handClear;
+                        if (_facing.Step(headYaw, handNear, Time.deltaTime))
+                        {
+                            Debug.Log("[BattleRunes] The head turned away for 1 s, no hand near: facing it again.");
+                            _tiltTarget = tilt;
+                        }
+                        float k = 1f - Mathf.Exp(-Time.deltaTime * 7.5f);
+                        _yaw = Mathf.LerpAngle(_yaw, _facing.Yaw, k);
+                        _tilt = Mathf.Lerp(_tilt, _tiltTarget, k);
+                    }
                 }
             }
             _row.rotation = island.transform.rotation * Quaternion.Euler(_tilt, _yaw, 0f);
