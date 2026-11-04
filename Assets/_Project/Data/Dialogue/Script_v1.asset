@@ -1739,6 +1739,30 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: A Bottlewhale! Look, there's a tiny ship inside it!
+  - id: temple.few4
+    once: 0
+    objective: 0
+    priority: 2
+    note: 'Nov 4: at Galewick''s open tower door with fewer than 4 Islings in the
+      pods; not in the Quick Journey'
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The Keeper up there is fierce. Let's bring at least 4 Islings.
+  - id: temple.few6
+    once: 0
+    objective: 0
+    priority: 2
+    note: 'Nov 4: at the forge or the lake temple door with fewer than 6 Islings
+      in the pods'
+    target: 
+    validWhile: 
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: A fierce Keeper waits inside. Let's fill all 6 pods first.
   - id: lm.temple.shut
     once: 0
     objective: 0

@@ -19,7 +19,7 @@ namespace Diorama
             public float minBelowEye;
             public float minAboveFloor;
 
-            public static Rule Default => new Rule { distance = 0.45f, topBelowEye = 0.30f, minBelowEye = 0.15f, minAboveFloor = 0.55f };
+            public static Rule Default => new Rule { distance = 0.55f, topBelowEye = 0.30f, minBelowEye = 0.15f, minAboveFloor = 0.55f };
         }
 
         /// <summary>Horizontal facing from a head pose (never zero).</summary>

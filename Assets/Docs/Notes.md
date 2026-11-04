@@ -1,4 +1,4 @@
--might get stuck in the swipe twice tutorial. I dont see a difference when swiped twice, we dont need to tell to swipe twice. Lets just say to swipe and tap to stop. And lets make sure that condition marks success for that instruction. O ruser will be stuck in that. 
-- mini text on the board is not at all visible. 
-- when plucking the owl, lets make sure the character doesnt move. The plucking action is taken as a pinch and it moves the character. 
-- The lanterns going into the statue, it looks like a overlapping mesh, looks very unprofessional and awkward. We can keep some kind of a gold crystal in the forehead of the statue, unlit, and when this lantern goes, it goes to this gold crystal, and lets it glow. No need to show the lantern. 
+- The level of the temple creatures is set to too low I believe. I think we should keep a limit for the minimum number of islings to be carried by the user to enter the tower. For the galewick, the minimum should be 4. And the others it could be 6.
+- Finale is good. The gold crystal on the statue forehead change is good. Would be better if the gold can look radiating, or glowing. it looks blank bright yellow.
+- The menu buttons can be bit spacious. U can see in this image how cloase they are. 
+- the recenter position for island, it can be little bit further from the user. it is very close to the belly now. Other fixes are good. 

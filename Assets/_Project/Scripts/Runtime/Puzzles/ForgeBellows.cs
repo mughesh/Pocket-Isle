@@ -84,6 +84,7 @@ namespace Diorama
         float _doorHeat, _sink;
         bool _open, _opening;
         bool _warnedHall;
+        float _fewNagged = -99f;
         float _coldSaidAt = -99f;
 
         WorldMap Map => pump != null ? pump.map : null;
@@ -377,6 +378,8 @@ namespace Diorama
                 _warnedHall = true;
                 return;
             }
+            // Nov 4: enough Islings in the pods first (TempleRules).
+            if (!TempleRules.Gate(false, ref _fewNagged, this)) return;
             var front = new Vector2Int(door.x + 1, door.y + 1);
             Debug.Log($"[ForgeBellows] Into the forge from c{tile.x} r{tile.y}.");
             swap.Enter(hall, hallEntry, new Vector2Int(0, -1), front, new Vector2Int(0, 1));

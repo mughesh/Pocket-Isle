@@ -184,9 +184,10 @@ namespace Diorama
             _wingL.glowBoostB = _wingR.glowBoostB = new Vector4(v * 0.8f, wings * 0.5f + b * 0.4f, 0f, 0f);
             if (_crystal != null)
             {
-                // Glow = the gem, Accent = its table facet.
+                // Glow = the gem, Accent = its table facet. Nov 4 (Mugesh: it read as flat bright yellow): the gem stays a
+                // deep amber so its facets show, the table burns brightest; the radiance is the finale's halo around it.
                 float c = Mathf.Clamp01(crystal);
-                _crystal.glowBoostB = new Vector4(c * (2.2f + 0.9f * beat), c * (1.6f + 0.7f * beat), 0f, 0f);
+                _crystal.glowBoostB = new Vector4(c * (0.9f + 0.6f * beat), c * (2f + 0.9f * beat), 0f, 0f);
             }
         }
 

@@ -1890,7 +1890,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.IslandPlacer
   island: {fileID: 270959109}
   islandScale: 0.6
-  distance: 0.45
+  distance: 0.55
   topBelowEye: 0.3
   minBelowEye: 0.15
   minAboveFloor: 0.55

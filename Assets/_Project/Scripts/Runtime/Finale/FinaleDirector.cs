@@ -111,7 +111,8 @@ namespace Diorama
         MeshRenderer _ringRenderer;
         MaterialPropertyBlock _block;
         float _ringAlpha;
-        BattleFx.Item _halo;
+        BattleFx.Item _halo, _shine, _pulse;
+        float _pulseAt = -1f, _twinkleAt;
         readonly bool[] _wasPinching = { true, true };
 
         float Unit => heart != null ? heart.UnitWorld : 0.05f;
@@ -213,6 +214,7 @@ namespace Diorama
 
         void LateUpdate()
         {
+            CrystalShine();
             if (!Running && Done) PostGame();
             else if (_collection != null) _collection.Hide();
         }
@@ -944,6 +946,60 @@ namespace Diorama
             }
             heart.crystal = 1f;
             if (ring != null) fx.Release(ring);
+        }
+
+        // ---- Nov 4: the lit crystal radiates ----
+
+        /// <summary>
+        /// While the forehead crystal is lit (Mugesh: it looked blank bright yellow): a soft gold halo breathing with the
+        /// heartbeat, a ring of light swelling out of it on each beat, and now and then a twinkle drifting up.
+        /// </summary>
+        void CrystalShine()
+        {
+            float c = heart != null && heart.Showing ? Mathf.Clamp01(heart.crystal) : 0f;
+            if (fx == null || c < 0.01f)
+            {
+                if (_shine != null) fx.Release(_shine);
+                if (_pulse != null) fx.Release(_pulse);
+                _shine = _pulse = null;
+                return;
+            }
+            Vector3 at = heart.SocketWorld;
+            float inv = 1f / Mathf.Max(1e-4f, fx.transform.lossyScale.x);
+            float phase = Time.time * heart.beatRate;
+            float beat = HeartOfWorld.Heartbeat(phase);
+            if (_shine == null)
+            {
+                _shine = fx.Get(BattleFx.Shape.Orb);
+                if (_shine != null) _shine.Set(new Color(1f, 0.88f, 0.55f), new Color(1f, 0.66f, 0.22f), 1f, 2.2f, 0.12f, 0.35f);
+            }
+            if (_shine != null)
+            {
+                _shine.transform.position = at;
+                _shine.transform.localScale = Vector3.one * (Unit * (0.42f + 0.1f * beat) * c * inv);
+                _shine.SetAlpha(c * (0.45f + 0.35f * beat));
+            }
+            // One ring per beat, facing the player, widening and fading.
+            float cycle = phase - Mathf.Floor(phase);
+            if (_pulse == null)
+            {
+                _pulse = fx.Get(BattleFx.Shape.Ring);
+                if (_pulse != null) _pulse.Set(new Color(1f, 0.92f, 0.6f), new Color(1f, 0.72f, 0.3f), 1f);
+            }
+            if (_pulse != null)
+            {
+                var cam = Camera.main;
+                Vector3 toward = cam != null ? cam.transform.position - at : island.transform.forward;
+                float k = Mathf.Clamp01((cycle - 0.08f) / 0.7f);
+                _pulse.transform.SetPositionAndRotation(at, Quaternion.FromToRotation(Vector3.up, toward));
+                _pulse.transform.localScale = Vector3.one * (Unit * Mathf.Lerp(0.25f, 1.1f, k) * inv);
+                _pulse.SetAlpha(cycle < 0.08f ? 0f : 0.5f * c * (1f - k));
+            }
+            if (Time.time >= _twinkleAt)
+            {
+                _twinkleAt = Time.time + Random.Range(0.25f, 0.6f);
+                fx.Burst(at + Random.insideUnitSphere * (Unit * 0.12f), 1, Gold, Unit * 0.12f, 0.9f, Unit * 0.025f);
+            }
         }
 
         // ---- the golden ring under the island ----

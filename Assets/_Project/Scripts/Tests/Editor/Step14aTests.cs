@@ -18,10 +18,11 @@ namespace Diorama.Tests
             IslandPlacement.Compute(head, look * Vector3.forward, look * Vector3.up, floor, Top, Rule);
 
         [Test]
-        public void Seated_45cmAhead_Top30cmBelowEyes_FacingThePlayer()
+        public void Seated_55cmAhead_Top30cmBelowEyes_FacingThePlayer()
         {
+            // Nov 4: 55 cm (45 sat at the belly).
             var p = Place(new Vector3(0f, 1.15f, 0f), Quaternion.identity);
-            Assert.AreEqual(0.45f, p.position.z, 1e-4f);
+            Assert.AreEqual(0.55f, p.position.z, 1e-4f);
             Assert.AreEqual(0f, p.position.x, 1e-4f);
             Assert.AreEqual(1.15f - 0.30f, p.position.y + Top, 1e-4f);
             Assert.AreEqual(-1f, (p.rotation * Vector3.forward).z, 1e-4f, "+Z faces the head");
@@ -64,7 +65,7 @@ namespace Diorama.Tests
         {
             var a = Place(new Vector3(0f, 1.2f, 0f), Quaternion.identity);
             var b = Place(new Vector3(1f, 1.2f, 2f), Quaternion.Euler(0f, 90f, 0f));
-            Assert.AreEqual(new Vector3(1.45f, a.position.y, 2f).ToString("F3"), b.position.ToString("F3"));
+            Assert.AreEqual(new Vector3(1.55f, a.position.y, 2f).ToString("F3"), b.position.ToString("F3"));
             Assert.IsFalse(IslandPlacement.Misplaced(new Vector3(1f, 1.2f, 2f), Vector3.right, Vector3.up, b.position));
             // The old spot after the shift: way off.
             Assert.IsTrue(IslandPlacement.Misplaced(new Vector3(1f, 1.2f, 2f), Vector3.right, Vector3.up, a.position));

@@ -55,10 +55,11 @@ namespace Diorama
 
         public static bool IsOpen { get; private set; }
 
-        static readonly Vector2 Pebble = new Vector2(0.024f, 0.024f);
-        static readonly Vector2 Choice = new Vector2(0.052f, 0.027f);
-        static readonly Vector2 Wide = new Vector2(0.078f, 0.03f);
-        const float RowGap = 0.037f, LabelX = -0.15f, FirstX = -0.045f;
+        // Nov 4 (Mugesh: the buttons sat too close): smaller runes, wider steps and rows, a wider board.
+        static readonly Vector2 Pebble = new Vector2(0.022f, 0.022f);
+        static readonly Vector2 Choice = new Vector2(0.048f, 0.025f);
+        static readonly Vector2 Wide = new Vector2(0.074f, 0.028f);
+        const float RowGap = 0.043f, LabelX = -0.16f, FirstX = -0.045f, PebbleStep = 0.036f, ChoiceStep = 0.062f, WideStep = 0.09f;
 
         Action _closed;
         TextMeshPro _creditText;
@@ -108,7 +109,7 @@ namespace Diorama
             _creditText = null;
             _pebbles.Clear();
             float top = 7f * RowGap;
-            runes.AddBacking(new Vector2(0f, top * 0.5f + 0.004f), new Vector2(0.34f, top + 0.06f));
+            runes.AddBacking(new Vector2(0f, top * 0.5f + 0.004f), new Vector2(0.37f, top + 0.06f));
             runes.AddText("<b>Settings</b>", new Vector2(0f, top + 0.004f), runes.fontSize * 1.1f);
             Volume("Music", VolumeSettings.Music, top - RowGap);
             Volume("Effects", VolumeSettings.Sfx, top - 2f * RowGap);
@@ -120,10 +121,10 @@ namespace Diorama
             // Step 14g: "Touch tiles to walk" ran into its first option.
             Choices("Touch to walk", top - 6f * RowGap, new[] { "On", "Off" },
                 () => GameSettings.TouchWalk ? 0 : 1, i => GameSettings.TouchWalk = i == 0);
-            runes.Add("Recenter island", new Vector2(-0.1275f, 0f), Wide, Recenter);
-            runes.Add("Controls", new Vector2(-0.0425f, 0f), Wide, () => BuildControls(BuildMain));
-            runes.Add("Credits", new Vector2(0.0425f, 0f), Wide, BuildCredits);
-            var back = runes.Add("Back", new Vector2(0.1275f, 0f), Wide, Close);
+            runes.Add("Recenter island", new Vector2(-1.5f * WideStep, 0f), Wide, Recenter);
+            runes.Add("Controls", new Vector2(-0.5f * WideStep, 0f), Wide, () => BuildControls(BuildMain));
+            runes.Add("Credits", new Vector2(0.5f * WideStep, 0f), Wide, BuildCredits);
+            var back = runes.Add("Back", new Vector2(1.5f * WideStep, 0f), Wide, Close);
             back.tint = new Color(0.62f, 0.55f, 0.4f);
             runes.Show();
         }
@@ -139,7 +140,7 @@ namespace Diorama
             for (int i = 0; i <= VolumeSettings.MaxLevel; i++)
             {
                 int level = i;
-                var r = runes.Add(i == 0 ? "off" : i.ToString(), new Vector2(FirstX + i * 0.034f, y), Pebble, () =>
+                var r = runes.Add(i == 0 ? "off" : i.ToString(), new Vector2(FirstX + i * PebbleStep, y), Pebble, () =>
                 {
                     VolumeSettings.SetLevel(bus, level);
                     PaintVolume(row, bus);
@@ -168,7 +169,7 @@ namespace Diorama
             for (int i = 0; i < names.Length; i++)
             {
                 int index = i;
-                row[i] = runes.Add(names[i], new Vector2(FirstX + 0.005f + i * 0.058f, y), Choice, () =>
+                row[i] = runes.Add(names[i], new Vector2(FirstX + 0.005f + i * ChoiceStep, y), Choice, () =>
                 {
                     set(index);
                     for (int k = 0; k < row.Length; k++) row[k].selected = k == current();

@@ -28,7 +28,7 @@ namespace Diorama
         public string openLine = "lm.temple.open";
 
         DoorGlow _glow;
-        float _nagged = -99f;
+        float _nagged = -99f, _fewNagged = -99f;
         bool _wasOpen;
 
         public bool IsOpen => PuzzleState.IsSolved(openWhen);
@@ -82,7 +82,8 @@ namespace Diorama
                 if (!string.IsNullOrEmpty(shutLine)) Dialogue.Say(shutLine);
                 return;
             }
-            Enter();
+            // Nov 4: enough Islings in the pods first (TempleRules).
+            if (TempleRules.Gate(false, ref _fewNagged, this)) Enter();
         }
 
         public void Enter()

@@ -55,7 +55,7 @@ namespace Diorama
         LoopAnchor _vaneSound;
         float _sink, _vanes, _vaneSpeed;
         bool _isOpen, _opening, _warnedHall;
-        float _nagged = -99f;
+        float _nagged = -99f, _fewNagged = -99f;
 
         public bool IsOpen => _isOpen;
         bool Here => island != null && map != null && island.world == map && !SceneSwap.IsInside && !SceneSwap.IsBusy;
@@ -124,7 +124,11 @@ namespace Diorama
         void OnBump(Vector2Int blocked)
         {
             if (!Here || !AtFront(explorer.Tile)) return;
-            if (_isOpen) Enter();
+            if (_isOpen)
+            {
+                // Nov 4: enough Islings in the pods first (TempleRules).
+                if (TempleRules.Gate(true, ref _fewNagged, this)) Enter();
+            }
             else if (!_opening) Try();
         }
 

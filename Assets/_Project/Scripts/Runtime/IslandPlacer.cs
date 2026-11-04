@@ -31,7 +31,7 @@ namespace Diorama
 
         [Header("Placement (step 14a)")]
         [Tooltip("Horizontal distance from the head to the island centre, in metres.")]
-        public float distance = 0.45f;
+        public float distance = 0.55f;
         [Tooltip("The island's top sits this far below eye height (m).")]
         public float topBelowEye = 0.30f;
         [Tooltip("...but never higher than this far below the eyes (m)...")]

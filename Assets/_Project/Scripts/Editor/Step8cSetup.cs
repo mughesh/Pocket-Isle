@@ -36,7 +36,7 @@ namespace Diorama.EditorTools
             {
                 Undo.RecordObject(placer, "Step 8c");
                 placer.belowEye = 0.35f;
-                placer.distance = 0.45f;
+                placer.distance = 0.55f;
                 EditorUtility.SetDirty(placer);
                 log.Append($"\n  island spawn: {placer.belowEye * 100f:0} cm below the eyes, {placer.distance * 100f:0} cm ahead (chest)");
             }
