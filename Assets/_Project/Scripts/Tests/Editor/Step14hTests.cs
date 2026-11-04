@@ -297,6 +297,63 @@ namespace Diorama.Tests
             Assert.IsNull(Journal.Hint(Species("Nowhere"), tables));
         }
 
+        // ---- E: temples warn; Keepers tuned to the team ----
+
+        [Test]
+        public void Temple_Warns_UnderTheSuggestedTeam_NeverInTheQuickJourney()
+        {
+            Assert.AreEqual(4, TempleRules.Needed(true, false));
+            Assert.AreEqual(6, TempleRules.Needed(false, false));
+            Assert.AreEqual(0, TempleRules.Needed(true, true), "no warning in the Quick Journey");
+            Assert.IsFalse(TempleRules.CanEnter(3, 4), "3 at Galewick: the warning");
+            Assert.IsTrue(TempleRules.CanEnter(6, 6), "a full team: straight in");
+            Assert.AreEqual("temple.warn", TempleRules.Line(6));
+            var s = UnityEditor.AssetDatabase.LoadAssetAtPath<DialogueScript>("Assets/_Project/Data/Dialogue/Script_v1.asset");
+            if (s == null) return;
+            var t = s.Find(TempleRules.WarnLine);
+            Assert.IsNotNull(t, "temple.warn (run the 14h setup)");
+            StringAssert.Contains("{keeper}", t.lines[0].text);
+            StringAssert.Contains("{n}", t.lines[0].text);
+        }
+
+        [Test]
+        public void KeeperScaling_MonotonicInTeamLevel_Capped()
+        {
+            foreach (var keeper in new[] { 8, 14, 13 })
+                foreach (float off in new[] { KeeperScaling.GaleowlOffset, KeeperScaling.HearthstagOffset, KeeperScaling.TidemotherOffset })
+                    for (int fighters = 1; fighters <= 3; fighters++)
+                    {
+                        float lastGap = float.NegativeInfinity;
+                        int lastLevel = 0;
+                        // Whole team levels (every fighter one level up). A single Isling's level-up moves the average
+                        // by a third and can meet the Keeper's whole-level step: then the edge dips for that one step.
+                        for (float team = 1f; team <= 30f; team += 1f)
+                        {
+                            int l = KeeperScaling.Level(keeper, team, fighters, KeeperScaling.Follow, off);
+                            float gap = team - l;
+                            Assert.GreaterOrEqual(gap, lastGap - 1e-4f, $"Keeper {keeper}, team {team}: levelling up never shrinks the gap");
+                            Assert.GreaterOrEqual(l, lastLevel, "it never drops as the team grows");
+                            Assert.LessOrEqual(l, keeper + KeeperScaling.Up, "capped above");
+                            Assert.GreaterOrEqual(l, keeper - KeeperScaling.Down, "floored below");
+                            lastGap = gap;
+                            lastLevel = l;
+                        }
+                    }
+        }
+
+        [Test]
+        public void KeeperScaling_TeamOfThreeStrongest_SmallTeamsEased()
+        {
+            var s = Species("T");
+            var team = new List<IslingInstance> { new IslingInstance(s, 5), new IslingInstance(s, 12), new IslingInstance(s, 10), new IslingInstance(s, 8) };
+            Assert.AreEqual(10f, KeeperScaling.TeamLevel(team), 1e-4f, "the three strongest: 12, 10, 8");
+            Assert.AreEqual(3, KeeperScaling.Fighters(team));
+            Assert.AreEqual(1, KeeperScaling.Fighters(new[] { new IslingInstance(s, 5) }));
+            int alone = KeeperScaling.Level(8, 8f, 1), three = KeeperScaling.Level(8, 8f, 3);
+            Assert.Less(alone, three, "a lone Isling meets an easier Keeper");
+            Assert.AreEqual(8, KeeperScaling.Level(8, 0f, 0), "no team: unchanged");
+        }
+
         [Test]
         public void Journal_Baked_46Islings_20_14_12()
         {

@@ -27,8 +27,9 @@ namespace Diorama.Tests
         [Test]
         public void Temple_LinePerMinimum()
         {
-            Assert.AreEqual("temple.few4", TempleRules.Line(4));
-            Assert.AreEqual("temple.few6", TempleRules.Line(6));
+            // Step 14h: one warning line at every door ({keeper}, {n} filled in).
+            Assert.AreEqual(TempleRules.WarnLine, TempleRules.Line(4));
+            Assert.AreEqual(TempleRules.WarnLine, TempleRules.Line(6));
         }
 
         [Test]

@@ -347,10 +347,8 @@ Step 11b, the hand moments (lesson lines stay pinned as a chip until the moment 
   - Spirit: A Sailfold! Folded from an old map, I bet. It sails anywhere.
 - `lm.meet.bottlewhale` · once (step 11c: the rare Bottlewhale)
   - Spirit: A Bottlewhale! Look, there's a tiny ship inside it!
-- `temple.few4` (Nov 4: at Galewick's open tower door with fewer than 4 Islings in the pods; not in the Quick Journey)
-  - Spirit: The Keeper up there is fierce. Let's bring at least 4 Islings.
-- `temple.few6` (Nov 4: at the forge or the lake temple door with fewer than 6 Islings in the pods)
-  - Spirit: A fierce Keeper waits inside. Let's fill all 6 pods first.
+- `temple.warn` (step 14h: at a temple door with fewer Islings in the pods than suggested: Galewick 4, the others 6; Go in / Not yet show; not in the Quick Journey)
+  - Spirit: {keeper} is strong. Most guardians bring {n} friends.
 - `lm.temple.shut` (step 11c: at the lake temple's door before the lagoon rises)
   - Spirit: The temple's sunk. The water's too low to open it.
 - `lm.temple.open` · once (the lagoon rises: the temple door surfaces and glows)

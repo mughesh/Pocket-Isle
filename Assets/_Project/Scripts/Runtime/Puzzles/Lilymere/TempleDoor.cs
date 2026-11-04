@@ -82,8 +82,8 @@ namespace Diorama
                 if (!string.IsNullOrEmpty(shutLine)) Dialogue.Say(shutLine);
                 return;
             }
-            // Nov 4: enough Islings in the pods first (TempleRules).
-            if (TempleRules.Gate(false, ref _fewNagged, this)) Enter();
+            // Step 14h: a small team gets a warning and Go in / Not yet (TempleRules).
+            if (TempleRules.Gate(false, "Tidemother", ref _fewNagged, this, Enter)) Enter();
         }
 
         public void Enter()

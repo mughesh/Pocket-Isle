@@ -378,11 +378,14 @@ namespace Diorama
                 _warnedHall = true;
                 return;
             }
-            // Nov 4: enough Islings in the pods first (TempleRules).
-            if (!TempleRules.Gate(false, ref _fewNagged, this)) return;
             var front = new Vector2Int(door.x + 1, door.y + 1);
-            Debug.Log($"[ForgeBellows] Into the forge from c{tile.x} r{tile.y}.");
-            swap.Enter(hall, hallEntry, new Vector2Int(0, -1), front, new Vector2Int(0, 1));
+            void Enter()
+            {
+                Debug.Log($"[ForgeBellows] Into the forge from c{tile.x} r{tile.y}.");
+                swap.Enter(hall, hallEntry, new Vector2Int(0, -1), front, new Vector2Int(0, 1));
+            }
+            // Step 14h: a small team gets a warning and Go in / Not yet (TempleRules).
+            if (TempleRules.Gate(false, "Hearthstag", ref _fewNagged, this, Enter)) Enter();
         }
 
         // ---- map space ----

@@ -1,25 +1,30 @@
+using System;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Diorama
 {
     /// <summary>
-    /// Nov 4 (Mugesh: the Keepers fell to a single Isling): a temple door lets the explorer in only with enough Islings in
-    /// the pods. Galewick's tower needs <see cref="GalewickIslings"/>, the forge and the lake temple
-    /// <see cref="OtherIslings"/>. The Quick Journey has no minimum (one Isling, timed). Short: the Spirit says
-    /// <see cref="Line"/> (at most every <see cref="NagSeconds"/>) and the door stays shut to walking in.
+    /// Nov 4 / step 14h: at a temple door with fewer Islings in the pods than most guardians bring (Galewick's tower
+    /// <see cref="GalewickIslings"/>, the forge and the lake temple <see cref="OtherIslings"/>), the Spirit warns
+    /// (<see cref="WarnLine"/>: "{keeper} is strong. Most guardians bring {n} friends.") and two tablets ask
+    /// <b>Go in</b> / <b>Not yet</b>. Go in enters as usual: a warning, never a wall (the Keeper is tuned to the team,
+    /// <see cref="KeeperScaling"/>). No warning in the Quick Journey.
     /// </summary>
     public static class TempleRules
     {
         public const int GalewickIslings = 4, OtherIslings = 6;
-        public const float NagSeconds = 8f;
+        public const float AskAgainSeconds = 3f;
+        public const string WarnLine = "temple.warn", GoIn = "Go in", NotYet = "Not yet";
 
-        /// <summary>Islings needed at a temple door (0 = no minimum).</summary>
+        /// <summary>Islings suggested at a temple door (0 = no warning).</summary>
         public static int Needed(bool galewick, bool quick) => quick ? 0 : galewick ? GalewickIslings : OtherIslings;
 
+        /// <summary>Enough Islings: no question, straight in.</summary>
         public static bool CanEnter(int carried, int needed) => carried >= needed;
 
-        /// <summary>The Spirit's line when short.</summary>
-        public static string Line(int needed) => needed >= OtherIslings ? "temple.few6" : "temple.few4";
+        /// <summary>The Spirit's warning (the same line at every door; {keeper} and {n} are filled in).</summary>
+        public static string Line(int needed) => WarnLine;
 
         /// <summary>Islings in the pods (fainted ones count: the shrine heals them).</summary>
         public static int Carried(Party party)
@@ -34,10 +39,10 @@ namespace Diorama
         static Party _party;
 
         /// <summary>
-        /// True when the explorer may walk in. Otherwise the Spirit explains (throttled by <paramref name="nagged"/>) and
-        /// the caller keeps the door shut.
+        /// True when the explorer may walk straight in. Otherwise (a small team) the Spirit warns, Go in / Not yet show,
+        /// and <paramref name="enter"/> runs on Go in. <paramref name="asked"/> keeps a bump right after "Not yet" quiet.
         /// </summary>
-        public static bool Gate(bool galewick, ref float nagged, Object door)
+        public static bool Gate(bool galewick, string keeper, ref float asked, Object door, Action enter)
         {
             int needed = Needed(galewick, QuickJourney.Active);
             if (needed <= 0) return true;
@@ -49,11 +54,21 @@ namespace Diorama
             }
             int carried = Carried(_party);
             if (CanEnter(carried, needed)) return true;
-            if (Time.time - nagged >= NagSeconds)
+            if (ChoiceBoard.IsOpen || Time.time - asked < AskAgainSeconds) return false;
+            asked = Time.time;
+            Dialogue.SetVar("keeper", keeper);
+            Dialogue.SetVar("n", needed.ToString());
+            Dialogue.Say(WarnLine);
+            string name = door != null ? door.name : "door";
+            Debug.Log($"[TempleRules] {name}: {carried} Isling(s) in the pods, most guardians bring {needed}: Go in / Not yet.");
+            if (!ChoiceBoard.Ask(GoIn, () =>
+                {
+                    Debug.Log($"[TempleRules] {name}: Go in with {carried}.");
+                    enter?.Invoke();
+                }, NotYet, () => Debug.Log($"[TempleRules] {name}: not yet.")))
             {
-                nagged = Time.time;
-                Dialogue.Say(Line(needed));
-                Debug.Log($"[TempleRules] {door.name}: {carried} Isling(s) in the pods, needs {needed}. Door stays shut.", door);
+                // No board to ask with: a warning must never become a wall.
+                return true;
             }
             return false;
         }

@@ -126,8 +126,8 @@ namespace Diorama
             if (!Here || !AtFront(explorer.Tile)) return;
             if (_isOpen)
             {
-                // Nov 4: enough Islings in the pods first (TempleRules).
-                if (TempleRules.Gate(true, ref _fewNagged, this)) Enter();
+                // Step 14h: a small team gets a warning and Go in / Not yet (TempleRules).
+                if (TempleRules.Gate(true, "Galeowl", ref _fewNagged, this, Enter)) Enter();
             }
             else if (!_opening) Try();
         }

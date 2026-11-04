@@ -481,6 +481,12 @@ namespace Diorama
             int level = ShardScaling.KeeperLevel(keeperLevel, ownShard);
             // Nov 3: easier in the Quick Journey (no gift any more; its realm only).
             level = QuickJourney.KeeperLevel(level);
+            // Step 14h: the full game's Keeper follows the team at the door (KeeperScaling; the Quick Journey keeps its fixed one).
+            int shardLevel = level;
+            var party = FindFirstObjectByType<Party>();
+            if (!QuickJourney.Active && party != null) level = KeeperScaling.Level(level, party.members, keeperSpecies);
+            if (level != shardLevel)
+                Debug.Log($"[KeeperHall] Tuned to the team: {KeeperScaling.Fighters(party.members)} fighter(s), top-3 Lv {KeeperScaling.TeamLevel(party.members):0.0}: Keeper Lv {shardLevel} -> {level}.");
             var fight = new EncounterDirector.KeeperFight
             {
                 keeper = new IslingInstance(keeperSpecies, level),

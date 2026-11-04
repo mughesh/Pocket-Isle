@@ -139,6 +139,21 @@ namespace Diorama.EditorTools
             }
         }
 
+        /// <summary>The temple warning as a door shows it (arg "keeper,n"; "yes" / "no" picks).</summary>
+        public static void Warn()
+        {
+            if (Arg == "yes" || Arg == "no")
+            {
+                ChoiceBoard.DebugPick(Arg == "yes");
+                return;
+            }
+            var a = Arg.Split(',');
+            Dialogue.SetVar("keeper", a[0]);
+            Dialogue.SetVar("n", a.Length > 1 ? a[1] : "4");
+            Dialogue.Say(TempleRules.WarnLine);
+            ChoiceBoard.Ask(TempleRules.GoIn, () => Debug.Log("[Step14hDebug] Go in."), TempleRules.NotYet, () => Debug.Log("[Step14hDebug] Not yet."));
+        }
+
         /// <summary>Which pod is due, whether the show runs, the pinned objective.</summary>
         public static void State()
         {
