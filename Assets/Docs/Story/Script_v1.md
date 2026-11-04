@@ -115,8 +115,8 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
 - `party.full` · once: Spirit: Your pods are full. New friends will wait for you at the Hearth Lodge.
 - `evolve.first` · once · → nearPad (first evolution)
   - Spirit: Look at that! They've grown into something new.
-- `evolve.ready` · objective · → evolvePod (step 14h: a pod Isling is ready to evolve and it's calm; pinned until it evolves, chip "Hold it"; {name} = its name)
-  - Spirit: {name} is glowing... it's ready to grow!
+- `evolve.ready` · objective · → evolvePod (step 14h: a pod Isling is ready to evolve and it's calm; pinned until it evolves, chip "Pod on your palm", "Turn your palm up" once held; Nov 4: a ghost hand grabs the pod and turns palm up; {name} = its name)
+  - Spirit: {name} is glowing! Take its pod and hold it on your open palm.
 - `evolve.done` (step 14h: after an evolution in the palm; {name} = the new form)
   - Spirit: {name}! So strong now.
 - `journal.first` · once · while !tutorial (step 14h: the first "New Isling!" toast)

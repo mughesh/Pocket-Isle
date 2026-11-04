@@ -36,6 +36,7 @@ namespace Diorama
         static readonly int SizeId = Shader.PropertyToID("_Size");
         static readonly int StateId = Shader.PropertyToID("_State");
         static readonly int InlayId = Shader.PropertyToID("_Inlay");
+        static readonly int FaceId = Shader.PropertyToID("_Face");
         static Mesh _mesh;
 
         /// <summary>One tablet: its renderer and how it looks now.</summary>
@@ -46,20 +47,24 @@ namespace Diorama
             public Vector2 size;
             /// <summary>Inlay colour and how much it shows (primary gold 1; 0 = a plain carved groove).</summary>
             public Color inlay;
+            /// <summary>Nov 4: the stone face's colour (a = how much; 0 = plain stone): element tablets, battle moves.</summary>
+            public Color face;
             readonly MaterialPropertyBlock _block = new MaterialPropertyBlock();
             Vector4 _state = new Vector4(-1f, 0f, 0f, 0f);
-            Color _inlay;
+            Color _inlay, _face;
 
             /// <summary>hover 0..1 (gold rim, brighter), dim 0..1 (disabled), fill 0..1 (hold runes), glow 0..1 (a pulse).</summary>
             public void Paint(float hover, float dim, float fill, float glow)
             {
                 var s = new Vector4(hover, dim, fill, glow);
-                if (s == _state && inlay == _inlay) return;
+                if (s == _state && inlay == _inlay && face == _face) return;
                 _state = s;
                 _inlay = inlay;
+                _face = face;
                 _block.SetVector(SizeId, new Vector4(size.x, size.y, 0f, 0f));
                 _block.SetVector(StateId, s);
                 _block.SetColor(InlayId, inlay);
+                _block.SetColor(FaceId, face);
                 renderer.SetPropertyBlock(_block);
             }
 

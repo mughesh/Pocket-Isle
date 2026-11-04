@@ -10,7 +10,7 @@ namespace Diorama
     /// <summary>
     /// Growth outside the battle flow. Step 14h: a party Isling that is <b>due</b> to evolve (any cause; never saved, see
     /// <see cref="Progression.NextDue"/>) makes its rim pod glow gold and pulse, and when calm the Spirit says
-    /// <c>evolve.ready</c> (pinned, chip "Hold it"). The palm moment: grab the glowing pod and turn the hand palm up: the pod
+    /// <c>evolve.ready</c> (pinned, chip "Pod on your palm", then "Turn your palm up" once held; Nov 4: a ghost grabs the pod and turns palm up). The palm moment: grab the glowing pod and turn the hand palm up: the pod
     /// settles on the palm, opens, the Isling stands there and evolves with the full show, then curls back into its pod,
     /// which flies home. Fallbacks: look + pinch the glowing pod (the show floats over the island), or held 6 s without a
     /// palm up (the show runs over the hand). One at a time; never forced.
@@ -19,7 +19,12 @@ namespace Diorama
     /// </summary>
     public class GrowthDirector : MonoBehaviour
     {
-        public const string ReadyLine = "evolve.ready", FirstLine = "evolve.first", DoneLine = "evolve.done", Chip = "Hold it";
+        public const string ReadyLine = "evolve.ready", FirstLine = "evolve.first", DoneLine = "evolve.done", Chip = "Pod on your palm";
+        /// <summary>Nov 4: the chip once the glowing pod is in the hand; the ghost that shows the whole move.</summary>
+        public const string HeldChip = "Turn your palm up", GhostClip = "grab_palm_up";
+
+        [Tooltip("Nov 4: the ghost hand showing grab + palm up on the glowing pod (found in the scene when empty).")]
+        public GhostHands ghosts;
 
         public Party party;
         public PodRack pods;
@@ -77,6 +82,8 @@ namespace Diorama
                 return;
             }
             if (hud == null) hud = FindFirstObjectByType<BattleHud>();
+            if (ghosts == null) ghosts = FindFirstObjectByType<GhostHands>();
+            if (ghosts == null) Debug.LogError("[GrowthDirector] No GhostHands in the scene: the glowing pod gets no ghost hand.", this);
             pods.DuePicked += OnDuePicked;
             Dialogue.RegisterTarget("evolvePod", () => Due >= 0 && !Showing ? pods.SlotWorld(Due) : null, k => { },
                 () => pods.Pod(Mathf.Max(0, Due)) != null ? pods.Pod(Mathf.Max(0, Due)).WorldRadius * 1.3f : 0.02f);
@@ -154,13 +161,40 @@ namespace Diorama
             if (Due < 0 || encounters.InBattle)
             {
                 if (ours) Dialogue.Unpin();
+                Ghost(false);
                 return;
             }
-            if (ours || !Calm || Dialogue.IsPinned) return;
+            if (ours)
+            {
+                // Nov 4 (Mugesh: the instruction and a ghost are needed): the ghost grabs the glowing pod and turns palm
+                // up while it waits; once the pod is in the hand the chip says the last step.
+                bool held = pods.IsHeld(Due) || debugPalm.HasValue;
+                Ghost(!held && Available);
+                if (held != _chipHeld)
+                {
+                    _chipHeld = held;
+                    Dialogue.SetChip(held ? HeldChip : Chip);
+                }
+                return;
+            }
+            Ghost(false);
+            if (!Calm || Dialogue.IsPinned) return;
+            _chipHeld = false;
             var c = party.At(Due);
             Dialogue.SetVar("name", c.Name);
             Dialogue.Pin(new[] { ReadyLine }, Chip);
             Dialogue.Repeat(ReadyLine);
+        }
+
+        bool _chipHeld, _ghostOn;
+
+        /// <summary>The grab + palm-up ghost on the glowing pod (only hides the ghost when it was ours).</summary>
+        void Ghost(bool on)
+        {
+            if (ghosts == null || on == _ghostOn) return;
+            _ghostOn = on;
+            if (on) ghosts.Show(GhostClip, GhostPlace.AtTarget, "evolvePod", 1f, DominantHand.Left, false);
+            else ghosts.Hide();
         }
 
         void OnDuePicked(int slot)
@@ -262,6 +296,7 @@ namespace Diorama
             _lastPalm = _lastNormal = default;
             palmUp.Reset();
             _heldFor = 0f;
+            Ghost(false);
             StartCoroutine(Show(slot, where, anchor, up));
         }
 

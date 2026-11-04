@@ -81,6 +81,9 @@ namespace Diorama
             Journal.CaughtIds = () => _caught;
             Journal.SeenIds = () => encounters != null ? encounters.Seen : (ICollection<string>)Array.Empty<string>();
             Journal.Owned = () => party.members.Concat(party.storage);
+            // Nov 4 (Mugesh: the starter showed greyed out): the starter is added after the load, so anything that joins
+            // the pods or the lodge counts as caught at once (catches still go through OnCaught for the toast).
+            party.Changed += OnPartyChanged;
             Progression.Evolved += OnEvolved;
             JournalToast.Ensure(explorer != null ? explorer.island : null);
             Load();
@@ -108,6 +111,7 @@ namespace Diorama
         void OnDestroy()
         {
             Progression.Evolved -= OnEvolved;
+            if (party != null) party.Changed -= OnPartyChanged;
             PuzzleState.Changed -= OnPuzzleChanged;
             if (shrines != null) shrines.Rested -= OnRested;
             if (encounters != null)
@@ -283,6 +287,19 @@ namespace Diorama
         {
             int added = Journal.Migrate(_caught, party.members.Concat(party.storage));
             if (added > 0) Debug.Log($"[GameSave] {added} species from the pods and the lodge count as caught (Journal).");
+        }
+
+        /// <summary>Nov 4: a new species in the pods or the lodge (the starter, a catch, a Dev add) is a Journal entry with its toast.</summary>
+        void OnPartyChanged()
+        {
+            if (!_ready) return;
+            foreach (var c in party.members.Concat(party.storage))
+                if (c != null && c.species != null && _caught.Add(SpeciesRegistry.IdOf(c.species)))
+                {
+                    Debug.Log($"[GameSave] {c.species.displayName} joined: it counts as caught (Journal).");
+                    // The starter is picked inside the opening: no toast over it.
+                    if (!Opening.InProgress) Journal.RaiseNewEntry(c.species);
+                }
         }
 
         static string Describe(List<IslingInstance> list) =>

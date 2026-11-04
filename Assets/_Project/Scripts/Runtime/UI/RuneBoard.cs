@@ -58,6 +58,8 @@ namespace Diorama
             /// <summary>Lit (a toggle that is on, a lit volume pebble).</summary>
             public bool selected;
             public Color tint = DefaultTint;
+            /// <summary>Nov 4: the tablet face's colour (a = how much; clear = plain stone), e.g. the Journal's element tablets.</summary>
+            public Color face = Color.clear;
             /// <summary>Step 14f: the main action (Resume, Continue): a gold inlay round its face (make it a little larger too).</summary>
             public bool primary;
             /// <summary>Step 14f: shown dimmed, can't be picked.</summary>
@@ -596,6 +598,7 @@ namespace Diorama
                     var inlay = r.primary ? TabletKit.GoldInlay : r.selected ? Gold : r.tint;
                     inlay.a = r.primary || r.selected ? 1f : tinted ? 0.7f : 0f;
                     r.tablet.inlay = inlay;
+                    r.tablet.face = r.face;
                     // Step 14g: a selected tablet (the chosen option, a lit volume pebble) is filled gold, its label dark.
                     r.tablet.Paint(r.hover, r.disabled ? 1f : 0f, r.selected ? 1f : r.fill, 0f);
                     var c = r.selected ? TabletKit.LabelOnGold : Color.Lerp(TabletKit.LabelColor, TabletKit.LabelLit, r.hover);

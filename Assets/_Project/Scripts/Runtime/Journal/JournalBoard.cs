@@ -53,8 +53,9 @@ namespace Diorama
             go.layer = template.gameObject.layer;
             var board = go.AddComponent<RuneBoard>();
             JsonUtility.FromJsonOverwrite(JsonUtility.ToJson(template), board);
-            // Taller than the menu: in front of the near rim and nearly upright, so the near trees never cut into it.
-            board.offset = template.offset + new Vector3(0f, 0.01f, 0.09f);
+            // Taller than the menu and nearly upright. Nov 4 (Mugesh: it came in front of the menu, big in his face): back over
+            // the island, 12 cm behind the near rim, and lifted 8 cm so the near trees stay under it.
+            board.offset = template.offset + new Vector3(0f, 0.08f, -0.12f);
             board.maxTilt = Mathf.Min(template.maxTilt, 18f);
             var j = go.AddComponent<JournalBoard>();
             j.runes = board;
@@ -148,6 +149,10 @@ namespace Diorama
                 var r = runes.Add($"{e} {Count(e)}", new Vector2((k - 1.5f) * TabStep, 0f), Tab, () => ShowElement(e));
                 r.selected = e == _element;
                 r.tint = ElementStyle.Of(e).burst;
+                // Nov 4 (Mugesh: only a coloured border): the tablet's face in its element colour.
+                var face = ElementStyle.Of(e).main;
+                face.a = 0.85f;
+                r.face = face;
             }
             var close = runes.Add("Close", new Vector2(1.5f * TabStep, 0f), Tab, Close);
             close.tint = new Color(0.62f, 0.55f, 0.4f);

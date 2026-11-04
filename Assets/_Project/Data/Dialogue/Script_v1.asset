@@ -585,13 +585,14 @@ MonoBehaviour:
     objective: 1
     priority: 1
     note: 'step 14h: a pod Isling is ready to evolve and it''s calm; pinned until
-      it evolves, chip "Hold it"; {name} = its name'
+      it evolves, chip "Pod on your palm", "Turn your palm up" once held; Nov 4:
+      a ghost hand grabs the pod and turns palm up; {name} = its name'
     target: evolvePod
     validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: '{name} is glowing... it''s ready to grow!'
+      text: '{name} is glowing! Take its pod and hold it on your open palm.'
   - id: evolve.done
     once: 0
     objective: 0

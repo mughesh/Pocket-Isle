@@ -172,6 +172,17 @@ written for Galeowl Lv 8):
     - the ghost lifts its palm to the crystal;
     - with the Spirit on your palm: the line about the gold crystal, the pulsing crystal and the dotted arc.
 
+## Nov 4 feedback fixes (headset test pending)
+
+| Note | Fix |
+|---|---|
+| Menu tablets too close | 2.4 cm between tablets (was 0.8). Shot `nov4_menu.png`. |
+| Journal in front of the menu, in your face | Back over the island (12 cm behind the near rim, 8 cm higher), behind the menu row. Shots `nov4_journal*.png`. |
+| Starter greyed out in the Journal | Anything joining the pods or lodge (the starter, Dev adds) counts as caught at once; "New Isling!" for it, except during the opening. |
+| Forge ember a ball from far off | Its glow halo (not clipped to the island window) only shows while the vent is in the window or it's in a hand. |
+| Element / move tablets only had a coloured border | The tablet face takes the element colour (Tablet shader `_Face`): Journal Fire / Water / Wind, battle moves (not Run). Shot `nov4_battle2.png`. |
+| Evolving needs the instruction and a ghost | Line: "{name} is glowing! Take its pod and hold it on your open palm." Chip "Pod on your palm", then "Turn your palm up" once held. New ghost clip `grab_palm_up` on the glowing pod (grab, lift, roll palm up). Shots `nov4_ghost_*.png`. |
+
 ## Open items
 
 - **Missing sounds** (in `Audio/PhaseB-Hooks.md`): Journal open / page, the toast chime, a glowing-pod loop. Placeholders:

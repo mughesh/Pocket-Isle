@@ -4,7 +4,8 @@
 // Vertex colour alpha picks the part: 0 stone, 0.25 moss, 0.5 inlay groove, 0.75 rim (the outline, gold when looked
 // at), 1 halo (dark shadow + a faint warm glow round it, so the slab never blends into a white wall or a dark room).
 // Toon banded with its own light (board space): looks the same in any room. Per instance: _Size, _State (hover, dim,
-// fill, press glow), _Inlay (rgb, a = how much the inlay shows its colour: primary gold, element, a lit toggle).
+// fill, press glow), _Inlay (rgb, a = how much the inlay shows its colour: primary gold, element, a lit toggle),
+// _Face (Nov 4: rgb, a = how much the stone face takes that colour: the element tablets and battle moves).
 // Queued with the HUD before other transparents (labels draw on top); writes depth so the slab hides its own back.
 Shader "Diorama/Tablet"
 {
@@ -49,6 +50,7 @@ Shader "Diorama/Tablet"
                 UNITY_DEFINE_INSTANCED_PROP(float4, _Size)
                 UNITY_DEFINE_INSTANCED_PROP(float4, _State)
                 UNITY_DEFINE_INSTANCED_PROP(float4, _Inlay)
+                UNITY_DEFINE_INSTANCED_PROP(float4, _Face)
             UNITY_INSTANCING_BUFFER_END(Props)
 
             struct Attributes
@@ -93,6 +95,7 @@ Shader "Diorama/Tablet"
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
                 float4 state = UNITY_ACCESS_INSTANCED_PROP(Props, _State);
                 float4 inlay = UNITY_ACCESS_INSTANCED_PROP(Props, _Inlay);
+                float4 face = UNITY_ACCESS_INSTANCED_PROP(Props, _Face);
                 float hover = state.x, dim = state.y, fill = state.z, glow = state.w;
                 float part = i.color.a;
 
@@ -116,6 +119,9 @@ Shader "Diorama/Tablet"
                     // Stone: the face dark (labels read on it), bevels catch the light.
                     float edge = saturate(1.0 + n.z * 1.25);
                     col = lerp(_Stone.rgb, _StoneLight.rgb, edge * saturate(ndl + 0.2)) * i.color.rgb * band;
+                    // Nov 4: a coloured face (element): deep in the middle so the cream label reads, bright on the bevels.
+                    float3 tinted = lerp(face.rgb * 0.5, face.rgb * 0.95 + 0.05, edge * saturate(ndl + 0.2)) * band;
+                    col = lerp(col, tinted, face.a);
                     // Hold runes fill gold from the bottom up.
                     float filled = step(i.face.y, fill) * step(0.001, fill);
                     col = lerp(col, _Gold.rgb * 0.8, filled * 0.75);

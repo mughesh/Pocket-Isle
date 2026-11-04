@@ -352,7 +352,12 @@ namespace Diorama
                 _ember.windowClip = true;
                 _ember.Place(new Vector2(vent.x, vent.y), ventHeight - emberSize * 0.3f, Quaternion.Euler(0f, Time.time * 20f, 0f), true, emberSize);
             }
-            Halo(pulse, carried);
+            // Nov 4 (Mugesh: the ember showed as a ball from far off): the ember is clipped to the island window, its halo
+            // isn't, so the halo only shows while the vent is in the window (or the ember is in a hand).
+            bool inWindow = carried || (window == null || !window.IsZoomed) &&
+                            island.FootprintContains(island.TileToLocal(vent, island.Content.capHeight));
+            if (inWindow) Halo(pulse, carried);
+            else ReleaseHalo();
             if (carried && fx != null && Time.time >= _sparkAt)
             {
                 _sparkAt = Time.time + 0.16f;

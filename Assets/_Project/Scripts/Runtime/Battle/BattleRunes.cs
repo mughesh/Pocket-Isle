@@ -572,6 +572,10 @@ namespace Diorama
                     var inlay = r.tint;
                     inlay.a = i == RunIndex ? 0f : 0.9f;
                     r.tablet.inlay = inlay;
+                    // Nov 4 (Mugesh: only a coloured border): the whole face takes the move's element colour.
+                    var face = r.tint;
+                    face.a = i == RunIndex ? 0f : 0.8f;
+                    r.tablet.face = face;
                     r.tablet.Paint(r.hover, on ? 0f : 0.65f, 0f, 0.7f * r.pulse);
                     var lc = Color.Lerp(TabletKit.LabelColor, TabletKit.LabelLit, Mathf.Max(r.hover, r.pulse));
                     lc.a = on ? 1f : 0.55f;

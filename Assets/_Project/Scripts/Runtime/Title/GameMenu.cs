@@ -126,7 +126,8 @@ namespace Diorama
             runes.Clear();
             var size = new Vector2(0.072f, 0.034f);
             var big = new Vector2(0.08f, 0.038f);
-            const float gap = 0.008f, side = 0.034f, apart = 0.03f;
+            // Nov 4 (Mugesh: Resume and the others too close): 2.4 cm between tablets (was 0.8).
+            const float gap = 0.024f, side = 0.034f, apart = 0.04f;
             float width = big.x + 2f * (size.x + gap) + gap + side;
             float x = -width * 0.5f;
             var resume = runes.Add("Resume", new Vector2(x + big.x * 0.5f, 0f), big, () => Close("Resume"));

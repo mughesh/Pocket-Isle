@@ -40,7 +40,7 @@ namespace Diorama
         {
             "poke", "grab_rim_slide", "grab_drop", "thumb_swipe_forward", "thumb_tap", "pinch", "grab_toss", "grab_flick", "palm_hover", "hands_up",
             "finger_flick", "palm_sweep", "pinch_pull", "cup_hands", "palm_carry", "pinch_drop", "pinch_lift", "cup_scoop", "cup_carry",
-            "palm_lift",
+            "palm_lift", "grab_palm_up",
         };
 
         /// <summary>Builds a placeholder clip from the right hand's rest pose (joint-local), or null for an unknown name.</summary>
@@ -415,6 +415,27 @@ namespace Diorama
                         Open(0.36f, new Vector3(0f, -0.012f, 0f), f, up, 0.36f), Open(0.58f, new Vector3(0f, 0.06f, 0.01f), f, up, 0.36f),
                         Open(0.7f, new Vector3(0f, 0.065f, 0.02f), f, up, 0.36f), Open(0.86f, new Vector3(0.01f, 0.06f, 0.02f), f, tip, 0.3f),
                         Open(1f, new Vector3(0f, 0.05f, -0.02f), f, up, 0.3f),
+                    };
+                }
+                case "grab_palm_up":
+                {
+                    // Nov 4 (Mugesh: evolving needs the instruction and a ghost): grab the glowing pod, lift it toward you,
+                    // roll the hand palm up (back of the hand to the right half way, then down) and hold it there.
+                    seconds = 3.2f;
+                    keyTime = 0.26f;
+                    Vector3 f = new Vector3(0f, -0.45f, 1f), d = new Vector3(0f, 1f, 0.45f);
+                    Vector3 lift = new Vector3(0f, 0.07f, -0.1f), flat = new Vector3(0f, 0.1f, 1f);
+                    Key Cup(float t, Vector3 p, Vector3 dorsal) => new Key
+                    {
+                        t = t, pos = p, fingers = flat, dorsal = dorsal,
+                        thumb = 0.35f, index = 0.4f, middle = 0.45f, ring = 0.5f, pinky = 0.55f, swing = 0.1f,
+                    };
+                    return new List<Key>
+                    {
+                        Open(0f, new Vector3(0f, 0.04f, -0.07f), f, d), Open(0.18f, new Vector3(0f, 0.01f, -0.02f), f, d), Open(0.26f, Vector3.zero, f, d),
+                        Closed(0.34f, Vector3.zero, f, d), Closed(0.5f, lift, flat, Vector3.up),
+                        Cup(0.62f, lift, new Vector3(1f, 0f, 0f)), Cup(0.74f, lift, Vector3.down), Cup(0.9f, lift, Vector3.down),
+                        Open(1f, lift, flat, Vector3.down, 0.25f),
                     };
                 }
                 case "palm_lift":
