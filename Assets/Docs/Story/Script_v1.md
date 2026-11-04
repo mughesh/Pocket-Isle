@@ -410,8 +410,8 @@ The third shard wakes the statue: it becomes the Heart of the World. Walking, wi
   - Spirit: I think... I'm a piece of it. Its light.
 - `spirit.finale.2` · objective (pinned; chip "Hold out your hand")
   - Spirit: I have to go back. Will you take me?
-- `spirit.finale.hand` · objective (the Spirit sits on your palm; chip "Lift it to the Heart")
-  - Spirit: Lift me up to the Heart. Gently.
+- `spirit.finale.hand` · objective (the Spirit sits on your palm; chip "To the crystal"; step 14h: Mugesh read "the Heart" as his own heart)
+  - Spirit: Lift me up to the gold crystal on its forehead.
 - `spirit.finale.wait` (30 s and nothing happened: it never forces it)
   - Spirit: It's okay. Whenever you're ready.
 - `spirit.finale.3` (as it leaves your palm)

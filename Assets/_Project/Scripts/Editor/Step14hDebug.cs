@@ -139,6 +139,40 @@ namespace Diorama.EditorTools
             }
         }
 
+        /// <summary>
+        /// Section F shots: arg "prefix": six shots 0.55 s apart (one ghost loop) from the seated head, framing the Heart and
+        /// the near rim (BattleDebug.SeatCamera holds the camera).
+        /// </summary>
+        public static void FinaleShots()
+        {
+            var f = FinaleDirector.Instance;
+            if (f == null) return;
+            BattleDebug.SeatCamera();
+            var queue = new List<(double, string)>();
+            double t0 = EditorApplication.timeSinceStartup;
+            for (int i = 0; i < 6; i++) queue.Add((t0 + 0.3 + i * 0.55, $"{Arg}_{i + 1}"));
+            EditorApplication.CallbackFunction tick = null;
+            tick = () =>
+            {
+                if (!EditorApplication.isPlaying || queue.Count == 0)
+                {
+                    EditorApplication.update -= tick;
+                    return;
+                }
+                if (EditorApplication.timeSinceStartup < queue[0].Item1) return;
+                string name = queue[0].Item2;
+                queue.RemoveAt(0);
+                var cam = Camera.main;
+                Vector3 socket = f.heart.SocketWorld;
+                Vector3 rim = f.island.transform.position + f.island.transform.forward * 0.25f;
+                Vector3 look = Vector3.Lerp(socket, rim, 0.45f);
+                Vector3 eye = cam != null ? cam.transform.position : look + Vector3.up * 0.4f;
+                BattleDebug.Render($"Logs/BattleShots/{name}.png", eye, Quaternion.LookRotation(look - eye, Vector3.up));
+                Debug.Log($"[Step14hDebug] Shot {name}.png ({f.Palm}).");
+            };
+            EditorApplication.update += tick;
+        }
+
         /// <summary>The temple warning as a door shows it (arg "keeper,n"; "yes" / "no" picks).</summary>
         public static void Warn()
         {

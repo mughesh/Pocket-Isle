@@ -2116,13 +2116,14 @@ MonoBehaviour:
     once: 0
     objective: 1
     priority: 2
-    note: the Spirit sits on your palm; chip "Lift it to the Heart"
+    note: 'the Spirit sits on your palm; chip "To the crystal"; step 14h: Mugesh
+      read "the Heart" as his own heart'
     target: 
     validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Lift me up to the Heart. Gently.
+      text: Lift me up to the gold crystal on its forehead.
   - id: spirit.finale.wait
     once: 0
     objective: 0

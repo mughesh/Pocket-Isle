@@ -354,6 +354,17 @@ namespace Diorama.Tests
             Assert.AreEqual(8, KeeperScaling.Level(8, 0f, 0), "no team: unchanged");
         }
 
+        // ---- F: carrying the Spirit to the crystal ----
+
+        [Test]
+        public void Finale_SaysTheCrystal_GhostLiftsPalmToCrystal()
+        {
+            CollectionAssert.Contains(GhostPlaceholders.Names, FinaleDirector.LiftClip);
+            var s = UnityEditor.AssetDatabase.LoadAssetAtPath<DialogueScript>("Assets/_Project/Data/Dialogue/Script_v1.asset");
+            if (s == null) return;
+            StringAssert.Contains("gold crystal on its forehead", s.Find("spirit.finale.hand").lines[0].text);
+        }
+
         [Test]
         public void Journal_Baked_46Islings_20_14_12()
         {

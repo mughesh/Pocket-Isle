@@ -61,7 +61,7 @@ namespace Diorama
         [Tooltip("Step 14f: the lantern dissolving into a gold mote (s), the mote's size at its biggest (tiles).")]
         public float dissolveSeconds = 0.3f, moteSize = 0.35f;
         const float FlightSeconds = 1.4f;
-        [Tooltip("Ghost hand for the goodbye (an open hand palm up).")]
+        [Tooltip("Unused since step 14h: the goodbye's ghost is FinaleDirector.LiftClip (palm_lift), palm to crystal.")]
         public string ghostClip = "palm_carry";
         [Tooltip("Hall of Fame: seconds between Islings coming out; Lodge Islings that wander out too.")]
         public float hallGap = 2.6f;
@@ -151,6 +151,11 @@ namespace Diorama
             PuzzleState.Restored += ApplySaved;
             Dialogue.RegisterTarget("heart", () => heart.Showing ? heart.HeadPointWorld(new Vector3(0f, 2.1f, 0.4f)) : (Vector3?)null, k => { }, () => 1.2f * Unit);
             Dialogue.RegisterTarget("finalePalm", () => Running && Step == FinaleStep.Goodbye ? PalmGuide : (Vector3?)null, k => { }, () => 0.03f * IslandScale);
+            // Step 14h: the ghost's lift: from the player's palm (or where to hold it out) to just under the crystal.
+            Dialogue.RegisterTarget(HandFromTarget, () => Running && Step == FinaleStep.Goodbye ? (handoff.Now == PalmHandoff.State.OnPalm ? _palmSeen : PalmGuide) : (Vector3?)null,
+                k => { }, () => 0.03f * IslandScale);
+            Dialogue.RegisterTarget(CrystalTarget, () => Running && Step == FinaleStep.Goodbye ? heart.SocketWorld - Vector3.up * (0.5f * Unit) : (Vector3?)null,
+                k => { }, () => 0.03f * IslandScale);
             spirit.hold = () => _holding ? _hold : (Vector3?)null;
             ApplySaved();
         }
@@ -483,6 +488,66 @@ namespace Diorama
             }
         }
 
+        /// <summary>Step 14h: the ghost hand rises palm up from the player's palm to the crystal (clip palm_lift).</summary>
+        public const string LiftClip = "palm_lift", HandFromTarget = "finaleHandFrom", CrystalTarget = "finaleCrystal";
+
+        Vector3 _palmSeen;
+        BattleFx.Item _aimRing;
+        readonly List<BattleFx.Item> _dots = new List<BattleFx.Item>();
+        const int DotCount = 9;
+
+        /// <summary>
+        /// Step 14h, while the Spirit sits on the palm: the crystal pulses with a gold ring (and the objective's gold), and a
+        /// dotted gold arc runs from the palm to it, the dots drifting toward the crystal.
+        /// </summary>
+        void Aim(bool on, Vector3 palm, Vector3 socket)
+        {
+            if (fx == null) return;
+            if (!on)
+            {
+                if (_aimRing != null) fx.Release(_aimRing);
+                _aimRing = null;
+                foreach (var d in _dots) fx.Release(d);
+                if (_dots.Count > 0) FocusHighlight.Clear();
+                _dots.Clear();
+                return;
+            }
+            float inv = 1f / Mathf.Max(1e-4f, fx.transform.lossyScale.x);
+            if (_aimRing == null)
+            {
+                _aimRing = fx.Get(BattleFx.Shape.Ring);
+                if (_aimRing != null) _aimRing.Set(new Color(1f, 0.92f, 0.6f), Gold, 1f);
+                FocusHighlight.SetPending(() => Running && handoff.Now == PalmHandoff.State.OnPalm ? heart.SocketWorld : (Vector3?)null, 0.9f * Unit);
+            }
+            if (_aimRing != null)
+            {
+                var cam = Camera.main;
+                Vector3 toward = cam != null ? cam.transform.position - socket : island.transform.forward;
+                float beat = 0.5f + 0.5f * Mathf.Sin(Time.time * 5f);
+                _aimRing.transform.SetPositionAndRotation(socket, Quaternion.FromToRotation(Vector3.up, toward));
+                _aimRing.transform.localScale = Vector3.one * (Unit * (0.55f + 0.2f * beat) * inv);
+                _aimRing.SetAlpha(0.45f + 0.45f * beat);
+            }
+            while (_dots.Count < DotCount)
+            {
+                var d = fx.Get(BattleFx.Shape.Orb);
+                if (d == null) break;
+                d.Set(new Color(1f, 0.95f, 0.7f), Gold, 1f);
+                _dots.Add(d);
+            }
+            Vector3 from = palm + Vector3.up * (0.4f * Unit), to = socket;
+            Vector3 mid = (from + to) * 0.5f + Vector3.up * (Vector3.Distance(from, to) * 0.3f);
+            float drift = Time.time * 0.5f % 1f;
+            for (int i = 0; i < _dots.Count; i++)
+            {
+                float t = (i + drift) / _dots.Count;
+                Vector3 p = (1f - t) * (1f - t) * from + 2f * (1f - t) * t * mid + t * t * to;
+                _dots[i].transform.position = p;
+                _dots[i].transform.localScale = Vector3.one * (0.0045f * IslandScale / 0.6f * inv);
+                _dots[i].SetAlpha(0.85f * Mathf.Sin(t * Mathf.PI));
+            }
+        }
+
         IEnumerator Goodbye()
         {
             SaveStep(FinaleStep.Goodbye);
@@ -491,7 +556,9 @@ namespace Diorama
             handoff.Reset();
             Dialogue.Pin(new[] { "spirit.finale.2", "spirit.finale.hand" }, "Hold out your hand", new[] { "spirit.finale.wait" });
             Dialogue.Say("spirit.finale.2");
-            if (ghosts != null && !string.IsNullOrEmpty(ghostClip)) ghosts.Show(ghostClip, GhostPlace.AtTarget, "finalePalm", 1f, DominantHand.Left, false);
+            // Step 14h: the ghost holds its palm out where yours would be, then lifts it all the way to the crystal; once the
+            // Spirit is on your palm it starts from your palm.
+            if (ghosts != null) ghosts.Show(LiftClip, GhostPlace.AtTarget, CrystalTarget, 1f, DominantHand.Left, false, 0f, HandFromTarget);
             Vector3 socketFrom = default;
             float flyT = -1f;
             while (true)
@@ -503,9 +570,10 @@ namespace Diorama
                 string line = handoff.Step(Time.deltaTime, tracked, up, open, palm, socket, IslandScale, gaze);
                 if (line == "spirit.finale.hand")
                 {
-                    Dialogue.SetChip("Lift it to the Heart");
+                    Dialogue.SetChip("To the crystal");
                     Dialogue.Say(line);
-                    if (ghosts != null) ghosts.Hide();
+                    _palmSeen = palm;
+                    if (ghosts != null) ghosts.Show(LiftClip, GhostPlace.AtTarget, CrystalTarget, 1f, DominantHand.Left, false, 0f, HandFromTarget);
                     Sfx(AudioIds.SparkChime, AudioIds.UiSaved, palm);
                     Debug.Log("[FinaleDirector] The Spirit lands on the palm.");
                     Moment?.Invoke("palm.land");
@@ -515,6 +583,7 @@ namespace Diorama
                 {
                     Dialogue.Unpin();
                     Dialogue.Say(line);
+                    if (ghosts != null) ghosts.Hide();
                     socketFrom = _hold;
                     flyT = 0f;
                     Debug.Log($"[FinaleDirector] The Spirit floats off {(was == PalmHandoff.State.OnPalm ? "the palm" : "by itself (look + pinch)")} into the Heart's forehead.");
@@ -526,15 +595,21 @@ namespace Diorama
                     case PalmHandoff.State.Waiting:
                         _hold = WaitPoint;
                         Halo(false, default);
+                        Aim(false, default, default);
                         break;
                     case PalmHandoff.State.OnPalm:
-                        // It sits on the palm, glowing, a warm halo round the hand.
-                        _hold = palm + normal * 0.03f + Vector3.up * (0.004f * Mathf.Sin(Time.time * 3f));
+                        // It sits on the palm, glowing, a warm halo round the hand; step 14h: it leans toward the crystal,
+                        // which pulses, and a dotted gold arc shows the way up.
+                        if (tracked) _palmSeen = palm;
+                        Vector3 lean = (socket - palm).sqrMagnitude > 1e-6f ? (socket - palm).normalized * (0.25f * Unit) : Vector3.zero;
+                        _hold = palm + normal * 0.03f + lean + Vector3.up * (0.004f * Mathf.Sin(Time.time * 3f));
                         Halo(true, palm + normal * 0.02f);
+                        Aim(true, palm, socket);
                         if (fx != null && Random.value < Time.deltaTime * 4f) fx.Burst(palm + normal * 0.02f, 2, Gold, 0.02f, 0.6f, 0.004f, Vector3.up, -0.03f);
                         break;
                     case PalmHandoff.State.ToSocket:
                         Halo(false, default);
+                        Aim(false, default, default);
                         flyT += Time.deltaTime;
                         MoteFlight(flyT, socketFrom);
                         break;
@@ -796,6 +871,7 @@ namespace Diorama
 
         void Clean()
         {
+            Aim(false, default, default);
             _beat?.Off(0.3f);
             foreach (var g in _guests)
                 if (g != null) Destroy(g.gameObject);
