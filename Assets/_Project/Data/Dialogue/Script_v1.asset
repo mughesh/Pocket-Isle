@@ -35,17 +35,18 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: Hello, big one! I'm a Lantern Spirit.
-  - id: intro.world
+  - id: lesson.move
     once: 1
     objective: 1
     priority: 1
-    note: 
+    note: 'step 14i: the move lesson''s line, was `intro.world`; chip "Hold a corner";
+      the ghost pinches a corner, holds while the gold ring fills, then moves it'
     target: rim
     validWhile: 
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: This little island is yours. Grab its rocky edge to move it.
+      text: Pinch and hold a corner, then move me wherever is comfy.
   - id: intro.starter
     once: 1
     objective: 1
@@ -147,7 +148,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Grab the rocky edge and slide it.
+      text: Pinch and hold a corner, then move it.
   - id: lesson.starter.again
     once: 0
     objective: 1
@@ -335,17 +336,17 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: Grab the big pod and flick it!
-  - id: lesson.twohands
+  - id: lesson.twoHands
     once: 0
     objective: 1
     priority: 1
-    note: step 8c, once after the first battle
+    note: 'step 14i: right after the move lesson, both slots; chip "Two hands"'
     target: islandRim
     validWhile: '!battle'
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Use both hands to turn or resize the island.
+      text: Hold two corners and pull apart to make it bigger.
   - id: lesson.hands
     once: 0
     objective: 0
@@ -2314,4 +2315,4 @@ MonoBehaviour:
     text: Psst. Rare ones hide in tall grass.
   - speaker: 0
     speakerName: Spirit
-    text: You can move the island anytime. Grab the edge.
+    text: You can move the island anytime. Pinch and hold a corner.

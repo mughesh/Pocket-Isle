@@ -17,8 +17,8 @@ Step 9h: less text before the starter (one line each; the lesson lines stay up u
   - Spirit: Something's here. Touch it?
 - `intro.arrive` · once
   - Spirit: Hello, big one! I'm a Lantern Spirit.
-- `intro.world` · objective · once · → rim
-  - Spirit: This little island is yours. Grab its rocky edge to move it.
+- `lesson.move` · objective · once · → rim (step 14i: the move lesson's line, was `intro.world`; chip "Hold a corner"; the ghost pinches a corner, holds while the gold ring fills, then moves it)
+  - Spirit: Pinch and hold a corner, then move me wherever is comfy.
 - `intro.starter` · objective · once · → starterPods
   - Spirit: Pick an Isling friend!
 - `starter.kilnpot` · Spirit: Kilnpot! Warm as a fresh-baked pot.
@@ -40,7 +40,7 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
 - `lesson.pinch.done` (step 14a: the pinch lesson's praise)
   - Spirit: Perfect!
 - `lesson.move.again` · objective · → rim
-  - Spirit: Grab the rocky edge and slide it.
+  - Spirit: Pinch and hold a corner, then move it.
 - `lesson.starter.again` · objective · → starterPods
   - Spirit: Look at one and pinch, or grab it.
 - `lesson.walk` · objective · while canWalk · → ghost (Nov 3: any direction, dots count 4 tiles walked)
@@ -75,8 +75,8 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
   - Spirit: Poke a rune!
 - `lesson.catch.again` · objective · while battle · → cradle
   - Spirit: Grab the big pod and flick it!
-- `lesson.twohands` · objective · while !battle · → islandRim (step 8c, once after the first battle)
-  - Spirit: Use both hands to turn or resize the island.
+- `lesson.twoHands` · objective · while !battle · → islandRim (step 14i: right after the move lesson, both slots; chip "Two hands")
+  - Spirit: Hold two corners and pull apart to make it bigger.
 - `lesson.hands` · while tutorial
   - Spirit: Show me your hands!
 - `praise.nice` · Spirit: Nice!
@@ -454,4 +454,4 @@ The third shard wakes the statue: it becomes the Heart of the World. Walking, wi
 - Spirit: Your Islings get stronger every battle.
 - Spirit: Every gate leads somewhere different. Just saying.
 - Spirit: Psst. Rare ones hide in tall grass.
-- Spirit: You can move the island anytime. Grab the edge.
+- Spirit: You can move the island anytime. Pinch and hold a corner.

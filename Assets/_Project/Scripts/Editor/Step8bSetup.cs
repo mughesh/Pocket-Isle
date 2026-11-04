@@ -157,17 +157,18 @@ namespace Diorama.EditorTools
                 },
                 new LessonData
                 {
-                    id = "move", line = "intro.world", chip = "Grab the edge", again = "lesson.move.again", startWhen = "opening.move", validWhile = "opening.move",
+                    id = "move", line = "lesson.move", chip = "Hold a corner", again = "lesson.move.again", startWhen = "opening.move", validWhile = "opening.move",
                     // Step 8e: a pinch on the side of the base (pinch or palm both grab the island).
                     // Step 9h: the ghost grabs the near rim's corner on the dominant side (was the base's side).
-                    doneWhen = "islandGrabbed", skipAfter = 12f, ghost = "grab_rim_slide", place = GhostPlace.AtTarget, source = "rimCorner",
+                    // Step 14i: waits 45 s (12 s timed out before a first-time player managed the hold).
+                    doneWhen = "islandGrabbed", skipAfter = 45f, ghost = "grab_rim_slide", place = GhostPlace.AtTarget, source = "rimCorner",
                 },
                 new LessonData
                 {
                     // Step 9h: right after moving the island (was after the first battle): both hands pinch the near corners
                     // and pull apart (the move recording, the left hand mirrored).
-                    id = "twoHands", line = "lesson.twohands", chip = "Both hands", startWhen = "opening.twoHands", validWhile = "opening.twoHands",
-                    delay = 0.5f, doneWhen = "twoHandGrab", skipAfter = 15f, ghost = "grab_rim_slide", place = GhostPlace.RimCorners, bothHands = true,
+                    id = "twoHands", line = "lesson.twoHands", chip = "Two hands", startWhen = "opening.twoHands", validWhile = "opening.twoHands",
+                    delay = 0.5f, doneWhen = "twoHandGrab", skipAfter = 45f, ghost = "grab_rim_slide", place = GhostPlace.RimCorners, bothHands = true,
                 },
                 new LessonData
                 {

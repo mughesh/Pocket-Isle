@@ -12,7 +12,7 @@ namespace Diorama
     {
         [Header("Lessons")]
         [Tooltip("Lesson ids skipped in the quick slot (every lesson that teaches a hand verb stays).")]
-        public string[] cutLessons = { "twoHands" };
+        public string[] cutLessons = { };
 
         [Header("Dials in the quick realm (Galewick since step 14c)")]
         [Tooltip("Nov 3 (no gift any more): the quick realm's Keeper is this many levels off in the quick slot (negative = easier).")]

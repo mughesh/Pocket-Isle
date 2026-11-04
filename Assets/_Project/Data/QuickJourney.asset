@@ -12,8 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67d46c191a7996a4c9c6be446f6bb773, type: 3}
   m_Name: QuickJourney
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.QuickJourneyConfig
-  cutLessons:
-  - twoHands
+  cutLessons: []
   keeperLevelOffset: -4
   encounterRate: 0.5
   xpMultiplier: 2

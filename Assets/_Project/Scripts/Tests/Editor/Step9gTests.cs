@@ -120,7 +120,7 @@ namespace Diorama.Tests
                 Assert.AreEqual(0f, QuickJourney.RareScaleFor(true, c));
                 Assert.IsFalse(QuickJourney.SkipsLesson("stop", false, c));
                 Assert.IsFalse(QuickJourney.SkipsLesson("far", true, c), "step 12a: the walk lessons are taught in both slots");
-                Assert.IsTrue(QuickJourney.SkipsLesson("twoHands", true, c));
+                Assert.IsFalse(QuickJourney.SkipsLesson("twoHands", true, c), "step 14i: the island lessons are taught in both slots");
                 Assert.IsFalse(QuickJourney.SkipsLesson("walk", true, c), "hand-verb lessons stay");
                 Assert.AreEqual(0.125f, QuickJourney.EncounterChance(0.125f, true, null), 1e-6f, "no config, no dials");
             }

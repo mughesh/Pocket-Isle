@@ -66,16 +66,16 @@ MonoBehaviour:
     goldTileRule: 
     tutorialGrass: 0
   - id: move
-    line: intro.world
+    line: lesson.move
     again: lesson.move.again
-    chip: Grab the edge
+    chip: Hold a corner
     help: 
     helpAfter: 30
     startWhen: opening.move
     delay: 0
     doneWhen: islandGrabbed
     validWhile: opening.move
-    skipAfter: 12
+    skipAfter: 45
     failWhen: 
     rewindTo: 
     praise: 1
@@ -92,16 +92,16 @@ MonoBehaviour:
     goldTileRule: 
     tutorialGrass: 0
   - id: twoHands
-    line: lesson.twohands
+    line: lesson.twoHands
     again: 
-    chip: Both hands
+    chip: Two hands
     help: 
     helpAfter: 30
     startWhen: opening.twoHands
     delay: 0.5
     doneWhen: twoHandGrab
     validWhile: opening.twoHands
-    skipAfter: 15
+    skipAfter: 45
     failWhen: 
     rewindTo: 
     praise: 1

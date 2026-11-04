@@ -14,7 +14,8 @@ namespace Diorama
     /// (fingertip or palm near it, or look at it and pinch; it unfolds by itself after <see cref="autoTouchSeconds"/>):
     /// it cracks open with light, the rocky base grows out of it, the Still Isle rises from the middle outward and the
     /// explorer pops up and stretches. A spark leaves the statue and becomes the Lantern Spirit by the rim
-    /// (<c>intro.arrive</c>), which then points at the rocky edge (<c>intro.world</c>, waits for a grab or 12 s). Three
+    /// (<c>intro.arrive</c>), which then points at a corner (step 14i: <c>lesson.move</c>, then <c>lesson.twoHands</c>, each
+    /// waits for a grab or <see cref="moveLessonSeconds"/>). Three
     /// glass pods rise from the statue and float in a row above the island, a starter turning in each
     /// (<c>intro.starter</c>): looking at one makes it grow and wiggle and the Spirit names it; grab it and drop it on
     /// the rim, or look + pinch it, and it is yours (the other two sink back into the statue). Then the explorer can walk
@@ -72,8 +73,8 @@ namespace Diorama
         [Header("Unfold")]
         public float growSeconds = 1.2f;
         public float riseSeconds = 1.6f;
-        [Tooltip("intro.world waits this long for a grab of the rim (s).")]
-        public float moveWaitSeconds = 12f;
+        [Tooltip("Step 14i: the move and two-hands lessons each wait this long for a grab (s; was 12 / 20: they timed out unseen).")]
+        public float moveLessonSeconds = 45f;
         [Tooltip("Step 9h: the pinch lesson waits this long for two pinches, then the opening moves on (s).")]
         public float pinchWaitSeconds = 45f;
         public float returnRiseSeconds = 2f;
@@ -385,7 +386,7 @@ namespace Diorama
             _stage = Stage.Move;
             float since = 0f;
             bool grabbed = false;
-            while (since < moveWaitSeconds && !grabbed)
+            while (since < moveLessonSeconds && !grabbed)
             {
                 since += Time.deltaTime;
                 grabbed = handle != null && handle.IsGrabbed;
@@ -400,7 +401,7 @@ namespace Diorama
             // Step 9h: two hands (turn, resize) right after one hand moved it (the lesson skips itself after 15 s; the
             // Quick Journey cuts it).
             _stage = Stage.TwoHands;
-            for (float t = 0f; onboarding != null && onboarding.CurrentId == "twoHands" && t < 20f; t += Time.deltaTime) yield return null;
+            for (float t = 0f; onboarding != null && onboarding.CurrentId == "twoHands" && t < moveLessonSeconds; t += Time.deltaTime) yield return null;
             while (handle != null && handle.IsGrabbed) yield return null;
             yield return WaitLines(4f);
 
