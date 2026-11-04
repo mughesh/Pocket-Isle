@@ -35,7 +35,8 @@ namespace Diorama
         [Tooltip("Where the row goes (added to the offset) when it would cover a creature.")]
         public Vector3 avoidOffset = new Vector3(0f, -0.05f, 0.035f);
         public Vector2 runeSize = new Vector2(0.085f, 0.04f);
-        public float spacing = 0.095f;
+        [Tooltip("Step 14j: centre to centre (was 'spacing' 0.095: a looked-at move grew into its neighbour); the rule is TabletLayout's.")]
+        public float runeStep = 0.097f;
         public float fontSize = 0.11f;
         public float captionFontSize = 0.12f;
 
@@ -199,14 +200,26 @@ namespace Diorama
         /// The row's front faces the head along -Z, so the plane normal faces backward (-Z).
         /// </summary>
         /// <summary>Plate size: Run is narrower.</summary>
+        /// <summary>Step 14j: how much a looked-at (and pulsing) move grows.</summary>
+        public const float HoverGrow = 0.2f;
+
+        /// <summary>Step 14j: the row against the tablet layout rule (<see cref="TabletLayout"/>).</summary>
+        public System.Collections.Generic.List<string> LayoutProblems()
+        {
+            var rects = new System.Collections.Generic.List<TabletLayout.Rect>();
+            for (int i = 0; i < Count; i++)
+                rects.Add(new TabletLayout.Rect { label = i == RunIndex ? "Run" : $"Move {i + 1}", center = new Vector2(RuneX(i), 0f), size = PlateSize(i), grow = HoverGrow });
+            return TabletLayout.Problems(rects);
+        }
+
         Vector2 PlateSize(int index) => index == RunIndex ? new Vector2(runeSize.x * runWidth, runeSize.y) : runeSize;
 
-        /// <summary>Rune centre along the row: three moves at <see cref="spacing"/>, Run tucked closer at the right end.</summary>
+        /// <summary>Rune centre along the row: three moves at <see cref="runeStep"/>, Run tucked closer at the right end.</summary>
         float RuneX(int index)
         {
-            float runGap = spacing - runeSize.x * (1f - runWidth) * 0.5f;
-            float width = 2f * spacing + runGap;
-            float x = index == RunIndex ? 2f * spacing + runGap : index * spacing;
+            float runGap = runeStep - runeSize.x * (1f - runWidth) * 0.5f;
+            float width = 2f * runeStep + runGap;
+            float x = index == RunIndex ? 2f * runeStep + runGap : index * runeStep;
             return x - width * 0.5f;
         }
 
@@ -545,7 +558,7 @@ namespace Diorama
             }
             Vector3 hit = o + d * (-o.z / d.z);
             float scale = _row.lossyScale.x;
-            bool near = Mathf.Abs(hit.x) < HalfRow + spacing && Mathf.Abs(hit.y) < runeSize.y * 2.5f;
+            bool near = Mathf.Abs(hit.x) < HalfRow + runeStep && Mathf.Abs(hit.y) < runeSize.y * 2.5f;
             _reticle.enabled = near;
             if (near) _reticle.transform.localPosition = new Vector3(hit.x, hit.y, -0.002f / Mathf.Max(1e-4f, scale));
             // Gaze cone: each plate (at least the 4 cm minimum) grows by the cone's radius at the row; the one whose

@@ -69,7 +69,7 @@ namespace Diorama.EditorTools
             Undo.RecordObject(director, "6 director");
             director.pods = rack;
             Undo.RecordObject(runes, "6 runes");
-            runes.spacing = 0.088f;
+            runes.runeStep = 0.097f;
             runes.runeSize = new Vector2(0.08f, 0.04f);
             // When the row would cover a creature it moves up and toward the player (down would hide the rim pods).
             runes.avoidOffset = new Vector3(0f, 0.045f, 0.045f);

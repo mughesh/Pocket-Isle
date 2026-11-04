@@ -211,15 +211,19 @@ namespace Diorama
             }
         }
 
+        /// <summary>Step 14j: how far the halo reaches past the slab's edge (was 8 mm + a 1.6 mm drop: neighbours' halos
+        /// met in an 8-12 mm gap and the tablets read as overlapping). Under half of <see cref="TabletLayout.MinGap"/>.</summary>
+        public const float HaloReach = 0.0035f;
+
         static void HaloRings(float r)
         {
-            const float dy = -0.0016f, z = 0.003f;
+            const float dy = -0.0008f, z = 0.003f;
             var back = Vector3.back;
             int c = V(new Vector3(0f, dy, z), back, new Color(1f, 0f, 0f, Halo), Vector2.zero);
             int a = AddRing(r, z, new Color(1f, 0f, 0f, Halo), d => back, dy);
-            int b = AddRing(r + 0.0018f, z, new Color(0.55f, 0.45f, 0f, Halo), d => back, dy);
-            int e = AddRing(r + 0.004f, z, new Color(0f, 0.6f, 0f, Halo), d => back, dy);
-            int f = AddRing(r + 0.008f, z, new Color(0f, 0f, 0f, Halo), d => back, dy);
+            int b = AddRing(r + 0.0009f, z, new Color(0.55f, 0.45f, 0f, Halo), d => back, dy);
+            int e = AddRing(r + 0.002f, z, new Color(0f, 0.6f, 0f, Halo), d => back, dy);
+            int f = AddRing(r + HaloReach - 0.0008f, z, new Color(0f, 0f, 0f, Halo), d => back, dy);
             Fan(c, a);
             Strip(b, a);
             Strip(e, b);

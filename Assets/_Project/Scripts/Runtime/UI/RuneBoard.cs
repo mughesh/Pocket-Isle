@@ -382,9 +382,43 @@ namespace Diorama
 
         // ---- every frame ----
 
+        /// <summary>Step 14j: how much a looked-at tablet grows (the layout rule allows for it).</summary>
+        public const float HoverGrow = 0.1f;
+
+        /// <summary>Step 14j: every pair of this board's tablets that breaks the layout rule (<see cref="TabletLayout"/>).</summary>
+        public List<string> LayoutProblems()
+        {
+            var rects = new List<TabletLayout.Rect>();
+            foreach (var r in _runes)
+                if (r.root != null && r.root.gameObject.activeSelf)
+                    rects.Add(new TabletLayout.Rect { label = r.label, center = r.center, size = r.size, grow = HoverGrow });
+            return TabletLayout.Problems(rects);
+        }
+
+        /// <summary>Step 14j: the last layout problems of every board, by board name (the bridge's layout check reads it).</summary>
+        public static readonly Dictionary<string, List<string>> LayoutLog = new Dictionary<string, List<string>>();
+
+        int _checkedCount = -1;
+        Vector2 _checkedMin, _checkedMax;
+
+        /// <summary>Editor and dev builds: checks the layout once each time it changes (logs any tablets too close).</summary>
+        void CheckLayout()
+        {
+            if (!Application.isEditor && !Debug.isDebugBuild) return;
+            if (_runes.Count == _checkedCount && _min == _checkedMin && _max == _checkedMax) return;
+            _checkedCount = _runes.Count;
+            _checkedMin = _min;
+            _checkedMax = _max;
+            var problems = LayoutProblems();
+            string key = name + (_runes.Count > 0 ? $" ({_runes[0].label}...)" : "");
+            LayoutLog[key] = problems;
+            if (problems.Count > 0) Debug.LogWarning($"[RuneBoard] {key}: tablets too close (rule: {TabletLayout.MinGap * 1000f:0} mm):\n  " + string.Join("\n  ", problems), this);
+        }
+
         void Update()
         {
             if (!IsShown) return;
+            CheckLayout();
             float dt = Time.unscaledDeltaTime;
             Place(false);
             var was = _hovered;
@@ -395,7 +429,7 @@ namespace Diorama
                 r.hover = Mathf.MoveTowards(r.hover, r == _hovered || _hovered == null && r == DefaultFocus ? 1f : 0f, dt * 8f);
                 bool popping = Time.unscaledTime >= r.appearAt;
                 r.appear = Mathf.MoveTowards(r.appear, popping ? 1f : 0f, dt / 0.25f);
-                r.visual.localScale = Vector3.one * (Mathf.Max(0.001f, EaseOutBack(r.appear)) * (1f + 0.1f * r.hover));
+                r.visual.localScale = Vector3.one * (Mathf.Max(0.001f, EaseOutBack(r.appear)) * (1f + HoverGrow * r.hover));
                 r.press = Mathf.MoveTowards(r.press, 0f, dt / 0.3f);
                 if (r.tablet != null) r.tablet.Press(r.press > 0.5f ? 1f : r.press * 2f);
             }

@@ -29,7 +29,9 @@ namespace Diorama
         const int Columns = 5, RowsPerPage = 4;
         const float CellX = 0.066f, CellY = 0.072f, Pic = 0.046f, GridBottom = 0.1f, Width = 0.37f;
         static readonly Vector2 Tab = new Vector2(0.074f, 0.03f);
-        const float TabStep = 0.086f;
+        static readonly List<float> TabX = new List<float>();
+        /// <summary>Step 14j: an unseen Isling: one flat dark slate colour (not black, no shading), the shape only.</summary>
+        public static readonly Color SilhouetteColor = new Color(0.17f, 0.19f, 0.25f, 1f).linear; // vertex colours are linear
         const float CardW = 0.25f, CardGap = 0.014f, ModelHeight = 0.075f;
 
         JournalData _data;
@@ -150,11 +152,13 @@ namespace Diorama
             runes.AddText($"Found <b>{Journal.Found(_data.entries, caught)} / {Journal.Total(_data.entries)}</b>",
                 new Vector2(Width * 0.5f - 0.02f - 0.08f, top + 0.012f), runes.fontSize * 1.05f, TextAlignmentOptions.Right, 0.16f);
 
-            // Element tablets with their counts, then Close; the element showing is gold.
+            // Element tablets with their counts, then Close; the element showing is gold. Step 14j: one row by the layout
+            // rule (fixed gaps, sized to fit the book's width).
+            var tab = TabletLayout.Row(Journal.Elements.Length + 1, Width - 0.02f, Tab, RuneBoard.HoverGrow, TabX);
             for (int k = 0; k < Journal.Elements.Length; k++)
             {
                 var e = Journal.Elements[k];
-                var r = runes.Add($"{e} {Count(e)}", new Vector2((k - 1.5f) * TabStep, 0f), Tab, () => ShowElement(e));
+                var r = runes.Add($"{e} {Count(e)}", new Vector2(TabX[k], 0f), tab, () => ShowElement(e));
                 r.selected = e == _element;
                 r.tint = ElementStyle.Of(e).burst;
                 // Nov 4 (Mugesh: only a coloured border): the tablet's face in its element colour.
@@ -162,7 +166,7 @@ namespace Diorama
                 face.a = 0.85f;
                 r.face = face;
             }
-            var close = runes.Add("Close", new Vector2(1.5f * TabStep, 0f), Tab, Close);
+            var close = runes.Add("Close", new Vector2(TabX[TabX.Count - 1], 0f), tab, Close);
             close.tint = new Color(0.62f, 0.55f, 0.4f);
             if (pages > 1)
             {
@@ -217,11 +221,13 @@ namespace Diorama
             var uvs = new List<Vector2>();
             var cols = new List<Color>();
             var tris = new List<int>();
+            var flags = new List<Vector2>();
             for (int c = 0; c < _shown.Count; c++)
             {
                 var e = _data.entries[_shown[c]];
                 var state = Journal.StateOf(e.species, caught, seen);
-                Color tint = state == Journal.State.Caught ? Color.white : state == Journal.State.Seen ? new Color(0.5f, 0.5f, 0.5f, 0.9f) : new Color(0.02f, 0.02f, 0.03f, 0.92f);
+                Color tint = state == Journal.State.Caught ? Color.white : state == Journal.State.Seen ? new Color(0.5f, 0.5f, 0.5f, 0.9f) : SilhouetteColor;
+                float flat = state == Journal.State.Unseen ? 1f : 0f;
                 var rect = _data.CellRect(e.cell);
                 float s = Pic * (c == _hover || c == _picked ? 1.15f : 1f) * 0.5f;
                 Vector2 p = PicCenter(c);
@@ -234,11 +240,16 @@ namespace Diorama
                 uvs.Add(new Vector2(rect.xMin, rect.yMax));
                 uvs.Add(new Vector2(rect.xMax, rect.yMax));
                 uvs.Add(new Vector2(rect.xMax, rect.yMin));
-                for (int k = 0; k < 4; k++) cols.Add(tint);
+                for (int k = 0; k < 4; k++)
+                {
+                    cols.Add(tint);
+                    flags.Add(new Vector2(flat, 0f));
+                }
                 tris.AddRange(new[] { b, b + 1, b + 2, b, b + 2, b + 3 });
             }
             _mesh.SetVertices(verts);
             _mesh.SetUVs(0, uvs);
+            _mesh.SetUVs(1, flags);
             _mesh.SetColors(cols);
             _mesh.SetTriangles(tris, 0);
             _mesh.RecalculateBounds();
@@ -404,8 +415,10 @@ namespace Diorama
             float h = ModelHeight * 0.5f;
             _cardMesh.SetVertices(new List<Vector3> { new Vector3(-h, -h, 0f), new Vector3(-h, h, 0f), new Vector3(h, h, 0f), new Vector3(h, -h, 0f) });
             _cardMesh.SetUVs(0, new List<Vector2> { new Vector2(r.xMin, r.yMin), new Vector2(r.xMin, r.yMax), new Vector2(r.xMax, r.yMax), new Vector2(r.xMax, r.yMin) });
-            Color tint = state == Journal.State.Seen ? new Color(0.8f, 0.8f, 0.8f, 1f) : new Color(0.02f, 0.02f, 0.03f, 0.92f);
+            Color tint = state == Journal.State.Seen ? new Color(0.8f, 0.8f, 0.8f, 1f) : SilhouetteColor;
             _cardMesh.SetColors(new List<Color> { tint, tint, tint, tint });
+            var flat = new Vector2(state == Journal.State.Unseen ? 1f : 0f, 0f);
+            _cardMesh.SetUVs(1, new List<Vector2> { flat, flat, flat, flat });
             _cardMesh.SetTriangles(new[] { 0, 1, 2, 0, 2, 3 }, 0);
             _cardMesh.RecalculateBounds();
             part.gameObject.AddComponent<MeshFilter>().sharedMesh = _cardMesh;

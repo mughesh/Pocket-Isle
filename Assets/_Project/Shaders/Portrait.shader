@@ -1,5 +1,6 @@
 // Step 14h: the Journal's portrait grid, one mesh: atlas x vertex colour (white = caught, grey = seen, black = an unseen
 // silhouette). Unlit, alpha blended, no depth write.
+// Step 14j: uv1.x = 1 draws a flat silhouette: the vertex colour only, cut out by the portrait's alpha (no shading or details).
 Shader "Diorama/Portrait"
 {
     Properties
@@ -37,6 +38,7 @@ Shader "Diorama/Portrait"
             {
                 float4 positionOS : POSITION;
                 float2 uv : TEXCOORD0;
+                float2 uv1 : TEXCOORD1;
                 float4 color : COLOR;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
@@ -45,6 +47,7 @@ Shader "Diorama/Portrait"
             {
                 float4 positionCS : SV_POSITION;
                 float2 uv : TEXCOORD0;
+                float silhouette : TEXCOORD1;
                 float4 color : COLOR;
                 UNITY_VERTEX_OUTPUT_STEREO
             };
@@ -57,6 +60,7 @@ Shader "Diorama/Portrait"
                 o.positionCS = TransformObjectToHClip(v.positionOS.xyz);
                 o.uv = v.uv;
                 o.color = v.color;
+                o.silhouette = v.uv1.x;
                 return o;
             }
 
@@ -64,7 +68,10 @@ Shader "Diorama/Portrait"
             {
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
                 half4 c = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv);
-                return half4(c.rgb * i.color.rgb, c.a * i.color.a) * _Tint;
+                half3 rgb = lerp(c.rgb * i.color.rgb, i.color.rgb, saturate(i.silhouette));
+                // A silhouette is a hard cut-out (no soft painted edges bleeding the colours through).
+                half a = lerp(c.a, smoothstep(0.35, 0.6, c.a), saturate(i.silhouette));
+                return half4(rgb, a * i.color.a) * _Tint;
             }
             ENDHLSL
         }

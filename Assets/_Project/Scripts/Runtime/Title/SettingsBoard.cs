@@ -238,12 +238,15 @@ namespace Diorama
             _creditText = null;
             _controlRunes.Clear();
             int n = Controls.Length;
-            var size = new Vector2(0.078f, 0.034f);
-            const float step = 0.083f;
+            // Step 14j: one row by the layout rule (was 7.8 cm tablets 5 mm apart).
+            const float rowWidth = 0.415f;
+            var xs = new List<float>();
+            var size = TabletLayout.Row(n, rowWidth, new Vector2(0.078f, 0.034f), RuneBoard.HoverGrow, xs);
+            float step = rowWidth / n;
             for (int i = 0; i < n; i++)
             {
                 int k = i;
-                _controlRunes.Add(runes.Add(Controls[i].rune, new Vector2((i - (n - 1) * 0.5f) * step, 0.012f), size, () => PickControl(k)));
+                _controlRunes.Add(runes.Add(Controls[i].rune, new Vector2(xs[i], 0.012f), size, () => PickControl(k)));
             }
             runes.AddBacking(new Vector2(0f, -0.026f), new Vector2(n * step + 0.01f, 0.03f));
             _controlText = runes.AddText("", new Vector2(0f, -0.026f), runes.fontSize * 0.82f, TextAlignmentOptions.Center, n * step);

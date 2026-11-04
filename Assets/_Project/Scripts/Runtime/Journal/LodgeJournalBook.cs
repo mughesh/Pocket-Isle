@@ -91,20 +91,39 @@ namespace Diorama
 
         IslandBuilder island => _lodge.island;
 
-        /// <summary>Island-local: one pod step beyond the leftmost rim pod (seen from the player), at the pods' height.</summary>
+        /// <summary>Step 14j: the clear gap between the tablet and the socket band (island-local m; ~1 cm at scale 0.6).</summary>
+        const float RimGap = 0.016f;
+        bool _spotLogged;
+
+        /// <summary>
+        /// Island-local: left of the pods (seen from the player), clear of the whole socket band (the six sockets and a
+        /// grown pod's reach, <see cref="PodRack.SocketBandLocal"/>) by <see cref="RimGap"/>; at the pods' height. Step 14j
+        /// (Mugesh: it touched the first pod): was one pod step past the leftmost pod's centre.
+        /// </summary>
         Vector3 RimSpot()
         {
             var pods = _lodge.pods;
             if (pods == null) return _lodge.PedestalTopLocal;
-            Vector3 left = pods.HomeLocal(0), right = left;
-            for (int i = 1; i < Party.Size; i++)
+            var home = pods.HomeLocal(0);
+            if (!pods.SocketBandLocal(out float minX, out float maxX, out _)) return home;
+            float hw = Size.x / 0.6f * 0.5f;
+            float x = maxX + RimGap + hw;
+            bool right = x + hw > island.FootprintHalfSize.x;
+            if (right) x = minX - RimGap - hw;
+            if (!_spotLogged)
             {
-                var p = pods.HomeLocal(i);
-                if (p.x > left.x) left = p;
-                if (p.x < right.x) right = p;
+                _spotLogged = true;
+                Debug.Log($"[LodgeRoom] Journal tablet {(right ? "right" : "left")} of the pods: x {x:0.000} (socket band {minX:0.000}..{maxX:0.000}, " +
+                          $"gap {RimGap * island.transform.lossyScale.x * 100f:0.0} cm, island half width {island.FootprintHalfSize.x:0.000}).");
             }
-            float step = Party.Size > 1 ? Mathf.Abs(left.x - right.x) / (Party.Size - 1) : 0.08f;
-            return left + new Vector3(Mathf.Max(step, Size.x / 0.6f * 0.75f) * 1.1f, 0f, 0f);
+            return new Vector3(x, home.y, home.z);
+        }
+
+        /// <summary>Step 14j: the tablet's rect along the rim (island-local x min / max), for the layout check.</summary>
+        public Vector2 RimSpan()
+        {
+            float hw = Size.x / 0.6f * 0.5f, x = RimSpot().x;
+            return new Vector2(x - hw, x + hw);
         }
 
         /// <summary>Opens the Journal (also the bridge).</summary>
