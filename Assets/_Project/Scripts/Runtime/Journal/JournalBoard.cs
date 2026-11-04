@@ -16,7 +16,10 @@ namespace Diorama
     /// card beside the book on the same board: a slowly turning 3D model (the portrait if only seen, a silhouette if
     /// unseen), name, element badge, strong / weak vs, where it lives, the evolution line, its moves, your best one's level
     /// and how many you have, and a one-line description (<see cref="JournalLore"/>). Poke it again to close the card.
-    /// The portraits are one mesh (one draw); each grid row's labels are one text.
+    /// The portraits are one mesh (one draw).
+    /// Step 14k (Mugesh: text too small, gaze not needed here): 4 x 3 portraits per page (pages instead of smaller text),
+    /// every label bigger, one text per cell so a hint wraps to 2 lines; input is poke and the hand ray + pinch (no look +
+    /// pinch); a fingertip near a portrait or the ray on it pops it (10% bigger, lifted, white rim), like every board tablet.
     /// Made at runtime next to the game menu's board (<see cref="Ensure"/>): nothing in the scene to wire.
     /// </summary>
     public class JournalBoard : MonoBehaviour
@@ -26,13 +29,16 @@ namespace Diorama
         public static bool IsOpen { get; private set; }
         public static JournalBoard Instance { get; private set; }
 
-        const int Columns = 5, RowsPerPage = 4;
-        const float CellX = 0.066f, CellY = 0.072f, Pic = 0.046f, GridBottom = 0.1f, Width = 0.37f;
-        static readonly Vector2 Tab = new Vector2(0.074f, 0.03f);
+        public const int Columns = 4, RowsPerPage = 3;
+        const float CellX = 0.0875f, CellY = 0.1f, Pic = 0.056f, GridBottom = 0.1f, Width = 0.37f;
+        /// <summary>Step 14k: label sizes (x the board's font size; 14j: names 0.66, status ~0.53, help 0.72).</summary>
+        public const float NameFont = 1f, StatusFont = 0.8f, HelpFont = 0.95f, HeaderFont = 1.2f;
+        const float HoverLift = RuneBoard.HoverLift, HoverGrow = RuneBoard.HoverGrow;
+        static readonly Vector2 Tab = new Vector2(0.074f, 0.036f); // step 14k: taller (bigger labels), was 0.03
         static readonly List<float> TabX = new List<float>();
         /// <summary>Step 14j: an unseen Isling: one flat dark slate colour (not black, no shading), the shape only.</summary>
         public static readonly Color SilhouetteColor = new Color(0.17f, 0.19f, 0.25f, 1f).linear; // vertex colours are linear
-        const float CardW = 0.25f, CardGap = 0.014f, ModelHeight = 0.075f;
+        const float CardW = 0.29f, CardGap = 0.014f, ModelHeight = 0.075f;
 
         JournalData _data;
         Element _element = Element.Fire;
@@ -46,7 +52,12 @@ namespace Diorama
         Action _closed;
         int _hover = -1, _picked = -1;
         readonly bool[] _wasPinching = { true, true };
-        readonly int[] _poked = { -1, -1 };
+        readonly int[] _poked = { -1, -1 }, _rayCell = { -1, -1 };
+        readonly float[] _pop = new float[Columns * RowsPerPage]; // eased hover per cell
+        readonly TextMeshPro[] _labels = new TextMeshPro[Columns * RowsPerPage];
+        MeshRenderer _rim;
+        ICollection<string> _caught;
+        MaterialPropertyBlock _rimBlock;
         float _built;
 
         /// <summary>The Journal board, made once beside <paramref name="template"/> (the game menu's board) with its settings.</summary>
@@ -65,8 +76,12 @@ namespace Diorama
             // the island, 12 cm behind the near rim, and lifted 8 cm so the near trees stay under it.
             board.offset = template.offset + new Vector3(0f, 0.08f, -0.12f);
             board.maxTilt = Mathf.Min(template.maxTilt, 18f);
+            // Step 14k: poke and the hand ray + pinch; no look + pinch here.
+            board.gazeSelect = false;
+            board.handRays = true;
             var j = go.AddComponent<JournalBoard>();
             j.runes = board;
+            board.RayLit = h => j._rayCell[h] >= 0;
             go.SetActive(true);
             return j;
         }
@@ -127,6 +142,9 @@ namespace Diorama
         {
             runes.Clear();
             var caught = Journal.CaughtIds();
+            _caught = caught;
+            System.Array.Clear(_pop, 0, _pop.Length);
+            _hover = -1;
             _shown.Clear();
             var all = new List<int>();
             for (int i = 0; i < _data.entries.Count; i++)
@@ -148,9 +166,9 @@ namespace Diorama
             }
             else runes.AddBacking(bookCenter, bookSize);
             // A text's centre is its rect's centre: left / right aligned text sits inside the rect.
-            runes.AddText("<b>Isling Journal</b>", new Vector2(-Width * 0.5f + 0.02f + 0.1f, top + 0.012f), runes.fontSize * 1.05f, TextAlignmentOptions.Left, 0.2f);
+            runes.AddText("<b>Isling Journal</b>", new Vector2(-Width * 0.5f + 0.02f + 0.1f, top + 0.014f), runes.fontSize * HeaderFont, TextAlignmentOptions.Left, 0.2f);
             runes.AddText($"Found <b>{Journal.Found(_data.entries, caught)} / {Journal.Total(_data.entries)}</b>",
-                new Vector2(Width * 0.5f - 0.02f - 0.08f, top + 0.012f), runes.fontSize * 1.05f, TextAlignmentOptions.Right, 0.16f);
+                new Vector2(Width * 0.5f - 0.02f - 0.08f, top + 0.014f), runes.fontSize * HeaderFont, TextAlignmentOptions.Right, 0.16f);
 
             // Element tablets with their counts, then Close; the element showing is gold. Step 14j: one row by the layout
             // rule (fixed gaps, sized to fit the book's width).
@@ -168,21 +186,29 @@ namespace Diorama
             }
             var close = runes.Add("Close", new Vector2(TabX[TabX.Count - 1], 0f), tab, Close);
             close.tint = new Color(0.62f, 0.55f, 0.4f);
+            // The help line on the left of the strip between the grid and the tabs, the page tablet on its right.
+            const float stripY = (GridBottom + 0.015f) * 0.5f + 0.004f;
+            float pageW = 0.084f, helpW = Width - 0.03f - (pages > 1 ? pageW + TabletLayout.MinGap : 0f);
             if (pages > 1)
             {
-                runes.Add($"Page {_page + 1}/{pages}", new Vector2(Width * 0.5f - 0.04f, GridBottom - 0.03f), new Vector2(0.06f, 0.024f), () =>
+                runes.Add($"Page {_page + 1}/{pages}", new Vector2(Width * 0.5f - 0.015f - pageW * 0.5f, stripY), new Vector2(pageW, 0.034f), () =>
                 {
                     _page = (_page + 1) % pages;
+                    _picked = -1;
                     Rebuild();
                 });
             }
 
-            _card = runes.AddText(CardText(), new Vector2(0f, 0.047f), runes.fontSize * 0.72f, TextAlignmentOptions.Center, Width - 0.03f);
+            _card = runes.AddText(CardText(), new Vector2(-Width * 0.5f + 0.015f + helpW * 0.5f, stripY), runes.fontSize * HelpFont, TextAlignmentOptions.Center, helpW);
             _card.textWrappingMode = TextWrappingModes.Normal;
-            _card.rectTransform.sizeDelta = new Vector2(Width - 0.03f, 0.04f);
+            _card.rectTransform.sizeDelta = new Vector2(helpW, 0.05f);
+            _card.enableAutoSizing = true;
+            _card.fontSizeMin = runes.fontSize * 0.75f;
+            _card.fontSizeMax = runes.fontSize * HelpFont;
 
             _grid = runes.AddPart("Portraits", Vector2.zero, new Vector2(Width, top));
             BuildGrid(caught);
+            PaintRim();
             _model = null;
             if (_picked >= 0 && _picked < _shown.Count) BuildCard(_data.entries[_shown[_picked]], caught, bookCenter, bookSize);
             runes.Show(0.02f);
@@ -208,13 +234,45 @@ namespace Diorama
         static Vector2 CellCenter(int cell) =>
             new Vector2((cell % Columns - (Columns - 1) * 0.5f) * CellX, GridBottom + (RowsPerPage - 1 - cell / Columns) * CellY + CellY * 0.5f);
 
-        static Vector2 PicCenter(int cell) => CellCenter(cell) + new Vector2(0f, 0.012f);
+        /// <summary>The portrait sits in the cell's top part; the labels (name, status / hint) fill the rest.</summary>
+        static Vector2 PicCenter(int cell) => CellCenter(cell) + new Vector2(0f, CellY * 0.5f - 0.004f - Pic * 0.5f);
 
-        /// <summary>One mesh for every portrait (state = vertex colour), one text per row for the names and status lines.</summary>
+        /// <summary>The labels' box under the portrait (cell-relative top, height).</summary>
+        static Vector2 LabelCenter(int cell) => CellCenter(cell) + new Vector2(0f, -0.0475f + LabelHeight * 0.5f - 0.003f);
+
+        const float LabelHeight = CellY - Pic - 0.009f;
+
+        /// <summary>One mesh for every portrait (state = vertex colour), one text per cell for its name and status line.</summary>
         void BuildGrid(ICollection<string> caught)
         {
+            BuildPictures(caught);
+            if (_grid == null) return;
             var seen = Journal.SeenIds();
             var owned = Journal.Owned();
+            for (int c = 0; c < _labels.Length; c++)
+            {
+                var t = _labels[c];
+                if (t == null) continue;
+                if (c >= _shown.Count)
+                {
+                    t.text = "";
+                    continue;
+                }
+                var e = _data.entries[_shown[c]];
+                var state = Journal.StateOf(e.species, caught, seen);
+                string n = Journal.NameLine(e, state);
+                string st = Journal.StatusLine(e, state, Journal.BestLevel(e.species, owned), caught);
+                string dim = state == Journal.State.Caught ? "" : "<color=#B9B4A6>";
+                // The name on one line (shrunk only if it would run past the cell), the status / hint on up to 2 lines.
+                t.text = $"<size={NamePercent(t, n):0}%>{dim}<b>{n}</b>{(dim.Length > 0 ? "</color>" : "")}</size>\n" +
+                         $"<size={StatusFont / NameFont * 100f:0}%><color=#D8C99A>{st}</color></size>";
+            }
+        }
+
+        /// <summary>Step 14k: the portraits mesh (with each cell's hover pop: bigger, lifted toward the player).</summary>
+        void BuildPictures(ICollection<string> caught)
+        {
+            var seen = Journal.SeenIds();
             if (_mesh == null) _mesh = new Mesh { name = "Journal Portraits" };
             _mesh.Clear();
             var verts = new List<Vector3>();
@@ -229,13 +287,14 @@ namespace Diorama
                 Color tint = state == Journal.State.Caught ? Color.white : state == Journal.State.Seen ? new Color(0.5f, 0.5f, 0.5f, 0.9f) : SilhouetteColor;
                 float flat = state == Journal.State.Unseen ? 1f : 0f;
                 var rect = _data.CellRect(e.cell);
-                float s = Pic * (c == _hover || c == _picked ? 1.15f : 1f) * 0.5f;
+                float pop = Mathf.Max(_pop[c], c == _picked ? 1f : 0f);
+                float s = Pic * (1f + HoverGrow * pop) * 0.5f, z = -HoverLift * _pop[c];
                 Vector2 p = PicCenter(c);
                 int b = verts.Count;
-                verts.Add(new Vector3(p.x - s, p.y - s, 0f));
-                verts.Add(new Vector3(p.x - s, p.y + s, 0f));
-                verts.Add(new Vector3(p.x + s, p.y + s, 0f));
-                verts.Add(new Vector3(p.x + s, p.y - s, 0f));
+                verts.Add(new Vector3(p.x - s, p.y - s, z));
+                verts.Add(new Vector3(p.x - s, p.y + s, z));
+                verts.Add(new Vector3(p.x + s, p.y + s, z));
+                verts.Add(new Vector3(p.x + s, p.y - s, z));
                 uvs.Add(new Vector2(rect.xMin, rect.yMin));
                 uvs.Add(new Vector2(rect.xMin, rect.yMax));
                 uvs.Add(new Vector2(rect.xMax, rect.yMax));
@@ -262,63 +321,66 @@ namespace Diorama
                 mr.sharedMaterial = _data.portraitMaterial;
                 mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 _grid.localPosition = new Vector3(0f, 0f, -0.002f);
-                // Labels: one text per row, columns placed with <pos> from each label's measured width.
-                for (int row = 0; row < RowsPerPage; row++)
+                for (int c = 0; c < _labels.Length; c++)
                 {
-                    var t = runes.AddText("", new Vector2(0f, CellCenter(row * Columns).y - 0.021f), runes.fontSize * 0.66f, TextAlignmentOptions.Left, Columns * CellX);
-                    t.rectTransform.sizeDelta = new Vector2(Columns * CellX, 0.03f);
-                    t.lineSpacing = -18f;
-                    t.name = $"Row {row + 1} labels";
-                    _rows[row] = t;
+                    var t = runes.AddText("", LabelCenter(c), runes.fontSize * NameFont, TextAlignmentOptions.Top, CellX * 0.96f);
+                    t.rectTransform.sizeDelta = new Vector2(CellX * 0.96f, LabelHeight);
+                    t.textWrappingMode = TextWrappingModes.Normal;
+                    t.overflowMode = TextOverflowModes.Ellipsis;
+                    t.lineSpacing = -14f;
+                    t.name = $"Cell {c + 1} label";
+                    _labels[c] = t;
                 }
+                // The hover rim: one white rounded frame behind the popped portrait (the boards' focus look).
+                var rimGo = new GameObject("Hover rim");
+                rimGo.transform.SetParent(_grid, false);
+                rimGo.layer = runes.gameObject.layer;
+                rimGo.AddComponent<MeshFilter>().sharedMesh = RimQuad;
+                _rim = rimGo.AddComponent<MeshRenderer>();
+                _rim.sharedMaterial = runes.hudMaterial;
+                _rim.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                _rim.enabled = false;
             }
             mf.sharedMesh = _mesh;
-            for (int row = 0; row < RowsPerPage; row++)
-            {
-                var t = _rows[row];
-                if (t == null) continue;
-                var names = new StringBuilder();
-                var status = new StringBuilder();
-                for (int col = 0; col < Columns; col++)
-                {
-                    int c = row * Columns + col;
-                    if (c >= _shown.Count) break;
-                    var e = _data.entries[_shown[c]];
-                    var state = Journal.StateOf(e.species, caught, seen);
-                    string n = Journal.NameLine(e, state);
-                    string st = Journal.StatusLine(e, state, Journal.BestLevel(e.species, owned), caught);
-                    string dim = state == Journal.State.Caught ? "" : "<color=#B9B4A6>";
-                    string nm = Fit(t, $"<b>{n}</b>", 100f);
-                    names.Append(At(t, col, nm)).Append(dim).Append(nm).Append(dim.Length > 0 ? "</color>" : "");
-                    string sm = Fit(t, st, 80f);
-                    status.Append(At(t, col, sm)).Append("<color=#D8C99A>").Append(sm).Append("</color>");
-                }
-                t.text = names + "\n" + status;
-            }
         }
 
-        readonly TextMeshPro[] _rows = new TextMeshPro[RowsPerPage];
+        static Mesh _rimQuad;
+        static Mesh RimQuad => _rimQuad != null ? _rimQuad : _rimQuad = BattleHud.VerticalQuad();
 
-        /// <summary>The label at <paramref name="percent"/> size, smaller if it would run past its column.</summary>
-        static string Fit(TextMeshPro t, string rich, float percent)
+        /// <summary>The white rim behind the most-popped portrait (fades with its pop).</summary>
+        void PaintRim()
         {
-            float w = t.GetPreferredValues($"<size={percent:0}%>{rich}</size>").x;
-            float max = CellX * 0.96f;
-            if (w > max) percent *= max / w;
-            return $"<size={percent:0}%>{rich}</size>";
+            if (_rim == null || runes.hudMaterial == null) return;
+            int best = -1;
+            for (int c = 0; c < _shown.Count; c++)
+                if (_pop[c] > 0.02f && (best < 0 || _pop[c] > _pop[best])) best = c;
+            _rim.enabled = best >= 0;
+            if (best < 0) return;
+            float k = _pop[best], side = Pic * (1f + HoverGrow * k) + 0.005f;
+            Vector2 p = PicCenter(best);
+            _rim.transform.localPosition = new Vector3(p.x, p.y, 0.001f - HoverLift * k);
+            _rim.transform.localScale = new Vector3(side, side, 1f);
+            if (_rimBlock == null) _rimBlock = new MaterialPropertyBlock();
+            _rimBlock.SetColor("_BackColor", new Color(1f, 1f, 1f, 0.06f * k));
+            _rimBlock.SetColor("_BorderColor", new Color(1f, 1f, 1f, 0.95f * k));
+            _rimBlock.SetFloat("_Fill", 0f);
+            _rimBlock.SetFloat("_Inset", 0f);
+            _rimBlock.SetFloat("_Aspect", 1f);
+            _rimBlock.SetFloat("_Radius", 0.14f);
+            _rimBlock.SetFloat("_Border", 0.06f);
+            _rim.SetPropertyBlock(_rimBlock);
         }
 
-        /// <summary>A &lt;pos&gt; tag that centres <paramref name="rich"/> under column <paramref name="col"/>.</summary>
-        static string At(TextMeshPro t, int col, string rich)
+        /// <summary>The name's size (percent of the label font): 100, smaller only if it would run past the cell.</summary>
+        static float NamePercent(TextMeshPro t, string name)
         {
-            float w = t.GetPreferredValues(rich).x;
-            float width = Columns * CellX;
-            float left = (col + 0.5f) * CellX - w * 0.5f;
-            return $"<pos={Mathf.Clamp(left / width * 100f, 0f, 100f):0.##}%>";
+            float w = t.GetPreferredValues($"<b>{name}</b>").x;
+            float max = CellX * 0.94f;
+            return w > max ? 100f * max / w : 100f;
         }
 
         string CardText() => _picked < 0 || _picked >= _shown.Count
-            ? "<color=#D8C99A>Poke a portrait, or look at one and pinch.</color>"
+            ? "<color=#D8C99A>Poke a portrait, or point and pinch.</color>"
             : "<color=#D8C99A>Poke it again to close its card.</color>";
 
         static string Hex(Color c) => "#" + ColorUtility.ToHtmlStringRGB(c);
@@ -345,7 +407,7 @@ namespace Diorama
             else CardPortrait(e, state, new Vector2(cx, picY));
 
             string name = state == Journal.State.Unseen ? "???" : s.displayName;
-            var title = runes.AddText($"<b>{name}</b>", new Vector2(cx, picY - ModelHeight * 0.5f - 0.016f), runes.fontSize * 1.0f, TextAlignmentOptions.Center, inner);
+            var title = runes.AddText($"<b>{name}</b>", new Vector2(cx, picY - ModelHeight * 0.5f - 0.016f), runes.fontSize * 1.15f, TextAlignmentOptions.Center, inner);
             title.textWrappingMode = TextWrappingModes.NoWrap;
             // Element badge: a small tablet with its face in the element's colour (not a button).
             var badgeAt = new Vector2(cx, picY - ModelHeight * 0.5f - 0.042f);
@@ -359,7 +421,7 @@ namespace Diorama
                 badge.face = face;
                 badge.Paint(0f, 0f, 0f, 0f);
             }
-            var badgeText = runes.AddText($"<b>{s.element}</b>", badgeAt, runes.fontSize * 0.7f, TextAlignmentOptions.Center, badgeSize.x);
+            var badgeText = runes.AddText($"<b>{s.element}</b>", badgeAt, runes.fontSize * 0.8f, TextAlignmentOptions.Center, badgeSize.x);
             TabletKit.StyleLabel(badgeText);
             // In front of the badge tablet (which sits at the part's depth), as a rune's label sits on its tablet.
             badgeText.transform.localPosition = new Vector3(badgeAt.x, badgeAt.y, badgePart.localPosition.z + TabletKit.LabelZ);
@@ -396,12 +458,12 @@ namespace Diorama
                 sb.Append($"<i>{JournalLore.Line(s)}</i>");
             }
             float bodyTop = picY - ModelHeight * 0.5f - 0.058f, bodyBottom = bookCenter.y - size.y * 0.5f + 0.012f;
-            var body = runes.AddText(sb.ToString(), new Vector2(left + inner * 0.5f, (bodyTop + bodyBottom) * 0.5f), runes.fontSize * 0.9f, TextAlignmentOptions.TopLeft, inner);
+            var body = runes.AddText(sb.ToString(), new Vector2(left + inner * 0.5f, (bodyTop + bodyBottom) * 0.5f), runes.fontSize * 1.0f, TextAlignmentOptions.TopLeft, inner);
             body.textWrappingMode = TextWrappingModes.Normal;
             body.rectTransform.sizeDelta = new Vector2(inner, bodyTop - bodyBottom);
             body.enableAutoSizing = true;
-            body.fontSizeMin = runes.fontSize * 0.6f;
-            body.fontSizeMax = runes.fontSize * 0.9f;
+            body.fontSizeMin = runes.fontSize * 0.75f;
+            body.fontSizeMax = runes.fontSize * 1.0f;
             body.paragraphSpacing = 6f;
         }
 
@@ -476,7 +538,10 @@ namespace Diorama
         /// <summary>Bridge: shows an element's page.</summary>
         public void DebugElement(Element e) => ShowElement(e);
 
-        // ---- poke, look + pinch on a portrait ----
+        // ---- step 14k: poke, hand ray + pinch, hover pop (no look + pinch) ----
+
+        /// <summary>Bridge: hovers a cell as a finger would (-1 = off), to see the pop without hands.</summary>
+        public static int DebugHover = -1;
 
         void Update()
         {
@@ -485,17 +550,7 @@ namespace Diorama
             if (_model != null) _model.localRotation = Quaternion.Euler(0f, Time.unscaledTime * 30f, 0f);
             if (Time.unscaledTime - _built < 0.3f) return;
             var root = runes.Root;
-            int hover = -1;
-            if (HeadGaze.TryGetRay(out var ray))
-            {
-                var plane = new Plane(root.forward, root.position);
-                if (plane.Raycast(ray, out float d)) hover = CellAt(root.InverseTransformPoint(ray.GetPoint(d)));
-            }
-            if (hover != _hover)
-            {
-                _hover = hover;
-                BuildGrid(Journal.CaughtIds());
-            }
+            int hover = DebugHover;
             for (int h = 0; h < 2; h++)
             {
                 var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
@@ -504,13 +559,36 @@ namespace Diorama
                 if (tracked)
                 {
                     var local = root.InverseTransformPoint(tip);
-                    if (Mathf.Abs(local.z) < 0.015f) poked = CellAt(local);
+                    int under = CellAt(local);
+                    // A fingertip up to 4 cm in front of a portrait pops it; touching it picks it.
+                    if (under >= 0 && local.z > -0.04f && local.z < 0.015f) hover = under;
+                    if (Mathf.Abs(local.z) < 0.015f) poked = under;
                 }
                 if (poked >= 0 && poked != _poked[h]) Pick(poked, "poke");
                 _poked[h] = poked;
+                // The hand ray (drawn by the board): a portrait under it pops, a pinch picks it.
+                _rayCell[h] = runes.RayPoint(h, out var rp) ? CellAt(new Vector3(rp.x, rp.y, 0f)) : -1;
+                if (hover < 0 && _rayCell[h] >= 0) hover = _rayCell[h];
                 bool pinching = tracked && hand.GetIndexFingerIsPinching();
-                if (pinching && !_wasPinching[h] && _hover >= 0) Pick(_hover, "look + pinch");
+                bool busy = runes.grabGuard != null && runes.grabGuard.IsHandBusy(h == 0);
+                if (pinching && !_wasPinching[h] && !busy && _rayCell[h] >= 0) Pick(_rayCell[h], $"ray + pinch ({(h == 0 ? "left" : "right")})");
                 _wasPinching[h] = pinching;
+            }
+            if (hover != _hover && hover >= 0) GameAudio.At(AudioIds.RuneHover, root.TransformPoint(PicCenter(hover)));
+            _hover = hover;
+            // Ease each portrait's pop (in ~0.12 s, out ~0.2 s); rebuild the portraits mesh only while something moves.
+            bool moving = false;
+            float dt = Time.unscaledDeltaTime;
+            for (int c = 0; c < _pop.Length; c++)
+            {
+                float to = c == _hover ? 1f : 0f, was = _pop[c];
+                _pop[c] = Mathf.MoveTowards(was, to, dt / (to > was ? 0.12f : 0.2f));
+                moving |= _pop[c] != was;
+            }
+            if (moving)
+            {
+                BuildPictures(_caught);
+                PaintRim();
             }
         }
 

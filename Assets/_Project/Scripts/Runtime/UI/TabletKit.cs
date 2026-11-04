@@ -69,7 +69,10 @@ namespace Diorama
             }
 
             /// <summary>Pressed 0..1: the slab sinks back a few millimetres.</summary>
-            public void Press(float pressed) => transform.localPosition = new Vector3(0f, 0f, Sink * Mathf.Clamp01(pressed));
+            public void Press(float pressed) => Press(pressed, 0f);
+
+            /// <summary>Step 14k: pressed 0..1 sinks it; <paramref name="lift"/> (board-local m) raises it toward the player (hover pop).</summary>
+            public void Press(float pressed, float lift) => transform.localPosition = new Vector3(0f, 0f, Sink * Mathf.Clamp01(pressed) - lift);
         }
 
         /// <summary>A tablet under <paramref name="parent"/> (its centre), <paramref name="size"/> board-local metres.</summary>

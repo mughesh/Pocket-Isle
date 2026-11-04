@@ -181,9 +181,9 @@ namespace Diorama
             _back.sortingOrder = -1;
             _back.transform.localScale = new Vector3(size.x, size.y, 1f);
             Paint(_back, PanelColor, new Color(1f, 1f, 1f, 0.25f), size.x / size.y, 0.06f, 0.02f);
-            _title = Text(_root, "Title", new Vector2(-0.02f, size.y * 0.5f - 0.016f), new Vector2(size.x - 0.06f, 0.02f), fontSize * 0.85f);
+            _title = Text(_root, "Title", new Vector2(-0.02f, size.y * 0.5f - 0.016f), new Vector2(size.x - 0.06f, 0.02f), fontSize * 1.0f);
             _title.alignment = TextAlignmentOptions.Left;
-            _status = Text(_root, "Status", new Vector2(0f, -size.y * 0.5f + 0.028f), new Vector2(size.x - 0.02f, 0.045f), fontSize * 0.8f);
+            _status = Text(_root, "Status", new Vector2(0f, -size.y * 0.5f + 0.028f), new Vector2(size.x - 0.02f, 0.045f), fontSize * 0.95f);
             _status.alignment = TextAlignmentOptions.TopLeft;
             _frame = Quad(_root, "Grab Frame");
             _frame.sortingOrder = -2;
@@ -204,7 +204,8 @@ namespace Diorama
             float sx = size.x * 0.5f - 0.01f - ScrollWidth * 0.5f;
             _up = MakeButton(() => "Up", () => ScrollBy(-2), null, false, new Vector2(sx, RowY(0)), new Vector2(ScrollWidth - 0.004f, RowHeight - 0.005f));
             _down = MakeButton(() => "Down", () => ScrollBy(2), null, false, new Vector2(sx, RowY(VisibleRows - 1)), new Vector2(ScrollWidth - 0.004f, RowHeight - 0.005f));
-            _up.text.fontSize = _down.text.fontSize = fontSize * 0.85f;
+            _up.text.enableAutoSizing = _down.text.enableAutoSizing = false;
+            _up.text.fontSize = _down.text.fontSize = fontSize * 0.95f;
             _tabs.Add(_up);
             _tabs.Add(_down);
             for (int h = 0; h < 2; h++)
@@ -258,7 +259,11 @@ namespace Diorama
             b.quad = Quad(_root, "Button");
             b.quad.transform.localPosition = new Vector3(center.x, center.y, -0.001f);
             b.quad.transform.localScale = new Vector3(box.x, box.y, 1f);
-            b.text = Text(_root, "Label", center, box - new Vector2(0.006f, 0.002f), fontSize);
+            // Step 14k: bigger labels (QA: hard to read), shrinking to fit a long one.
+            b.text = Text(_root, "Label", center, box - new Vector2(0.006f, 0.002f), fontSize * 1.2f);
+            b.text.enableAutoSizing = true;
+            b.text.fontSizeMin = fontSize * 0.8f;
+            b.text.fontSizeMax = fontSize * 1.2f;
             return b;
         }
 
@@ -313,7 +318,8 @@ namespace Diorama
             b.text.alignment = TextAlignmentOptions.BottomLeft;
             b.text.color = new Color(1f, 0.84f, 0.45f);
             b.text.fontStyle = FontStyles.Bold;
-            b.text.fontSize = fontSize * 0.9f;
+            b.text.enableAutoSizing = false;
+            b.text.fontSize = fontSize * 1.05f;
             _content.Add(b);
         }
 

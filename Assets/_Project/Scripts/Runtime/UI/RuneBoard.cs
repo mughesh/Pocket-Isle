@@ -46,6 +46,14 @@ namespace Diorama
         public float turnSeconds = 0.4f;
         public float maxTilt = 40f;
 
+        [Header("Input (step 14k)")]
+        [Tooltip("Look at a tablet + pinch picks it. Off on the Journal (Mugesh: gaze isn't needed there): poke and the hand ray only.")]
+        public bool gazeSelect = true;
+        [Tooltip("Each hand's pointer ray (ISDK pointer pose) shows a line and a dot on the board; pinch picks the tablet under it.")]
+        public bool handRays;
+        [Tooltip("The hand ray reaches this far (world m).")]
+        public float rayLength = 0.9f;
+
         [Header("Press")]
         public float pressDepth = 0.008f;
         [Tooltip("Hold runes (start over) need the pinch or poke kept this long (s).")]
@@ -101,7 +109,11 @@ namespace Diorama
         MeshRenderer _reticle;
         Mesh _quad;
         MaterialPropertyBlock _block;
-        Rune _hovered, _holding;
+        Rune _hovered, _holding, _gazeHover, _fingerHover;
+        readonly Rune[] _rayRune = new Rune[2];
+        readonly bool[] _rayOn = new bool[2], _fingerNear = new bool[2];
+        readonly Vector2[] _rayPoint = new Vector2[2];
+        readonly MeshRenderer[] _rayLine = new MeshRenderer[2], _rayDot = new MeshRenderer[2];
         int _holdHand = -1;
         readonly bool[] _wasPinching = { true, true };
         float _yaw, _tilt, _tiltTarget;
@@ -164,9 +176,19 @@ namespace Diorama
         {
             Showing.Remove(this);
             if (_quad != null) Destroy(_quad);
+            for (int h = 0; h < 2; h++)
+            {
+                if (_rayLine[h] != null) Destroy(_rayLine[h].gameObject);
+                if (_rayDot[h] != null) Destroy(_rayDot[h].gameObject);
+            }
         }
 
-        void OnDisable() => Showing.Remove(this);
+        void OnDisable()
+        {
+            Showing.Remove(this);
+            ShowRay(0, false);
+            ShowRay(1, false);
+        }
 
         // ---- building ----
 
@@ -179,7 +201,8 @@ namespace Diorama
                 if (go != null) Destroy(go);
             _runes.Clear();
             _extras.Clear();
-            _hovered = _holding = null;
+            _hovered = _holding = _gazeHover = _fingerHover = null;
+            _rayRune[0] = _rayRune[1] = null;
             _holdHand = -1;
             DefaultFocus = null;
             Anchor = null;
@@ -377,13 +400,22 @@ namespace Diorama
         {
             Showing.Remove(this);
             if (_root != null) _root.gameObject.SetActive(false);
-            _hovered = _holding = null;
+            _hovered = _holding = _gazeHover = _fingerHover = null;
+            for (int h = 0; h < 2; h++)
+            {
+                _rayRune[h] = null;
+                _rayOn[h] = false;
+                ShowRay(h, false);
+            }
         }
 
         // ---- every frame ----
 
         /// <summary>Step 14j: how much a looked-at tablet grows (the layout rule allows for it).</summary>
         public const float HoverGrow = 0.1f;
+
+        /// <summary>Step 14k: how far a hovered tablet lifts toward the player (board-local m).</summary>
+        public const float HoverLift = 0.004f;
 
         /// <summary>Step 14j: every pair of this board's tablets that breaks the layout rule (<see cref="TabletLayout"/>).</summary>
         public List<string> LayoutProblems()
@@ -422,7 +454,12 @@ namespace Diorama
             float dt = Time.unscaledDeltaTime;
             Place(false);
             var was = _hovered;
-            _hovered = GazeHover();
+            // Step 14k: a fingertip near a tablet (ISDK poke hover) wins, then a hand ray, then the look (boards with gaze on).
+            _fingerHover = FingerHover();
+            Rays();
+            _gazeHover = gazeSelect ? GazeHover() : null;
+            if (!gazeSelect && _reticle != null) _reticle.enabled = false;
+            _hovered = _fingerHover ?? _rayRune[0] ?? _rayRune[1] ?? _gazeHover;
             if (_hovered != null && _hovered != was) GameAudio.At(AudioIds.RuneHover, _hovered.visual.position);
             foreach (var r in _runes)
             {
@@ -431,7 +468,7 @@ namespace Diorama
                 r.appear = Mathf.MoveTowards(r.appear, popping ? 1f : 0f, dt / 0.25f);
                 r.visual.localScale = Vector3.one * (Mathf.Max(0.001f, EaseOutBack(r.appear)) * (1f + HoverGrow * r.hover));
                 r.press = Mathf.MoveTowards(r.press, 0f, dt / 0.3f);
-                if (r.tablet != null) r.tablet.Press(r.press > 0.5f ? 1f : r.press * 2f);
+                if (r.tablet != null) r.tablet.Press(r.press > 0.5f ? 1f : r.press * 2f, HoverLift * r.hover * (1f - r.press));
             }
             Keys();
             Pinches();
@@ -471,10 +508,13 @@ namespace Diorama
                 var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
                 bool pinching = hand != null && hand.IsTrackedDataValid && hand.GetIndexFingerIsPinching();
                 bool busy = grabGuard != null && grabGuard.IsHandBusy(h == 0);
-                if (pinching && !_wasPinching[h] && !busy && _hovered != null)
+                // Step 14k: this hand's ray target first, else the looked-at tablet (boards with gaze on). Never the
+                // finger-hovered one: that one is poked.
+                var target = _rayRune[h] ?? _gazeHover;
+                if (pinching && !_wasPinching[h] && !busy && target != null)
                 {
-                    if (_hovered.hold) StartHold(_hovered, h);
-                    else Pick(_hovered, $"gaze + pinch ({(h == 0 ? "left" : "right")})");
+                    if (target.hold) StartHold(target, h);
+                    else Pick(target, $"{(_rayRune[h] != null ? "ray" : "gaze")} + pinch ({(h == 0 ? "left" : "right")})");
                 }
                 if (!pinching && _holdHand == h) StopHold();
                 _wasPinching[h] = pinching;
@@ -504,7 +544,7 @@ namespace Diorama
             if (_holding == null) return;
             var r = _holding;
             // A pinch hold keeps counting while the rune stays looked at; a poke hold while the finger stays pressed in.
-            bool kept = _holdHand == -2 || (_holdHand >= 0 ? _hovered == r : r.poked);
+            bool kept = _holdHand == -2 || (_holdHand >= 0 ? _rayRune[_holdHand] == r || _gazeHover == r : r.poked);
             r.fill = HoldStep(r.fill, kept, dt, holdSeconds);
             if (!kept)
             {
@@ -586,6 +626,151 @@ namespace Diorama
                 }
             }
             _root.rotation = island.transform.rotation * Quaternion.Euler(_tilt, _yaw, 0f);
+        }
+
+        // ---- step 14k: finger hover and hand rays ----
+
+        /// <summary>The tablet a fingertip hovers (ISDK poke hover or press), or null.</summary>
+        Rune FingerHover()
+        {
+            foreach (var r in _runes)
+                if (r.poke != null && r.appear > 0.3f && !r.disabled &&
+                    (r.poke.State == InteractableState.Hover || r.poke.State == InteractableState.Select)) return r;
+            return null;
+        }
+
+        /// <summary>This hand's fingertip is close in front of the board (it is poking: no ray, no ray pinch).</summary>
+        public bool FingerNear(int h) => _fingerNear[h];
+
+        /// <summary>Where this hand's ray meets the board now (board-local), when <see cref="handRays"/> is on.</summary>
+        public bool RayPoint(int h, out Vector2 p)
+        {
+            p = _rayPoint[h];
+            return _rayOn[h];
+        }
+
+        /// <summary>A board-local point inside a tablet (a little generous), or null.</summary>
+        Rune RuneAt(Vector2 p)
+        {
+            foreach (var r in _runes)
+            {
+                if (r.appear < 0.3f || r.disabled) continue;
+                if (Mathf.Abs(p.x - r.center.x) <= r.size.x * 0.5f + 0.003f && Mathf.Abs(p.y - r.center.y) <= r.size.y * 0.5f + 0.003f) return r;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Each hand's pointer ray (ISDK pointer pose), like the dev panel's: where it meets the board a thin line and a dot
+        /// show (gold over a tablet); a pinch picks the tablet under it. Hidden while that hand's fingertip is near the
+        /// board (poking) or the hand is busy with the island.
+        /// </summary>
+        void Rays()
+        {
+            for (int h = 0; h < 2; h++)
+            {
+                _rayRune[h] = null;
+                _rayOn[h] = false;
+                _fingerNear[h] = false;
+                var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
+                if (hand == null || !hand.IsTrackedDataValid)
+                {
+                    ShowRay(h, false);
+                    continue;
+                }
+                if (HandLookup.TryGetJoint(hand, HandJointId.HandIndexTip, out var tip))
+                {
+                    Vector3 l = _root.InverseTransformPoint(tip);
+                    float s = Mathf.Max(1e-4f, _root.lossyScale.x);
+                    _fingerNear[h] = l.x > _min.x - 0.03f && l.x < _max.x + 0.03f && l.y > _min.y - 0.03f && l.y < _max.y + 0.03f &&
+                                     l.z > -0.06f / s && l.z < 0.04f / s;
+                }
+                bool busy = grabGuard != null && grabGuard.IsHandBusy(h == 0);
+                if (!handRays || _fingerNear[h] || busy || !hand.GetPointerPose(out var pose))
+                {
+                    ShowRay(h, false);
+                    continue;
+                }
+                Vector3 o = _root.InverseTransformPoint(pose.position), d = _root.InverseTransformDirection(pose.forward);
+                if (d.z <= 1e-4f)
+                {
+                    ShowRay(h, false);
+                    continue;
+                }
+                Vector3 hit = o + d * (-o.z / d.z);
+                var p = new Vector2(hit.x, hit.y);
+                Vector3 end = _root.TransformPoint(new Vector3(p.x, p.y, -0.003f));
+                bool on = p.x > _min.x - 0.02f && p.x < _max.x + 0.02f && p.y > _min.y - 0.02f && p.y < _max.y + 0.02f &&
+                          (end - pose.position).magnitude <= rayLength;
+                if (!on)
+                {
+                    ShowRay(h, false);
+                    continue;
+                }
+                _rayOn[h] = true;
+                _rayPoint[h] = p;
+                _rayRune[h] = RuneAt(p);
+                bool pinching = hand.GetIndexFingerIsPinching();
+                bool lit = _rayRune[h] != null || RayLit != null && RayLit(h);
+                Color c = lit ? new Color(1f, 0.9f, 0.55f, pinching ? 1f : 0.85f) : new Color(1f, 1f, 1f, 0.5f);
+                DrawRay(h, pose.position, end, c, pinching);
+            }
+        }
+
+        /// <summary>Step 14k: something else on the board is under this hand's ray (a Journal portrait): the ray shows gold.</summary>
+        public Func<int, bool> RayLit { get; set; }
+
+        void ShowRay(int h, bool on)
+        {
+            if (_rayLine[h] != null) _rayLine[h].enabled = on;
+            if (_rayDot[h] != null) _rayDot[h].enabled = on;
+        }
+
+        MeshRenderer RayPart(string name)
+        {
+            var go = new GameObject(name);
+            go.layer = gameObject.layer;
+            go.AddComponent<MeshFilter>().sharedMesh = _quad;
+            var mr = go.AddComponent<MeshRenderer>();
+            mr.sharedMaterial = hudMaterial;
+            mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            return mr;
+        }
+
+        void DrawRay(int h, Vector3 from, Vector3 end, Color c, bool pinching)
+        {
+            if (hudMaterial == null) return;
+            if (_rayLine[h] == null) _rayLine[h] = RayPart($"{name} Ray {(h == 0 ? "L" : "R")}");
+            if (_rayDot[h] == null) _rayDot[h] = RayPart($"{name} Ray Dot {(h == 0 ? "L" : "R")}");
+            Vector3 along = end - from;
+            float len = Mathf.Max(1e-4f, along.magnitude);
+            Vector3 up = along / len;
+            var cam = Camera.main;
+            Vector3 toCam = cam != null ? cam.transform.position - (from + end) * 0.5f : -along;
+            Vector3 normal = Vector3.ProjectOnPlane(toCam, up);
+            if (normal.sqrMagnitude < 1e-8f) normal = Vector3.Cross(up, Vector3.right);
+            var t = _rayLine[h].transform;
+            t.SetPositionAndRotation((from + end) * 0.5f, Quaternion.LookRotation(-normal, up));
+            t.localScale = new Vector3(0.0035f, len, 1f);
+            PaintQuad(_rayLine[h], new Color(c.r, c.g, c.b, c.a * 0.55f), 0.0035f / len);
+            var dt = _rayDot[h].transform;
+            dt.SetPositionAndRotation(end, _root.rotation);
+            dt.localScale = Vector3.one * (pinching ? 0.007f : 0.011f);
+            PaintQuad(_rayDot[h], c, 1f);
+            ShowRay(h, true);
+        }
+
+        void PaintQuad(MeshRenderer mr, Color back, float aspect)
+        {
+            _block.Clear();
+            _block.SetColor(BackColorId, back);
+            _block.SetColor(BorderColorId, Color.clear);
+            _block.SetFloat(FillId, 0f);
+            _block.SetFloat(InsetId, 0f);
+            _block.SetFloat(AspectId, aspect);
+            _block.SetFloat(RadiusId, 0.5f);
+            _block.SetFloat(BorderId, 0f);
+            mr.SetPropertyBlock(_block);
         }
 
         Rune GazeHover()

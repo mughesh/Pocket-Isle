@@ -128,7 +128,12 @@ Shader "Diorama/Tablet"
                 }
                 else if (part < 0.375) col = _Moss.rgb * i.color.rgb * band;
                 else if (part < 0.625) col = lerp(_Groove.rgb, inlay.rgb, inlay.a) * lerp(1.0, band, 1.0 - inlay.a * 0.6) + inlay.rgb * inlay.a * 0.25 * (hover + glow);
-                else col = lerp(_Rim.rgb, _Gold.rgb * 1.35, saturate(hover + glow * 0.7));
+                else
+                {
+                    // Step 14k: hover (a finger near, the ray, the look) = a white rim, the game's focus language; the press glow stays gold.
+                    col = lerp(_Rim.rgb, float3(1.25, 1.25, 1.22), saturate(hover));
+                    col = lerp(col, _Gold.rgb * 1.35, saturate(glow * 0.7));
+                }
 
                 // Looked at: the stone brightens a touch; disabled: grey and dim.
                 col *= 1.0 + 0.18 * hover;
