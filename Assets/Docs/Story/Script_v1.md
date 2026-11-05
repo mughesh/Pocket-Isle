@@ -200,7 +200,7 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
 - `cinder.keeper.win` · in hall · story · once · → hearthstag (it kneels and calms)
   - Spirit: It wasn't angry. It was scared, holding all the fire in.
 - `cinder.shard.take` · in hall · story · once · → fireShard (the fire shard floats to the player)
-  - Spirit: The fire shard! Take it.
+  - Spirit: The fire shard! Touch it!
 - `cinder.restored` · in cinderwood · story · once (the restoration wave outside)
   - Spirit: Cinderwood is warm again!
 
@@ -291,7 +291,7 @@ Step 10d / 10e, the tower hall:
   - Galeowl: But a still world is a stuck world.
   - Galeowl: Thank you, guardian. Let it blow.
 - `gw.shard.take` · in hall · story · once · → windShard (step 10e: the wind shard floats out of the window to the player)
-  - Spirit: The wind shard! Grab it.
+  - Spirit: The wind shard! Touch it!
 - `gw.restored` · in galewick · story · once (the restoration wave from the tower)
   - Spirit: Feel that? Galewick is breathing again!
 
@@ -364,7 +364,7 @@ Step 11b, the hand moments (lesson lines stay pinned as a chip until the moment 
   - Tidemother: I watched it drain away once. I was so afraid of losing it again.
   - Tidemother: Thank you, guardian. Water is meant to flow.
 - `lm.shard.take` · in hall · story · once · → waterShard (step 11c: the water shard floats out to the player)
-  - Spirit: The water shard! Grab it.
+  - Spirit: The water shard! Touch it!
 - `lm.restored` · in lilymere · story · once (the restoration wave from the temple)
   - Spirit: Listen... the whole lagoon is singing again!
 

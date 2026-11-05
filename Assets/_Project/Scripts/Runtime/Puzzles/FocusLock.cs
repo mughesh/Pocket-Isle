@@ -74,6 +74,10 @@ namespace Diorama
                     _holding = best;
                 }
             }
+            else if (_holding != null && _holding.KeepViewWhileLocked)
+            {
+                // Step 16: a scene at the moment (the statue's whisper) keeps the view where it is.
+            }
             else if (_holding != null)
             {
                 Debug.Log($"[FocusLock] Letting go of {(_holding != null ? _holding.id : "?")}.");

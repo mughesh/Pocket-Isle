@@ -1363,7 +1363,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: The fire shard! Take it.
+      text: The fire shard! Touch it!
       context: 
   - id: cinder.restored
     once: 1
@@ -1951,7 +1951,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: The wind shard! Grab it.
+      text: The wind shard! Touch it!
       context: 
   - id: gw.restored
     once: 1
@@ -2415,7 +2415,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: The water shard! Grab it.
+      text: The water shard! Touch it!
       context: 
   - id: lm.restored
     once: 1

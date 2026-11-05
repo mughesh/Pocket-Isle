@@ -147,7 +147,9 @@ namespace Diorama
         [Tooltip("Palm up this long before it lands (s).")]
         public float landSeconds = 0.35f;
         [Tooltip("Carried this close to the socket (m, real world at island scale 1): it floats in.")]
-        public float socketRadius = 0.06f;
+        public float socketRadius = 0.12f;
+        /// <summary>Step 16: forgiving: within 12 cm it floats in, whatever an older scene saved.</summary>
+        public const float ForgivingRadius = 0.12f;
         [Tooltip("Palm down or untracked this long while carried: it floats back (s).")]
         public float loseSeconds = 0.6f;
         [Tooltip("Nothing happening this long: the wait line (s).")]
@@ -198,7 +200,7 @@ namespace Diorama
             }
             else if (Now == State.OnPalm)
             {
-                if ((palm - socket).magnitude <= socketRadius * Mathf.Max(1f, scale) && tracked)
+                if ((palm - socket).magnitude <= Mathf.Max(socketRadius, ForgivingRadius) * Mathf.Max(1f, scale) && tracked)
                 {
                     Now = State.ToSocket;
                     return "spirit.finale.3";

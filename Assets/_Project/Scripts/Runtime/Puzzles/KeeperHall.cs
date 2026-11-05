@@ -99,6 +99,11 @@ namespace Diorama
         [Header("Taking the shard (step 11d: it was too hard)")]
         [Tooltip("A pinch, or a fist closing, this close to the floating shard takes it (m, real hands).")]
         public float shardGrabReach = 0.09f;
+        [Tooltip("Step 16: a fingertip or palm this close to the floating shard takes it (touch, real m).")]
+        public float shardTouchReach = 0.06f;
+        [Tooltip("Step 16: the shard floats this high over the cap and this far toward the player (share of the half depth): above the hall's entry arch.")]
+        public float shardHoverHeight = 0.2f;
+        [Range(0f, 1f)] public float shardHoverFront = 0.7f;
         [Tooltip("Not taken after this long (s): it floats to the Spirit by itself.")]
         public float shardAutoSeconds = 4f;
         /// <summary>Step 11d: the shard's ghost pinches it (thumb + index), not a fist.</summary>
@@ -706,7 +711,8 @@ namespace Diorama
             Vector3 from = island.TileToLocal(forgeMouth, island.Content.capHeight + forgeMouthHeight * island.map.tileSize);
             Vector3 up = from + Vector3.up * 0.09f;
             var half = island.FootprintHalfSize;
-            Vector3 hover = new Vector3(0f, island.CapTopLocal + 0.12f, half.y * 0.55f);
+            // Step 16: higher and nearer the player (it hid behind the hall's entry arch at 0.12 m).
+            Vector3 hover = new Vector3(0f, island.CapTopLocal + shardHoverHeight, half.y * shardHoverFront);
             _shardHovering = true;
             _shardFloat.Stop(0f);
             _shardFloat = AudioService.PlayLoop(AudioIds.ShardFloat, island.transform.TransformPoint(hover), 0.6f);
@@ -729,7 +735,7 @@ namespace Diorama
             if (ghosts != null) ghosts.Show(ShardGhost, GhostPlace.AtTarget, shardTarget, 1f, DominantHand.Left, false, aside: true);
             FocusHighlight.SetPending(() => _shardHovering ? island.transform.TransformPoint(_shardLocal) : (Vector3?)null, 0.05f * island.transform.lossyScale.x);
             explorer.Locked = false;
-            Debug.Log($"[KeeperHall] {ownShard} floats in front of the player: grab it (pinch, or look + pinch).");
+            Debug.Log($"[KeeperHall] {ownShard} floats in front of the player: touch it (fingertip or palm), grab it, or look + pinch.");
         }
 
         Vector3 _shardHome;
@@ -777,6 +783,12 @@ namespace Diorama
                             HandPuzzle.IsFistPose(hand, palm) && (palm - world).magnitude < shardGrabReach * 1.2f;
                 bool fistStarted = fist && !_wasFist[h];
                 _wasFist[h] = fist;
+                // Step 16: a touch is enough (the small shard was hard to grab).
+                if (hand != null && hand.IsTrackedDataValid && TouchesShard(hand, world))
+                {
+                    CollectShard($"{(h == 0 ? "left" : "right")} hand touch");
+                    return;
+                }
                 if (fistStarted)
                 {
                     CollectShard($"{(h == 0 ? "left" : "right")} hand grab");
@@ -790,6 +802,13 @@ namespace Diorama
                     return;
                 }
             }
+        }
+
+        bool TouchesShard(IHand hand, Vector3 world)
+        {
+            float r = shardTouchReach * Mathf.Max(1f, island.transform.lossyScale.x);
+            return HandLookup.TryGetJoint(hand, HandJointId.HandIndexTip, out var tip) && (tip - world).magnitude < r ||
+                   HandLookup.TryGetJoint(hand, HandJointId.HandPalm, out var palm) && (palm - world).magnitude < r;
         }
 
         /// <summary>Step 11d: a gold ring and glow round the floating shard while it waits.</summary>

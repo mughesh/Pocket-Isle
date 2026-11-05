@@ -112,7 +112,7 @@ namespace Diorama.Tests
             Assert.AreEqual("spirit.finale.hand", Run(h, 0.3f, true, 0.9f, true, new Vector3(0f, 1f, 0.9f)));
             Assert.AreEqual(PalmHandoff.State.OnPalm, h.Now);
             Assert.IsNull(Run(h, 1f, true, 0.9f, true, Socket + new Vector3(0f, -0.1f, 0.1f)), "14 cm away: it stays on the palm");
-            Assert.AreEqual("spirit.finale.3", Run(h, 0.1f, true, 0.9f, true, Socket + new Vector3(0f, -0.03f, 0.03f)), "within 6 cm: it floats in");
+            Assert.AreEqual("spirit.finale.3", Run(h, 0.1f, true, 0.9f, true, Socket + new Vector3(0f, -0.03f, 0.03f)), "within 12 cm (step 16, forgiving): it floats in");
             Assert.AreEqual(PalmHandoff.State.ToSocket, h.Now);
         }
 

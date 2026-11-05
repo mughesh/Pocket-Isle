@@ -120,7 +120,33 @@ namespace Diorama
 
         protected override bool GhostAside => true;
         public override bool Busy => _hand >= 0 || _flying;
-        protected override bool Available => ShardHolder.Holds(id);
+        /// <summary>Step 16: the offer (lesson, Spirit's offer, focus lock) only starts next to the statue (walk-up rule).</summary>
+        protected override bool Available => ShardHolder.Holds(id) && NearStatue;
+        /// <summary>Step 16: the view stays on the statue while it whispers (the explorer is locked then).</summary>
+        public override bool KeepViewWhileLocked => _scene;
+
+        [Header("Step 16")]
+        [Tooltip("The offer starts with the explorer this many tiles from the statue's footprint (1 = next to it).")]
+        [Min(1)] public int offerDistance = 1;
+        [Tooltip("Released this close to the socket (world m) it snaps in (forgiving; the old snapRadius stays as a minimum).")]
+        public float forgivingSnap = 0.12f;
+        [Tooltip("The explorer stays locked at most this long while the statue whispers and the Spirit answers (s).")]
+        public float sceneLockSeconds = 30f;
+
+        bool _scene;
+
+        /// <summary>The statue's tiles (its prop's footprint on the map; 3 x 4 if the map has no prop there).</summary>
+        RectInt StatueRect
+        {
+            get
+            {
+                var size = new Vector2Int(3, 4);
+                if (map != null && map.TryGetProp(map.PropAt(statueAnchor.y, statueAnchor.x), out var e)) size = WorldMap.FootprintOf(e);
+                return new RectInt(statueAnchor, size);
+            }
+        }
+
+        bool NearStatue => explorer != null && WalkUp.Distance(explorer.Tile, StatueRect) <= offerDistance;
         protected override Vector2 HomeTile => statueAnchor + Vector2.one;
 
         public override Vector3? FocusPoint => Here && ShardHolder.Holds(id) && holder != null ? holder.CupWorld(id) : (Vector3?)null;
@@ -222,9 +248,10 @@ namespace Diorama
             bool here = Here;
             SyncStatue(false);
             bool held = ShardHolder.Holds(id);
-            if (holder != null) holder.SetOffering(id, here && !IsSolved && held && Usable);
+            bool near = NearStatue;
+            if (holder != null) holder.SetOffering(id, here && !IsSolved && held && Usable && near);
             if (_hand >= 0) Hold();
-            else if (!_flying && !IsSolved && held && Usable) TryGrab();
+            else if (!_flying && !IsSolved && held && Usable && near) TryGrab();
             if (_hand >= 0) IslandHandle.MarkHandHeld(_hand == 0);
             Draw(here);
             base.Update();
@@ -272,7 +299,7 @@ namespace Diorama
             if (!s.tracked || !s.Holding)
             {
                 _hand = -1;
-                bool near = (_shardWorld - SocketWorld).magnitude <= snapRadius * Mathf.Max(1f, island.transform.lossyScale.x);
+                bool near = (_shardWorld - SocketWorld).magnitude <= Mathf.Max(snapRadius, forgivingSnap) * Mathf.Max(1f, island.transform.lossyScale.x);
                 Debug.Log($"[StatueSocket] Released {(near ? "at the socket: it locks in" : "away from the socket: back to the Spirit's offer spot")}.");
                 StartCoroutine(Fly(_shardWorld, near));
                 return;
@@ -296,10 +323,12 @@ namespace Diorama
             _flying = false;
             if (holder != null) holder.SetOut(id, false);
             if (toSocket) StartCoroutine(LockIn());
+            else if (_scene) EndScene("the shard flew back");
         }
 
         IEnumerator LockIn()
         {
+            if (!_quiet) BeginScene();
             MarkSolved(2); // saved: placed (shards placed 1 / 3)
             _pulse = 1f;
             float tile = TileWorld;
@@ -334,6 +363,32 @@ namespace Diorama
             foreach (var line in lines) Dialogue.Say(line);
             Debug.Log($"[StatueSocket] Whisper: {string.Join(", ", lines)}.");
             Placed?.Invoke(this, placed);
+            // Step 16: the explorer waits while the statue whispers and the Spirit answers (no walking into the lodge mid-scene).
+            yield return new WaitForSeconds(0.5f);
+            for (float t = 0f; t < sceneLockSeconds; t += Time.deltaTime)
+            {
+                bool pending = Dialogue.IsTalking;
+                foreach (var l in lines) pending |= Dialogue.IsPending(l);
+                if (!pending || FinaleDirector.Running) break;
+                yield return null;
+            }
+            EndScene(FinaleDirector.Running ? "the finale takes over" : "the whisper is over");
+        }
+
+        void BeginScene()
+        {
+            _scene = true;
+            if (explorer != null) explorer.Locked = true;
+            Debug.Log("[StatueSocket] Shard placed: the explorer waits while the statue whispers; the view stays on the statue.");
+        }
+
+        void EndScene(string why)
+        {
+            if (!_scene) return;
+            _scene = false;
+            // The finale locks the explorer itself; leave it to it.
+            if (explorer != null && !FinaleDirector.Running) explorer.Locked = false;
+            Debug.Log($"[StatueSocket] Scene over ({why}): the explorer can walk again.");
         }
 
         void Draw(bool here)

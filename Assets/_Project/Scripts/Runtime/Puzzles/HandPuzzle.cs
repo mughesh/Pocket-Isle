@@ -123,6 +123,9 @@ namespace Diorama
         /// <summary>Step 12b: the shared focus lock frames this moment (false = it holds the view itself: the lotus garden).</summary>
         public virtual bool FocusLockable => true;
 
+        /// <summary>Step 16: the focus lock keeps holding this moment's view while the explorer is locked (a scene plays).</summary>
+        public virtual bool KeepViewWhileLocked => false;
+
         /// <summary>Step 12b: workable now in principle (not solved, here, available, no battle).</summary>
         public bool ActiveHere => !IsSolved && Here && Available && explorer != null && !explorer.Locked;
 
