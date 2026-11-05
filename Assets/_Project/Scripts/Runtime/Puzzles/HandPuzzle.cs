@@ -281,6 +281,8 @@ namespace Diorama
         /// <summary>Step 10e: the ghost shows both hands (mirrored), this far apart (world metres; 0 = the ghost's default).</summary>
         protected virtual bool GhostBothHands => false;
         protected virtual float GhostSpread => 0f;
+        /// <summary>Step 16: the ghost sits smaller and to the side of the target (it must never cover it).</summary>
+        protected virtual bool GhostAside => false;
 
         /// <summary>Whether it can be worked at all right now (the statue socket: only while a shard is held).</summary>
         protected virtual bool Available => true;
@@ -438,8 +440,8 @@ namespace Diorama
             {
                 // A piece you carry: the ghost grabs it and lets go over its spot (step 9h); others play at the piece.
                 if (GhostDropPoint.HasValue)
-                    ghosts.Show(ghostClip, GhostPlace.AtTarget, "puzzleTo:" + id, ghostScale, DominantHand.Left, GhostBothHands, GhostSpread, "puzzle:" + id);
-                else ghosts.Show(ghostClip, GhostPlace.AtTarget, "puzzle:" + id, ghostScale, DominantHand.Left, GhostBothHands, GhostSpread);
+                    ghosts.Show(ghostClip, GhostPlace.AtTarget, "puzzleTo:" + id, ghostScale, DominantHand.Left, GhostBothHands, GhostSpread, "puzzle:" + id, aside: GhostAside);
+                else ghosts.Show(ghostClip, GhostPlace.AtTarget, "puzzle:" + id, ghostScale, DominantHand.Left, GhostBothHands, GhostSpread, aside: GhostAside);
             }
             Debug.Log($"[{GetType().Name}] {id}: lesson ({lessonLine}, ghost {(string.IsNullOrEmpty(ghostClip) ? "none" : ghostClip)}).");
         }

@@ -59,6 +59,15 @@ namespace Diorama
         public float struggleScale = 1.2f;
         [Tooltip("Gaze dot size (m).")]
         public float dotSize = 0.012f;
+        [Tooltip("Step 16: a real hand (index tip or palm) this close to the lesson's target fades the ghost (m), so it never hides what you reach for.")]
+        public float handNearRadius = 0.16f;
+        [Tooltip("Step 16: the ghost's alpha while a real hand is near the target.")]
+        [Range(0f, 1f)] public float handNearAlpha = 0.08f;
+        [Tooltip("Step 16: seconds to fade out / back in when a hand comes near / leaves.")]
+        public float handNearSeconds = 0.2f;
+        [Tooltip("Step 16: 'aside' ghosts (finale lift, evolution, shard) are this much smaller and sit this far to the side of the target (m), never between the head and it.")]
+        [Range(0.2f, 1f)] public float asideScale = 0.6f;
+        public float asideOffset = 0.1f;
 
         const int JointCount = (int)HandJointId.HandEnd;
         static readonly int AlphaId = Shader.PropertyToID("_Alpha");
@@ -78,7 +87,7 @@ namespace Diorama
             public GhostPlace place;
             public string target, source;
             public float scale, spread, lift;
-            public bool left, both;
+            public bool left, both, aside;
         }
 
         /// <summary>A clip's grab and release (seconds into the trimmed clip), found once from its thumb-index gap.</summary>
@@ -101,7 +110,7 @@ namespace Diorama
         bool _showing, _hasSaved;
         GhostHandClip _clip;
         float _lastT = -1f;
-        float _time, _visible, _struggle;
+        float _time, _visible, _struggle, _handNear;
         int _loops;
         Vector3 _keyWorld;
         bool _keyValid;
@@ -211,7 +220,8 @@ namespace Diorama
         /// </summary>
         /// <param name="source">Step 9h, grab clips: where the grab lands; <paramref name="target"/> is then where the release lands.</param>
         /// <param name="lift">The release spot sits this far above the target (m).</param>
-        public void Show(string clip, GhostPlace place, string target, float scale, bool left, bool both, float spread = 0f, string source = null, float lift = 0f)
+        /// <param name="aside">Step 16: smaller and off to the dominant side of the target (finale lift, evolution, shard).</param>
+        public void Show(string clip, GhostPlace place, string target, float scale, bool left, bool both, float spread = 0f, string source = null, float lift = 0f, bool aside = false)
         {
             var c = Find(clip);
             if (c == null)
@@ -223,7 +233,7 @@ namespace Diorama
             _request = new Request
             {
                 clip = clip, place = place, target = target, source = source, scale = Mathf.Max(0.1f, scale), left = left, both = both,
-                spread = spread, lift = lift,
+                spread = spread, lift = lift, aside = aside,
             };
             _clip = c;
             _showing = true;
@@ -371,9 +381,20 @@ namespace Diorama
                 t = debugFreeze * _clip.Duration;
                 loopFade = 1f;
             }
-            float alpha = _visible * loopFade;
+            // Step 16: a real hand near the target (or the release spot) fades the ghost so it never hides the target.
+            bool near = _request.place != GhostPlace.BesideHand && debugFreeze < 0f &&
+                        (HandNear(point, handNearRadius) || (release.HasValue && HandNear(release.Value, handNearRadius)));
+            _handNear = Mathf.MoveTowards(_handNear, near ? 1f : 0f, dt / Mathf.Max(0.01f, handNearSeconds));
+            float alpha = _visible * loopFade * NearAlpha(_handNear, handNearAlpha);
+            if (_request.aside)
+            {
+                // Off to the dominant hand's side of the target, across the line of sight (never between head and target).
+                Vector3 side = AsideDir(point, _request.left);
+                point += side * asideOffset;
+                if (release.HasValue) release = release.Value + side * asideOffset;
+            }
             float placeScale = (_request.place == GhostPlace.AtTarget || _request.place == GhostPlace.IslandSides || _request.place == GhostPlace.RimCorners) && library != null ? library.targetScale : 1f;
-            float scale = _request.scale * placeScale * Mathf.Max(0.05f, _clip.size) * Mathf.Lerp(1f, struggleScale, _struggle);
+            float scale = _request.scale * placeScale * Mathf.Max(0.05f, _clip.size) * Mathf.Lerp(1f, struggleScale, _struggle) * (_request.aside ? asideScale : 1f);
 
             var a = _request.both ? _left ?? _right : _request.left ? _left ?? _right : _right ?? _left;
             var b = _request.both ? (a == _left ? _right : _left) : null;
@@ -413,6 +434,34 @@ namespace Diorama
             _keyValid = true;
             UpdateDot(point, t / Mathf.Max(0.01f, _clip.Duration), alpha);
             Spark(grab, t, point, alpha, scale);
+        }
+
+        /// <summary>Step 16: the ghost's alpha share for a hand-near amount (0 = no hand near, 1 = a hand at the target).</summary>
+        public static float NearAlpha(float near, float nearAlpha) => Mathf.Lerp(1f, nearAlpha, Mathf.Clamp01(near));
+
+        /// <summary>Step 16: either tracked hand's index tip or palm is within <paramref name="radius"/> of a point.</summary>
+        public static bool HandNear(Vector3 point, float radius)
+        {
+            float r2 = radius * radius;
+            foreach (var side in new[] { Handedness.Left, Handedness.Right })
+            {
+                var hand = HandRegistry.Get(side);
+                if (hand == null || !hand.IsTrackedDataValid) continue;
+                if (HandLookup.TryGetJoint(hand, HandJointId.HandIndexTip, out var tip) && (tip - point).sqrMagnitude < r2) return true;
+                if (HandLookup.TryGetJoint(hand, HandJointId.HandPalm, out var palm) && (palm - point).sqrMagnitude < r2) return true;
+            }
+            return false;
+        }
+
+        /// <summary>Step 16: horizontal direction across the line of sight to a point, toward the dominant hand's side.</summary>
+        public static Vector3 AsideDir(Vector3 point, bool left)
+        {
+            var cam = Camera.main;
+            Vector3 view = cam != null ? point - cam.transform.position : Vector3.forward;
+            view.y = 0f;
+            if (view.sqrMagnitude < 1e-6f) view = Vector3.forward;
+            Vector3 right = Vector3.Cross(Vector3.up, view.normalized);
+            return left ? -right : right;
         }
 
         /// <summary>Step 11d: a pinch ghost's thumb and index close: a tiny gold spark at the pinch (where it grabs).</summary>

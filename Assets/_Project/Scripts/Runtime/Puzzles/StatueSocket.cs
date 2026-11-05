@@ -118,6 +118,7 @@ namespace Diorama
             }
         }
 
+        protected override bool GhostAside => true;
         public override bool Busy => _hand >= 0 || _flying;
         protected override bool Available => ShardHolder.Holds(id);
         protected override Vector2 HomeTile => statueAnchor + Vector2.one;

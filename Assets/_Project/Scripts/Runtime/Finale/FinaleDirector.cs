@@ -558,7 +558,7 @@ namespace Diorama
             Dialogue.Say("spirit.finale.2");
             // Step 14h: the ghost holds its palm out where yours would be, then lifts it all the way to the crystal; once the
             // Spirit is on your palm it starts from your palm.
-            if (ghosts != null) ghosts.Show(LiftClip, GhostPlace.AtTarget, CrystalTarget, 1f, DominantHand.Left, false, 0f, HandFromTarget);
+            if (ghosts != null) ghosts.Show(LiftClip, GhostPlace.AtTarget, CrystalTarget, 1f, DominantHand.Left, false, 0f, HandFromTarget, aside: true);
             Vector3 socketFrom = default;
             float flyT = -1f;
             while (true)
@@ -573,7 +573,7 @@ namespace Diorama
                     Dialogue.SetChip("To the crystal");
                     Dialogue.Say(line);
                     _palmSeen = palm;
-                    if (ghosts != null) ghosts.Show(LiftClip, GhostPlace.AtTarget, CrystalTarget, 1f, DominantHand.Left, false, 0f, HandFromTarget);
+                    if (ghosts != null) ghosts.Show(LiftClip, GhostPlace.AtTarget, CrystalTarget, 1f, DominantHand.Left, false, 0f, HandFromTarget, aside: true);
                     Sfx(AudioIds.SparkChime, AudioIds.UiSaved, palm);
                     Debug.Log("[FinaleDirector] The Spirit lands on the palm.");
                     Moment?.Invoke("palm.land");

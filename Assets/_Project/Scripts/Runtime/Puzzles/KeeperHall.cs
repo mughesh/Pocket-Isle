@@ -726,7 +726,7 @@ namespace Diorama
             _shardHome = hover;
             _shardWait = 0f;
             if (!string.IsNullOrEmpty(shardLine)) Dialogue.Say(shardLine);
-            if (ghosts != null) ghosts.Show(ShardGhost, GhostPlace.AtTarget, shardTarget, 1f, DominantHand.Left, false);
+            if (ghosts != null) ghosts.Show(ShardGhost, GhostPlace.AtTarget, shardTarget, 1f, DominantHand.Left, false, aside: true);
             FocusHighlight.SetPending(() => _shardHovering ? island.transform.TransformPoint(_shardLocal) : (Vector3?)null, 0.05f * island.transform.lossyScale.x);
             explorer.Locked = false;
             Debug.Log($"[KeeperHall] {ownShard} floats in front of the player: grab it (pinch, or look + pinch).");

@@ -193,7 +193,7 @@ namespace Diorama
         {
             if (ghosts == null || on == _ghostOn) return;
             _ghostOn = on;
-            if (on) ghosts.Show(GhostClip, GhostPlace.AtTarget, "evolvePod", 1f, DominantHand.Left, false);
+            if (on) ghosts.Show(GhostClip, GhostPlace.AtTarget, "evolvePod", 1f, DominantHand.Left, false, aside: true);
             else ghosts.Hide();
         }
 
