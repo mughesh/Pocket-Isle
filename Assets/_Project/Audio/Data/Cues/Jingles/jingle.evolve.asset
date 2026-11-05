@@ -15,7 +15,7 @@ MonoBehaviour:
   id: jingle.evolve
   clips:
   - {fileID: 8300000, guid: 1993c7e5ed6934c489309e072afcc1b6, type: 3}
-  volume: 0.8
+  volume: 0.28
   volumeJitter: 0
   pitchMin: 1
   pitchMax: 1

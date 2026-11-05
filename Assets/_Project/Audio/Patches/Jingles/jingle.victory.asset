@@ -15,7 +15,7 @@ MonoBehaviour:
   id: jingle.victory
   recipe: batch1
   mode: 2
-  duration: 2.3
+  duration: 1.9
   seed: 1
   variants: 1
   jitterPitch: 0.5
@@ -37,9 +37,9 @@ MonoBehaviour:
     pitchTime: 0.1
     pitchCurve: 1
     amp:
-      attack: 0.003
+      attack: 0.005
       hold: 0
-      decay: 0.5
+      decay: 0.4
       sustain: 0
       release: 0.05
     vibratoRate: 0
@@ -48,8 +48,8 @@ MonoBehaviour:
     tremoloRate: 0
     tremoloDepth: 0
     fmRatio: 4
-    fmIndex: 2
-    fmDecay: 0.025
+    fmIndex: 0.6
+    fmDecay: 0.02
     filter: 0
     cutoffStart: 2000
     cutoffEnd: 2000
@@ -149,15 +149,15 @@ MonoBehaviour:
     hz: 440
     gate: 0
     startOffset: 0
-    gain: 0.5
+    gain: 0.45
     pitchStart: 0
     pitchEnd: 0
     pitchTime: 0.1
     pitchCurve: 1
     amp:
-      attack: 0.004
+      attack: 0.008
       hold: 0
-      decay: 1.2
+      decay: 0.7
       sustain: 0
       release: 0.05
     vibratoRate: 0
@@ -166,8 +166,8 @@ MonoBehaviour:
     tremoloRate: 0
     tremoloDepth: 0
     fmRatio: 3.5
-    fmIndex: 2
-    fmDecay: 0.3
+    fmIndex: 0.5
+    fmDecay: 0.14
     filter: 0
     cutoffStart: 2000
     cutoffEnd: 2000
@@ -273,9 +273,9 @@ MonoBehaviour:
     pitchTime: 0.1
     pitchCurve: 1
     amp:
-      attack: 0.2
+      attack: 0.15
       hold: 0
-      decay: 1.5
+      decay: 1
       sustain: 0
       release: 0.05
     vibratoRate: 0
@@ -287,8 +287,8 @@ MonoBehaviour:
     fmIndex: 0
     fmDecay: 0
     filter: 1
-    cutoffStart: 900
-    cutoffEnd: 900
+    cutoffStart: 700
+    cutoffEnd: 700
     cutoffTime: 0.2
     cutoffCurve: 1
     resonance: 0.1
@@ -396,7 +396,7 @@ MonoBehaviour:
     velocity: 1
   - note: A5
     start: 0.36
-    length: 0.25
+    length: 0.22
     layer: 0
     velocity: 1
   - note: E5
@@ -411,22 +411,22 @@ MonoBehaviour:
     velocity: 1
   - note: D6
     start: 0.86
-    length: 0.5
+    length: 0.4
     layer: 0
     velocity: 1
   - note: D6
     start: 0.86
-    length: 1.2
+    length: 0.8
     layer: 1
     velocity: 1
   - note: D3
     start: 0.86
-    length: 1.2
+    length: 0.9
     layer: 2
     velocity: 1
   gain: 1
   limiter: 1
-  lowpass: 9000
+  lowpass: 2500
   normalize: 1
   levelMode: 1
   tier: 4

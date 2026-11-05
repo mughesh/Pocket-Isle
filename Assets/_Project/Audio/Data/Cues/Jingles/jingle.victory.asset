@@ -15,7 +15,7 @@ MonoBehaviour:
   id: jingle.victory
   clips:
   - {fileID: 8300000, guid: 86148c60125c28445a046fc69fd5218a, type: 3}
-  volume: 0.8
+  volume: 0.28
   volumeJitter: 0
   pitchMin: 1
   pitchMax: 1

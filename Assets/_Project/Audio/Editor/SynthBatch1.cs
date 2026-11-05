@@ -147,6 +147,19 @@ namespace Diorama.Audio.EditorTools
         static SynthLayer Marimba(string note, float decay = 0.5f) =>
             L(Sine).Note(note).Env(0.003f, decay).Fm(4f, 2f, 0.025f);
 
+        /// <summary>Step 16 jingles: a marimba with less FM bite (fewer partials above 3 kHz).</summary>
+        static SynthLayer SoftMallet(string note, float decay = 0.4f) =>
+            L(Sine).Note(note).Env(0.005f, decay).Fm(4f, 0.6f, 0.02f);
+
+        static SynthLayer SoftBell(string note, float decay = 0.7f) =>
+            L(Sine).Note(note).Env(0.008f, decay).Fm(3.5f, 0.5f, decay * 0.2f);
+
+        static SynthLayer SoftGlass(string note, float decay = 0.45f) =>
+            L(Sine).Note(note).Env(0.005f, decay).Fm(2.76f, 0.5f, 0.05f);
+
+        /// <summary>Step 16: jingle cue volume (was 0.8 / 0.9; about -9 dB).</summary>
+        public const float JingleVolume = 0.28f;
+
         static SynthLayer Kalimba(string note, float decay = 0.8f) =>
             L(Sine).Note(note).Env(0.003f, decay).Fm(7f, 1.2f, 0.02f);
 
@@ -654,31 +667,33 @@ namespace Diorama.Audio.EditorTools
                 .Notes(Scatter(51, 14, 2.5f, 27.5f, new[] { "A5", "B5", "D6" }, 0.05f, 2, 0.15f, 0.35f)),
                 Amb(0.3f), true);
 
-            // Jingles (marimba + bell, D major pentatonic)
-            var mb = new[] { Marimba("D5", 0.5f), Bell("D6", 1.2f).Gain(0.5f), L(SoftSaw).Note("D3").LP(900f).Env(0.2f, 1.5f).Gain(0.4f) };
-            Add("Jingles", "jingle.catch", p => p.Seq(1.6f, mb,
-                    "D5@0:0.12/0", "F#5@0.09:0.12/0", "A5@0.18:0.12/0", "D6@0.27:0.3/0", "D6@0.4:1/1", "A6@0.4:1/1*0.6"),
-                Jingle(0.9f));
-            Add("Jingles", "jingle.victory", p => p.Seq(2.3f, mb,
-                    "A4@0:0.12/0", "D5@0.12:0.12/0", "F#5@0.24:0.12/0", "A5@0.36:0.25/0",
-                    "E5@0.62:0.12/0", "F#5@0.74:0.12/0", "D6@0.86:0.5/0", "D6@0.86:1.2/1", "D3@0.86:1.2/2"),
-                Jingle(0.9f));
-            Add("Jingles", "jingle.levelup", p => p.Seq(1.5f, mb,
-                    "D5@0:0.06/0", "E5@0.06:0.06/0", "F#5@0.12:0.06/0", "A5@0.18:0.06/0", "B5@0.24:0.06/0", "D6@0.3:0.3/0",
-                    "D6@0.3:1/1", "A6@0.3:1/1*0.6"),
-                Jingle(0.95f));
-            Add("Jingles", "jingle.evolve", p => p.Seq(2.7f, new[] { mb[0], mb[1], mb[2], Glass("D7", 0.8f).Gain(0.4f) },
-                    "D5@0:0.25/0", "A5@0.25:0.25/0", "F#5@0.5:0.25/0", "D6@0.75:0.4/0", "A6@1.1:0.5/0",
-                    "D6@1.1:1.3/1", "D3@0:1.6/2", "A6@1.25:0.3/3", "B6@1.33:0.3/3", "D7@1.41:0.6/3"),
-                Jingle(0.95f));
-            Add("Jingles", "jingle.keeper", p => p.Seq(3f, mb,
-                    "D4@0:0.2/0", "A4@0.2:0.2/0", "D5@0.4:0.3/0", "E5@0.7:0.15/0", "F#5@0.85:0.15/0", "A5@1:0.4/0",
-                    "B5@1.4:0.15/0", "A5@1.55:0.15/0", "D6@1.7:0.6/0", "D6@1.7:1.2/1", "A5@1.7:1.2/1*0.6", "D3@0:1.6/2", "D3@1.7:1.2/2"),
-                Jingle(0.95f));
-            Add("Jingles", "jingle.shard", p => p.Seq(2.3f, new[] { Glass("D6", 0.6f), mb[1] },
-                    "A5@0:0.15/0", "D6@0.08:0.15/0", "E6@0.16:0.15/0", "A6@0.24:0.15/0", "B6@0.32:0.15/0", "D7@0.4:0.8/0",
-                    "D6@0.4:1.4/1", "A6@0.4:1.4/1*0.5"),
-                Jingle(0.9f));
+            // Jingles (D major pentatonic). Step 16: warmer and quieter (the judges' video had them 15-16 dB over the game's
+            // median, half their energy above 3 kHz): soft mallet + soft bell (low FM index), low-pass 2.5 kHz, shorter tails.
+            // Cue volume 0.28 (was 0.8, about -9 dB).
+            var mb = new[] { SoftMallet("D5", 0.4f), SoftBell("D6", 0.7f).Gain(0.45f), L(SoftSaw).Note("D3").LP(700f).Env(0.15f, 1f).Gain(0.4f) };
+            Add("Jingles", "jingle.catch", p => p.Seq(1.3f, mb,
+                    "D5@0:0.12/0", "F#5@0.09:0.12/0", "A5@0.18:0.12/0", "D6@0.27:0.25/0", "D6@0.4:0.7/1", "A6@0.4:0.7/1*0.5").Master(1f, 2500f),
+                Jingle(JingleVolume));
+            Add("Jingles", "jingle.victory", p => p.Seq(1.9f, mb,
+                    "A4@0:0.12/0", "D5@0.12:0.12/0", "F#5@0.24:0.12/0", "A5@0.36:0.22/0",
+                    "E5@0.62:0.12/0", "F#5@0.74:0.12/0", "D6@0.86:0.4/0", "D6@0.86:0.8/1", "D3@0.86:0.9/2").Master(1f, 2500f),
+                Jingle(JingleVolume));
+            Add("Jingles", "jingle.levelup", p => p.Seq(1.2f, mb,
+                    "D5@0:0.06/0", "E5@0.06:0.06/0", "F#5@0.12:0.06/0", "A5@0.18:0.06/0", "B5@0.24:0.06/0", "D6@0.3:0.25/0",
+                    "D6@0.3:0.7/1", "A6@0.3:0.7/1*0.5").Master(1f, 2500f),
+                Jingle(JingleVolume));
+            Add("Jingles", "jingle.evolve", p => p.Seq(2.2f, new[] { mb[0], mb[1], mb[2], SoftGlass("D7", 0.5f).Gain(0.3f) },
+                    "D5@0:0.25/0", "A5@0.25:0.25/0", "F#5@0.5:0.25/0", "D6@0.75:0.35/0", "A6@1.1:0.4/0",
+                    "D6@1.1:0.9/1", "D3@0:1.3/2", "A6@1.25:0.25/3", "B6@1.33:0.25/3", "D7@1.41:0.4/3").Master(1f, 2500f),
+                Jingle(JingleVolume));
+            Add("Jingles", "jingle.keeper", p => p.Seq(2.5f, mb,
+                    "D4@0:0.2/0", "A4@0.2:0.2/0", "D5@0.4:0.3/0", "E5@0.7:0.15/0", "F#5@0.85:0.15/0", "A5@1:0.35/0",
+                    "B5@1.4:0.15/0", "A5@1.55:0.15/0", "D6@1.7:0.45/0", "D6@1.7:0.8/1", "A5@1.7:0.8/1*0.5", "D3@0:1.4/2", "D3@1.7:0.8/2").Master(1f, 2500f),
+                Jingle(JingleVolume));
+            Add("Jingles", "jingle.shard", p => p.Seq(1.8f, new[] { SoftGlass("D6", 0.45f), mb[1] },
+                    "A5@0:0.15/0", "D6@0.08:0.15/0", "E6@0.16:0.15/0", "A6@0.24:0.15/0", "B6@0.32:0.15/0", "D7@0.4:0.5/0",
+                    "D6@0.4:0.9/1", "A6@0.4:0.9/1*0.4").Master(1f, 2500f),
+                Jingle(JingleVolume));
 
             // Kenney CC0 (Part 4): catch.shatter mixes in a light glass impact; cues without a synth patch.
             _list.Find(r => r.id == "catch.shatter").mixWith = "Clips/Kenney/catch.shatter";

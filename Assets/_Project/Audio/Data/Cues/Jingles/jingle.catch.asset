@@ -15,7 +15,7 @@ MonoBehaviour:
   id: jingle.catch
   clips:
   - {fileID: 8300000, guid: cc779e7f28cb94d409ab7b2147cd4a18, type: 3}
-  volume: 0.8
+  volume: 0.28
   volumeJitter: 0
   pitchMin: 1
   pitchMax: 1

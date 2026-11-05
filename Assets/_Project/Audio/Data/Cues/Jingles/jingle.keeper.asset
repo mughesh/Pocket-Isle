@@ -15,7 +15,7 @@ MonoBehaviour:
   id: jingle.keeper
   clips:
   - {fileID: 8300000, guid: 0d36bf9b5fc1add4b9854f6f12d9d0ce, type: 3}
-  volume: 0.8
+  volume: 0.28
   volumeJitter: 0
   pitchMin: 1
   pitchMax: 1

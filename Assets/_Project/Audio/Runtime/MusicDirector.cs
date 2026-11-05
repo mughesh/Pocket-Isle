@@ -14,7 +14,7 @@ namespace Diorama.Audio
     public class MusicDirector : MonoBehaviour
     {
         public const float AreaCrossfade = 2f, BattleCrossfade = 0.6f;
-        public const float RestoredDb = 2f, DialogueDb = -4f, PauseDb = -8f, JingleDb = -8f;
+        public const float RestoredDb = 2f, DialogueDb = -4f, PauseDb = -8f, JingleDb = -4f; // Step 16: -8 -> -4 (the jingles are 9 dB quieter, so the music ducks less)
 
         static MusicDirector _instance;
 
@@ -83,7 +83,7 @@ namespace Diorama.Audio
         }
 
         /// <summary>Ducks the music under a jingle for its length, then lets it come back (victory, catch, level up).</summary>
-        public static void Jingle(float seconds = 2.5f)
+        public static void Jingle(float seconds = 2f)
         {
             if (Instance != null) _instance._jingleUntil = Mathf.Max(_instance._jingleUntil, Time.unscaledTime + seconds);
         }

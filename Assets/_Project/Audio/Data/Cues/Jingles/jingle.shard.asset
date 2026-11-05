@@ -15,7 +15,7 @@ MonoBehaviour:
   id: jingle.shard
   clips:
   - {fileID: 8300000, guid: 083603b255d342542a1f287fc908399c, type: 3}
-  volume: 0.8
+  volume: 0.28
   volumeJitter: 0
   pitchMin: 1
   pitchMax: 1
