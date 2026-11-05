@@ -483,6 +483,34 @@ when the log or the forge door is solved.
 | **Embercrane -> Pyrecrane** (rare) | 16 | field 5, springs 5 (rare) | Flame Wing / Ember Puff / Puff Up |
 - Glazegolem / Kilngolem read as rare: deep teal glaze, gold kintsugi cracks that glow and pulse.
 
+## Rules from step 16 (Nov 6, judge-review polish)
+- **Ghost hands never hide the target:** a real fingertip or palm within 16 cm of the lesson target fades the ghost to 8%
+  (0.2 s). Finale lift, evolution, Keeper shard and statue ghosts are smaller (x0.6) and 10 cm to the side of the target.
+- **Jingles** (catch, level up, evolve, shard, Keeper, victory): soft mallet + soft bell, low-passed at 2.5 kHz, short tails,
+  cue volume 0.28 (about -9 dB); the music ducks 4 dB under them.
+- **The Spirit stays out of the way:** it parks beside a line's target (the player's right first, then left, then further
+  out), never above it; it and its bubble keep clear of the objective area (the ghost's grab and drop spots, both battle
+  creatures). Home is the near-right corner. Chatter waits while a focal card is up (evolution card, realm name card, the
+  Quick Journey end card, the thank-you card); objectives still show. Typing 60 letters/s; lines under 30 letters at once.
+- **Shards:** a Keeper's shard floats 0.2 m over the cap, toward the player, and goes to the Spirit by a touch (fingertip or
+  palm within 6 cm), a grab or look + pinch. The statue offer starts only next to the statue (walk-up rule); the view holds
+  on it and the explorer waits while it whispers. Shard into the socket and the Spirit to the forehead snap within 12 cm.
+- **First minute:** while only the shard floats, no island ambience or music: the shard hums (glassy, slow pulse) and a
+  shimmer grows as a hand comes near; the island's sound starts as it unfolds. The swipe ghost is side-on, palm in and
+  down (a palm toward the face is Meta's system gesture). Lessons don't say "tap to stop" (the walk stops by itself; tap
+  still works). A small menu stone (≡) sits on the near rim, front-left, past the Journal's spot: poke it to pause.
+- **Battles:** idle bob, sway and glances on the pads; every move winds up 0.25 s (a slam 0.125 s); shots fly 0.35 s,
+  bigger, with an element trail; a lunge hops in; a slam shakes the pads; 60 ms hit-stop on every hit; damage numbers in
+  the element colour; HP bars drain with a lagging pale segment, low HP pulses red; a fainting Isling spins and flops, the
+  winner hops; Keepers flourish before each move (crown flare, wing gust, wave). About 1.0-1.5 s per move (+22% at most).
+- **Tall grass:** 16% per grass step, 30% in clumps of 2-4 tiles; the grace after a battle counts every step. The Quick
+  Journey's x0.5 applies on top.
+- **The ending:** Skip from the Hall of Fame on; one slate plaque over the Heart scrolls the credits (about 10 s); then
+  "Thank you for playing Pocket Isle" with Keep exploring / Title. Credits name no brands except the free-plan ElevenLabs
+  line (until the paid regeneration, step 15b).
+- **Lodge:** a round woven rug (terracotta, cream, sage), stone tiles and a warm floor glow at the hearth, a bookshelf with a
+  fern and cushions, a side table with a lantern and a chest. A soft glow under the island in every scene.
+
 ## Rules from step 14k (Nov 4, late night)
 - **Grab band (replaces 14j's zone round the line):** a pinch or palm grab on a corner (or the front lip under the pods while
   exploring; pods always win) counts in a **band from the glowing line inward**: 3.5 cm (world) in over the rim, at the cap's

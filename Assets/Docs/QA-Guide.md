@@ -44,7 +44,17 @@ Each tab is split into groups under gold headings.
 Cheats (one-hit KO, invincible, wild battles off, rare x10, time and walk speed) last until the app closes. They are
 never saved.
 
-## 4. What's new in this build (step 14h, Nov 4)
+## 4. What's new in this build (step 16, Nov 6)
+
+- **Pause:** poke the small ≡ stone on the near rim (front-left), or palm up and pinch with your left hand.
+- **First minute:** only the shard's hum until the island unfolds; reach toward the shard and it shimmers brighter.
+- **Battles move more:** wind-ups, bigger shots, hops, hit-stop, coloured damage numbers, HP bars that drain with a pale
+  trail. The battle line sits on a dark pill.
+- **Shards:** touch the floating shard to give it to the Spirit. Walk up to the statue before it offers the shard.
+- **Ending:** a Skip tablet from the Hall of Fame; the credits on one plaque; then Keep exploring or Title.
+- The Spirit and its speech bubble keep to the side of what you're reaching for; ghost hands fade when your hand is near.
+
+## Step 14h (Nov 4)
 
 - The menu is shorter: Resume, **Journal**, Settings, the speaker. Controls and Title are inside Settings.
 - **Journal:** every Isling you've met or caught; poke a portrait for its card. Also on the lodge pedestal.
