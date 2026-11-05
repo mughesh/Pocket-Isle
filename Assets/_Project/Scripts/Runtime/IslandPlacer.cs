@@ -50,6 +50,9 @@ namespace Diorama
         public float startupSettleMax = 3f;
         [Tooltip("After a recenter, wait at most this long for the head to settle (s).")]
         public float recenterSettleMax = 2f;
+        [Tooltip("Step 16 (Mugesh: the island blinked out and back on a Meta recenter): after the settle it glides to the new spot this long (s; 0 = jump).")]
+        public float recenterGlideSeconds = 0.4f;
+        Coroutine _glide;
 
         /// <summary>Short text for debug labels.</summary>
         public string Status { get; private set; } = "starting";
@@ -339,8 +342,42 @@ namespace Diorama
                 source = "seated default (no head pose)";
                 Status = source;
             }
+            if (HasPlaced && recenterGlideSeconds > 0f && reason.Contains("recenter"))
+            {
+                if (_glide != null) StopCoroutine(_glide);
+                _glide = StartCoroutine(GlideTo(pose, reason, source));
+                return;
+            }
             Apply(pose, reason, source);
         }
+
+        /// <summary>
+        /// Step 16: glides from where the island is to <paramref name="pose"/> (in its parent's space, so a tracking space
+        /// that moves meanwhile carries both ends), eased, on unscaled time; then places it there exactly.
+        /// </summary>
+        IEnumerator GlideTo(Pose pose, string reason, string source)
+        {
+            var t = island.transform;
+            var parent = t.parent;
+            Vector3 fromPos = t.localPosition;
+            Quaternion fromRot = t.localRotation;
+            Vector3 toPos = parent != null ? parent.InverseTransformPoint(pose.position) : pose.position;
+            Quaternion toRot = parent != null ? Quaternion.Inverse(parent.rotation) * pose.rotation : pose.rotation;
+            Debug.Log($"[IslandPlacer] {reason}: gliding {(fromPos - toPos).magnitude:F2} m to the new spot ({recenterGlideSeconds:0.0#} s).");
+            for (float e = 0f; e < recenterGlideSeconds; e += Time.unscaledDeltaTime)
+            {
+                float k = GlideEase(e / recenterGlideSeconds);
+                t.localPosition = Vector3.LerpUnclamped(fromPos, toPos, k);
+                t.localRotation = Quaternion.SlerpUnclamped(fromRot, toRot, k);
+                yield return null;
+            }
+            _glide = null;
+            var world = parent != null ? new Pose(parent.TransformPoint(toPos), parent.rotation * toRot) : new Pose(toPos, toRot);
+            Apply(world, reason + " (glided)", source);
+        }
+
+        /// <summary>Step 16: the glide's ease (smooth start and stop, 0..1).</summary>
+        public static float GlideEase(float u) => Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(u));
 
         /// <summary>Puts the island at <paramref name="pose"/> (the shard stage's follow uses this) and logs it.</summary>
         public void Apply(Pose pose, string reason, string source = "rule")

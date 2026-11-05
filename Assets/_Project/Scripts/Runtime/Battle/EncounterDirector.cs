@@ -59,6 +59,44 @@ namespace Diorama
         [Range(0f, 1f)] public float grassChance = 0.125f;
         [Tooltip("Steps after a battle before tall grass can trigger again.")]
         [Min(0)] public int graceSteps = 3;
+        [Header("Step 16: every clump of 2+ tiles can have Islings")]
+        [Tooltip("Per-step chance in tall grass (step 16; was grassChance 0.125). The Quick Journey's x0.5 applies on top.")]
+        [Range(0f, 1f)] public float grassChanceStep16 = 0.16f;
+        [Tooltip("Small clumps (2 to smallClumpMax tiles) use this per-step chance instead (two steps in a 2-tile clump: about half the time).")]
+        [Range(0f, 1f)] public float smallClumpChance = 0.3f;
+        [Min(2)] public int smallClumpMax = 4;
+        [Tooltip("Step 16: the grace after a battle counts every step walked (it counted grass steps only, so small clumps after a battle stayed empty).")]
+        public bool graceCountsAllSteps = true;
+
+        readonly Dictionary<Vector2Int, int> _clumps = new Dictionary<Vector2Int, int>();
+        IslandMap _clumpMap;
+
+        /// <summary>Step 16: tiles in the tall-grass clump this tile belongs to (4-connected; 0 if it isn't tall grass).</summary>
+        public static int ClumpSize(IslandMap map, Vector2Int tile, Dictionary<Vector2Int, int> cache = null)
+        {
+            if (map == null || tile.y < 0 || tile.y >= map.Rows || tile.x < 0 || tile.x >= map.Columns || map.At(tile.y, tile.x) != IslandMap.TallGrass) return 0;
+            if (cache != null && cache.TryGetValue(tile, out int known)) return known;
+            var seen = new HashSet<Vector2Int> { tile };
+            var queue = new Queue<Vector2Int>();
+            queue.Enqueue(tile);
+            while (queue.Count > 0 && seen.Count < 400)
+            {
+                var t = queue.Dequeue();
+                foreach (var d in new[] { Vector2Int.right, Vector2Int.left, Vector2Int.up, Vector2Int.down })
+                {
+                    var n = t + d;
+                    if (n.y < 0 || n.y >= map.Rows || n.x < 0 || n.x >= map.Columns || seen.Contains(n) || map.At(n.y, n.x) != IslandMap.TallGrass) continue;
+                    seen.Add(n);
+                    queue.Enqueue(n);
+                }
+            }
+            if (cache != null) foreach (var t in seen) cache[t] = seen.Count;
+            return seen.Count;
+        }
+
+        /// <summary>Step 16: the per-step chance in a clump of this size (before the Quick Journey's factor).</summary>
+        public static float StepChance(int clump, float baseChance, float smallChance, int smallMax) =>
+            clump >= 2 && clump <= smallMax ? Mathf.Max(baseChance, smallChance) : baseChance;
         [Tooltip("Zoom range; the zoom picks the largest value that fits both pads and their labels inside the island.")]
         public Vector2 zoomRange = new Vector2(2.2f, 3f);
         public float zoomSeconds = 0.6f;
@@ -173,8 +211,9 @@ namespace Diorama
             MapCreature.HideAll = false;
             int s = seed != 0 ? seed : System.Environment.TickCount;
             _rnd = new SeededRandom(s);
-            Debug.Log($"[EncounterDirector] Ready. Grass chance {grassChance:P0} per step, seed {s}.");
+            Debug.Log($"[EncounterDirector] Ready. Grass chance {grassChanceStep16:P0} per step ({smallClumpChance:P0} in clumps of 2-{smallClumpMax} tiles; was {grassChance:P0}), seed {s}.");
             explorer.OnTallGrassStep += OnTallGrassStep;
+            explorer.OnStep += CountStep;
             explorer.OnFishTap += OnFishTap;
             runes.Chosen += OnChosen;
             pods.Thrown += OnPodThrown;
@@ -186,6 +225,7 @@ namespace Diorama
             if (explorer != null)
             {
                 explorer.OnTallGrassStep -= OnTallGrassStep;
+                explorer.OnStep -= CountStep;
                 explorer.OnFishTap -= OnFishTap;
             }
             if (runes != null) runes.Chosen -= OnChosen;
@@ -236,6 +276,11 @@ namespace Diorama
         [ContextMenu("Test Water Encounter")]
         void TestWater() => StartEncounter(Habitat.Water);
 
+        void CountStep(Vector2Int tile)
+        {
+            if (graceCountsAllSteps && !InBattle) ++_stepsSinceBattle;
+        }
+
         void OnTallGrassStep(Vector2Int tile)
         {
             var table = GrassTableAt(tile);
@@ -259,9 +304,19 @@ namespace Diorama
                 StartCoroutine(Encounter(table, tile, new IslingInstance(firstSpecies, firstLevel)));
                 return;
             }
-            if (++_stepsSinceBattle <= graceSteps) return;
+            if (!graceCountsAllSteps) ++_stepsSinceBattle;
+            if (_stepsSinceBattle <= graceSteps) return;
+            // Step 16: small clumps get a better chance per step, so every clump of 2+ tiles can have Islings.
+            if (_clumpMap != island.world)
+            {
+                _clumpMap = island.world;
+                _clumps.Clear();
+            }
+            int clump = ClumpSize(island.world, tile, _clumps);
+            float chance = StepChance(clump, grassChanceStep16, smallClumpChance, smallClumpMax);
             // Step 9g: the Quick Journey halves it in Cinderwood (QuickJourneyConfig.encounterRate).
-            if (DevCheats.WildOff || _rnd.Next() >= QuickJourney.EncounterChance(grassChance)) return;
+            if (DevCheats.WildOff || _rnd.Next() >= QuickJourney.EncounterChance(chance)) return;
+            Debug.Log($"[EncounterDirector] Grass step in a {clump}-tile clump (chance {QuickJourney.EncounterChance(chance):P0}).");
             StartCoroutine(Encounter(table, tile));
         }
 

@@ -77,5 +77,46 @@ namespace Diorama.Tests
             Assert.Greater(BattleStage.DamageColor(Element.Fire).r, BattleStage.DamageColor(Element.Fire).b);
             Assert.Greater(BattleStage.DamageColor(Element.Water).b, BattleStage.DamageColor(Element.Water).r);
         }
+    
+        [Test]
+        public void SmallGrassClumps_CanHaveIslings()
+        {
+            Assert.AreEqual(0.16f, EncounterDirector.StepChance(1, 0.16f, 0.3f, 4), 1e-5f, "a lone tile: base");
+            Assert.AreEqual(0.3f, EncounterDirector.StepChance(2, 0.16f, 0.3f, 4), 1e-5f);
+            Assert.AreEqual(0.3f, EncounterDirector.StepChance(4, 0.16f, 0.3f, 4), 1e-5f);
+            Assert.AreEqual(0.16f, EncounterDirector.StepChance(12, 0.16f, 0.3f, 4), 1e-5f, "a big patch: base");
+            // Two steps through a 2-tile clump: about half the time an Isling.
+            float two = 1f - (1f - 0.3f) * (1f - 0.3f);
+            Assert.That(two, Is.InRange(0.45f, 0.55f));
+        }
+
+        [Test]
+        public void GrassClumpSize_FloodsFourWays()
+        {
+            var map = ScriptableObject.CreateInstance<IslandMap>();
+            map.layout = string.Join(((char)10).ToString(), "TT..", "...T", "..TT");
+            Assert.AreEqual(2, EncounterDirector.ClumpSize(map, new Vector2Int(0, 0)));
+            Assert.AreEqual(3, EncounterDirector.ClumpSize(map, new Vector2Int(3, 1)));
+            Assert.AreEqual(0, EncounterDirector.ClumpSize(map, new Vector2Int(1, 1)), "not grass");
+            Object.DestroyImmediate(map);
+        }
+
+        [Test]
+        public void RecenterGlide_EasesInAndOut()
+        {
+            Assert.AreEqual(0f, IslandPlacer.GlideEase(0f), 1e-5f);
+            Assert.AreEqual(1f, IslandPlacer.GlideEase(1f), 1e-5f);
+            Assert.AreEqual(0.5f, IslandPlacer.GlideEase(0.5f), 1e-5f);
+            Assert.Less(IslandPlacer.GlideEase(0.1f), 0.1f, "slow start");
+        }
+
+        [Test]
+        public void TwoHandLesson_PassesOnItsOwn()
+        {
+            var s = UnityEditor.AssetDatabase.LoadAssetAtPath<OnboardingScript>("Assets/_Project/Data/Onboarding/Onboarding_Main.asset");
+            var l = s.lessons.Find(x => x.id == "twoHands");
+            StringAssert.Contains("twoHandsTimedOut", l.doneWhen);
+            Assert.IsTrue(System.Array.IndexOf(Onboarding.Events, "twoHandsTimedOut") >= 0);
+        }
     }
 }

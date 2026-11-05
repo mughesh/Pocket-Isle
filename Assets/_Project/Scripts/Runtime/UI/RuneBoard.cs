@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Diorama.Audio;
 using Oculus.Interaction;
@@ -82,6 +83,7 @@ namespace Diorama
             internal PokeInteractable poke;
             internal float hover, appear, appearAt, fill, press;
             internal bool poked;
+            internal float selectSince = -1f;
 
             public void SetLabel(string text)
             {
@@ -450,6 +452,7 @@ namespace Diorama
         void Update()
         {
             if (!IsShown) return;
+            WatchPokes();
             CheckLayout();
             float dt = Time.unscaledDeltaTime;
             Place(false);
@@ -578,7 +581,44 @@ namespace Diorama
             // A hold rune already rang at the end of its fill tone.
             if (!r.hold) GameAudio.At(AudioIds.RuneSelect, r.visual.position);
             r.poked = false;
+            // Step 16 (Mugesh: the hand stayed stuck on a menu button until the menu closed): the menu pauses the game
+            // (time scale 0) and ISDK's poke doesn't let go then; switch the poke off for a frame so the finger is released.
+            if (r.poke != null && r.poke.State == InteractableState.Select) ReleasePoke(r, how);
             r.picked?.Invoke();
+        }
+
+        void ReleasePoke(Rune r, string why)
+        {
+            if (r.poke == null || !isActiveAndEnabled) return;
+            r.selectSince = -1f;
+            StartCoroutine(ReleasePokeNextFrame(r.poke));
+            Debug.Log($"[RuneBoard] {name}: {r.label}: poke released ({why}).");
+        }
+
+        static IEnumerator ReleasePokeNextFrame(PokeInteractable poke)
+        {
+            poke.enabled = false;
+            yield return null;
+            if (poke != null) poke.enabled = true;
+        }
+
+        /// <summary>Step 16: a poke held in Select longer than this (s, unscaled; not hold runes) is released.</summary>
+        public float pokeStuckSeconds = 1.2f;
+
+        void WatchPokes()
+        {
+            float now = Time.unscaledTime;
+            foreach (var r in _runes)
+            {
+                if (r.poke == null) continue;
+                if (r.poke.State != InteractableState.Select)
+                {
+                    r.selectSince = -1f;
+                    continue;
+                }
+                if (r.selectSince < 0f) r.selectSince = now;
+                else if (!r.hold && now - r.selectSince > pokeStuckSeconds) ReleasePoke(r, "stuck in select");
+            }
         }
 
         /// <summary>

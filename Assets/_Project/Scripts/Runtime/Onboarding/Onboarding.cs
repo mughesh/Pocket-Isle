@@ -72,7 +72,13 @@ namespace Diorama
             "swipeWalked", "tapStopped", "walkedOn3",
             // Step 14f: the last walk lesson ("Swipe to walk, tap to stop") also passes after two finished swipe walks.
             "swipeWalks2",
+            // Step 16: the two-hand lesson passes after twoHandsPassSeconds (one-handed players never get stuck).
+            "twoHandsTimedOut",
         };
+
+        [Tooltip("Step 16: the two-hand (turn, resize) lesson passes after this long without a two-hand grab (s).")]
+        public float twoHandsPassSeconds = 8f;
+        float _twoHandsFor;
 
         /// <summary>Nov 3: the walk lesson's id and how many tiles swipes must really walk (any direction).</summary>
         public const string WalkLesson = "walk", FarLesson = "far";
@@ -319,6 +325,17 @@ namespace Diorama
             }
 
             var lesson = _runner.Current;
+            // Step 16: one-handed players: the two-hand lesson passes by itself after a few seconds.
+            if (CurrentId == "twoHands" && Current != null)
+            {
+                _twoHandsFor += Time.deltaTime;
+                if (_twoHandsFor >= twoHandsPassSeconds && _twoHandsFor - Time.deltaTime < twoHandsPassSeconds)
+                {
+                    Debug.Log($"[Onboarding] twoHands: no two-hand grab in {twoHandsPassSeconds:0} s: it passes (one hand is fine).");
+                    _runner.Mark("twoHandsTimedOut");
+                }
+            }
+            else _twoHandsFor = 0f;
             var outcome = _runner.Tick(Time.deltaTime);
             switch (outcome)
             {

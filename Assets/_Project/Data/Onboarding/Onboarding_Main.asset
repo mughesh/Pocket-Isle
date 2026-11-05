@@ -99,7 +99,7 @@ MonoBehaviour:
     helpAfter: 30
     startWhen: opening.twoHands
     delay: 0.5
-    doneWhen: twoHandGrab
+    doneWhen: twoHandGrab | twoHandsTimedOut
     validWhile: opening.twoHands
     skipAfter: 45
     failWhen: 
