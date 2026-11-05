@@ -27,6 +27,18 @@ namespace Diorama
         readonly Mesh _quad;
         Vector2 _size;
 
+        /// <summary>Step 16: this tablet's own colours (the credits plaque: dark slate, gold trim, cream text); null = stone.</summary>
+        public Color? back, edge, ink;
+
+        /// <summary>Step 16: the credits plaque and the thank-you card's look.</summary>
+        public void Slate()
+        {
+            back = new Color(0.15f, 0.16f, 0.18f, 0.95f);
+            edge = new Color(0.93f, 0.72f, 0.3f, 1f);
+            ink = new Color(1f, 0.95f, 0.84f, 1f);
+            _text.color = ink.Value;
+        }
+
         public Transform transform => _root;
 
         /// <summary>Step 14h: the panel's size (m, before the Place scale).</summary>
@@ -85,14 +97,17 @@ namespace Diorama
                 if (away.sqrMagnitude > 1e-6f) _root.rotation = Quaternion.LookRotation(away, Vector3.up);
             }
             _block.Clear();
-            _block.SetColor(BackColorId, new Color(Stone.r, Stone.g, Stone.b, Stone.a * alpha));
-            _block.SetColor(BorderColorId, new Color(Edge.r, Edge.g, Edge.b, alpha));
+            var b = back ?? Stone;
+            var e = edge ?? Edge;
+            _block.SetColor(BackColorId, new Color(b.r, b.g, b.b, b.a * alpha));
+            _block.SetColor(BorderColorId, new Color(e.r, e.g, e.b, alpha));
             _block.SetFloat(FillId, 0f);
             _block.SetFloat(AspectId, _size.x / Mathf.Max(1e-4f, _size.y));
             _block.SetFloat(RadiusId, Mathf.Min(0.45f, 0.012f / Mathf.Max(1e-4f, _size.y)));
             _block.SetFloat(BorderId, Mathf.Clamp(0.0028f / Mathf.Max(1e-4f, _size.y), 0.02f, 0.3f));
             _panel.SetPropertyBlock(_block);
-            _text.color = new Color(Ink.r, Ink.g, Ink.b, alpha);
+            var k = ink ?? Ink;
+            _text.color = new Color(k.r, k.g, k.b, alpha);
         }
 
         public void Hide()

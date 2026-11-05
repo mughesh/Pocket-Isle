@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Diorama.Audio;
 using Oculus.Interaction.Input;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Diorama
 {
@@ -84,8 +85,23 @@ namespace Diorama
             "Built with Unity\nand the Meta XR SDK", "Sounds: ElevenLabs\nand synthesised", "Music: to come", "Thank you for playing.",
         };
 
+        [Header("Step 16: shorter and graceful")]
+        [Tooltip("Hall of Fame: seconds between Islings coming out (the serialized hallGap was 2.6).")]
+        public float hallGapStep16 = 1.6f;
+        [Tooltip("Credits plaque: lines shown at once, seconds per scroll step (whole credits <= 20 s).")]
+        [Min(1)] public int creditWindow = 3;
+        public float creditStepSeconds = 2.6f;
+        [Tooltip("The plaque and the thank-you card float this high over the Heart's forehead (island-local m).")]
+        public float plaqueAbove = 0.09f;
+
         /// <summary>The finale is playing (walking, battles and the menu's Title wait).</summary>
         public static bool Running { get; private set; }
+        /// <summary>Step 16: the Quick Journey's See the ending (nothing saved; Title is the only way on).</summary>
+        public static bool Preview { get; private set; }
+        /// <summary>Step 16: the "Thank you for playing" card is up (Keep exploring / Title).</summary>
+        public static bool FinalCardUp { get; private set; }
+        bool _skip;
+        StoneTablet _thanks;
         public static FinaleDirector Instance { get; private set; }
         /// <summary>Debug (bridge shots): a moment of the finale ("palm.land", "socket", "spark.out", "done").</summary>
         public static event System.Action<string> Moment;
@@ -126,6 +142,8 @@ namespace Diorama
         {
             if (Instance == this) Instance = null;
             Running = false;
+            FinalCardUp = false;
+            Preview = false;
             StatueSocket.Shake = 0f;
             Clean();
         }
@@ -370,11 +388,110 @@ namespace Diorama
             if (from <= FinaleStep.Understanding) yield return Understanding();
             yield return Goodbye();
             yield return EyesOpen();
+            _skip = false;
+            ShowSkip(true);
             yield return HallOfFame();
             Beat(false);
             yield return Credits();
+            ShowSkip(false);
             yield return SparkReturns();
             Finish();
+            ShowFinalCard();
+        }
+
+        /// <summary>Step 16: a Skip tablet from the Hall of Fame on (the runes board, near rim).</summary>
+        void ShowSkip(bool on)
+        {
+            if (runes == null) return;
+            if (!on)
+            {
+                runes.Hide();
+                runes.Clear();
+                return;
+            }
+            runes.Clear();
+            runes.Add("Skip", Vector2.zero, new Vector2(0.07f, 0.03f), () =>
+            {
+                _skip = true;
+                runes.Hide();
+                Debug.Log("[FinaleDirector] Skip: on to the spark.");
+            });
+            runes.Anchor = null;
+            runes.Show(0.1f);
+        }
+
+        /// <summary>Step 16: waits <paramref name="seconds"/>, or less once Skip is pressed.</summary>
+        IEnumerator Hold(float seconds)
+        {
+            for (float t = 0f; t < seconds && !_skip; t += Time.deltaTime) yield return null;
+        }
+
+        Vector3 OverHeart => heart.SocketWorld + island.transform.up * (plaqueAbove * IslandScale);
+
+        /// <summary>
+        /// Step 16: after the spark returns, "Thank you for playing Pocket Isle" over the Heart with Keep exploring and Title
+        /// (the scene never ends on a still island). See the ending (preview): Title only.
+        /// </summary>
+        void ShowFinalCard()
+        {
+            FinalCardUp = true;
+            Dialogue.SetFocal("final card", true);
+            _thanks = new StoneTablet("Thank you card", island.transform, hudMaterial, island.gameObject.layer);
+            _thanks.Slate();
+            _thanks.Set("Thank you for playing\n<b>Pocket Isle</b>", 0.26f, 0.5f, new Vector2(0.024f, 0.016f));
+            _cards.Add(_thanks);
+            StartCoroutine(PlaceThanks());
+            if (runes != null)
+            {
+                runes.Clear();
+                var size = new Vector2(0.1f, 0.042f);
+                if (!Preview)
+                {
+                    var keep = runes.Add("Keep exploring", new Vector2(-0.062f, 0f), size, KeepExploring);
+                    runes.DefaultFocus = keep;
+                }
+                runes.Add("Title", new Vector2(Preview ? 0f : 0.062f, 0f), size, ToTitle);
+                runes.Anchor = null;
+                runes.Show(0.15f);
+            }
+            Debug.Log($"[FinaleDirector] The thank-you card ({(Preview ? "Title" : "Keep exploring / Title")}).");
+        }
+
+        IEnumerator PlaceThanks()
+        {
+            for (float t = 0f; FinalCardUp && _thanks != null; t += Time.deltaTime)
+            {
+                float bob = Mathf.Sin(t * 1.4f) * 0.004f * IslandScale;
+                _thanks.Place(OverHeart + island.transform.up * bob, IslandScale, Mathf.Clamp01(t / 0.8f));
+                if (fx != null && Random.value < Time.deltaTime * 3f) fx.Burst(OverHeart, 2, Gold, Unit * 0.5f, 0.8f, Unit * 0.03f, Vector3.up * Unit * 0.3f);
+                yield return null;
+            }
+        }
+
+        void CloseFinalCard()
+        {
+            FinalCardUp = false;
+            Dialogue.SetFocal("final card", false);
+            if (_thanks != null) _thanks.Hide();
+            if (runes != null)
+            {
+                runes.Hide();
+                runes.Clear();
+            }
+        }
+
+        void KeepExploring()
+        {
+            CloseFinalCard();
+            Debug.Log("[FinaleDirector] Keep exploring: free play with the Spark.");
+        }
+
+        void ToTitle()
+        {
+            CloseFinalCard();
+            if (!Preview && save != null) save.Save("finale: title");
+            Debug.Log($"[FinaleDirector] Title{(Preview ? " (the ending preview: nothing saved)" : "")}.");
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
 
         void SaveStep(FinaleStep step)
@@ -693,13 +810,14 @@ namespace Diorama
         {
             SaveStep(FinaleStep.HallOfFame);
             Dialogue.Say("heart.friends");
-            yield return new WaitForSeconds(2.5f);
+            yield return Hold(2f);
             var rosters = Rosters();
             int n = Mathf.Min(Party.Size, party.members.Count);
             for (int i = 0; i < n; i++)
             {
                 var c = party.members[i];
                 if (c == null || c.species == null || c.species.Prefab == null) continue;
+                if (_skip) break;
                 if (string.IsNullOrEmpty(c.metIn)) c.metIn = IsStarterLine(c.species) ? FinaleLogic.StillIsle : FinaleLogic.GuessMetIn(c.species, rosters);
                 var tile = new Vector2Int(Mathf.FloorToInt(Center.x - (n - 1) * 0.5f + i + 0.5f), Mathf.RoundToInt(Center.y) + 2);
                 yield return ComeOut(i, tile);
@@ -714,7 +832,7 @@ namespace Diorama
                     GameAudio.At(AudioIds.UiSaved, MapWorld(tile, 1f));
                     Debug.Log($"[FinaleDirector] Hall of Fame: {c.Name} Lv {c.level}, met in {c.metIn}.");
                 }
-                yield return new WaitForSeconds(hallGap);
+                yield return Hold(Mathf.Min(hallGap, hallGapStep16));
             }
             // A few of the Lodge's Islings wander out too.
             int guests = 0;
@@ -724,19 +842,20 @@ namespace Diorama
                 if (c == null || c.species == null || c.species.Prefab == null) continue;
                 int side = guests % 2 == 0 ? -1 : 1;
                 var tile = new Vector2Int(Mathf.RoundToInt(Center.x) + side * (4 + guests / 2), Mathf.RoundToInt(Center.y) + 1 + guests);
+                if (_skip) break;
                 Spawn(c, tile, true);
                 guests++;
-                yield return new WaitForSeconds(0.8f);
+                yield return Hold(0.6f);
             }
             if (save != null) save.AddHallOfFame();
             // Everyone cheers.
             GameAudio.Ui(AudioIds.JingleVictory);
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 3 && !_skip; i++)
             {
                 MapCreature.HopNear(hub, Center, 10f);
-                yield return new WaitForSeconds(0.7f);
+                yield return Hold(0.7f);
             }
-            yield return new WaitForSeconds(4f);
+            yield return Hold(2f);
             foreach (var (card, _) in _labels) card.Hide();
             _labels.Clear();
             _labelHeight.Clear();
@@ -786,29 +905,41 @@ namespace Diorama
             }
         }
 
+        /// <summary>
+        /// Step 16: one plaque (dark slate, gold trim) over the Heart, the credits scrolling through it a few lines at a
+        /// time (<see cref="creditWindow"/>, <see cref="creditStepSeconds"/> each; the whole of it well under 20 s).
+        /// </summary>
         IEnumerator Credits()
         {
             SaveStep(FinaleStep.Credits);
-            var tablet = new StoneTablet("Credits tablet", island.transform, hudMaterial, island.gameObject.layer);
-            _cards.Add(tablet);
-            var b = island.LocalBounds;
-            foreach (var text in credits)
+            if (_skip) yield break;
+            var lines = CreditsText.Lines;
+            var plaque = new StoneTablet("Credits plaque", island.transform, hudMaterial, island.gameObject.layer);
+            plaque.Slate();
+            _cards.Add(plaque);
+            Sfx(AudioIds.CreditsTablet, AudioIds.StatueSocket, OverHeart);
+            int window = Mathf.Min(creditWindow, lines.Length);
+            int steps = CreditSteps(lines.Length, window);
+            float total = steps * creditStepSeconds;
+            Debug.Log($"[FinaleDirector] Credits: one plaque, {lines.Length} lines, {window} at a time, {total:0.0} s.");
+            float t = 0f;
+            for (int p = 0; p < steps && !_skip; p++)
             {
-                if (string.IsNullOrEmpty(text)) continue;
-                tablet.Set(text, 0.22f, 0.42f, new Vector2(0.02f, 0.014f));
-                Sfx(AudioIds.CreditsTablet, AudioIds.StatueSocket, island.transform.TransformPoint(new Vector3(0f, island.CapTopLocal, b.min.z)));
-                Debug.Log($"[FinaleDirector] Credits: {text.Replace('\n', ' ')}");
-                for (float t = 0f; t < tabletSeconds; t += Time.deltaTime)
+                var shown = new string[window];
+                for (int i = 0; i < window; i++) shown[i] = p + i < lines.Length ? lines[p + i] : " ";
+                plaque.Set(string.Join("\n", shown), 0.2f, 0.5f, new Vector2(0.022f, 0.015f));
+                for (float s = 0f; s < creditStepSeconds && !_skip; s += Time.deltaTime, t += Time.deltaTime)
                 {
-                    // Rises from behind the far rim, stays readable, sinks again.
-                    float rise = Mathf.SmoothStep(0f, 1f, t / 0.9f) * (1f - Mathf.SmoothStep(0f, 1f, (t - tabletSeconds + 0.9f) / 0.9f));
-                    var local = new Vector3(0f, island.CapTopLocal + Mathf.Lerp(tabletRise.x, tabletRise.y, rise), b.min.z + 0.02f);
-                    tablet.Place(island.transform.TransformPoint(local), IslandScale, Mathf.Clamp01(rise * 1.5f));
+                    float alpha = Mathf.Clamp01(t / 0.6f) * Mathf.Clamp01((total - t) / 0.6f);
+                    plaque.Place(OverHeart, IslandScale, alpha);
                     yield return null;
                 }
             }
-            tablet.Hide();
+            plaque.Hide();
         }
+
+        /// <summary>Step 16: scroll positions to show every line once (pure).</summary>
+        public static int CreditSteps(int lines, int window) => Mathf.Max(1, lines - Mathf.Max(1, window) + 1);
 
         IEnumerator SparkReturns()
         {
@@ -1184,6 +1315,7 @@ namespace Diorama
                 if (SceneSwap.IsInside) swap.ReturnNow();
                 swap.TravelNow(f.hub, front, new Vector2Int(0, -1));
             }
+            Preview = !persist;
             if (persist && f.save != null) f.save.Save("dev: finale " + (goodbye ? "from the goodbye" : "from the wake"));
             return goodbye ? "from the goodbye" : "from the wake";
         }
@@ -1200,6 +1332,8 @@ namespace Diorama
         {
             Running = false;
             Instance = null;
+            Preview = false;
+            FinalCardUp = false;
         }
     }
 }

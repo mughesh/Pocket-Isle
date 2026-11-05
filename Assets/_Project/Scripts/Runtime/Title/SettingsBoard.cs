@@ -285,7 +285,8 @@ namespace Diorama
         void BuildCredits()
         {
             runes.Clear();
-            _creditLines = credits.Replace("\r", "").Split('\n');
+            // Step 16: one credits text for the card and the finale (no brand names but the licence-required line).
+            _creditLines = CreditsText.Block.Split('\n');
             _creditTop = 0;
             _creditNext = Time.unscaledTime + creditSeconds * 1.5f;
             float h = creditLines * 0.026f + 0.03f;

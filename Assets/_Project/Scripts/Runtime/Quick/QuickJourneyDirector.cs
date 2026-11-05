@@ -385,7 +385,9 @@ namespace Diorama
 
         IEnumerator AfterEnding()
         {
-            yield return new WaitForSeconds(4f);
+            // Step 16: the thank-you card's Title goes back itself; otherwise give it time to be read.
+            for (float t = 0f; t < 20f && FinaleDirector.FinalCardUp; t += Time.deltaTime) yield return null;
+            yield return new WaitForSeconds(1f);
             Debug.Log("[QuickJourney] The ending is over: back to the title (the quick save as it was).");
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }

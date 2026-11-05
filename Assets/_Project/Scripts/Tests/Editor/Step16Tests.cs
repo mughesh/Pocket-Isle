@@ -135,5 +135,20 @@ namespace Diorama.Tests
             Assert.Greater(p.y, 0.03f);
             Assert.Less(p.x, 0.26f);
         }
+    
+        [Test]
+        public void Credits_NoBrandsButTheRequiredLine_AndUnder20s()
+        {
+            var lines = CreditsText.Lines;
+            foreach (var l in lines)
+            {
+                StringAssert.DoesNotContain("Unity", l);
+                StringAssert.DoesNotContain("Meta", l);
+            }
+            CollectionAssert.Contains(lines, CreditsText.SoundsFreePlan, "required by the free plan until step 15b");
+            float seconds = FinaleDirector.CreditSteps(lines.Length, 3) * 2.6f;
+            Assert.LessOrEqual(seconds, 20f);
+            Assert.AreEqual(1, FinaleDirector.CreditSteps(2, 3));
+        }
     }
 }
