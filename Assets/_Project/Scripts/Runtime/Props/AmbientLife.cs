@@ -34,6 +34,8 @@ namespace Diorama
         ParticleSystem _dots;
         float _nextBird, _dotClock;
         string _realm;
+        Vector3 _anchor;
+        bool _hasAnchor;
 
         static readonly int WingColorId = Shader.PropertyToID("_WingColor"), FlapId = Shader.PropertyToID("_Flap");
 
@@ -93,9 +95,15 @@ namespace Diorama
             {
                 _realm = realm;
                 _critters.Clear();
-                if (_dots != null) _dots.Clear();
+                if (_dots != null)
+                {
+                    _dots.Clear();
+                    _dots.transform.localPosition = Vector3.zero;
+                }
                 _nextBird = Time.time + 4f;
+                _hasAnchor = false;
             }
+            if (realm != null) FollowMap();
             if (realm == null || cfg == null)
             {
                 LastMs = (Time.realtimeSinceStartup - t0) * 1000f;
@@ -119,6 +127,29 @@ namespace Diorama
             Draw();
             Dots(realm, cfg, restored);
             LastMs = (Time.realtimeSinceStartup - t0) * 1000f;
+        }
+
+        /// <summary>
+        /// Nov 5 fix: the map scrolls under the window when the explorer walks, so everything here moves with the ground
+        /// (map tile (0,0)'s island-local spot), not with the window. Without this they rode along with the explorer.
+        /// </summary>
+        void FollowMap()
+        {
+            Vector3 anchor = _island.TileToLocal(Vector2.zero);
+            Vector3 d = _hasAnchor ? anchor - _anchor : Vector3.zero;
+            _anchor = anchor;
+            _hasAnchor = true;
+            d.y = 0f;
+            if (d.sqrMagnitude < 1e-12f) return;
+            for (int i = 0; i < _critters.Count; i++)
+            {
+                var c = _critters[i];
+                c.pos += d;
+                c.target += d;
+                _critters[i] = c;
+            }
+            // The dots simulate in their own local space: move that space with the ground.
+            if (_dots != null) _dots.transform.localPosition += d;
         }
 
         static string RealmOf(string map)
@@ -254,11 +285,17 @@ namespace Diorama
                         if (Mathf.Abs(c.pos.x) > half.x * 1.05f && c.life > 1f) c.fade = -2f;
                         break;
                 }
-                // Inside the window only (the shader clips the rest; this keeps them from wandering off).
+                // Scrolled out of the window with the ground: gone (the shader clips it); Keep() brings a new one in.
+                // Targets that scrolled out are picked again so they don't fly off chasing them.
                 if (c.kind != Kind.Bird)
                 {
-                    c.pos.x = Mathf.Clamp(c.pos.x, -half.x * 0.9f, half.x * 0.9f);
-                    c.pos.z = Mathf.Clamp(c.pos.z, -half.y * 0.9f, half.y * 0.9f);
+                    if (Mathf.Abs(c.pos.x) > half.x * 0.95f || Mathf.Abs(c.pos.z) > half.y * 0.95f)
+                    {
+                        _critters.RemoveAt(i);
+                        continue;
+                    }
+                    if (Mathf.Abs(c.target.x) > half.x * 0.85f || Mathf.Abs(c.target.z) > half.y * 0.85f)
+                        c.target = RandomSpot(c.kind);
                 }
                 if (c.fade < -1.2f || c.life > 240f)
                 {
@@ -399,7 +436,7 @@ namespace Diorama
                 }
                 if (!found) continue;
                 at.y = cap + (sparkle ? tile * 0.05f : tile * Random.Range(0.3f, 1.6f));
-                p.position = at;
+                p.position = at - _dots.transform.localPosition;
                 p.velocity = sparkle ? Vector3.zero : new Vector3(Random.Range(-1f, 1f), Random.Range(0.1f, 0.4f), Random.Range(-1f, 1f)) * tile * 0.15f;
                 p.startColor = sparkle ? new Color(0.85f, 0.97f, 1f, 1f) : new Color(0.75f, 1f, 0.35f, 1f);
                 p.startSize = tile * (sparkle ? Random.Range(0.12f, 0.2f) : Random.Range(0.12f, 0.18f));
