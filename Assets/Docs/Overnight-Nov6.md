@@ -66,7 +66,10 @@ AudioScope: all six pass.
 - **Not shot:** Keeper flourishes (the Forge Hall trip didn't start from tonight's save in flat Play). Check them on the headset.
 
 ## Smoke run (final branch state)
-84/84 ok, 0 failed, 6.5 min. Notes, none a bug:
+Run twice at the end, 84/84 ok both times, 0 failed, 6.5 min. Between them I fixed one bug the tests caught after Play:
+the "chatter waits under a focal card" hold is a static that outlived Play when the finale ended with its card up, and 9
+Edit-mode dialogue tests then saw lines held. Now the hold only counts while playing, and a new or destroyed Dialogue
+clears it. Notes, none a bug:
 - "No progress for 20 s" in the opening (the starter wait, scripted).
 - Galeowl's HP label inside its box. This is the same note as Tidemother on Nov 5: a huge Keeper's box covers the label at its feet, and the label draws on top. Check it on the headset.
 - The finale's "no progress" note from Nov 5 is gone: the ending no longer has a 20 s still stretch.

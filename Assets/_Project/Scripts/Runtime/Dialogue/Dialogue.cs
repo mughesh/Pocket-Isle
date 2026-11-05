@@ -331,6 +331,7 @@ namespace Diorama
         {
             if (_instance != null && _instance != this) Debug.LogError("[Dialogue] Two Dialogue components in the scene.", this);
             _instance = this;
+            Focal.Clear(); // a new scene: no focal card is up yet
             foreach (var kv in _pendingAnchors) _anchors[kv.Key] = kv.Value;
             _pendingAnchors.Clear();
             if (script == null) Debug.LogError("[Dialogue] No script assigned. Tools > Pocket Isle > Dialogue > Import Script_v1.", this);
@@ -340,6 +341,7 @@ namespace Diorama
         void OnDestroy()
         {
             if (_instance == this) _instance = null;
+            Focal.Clear();
             if (encounters != null) encounters.BattleStarted -= OnBattleStarted;
         }
 
@@ -571,7 +573,8 @@ namespace Diorama
             if (on ? Focal.Add(who) : Focal.Remove(who)) Debug.Log($"[Dialogue] Focal card {who} {(on ? "up: chatter waits" : "down")}.");
         }
 
-        public static bool FocalUp => Focal.Count > 0 || RealmNameCard.Showing;
+        /// <summary>Only while playing: a card left up when Play stopped must not hold lines in Edit mode (tests).</summary>
+        public static bool FocalUp => Application.isPlaying && (Focal.Count > 0 || RealmNameCard.Showing);
 
         /// <summary>Step 16: a line that may show while a focal card is up.</summary>
         bool PassesFocal(Queued q) => q.kind == LineKind.Objective || q.objective || _pinned.Contains(q.trigger);
