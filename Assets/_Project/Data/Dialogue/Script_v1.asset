@@ -212,7 +212,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Swipe your thumb left, right or forward to walk.
+      text: Swipe your thumb along your finger to walk.
       context: 
   - id: lesson.walk.again
     once: 0
@@ -268,7 +268,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Swipe to walk, tap to stop.
+      text: Swipe again. It stops by itself.
       context: 
   - id: lesson.walk.far.again
     once: 0
@@ -282,7 +282,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Swipe to go. Tap your thumb to stop.
+      text: Swipe to go. Your explorer stops on its own.
       context: 
   - id: lesson.walk.help
     once: 0
@@ -310,7 +310,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Swipe to walk, then tap your thumb to stop.
+      text: Swipe to walk. It stops at a turn or a wall.
       context: 
   - id: lesson.stop.again
     once: 0
@@ -324,7 +324,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Swipe, then tap to stop.
+      text: Swipe, and off you go.
       context: 
   - id: lesson.look
     once: 0
@@ -1021,7 +1021,8 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Palm up and pinch with your left hand any time to pause.
+      text: Poke the stone on the rim, or palm up and pinch with your left hand,
+        to pause.
       context: 
   - id: cw.arrive
     once: 1

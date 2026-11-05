@@ -132,14 +132,22 @@ namespace Diorama.Audio.EditorTools
 
         static void Opening()
         {
+            // Step 16: a soft, curious glassy shimmer with a slow pulse (2 swells per 4 s loop), no island sounds under it.
             Re("shard.hum", Good, p => p.Loop(4f, 1f,
-                    L(Sine).Note("A4").Fm(1.5f, 0.6f).Env(0.2f, 1f, 1f),
-                    L(Sine).Note("E5").Env(0.2f, 1f, 1f).Trem(4f, 0.3f).Gain(0.3f),
-                    L(Sine).Note("A5").Vib(5f, 0.08f).Env(0.2f, 1f, 1f).Gain(0.25f),
-                    L(Sine).Note("A5").Pitch(0.06f, 0.06f, 0f).Env(0.2f, 1f, 1f).Gain(0.2f),
-                    M("Wind/Breeze", 1600f).Gain(0.12f),
-                    Sparkle(0.8f))
-                .Notes(N("A6", 0.7f, 0.2f, 5, 0.25f), N("D7", 2.3f, 0.2f, 5, 0.2f), N("B6", 3.4f, 0.2f, 5, 0.18f)));
+                    L(Sine).Note("A5").Fm(2.76f, 0.25f).Env(0.2f, 1f, 1f).Trem(0.5f, 0.55f),
+                    L(Sine).Note("E6").Env(0.2f, 1f, 1f).Trem(0.5f, 0.55f).Gain(0.35f),
+                    L(Sine).Note("A4").Env(0.2f, 1f, 1f).Trem(0.25f, 0.3f).Gain(0.3f),
+                    L(Sine).Note("A6").Pitch(0.02f, 0.02f, 0f).Env(0.2f, 1f, 1f).Trem(0.25f, 0.6f).Gain(0.1f),
+                    Sparkle(0.6f))
+                .Notes(N("A6", 0.9f, 0.2f, 4, 0.15f), N("E7", 2.9f, 0.2f, 4, 0.12f)).Master(1f, 6000f));
+
+            // Step 16: the bright layer over the hum, faded in as a hand comes near (Opening.ShimmerAmount).
+            New("Opening", "shard.shimmer", Good, SynthBatch1.Loop(0.6f), p => p.Loop(4f, 1f,
+                    L(Sine).Note("E7").Fm(2.76f, 0.3f).Env(0.2f, 1f, 1f).Trem(1f, 0.5f).Gain(0.45f),
+                    L(Sine).Note("A6").Env(0.2f, 1f, 1f).Trem(0.75f, 0.4f).Gain(0.5f),
+                    L(Sine).Note("B7").Env(0.2f, 1f, 1f).Trem(1.25f, 0.6f).Gain(0.15f),
+                    Sparkle(0.5f))
+                .Notes(N("D7", 0.4f, 0.2f, 3, 0.3f), N("A7", 1.4f, 0.2f, 3, 0.2f), N("E7", 2.4f, 0.2f, 3, 0.25f), N("B7", 3.3f, 0.2f, 3, 0.2f)).Master(1f, 9000f));
 
             New("Opening", "shard.touch", Good, SynthBatch1.Sfx(0.8f, 40, 2), p => p.One(1.3f,
                     Mn("Modal/Glass clink", "A6").Gain(0.7f),

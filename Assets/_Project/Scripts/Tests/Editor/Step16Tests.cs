@@ -41,5 +41,24 @@ namespace Diorama.Tests
             Assert.IsTrue(ObjectiveArea.Blocks(head, new Vector3(0.05f, 0f, 1f), 0.02f, spheres), "touching");
             Assert.IsFalse(ObjectiveArea.Blocks(head, new Vector3(0.2f, 0f, 1f), 0.02f, spheres), "beside it");
         }
+    
+        [Test]
+        public void ShardShimmer_GrowsAsAHandComesNear()
+        {
+            Assert.AreEqual(0f, Opening.ShimmerAmount(float.PositiveInfinity, 0.06f, 0.4f), 1e-5f, "no hands");
+            Assert.AreEqual(0f, Opening.ShimmerAmount(0.5f, 0.06f, 0.4f), 1e-5f);
+            Assert.AreEqual(1f, Opening.ShimmerAmount(0.03f, 0.06f, 0.4f), 1e-5f);
+            float mid = Opening.ShimmerAmount(0.23f, 0.06f, 0.4f);
+            Assert.That(mid, Is.InRange(0.3f, 0.7f));
+        }
+
+        [Test]
+        public void MenuStone_IsSmall_AndTheMenuLineNamesIt()
+        {
+            Assert.That(MenuStone.Size.x, Is.InRange(0.02f, 0.04f));
+            var script = UnityEditor.AssetDatabase.LoadAssetAtPath<DialogueScript>("Assets/_Project/Data/Dialogue/Script_v1.asset");
+            var t = script.triggers.Find(x => x.id == "menu.first");
+            StringAssert.Contains("Poke the stone on the rim", t.lines[0].text);
+        }
     }
 }

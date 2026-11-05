@@ -45,7 +45,20 @@ namespace Diorama
             if (_island == null) return;
             FollowIsland();
             Pick(out string area, out string realm, out bool restored, out MusicState music);
-            if (area != _area)
+            // Step 16: while only the shard floats in the room, no island ambience or music (they start as it unfolds).
+            bool shardOnly = Opening.ShardOnly;
+            if (shardOnly)
+            {
+                area = "(shard)";
+                music = MusicState.None;
+            }
+            if (area != _area && shardOnly)
+            {
+                AmbienceDirector.SetArea(null, 0.5f);
+                _area = area;
+                Debug.Log("[AudioDirector] Only the shard: no island ambience or music yet.");
+            }
+            else if (area != _area)
             {
                 float fade = realm == _realm && restored != _wasRestored ? 4f : SceneSwap.IsInside || _area == "Lodge" || _area == "ForgeHall" ? 1.5f : 2f;
                 AmbienceDirector.SetArea(Profile(area), fade);

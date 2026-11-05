@@ -45,8 +45,16 @@ namespace Diorama
             if (IsOpen) IsOpen = false;
         }
 
+        bool _stone;
+
         void Update()
         {
+            // Step 16: the menu stone on the rim (poke to pause), made once.
+            if (!_stone && island != null && island.map != null)
+            {
+                _stone = true;
+                MenuStone.Ensure(this);
+            }
             if (Pressed())
             {
                 if (IsOpen) Close("menu gesture");

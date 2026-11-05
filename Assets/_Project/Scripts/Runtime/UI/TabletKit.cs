@@ -339,6 +339,27 @@ namespace Diorama
             return on ? _speakerOn = m : _speakerOff = m;
         }
 
+        static Mesh _menuBars;
+
+        /// <summary>Step 16: the menu stone's icon, three bars ("≡") drawn for a 3 cm tablet, front-facing, as inlay.</summary>
+        public static Mesh MenuBars()
+        {
+            if (_menuBars != null) return _menuBars;
+            P.Clear(); N.Clear(); C.Clear(); A.Clear(); T.Clear();
+            var col = new Color(1f, 1f, 1f, Inlay);
+            foreach (float y in new[] { -0.0055f, 0f, 0.0055f })
+                Poly(col, new Vector2(-0.0075f, y - 0.0012f), new Vector2(-0.0075f, y + 0.0012f), new Vector2(0.0075f, y + 0.0012f), new Vector2(0.0075f, y - 0.0012f));
+            var m = new Mesh { name = "Menu bars" };
+            m.SetVertices(P);
+            m.SetNormals(N);
+            m.SetColors(C);
+            m.SetUVs(1, A);
+            m.SetTriangles(T, 0);
+            m.RecalculateBounds();
+            m.UploadMeshData(true);
+            return _menuBars = m;
+        }
+
         /// <summary>A convex polygon, points clockwise as seen from the front.</summary>
         static void Poly(Color col, params Vector2[] pts)
         {

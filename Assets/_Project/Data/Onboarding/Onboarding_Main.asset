@@ -172,7 +172,7 @@ MonoBehaviour:
   - id: far
     line: lesson.walk.far
     again: lesson.walk.far.again
-    chip: Swipe, tap
+    chip: Swipe
     help: 
     helpAfter: 30
     startWhen: canWalk
@@ -183,7 +183,7 @@ MonoBehaviour:
     failWhen: 
     rewindTo: 
     praise: 1
-    ghost: thumb_swipe_tap
+    ghost: thumb_swipe_forward
     place: 2
     target: ghost
     source: 

@@ -196,6 +196,7 @@ namespace Diorama.Audio
         public const string ShardDock = "shard.dock";
         public const string ShardFloat = "shard.float";
         public const string ShardHum = "shard.hum";
+        public const string ShardShimmer = "shard.shimmer";
         public const string ShardTouch = "shard.touch";
         public const string ShrineFill = "shrine.fill";
         public const string ShrineFlame = "shrine.flame";

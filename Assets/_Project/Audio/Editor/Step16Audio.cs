@@ -21,6 +21,25 @@ namespace Diorama.Audio.EditorTools
         public static void MeasureBefore() => Measure("Before");
         public static void MeasureAfter() => Measure("After");
 
+        /// <summary>Step 16 E: the shard's hum (reworked) and its shimmer (new), baked and synced (AudioIds rewritten).</summary>
+        public static void BakeOpening()
+        {
+            SynthBaker.CreateMissing();
+            var ids = new HashSet<string> { "shard.hum", "shard.shimmer" };
+            var bake = new List<SynthPatch>();
+            foreach (var p in SynthBaker.AllPatches())
+            {
+                if (!ids.Contains(p.id)) continue;
+                SynthRecipes.Apply(p, SynthRecipes.Find(p.id));
+                EditorUtility.SetDirty(p);
+                bake.Add(p);
+            }
+            AssetDatabase.SaveAssets();
+            SynthBaker.BakeAll(bake);
+            AudioCueTools.SyncAll();
+            Debug.Log($"[Step16Audio] Baked {bake.Count} opening patches ({string.Join(", ", ids)}).");
+        }
+
         public static void Bake()
         {
             SynthBaker.CreateMissing();

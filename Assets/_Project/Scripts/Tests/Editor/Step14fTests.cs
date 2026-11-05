@@ -25,7 +25,9 @@ namespace Diorama.Tests
                 StringAssert.Contains(e, far.doneWhen);
             Assert.IsTrue(far.skipAfter > 0f && far.skipAfter <= 30f, $"passes itself within 30 s ({far.skipAfter})");
             Assert.AreEqual("ahead", far.goldTileRule);
-            Assert.AreEqual(Step12aSetup.SwipeTapClip, far.ghost);
+            // Step 16: the walk stops by itself; the lessons show the swipe only (tap still stops, on the Controls card).
+            Assert.AreEqual("thumb_swipe_forward", far.ghost);
+            Assert.IsFalse(far.chip.ToLowerInvariant().Contains("tap"), far.chip);
             Assert.IsFalse(far.chip.ToLowerInvariant().Contains("twice"), far.chip);
             Assert.IsTrue(System.Array.IndexOf(Onboarding.Events, "swipeWalks2") >= 0);
             foreach (var l in s.lessons)
@@ -36,7 +38,10 @@ namespace Diorama.Tests
             foreach (var t in script.triggers)
                 if (t.id.StartsWith("lesson."))
                     foreach (var line in t.lines)
+                    {
                         Assert.IsFalse(line.text.ToLowerInvariant().Contains("twice"), $"{t.id}: '{line.text}'");
+                        Assert.IsFalse(line.text.ToLowerInvariant().Contains("tap to stop") || line.text.ToLowerInvariant().Contains("to stop"), $"{t.id}: '{line.text}' (step 16: no tap to stop)");
+                    }
         }
 
         [Test]

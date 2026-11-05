@@ -100,6 +100,16 @@ namespace Diorama
         /// <summary>True while a new game's opening runs (no saving, no encounters: the party is empty).</summary>
         public static bool InProgress { get; private set; }
 
+        /// <summary>Step 16: only the shard floats in the room (before the island unfolds): no island ambience or music.</summary>
+        public static bool ShardOnly { get; private set; }
+
+        [Header("Step 16: the shard's sound")]
+        [Tooltip("The shimmer over the hum is silent beyond this hand distance (m) and full at shimmerNear.")]
+        public float shimmerFar = 0.4f;
+        public float shimmerNear = 0.06f;
+        AudioHandle _shardShimmer;
+        float _shimmer;
+
         /// <summary>The starter was picked and walking is free.</summary>
         public event Action Finished;
 
@@ -171,6 +181,7 @@ namespace Diorama
         {
             DialogueBubble.KeepClear -= StarterPodsInView;
             InProgress = false;
+            ShardOnly = false;
             if (_shardMesh != null) Destroy(_shardMesh);
         }
 
@@ -246,7 +257,8 @@ namespace Diorama
             island.swapSink = 1f;
             // Never exactly 0: the island's world-to-island matrix must stay invertible (window clipping uses it).
             island.transform.localScale = Vector3.one * HiddenScale;
-            Debug.Log("[Opening] New game: the shard arrives.");
+            ShardOnly = true;
+            Debug.Log("[Opening] New game: the shard arrives (no island sound until it unfolds).");
             yield return WaitPlaced();
 
             // First use of the opening's shaders, drawn once and tiny before anything shows (the device hitched up to
@@ -259,6 +271,9 @@ namespace Diorama
             _stage = Stage.Shard;
             MakeShard(ShardRest + island.transform.rotation * driftFrom);
             _shardHum = AudioService.PlayLoop(AudioIds.ShardHum, _shard, 1.5f);
+            _shimmer = 0f;
+            _shardShimmer = AudioService.PlayLoop(ShimmerCue, _shard, 0.5f);
+            _shardShimmer.SetVolume(0f);
             Vector3 from = _shard.position;
             _spinSpeed = 0.6f;
             for (float t = 0f; t < driftSeconds; t += Time.deltaTime)
@@ -297,6 +312,9 @@ namespace Diorama
                 MoveShard(ShardRest + Vector3.up * (bob * Mathf.Sin(Time.time * 1.7f)), 0.35f);
                 SetShardGlow(0.35f + 0.25f * Mathf.Sin(Time.time * 2.2f), 0.2f);
                 _touched = glide == null && ShardTouched();
+                // Step 16: the shimmer brightens as a hand comes near.
+                _shimmer = Mathf.MoveTowards(_shimmer, ShimmerAmount(HandDistance(_shard.position), shimmerNear, shimmerFar), Time.deltaTime * 2f);
+                _shardShimmer.SetVolume(_shimmer);
                 yield return null;
             }
             if (glide != null) StopCoroutine(glide);
@@ -316,6 +334,8 @@ namespace Diorama
             }
             Burst(_shard.position, 46, new Color(1f, 0.85f, 0.45f), 0.25f);
             _shardHum.Stop(0.3f);
+            _shardShimmer.Stop(0.3f);
+            ShardOnly = false;
             GameAudio.At(AudioIds.ShardCrack, _shard.position);
             GameAudio.At(AudioIds.IslandUnfold, island.transform.position);
             StartCoroutine(Flash(_shard.position, shardSize * 1.6f, 0.6f));
@@ -553,6 +573,27 @@ namespace Diorama
         /// within <see cref="contactSlack"/>), or a pinch while looking at it. A contact nudges the shard away from the
         /// hand (it springs back) and flashes where it was touched.
         /// </summary>
+        /// <summary>Step 16: the shard's shimmer (Audio Lab recipe, Opening group).</summary>
+        public const string ShimmerCue = "shard.shimmer";
+
+        /// <summary>Step 16: 0 beyond <paramref name="far"/>, 1 at <paramref name="near"/> and closer, eased between.</summary>
+        public static float ShimmerAmount(float distance, float near, float far) =>
+            Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(far, near, distance));
+
+        /// <summary>The nearest tracked index tip or palm to a point (m; infinity without hands).</summary>
+        static float HandDistance(Vector3 point)
+        {
+            float best = float.PositiveInfinity;
+            for (int h = 0; h < 2; h++)
+            {
+                var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
+                if (hand == null || !hand.IsTrackedDataValid) continue;
+                if (HandLookup.TryGetJoint(hand, HandJointId.HandIndexTip, out var tip)) best = Mathf.Min(best, (tip - point).magnitude);
+                if (HandLookup.TryGetJoint(hand, HandJointId.HandPalm, out var palm)) best = Mathf.Min(best, (palm - point).magnitude);
+            }
+            return best;
+        }
+
         bool ShardTouched()
         {
             if (_shard == null) return false;
@@ -1132,6 +1173,10 @@ namespace Diorama
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void ResetStatics() => InProgress = false;
+        static void ResetStatics()
+        {
+            InProgress = false;
+            ShardOnly = false;
+        }
     }
 }

@@ -44,7 +44,7 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
 - `lesson.starter.again` · in hub · objective · → starterPods
   - Spirit: Look at one and pinch, or grab it.
 - `lesson.walk` · in outside & !battle · objective · while canWalk · → ghost (Nov 3: any direction, dots count 4 tiles walked)
-  - Spirit: Swipe your thumb left, right or forward to walk.
+  - Spirit: Swipe your thumb along your finger to walk.
 - `lesson.walk.again` · in outside & !battle · objective · while canWalk · → ghost
   - Spirit: Swipe any way. Watch your explorer go!
 - `lesson.walk.turn` · in outside & !battle · objective · while canWalk · → ghost (step 12a)
@@ -52,15 +52,15 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
 - `lesson.walk.turn.again` · in outside & !battle · objective · while canWalk · → ghost
   - Spirit: Swipe, and I'll follow the path.
 - `lesson.walk.far` · in outside & !battle · objective · while canWalk · → ghost (step 14f: done on a tap stop, the gold tile or two swipe walks)
-  - Spirit: Swipe to walk, tap to stop.
+  - Spirit: Swipe again. It stops by itself.
 - `lesson.walk.far.again` · in outside & !battle · objective · while canWalk · → ghost
-  - Spirit: Swipe to go. Tap your thumb to stop.
+  - Spirit: Swipe to go. Your explorer stops on its own.
 - `lesson.walk.help` · in outside & !battle · objective · while canWalk · → ghost
   - Spirit: Or look at a spot and pinch.
 - `lesson.stop` · in outside & !battle · story · while canWalk · → ghost
-  - Spirit: Swipe to walk, then tap your thumb to stop.
+  - Spirit: Swipe to walk. It stops at a turn or a wall.
 - `lesson.stop.again` · in outside & !battle · story · while canWalk · → ghost
-  - Spirit: Swipe, then tap to stop.
+  - Spirit: Swipe, and off you go.
 - `lesson.look` · in outside & !battle · objective · while canWalk · → goldTile
   - Spirit: Look at the glowing spot and pinch.
 - `lesson.look.again` · in outside & !battle · objective · while canWalk · → goldTile
@@ -154,7 +154,7 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
 - `steambara.first` · in battle · story · once · → wildPad (step 9f: the first wild Steambara)
   - Spirit: A water Isling, visiting the springs! Water beats fire...
 - `menu.first` · in outside & !battle · story · once (step 9g: a few calm seconds after the lessons end, never in a battle)
-  - Spirit: Palm up and pinch with your left hand any time to pause.
+  - Spirit: Poke the stone on the rim, or palm up and pinch with your left hand, to pause.
 
 ## Cinderwood (fire)
 - `cw.arrive` · in cinderwood · intro · once (step 14c: the arrival line; Nov 3: a thorny vine blocks the trail ahead)

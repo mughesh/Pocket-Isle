@@ -39,6 +39,22 @@ namespace Diorama.EditorTools
                 sb.Append($"\n  lodge Journal tablet x {span.x:0.000}..{span.y:0.000}, socket band {minX:0.000}..{maxX:0.000}: gap {gap * 100f:0.0} local cm {(gap > 0.008f ? "ok" : "TOO CLOSE")}");
                 if (gap <= 0.008f) bad++;
             }
+            // Step 16: the menu stone on the rim: clear of the pods and the lodge Journal tablet's spot.
+            var stone = Object.FindFirstObjectByType<MenuStone>(FindObjectsInactive.Include);
+            if (stone != null && rack != null && rack.SocketBandLocal(out float sMin, out float sMax, out _))
+            {
+                var s = stone.RimSpan();
+                float gapPods = Mathf.Max(s.x - sMax, sMin - s.y);
+                float gapBook = float.PositiveInfinity;
+                if (book != null)
+                {
+                    var j = book.RimSpan();
+                    gapBook = Mathf.Max(s.x - j.y, j.x - s.y);
+                }
+                bool ok = gapPods > 0.008f && gapBook > 0.008f;
+                sb.Append($"\n  menu stone x {s.x:0.000}..{s.y:0.000}: gap to the pods {gapPods * 100f:0.0}, to the Journal tablet {(float.IsInfinity(gapBook) ? "-" : (gapBook * 100f).ToString("0.0"))} local cm {(ok ? "ok" : "TOO CLOSE")}");
+                if (!ok) bad++;
+            }
             sb.Append($"\n  {bad} problem(s).");
             Debug.Log(sb.ToString());
         }

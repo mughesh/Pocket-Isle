@@ -39,6 +39,9 @@ namespace Diorama
         [Tooltip("How a wrist-anchored clip (thumb gestures) is shown: where the fingers and the back of the hand point (right hand; x right, y up, z away from the player).")]
         public Vector3 wristFingers = new Vector3(-0.35f, 0.25f, 1f);
         public Vector3 wristDorsal = new Vector3(1f, 0.35f, 0.25f);
+        [Tooltip("Step 16: replaces wristDorsal: the back of the hand up and out, a little toward the head, so the palm faces " +
+                 "inward/down (a palm toward the face is Meta's system gesture: the judges' video opened the system menu).")]
+        public Vector3 wristBack = new Vector3(0.75f, 0.6f, -0.15f);
         [Tooltip("Both hands (show me your hands) sit this far apart (m).")]
         public float bothSpread = 0.18f;
         [Tooltip("Step 9h: the island-move ghost grabs the near rim this far in from the dominant side's corner (island-local m).")]
@@ -347,6 +350,29 @@ namespace Diorama
 
         /// <summary>Poses the ghosts now (debug shots render right after).</summary>
         public void DebugPose() => Tick(0f);
+
+        /// <summary>
+        /// Step 16 (debug): which way the showing ghost's palm faces, against the head: the back of the hand is
+        /// cross(index knuckle - wrist, little knuckle - wrist) for a right hand (flipped for the left).
+        /// </summary>
+        public string DebugPalm()
+        {
+            var cam = Camera.main;
+            var sb = new System.Text.StringBuilder();
+            foreach (var g in new[] { _left, _right })
+            {
+                if (g == null || g.renderer == null || !g.renderer.enabled) continue;
+                var w = g.joints[(int)HandJointId.HandWristRoot];
+                var i = g.joints[(int)HandJointId.HandIndex1];
+                var p = g.joints[(int)HandJointId.HandPinky1];
+                var palm = g.joints[(int)HandJointId.HandPalm];
+                if (w == null || i == null || p == null || palm == null) continue;
+                Vector3 back = Vector3.Cross(i.position - w.position, p.position - w.position).normalized * (g.left ? -1f : 1f);
+                Vector3 toHead = cam != null ? (cam.transform.position - palm.position).normalized : Vector3.up;
+                sb.Append($"{(g.left ? "L" : "R")}: back of the hand {back:F2}, up {back.y:F2}, palm toward the head {-Vector3.Dot(back, toHead):F2}. ");
+            }
+            return sb.Length > 0 ? sb.ToString() : "no ghost showing";
+        }
 
         void Tick(float dt)
         {
@@ -694,7 +720,7 @@ namespace Diorama
         Quaternion WristView(bool left)
         {
             var f = wristFingers;
-            var d = wristDorsal;
+            var d = wristBack;
             if (left)
             {
                 f = GhostHandClip.Mirror(f);
