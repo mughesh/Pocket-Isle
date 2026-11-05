@@ -557,7 +557,26 @@ namespace Diorama
         /// </summary>
         public static bool Held => GameMenu.IsOpen || SettingsBoard.IsOpen || JournalBoard.IsOpen;
 
-        bool _held;
+        static readonly HashSet<string> Focal = new HashSet<string>();
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetFocal() => Focal.Clear();
+
+        /// <summary>
+        /// Step 16: a focal card is up (evolution card, realm name card, the Quick Journey's end card, credits): the Spirit's
+        /// chatter waits (the line showing goes back to the queue); objectives and the lesson teaching now still show.
+        /// </summary>
+        public static void SetFocal(string who, bool on)
+        {
+            if (on ? Focal.Add(who) : Focal.Remove(who)) Debug.Log($"[Dialogue] Focal card {who} {(on ? "up: chatter waits" : "down")}.");
+        }
+
+        public static bool FocalUp => Focal.Count > 0 || RealmNameCard.Showing;
+
+        /// <summary>Step 16: a line that may show while a focal card is up.</summary>
+        bool PassesFocal(Queued q) => q.kind == LineKind.Objective || q.objective || _pinned.Contains(q.trigger);
+
+        bool _held, _focal;
 
         void Next()
         {
@@ -581,7 +600,9 @@ namespace Diorama
             // While a lesson teaches (here) only its own lines and a place's intro show; the others keep waiting. A
             // lesson that doesn't apply here (the grass lesson in the lodge) doesn't hold anything up.
             bool pin = PinActive();
-            int next = _queue.FindIndex(q => InPlace(q) && (pin ? _pinned.Contains(q.trigger) || q.kind == LineKind.Intro : !_pinned.Contains(q.trigger)));
+            bool focal = FocalUp;
+            int next = _queue.FindIndex(q => InPlace(q) && (!focal || PassesFocal(q)) &&
+                                             (pin ? _pinned.Contains(q.trigger) || q.kind == LineKind.Intro : !_pinned.Contains(q.trigger)));
             // Filler waits until the place's intro and any objective have shown.
             if (next >= 0 && _queue[next].kind == LineKind.Filler)
             {
@@ -722,6 +743,18 @@ namespace Diorama
                 if (held && _current.HasValue || !held && !_current.HasValue) Next();
             }
             if (held) return;
+            // Step 16: a focal card came up: chatter showing goes back to the queue; it went down: what waited shows.
+            bool focalUp = FocalUp;
+            if (focalUp != _focal)
+            {
+                _focal = focalUp;
+                if (focalUp && _current.HasValue && !PassesFocal(_current.Value))
+                {
+                    _queue.Insert(0, _current.Value);
+                    Next();
+                }
+                else if (!focalUp && !_current.HasValue) Next();
+            }
             UpdateTarget();
             TryIdleHint();
         }

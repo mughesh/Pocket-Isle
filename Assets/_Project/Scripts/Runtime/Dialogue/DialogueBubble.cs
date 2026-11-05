@@ -81,7 +81,12 @@ namespace Diorama
         public float spiritRadius = 0.024f;
 
         [Header("Timing")]
+        [Tooltip("Old typing speed (the scene still holds 45); see typingCharsPerSecond.")]
         public float charsPerSecond = 45f;
+        [Tooltip("Step 16: letters per second (captures showed half-typed lines at 45).")]
+        public float typingCharsPerSecond = 60f;
+        [Tooltip("Step 16: lines shorter than this show at once (no typing).")]
+        public int instantUnderChars = 30;
         [Tooltip("Step 9h reading pace: a line stays up at least holdBase + holdPerChar x characters after it is typed in.")]
         public float holdBase = 1.5f;
         public float holdPerChar = 0.06f;
@@ -372,7 +377,8 @@ namespace Diorama
 
             _chars = line.text.Length;
             _text.maxVisibleCharacters = 0;
-            _typeSeconds = _chars / Mathf.Max(1f, CharsPerSecond);
+            _instant = !_heart && _chars < instantUnderChars;
+            _typeSeconds = _instant ? 0f : _chars / Mathf.Max(1f, CharsPerSecond);
             _holdSeconds = HoldSeconds(_chars, holdBase, holdPerChar);
             _shownAt = Time.time;
             _blipAt = 0;
@@ -387,7 +393,11 @@ namespace Diorama
             Place(true);
         }
 
-        float CharsPerSecond => _heart ? heartCharsPerSecond : charsPerSecond;
+        float CharsPerSecond => _heart ? heartCharsPerSecond : Mathf.Max(charsPerSecond, typingCharsPerSecond);
+        bool _instant;
+
+        /// <summary>Step 16: letters visible after <paramref name="t"/> s (a short line shows at once).</summary>
+        public static int VisibleChars(int chars, float t, float cps, bool instant) => instant ? chars : Mathf.Min(chars, Mathf.CeilToInt(t * cps));
 
         /// <summary>Step 11d: the pinned line's chip text changes (a counter); a chip already showing is laid out again.</summary>
         public void SetChip(string chip)
@@ -670,7 +680,7 @@ namespace Diorama
                 return;
             }
             float t = Time.time - _shownAt;
-            _text.maxVisibleCharacters = _chip ? 99999 : WholeWords(Mathf.Min(_chars, Mathf.CeilToInt(t * CharsPerSecond)));
+            _text.maxVisibleCharacters = _chip ? 99999 : WholeWords(VisibleChars(_chars, t, CharsPerSecond, _instant));
             if (_heart && !_chip) FadeLetters(t);
             Blip(_text.maxVisibleCharacters);
             _appear = Mathf.Min(1f, t / 0.15f);

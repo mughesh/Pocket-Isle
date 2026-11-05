@@ -48,7 +48,17 @@ namespace Diorama
         public int Due { get; private set; } = -1;
 
         /// <summary>The evolution show is playing.</summary>
-        public bool Showing { get; private set; }
+        public bool Showing
+        {
+            get => _showingCard;
+            private set
+            {
+                _showingCard = value;
+                Dialogue.SetFocal("evolution card", value);
+            }
+        }
+
+        bool _showingCard;
 
         /// <summary>Bridge / tests: a synthetic hand holding the due pod at this world point (palm up when <see cref="debugPalmUp"/> ≥ 0.55).</summary>
         [NonSerialized] public Vector3? debugPalm;

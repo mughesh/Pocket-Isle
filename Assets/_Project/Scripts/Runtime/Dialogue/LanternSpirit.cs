@@ -132,6 +132,7 @@ namespace Diorama
             lantern.localPosition = Vector3.up * (_view != null ? _view.centerHeight : 0.02f);
             FocusHighlight.SetLantern(lantern);
             if (island != null && island.map != null) transform.localPosition = _lastGoal = HomeLocal();
+            ObjectiveArea.HookBubble();
         }
 
         void OnEnable() => Dialogue.Speaking += OnSpeaking;
@@ -156,7 +157,7 @@ namespace Diorama
                     _flyFrom = transform.localPosition;
                     _flyStart = Time.time;
                 }
-                Debug.Log(battle ? $"[LanternSpirit] Battle: waiting beside the near rim ({(DominantHand.Left ? "right" : "left")} side, the non-dominant one)." : "[LanternSpirit] Battle over: back to the corner.");
+                Debug.Log(battle ? "[LanternSpirit] Battle: waiting beside the near rim (right side, left if the right is in the way)." : "[LanternSpirit] Battle over: back to the corner.");
             }
             var held = hold != null ? hold() : null;
             if (held.HasValue) Hold(held.Value);
@@ -230,23 +231,63 @@ namespace Diorama
             if (look.sqrMagnitude > 1e-6f) transform.rotation = Quaternion.LookRotation(look, Vector3.up) * Quaternion.Euler(_away && _clamped ? 12f : 0f, 0f, 0f);
         }
 
-        /// <summary>The near-left corner of the rim (the player sits on the island's +Z side; their left is +X).</summary>
+        [Header("Step 16: out of the objective's way")]
+        [Tooltip("Parks this far beside the target's edge (island-scale m), on the player's right first, then left.")]
+        public float sideGap = 0.05f;
+        [Tooltip("And this high above the target's middle (island-scale m).")]
+        public float sideLift = 0.02f;
+        [Tooltip("The bubble's middle, from the Spirit: x further out to the side, y up (island-scale m), for the clear check.")]
+        public Vector2 bubbleProbe = new Vector2(0.07f, 0.05f);
+        [Tooltip("Radii (world m) of the Spirit and its bubble for the clear check.")]
+        public float spiritProbeRadius = 0.025f, bubbleProbeRadius = 0.04f;
+
+        readonly System.Collections.Generic.List<Vector4> _avoid = new System.Collections.Generic.List<Vector4>();
+        int _side = -1;
+        bool _homeLeft;
+        float _homeCheckAt;
+
+        /// <summary>
+        /// The near rim's corner on the player's right (Mugesh, step 16), or the left one while the right is in the
+        /// objective's way (the ghost or its drop spot there). In a battle: beside the near rim, outside the side edge.
+        /// Island +X is the player's left.
+        /// </summary>
         Vector3 HomeLocal()
+        {
+            if (Time.time >= _homeCheckAt)
+            {
+                _homeCheckAt = Time.time + 1f;
+                bool wasLeft = _homeLeft;
+                _homeLeft = false;
+                var cam = Camera.main;
+                if (cam != null)
+                {
+                    _avoid.Clear();
+                    ObjectiveArea.Gather(_avoid);
+                    if (_avoid.Count > 0 && ObjectiveArea.Blocks(cam.transform.position, island.transform.TransformPoint(HomeLocal(false)), spiritProbeRadius, _avoid) &&
+                        !ObjectiveArea.Blocks(cam.transform.position, island.transform.TransformPoint(HomeLocal(true)), spiritProbeRadius, _avoid))
+                        _homeLeft = true;
+                }
+                if (wasLeft != _homeLeft) Debug.Log($"[LanternSpirit] Home: the {(_homeLeft ? "left (the right is in the objective's way)" : "right")} corner.");
+            }
+            return HomeLocal(_homeLeft);
+        }
+
+        Vector3 HomeLocal(bool left)
         {
             var b = island.LocalBounds;
             if (_battle)
             {
-                // Island +X is the player's left: a right-handed player gets it on the left side.
-                float x = DominantHand.Left ? b.min.x - battleOffset.x : b.max.x + battleOffset.x;
+                float x = left ? b.max.x + battleOffset.x : b.min.x - battleOffset.x;
                 return new Vector3(x, island.map.capHeight + battleOffset.y, b.max.z - battleOffset.z);
             }
-            return new Vector3(b.max.x - cornerOffset.x, island.map.capHeight + cornerOffset.y, b.max.z - cornerOffset.z);
+            return new Vector3(left ? b.max.x - cornerOffset.x : b.min.x + cornerOffset.x, island.map.capHeight + cornerOffset.y, b.max.z - cornerOffset.z);
         }
 
         /// <summary>
-        /// Step 14a: just above the target (its radius plus <see cref="aboveOffset"/>.y), a little toward the player, so
-        /// it marks the interaction point without covering it or the ghost hand reaching in from the player's side.
-        /// Pulled back inside the view cone. Returned in the parent's space.
+        /// Step 16: beside the target (its radius plus <see cref="sideGap"/>), a little above its middle, on the player's
+        /// right first, then the left, further out if both are taken: the first spot where neither the Spirit nor its
+        /// bubble covers the objective's area (<see cref="ObjectiveArea"/>: the ghost, the drop spot, the battle's
+        /// creatures) in the player's view. Pulled back inside the view cone. Returned in the parent's space.
         /// </summary>
         Vector3 TargetLocal(Vector3 target)
         {
@@ -257,7 +298,36 @@ namespace Diorama
             Vector3 toPlayer = head - target;
             toPlayer.y = 0f;
             toPlayer = toPlayer.sqrMagnitude > 1e-6f ? toPlayer.normalized : island.transform.forward;
-            Vector3 world = target + Vector3.up * (_targetRadius + aboveOffset.x * scale) + toPlayer * (aboveOffset.y * scale);
+            Vector3 right = Vector3.Cross(Vector3.up, -toPlayer);
+
+            _avoid.Clear();
+            ObjectiveArea.Gather(_avoid);
+            Vector3 world = default;
+            int pick = -1;
+            for (int pass = 0; pass < 2 && pick < 0; pass++)
+                for (int i = 0; i < 4; i++)
+                {
+                    // Keep the side chosen last while it stays clear (no flip-flopping), then right, left, further right, further left.
+                    int c = pass == 0 ? _side : i;
+                    if (c < 0) break;
+                    Vector3 side = (c % 2 == 0 ? right : -right);
+                    float gap = _targetRadius + sideGap * scale * (c < 2 ? 1f : 1.8f);
+                    Vector3 spot = target + side * gap + Vector3.up * (sideLift * scale) + toPlayer * (aboveOffset.y * scale);
+                    Vector3 bubble = spot + side * (bubbleProbe.x * scale) + Vector3.up * (bubbleProbe.y * scale);
+                    bool clear = !ObjectiveArea.Blocks(head, spot, spiritProbeRadius, _avoid) && !ObjectiveArea.Blocks(head, bubble, bubbleProbeRadius, _avoid);
+                    if (clear || pass == 1 && i == 3 && pick < 0)
+                    {
+                        pick = clear ? c : 0;
+                        world = clear ? spot : target + right * (_targetRadius + sideGap * scale) + Vector3.up * (sideLift * scale);
+                        break;
+                    }
+                    if (pass == 0) break;
+                }
+            if (pick != _side)
+            {
+                Debug.Log($"[LanternSpirit] Parks {(pick % 2 == 0 ? "right" : "left")} of the target{(pick >= 2 ? " (further out)" : "")}.");
+                _side = pick;
+            }
 
             _clamped = false;
             if (cam != null)

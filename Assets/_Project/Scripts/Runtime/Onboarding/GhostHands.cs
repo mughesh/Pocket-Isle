@@ -116,6 +116,13 @@ namespace Diorama
         bool _keyValid;
         readonly HashSet<string> _warned = new HashSet<string>();
 
+        /// <summary>Step 16: the scene's ghost hands (for <see cref="ObjectiveArea"/>).</summary>
+        public static GhostHands Current { get; private set; }
+        /// <summary>Step 16: where a grab clip lets go (the drop spot), while it shows.</summary>
+        public Vector3? ReleasePoint => IsShowing && _keyValid && _releaseValid ? _releaseWorld : (Vector3?)null;
+        Vector3 _releaseWorld;
+        bool _releaseValid;
+
         /// <summary>A ghost is showing (or fading out).</summary>
         public bool IsShowing => _showing || _visible > 0.001f;
         /// <summary>Where the demonstrated spot is now (the "ghost" dialogue target).</summary>
@@ -127,6 +134,7 @@ namespace Diorama
 
         void Start()
         {
+            Current = this;
             if (material == null) Debug.LogError("[GhostHands] No material (Set Up MR_Main (8b onboarding)): no ghost hands.", this);
             _left = Build(leftSource, true);
             _right = Build(rightSource, false);
@@ -153,6 +161,7 @@ namespace Diorama
 
         void OnDestroy()
         {
+            if (Current == this) Current = null;
             if (onboarding != null)
             {
                 onboarding.LessonShown -= OnLessonShown;
@@ -432,6 +441,8 @@ namespace Diorama
 
             _keyWorld = point;
             _keyValid = true;
+            _releaseValid = release.HasValue;
+            if (release.HasValue) _releaseWorld = release.Value;
             UpdateDot(point, t / Mathf.Max(0.01f, _clip.Duration), alpha);
             Spark(grab, t, point, alpha, scale);
         }

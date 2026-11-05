@@ -95,10 +95,23 @@ namespace Diorama
             }
         }
 
+        void OnEnable() => ObjectiveArea.Collect += KeepClearOfCreatures;
+
         void OnDisable()
         {
+            ObjectiveArea.Collect -= KeepClearOfCreatures;
             _lowHp.Stop(0.1f);
             _lowHp = default;
+        }
+
+        /// <summary>Step 16: the Spirit and its bubble keep off both creatures (your own Isling, the wild one) in a battle.</summary>
+        void KeepClearOfCreatures(System.Collections.Generic.List<Vector4> into)
+        {
+            foreach (var a in new[] { _player, _wild })
+            {
+                if (a == null || !a.TryGetVisualBounds(out var b)) continue;
+                into.Add(ObjectiveArea.Sphere(b.center, Mathf.Max(b.extents.x, Mathf.Max(b.extents.y, b.extents.z)) * 1.1f));
+            }
         }
 
         // ---- setup ----

@@ -267,6 +267,7 @@ namespace Diorama
                 if (fx != null) fx.Burst(at.Value, 24, new Color(1f, 0.85f, 0.45f), TileWorld * 1.2f, 0.9f, TileWorld * 0.06f, island.transform.up * TileWorld * 0.6f);
             }
             runes.Show(0.18f);
+            Dialogue.SetFocal("end card", true);
             Debug.Log("[QuickJourney] End card over the " + (at.HasValue ? "statue" : "near rim (no statue in view)") + ": " + string.Join(" / ", EndRunes) + ".");
         }
 
@@ -283,6 +284,7 @@ namespace Diorama
         void KeepExploring()
         {
             runes.Hide();
+            Dialogue.SetFocal("end card", false);
             runes.Clear();
             Debug.Log("[QuickJourney] Keep exploring: the full adventure's trail leads on (Cinderwood next).");
             var trail = FindFirstObjectByType<SpiritTrail>();
@@ -296,6 +298,7 @@ namespace Diorama
         void SeeTheEnding()
         {
             runes.Hide();
+            Dialogue.SetFocal("end card", false);
             runes.Clear();
             _previewing = true;
             FinaleDirector.Moment -= OnFinaleMoment;
@@ -367,6 +370,7 @@ namespace Diorama
         void ToTitle()
         {
             runes.Hide();
+            Dialogue.SetFocal("end card", false);
             if (save != null)
             {
                 save.Save("quick journey: title");
