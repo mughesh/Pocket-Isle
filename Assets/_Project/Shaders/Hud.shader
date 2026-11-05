@@ -9,6 +9,8 @@ Shader "Diorama/Hud"
         _BackColor ("Back Colour", Color) = (0.08, 0.11, 0.09, 0.85)
         _FillColor ("Fill Colour", Color) = (0.44, 0.82, 0.42, 1)
         _Fill ("Fill", Range(0, 1)) = 1
+        _Ghost ("Lagging Ghost (fill share, 0 = none)", Range(0, 1)) = 0
+        _GhostColor ("Ghost Colour", Color) = (1, 0.93, 0.75, 0.85)
         _Inset ("Fill Inset (of height)", Range(0, 0.5)) = 0.2
         _BorderColor ("Border Colour", Color) = (1, 1, 1, 0)
         _Border ("Border Width (of height)", Range(0, 0.3)) = 0.06
@@ -40,6 +42,8 @@ Shader "Diorama/Hud"
                 float4 _BackColor;
                 float4 _FillColor;
                 float _Fill;
+                float _Ghost;
+                float4 _GhostColor;
                 float _Inset;
                 float4 _BorderColor;
                 float _Border;
@@ -94,6 +98,10 @@ Shader "Diorama/Hud"
                 float di = RoundBox(p, hi, max(0.0, _Radius - _Inset));
                 float edge = lerp(-hi.x, hi.x, _Fill);
                 float fill = (1.0 - smoothstep(-aa, aa, di)) * (1.0 - smoothstep(-aa, aa, p.x - edge)) * step(0.001, _Fill);
+                // Step 16: the lagging segment between the fill's edge and the ghost's (HP lost a moment ago).
+                float gedge = lerp(-hi.x, hi.x, _Ghost);
+                float ghost = (1.0 - smoothstep(-aa, aa, di)) * (1.0 - smoothstep(-aa, aa, p.x - gedge)) * smoothstep(-aa, aa, p.x - edge) * step(0.001, _Ghost);
+                col = lerp(col, _GhostColor, ghost * _GhostColor.a);
                 col = lerp(col, _FillColor, fill * _FillColor.a);
 
                 float border = smoothstep(-_Border - aa, -_Border + aa, d) * _BorderColor.a;

@@ -74,13 +74,16 @@ namespace Diorama
             GetComponent<MeshRenderer>().SetPropertyBlock(block);
         }
 
+        /// <summary>Step 16: a slam shakes the pad (island-local offset, set by the stage).</summary>
+        [System.NonSerialized] public Vector3 shake;
+
         void LateUpdate() => Snap();
 
         public void Snap()
         {
             if (island == null || island.Content == null) return;
             float down = (1f - Mathf.SmoothStep(0f, 1f, Rise)) * (topHeight + 0.1f) * widthTiles * island.map.tileSize;
-            transform.localPosition = island.TileToLocal(tile, island.Content.capHeight + restLift - down);
+            transform.localPosition = island.TileToLocal(tile, island.Content.capHeight + restLift - down) + shake;
             transform.localRotation = Quaternion.identity;
             transform.localScale = Vector3.one * Scale;
         }

@@ -26,6 +26,18 @@ namespace Diorama
         [Header("Timing (s)")]
         public float pauseBetweenMoves = 0.45f;
 
+        [Header("Step 16: battle spectacle")]
+        [Tooltip("Every move winds up this long first: crouch, squash, the element's glow building, a charge sound (s).")]
+        public float windUpSeconds = 0.25f;
+        [Tooltip("Every damaging hit holds the stage this long (hit-stop, s); super effective uses the larger of this and PolishConfig.hitStop.")]
+        public float hitStopSeconds = 0.06f;
+        [Tooltip("The projectile's flight (s) and its size (map metres).")]
+        public float shotSeconds = 0.35f, shotRadius = 0.011f;
+        [Tooltip("Idle on the pad: bob (share of the height), sway (degrees), a glance every few seconds.")]
+        public float idleBob = 0.03f, idleSway = 3f, glanceYaw = 14f;
+        [Tooltip("A lunge hops this high (share of the height) on its way in.")]
+        public float lungeHop = 0.35f;
+
         static readonly Color Gold = new Color(1f, 0.84f, 0.35f);
         static readonly Color Leaf = new Color(0.55f, 0.8f, 0.35f);
         static readonly Color Smoke = new Color(0.6f, 0.64f, 0.61f);
@@ -390,6 +402,8 @@ namespace Diorama
             fx.Release(ring);
             a.grow = 1f;
             a.View.Hop();
+            // Step 16: the wild one reacts to your Isling's arrival (a hop; a Keeper keeps its fury).
+            if (_wild != null && !_wildKeeper && PolishConfig.BattleFeelOn) _wild.View.Hop();
         }
 
         // ---- pods: recall, capture ----
@@ -630,15 +644,19 @@ namespace Diorama
                             fx.Burst(self.WorldCenter, 20, Smoke, World(0.03f), 0.7f, World(0.005f), Vector3.up * World(0.02f));
                             GameAudio.At(AudioIds.Faint, self.WorldCenter);
                             Cry(self, e.side == BattleSide.Player ? _playerCry : _wildCry, 0.8f);
+                            DropShieldOf(e.side, true);
                             if (dazed)
                             {
                                 self.View.Daze();
                                 StartCoroutine(DizzyStars(self));
                             }
+                            else if (PolishConfig.BattleFeelOn) yield return FaintSpin(self);
                             else self.View.Faint();
-                            DropShieldOf(e.side, true);
+                            // Step 16: the winner does a happy hop.
+                            var winner = Actor(e.side == BattleSide.Player ? BattleSide.Wild : BattleSide.Player);
+                            if (winner != null && PolishConfig.BattleFeelOn && !(winner == _wild && _wildKeeper)) winner.View.Hop();
                         }
-                        yield return Wait(0.8f);
+                        yield return Wait(dazed || !PolishConfig.BattleFeelOn ? 0.8f : 0.5f);
                         break;
                     case BattleEventKind.FleeFailed:
                         caption("Couldn't get away!");
@@ -667,6 +685,24 @@ namespace Diorama
                         break;
                 }
             }
+        }
+
+        /// <summary>Step 16: a little spin and flop with sparkles, then the faint pose (eyes shut, tipped over).</summary>
+        IEnumerator FaintSpin(StageActor a)
+        {
+            float yaw0 = a.yaw;
+            yield return Tween(0.4f, p =>
+            {
+                a.yaw = yaw0 + 360f * EaseInOut(p);
+                a.lift = Mathf.Sin(p * Mathf.PI) * a.Height * 0.25f;
+                if (Time.frameCount % 2 == 0) fx.Burst(a.WorldCenter, 2, Gold, World(0.02f), 0.5f, World(0.003f), Vector3.up * World(0.02f));
+            });
+            a.yaw = yaw0;
+            a.lift = 0f;
+            a.View.Faint();
+            fx.Burst(a.WorldCenter, 18, Gold, World(0.04f), 0.7f, World(0.0035f), Vector3.up * World(0.03f));
+            yield return Tween(0.2f, p => a.squash = new Vector3(1f + 0.15f * Mathf.Sin(p * Mathf.PI), 1f - 0.15f * Mathf.Sin(p * Mathf.PI), 1f + 0.15f * Mathf.Sin(p * Mathf.PI)));
+            a.squash = Vector3.one;
         }
 
         /// <summary>Three little gold stars circling a dazed creature's head while it stays dazed.</summary>
@@ -716,18 +752,168 @@ namespace Diorama
             var style = ElementStyle.Of(move.element);
             var userStyle = ElementStyle.Of(battle.Get(side).isling.Element);
             Action impact = () => { if (outcome.HasValue) Impact(outcome.Value, user, target, userStyle); };
+            int who = side == BattleSide.Player ? 0 : 1;
+            _acting[who] = true;
+            float started = Time.time;
+            try
+            {
+                bool feel = PolishConfig.BattleFeelOn;
+                // Step 16: a Keeper's signature flourish, then every move winds up (crouch, glow, charge sound).
+                if (feel && side == BattleSide.Wild && _wildKeeper) yield return Flourish(user, target, battle.Get(side).isling.Element, userStyle);
+                // A slam winds up shorter (its leap is a wind-up of its own): it stays within +25% of the old pace.
+                if (feel) yield return WindUp(user, move.kind == MoveKind.Support ? userStyle : style,
+                    move.kind != MoveKind.Support && move.animation == MoveAnimation.Slam ? windUpSeconds * 0.5f : windUpSeconds);
+                else GameAudio.At(AudioIds.MoveCharge, user.WorldCenter);
 
-            if (move.kind == MoveKind.Support)
-            {
-                GameAudio.At(AudioIds.MoveCharge, user.WorldCenter);
-                yield return Support(user, move, userStyle, impact);
-                yield break;
+                if (move.kind == MoveKind.Support)
+                {
+                    yield return Support(user, move, userStyle, impact);
+                    yield break;
+                }
+                switch (move.animation)
+                {
+                    case MoveAnimation.Lunge: yield return Lunge(user, target, impact); break;
+                    case MoveAnimation.Slam: yield return Slam(user, target, style, impact); break;
+                    default: yield return Shoot(user, target, move, style, impact); break;
+                }
             }
-            switch (move.animation)
+            finally
             {
-                case MoveAnimation.Lunge: yield return Lunge(user, target, impact); break;
-                case MoveAnimation.Slam: yield return Slam(user, target, style, impact); break;
-                default: yield return Shoot(user, target, move, style, impact); break;
+                _acting[who] = false;
+                LastMoveSeconds = Time.time - started;
+                Debug.Log($"[BattleStage] {move.Name} ({(move.kind == MoveKind.Support ? "support" : move.animation.ToString().ToLowerInvariant())}): {LastMoveSeconds:0.00} s (+ {pauseBetweenMoves:0.00} s pause).");
+            }
+        }
+
+        /// <summary>Step 16: seconds the last move took (wind-up to recover, without the pause after it).</summary>
+        public static float LastMoveSeconds { get; private set; }
+
+        readonly bool[] _acting = new bool[2];
+        readonly float[] _glanceAt = { 2f, 3.4f }, _glanceStart = { -9f, -9f };
+
+        /// <summary>Step 16: crouch and squash, the element's glow building on the body, motes drawn in, a charge sound.</summary>
+        IEnumerator WindUp(StageActor user, ElementStyle style, float seconds)
+        {
+            GameAudio.At(AudioIds.MoveCharge, user.WorldCenter);
+            yield return Tween(seconds, p =>
+            {
+                float k = EaseInOut(p);
+                user.squash = new Vector3(1f + 0.14f * k, 1f - 0.16f * k, 1f + 0.14f * k);
+                user.View.SetFlash(0.3f * k);
+                if (Time.frameCount % 2 == 0)
+                {
+                    Vector3 c = user.WorldCenter, r = UnityEngine.Random.onUnitSphere * World(0.035f);
+                    fx.Burst(c + r, 1, style.edge, World(0.003f), 0.22f, World(0.003f), -r * 4f);
+                }
+            });
+            user.View.SetFlash(0f);
+        }
+
+        /// <summary>
+        /// Step 16: a Keeper's signature before its move: Hearthstag's crown flares (fire), Galeowl's wing gust sweeps
+        /// the arena (wind), Tidemother's wave splashes across it (water).
+        /// </summary>
+        IEnumerator Flourish(StageActor user, StageActor target, Element element, ElementStyle style)
+        {
+            Vector3 top = island.transform.TransformPoint(user.LocalTop);
+            Vector3 up = island.transform.up;
+            switch (element)
+            {
+                case Element.Fire:
+                    GameAudio.At(AudioIds.MoveCharge, top);
+                    yield return Tween(0.3f, p =>
+                    {
+                        user.View.SetFlash(0.45f * Mathf.Sin(p * Mathf.PI));
+                        if (Time.frameCount % 2 == 0)
+                        {
+                            fx.Burst(top, 4, new Color(1f, 0.55f, 0.15f), World(0.03f), 0.6f, World(0.004f), up * World(0.08f));
+                            fx.Burst(top, 2, new Color(1f, 0.92f, 0.5f), World(0.04f), 0.4f, World(0.003f), up * World(0.05f));
+                        }
+                    });
+                    StartCoroutine(Pop(top, style.burst));
+                    break;
+                case Element.Wind:
+                {
+                    var ring = fx.Get(BattleFx.Shape.Ring);
+                    ring.Set(style.edge, style.edge, 1f);
+                    float dist = (target.tile - user.tile).magnitude + 1f;
+                    Vector2 dir = (target.tile - user.tile).normalized;
+                    yield return Tween(0.4f, p =>
+                    {
+                        float r = 0.2f + dist * 1.2f * EaseInOut(p);
+                        ring.transform.localPosition = island.TileToLocal(user.tile, Cap + 0.003f);
+                        ring.transform.localScale = Vector3.one * (r * TileSize * Zoom);
+                        ring.SetAlpha(0.9f * (1f - p));
+                        // The gust's leaves and grass bits sweep across the pads.
+                        Vector2 at = Vector2.Lerp(user.tile, target.tile, p) + new Vector2(-dir.y, dir.x) * UnityEngine.Random.Range(-1f, 1f);
+                        fx.Burst(WorldAt(at, 0.006f), 2, new Color(0.6f, 0.85f, 0.45f), World(0.01f), 0.5f, World(0.003f),
+                            island.transform.TransformDirection(new Vector3(dir.x, 0f, dir.y)) * World(0.25f) + up * World(0.03f));
+                    });
+                    fx.Release(ring);
+                    if (_playerPad != null) StartCoroutine(ShakePad(_playerPad, 0.2f, 0.0015f));
+                    break;
+                }
+                case Element.Water:
+                {
+                    var ring = fx.Get(BattleFx.Shape.Ring);
+                    ring.Set(style.edge, style.core, 1f);
+                    yield return Tween(0.45f, p =>
+                    {
+                        Vector2 at = Vector2.Lerp(user.tile, target.tile, EaseInOut(p));
+                        ring.transform.localPosition = island.TileToLocal(at, Cap + 0.004f);
+                        ring.transform.localScale = Vector3.one * (TileSize * Zoom * (0.6f + 0.6f * Mathf.Sin(p * Mathf.PI)));
+                        ring.SetAlpha(0.85f);
+                        if (Time.frameCount % 2 == 0)
+                            fx.Burst(WorldAt(at, 0.01f), 4, new Color(0.6f, 0.88f, 1f), World(0.04f), 0.5f, World(0.003f), up * World(0.06f), World(0.3f));
+                    });
+                    fx.Release(ring);
+                    StartCoroutine(Splash(island.transform.TransformPoint(island.TileToLocal(target.tile, Cap)), new Color(0.55f, 0.85f, 1f)));
+                    break;
+                }
+            }
+            user.View.SetFlash(0f);
+        }
+
+        IEnumerator ShakePad(BattlePad pad, float seconds, float amount)
+        {
+            for (float t = 0f; t < seconds && pad != null; t += Time.deltaTime)
+            {
+                float k = 1f - t / seconds;
+                pad.shake = new Vector3(UnityEngine.Random.Range(-1f, 1f), 0f, UnityEngine.Random.Range(-1f, 1f)) * (amount * k);
+                yield return null;
+            }
+            if (pad != null) pad.shake = Vector3.zero;
+        }
+
+        /// <summary>Step 16: alive on the pad: a bob, a little sway, a glance (eyes off the player, a small turn) and a blink every few seconds.</summary>
+        void Idle()
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                var a = i == 0 ? _player : _wild;
+                if (a == null || a.View == null) continue;
+                bool keeper = i == 1 && _wildKeeper;
+                bool still = PolishConfig.BattleFeelOn && !keeper && !_acting[i] && a.grow > 0.95f && !a.View.IsFainted && !a.View.IsDazed;
+                if (!still)
+                {
+                    a.idleLift = Mathf.MoveTowards(a.idleLift, 0f, Time.deltaTime * 0.05f);
+                    a.idleRoll = Mathf.MoveTowards(a.idleRoll, 0f, Time.deltaTime * 30f);
+                    a.idleYaw = Mathf.MoveTowards(a.idleYaw, 0f, Time.deltaTime * 60f);
+                    continue;
+                }
+                float t = Time.time + i * 1.7f;
+                a.idleLift = a.Height * idleBob * (0.5f + 0.5f * Mathf.Sin(t * Mathf.PI * 2f * 0.9f));
+                a.idleRoll = Mathf.Sin(t * Mathf.PI * 2f * 0.45f) * idleSway;
+                if (Time.time >= _glanceAt[i])
+                {
+                    _glanceStart[i] = Time.time;
+                    _glanceAt[i] = Time.time + 3f + UnityEngine.Random.value * 3f;
+                    a.View.BlinkNow();
+                }
+                float g = (Time.time - _glanceStart[i]) / 0.9f;
+                bool glancing = g >= 0f && g <= 1f;
+                a.View.lookAtPlayer = !glancing;
+                a.idleYaw = glancing ? Mathf.Sin(g * Mathf.PI) * glanceYaw * (i == 0 ? 1f : -1f) : 0f;
             }
         }
 
@@ -764,29 +950,39 @@ namespace Diorama
             hud.SetHp(bar, o.hpAfter);
             GameAudio.At(o.effectiveness == Effectiveness.Super ? AudioIds.HitSuper : o.effectiveness == Effectiveness.NotVery || o.blocked ? AudioIds.HitWeak : AudioIds.HitNormal,
                 target.WorldCenter);
-            hud.PopText(target.LocalTop + Vector3.up * 0.042f, $"-{o.amount}", Color.white);
+            // Step 16: the number in the move's element colour, a bit bigger.
+            hud.PopText(target.LocalTop + Vector3.up * 0.042f, $"-{o.amount}", DamageColor(o.move != null ? o.move.element : Element.Neutral), 1.2f);
             if (o.blocked) hud.PopText(target.LocalTop + Vector3.up * 0.075f, "Blocked!", new Color(1f, 0.7f, 0.3f), 0.75f, 1.4f);
             else if (o.effectiveness == Effectiveness.Super) hud.PopText(target.LocalTop + Vector3.up * 0.075f, "Super effective!", SuperColor, 0.65f, 1.4f);
             else if (o.effectiveness == Effectiveness.NotVery) hud.PopText(target.LocalTop + Vector3.up * 0.075f, "Not very effective", WeakColor, 0.65f, 1.4f);
             if (PolishConfig.BattleFeelOn)
             {
                 ElementHit(target, o.move != null ? o.move.element : Element.Neutral);
-                if (o.effectiveness == Effectiveness.Super && !o.blocked)
-                {
-                    _hitStopUntil = Time.time + PolishConfig.Get().hitStop;
-                    StartCoroutine(GoldFlash(target.WorldCenter));
-                }
+                // Step 16: every hit holds the stage a moment (hit-stop); super effective a little longer, with the gold flash.
+                bool super = o.effectiveness == Effectiveness.Super && !o.blocked;
+                _hitStopUntil = Time.time + (super ? Mathf.Max(hitStopSeconds, PolishConfig.Get().hitStop) : hitStopSeconds);
+                if (super) StartCoroutine(GoldFlash(target.WorldCenter));
             }
             if (o.shieldAbsorbed) DropShieldOf(o.side, true);
             StartCoroutine(Knockback(target, (target.tile - user.tile).normalized));
         }
+
+        /// <summary>Step 16: damage numbers in the element's colour (neutral stays white).</summary>
+        public static Color DamageColor(Element e) => e switch
+        {
+            Element.Fire => new Color(1f, 0.55f, 0.2f),
+            Element.Water => new Color(0.45f, 0.78f, 1f),
+            Element.Wind => new Color(0.5f, 0.92f, 0.7f),
+            _ => Color.white,
+        };
 
         IEnumerator Knockback(StageActor target, Vector2 dir)
         {
             float seed = UnityEngine.Random.value * 10f;
             yield return Tween(0.36f, p =>
             {
-                target.View.SetFlash((1f - p) * 0.85f);
+                // Step 16: a full white flash for the first 0.1 s, then it fades.
+                target.View.SetFlash(p < 0.28f ? 1f : (1f - p) * 0.85f);
                 float k = Mathf.Sin(p * Mathf.PI) * (1f - p) * 0.35f;
                 Vector2 side = new Vector2(-dir.y, dir.x) * (Mathf.Sin(p * 45f + seed) * 0.04f * (1f - p));
                 target.nudge = dir * k + side;
@@ -799,8 +995,13 @@ namespace Diorama
 
         IEnumerator Shoot(StageActor user, StageActor target, MoveData move, ElementStyle style, Action impact)
         {
-            GameAudio.At(AudioIds.MoveCharge, user.WorldCenter);
-            yield return Tween(0.26f, p => user.squash = new Vector3(1f + 0.12f * p, 1f - 0.12f * p, 1f + 0.12f * p));
+            bool feel = PolishConfig.BattleFeelOn;
+            if (!feel)
+            {
+                GameAudio.At(AudioIds.MoveCharge, user.WorldCenter);
+                yield return Tween(0.26f, p => user.squash = new Vector3(1f + 0.12f * p, 1f - 0.12f * p, 1f + 0.12f * p));
+            }
+            else yield return Tween(0.06f, p => user.squash = Vector3.Lerp(new Vector3(1.14f, 0.84f, 1.14f), new Vector3(0.92f, 1.12f, 0.92f), p));
             user.squash = Vector3.one;
             GameAudio.At(ElementCue("move.shoot.", move.element), user.WorldCenter);
             Vector2 dir = (target.tile - user.tile).normalized;
@@ -808,19 +1009,59 @@ namespace Diorama
             float h0 = user.CenterHeight, h1 = target.CenterHeight;
             var orb = fx.Get(BattleFx.Shape.Orb);
             orb.Set(style.core, style.edge, 1f, 1f, 1f, move.element == Element.Water ? 0.12f : 0.35f);
-            const float radius = 0.007f; // map metres
-            yield return Tween(0.42f, p =>
+            // Step 16: bigger and readable, ~0.35 s with a slight arc; each element moves its own way.
+            float radius = feel ? shotRadius : 0.007f; // map metres
+            float flight = feel ? shotSeconds : 0.42f;
+            var element = move.element;
+            float spin = 0f;
+            yield return Tween(flight, p =>
             {
                 Vector2 t = Vector2.Lerp(from, to, p);
-                float h = Mathf.Lerp(h0, h1, p) + (move.arc ? Mathf.Sin(p * Mathf.PI) * 0.03f : 0f);
+                float arc = move.arc ? 0.03f : feel ? 0.015f : 0f;
+                float h = Mathf.Lerp(h0, h1, p) + Mathf.Sin(p * Mathf.PI) * arc;
                 orb.transform.localPosition = island.TileToLocal(t, Cap + h);
-                orb.transform.localScale = Vector3.one * (radius * Zoom * (1f + Mathf.Sin(Time.time * 30f) * 0.08f));
-                fx.Burst(island.transform.TransformPoint(orb.transform.localPosition), 2, style.trail, World(0.012f), 0.3f, World(0.003f));
+                Vector3 size = Vector3.one * (radius * Zoom * (1f + Mathf.Sin(Time.time * 30f) * 0.08f));
+                Vector3 world = island.transform.TransformPoint(orb.transform.localPosition);
+                if (feel && element == Element.Water)
+                {
+                    // A wobbling bubble.
+                    float w = Mathf.Sin(Time.time * 22f) * 0.16f;
+                    size = Vector3.Scale(size, new Vector3(1f + w, 1f - w, 1f + w));
+                }
+                orb.transform.localScale = size;
+                if (!feel)
+                {
+                    fx.Burst(world, 2, style.trail, World(0.012f), 0.3f, World(0.003f));
+                    return;
+                }
+                switch (element)
+                {
+                    case Element.Fire:
+                        // An ember ball with a rising trail.
+                        fx.Burst(world, 3, style.trail, World(0.012f), 0.4f, World(0.004f), Vector3.up * World(0.03f));
+                        break;
+                    case Element.Wind:
+                    {
+                        // A spinning crescent: two motes circling the orb.
+                        spin += Time.deltaTime * 25f;
+                        Vector3 r = island.transform.rotation * new Vector3(Mathf.Cos(spin), Mathf.Sin(spin), 0f) * World(radius * 1.6f);
+                        fx.Burst(world + r, 1, style.core, World(0.002f), 0.25f, World(0.003f));
+                        fx.Burst(world - r, 1, style.edge, World(0.002f), 0.25f, World(0.003f));
+                        break;
+                    }
+                    case Element.Water:
+                        fx.Burst(world, 2, style.trail, World(0.01f), 0.35f, World(0.0035f), Vector3.zero, World(0.2f));
+                        break;
+                    default:
+                        // A star pellet: sparkles.
+                        fx.Burst(world, 2, new Color(1f, 0.95f, 0.75f), World(0.02f), 0.3f, World(0.003f));
+                        break;
+                }
             });
             fx.Release(orb);
             Vector3 hitAt = target.WorldCenter;
             GameAudio.At(ElementCue("move.impact.", move.element), hitAt);
-            fx.Burst(hitAt, 34, style.burst, World(0.08f), 0.5f, World(0.004f), Vector3.up * World(0.02f));
+            fx.Burst(hitAt, feel ? 51 : 34, style.burst, World(feel ? 0.12f : 0.08f), 0.5f, World(0.004f), Vector3.up * World(0.02f));
             StartCoroutine(Pop(hitAt, style.burst));
             impact();
             yield return Wait(0.25f);
@@ -829,19 +1070,33 @@ namespace Diorama
         IEnumerator Lunge(StageActor user, StageActor target, Action impact)
         {
             Vector2 d = target.tile - user.tile;
-            yield return Tween(0.14f, p => user.squash = new Vector3(1f + 0.12f * p, 1f - 0.12f * p, 1f + 0.12f * p));
+            bool feel = PolishConfig.BattleFeelOn;
+            if (!feel) yield return Tween(0.14f, p => user.squash = new Vector3(1f + 0.12f * p, 1f - 0.12f * p, 1f + 0.12f * p));
             GameAudio.At(AudioIds.MoveLunge, user.WorldCenter);
+            float hop = feel ? user.Height * lungeHop : 0f;
             yield return Tween(0.15f, p =>
             {
                 float q = EaseInOut(p);
                 user.nudge = d * (0.6f * q);
+                // Step 16: a real hop toward the target, stretched along the way.
+                user.lift = Mathf.Sin(q * Mathf.PI * 0.85f) * hop;
                 user.squash = new Vector3(1.12f - 0.2f * q, 0.88f + 0.2f * q, 1.12f - 0.2f * q);
             });
-            user.squash = Vector3.one;
-            fx.Burst(target.WorldCenter, 16, Color.white, World(0.07f), 0.3f, World(0.0035f));
+            // Contact: squashed against it.
+            user.squash = feel ? new Vector3(1.15f, 0.85f, 1.15f) : Vector3.one;
+            fx.Burst(target.WorldCenter, feel ? 24 : 16, Color.white, World(feel ? 0.1f : 0.07f), 0.3f, World(0.0035f));
             impact();
-            yield return Tween(0.26f, p => user.nudge = d * (0.6f * (1f - EaseInOut(p))));
+            // Bounce back with a little hop.
+            yield return Tween(feel ? 0.24f : 0.26f, p =>
+            {
+                float q = EaseInOut(p);
+                user.nudge = d * (0.6f * (1f - q));
+                user.lift = Mathf.Sin(q * Mathf.PI) * hop * 0.4f;
+                user.squash = Vector3.Lerp(user.squash, Vector3.one, p);
+            });
             user.nudge = Vector2.zero;
+            user.lift = 0f;
+            user.squash = Vector3.one;
         }
 
         IEnumerator Slam(StageActor user, StageActor target, ElementStyle style, Action impact)
@@ -857,6 +1112,13 @@ namespace Diorama
             }, () => user.squash = Vector3.one));
             GameAudio.At(AudioIds.MoveSlam, WorldAt(user.tile, 0.004f));
             fx.Burst(WorldAt(user.tile, 0.004f), 24, style.burst, World(0.06f), 0.45f, World(0.004f), Vector3.up * World(0.03f));
+            if (PolishConfig.BattleFeelOn)
+            {
+                // Step 16: dust and the pads shake.
+                fx.Burst(WorldAt(user.tile, 0.004f), 18, new Color(0.72f, 0.66f, 0.58f), World(0.05f), 0.7f, World(0.005f), Vector3.up * World(0.01f));
+                if (_playerPad != null) StartCoroutine(ShakePad(_playerPad, 0.25f, 0.002f));
+                if (_wildPad != null) StartCoroutine(ShakePad(_wildPad, 0.25f, 0.002f));
+            }
             var ring = fx.Get(BattleFx.Shape.Ring);
             ring.Set(style.edge, style.edge, 1f);
             float dist = (target.tile - user.tile).magnitude;
@@ -884,7 +1146,7 @@ namespace Diorama
                 case SupportEffect.Shield:
                     impact(); // raises the bubble
                     fx.Burst(user.WorldCenter, 22, style.shield, World(0.04f), 0.45f, World(0.004f));
-                    yield return Wait(0.5f);
+                    yield return Wait(PolishConfig.BattleFeelOn ? 0.45f : 0.5f);
                     break;
                 case SupportEffect.RaiseAttack:
                     yield return Tween(0.4f, p =>
@@ -991,6 +1253,7 @@ namespace Diorama
         void LateUpdate()
         {
             LowHp();
+            Idle();
             // Step 14j: re-fit while both stand on their pads (the battle zoom and the head move after the spawn fit).
             if (_player != null && _wild != null && _player.grow > 0.9f && _wild.grow > 0.9f && Time.time >= _refitAt)
             {
@@ -1006,7 +1269,9 @@ namespace Diorama
         {
             shield.transform.localPosition = user.LocalCenter;
             float target = user.Height * 0.72f * Zoom;
-            if (shield.transform.localScale.x > target * 0.98f) shield.transform.localScale = Vector3.one * target;
+            // Step 16: the bubble pulses softly while it stands.
+            if (PolishConfig.BattleFeelOn) target *= 1f + 0.04f * Mathf.Sin(Time.time * 4f);
+            if (shield.transform.localScale.x > target * 0.9f) shield.transform.localScale = Vector3.one * target;
         }
 
         // ---- growth: XP, level-ups, evolution ----

@@ -60,5 +60,22 @@ namespace Diorama.Tests
             var t = script.triggers.Find(x => x.id == "menu.first");
             StringAssert.Contains("Poke the stone on the rim", t.lines[0].text);
         }
+    
+        [Test]
+        public void HpGhost_Holds_ThenDrains_NeverBelowTheBar()
+        {
+            Assert.AreEqual(80f, BattleHud.NextGhost(80f, 40f, 1f, 1.4f, 30f, 0.1f), 1e-4f, "held");
+            Assert.AreEqual(77f, BattleHud.NextGhost(80f, 40f, 2f, 1.4f, 30f, 0.1f), 1e-4f, "draining");
+            Assert.AreEqual(40f, BattleHud.NextGhost(41f, 40f, 2f, 1.4f, 30f, 0.1f), 1e-4f, "stops at the bar");
+            Assert.AreEqual(-1f, BattleHud.NextGhost(-1f, 40f, 2f, 1.4f, 30f, 0.1f), 1e-4f, "none");
+        }
+
+        [Test]
+        public void DamageNumbers_InTheElementColour()
+        {
+            Assert.AreEqual(Color.white, BattleStage.DamageColor(Element.Neutral));
+            Assert.Greater(BattleStage.DamageColor(Element.Fire).r, BattleStage.DamageColor(Element.Fire).b);
+            Assert.Greater(BattleStage.DamageColor(Element.Water).b, BattleStage.DamageColor(Element.Water).r);
+        }
     }
 }

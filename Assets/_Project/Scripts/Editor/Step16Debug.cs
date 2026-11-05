@@ -37,6 +37,46 @@ namespace Diorama.EditorTools
             Debug.Log($"[Step16Debug] Shot {name}.png.");
         }
 
+        /// <summary>
+        /// A frame sequence from a seated head toward the battle (arg "prefix,count,interval s"): Logs/BattleShots/prefix_n.png.
+        /// </summary>
+        public static void Frames()
+        {
+            var a = Arg.Split(',');
+            string prefix = a[0];
+            int count = a.Length > 1 && int.TryParse(a[1], out int c) ? c : 6;
+            float every = a.Length > 2 && float.TryParse(a[2], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float e) ? e : 0.15f;
+            int n = 0;
+            double next = EditorApplication.timeSinceStartup;
+            EditorApplication.CallbackFunction tick = null;
+            tick = () =>
+            {
+                if (!EditorApplication.isPlaying || n >= count)
+                {
+                    EditorApplication.update -= tick;
+                    return;
+                }
+                if (EditorApplication.timeSinceStartup < next) return;
+                next += every;
+                n++;
+                var island = Island;
+                if (island == null) return;
+                var t = island.transform;
+                Vector3 look = t.TransformPoint(new Vector3(0f, island.CapTopLocal + 0.05f, 0f));
+                var actors = Object.FindObjectsByType<StageActor>(FindObjectsSortMode.None);
+                if (actors.Length > 0)
+                {
+                    Vector3 sum = Vector3.zero;
+                    foreach (var s in actors) sum += s.WorldCenter;
+                    look = sum / actors.Length;
+                }
+                var eye = t.position + t.rotation * new Vector3(0.05f, 0.45f, 0.5f);
+                BattleDebug.Render($"Logs/BattleShots/{prefix}_{n}.png", eye, Quaternion.LookRotation(look - eye, Vector3.up));
+            };
+            EditorApplication.update += tick;
+            Debug.Log($"[Step16Debug] Frames {prefix}: {count} every {every:0.00} s.");
+        }
+
         public static void Palm()
         {
             var g = Object.FindFirstObjectByType<GhostHands>();

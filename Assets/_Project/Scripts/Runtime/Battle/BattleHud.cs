@@ -55,6 +55,8 @@ namespace Diorama
             public TextMeshPro label;
             public StageActor actor;
             public float shown, target;
+            /// <summary>Step 16: the lagging "ghost" segment (HP), held a moment after a hit, then drains to shown.</summary>
+            public float ghost = -1f, ghostHoldUntil;
             public int max;
             public MeshRenderer xpQuad;
             public float xp = -1f; // 0..1, -1 = no XP bar
@@ -80,6 +82,7 @@ namespace Diorama
 
         static readonly int FillId = Shader.PropertyToID("_Fill");
         static readonly int FillColorId = Shader.PropertyToID("_FillColor");
+        static readonly int GhostId = Shader.PropertyToID("_Ghost"), GhostColorId = Shader.PropertyToID("_GhostColor");
         static readonly int AspectId = Shader.PropertyToID("_Aspect");
         static readonly Color Green = new Color(0.44f, 0.82f, 0.42f), Yellow = new Color(0.95f, 0.79f, 0.3f), Red = new Color(0.94f, 0.36f, 0.29f);
         static readonly Color XpGold = new Color(1f, 0.8f, 0.3f);
@@ -215,8 +218,28 @@ namespace Diorama
         /// <summary>The bar slides to the new value.</summary>
         public void SetHp(Bar bar, int hp)
         {
-            if (bar != null) bar.target = Mathf.Clamp(hp, 0, bar.max);
+            if (bar == null) return;
+            int t = Mathf.Clamp(hp, 0, bar.max);
+            // Step 16: a drop leaves a pale segment that lingers, then follows.
+            if (t < bar.target)
+            {
+                bar.ghost = Mathf.Max(bar.ghost, bar.shown);
+                bar.ghostHoldUntil = Time.time + ghostHold;
+            }
+            bar.target = t;
         }
+
+        [Header("Step 16: HP bars")]
+        [Tooltip("The lagging segment waits this long after a hit (s), then drains at ghostDrain x max per second.")]
+        public float ghostHold = 0.4f;
+        public float ghostDrain = 0.6f;
+        [Tooltip("Below this share the fill pulses red softly.")]
+        public float lowShare = 0.25f;
+        public Color ghostColor = new Color(1f, 0.93f, 0.75f, 0.85f);
+
+        /// <summary>Step 16: the ghost segment's next value (pure): holds, then drains toward shown, never below it.</summary>
+        public static float NextGhost(float ghost, float shown, float now, float holdUntil, float rate, float dt) =>
+            ghost < 0f ? -1f : now < holdUntil ? Mathf.Max(ghost, shown) : Mathf.Max(shown, ghost - rate * dt);
 
         public void Clear()
         {
@@ -248,11 +271,21 @@ namespace Diorama
                 if (b.root == null || b.actor == null) continue;
                 Place(b, cam);
                 Face(b.root, cam);
+                bool paint = false;
                 if (!Mathf.Approximately(b.shown, b.target))
                 {
-                    b.shown = Mathf.MoveTowards(b.shown, b.target, Time.deltaTime * b.max * 1.4f);
-                    Paint(b);
+                    // Step 16: drains smoothly (eased: fast first, settling), not at a flat rate.
+                    b.shown = Mathf.MoveTowards(b.shown, b.target, Time.deltaTime * Mathf.Max(b.max * 0.5f, Mathf.Abs(b.target - b.shown) * 4f));
+                    paint = true;
                 }
+                if (b.ghost >= 0f)
+                {
+                    b.ghost = NextGhost(b.ghost, b.shown, Time.time, b.ghostHoldUntil, ghostDrain * b.max, Time.deltaTime);
+                    if (b.ghost <= b.shown + 0.01f) b.ghost = -1f;
+                    paint = true;
+                }
+                if (b.shown / Mathf.Max(1, b.max) < lowShare && b.shown > 0f) paint = true;
+                if (paint) Paint(b);
             }
             for (int i = _pops.Count - 1; i >= 0; i--)
             {
@@ -432,7 +465,12 @@ namespace Diorama
             b.quad.GetPropertyBlock(_block);
             _block.SetFloat(FillId, f);
             _block.SetFloat(AspectId, barSize.x / barSize.y);
-            _block.SetColor(FillColorId, f > 0.5f ? Green : f > 0.25f ? Yellow : Red);
+            Color fillColor = f > 0.5f ? Green : f > lowShare ? Yellow : Red;
+            // Step 16: low HP pulses red softly.
+            if (f <= lowShare && f > 0f) fillColor = Color.Lerp(Red, new Color(1f, 0.62f, 0.55f), 0.5f + 0.5f * Mathf.Sin(Time.time * 6f));
+            _block.SetColor(FillColorId, fillColor);
+            _block.SetFloat(GhostId, b.ghost >= 0f ? b.ghost / b.max : 0f);
+            _block.SetColor(GhostColorId, ghostColor);
             b.quad.SetPropertyBlock(_block);
         }
 

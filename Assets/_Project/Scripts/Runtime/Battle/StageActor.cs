@@ -32,6 +32,8 @@ namespace Diorama
         [Tooltip("Step 14h: battle pads only, the readable-battle size factor (PadFit); it eases toward fitTarget.")]
         public float fit = 1f;
         public float fitTarget = 1f;
+        [Tooltip("Step 16: the idle life on the pad (bob in map metres, sway roll and glance yaw in degrees), set every frame by the stage.")]
+        public float idleLift, idleRoll, idleYaw;
 
         public CreatureView View { get; private set; }
 
@@ -106,8 +108,8 @@ namespace Diorama
         public void Snap()
         {
             if (island == null || island.Content == null) return;
-            transform.localPosition = island.TileToLocal(tile + nudge + shake, island.Content.capHeight + baseLift + lift);
-            transform.localRotation = Quaternion.Euler(0f, yaw, 0f) * Quaternion.Euler(pitch, 0f, shakeRoll);
+            transform.localPosition = island.TileToLocal(tile + nudge + shake, island.Content.capHeight + baseLift + lift + idleLift);
+            transform.localRotation = Quaternion.Euler(0f, yaw + idleYaw, 0f) * Quaternion.Euler(pitch, 0f, shakeRoll + idleRoll);
             transform.localScale = squash * (island.Zoom * Mathf.Max(0.0001f, grow * fit));
         }
 
