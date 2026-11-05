@@ -254,12 +254,14 @@ namespace Diorama
         {
             if (runes == null) return;
             runes.Clear();
-            var size = new Vector2(0.1f, 0.04f);
-            var keep = runes.Add(EndRunes[0], new Vector2(-0.11f, 0f), size, KeepExploring);
+            // Step 16 (judges: tiny runes above the statue): the title's tablet size and gap, in front of the statue.
+            var size = EndRuneSize;
+            float step = size.x + EndRuneGap;
+            var keep = runes.Add(EndRunes[0], new Vector2(-step, 0f), size, KeepExploring);
             runes.Add(EndRunes[1], new Vector2(0f, 0f), size, SeeTheEnding);
-            runes.Add(EndRunes[2], new Vector2(0.11f, 0f), size, ToTitle);
+            runes.Add(EndRunes[2], new Vector2(step, 0f), size, ToTitle);
             runes.DefaultFocus = keep;
-            runes.Anchor = OverStatue;
+            runes.Anchor = InFrontOfStatue;
             var at = OverStatue();
             if (at.HasValue)
             {
@@ -268,7 +270,28 @@ namespace Diorama
             }
             runes.Show(0.18f);
             Dialogue.SetFocal("end card", true);
-            Debug.Log("[QuickJourney] End card over the " + (at.HasValue ? "statue" : "near rim (no statue in view)") + ": " + string.Join(" / ", EndRunes) + ".");
+            Debug.Log("[QuickJourney] End card in front of the " + (at.HasValue ? "statue" : "near rim (no statue in view)") + ": " + string.Join(" / ", EndRunes) + ".");
+        }
+
+        /// <summary>Step 16: the end card's tablets: the title screen's wide size, 2.4 cm apart (the menu's gap).</summary>
+        public static readonly Vector2 EndRuneSize = new Vector2(0.1f, 0.042f);
+        public const float EndRuneGap = 0.024f;
+
+        [Tooltip("Step 16: the end card floats this far from the statue toward the near rim (share) and this high over the cap (island-local m).")]
+        [Range(0f, 1f)] public float endTowardPlayer = 0.55f;
+        public float endAboveCap = 0.07f;
+
+        /// <summary>Step 16: between the statue and the near rim, low enough to read; null = the near rim (no statue in view).</summary>
+        Vector3? InFrontOfStatue()
+        {
+            if (island == null || island.world != hub || StatueSocket.HeartVoice == null) return null;
+            var t = island.transform;
+            Vector3 statue = t.InverseTransformPoint(StatueSocket.HeartVoice.position);
+            var b = island.LocalBounds;
+            Vector3 nearRim = new Vector3(b.center.x, island.CapTopLocal, b.max.z);
+            Vector3 p = Vector3.Lerp(new Vector3(statue.x, island.CapTopLocal, statue.z), nearRim, endTowardPlayer);
+            p.y = island.CapTopLocal + endAboveCap;
+            return t.TransformPoint(p);
         }
 
         float TileWorld => island != null && island.map != null ? island.map.tileSize * island.transform.lossyScale.x : 0.05f;

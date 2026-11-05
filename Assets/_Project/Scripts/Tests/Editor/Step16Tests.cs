@@ -118,5 +118,22 @@ namespace Diorama.Tests
             StringAssert.Contains("twoHandsTimedOut", l.doneWhen);
             Assert.IsTrue(System.Array.IndexOf(Onboarding.Events, "twoHandsTimedOut") >= 0);
         }
+    
+        [Test]
+        public void EndCard_UsesTheTitleTabletSize_AndTheMenuGap()
+        {
+            Assert.GreaterOrEqual(QuickJourneyDirector.EndRuneSize.x, 0.1f);
+            Assert.GreaterOrEqual(QuickJourneyDirector.EndRuneSize.y, 0.042f);
+            Assert.GreaterOrEqual(QuickJourneyDirector.EndRuneGap, 0.024f);
+        }
+
+        [Test]
+        public void BattleCaption_PillHugsTheText()
+        {
+            var p = BattleRunes.PillSize(new Vector2(0.2f, 0.03f), 0.144f);
+            Assert.Greater(p.x, 0.2f);
+            Assert.Greater(p.y, 0.03f);
+            Assert.Less(p.x, 0.26f);
+        }
     }
 }

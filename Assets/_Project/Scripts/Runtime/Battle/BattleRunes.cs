@@ -39,6 +39,10 @@ namespace Diorama
         public float runeStep = 0.097f;
         public float fontSize = 0.11f;
         public float captionFontSize = 0.12f;
+        [Tooltip("Step 16: the battle line sits on a dark rounded pill, cream text, this much larger than captionFontSize.")]
+        public float captionScale = 1.2f;
+        public Color captionText = new Color(1f, 0.95f, 0.84f);
+        public Color captionPill = new Color(0.13f, 0.1f, 0.08f, 0.86f);
 
         [Header("Facing")]
         [Tooltip("Step 14i: the row faces the head at battle start, then stays; it faces it again only when the head has been " +
@@ -90,6 +94,7 @@ namespace Diorama
         readonly Rune[] _runes = new Rune[Count];
         Transform _row;
         TextMeshPro _caption;
+        MeshRenderer _captionPill;
         MeshRenderer _reticle;
         Mesh _quad;
         MaterialPropertyBlock _block;
@@ -174,8 +179,19 @@ namespace Diorama
                 BuildPoke(rune, i, PlateSize(i));
                 _runes[i] = rune;
             }
-            _caption = MakeText(_row, captionFontSize);
-            _caption.transform.localPosition = new Vector3(0f, runeSize.y * 0.5f + 0.018f, 0f);
+            _caption = MakeText(_row, captionFontSize * captionScale);
+            _caption.transform.localPosition = new Vector3(0f, runeSize.y * 0.5f + 0.02f, 0f);
+            _caption.color = captionText;
+            _caption.outlineWidth = 0.08f;
+            // Step 16: a dark rounded pill behind the line (it was white text on the busy island).
+            var pillGo = new GameObject("Caption Pill");
+            pillGo.transform.SetParent(_row, false);
+            pillGo.transform.localPosition = _caption.transform.localPosition + new Vector3(0f, 0f, 0.0008f);
+            pillGo.AddComponent<MeshFilter>().sharedMesh = _quad;
+            _captionPill = pillGo.AddComponent<MeshRenderer>();
+            _captionPill.sharedMaterial = hudMaterial;
+            _captionPill.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            pillGo.SetActive(false);
 
             var reticleGo = new GameObject("Gaze Reticle");
             reticleGo.transform.SetParent(_row, false);
@@ -404,7 +420,31 @@ namespace Diorama
         public void SetCaption(string text)
         {
             if (_caption != null) _caption.text = text;
+            FitPill(text);
         }
+
+        /// <summary>Step 16: the pill hugs the line (a little padding), hidden with no text.</summary>
+        void FitPill(string text)
+        {
+            if (_captionPill == null || _caption == null) return;
+            bool on = !string.IsNullOrEmpty(text);
+            _captionPill.gameObject.SetActive(on);
+            if (!on) return;
+            Vector2 size = _caption.GetPreferredValues(text, 10f, 10f);
+            var pill = PillSize(size, captionFontSize * captionScale);
+            _captionPill.transform.localScale = new Vector3(pill.x, pill.y, 1f);
+            var block = new MaterialPropertyBlock();
+            block.SetColor(BackColorId, captionPill);
+            block.SetColor(BorderColorId, new Color(1f, 0.85f, 0.5f, 0.35f));
+            block.SetFloat(BorderId, 0.05f);
+            block.SetFloat(FillId, 0f);
+            block.SetFloat(AspectId, pill.x / Mathf.Max(1e-4f, pill.y));
+            block.SetFloat(RadiusId, 0.5f);
+            _captionPill.SetPropertyBlock(block);
+        }
+
+        /// <summary>Step 16: the caption pill's size for a text size (padding grows with the font).</summary>
+        public static Vector2 PillSize(Vector2 text, float font) => new Vector2(text.x + font * 0.18f, text.y + font * 0.08f);
 
         void Update()
         {
