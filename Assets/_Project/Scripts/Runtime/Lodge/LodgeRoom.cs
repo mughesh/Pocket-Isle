@@ -222,8 +222,51 @@ namespace Diorama
             if (_doorRing != null) _doorRing.gameObject.SetActive(false);
         }
 
+        [Header("Step 16: the hearth's warm glow on the floor")]
+        [Tooltip("Map tile of the glow's middle (in front of the hearth), its size (tiles) and strength.")]
+        public Vector2 hearthGlowTile = new Vector2(3.5f, 1.1f);
+        public float hearthGlowTiles = 2.6f, hearthGlowIntensity = 0.35f;
+        MeshRenderer _hearthGlow;
+        MaterialPropertyBlock _glowBlock;
+
+        /// <summary>Step 16: a warm flickering glow ring on the floor in front of the hearth while the lodge shows (one quad).</summary>
+        void HearthGlow()
+        {
+            bool on = Active && IslandUnderGlow.Beacon != null && island != null && island.map != null;
+            if (!on)
+            {
+                if (_hearthGlow != null && _hearthGlow.enabled) _hearthGlow.enabled = false;
+                return;
+            }
+            if (_hearthGlow == null)
+            {
+                var go = new GameObject("Lodge Hearth Glow");
+                go.layer = island.gameObject.layer;
+                go.transform.SetParent(island.transform, false);
+                go.AddComponent<MeshFilter>().sharedMesh = BattleHud.VerticalQuad();
+                _hearthGlow = go.AddComponent<MeshRenderer>();
+                _hearthGlow.sharedMaterial = IslandUnderGlow.Beacon;
+                _hearthGlow.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                _glowBlock = new MaterialPropertyBlock();
+            }
+            _hearthGlow.enabled = true;
+            var t = _hearthGlow.transform;
+            t.localPosition = island.TileToLocal(hearthGlowTile, lodge.capHeight + 0.002f);
+            t.localRotation = Quaternion.LookRotation(Vector3.down, Vector3.forward);
+            t.localScale = Vector3.one * (hearthGlowTiles * lodge.tileSize * island.Zoom);
+            float flicker = 0.85f + 0.1f * Mathf.Sin(Time.time * 7.3f) + 0.05f * Mathf.Sin(Time.time * 13.1f);
+            _glowBlock.Clear();
+            _glowBlock.SetFloat("_Mode", 1f);
+            _glowBlock.SetFloat("_Fill", 1f);
+            _glowBlock.SetColor("_Color", new Color(1f, 0.5f, 0.18f, 1f));
+            _glowBlock.SetColor("_Core", new Color(1f, 0.82f, 0.5f, 1f));
+            _glowBlock.SetFloat("_Intensity", hearthGlowIntensity * flicker);
+            _hearthGlow.SetPropertyBlock(_glowBlock);
+        }
+
         void Update()
         {
+            HearthGlow();
             if (_card == null) return;
             _card.Tick();
             if (!Active) return;

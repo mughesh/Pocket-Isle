@@ -33,24 +33,44 @@ MonoBehaviour:
     motion: 0
     motionAmount: 0
     budgetWeight: 0
+  - shape: {fileID: 11400000, guid: ace5bd6c69055974a8179ab86687c486, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 3
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 0
+  - shape: {fileID: 11400000, guid: abd0da116bb5df9438a0815207c1f308, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 5
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 0
   palette:
-  - restored: {r: 0.906353, g: 0.77309567, b: 0.61279535, a: 1}
-    unrestored: {r: 0.84705883, g: 0.74509805, b: 0.5882353, a: 1}
+  - restored: {r: 0.9525099, g: 0.83837825, b: 0.68119144, a: 1}
+    unrestored: {r: 0.8901961, g: 0.8039216, b: 0.6509804, a: 1}
     glow: 0
   - restored: {r: 0.5119216, g: 0.35215506, b: 0.20946825, a: 1}
     unrestored: {r: 0.47843137, g: 0.32156864, b: 0.21176471, a: 1}
     glow: 0
-  - restored: {r: 0.7720785, g: 0.7007351, b: 0.6208519, a: 1}
-    unrestored: {r: 0.72156864, g: 0.6666667, b: 0.5882353, a: 1}
+  - restored: {r: 0.7720785, g: 0.60202265, b: 0.44293812, a: 1}
+    unrestored: {r: 0.72156864, g: 0.5568628, b: 0.43137255, a: 1}
     glow: 0
-  - restored: {r: 0.45587876, g: 0.5119216, b: 0.3340079, a: 1}
-    unrestored: {r: 0.41960785, g: 0.47843137, b: 0.32156864, a: 1}
+  - restored: {r: 0.6059457, g: 0.68396086, b: 0.50159925, a: 1}
+    unrestored: {r: 0.56078434, g: 0.6392157, b: 0.47843137, a: 1}
     glow: 0
   - restored: {r: 1, g: 0.62646437, b: 0.24760789, a: 1}
     unrestored: {r: 1, g: 0.6901961, b: 0.2901961, a: 1}
     glow: 1.2
-  - restored: {r: 0.66298044, g: 0.25253344, b: 0.16482195, a: 1}
-    unrestored: {r: 0.61960787, g: 0.23137255, b: 0.18039216, a: 1}
+  - restored: {r: 0.80564713, g: 0.4133473, b: 0.22742745, a: 1}
+    unrestored: {r: 0.7529412, g: 0.3764706, b: 0.24313726, a: 1}
     glow: 0
   tips:
     on: 0
@@ -66,5 +86,5 @@ MonoBehaviour:
   yawJitter: 0
   scaleJitter: 0
   resolution: 40
-  triangleBudget: 600
+  triangleBudget: 1700
   bakedMesh: {fileID: 4300000, guid: b409d892a1a12fc498d181e9e4a4dffc, type: 2}

@@ -61,6 +61,10 @@ namespace Diorama
         [Tooltip("Step 14k: the band lies this far above the cap top (island-local m).")]
         public float bandLift = 0.004f;
         public Color color = new Color(0.95f, 0.97f, 1f);
+        [Tooltip("Step 16: not hovered, the line is warm and translucent (the bright white read as a UI frame).")]
+        public Color restColor = new Color(1f, 0.86f, 0.66f);
+        [Range(0f, 1f)] public float restAlpha = 0.6f;
+        float _soft = 1f;
         [Tooltip("Held: the frame tints toward this.")]
         public Color grabbedColor = new Color(1f, 0.78f, 0.3f);
         [Range(0f, 1f)] public float grabbedTint = 0.85f;
@@ -196,7 +200,9 @@ namespace Diorama
             float heldAll = Mathf.Max(_hands[0].held, _hands[1].held);
             float hoverAll = Mathf.Max(_hands[0].hover, _hands[1].hover);
             float w = Mathf.Lerp(Mathf.Lerp(width.x, width.y, hoverAll), width.z, heldAll);
-            Color tint = Color.Lerp(color, grabbedColor, grabbedTint * heldAll);
+            float engaged = Mathf.Max(hoverAll, heldAll);
+            _soft = Mathf.Lerp(restAlpha, 1f, engaged);
+            Color tint = Color.Lerp(Color.Lerp(restColor, color, engaged), grabbedColor, grabbedTint * heldAll);
 
             _verts.Clear();
             _colors.Clear();
@@ -242,7 +248,7 @@ namespace Diorama
                 // Only the handles light (the corner brackets; the lip line is all handle).
                 if (mask != null && !mask[i]) level = 0f;
                 if (closed) _levels.Add(level);
-                var c = new Color(tint.r, tint.g, tint.b, level);
+                var c = new Color(tint.r, tint.g, tint.b, level * _soft);
                 _verts.Add(p - side);
                 _verts.Add(p + side);
                 _colors.Add(c);
@@ -284,7 +290,7 @@ namespace Diorama
                 Vector3 q = p + inward * depth;
                 q.x = Mathf.Clamp(q.x, -ix, ix);
                 q.z = Mathf.Clamp(q.z, -iz, iz);
-                var c = new Color(tint.r, tint.g, tint.b, _levels[i] * bandLevel);
+                var c = new Color(tint.r, tint.g, tint.b, _levels[i] * bandLevel * _soft);
                 _verts.Add(t.TransformPoint(p));
                 _verts.Add(t.TransformPoint(q));
                 _colors.Add(c);

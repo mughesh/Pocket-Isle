@@ -74,6 +74,8 @@ namespace Diorama.EditorTools
         static void WriteProps(WorldMap lodge, StringBuilder log)
         {
             var recipes = PropKit.WriteLodgeProps();
+            // Step 16: the dressing (the round rug replaces the rug's pieces; hearth stones; two wall sets).
+            foreach (var kv in PropKit.WriteLodgeDressing()) recipes[kv.Key] = kv.Value;
             AssetDatabase.SaveAssets();
             foreach (var r in recipes.Values) PropBaker.Bake(r);
             lodge.propLegend = new List<PropLegend>
@@ -81,17 +83,11 @@ namespace Diorama.EditorTools
                 Entry('w', recipes["LodgeWall"]), Entry('v', recipes["LodgeWall"], true), Entry('E', recipes["LodgeHearth"]),
                 Entry('C', recipes["LodgeHoneycomb"]), Entry('U', recipes["LodgeRug"]), Entry('c', recipes["LodgeCushion"]),
                 Entry('D', recipes["LodgeDoor"], false, 180f),
+                Entry('S', recipes["LodgeHearthStones"]), Entry('A', recipes["LodgeShelfFern"], false, 270f),
+                Entry('B', recipes["LodgeTableChest"], false, 90f),
             };
             // 8 x 8, row 0 = back. Multi-tile props: the key sits on their top-left tile.
-            string grid =
-                "wC.E.D.w\n" +
-                "v.c....v\n" +
-                "vc.....v\n" +
-                "v..U..cv\n" +
-                "........\n" +
-                "........\n" +
-                "........\n" +
-                "........";
+            string grid = Step16Lodge.Grid;
             lodge.SetProps(grid);
             log.Append($"\n  lodge props: {recipes.Count} written and baked (wall, hearth, honeycomb, rug, cushion, door)");
         }

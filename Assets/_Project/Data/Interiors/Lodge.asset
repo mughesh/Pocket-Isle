@@ -33,9 +33,9 @@ MonoBehaviour:
   startTile: {x: 5, y: 1}
   props: 'wC.E.D.w
 
-    v.c....v
+    vAcS...v
 
-    vc.....v
+    vc....Bv
 
     v..U..cv
 
@@ -75,6 +75,18 @@ MonoBehaviour:
     recipe: {fileID: 11400000, guid: 937339c3b2bbb0f418f283ed2b3e0850, type: 2}
     turned: 0
     yaw: 180
+  - key: S
+    recipe: {fileID: 11400000, guid: 3f22eba24b36571459675dd24517e946, type: 2}
+    turned: 0
+    yaw: 0
+  - key: A
+    recipe: {fileID: 11400000, guid: 97c24dc306dccbf4891d2afb4cc56d6f, type: 2}
+    turned: 0
+    yaw: 270
+  - key: B
+    recipe: {fileID: 11400000, guid: eab12735df2387845b998291bd84361a, type: 2}
+    turned: 0
+    yaw: 90
   viewZoom: 1.6
   theme: {fileID: 11400000, guid: 366cdeb7b4073f44bb3c017f25e29cb1, type: 2}
   grassTable: {fileID: 0}

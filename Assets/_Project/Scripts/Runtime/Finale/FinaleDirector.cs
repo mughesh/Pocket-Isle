@@ -150,6 +150,8 @@ namespace Diorama
 
         void Start()
         {
+            // Step 16: the soft glow under the island (grounding), every scene.
+            IslandUnderGlow.Ensure(island, ringMaterial);
             // Step 13 D: every Keeper hall gets the friendly rematch.
             foreach (var hall in FindObjectsByType<KeeperHall>(FindObjectsInactive.Include, FindObjectsSortMode.None))
                 if (hall.GetComponent<KeeperRematch>() == null)
@@ -1230,6 +1232,7 @@ namespace Diorama
             }
             bool on = _ringAlpha > 0.01f;
             _ring.gameObject.SetActive(on);
+            IslandUnderGlow.Suppressed = on;
             if (!on) return;
             var b = island.LocalBounds;
             _ring.localPosition = new Vector3(0f, b.min.y - 0.01f, 0f);

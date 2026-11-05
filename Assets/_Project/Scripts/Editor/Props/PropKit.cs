@@ -452,6 +452,116 @@ namespace Diorama.EditorTools
 
         // ---- themes ----
 
+        /// <summary>
+        /// Step 16 (judges: the lodge read like a prototype): a round woven rug (cream, terracotta, sage rings; replaces the
+        /// rug's pieces), warm stone tiles in front of the hearth, and two low wall sets: a small bookshelf with a potted
+        /// fern and a cushion stack; a side table with a lantern and a chest. Each set is one recipe (one instanced draw),
+        /// round enough to read from any yaw. Shape units are tiles, y up from the floor.
+        /// </summary>
+        public static Dictionary<string, PropRecipe> WriteLodgeDressing()
+        {
+            DioramaSceneSetup.EnsureFolder(Root);
+            DioramaSceneSetup.EnsureFolder($"{Root}/Shapes");
+            var cream = C("#E3CDA6");
+            var oak = C("#7A5236");
+            var stone = C("#B88E6E");
+            var sage = C("#8FA37A");
+            var ember = C("#FFB04A", 1.2f);
+            var terracotta = C("#C0603E");
+            var all = new Dictionary<string, PropRecipe>();
+
+            var rug = Recipe("LodgeRug", new Vector2Int(2, 2), false, false, 1700);
+            rug.palette = Palette(cream, oak, stone, sage, ember, terracotta);
+            rug.yawJitter = 0f;
+            rug.scaleJitter = 0f;
+            rug.outline = 0f;
+            rug.pieces = new List<PropPiece>
+            {
+                Piece(PShape("LodgeRug_Weave", Ell(Vector3.zero, new Vector3(0.88f, 0.4f, 0.88f), 0f), Plane(new Vector3(0f, 0.04f, 0f), Vector3.up, 0f)), PropSlot.Accent),
+                Piece(PShape("LodgeRug_Inner", Ell(Vector3.zero, new Vector3(0.66f, 0.4f, 0.66f), 0f), Plane(new Vector3(0f, 0.06f, 0f), Vector3.up, 0f)), PropSlot.Clay),
+                Piece(PShape("LodgeRug_Sage", Ell(Vector3.zero, new Vector3(0.42f, 0.4f, 0.42f), 0f), Plane(new Vector3(0f, 0.08f, 0f), Vector3.up, 0f)), PropSlot.Leaf),
+                Piece(PShape("LodgeRug_Dot", Ell(Vector3.zero, new Vector3(0.17f, 0.4f, 0.17f), 0f), Plane(new Vector3(0f, 0.1f, 0f), Vector3.up, 0f)), PropSlot.Accent),
+            };
+            all["LodgeRug"] = rug;
+
+            var stones = Recipe("LodgeHearthStones", new Vector2Int(2, 1), false, false, 1200);
+            stones.palette = Palette(cream, oak, stone, sage, ember, C("#9C6B4E"));
+            stones.yawJitter = 0f;
+            stones.scaleJitter = 0f;
+            stones.outline = 0.012f;
+            var slabs = new List<SdfPrimitive>();
+            var warm = new List<SdfPrimitive>();
+            for (int i = 0; i < 7; i++)
+            {
+                float x = -0.84f + i * 0.28f;
+                float z = -0.3f + (i % 2) * 0.05f;
+                var slab = Box(new Vector3(x, 0.02f, z), new Vector3(0.12f, 0.035f, 0.15f), 0.025f, 0f, new Vector3(0f, (i * 37) % 11 - 5, 0f));
+                (i % 3 == 1 ? warm : slabs).Add(slab);
+            }
+            for (int i = 0; i < 4; i++)
+                slabs.Add(Box(new Vector3(-0.42f + i * 0.28f, 0.015f, 0.02f), new Vector3(0.12f, 0.03f, 0.12f), 0.025f, 0f, new Vector3(0f, (i * 53) % 9 - 4, 0f)));
+            stones.pieces = new List<PropPiece>
+            {
+                Piece(PShape("LodgeHearthStones_Slabs", slabs.ToArray()), PropSlot.Stone),
+                Piece(PShape("LodgeHearthStones_Warm", warm.ToArray()), PropSlot.Accent),
+            };
+            all["LodgeHearthStones"] = stones;
+
+            var shelf = Recipe("LodgeShelfFern", new Vector2Int(1, 1), true, false, 2000);
+            shelf.palette = Palette(C("#B5653F"), oak, C("#D9A441"), C("#5E8A4E"), ember, C("#C9A15A"));
+            shelf.yawJitter = 0f;
+            shelf.scaleJitter = 0f;
+            shelf.pieces = new List<PropPiece>
+            {
+                // A low two-sided bookshelf along the back of the tile.
+                Piece(PShape("LodgeShelf_Frame",
+                    Box(new Vector3(0f, 0.2f, -0.2f), new Vector3(0.34f, 0.2f, 0.09f), 0.02f, 0f),
+                    Box(new Vector3(0f, 0.2f, -0.2f), new Vector3(0.3f, 0.06f, 0.1f), 0.01f, 0f).Sub()), PropSlot.Wood),
+                Piece(PShape("LodgeShelf_Books",
+                    Box(new Vector3(-0.2f, 0.47f, -0.2f), new Vector3(0.035f, 0.07f, 0.06f), 0.01f, 0f),
+                    Box(new Vector3(-0.12f, 0.46f, -0.2f), new Vector3(0.03f, 0.06f, 0.06f), 0.01f, 0f),
+                    Box(new Vector3(-0.05f, 0.45f, -0.2f), new Vector3(0.025f, 0.05f, 0.06f), 0.01f, 0f, new Vector3(0f, 0f, -14f)),
+                    Box(new Vector3(0.14f, 0.43f, -0.2f), new Vector3(0.08f, 0.025f, 0.06f), 0.01f, 0f)), PropSlot.Accent),
+                // A potted fern, front right.
+                Piece(PShape("LodgeFern_Pot", Cone(new Vector3(0.22f, 0f, 0.18f), new Vector3(0.22f, 0.15f, 0.18f), 0.08f, 0.11f, 0f)), PropSlot.Clay),
+                Piece(PShape("LodgeFern_Leaves",
+                    Ell(new Vector3(0.22f, 0.24f, 0.18f), new Vector3(0.12f, 0.09f, 0.12f), 0.05f),
+                    Ell(new Vector3(0.12f, 0.27f, 0.18f), new Vector3(0.11f, 0.03f, 0.05f), 0.04f, new Vector3(0f, 0f, 25f)),
+                    Ell(new Vector3(0.32f, 0.27f, 0.18f), new Vector3(0.11f, 0.03f, 0.05f), 0.04f, new Vector3(0f, 0f, -25f)),
+                    Ell(new Vector3(0.22f, 0.27f, 0.08f), new Vector3(0.05f, 0.03f, 0.11f), 0.04f, new Vector3(-25f, 0f, 0f)),
+                    Ell(new Vector3(0.22f, 0.27f, 0.28f), new Vector3(0.05f, 0.03f, 0.11f), 0.04f, new Vector3(25f, 0f, 0f))), PropSlot.Leaf, PropMotion.Sway, 0.01f),
+                // A stack of two cushions, front left.
+                Piece(PShape("LodgeCushionStack",
+                    Ell(new Vector3(-0.2f, 0.05f, 0.18f), new Vector3(0.14f, 0.05f, 0.13f), 0.02f),
+                    Ell(new Vector3(-0.2f, 0.13f, 0.18f), new Vector3(0.11f, 0.045f, 0.1f), 0.02f)), PropSlot.Stone),
+            };
+            all["LodgeShelfFern"] = shelf;
+
+            var table = Recipe("LodgeTableChest", new Vector2Int(1, 1), true, false, 3000);
+            table.palette = Palette(cream, oak, C("#3D3633"), sage, ember, C("#C9A15A"));
+            table.yawJitter = 0f;
+            table.scaleJitter = 0f;
+            table.pieces = new List<PropPiece>
+            {
+                // A little round side table (and the chest, front right).
+                Piece(PShape("LodgeTable_Wood",
+                    Ell(new Vector3(-0.12f, 0.3f, -0.15f), new Vector3(0.17f, 0.025f, 0.17f), 0.01f),
+                    Cone(new Vector3(-0.12f, 0f, -0.15f), new Vector3(-0.12f, 0.3f, -0.15f), 0.07f, 0.03f, 0.02f),
+                    Box(new Vector3(0.18f, 0.1f, 0.17f), new Vector3(0.14f, 0.1f, 0.1f), 0.02f, 0f)), PropSlot.Wood),
+                Piece(PShape("LodgeTable_Iron",
+                    Ell(new Vector3(-0.12f, 0.46f, -0.15f), new Vector3(0.05f, 0.02f, 0.05f), 0.01f),
+                    Ell(new Vector3(-0.12f, 0.33f, -0.15f), new Vector3(0.055f, 0.012f, 0.055f), 0.01f)), PropSlot.Stone),
+                Piece(PShape("LodgeTable_Lantern",
+                    Ell(new Vector3(-0.12f, 0.39f, -0.15f), new Vector3(0.045f, 0.06f, 0.045f), 0.01f)), PropSlot.Glow, PropMotion.Flicker, 0.003f),
+                Piece(PShape("LodgeChest_Bands",
+                    Box(new Vector3(0.18f, 0.205f, 0.17f), new Vector3(0.145f, 0.018f, 0.105f), 0.01f, 0f),
+                    Box(new Vector3(0.18f, 0.12f, 0.27f), new Vector3(0.025f, 0.03f, 0.008f), 0.005f, 0f)), PropSlot.Accent),
+            };
+            all["LodgeTableChest"] = table;
+            AssetDatabase.SaveAssets();
+            return all;
+        }
+
         static void WriteThemes(PropRecipe autumnTree)
         {
             var cinder = Asset<RealmTheme>($"{Root}/Themes/Cinderwood.asset");
