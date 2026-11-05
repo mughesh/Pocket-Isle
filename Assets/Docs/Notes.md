@@ -1,7 +1,13 @@
-- The journal button on the lodge looks too odd in the middle of the room. Let it be shown to the left of the pods in the rim. only when the user is in the lodge. 
-- The journal board looks good but selecting that is not giving me much of information. A small line in the bottom, but it is nothing. I thought it could be mmore than that.
-- the board is very sensitive to my head rotation. So when I try to touh the button, a slight head movement makes it slightly turn a bit, it is annoying kind of. 
-- About the island itself, Sometimes I feel like the it is slightly not facing me. Like litely tilted along its y axis. If i grab and position it exactly in front of me, it is ok. 
-- I think we removed the tutorial for grab and scale the island. Why ?
-- I still have the grab vs pinch conflict. I am resting my hand on the armrest and pinching. and it is near the grab corner, making it grab. The only solution I have now is, to keep the grab as a hold grab instad of a simple grab. User will need to hold pinch on that rail for 2-3 seconds to grab it. This way we wont have the conflict. But it might still calculate if the user is trying to grab the rail or pinch. Grab holding should show a visual signifier for the user. Also we might need to change the instructions and ghost hands of this. This is a lot of change. What else can we do about this ?
-- There are places in the map where the movement is hard because of crooked paths, looks unnecessary to me like in this image.
+- There is no ghost hands for swipe and tap to stop. Should we remove that as the character is already stoping by itself. 
+- many times the lanter's text is obstructing. like when the pod is to be picked an dropped to catch new isling, the instruction that came, it was right in front of me over my own isling, hiding the whole isling behghind. I am not able to see where to drop the pod. Lantern and tit text shall be bit more towards the right. this might be happening in many other cases as well. 
+- hand gets stuck in the menu button sometimes. only after closng the menu releases it. The hand used to interact the button gets stuck in that button
+- using meta recenter works. but it disapears the island for a moment and shows it again. I thought it would smoothly move the island to the point. 
+- after the battle, the shard can be floating bit aboive. Right now it gets behind the entry arch, hides from my view. 
+- Interacting to it, it can work even if the user just touched it. the current intstuction is confusing, and the grab is not working well for this small object. 
+- When entering still isle with a shard, the option to place it comes, the shard is floating. I am not even in the closer view of the statue. Also, it goes out of focus when I do this and the character is far away. We need that auto focus thing we have for the hand interactions here too. 
+- When doing this shard placement, lets lock the character for a while. I was able to enter the lodge and move around when the statue was talking. 
+- When starting the app, I am able to hear the island sound when i am just seeing the shard. I am supposed touch the shard and not to hear these sounds at this point. We need a more curious sound for this. This is highly needed. Anything realted to the first few minutes of experience is important. 
+- There are many number of smaller clump of ltall grasses. I dont see any of the islings there. The frequency of them coming and the places it can come can be slightly increased. 
+- Ending drags. About 70 s on a static island with tiny credits in speech bubbles, then it closes on a blank white island. without any skip button
+- Credits name “ElevenLabs, Kenney (CC0)”. Your checklist says to avoid brand names in the app. I guess we will remove this when we got the subscription
+- We should defenitely work on adding a grab lock button. It can be below the grab line on the rim. 
