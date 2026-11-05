@@ -485,6 +485,8 @@ namespace Diorama
             int shardLevel = level;
             var party = FindFirstObjectByType<Party>();
             if (!QuickJourney.Active && party != null) level = KeeperScaling.Level(level, party.members, keeperSpecies);
+            // Nov 5: the quick Keeper stays easy but a strong team gets a little more of a fight (at most +3).
+            else if (party != null) level += QuickJourney.StrongTeamExtra(KeeperScaling.TeamLevel(party.members));
             if (level != shardLevel)
                 Debug.Log($"[KeeperHall] Tuned to the team: {KeeperScaling.Fighters(party.members)} fighter(s), top-3 Lv {KeeperScaling.TeamLevel(party.members):0.0}: Keeper Lv {shardLevel} -> {level}.");
             var fight = new EncounterDirector.KeeperFight

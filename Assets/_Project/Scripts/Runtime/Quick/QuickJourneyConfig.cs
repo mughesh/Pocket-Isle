@@ -17,6 +17,10 @@ namespace Diorama
         [Header("Dials in the quick realm (Galewick since step 14c)")]
         [Tooltip("Nov 3 (no gift any more): the quick realm's Keeper is this many levels off in the quick slot (negative = easier).")]
         public int keeperLevelOffset = -2;
+        [Tooltip("Nov 5: a team whose 3 strongest average above this level counts as strong; the quick Keeper gains 1 level per 2 above it.")]
+        [Min(1)] public int strongTeamLevel = 8;
+        [Tooltip("Nov 5: at most this many levels added for a strong team (keeps the quick Keeper easy).")]
+        [Min(0)] public int strongTeamMaxExtra = 3;
         [Tooltip("x the tall-grass encounter chance.")]
         [Range(0f, 2f)] public float encounterRate = 0.5f;
         [Tooltip("x the win XP, on top of the normal curve.")]

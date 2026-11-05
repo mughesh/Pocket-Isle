@@ -109,7 +109,7 @@ namespace Diorama.Tests
         [Test]
         public void Quick_DialsApplyOnlyInTheQuickSlot()
         {
-            var c = ScriptableObject.CreateInstance<QuickJourneyConfig>();
+            var c = UnityEngine.ScriptableObject.CreateInstance<QuickJourneyConfig>();
             try
             {
                 Assert.AreEqual(0.125f, QuickJourney.EncounterChance(0.125f, false, c), 1e-6f);
@@ -126,7 +126,7 @@ namespace Diorama.Tests
             }
             finally
             {
-                Object.DestroyImmediate(c);
+                UnityEngine.Object.DestroyImmediate(c);
             }
         }
 
@@ -158,6 +158,24 @@ namespace Diorama.Tests
             Assert.AreEqual(12, QuickJourney.KeeperLevel(12, true, false, c), "other realms unchanged");
             Assert.Less(c.encounterRate, 1f);
             Assert.Greater(c.xpMultiplier, 1f);
+        }
+
+        [Test]
+        public void Quick_StrongTeam_AddsAFewLevelsOnly()
+        {
+            var c = UnityEngine.ScriptableObject.CreateInstance<QuickJourneyConfig>();
+            c.strongTeamLevel = 8;
+            c.strongTeamMaxExtra = 3;
+            Assert.AreEqual(0, QuickJourney.StrongTeamExtra(5f, true, true, c), "a weak team: no change");
+            Assert.AreEqual(0, QuickJourney.StrongTeamExtra(7f, true, true, c), "a typical quick team: no change");
+            Assert.AreEqual(0, QuickJourney.StrongTeamExtra(9f, true, true, c));
+            Assert.AreEqual(1, QuickJourney.StrongTeamExtra(10f, true, true, c));
+            Assert.AreEqual(2, QuickJourney.StrongTeamExtra(12f, true, true, c));
+            Assert.AreEqual(3, QuickJourney.StrongTeamExtra(16f, true, true, c), "capped");
+            Assert.AreEqual(3, QuickJourney.StrongTeamExtra(30f, true, true, c), "capped");
+            Assert.AreEqual(0, QuickJourney.StrongTeamExtra(16f, false, true, c), "full adventure: KeeperScaling instead");
+            Assert.AreEqual(0, QuickJourney.StrongTeamExtra(16f, true, false, c), "other realms unchanged");
+            UnityEngine.Object.DestroyImmediate(c);
         }
 
         [Test]

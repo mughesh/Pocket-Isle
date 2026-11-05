@@ -67,6 +67,19 @@ namespace Diorama
 
         public static int KeeperLevel(int level) => KeeperLevel(level, Active, InQuickRealm, Config);
 
+        /// <summary>
+        /// Nov 5 (Mugesh): the quick Keeper stays easy, but a strong team (top-3 average above
+        /// <see cref="QuickJourneyConfig.strongTeamLevel"/>) gets 1 extra level per 2 above it, up to
+        /// <see cref="QuickJourneyConfig.strongTeamMaxExtra"/> (pure). A typical quick team (Lv 7) adds nothing.
+        /// </summary>
+        public static int StrongTeamExtra(float teamLevel, bool quick, bool quickRealm, QuickJourneyConfig c)
+        {
+            if (!quick || !quickRealm || c == null) return 0;
+            return Mathf.Clamp(Mathf.FloorToInt((teamLevel - c.strongTeamLevel) / 2f), 0, c.strongTeamMaxExtra);
+        }
+
+        public static int StrongTeamExtra(float teamLevel) => StrongTeamExtra(teamLevel, Active, InQuickRealm, Config);
+
         public static bool SkipsLesson(string id, bool quick, QuickJourneyConfig c) =>
             quick && c != null && c.cutLessons != null && Array.IndexOf(c.cutLessons, id) >= 0;
 
