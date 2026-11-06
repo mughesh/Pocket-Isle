@@ -51,7 +51,7 @@ namespace Diorama
         /// <paramref name="stopAt"/> gets (from tile, next tile).
         /// </summary>
         public static string Plan(IslandMap map, Vector2Int from, Vector2Int direction, bool continuous, int maxTiles,
-            Func<Vector2Int, Vector2Int, WalkStop> stopAt, List<Vector2Int> tiles)
+            Func<Vector2Int, Vector2Int, WalkStop> stopAt, List<Vector2Int> tiles, bool throughBranches = false)
         {
             tiles.Clear();
             if (map == null || direction.sqrMagnitude != 1) return Blocked;
@@ -68,7 +68,8 @@ namespace Diorama
                     bool fwd = PathWalk(map, cur + h);
                     if (fwd)
                     {
-                        if (Branch(map, cur, h, l) || Branch(map, cur, h, -l)) return Junction;
+                        // Nov 6 (walk until tap): straight on past side roads; a swipe that way mid-walk turns there.
+                        if (!throughBranches && (Branch(map, cur, h, l) || Branch(map, cur, h, -l))) return Junction;
                     }
                     else
                     {

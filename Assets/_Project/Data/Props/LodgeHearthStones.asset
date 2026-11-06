@@ -59,12 +59,12 @@ MonoBehaviour:
     at: 0
     byHeight: 0
   spec: 0.15
-  outline: 0.012
+  outline: 0
   footprint: {x: 2, y: 1}
   blocksWalking: 0
   randomYaw: 0
   yawJitter: 0
   scaleJitter: 0
   resolution: 72
-  triangleBudget: 2000
+  triangleBudget: 300
   bakedMesh: {fileID: 4300000, guid: eed3274bce3b460439a9727cddd76a9d, type: 2}

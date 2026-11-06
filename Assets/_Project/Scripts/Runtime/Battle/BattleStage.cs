@@ -34,7 +34,7 @@ namespace Diorama
         [Tooltip("The projectile's flight (s) and its size (map metres).")]
         public float shotSeconds = 0.35f, shotRadius = 0.011f;
         [Tooltip("Idle on the pad: bob (share of the height), sway (degrees), a glance every few seconds.")]
-        public float idleBob = 0.03f, idleSway = 3f, glanceYaw = 14f;
+        public float idleBob = 0.03f, idleSway = 0f, glanceYaw = 6f; // Nov 6: no side-to-side sway (Mugesh), a smaller glance
         [Tooltip("A lunge hops this high (share of the height) on its way in.")]
         public float lungeHop = 0.35f;
 

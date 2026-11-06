@@ -70,7 +70,9 @@ namespace Diorama
         public float handNearSeconds = 0.2f;
         [Tooltip("Step 16: 'aside' ghosts (finale lift, evolution, shard) are this much smaller and sit this far to the side of the target (m), never between the head and it.")]
         [Range(0.2f, 1f)] public float asideScale = 0.6f;
-        public float asideOffset = 0.1f;
+        [Tooltip("Nov 6 (Mugesh: the evolve ghost grabbed the wrong spot on the rim): 0 = aside ghosts stay on their target " +
+                 "(only smaller); the fade near a real hand keeps the target visible. Was 0.1 m to the side.")]
+        public float asideOffset = 0f;
 
         const int JointCount = (int)HandJointId.HandEnd;
         static readonly int AlphaId = Shader.PropertyToID("_Alpha");

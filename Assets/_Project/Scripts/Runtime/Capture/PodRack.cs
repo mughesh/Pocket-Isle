@@ -136,6 +136,9 @@ namespace Diorama
         /// </summary>
         public int DueSlot { get; set; } = -1;
 
+        [Tooltip("Nov 6: the pod ready to evolve grows by this share and back, this many times a second.")]
+        public float dueBreathe = 0.18f, dueBreatheHz = 0.8f;
+
         /// <summary>Step 14h: look + pinch on the glowing <see cref="DueSlot"/> pod (exploring).</summary>
         public event Action<int> DuePicked;
 
@@ -433,7 +436,9 @@ namespace Diorama
                 {
                     p.transform.localPosition = HomeLocal(i);
                     p.transform.localRotation = Quaternion.identity;
-                    if (i < Party.Size) p.BaseScale = Vector3.one * FocusScale(i);
+                    // Nov 6 (Mugesh): the pod ready to evolve also breathes in size, slow and rhythmic.
+                    float breathe = i == DueSlot ? 1f + dueBreathe * (0.5f + 0.5f * Mathf.Sin(Time.time * Mathf.PI * 2f * dueBreatheHz)) : 1f;
+                    if (i < Party.Size) p.BaseScale = Vector3.one * (FocusScale(i) * breathe);
                 }
                 p.IslingOut = i == ActiveSlot;
                 float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * 6f);

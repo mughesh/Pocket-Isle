@@ -61,10 +61,58 @@ namespace Diorama.EditorTools
 
         public static Report Bake(PropRecipe recipe) => Bake(recipe, true);
 
+        /// <summary>
+        /// Nov 6: a flat prop (<see cref="FlatProps"/>): extruded layers, each with the palette slot of the recipe's piece
+        /// at the same index (no SDF, no marching cubes; a few hundred triangles).
+        /// </summary>
+        static Report BakeFlat(PropRecipe recipe, List<FlatProps.Layer> layers, Report report, bool save, double t0)
+        {
+            var verts = new List<Vector3>();
+            var normals = new List<Vector3>();
+            var uv0 = new List<Vector4>();
+            var uv1 = new List<Vector3>();
+            var tris = new List<int>();
+            var pieces = recipe.pieces ?? new List<PropPiece>();
+            for (int i = 0; i < layers.Count; i++)
+            {
+                var slot = i < pieces.Count ? pieces[i].slot : PropSlot.Stone;
+                int start = verts.Count;
+                FlatProps.Build(layers[i], verts, normals, tris);
+                var center = new Vector3(0f, layers[i].top * 0.5f, 0f);
+                for (int v = start; v < verts.Count; v++)
+                {
+                    uv0.Add(new Vector4((int)slot, (int)PropMotion.None, layers[i].top > 0f ? verts[v].y / layers[i].top : 0f, 0f));
+                    uv1.Add(center);
+                }
+            }
+            var baked = new Mesh { name = $"Prop_{recipe.name}" };
+            baked.SetVertices(verts);
+            baked.SetNormals(normals);
+            baked.SetUVs(0, uv0);
+            baked.SetUVs(1, uv1);
+            baked.SetTriangles(tris, 0);
+            baked.RecalculateBounds();
+            report.triangles = tris.Count / 3;
+            report.pieces = layers.Count;
+            DioramaSceneSetup.EnsureFolder(MeshDir);
+            recipe.bakedMesh = SaveMesh(baked, $"{MeshDir}/Prop_{recipe.name}.asset");
+            EditorUtility.SetDirty(recipe);
+            if (save)
+            {
+                AssetDatabase.SaveAssets();
+                IslandBuilder.RebuildAll();
+            }
+            report.seconds = (float)(EditorApplication.timeSinceStartup - t0);
+            Debug.Log($"[PropBaker] {report} (flat: {layers.Count} extruded layers)", recipe);
+            return report;
+        }
+
         static Report Bake(PropRecipe recipe, bool save)
         {
             double t0 = EditorApplication.timeSinceStartup;
             var report = new Report { name = recipe.name, budget = recipe.triangleBudget };
+            var flat = FlatProps.LayersFor(recipe.name);
+            if (flat != null) return BakeFlat(recipe, flat, report, save, t0);
 
             // Share the triangle budget by piece size (longest side squared ~ surface).
             var pieces = new List<(PropPiece piece, SdfEvaluator eval, Vector3 pivot, float weight)>();

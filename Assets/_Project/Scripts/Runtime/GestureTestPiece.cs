@@ -63,6 +63,12 @@ namespace Diorama
         public float continuousSeconds = 0.4f;
         [Tooltip("Most tiles one swipe walks.")]
         [Min(1)] public int smartTiles = SmartStep.SmartTiles;
+        [Tooltip("Nov 6 (Mugesh: stopping after 5 tiles or at a path's edge was irritating): one swipe walks until a thumb tap, " +
+                 "a new swipe, a dead end, a T with no road ahead, a gate or a hand moment. It follows the path's turns and goes " +
+                 "straight past side roads (swipe that way mid-walk to turn there). Off = the step 12a smart step (5 tiles).")]
+        public bool swipeWalksUntilTap = true;
+        [Tooltip("Most tiles one swipe walks when it walks until a tap.")]
+        [Min(1)] public int untilTapTiles = 200;
         [Tooltip("A second swipe the same way within this many seconds keeps walking.")]
         public float doubleSwipeSeconds = 0.45f;
 
@@ -482,7 +488,8 @@ namespace Diorama
         {
             _continuous = continuous;
             PlanFrom = _tile;
-            PlanEnd = SmartStep.Plan(Map, _tile, way, continuous, continuous ? 60 : smartTiles, PlanStop, _plan);
+            bool open = swipeWalksUntilTap;
+            PlanEnd = SmartStep.Plan(Map, _tile, way, continuous || open, open ? untilTapTiles : continuous ? 60 : smartTiles, PlanStop, _plan, open);
             _planIndex = 0;
             _running = false;
             PlanChanged?.Invoke();

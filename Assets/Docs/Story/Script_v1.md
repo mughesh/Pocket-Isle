@@ -51,10 +51,10 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
   - Spirit: The path turns. Swipe again!
 - `lesson.walk.turn.again` · in outside & !battle · objective · while canWalk · → ghost
   - Spirit: Swipe, and I'll follow the path.
-- `lesson.walk.far` · in outside & !battle · objective · while canWalk · → ghost (step 14f: done on a tap stop, the gold tile or two swipe walks)
-  - Spirit: Swipe again. It stops by itself.
+- `lesson.walk.far` · in outside & !battle · objective · while canWalk · → ghost (step 14f: done on a tap stop, the gold tile or two swipe walks; Nov 6: a swipe walks until a tap)
+  - Spirit: Swipe to go. Tap your thumb to stop.
 - `lesson.walk.far.again` · in outside & !battle · objective · while canWalk · → ghost
-  - Spirit: Swipe to go. Your explorer stops on its own.
+  - Spirit: Your explorer walks until you tap your thumb.
 - `lesson.walk.help` · in outside & !battle · objective · while canWalk · → ghost
   - Spirit: Or look at a spot and pinch.
 - `lesson.stop` · in outside & !battle · story · while canWalk · → ghost

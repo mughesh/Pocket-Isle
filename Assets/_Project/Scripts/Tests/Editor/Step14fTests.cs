@@ -25,7 +25,7 @@ namespace Diorama.Tests
                 StringAssert.Contains(e, far.doneWhen);
             Assert.IsTrue(far.skipAfter > 0f && far.skipAfter <= 30f, $"passes itself within 30 s ({far.skipAfter})");
             Assert.AreEqual("ahead", far.goldTileRule);
-            // Step 16: the walk stops by itself; the lessons show the swipe only (tap still stops, on the Controls card).
+            // Step 16: the lessons show the swipe ghost only; Nov 6: the far line teaches the tap (a swipe walks until a tap).
             Assert.AreEqual("thumb_swipe_forward", far.ghost);
             Assert.IsFalse(far.chip.ToLowerInvariant().Contains("tap"), far.chip);
             Assert.IsFalse(far.chip.ToLowerInvariant().Contains("twice"), far.chip);
@@ -35,13 +35,16 @@ namespace Diorama.Tests
 
             var script = AssetDatabase.LoadAssetAtPath<DialogueScript>("Assets/_Project/Data/Dialogue/Script_v1.asset");
             if (script == null) return;
+            bool farTeachesTap = false;
             foreach (var t in script.triggers)
                 if (t.id.StartsWith("lesson."))
                     foreach (var line in t.lines)
                     {
                         Assert.IsFalse(line.text.ToLowerInvariant().Contains("twice"), $"{t.id}: '{line.text}'");
-                        Assert.IsFalse(line.text.ToLowerInvariant().Contains("tap to stop") || line.text.ToLowerInvariant().Contains("to stop"), $"{t.id}: '{line.text}' (step 16: no tap to stop)");
+                        // Nov 6: a swipe walks until a thumb tap, so the far lesson teaches the tap (step 16 had it stop by itself).
+                        if (t.id == "lesson.walk.far" && line.text.ToLowerInvariant().Contains("tap")) farTeachesTap = true;
                     }
+            Assert.IsTrue(farTeachesTap, "lesson.walk.far teaches the thumb tap (a swipe walks until a tap)");
         }
 
         [Test]

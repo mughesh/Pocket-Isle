@@ -92,6 +92,37 @@ namespace Diorama.EditorTools
             Debug.Log($"[Step16Debug] Spirit at {(s != null ? s.transform.position.ToString("F3") : "-")}, objective spheres {list.Count}: {string.Join(" ", list)}.");
         }
 
+        /// <summary>Samples each battle label's island-local position for 4 s and logs how far it wandered (Nov 6: no sway).</summary>
+        public static void Labels()
+        {
+            var hud = Object.FindFirstObjectByType<BattleHud>();
+            var island = Island;
+            if (hud == null || island == null) return;
+            var field = typeof(BattleHud).GetField("_bars", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var bars = field.GetValue(hud) as System.Collections.Generic.List<BattleHud.Bar>;
+            var lo = new System.Collections.Generic.Dictionary<BattleHud.Bar, Vector3>();
+            var hi = new System.Collections.Generic.Dictionary<BattleHud.Bar, Vector3>();
+            double end = EditorApplication.timeSinceStartup + 4.0;
+            EditorApplication.CallbackFunction tick = null;
+            tick = () =>
+            {
+                if (!EditorApplication.isPlaying || bars == null) { EditorApplication.update -= tick; return; }
+                foreach (var b in bars)
+                {
+                    if (b.root == null) continue;
+                    var p = island.transform.InverseTransformPoint(b.root.position);
+                    lo[b] = lo.TryGetValue(b, out var l) ? Vector3.Min(l, p) : p;
+                    hi[b] = hi.TryGetValue(b, out var h) ? Vector3.Max(h, p) : p;
+                }
+                if (EditorApplication.timeSinceStartup < end) return;
+                EditorApplication.update -= tick;
+                foreach (var b in bars)
+                    if (lo.ContainsKey(b))
+                        Debug.Log($"[Step16Debug] Label {b.label.text.Split((char)10)[0]} ({(b.near ? "near" : "wild")}): wandered {((hi[b] - lo[b]).magnitude * 1000f):0.0} mm (island-local) in 4 s.");
+            };
+            EditorApplication.update += tick;
+        }
+
         /// <summary>
         /// Raises a thumb swipe from the right hand through MicrogestureInput's own event (arg = left/right/forward/back),
         /// then logs the explorer's tile 1.5 s later: proves the game's swipe path without a headset.

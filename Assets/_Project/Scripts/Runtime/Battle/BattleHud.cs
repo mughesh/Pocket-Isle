@@ -47,6 +47,9 @@ namespace Diorama
         [Range(0f, 0.4f)] public float minViewportY = 0.06f;
         [Tooltip("How often the wild label re-checks that it clears the near Isling on screen (s).")]
         public float clearCheckSeconds = 0.25f;
+        [Tooltip("Nov 6 (Mugesh: the name panels kept swaying): the wild label finds its spot only this long after both labels " +
+                 "appear, then holds it (it chased the near Isling's idle bob and sway before).")]
+        public float settleSeconds = 1.5f;
 
         public class Bar
         {
@@ -70,6 +73,8 @@ namespace Diorama
             public System.Func<float> padRadiusNow;
             /// <summary>Step 14k: sideways slide (island-local x) that keeps the wild label off the near Isling.</summary>
             public float shift, shiftTarget, checkedAt = -1f;
+            /// <summary>Nov 6: when the bar appeared; the near label's lift over the caption (only ever grows: no bobbing).</summary>
+            public float bornAt, captionLift;
         }
 
         class Pop
@@ -150,6 +155,7 @@ namespace Diorama
             bar.near = near;
             bar.padRadius = padRadius;
             bar.padRadiusNow = padRadiusNow;
+            bar.bornAt = Time.time;
             root.localScale = Vector3.one * labelScale;
             bar.plate = MakePlate(root);
             _bars.Add(bar);
@@ -335,7 +341,11 @@ namespace Diorama
             Vector3 up = cam.transform.up;
             Vector3 At(float shift) => it.TransformPoint(feet + new Vector3(shift, footLift, padR + footGap)) + up * (-bottom * scale);
 
-            if (!b.near && Time.time - b.checkedAt >= clearCheckSeconds)
+            float settleUntil = b.bornAt;
+            foreach (var o in _bars)
+                if (o.near) settleUntil = Mathf.Max(settleUntil, o.bornAt);
+            settleUntil += settleSeconds;
+            if (!b.near && Time.time <= settleUntil && Time.time - b.checkedAt >= clearCheckSeconds)
             {
                 b.checkedAt = Time.time;
                 b.shiftTarget = ClearShift(cam, At, halfW * scale, (top - bottom) * 0.5f * scale, (top + bottom) * 0.5f * scale);
@@ -349,7 +359,13 @@ namespace Diorama
             v = cam.WorldToViewportPoint(world - up * below);
             if (v.z > 0f && v.y < minViewportY) world = cam.ViewportToWorldPoint(new Vector3(v.x, minViewportY, v.z)) + up * below;
             // The near label rises over the caption above the runes rather than sit on it.
-            if (b.near) world = ClearCaption(cam, world, halfW * scale, above, below);
+            if (b.near)
+            {
+                // Nov 6: the lift only grows (it bobbed up and down as the caption came and went).
+                float lift = Vector3.Dot(ClearCaption(cam, world, halfW * scale, above, below) - world, up);
+                b.captionLift = Mathf.Max(b.captionLift, lift);
+                world += up * b.captionLift;
+            }
             b.root.position = world;
         }
 

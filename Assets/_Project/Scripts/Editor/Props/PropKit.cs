@@ -470,11 +470,11 @@ namespace Diorama.EditorTools
             var terracotta = C("#C0603E");
             var all = new Dictionary<string, PropRecipe>();
 
-            // Nov 6 fix (Mugesh: the rug and hearth stones looked broken): the baker's cell is the piece's longest side /
-            // resolution, and at 40 a 2-tile rug got 4.4 cm cells for 2 cm ring steps (holes, jagged rims); the rings were
-            // also domes cut from below the floor, which spent the triangle budget on hidden faces. Now each ring is a flat
-            // slab (cut at the floor and its top), steps of 3 cm, baked at 64 (2.75 cm cells; 120 left the flat slabs at 21k triangles).
-            var rug = Recipe("LodgeRug", new Vector2Int(2, 2), false, false, 2400);
+            // Nov 6 fix (Mugesh: the rug and hearth stones looked broken, then too dense): marching cubes made thin flat
+            // rings jagged (4.4 cm cells for 2 cm steps) and, finer, 6-21k triangles. The rug and the hearth apron are now
+            // built as extruded outlines by FlatProps (a few hundred triangles); these SDF pieces stay as the same shapes
+            // (for previews) and give each layer its palette slot, in order.
+            var rug = Recipe("LodgeRug", new Vector2Int(2, 2), false, false, 700); // Nov 6: built flat (FlatProps); the pieces give the slots
             rug.resolution = 64;
             rug.palette = Palette(cream, oak, stone, sage, ember, terracotta);
             rug.yawJitter = 0f;
@@ -494,12 +494,12 @@ namespace Diorama.EditorTools
 
             // Same fix (Mugesh: the small tiles by the fire looked broken): eleven little slabs read as scattered chips at
             // island scale. Now one half-round stone apron out from the hearth with a warm inset, flat tops cut at the floor.
-            var stones = Recipe("LodgeHearthStones", new Vector2Int(2, 1), false, false, 2000);
+            var stones = Recipe("LodgeHearthStones", new Vector2Int(2, 1), false, false, 300); // Nov 6: built flat (FlatProps)
             stones.resolution = 72;
             stones.palette = Palette(cream, oak, stone, sage, ember, C("#9C6B4E"));
             stones.yawJitter = 0f;
             stones.scaleJitter = 0f;
-            stones.outline = 0.012f;
+            stones.outline = 0f; // hard-edged flat layers: an inverted hull would crack at the corners
             // Keeps the half toward the room (z > -0.5: the hearth's side of the tile is z = -0.5).
             SdfPrimitive Back() => Plane(new Vector3(0f, 0f, -0.5f), Vector3.back, 0f);
             stones.pieces = new List<PropPiece>

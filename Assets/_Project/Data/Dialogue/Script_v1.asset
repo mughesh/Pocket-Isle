@@ -260,7 +260,8 @@ MonoBehaviour:
     once: 0
     objective: 1
     priority: 1
-    note: 'step 14f: done on a tap stop, the gold tile or two swipe walks'
+    note: 'step 14f: done on a tap stop, the gold tile or two swipe walks; Nov 6:
+      a swipe walks until a tap'
     target: ghost
     validWhile: canWalk
     context: outside & !battle
@@ -268,7 +269,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Swipe again. It stops by itself.
+      text: Swipe to go. Tap your thumb to stop.
       context: 
   - id: lesson.walk.far.again
     once: 0
@@ -282,7 +283,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Swipe to go. Your explorer stops on its own.
+      text: Your explorer walks until you tap your thumb.
       context: 
   - id: lesson.walk.help
     once: 0
