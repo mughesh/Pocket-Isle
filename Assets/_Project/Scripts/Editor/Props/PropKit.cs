@@ -470,40 +470,44 @@ namespace Diorama.EditorTools
             var terracotta = C("#C0603E");
             var all = new Dictionary<string, PropRecipe>();
 
-            var rug = Recipe("LodgeRug", new Vector2Int(2, 2), false, false, 1700);
+            // Nov 6 fix (Mugesh: the rug and hearth stones looked broken): the baker's cell is the piece's longest side /
+            // resolution, and at 40 a 2-tile rug got 4.4 cm cells for 2 cm ring steps (holes, jagged rims); the rings were
+            // also domes cut from below the floor, which spent the triangle budget on hidden faces. Now each ring is a flat
+            // slab (cut at the floor and its top), steps of 3 cm, baked at 64 (2.75 cm cells; 120 left the flat slabs at 21k triangles).
+            var rug = Recipe("LodgeRug", new Vector2Int(2, 2), false, false, 2400);
+            rug.resolution = 64;
             rug.palette = Palette(cream, oak, stone, sage, ember, terracotta);
             rug.yawJitter = 0f;
             rug.scaleJitter = 0f;
             rug.outline = 0f;
+            SdfPrimitive Ring(float r) => Ell(Vector3.zero, new Vector3(r, 0.4f, r), 0f);
+            SdfPrimitive Top(float y) => Plane(new Vector3(0f, y, 0f), Vector3.up, 0f);
+            SdfPrimitive Bottom() => Plane(Vector3.zero, Vector3.down, 0f);
             rug.pieces = new List<PropPiece>
             {
-                Piece(PShape("LodgeRug_Weave", Ell(Vector3.zero, new Vector3(0.88f, 0.4f, 0.88f), 0f), Plane(new Vector3(0f, 0.04f, 0f), Vector3.up, 0f)), PropSlot.Accent),
-                Piece(PShape("LodgeRug_Inner", Ell(Vector3.zero, new Vector3(0.66f, 0.4f, 0.66f), 0f), Plane(new Vector3(0f, 0.06f, 0f), Vector3.up, 0f)), PropSlot.Clay),
-                Piece(PShape("LodgeRug_Sage", Ell(Vector3.zero, new Vector3(0.42f, 0.4f, 0.42f), 0f), Plane(new Vector3(0f, 0.08f, 0f), Vector3.up, 0f)), PropSlot.Leaf),
-                Piece(PShape("LodgeRug_Dot", Ell(Vector3.zero, new Vector3(0.17f, 0.4f, 0.17f), 0f), Plane(new Vector3(0f, 0.1f, 0f), Vector3.up, 0f)), PropSlot.Accent),
+                Piece(PShape("LodgeRug_Weave", Ring(0.88f), Top(0.035f), Bottom()), PropSlot.Accent),
+                Piece(PShape("LodgeRug_Inner", Ring(0.66f), Top(0.065f), Bottom()), PropSlot.Clay),
+                Piece(PShape("LodgeRug_Sage", Ring(0.42f), Top(0.095f), Bottom()), PropSlot.Leaf),
+                Piece(PShape("LodgeRug_Dot", Ring(0.17f), Top(0.125f), Bottom()), PropSlot.Accent),
             };
             all["LodgeRug"] = rug;
 
-            var stones = Recipe("LodgeHearthStones", new Vector2Int(2, 1), false, false, 1200);
+            // Same fix (Mugesh: the small tiles by the fire looked broken): eleven little slabs read as scattered chips at
+            // island scale. Now one half-round stone apron out from the hearth with a warm inset, flat tops cut at the floor.
+            var stones = Recipe("LodgeHearthStones", new Vector2Int(2, 1), false, false, 2000);
+            stones.resolution = 72;
             stones.palette = Palette(cream, oak, stone, sage, ember, C("#9C6B4E"));
             stones.yawJitter = 0f;
             stones.scaleJitter = 0f;
             stones.outline = 0.012f;
-            var slabs = new List<SdfPrimitive>();
-            var warm = new List<SdfPrimitive>();
-            for (int i = 0; i < 7; i++)
-            {
-                float x = -0.84f + i * 0.28f;
-                float z = -0.3f + (i % 2) * 0.05f;
-                var slab = Box(new Vector3(x, 0.02f, z), new Vector3(0.12f, 0.035f, 0.15f), 0.025f, 0f, new Vector3(0f, (i * 37) % 11 - 5, 0f));
-                (i % 3 == 1 ? warm : slabs).Add(slab);
-            }
-            for (int i = 0; i < 4; i++)
-                slabs.Add(Box(new Vector3(-0.42f + i * 0.28f, 0.015f, 0.02f), new Vector3(0.12f, 0.03f, 0.12f), 0.025f, 0f, new Vector3(0f, (i * 53) % 9 - 4, 0f)));
+            // Keeps the half toward the room (z > -0.5: the hearth's side of the tile is z = -0.5).
+            SdfPrimitive Back() => Plane(new Vector3(0f, 0f, -0.5f), Vector3.back, 0f);
             stones.pieces = new List<PropPiece>
             {
-                Piece(PShape("LodgeHearthStones_Slabs", slabs.ToArray()), PropSlot.Stone),
-                Piece(PShape("LodgeHearthStones_Warm", warm.ToArray()), PropSlot.Accent),
+                Piece(PShape("LodgeHearthStones_Slabs", Ell(new Vector3(0f, 0f, -0.5f), new Vector3(0.86f, 0.4f, 0.62f), 0f),
+                    Top(0.07f), Bottom(), Back()), PropSlot.Stone),
+                Piece(PShape("LodgeHearthStones_Warm", Ell(new Vector3(0f, 0f, -0.5f), new Vector3(0.56f, 0.4f, 0.38f), 0f),
+                    Top(0.105f), Bottom(), Back()), PropSlot.Accent),
             };
             all["LodgeHearthStones"] = stones;
 

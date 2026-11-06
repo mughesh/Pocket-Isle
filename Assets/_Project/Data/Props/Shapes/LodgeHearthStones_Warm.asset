@@ -13,23 +13,43 @@ MonoBehaviour:
   m_Name: LodgeHearthStones_Warm
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.SdfShape
   primitives:
-  - kind: 5
+  - kind: 1
     blend: 0
     k: 0
     mirrorX: 0
-    a: {x: -0.55999994, y: 0.02, z: -0.25}
-    b: {x: 0.025, y: 0, z: 0}
-    size: {x: 0.12, y: 0.035, z: 0.15}
-    rotation: {x: 0, y: -1, z: 0}
+    a: {x: 0, y: 0, z: -0.5}
+    b: {x: 0, y: 0, z: 0}
+    size: {x: 0.56, y: 0.4, z: 0.38}
+    rotation: {x: 0, y: 0, z: 0}
     bumps: 0
     bumpFrequency: 0
-  - kind: 5
-    blend: 0
+  - kind: 4
+    blend: 2
     k: 0
     mirrorX: 0
-    a: {x: 0.28000003, y: 0.02, z: -0.3}
-    b: {x: 0.025, y: 0, z: 0}
-    size: {x: 0.12, y: 0.035, z: 0.15}
+    a: {x: 0, y: 0.105, z: 0}
+    b: {x: 0, y: 1, z: 0}
+    size: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 4
+    blend: 2
+    k: 0
+    mirrorX: 0
+    a: {x: 0, y: 0, z: 0}
+    b: {x: 0, y: -1, z: 0}
+    size: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 4
+    blend: 2
+    k: 0
+    mirrorX: 0
+    a: {x: 0, y: 0, z: -0.5}
+    b: {x: 0, y: 0, z: -1}
+    size: {x: 0, y: 0, z: 0}
     rotation: {x: 0, y: 0, z: 0}
     bumps: 0
     bumpFrequency: 0

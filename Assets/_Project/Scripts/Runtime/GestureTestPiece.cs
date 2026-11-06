@@ -246,6 +246,12 @@ namespace Diorama
             get => _locked;
             set
             {
+                // Nov 6: who locks and frees the explorer (a lock that never let go cost a morning).
+                if (value != _locked)
+                {
+                    var caller = new System.Diagnostics.StackFrame(1).GetMethod();
+                    Debug.Log($"[GestureTestPiece] {(value ? "Locked" : "Free")} ({(caller != null ? caller.DeclaringType?.Name + "." + caller.Name : "?")}).");
+                }
                 _locked = value;
                 if (value)
                 {

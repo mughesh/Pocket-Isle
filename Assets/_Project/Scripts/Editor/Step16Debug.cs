@@ -91,5 +91,39 @@ namespace Diorama.EditorTools
             ObjectiveArea.Gather(list);
             Debug.Log($"[Step16Debug] Spirit at {(s != null ? s.transform.position.ToString("F3") : "-")}, objective spheres {list.Count}: {string.Join(" ", list)}.");
         }
+
+        /// <summary>
+        /// Raises a thumb swipe from the right hand through MicrogestureInput's own event (arg = left/right/forward/back),
+        /// then logs the explorer's tile 1.5 s later: proves the game's swipe path without a headset.
+        /// </summary>
+        public static void Swipe()
+        {
+            var input = Object.FindFirstObjectByType<MicrogestureInput>();
+            var explorer = Object.FindFirstObjectByType<GestureTestPiece>();
+            if (input == null || explorer == null)
+            {
+                Debug.Log("[Step16Debug] Swipe: no input or explorer.");
+                return;
+            }
+            var g = Arg switch
+            {
+                "left" => ThumbGesture.SwipeLeft,
+                "forward" => ThumbGesture.SwipeForward,
+                "back" => ThumbGesture.SwipeBack,
+                _ => ThumbGesture.SwipeRight,
+            };
+            var from = explorer.Tile;
+            typeof(MicrogestureInput).GetMethod("Raise", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                .Invoke(input, new object[] { g, GestureSource.RightHand });
+            double at = EditorApplication.timeSinceStartup + 1.5;
+            EditorApplication.CallbackFunction tick = null;
+            tick = () =>
+            {
+                if (EditorApplication.timeSinceStartup < at) return;
+                EditorApplication.update -= tick;
+                Debug.Log($"[Step16Debug] Swipe {g}: c{from.x} r{from.y} -> c{explorer.Tile.x} r{explorer.Tile.y} (can move {explorer.CanMove}: locked {explorer.Locked}, held still {explorer.HeldStill}, zoomed {Object.FindFirstObjectByType<WorldWindow>()?.IsZoomed}; opening {Opening.InProgress}, finale {FinaleDirector.Running}, swap {SceneSwap.IsBusy}, menu {GameMenu.IsOpen}; blocked {input.IsBlocked(GestureSource.RightHand)}).");
+            };
+            EditorApplication.update += tick;
+        }
     }
 }
