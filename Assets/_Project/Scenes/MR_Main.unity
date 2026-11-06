@@ -256,6 +256,9 @@ MonoBehaviour:
   moreLine: hub.shard.more
   twoLine: statue.two
   threeLine: statue.three
+  offerDistance: 1
+  forgivingSnap: 0.12
+  sceneLockSeconds: 30
 --- !u!1 &78739057
 GameObject:
   m_ObjectHideFlags: 0
@@ -312,6 +315,8 @@ MonoBehaviour:
   rimGuardDistance: 0.07
   activePopOut: 0.003
   cardSeconds: 4
+  dueBreathe: 0.18
+  dueBreatheHz: 0.8
 --- !u!4 &78739059
 Transform:
   m_ObjectHideFlags: 0
@@ -405,8 +410,7 @@ MonoBehaviour:
   fx: {fileID: 1078587927}
   hudMaterial: {fileID: 2100000, guid: 0656b6c4f92798e49a14cf09a2c6800e, type: 2}
   grabGuard: {fileID: 270959111}
-  pedestalTile: {x: 4, y: 5}
-  pedestalTop: 0.5
+  cardSeconds: 6
   doorTiles:
   - {x: 5, y: 0}
   - {x: 6, y: 0}
@@ -421,6 +425,9 @@ MonoBehaviour:
   maxInRoom: 8
   grabSize: 0.07
   dropDistance: 0.06
+  hearthGlowTile: {x: 3.5, y: 1.1}
+  hearthGlowTiles: 2.6
+  hearthGlowIntensity: 0.35
 --- !u!4 &155307359
 Transform:
   m_ObjectHideFlags: 0
@@ -735,6 +742,8 @@ MonoBehaviour:
   sideGap: 0.012
   spiritRadius: 0.024
   charsPerSecond: 45
+  typingCharsPerSecond: 60
+  instantUnderChars: 30
   holdBase: 1.5
   holdPerChar: 0.06
   chipAfter: 6
@@ -911,12 +920,17 @@ MonoBehaviour:
   tabletMaterial: {fileID: 2100000, guid: 7f2dc384d03ba1244a3a29afac016aeb, type: 2}
   offset: {x: 0, y: 0.05, z: 0.02}
   fontSize: 0.11
-  maxDrift: 15
-  driftSpeed: 1.5
-  refaceAngle: 35
+  turnAwayAngle: 30
+  turnAwaySeconds: 1
+  handClear: 0.15
+  turnSeconds: 0.4
   maxTilt: 40
+  gazeSelect: 1
+  handRays: 0
+  rayLength: 0.9
   pressDepth: 0.008
   holdSeconds: 2
+  pokeStuckSeconds: 1.2
 --- !u!1 &261742740
 GameObject:
   m_ObjectHideFlags: 0
@@ -1097,21 +1111,25 @@ MonoBehaviour:
   maxScaleFactor: 2
   autoFace: 1
   faceSeconds: 0.25
-  idleAngle: 35
+  reFaceAngle: 6
   idleSeconds: 1.5
   idleTurnSeconds: 1
   window: {fileID: 270959113}
+  ghosts: {fileID: 0}
   pods: {fileID: 78739058}
   encounters: {fileID: 1499891275}
   podStripColliders:
   - {fileID: 1736066357}
   grabHoverSeconds: 0.15
   gazeAwayDistance: 0.15
-  zoneMargin: 0.01
   cornerSize: 0.1
-  cornerReach: 0.03
+  frame: {fileID: 0}
+  grabPastLine: 0.003
+  grabInward: 0.035
+  grabAboveCap: 0.025
+  grabBandBottom: -0.12
+  pinchStrengthForPoint: 0.4
   lipBelowPods: 0.02
-  lipDepth: 0.05
   podClearance: 0.01
 --- !u!114 &270959112
 MonoBehaviour:
@@ -1869,6 +1887,8 @@ MonoBehaviour:
   smartSeconds: 0.28
   continuousSeconds: 0.28
   smartTiles: 5
+  swipeWalksUntilTap: 1
+  untilTapTiles: 200
   doubleSwipeSeconds: 0.45
   maxPathSteps: 40
   runPathSteps: 8
@@ -1899,6 +1919,7 @@ MonoBehaviour:
   trackingTimeout: 3
   startupSettleMax: 3
   recenterSettleMax: 2
+  recenterGlideSeconds: 0.4
 --- !u!114 &374318556
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2055,11 +2076,13 @@ MonoBehaviour:
   offset: {x: 0, y: 0.05, z: 0.02}
   avoidOffset: {x: 0, y: 0.045, z: 0.045}
   runeSize: {x: 0.08, y: 0.04}
-  spacing: 0.088
+  runeStep: 0.097
   fontSize: 0.11
   captionFontSize: 0.12
-  maxDrift: 15
-  driftSpeed: 1.5
+  captionScale: 1.2
+  captionText: {r: 1, g: 0.95, b: 0.84, a: 1}
+  captionPill: {r: 0.13, g: 0.1, b: 0.08, a: 0.86}
+  turnAwayAngle: 30
   maxTilt: 40
   pressDepth: 0.008
   runWidth: 0.7
@@ -2150,6 +2173,9 @@ MonoBehaviour:
   shardRecipe: {fileID: 11400000, guid: 0d00935bd93bf4d44ba91c69122fee75, type: 2}
   smokeMaterial: {fileID: 2100000, guid: 63c5a847d0fbf454882a87650c5454fc, type: 2}
   shardGrabReach: 0.09
+  shardTouchReach: 0.06
+  shardHoverHeight: 0.2
+  shardHoverFront: 0.7
   shardAutoSeconds: 4
   spirit: {fileID: 1847074513}
   keeperSpot: {x: 4.5, y: 2.6}
@@ -2721,6 +2747,9 @@ MonoBehaviour:
   moreLine: hub.shard.more
   twoLine: statue.two
   threeLine: statue.three
+  offerDistance: 1
+  forgivingSnap: 0.12
+  sceneLockSeconds: 30
 --- !u!1 &570826974
 GameObject:
   m_ObjectHideFlags: 0
@@ -2829,12 +2858,17 @@ MonoBehaviour:
   tabletMaterial: {fileID: 2100000, guid: 7f2dc384d03ba1244a3a29afac016aeb, type: 2}
   offset: {x: 0, y: 0.05, z: 0.02}
   fontSize: 0.11
-  maxDrift: 15
-  driftSpeed: 1.5
-  refaceAngle: 35
+  turnAwayAngle: 30
+  turnAwaySeconds: 1
+  handClear: 0.15
+  turnSeconds: 0.4
   maxTilt: 40
+  gazeSelect: 1
+  handRays: 0
+  rayLength: 0.9
   pressDepth: 0.008
   holdSeconds: 2
+  pokeStuckSeconds: 1.2
 --- !u!1 &634390647
 GameObject:
   m_ObjectHideFlags: 0
@@ -3150,6 +3184,7 @@ MonoBehaviour:
   encounters: {fileID: 1499891275}
   idleSeconds: 40
   idleGap: 120
+  idleAfterArrival: 8
 --- !u!4 &733261510
 Transform:
   m_ObjectHideFlags: 0
@@ -3305,6 +3340,9 @@ MonoBehaviour:
   shardRecipe: {fileID: 11400000, guid: d4841e0bb04882b43a2477d94a098d44, type: 2}
   smokeMaterial: {fileID: 2100000, guid: 63c5a847d0fbf454882a87650c5454fc, type: 2}
   shardGrabReach: 0.09
+  shardTouchReach: 0.06
+  shardHoverHeight: 0.2
+  shardHoverFront: 0.7
   shardAutoSeconds: 4
   spirit: {fileID: 1847074513}
   keeperSpot: {x: 4.5, y: 3.4}
@@ -4234,6 +4272,19 @@ MonoBehaviour:
   labelFontSize: 0.11
   popFontSize: 0.16
   xpBarHeight: 0.4
+  maxViewportY: 0.86
+  platePadding: {x: 0.008, y: 0.005}
+  plateColor: {r: 0.04, g: 0.05, b: 0.05, a: 0.62}
+  labelScale: 1.35
+  footGap: 0.006
+  footLift: 0.002
+  minViewportY: 0.06
+  clearCheckSeconds: 0.25
+  settleSeconds: 1.5
+  ghostHold: 0.4
+  ghostDrain: 0.6
+  lowShare: 0.25
+  ghostColor: {r: 1, g: 0.93, b: 0.75, a: 0.85}
 --- !u!114 &1078587927
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4270,6 +4321,14 @@ MonoBehaviour:
   padSeconds: 0.4
   progression: {fileID: 11400000, guid: c5e0845f05a2ec34a817839899fdc421, type: 2}
   pauseBetweenMoves: 0.45
+  windUpSeconds: 0.25
+  hitStopSeconds: 0.06
+  shotSeconds: 0.35
+  shotRadius: 0.011
+  idleBob: 0.03
+  idleSway: 3
+  glanceYaw: 14
+  lungeHop: 0.35
 --- !u!1 &1083828881
 GameObject:
   m_ObjectHideFlags: 0
@@ -4320,12 +4379,17 @@ MonoBehaviour:
   tabletMaterial: {fileID: 2100000, guid: 7f2dc384d03ba1244a3a29afac016aeb, type: 2}
   offset: {x: 0, y: 0.120000005, z: 0.02}
   fontSize: 0.11
-  maxDrift: 15
-  driftSpeed: 1.5
-  refaceAngle: 35
+  turnAwayAngle: 30
+  turnAwaySeconds: 1
+  handClear: 0.15
+  turnSeconds: 0.4
   maxTilt: 40
+  gazeSelect: 1
+  handRays: 0
+  rayLength: 0.9
   pressDepth: 0.008
   holdSeconds: 2
+  pokeStuckSeconds: 1.2
 --- !u!1 &1127440539
 GameObject:
   m_ObjectHideFlags: 0
@@ -4890,6 +4954,8 @@ MonoBehaviour:
   hub: {fileID: 11400000, guid: ab0469af29722704f949fec768f94b68, type: 2}
   galewick: {fileID: 11400000, guid: 1c0f5df7c1c50ad4789ffbf83b2addd2, type: 2}
   runesOverStatue: 0.035
+  endTowardPlayer: 0.55
+  endAboveCap: 0.07
 --- !u!1 &1291464261
 GameObject:
   m_ObjectHideFlags: 0
@@ -4973,6 +5039,9 @@ MonoBehaviour:
   moreLine: hub.shard.more
   twoLine: statue.two
   threeLine: statue.three
+  offerDistance: 1
+  forgivingSnap: 0.12
+  sceneLockSeconds: 30
 --- !u!1 &1294784575
 GameObject:
   m_ObjectHideFlags: 0
@@ -5155,6 +5224,7 @@ MonoBehaviour:
   goldMaterial: {fileID: 2100000, guid: dc3915bdb04a1cb4eb4760821e23e7b7, type: 2}
   fx: {fileID: 1078587927}
   sparkleColor: {r: 1, g: 0.82, b: 0.35, a: 1}
+  twoHandsPassSeconds: 8
   swipeTiles: 4
 --- !u!4 &1380201672
 Transform:
@@ -5259,6 +5329,7 @@ MonoBehaviour:
   aboveTargetHeight: 0.07
   wristFingers: {x: -0.35, y: 0.25, z: 1}
   wristDorsal: {x: 1, y: 0.35, z: 0.25}
+  wristBack: {x: 0.75, y: 0.6, z: -0.15}
   bothSpread: 0.18
   cornerInset: 0.05
   sideDrop: 0.015
@@ -5270,6 +5341,11 @@ MonoBehaviour:
   struggleSpeed: 0.6
   struggleScale: 1.2
   dotSize: 0.012
+  handNearRadius: 0.16
+  handNearAlpha: 0.08
+  handNearSeconds: 0.2
+  asideScale: 0.6
+  asideOffset: 0.1
 --- !u!4 &1421177269
 Transform:
   m_ObjectHideFlags: 0
@@ -5362,6 +5438,10 @@ MonoBehaviour:
   firstLevel: 3
   grassChance: 0.125
   graceSteps: 3
+  grassChanceStep16: 0.16
+  smallClumpChance: 0.3
+  smallClumpMax: 4
+  graceCountsAllSteps: 1
   zoomRange: {x: 2.2, y: 3}
   zoomSeconds: 0.6
   padDistance: 3
@@ -5423,10 +5503,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4af38de640a47ee48af1338d2f366215, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.GrowthDirector
+  ghosts: {fileID: 0}
   party: {fileID: 1499891276}
   pods: {fileID: 78739058}
   encounters: {fileID: 1499891275}
   progression: {fileID: 11400000, guid: c5e0845f05a2ec34a817839899fdc421, type: 2}
+  hud: {fileID: 0}
+  palmZoom: 1.6
+  palmUp:
+    upDot: 0.55
+    landSeconds: 0.35
+  palmTimeout: 6
+  cardSeconds: 3
 --- !u!1 &1522577912
 GameObject:
   m_ObjectHideFlags: 0
@@ -5475,7 +5563,11 @@ MonoBehaviour:
   nearLevel: 0.55
   hoverLevel: 1
   grabbedLevel: 1.1
+  bandLevel: 0.4
+  bandLift: 0.004
   color: {r: 0.95, g: 0.97, b: 1, a: 1}
+  restColor: {r: 1, g: 0.86, b: 0.66, a: 1}
+  restAlpha: 0.6
   grabbedColor: {r: 1, g: 0.78, b: 0.3, a: 1}
   grabbedTint: 0.85
   fadeInSeconds: 0.12
@@ -6778,6 +6870,11 @@ MonoBehaviour:
   holdSharpness: 7
   sparkScale: 0.72
   sparkGlow: 0.35
+  sideGap: 0.05
+  sideLift: 0.02
+  bubbleProbe: {x: 0.07, y: 0.05}
+  spiritProbeRadius: 0.025
+  bubbleProbeRadius: 0.04
 --- !u!114 &1847074514
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6933,7 +7030,7 @@ MonoBehaviour:
   nudgeDamping: 0.3
   growSeconds: 1.2
   riseSeconds: 1.6
-  moveWaitSeconds: 12
+  moveLessonSeconds: 45
   pinchWaitSeconds: 45
   returnRiseSeconds: 2
   podScale: 2.4
@@ -6943,6 +7040,8 @@ MonoBehaviour:
   podMinGap: 0.4
   dropReach: 0.12
   statueNear: 3
+  shimmerFar: 0.4
+  shimmerNear: 0.06
 --- !u!4 &1891040200
 Transform:
   m_ObjectHideFlags: 0
@@ -7361,12 +7460,17 @@ MonoBehaviour:
   tabletMaterial: {fileID: 2100000, guid: 7f2dc384d03ba1244a3a29afac016aeb, type: 2}
   offset: {x: 0, y: 0.05, z: 0.02}
   fontSize: 0.11
-  maxDrift: 15
-  driftSpeed: 1.5
-  refaceAngle: 35
+  turnAwayAngle: 30
+  turnAwaySeconds: 1
+  handClear: 0.15
+  turnSeconds: 0.4
   maxTilt: 40
+  gazeSelect: 1
+  handRays: 0
+  rayLength: 0.9
   pressDepth: 0.008
   holdSeconds: 2
+  pokeStuckSeconds: 1.2
 --- !u!1 &2003276423
 GameObject:
   m_ObjectHideFlags: 0
@@ -7783,6 +7887,10 @@ MonoBehaviour:
     and synthesised'
   - 'Music: to come'
   - Thank you for playing.
+  hallGapStep16: 1.6
+  creditWindow: 3
+  creditStepSeconds: 2.6
+  plaqueAbove: 0.09
 --- !u!1 &2107210735
 GameObject:
   m_ObjectHideFlags: 0
@@ -7916,6 +8024,9 @@ MonoBehaviour:
   shardRecipe: {fileID: 11400000, guid: 243f873e41708f049b1a176b344ec7c1, type: 2}
   smokeMaterial: {fileID: 2100000, guid: 63c5a847d0fbf454882a87650c5454fc, type: 2}
   shardGrabReach: 0.09
+  shardTouchReach: 0.06
+  shardHoverHeight: 0.2
+  shardHoverFront: 0.7
   shardAutoSeconds: 4
   spirit: {fileID: 1847074513}
   keeperSpot: {x: 4.5, y: 2.7}
