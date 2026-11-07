@@ -32,6 +32,7 @@ namespace Diorama.Audio
         public const string ChannelRipple = "channel.ripple";
         public const string ClearingRumble = "clearing.rumble";
         public const string CloudPart = "cloud.part";
+        public const string CreditsLantern = "credits.lantern";
         public const string CreditsTablet = "credits.tablet";
         public const string CryAshmole = "cry.Ashmole";
         public const string CryBottlewhale = "cry.Bottlewhale";

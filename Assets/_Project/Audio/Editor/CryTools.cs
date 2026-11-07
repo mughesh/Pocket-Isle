@@ -262,6 +262,17 @@ namespace Diorama.Audio.EditorTools
                     .Vars(6, 3f, 0.1f, 0.3f).Master(1f, 7500f),
                 cue = SynthBatch1.Voice(0.35f),
             };
+            // Step 19: a sky lantern lets go of the Heart (the credits): a soft paper flutter over a low, warm whoosh. Low.
+            yield return new SynthRecipes.Recipe
+            {
+                set = Set, group = "Finale", id = "credits.lantern",
+                build = patch => patch.One(0.9f,
+                        L(WhiteNoise).BP(2600f, 1700f, 0.6f, 0.3f).Env(0.05f, 0.5f).Trem(21f, 0.6f).Gain(0.45f),
+                        L(PinkNoise).BP(450f, 1000f, 0.7f, 0.4f).Env(0.18f, 0.6f).Gain(0.8f),
+                        L(Sine).Note("A4").Env(0.12f, 0.5f).Gain(0.06f))
+                    .Vars(3, 1f).Master(1f, 6000f),
+                cue = SynthBatch1.Sfx(0.3f, 110, 3, 0.05f, 2f),
+            };
         }
 
         static Action<AudioCue> And2(this Action<AudioCue> a, Action<AudioCue> b) => c =>
