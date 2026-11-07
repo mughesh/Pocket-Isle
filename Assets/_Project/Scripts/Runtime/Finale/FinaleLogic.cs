@@ -136,8 +136,36 @@ namespace Diorama
         /// a bigger party widens the arc before it moves out. The arc never
         /// goes past 100 deg either side of the front (never behind the statue).
         /// </summary>
-        public static Vector2[] HallArc(Vector2 center, int n, float width, float minRadius, float gapFactor = 1.4f)
+        public static Vector2[] HallArc(Vector2 center, int n, float width, float minRadius, float gapFactor = 1.4f) =>
+            HallArc(center, n, width, minRadius, gapFactor, null);
+
+        /// <summary>
+        /// Nov 7 (Mugesh: an Isling stood in the explorer): with <paramref name="keepFree"/> (the explorer's tile in front
+        /// of the statue) the arc runs through that spot and leaves it empty: the party stands either side of the explorer,
+        /// one gap from it, alternating right and left.
+        /// </summary>
+        public static Vector2[] HallArc(Vector2 center, int n, float width, float minRadius, float gapFactor, Vector2? keepFree)
         {
+            if (keepFree.HasValue && n > 0)
+            {
+                var spots2 = new Vector2[n];
+                Vector2 toFree = keepFree.Value - center;
+                float r0 = Mathf.Max(minRadius, toFree.magnitude);
+                float baseAngle = toFree.sqrMagnitude > 1e-6f ? Mathf.Atan2(toFree.x, toFree.y) : 0f;
+                float gap2 = gapFactor * width;
+                int far = (n + 1) / 2; // the outermost slot index either side
+                const float maxHalf = 100f;
+                float needR2 = gap2 / (2f * Mathf.Sin(Mathf.Min(maxHalf / far, 89f) * 0.5f * Mathf.Deg2Rad));
+                float r2 = Mathf.Max(r0, needR2);
+                float step2 = 2f * Mathf.Asin(Mathf.Clamp01(gap2 / (2f * r2)));
+                for (int i = 0; i < n; i++)
+                {
+                    int k = i / 2 + 1;
+                    float a = baseAngle + (i % 2 == 0 ? -1f : 1f) * k * step2;
+                    spots2[i] = center + new Vector2(Mathf.Sin(a), Mathf.Cos(a)) * r2;
+                }
+                return spots2;
+            }
             var spots = new Vector2[Mathf.Max(0, n)];
             if (n <= 0) return spots;
             if (n == 1)

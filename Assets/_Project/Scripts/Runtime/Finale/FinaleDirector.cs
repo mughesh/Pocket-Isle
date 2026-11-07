@@ -822,7 +822,10 @@ namespace Diorama
             // Step 17 H: a front arc round the statue, no two footprints overlapping (they huddled on one row in front of
             // it, Riverloom clipping into Toastling).
             float width = PartyWidthTiles(n);
-            var spots = FinaleLogic.HallArc(Center, n, width, statueClearTiles + width * 0.5f, hallGapFactor);
+            // Nov 7: the explorer's spot in front of the statue stays free (an Isling stood in the explorer).
+            Vector2? keepFree = explorer != null ? (Vector2)explorer.Tile : (Vector2?)null;
+            var spots = FinaleLogic.HallArc(Center, n, width, statueClearTiles + width * 0.5f, hallGapFactor, keepFree);
+            if (keepFree.HasValue) Debug.Log($"[FinaleDirector] Hall of Fame: the explorer's tile {explorer.Tile} stays free (the party stands either side).");
             Debug.Log($"[FinaleDirector] Hall of Fame arc: {n} Islings, widest {width:0.0} tiles, closest centres {(n > 1 ? FinaleLogic.MinGap(spots) : 0f):0.0} tiles " +
                       $"(need {hallGapFactor * width:0.0}), radius {(n > 0 ? Vector2.Distance(spots[0], Center) : 0f):0.0} tiles.");
             for (int i = 0; i < n; i++)
@@ -983,10 +986,10 @@ namespace Diorama
         public Vector2 bannerAt = new Vector2(0.17f, 0.03f);
         [Tooltip("The whole roll takes this long (s); Skip still ends it.")]
         public float creditsSeconds = 13f;
-        [Tooltip("Mugesh's cut-out standee beside the banner (set at build and Play from Assets/_Project/Art/Credits/Mugesh.png when it exists; empty = no standee).")]
+        [Tooltip("Mugesh's cut-out standee beside the banner (Nov 7: the round portrait; set at build and Play from Assets/_Project/Art/Credits/CreditsPortrait.png when it exists; empty = no standee).")]
         public Texture2D standee;
         [Tooltip("The standee's height (m at island scale 1).")]
-        public float standeeHeight = 0.2f;
+        public float standeeHeight = 0.15f;
 
         /// <summary>
         /// Step 17 J (was the step 16 plaque over the Heart): a wide slate banner behind the island, the credits rolling
@@ -1002,7 +1005,7 @@ namespace Diorama
             var cut = standee != null ? new CreditsStandee(island.transform, standee, island.gameObject.layer) : null;
             Sfx(AudioIds.CreditsTablet, AudioIds.StatueSocket, BannerWorld);
             Debug.Log($"[FinaleDirector] Credits: a banner behind the island, {lines.Length} lines rolling up, {bannerLines} at a time, {creditsSeconds:0.#} s; " +
-                      $"{(cut != null ? $"standee {standee.name}" : "no standee (no Art/Credits/Mugesh.png)")}.");
+                      $"{(cut != null ? $"standee {standee.name}" : "no standee (no Art/Credits/CreditsPortrait.png)")}.");
             for (float t = 0f; t < creditsSeconds && !_skip; t += Time.deltaTime)
             {
                 float alpha = Mathf.Clamp01(t / 0.6f) * Mathf.Clamp01((creditsSeconds - t) / 0.6f);
