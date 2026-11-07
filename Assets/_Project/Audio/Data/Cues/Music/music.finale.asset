@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: music.finale
   m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
   id: music.finale
-  clips: []
-  volume: 0.6
+  clips:
+  - {fileID: 8300000, guid: 0b437c8145ed0384390ae99b14d81a0b, type: 3}
+  volume: 0.4
   volumeJitter: 0
   pitchMin: 1
   pitchMax: 1
@@ -23,13 +24,14 @@ MonoBehaviour:
   spatial: 0
   minDistance: 0.1
   maxDistance: 1.5
-  loop: 1
+  loop: 0
+  restSeconds: 0
   maxVoices: 1
   minInterval: 0
   priority: 0
-  awaitingClips: 1
-  notes: 'Awaiting Lyria: drop the track in Clips/Music/, cut the loop with Audio
-    Lab > Loop tool, add the _loop clip here.'
+  awaitingClips: 0
+  notes: 'Step 20: the Heart wakes -> credits, once (First Light from the swell at
+    0:41.5).'
   review:
     status: 0
     note: 

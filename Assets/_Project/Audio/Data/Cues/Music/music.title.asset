@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: music.title
   m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
   id: music.title
-  clips: []
-  volume: 0.6
+  clips:
+  - {fileID: 8300000, guid: 50bce0ee95002ae49b9709d66b8f0a94, type: 3}
+  volume: 0.25
   volumeJitter: 0
   pitchMin: 1
   pitchMax: 1
@@ -23,13 +24,13 @@ MonoBehaviour:
   spatial: 0
   minDistance: 0.1
   maxDistance: 1.5
-  loop: 1
+  loop: 0
+  restSeconds: 0
   maxVoices: 1
   minInterval: 0
   priority: 0
-  awaitingClips: 1
-  notes: 'Awaiting Lyria: drop the track in Clips/Music/, cut the loop with Audio
-    Lab > Loop tool, add the _loop clip here.'
+  awaitingClips: 0
+  notes: 'Step 20: title screen, once (cut from First Light 0:00-0:43, fades itself).'
   review:
     status: 0
     note: 

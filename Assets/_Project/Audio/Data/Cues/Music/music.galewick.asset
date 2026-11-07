@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
   id: music.galewick
   clips:
-  - {fileID: 8300000, guid: 5c505b59616a210488c548116ab58f99, type: 3}
+  - {fileID: 8300000, guid: 78892af0e54e98f43b77445b8e40ed4f, type: 3}
   volume: 0.25
   volumeJitter: 0
   pitchMin: 1
@@ -30,7 +30,8 @@ MonoBehaviour:
   minInterval: 0
   priority: 0
   awaitingClips: 0
-  notes: 'Step 18: First Light at the Summit (Mugesh). Plays once, 45 s rest, again.'
+  notes: 'Step 20: Steps Through Tall Grass. Galewick restored only (unless Realm
+    music: always).'
   review:
     status: 0
     note: 
