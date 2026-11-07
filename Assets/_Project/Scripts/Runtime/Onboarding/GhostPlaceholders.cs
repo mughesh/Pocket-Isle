@@ -43,6 +43,16 @@ namespace Diorama
             "palm_lift", "grab_palm_up",
         };
 
+        /// <summary>
+        /// Step 17 F10: the rig's hand root has its fingers along local -Y and the back of the hand along +Z, not +Z / +Y as
+        /// <see cref="Key.fingers"/> / <see cref="Key.dorsal"/> assume: "palm up, fingers forward" came out as a vertical
+        /// palm facing the player (the evolution ghost read as "stop"). These clips get the root turned so the keys mean
+        /// what they say. Only the palm-up clips (renders checked); the others were tuned by eye against the old mapping.
+        /// </summary>
+        static readonly Quaternion MeshFix = Quaternion.Euler(-90f, 0f, 0f);
+
+        static bool MeshAxes(string name) => name == "grab_palm_up" || name == "palm_lift";
+
         /// <summary>Builds a placeholder clip from the right hand's rest pose (joint-local), or null for an unknown name.</summary>
         public static GhostHandClip Make(string name, Quaternion[] bindRot, Vector3[] bindPos)
         {
@@ -80,7 +90,7 @@ namespace Diorama
                 var frame = new GhostFrame
                 {
                     rootPos = k.pos,
-                    rootRot = Quaternion.LookRotation(k.fingers, k.dorsal),
+                    rootRot = Quaternion.LookRotation(k.fingers, k.dorsal) * (MeshAxes(name) ? MeshFix : Quaternion.identity),
                     rot = (Quaternion[])bindRot.Clone(),
                     pos = (Vector3[])bindPos.Clone(),
                 };
@@ -424,7 +434,8 @@ namespace Diorama
                     seconds = 3.2f;
                     keyTime = 0.26f;
                     Vector3 f = new Vector3(0f, -0.45f, 1f), d = new Vector3(0f, 1f, 0.45f);
-                    Vector3 lift = new Vector3(0f, 0.07f, -0.1f), flat = new Vector3(0f, 0.1f, 1f);
+                    // Step 17 F10: ends palm flat and up, about 10 cm above the rim's front edge (was 7 cm up, 10 cm out).
+                    Vector3 lift = new Vector3(0f, 0.1f, -0.05f), flat = new Vector3(0f, 0.1f, 1f);
                     Key Cup(float t, Vector3 p, Vector3 dorsal) => new Key
                     {
                         t = t, pos = p, fingers = flat, dorsal = dorsal,

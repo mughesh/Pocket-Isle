@@ -93,6 +93,9 @@ namespace Diorama
         /// <summary>A lesson chain is running.</summary>
         public static bool Running => _instance != null && _instance._runner != null && _instance._runner.IsRunning;
 
+        /// <summary>Step 17: the running lesson's id (move, twoHands, ...), or null.</summary>
+        public static string Lesson => _instance != null ? _instance.CurrentId : null;
+
         /// <summary>A lesson starts teaching: show its ghost.</summary>
         public event Action<LessonData> LessonShown;
         /// <summary>The lesson being taught ended (done = true with praise; false = skipped, rewound or interrupted).</summary>

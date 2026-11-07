@@ -204,7 +204,17 @@ namespace Diorama
 
         void Place(float t)
         {
-            Vector3 goal = _away ? TargetLocal(_targetWorld) : HomeLocal();
+            // Step 17 F11: the move and resize lessons: above the back centre, never near a corner handle (the bubble covered
+            // the front-right handle and the ghost hand there).
+            bool backPark = BackParkLesson;
+            if (backPark != _backPark)
+            {
+                _backPark = backPark;
+                _flyFrom = transform.localPosition;
+                _flyStart = Time.time;
+                Debug.Log(backPark ? $"[LanternSpirit] Lesson {Onboarding.Lesson}: parked above the back centre (clear of the corner handles)." : "[LanternSpirit] Back from the back centre.");
+            }
+            Vector3 goal = backPark ? BackLocal() : _away ? TargetLocal(_targetWorld) : HomeLocal();
             // A target that jumps (a pod flies off, a new target) starts a fresh flight from here.
             if (_away && (goal - _lastGoal).magnitude > 0.06f && Time.time - _flyStart > flySeconds)
             {
@@ -270,6 +280,26 @@ namespace Diorama
                 if (wasLeft != _homeLeft) Debug.Log($"[LanternSpirit] Home: the {(_homeLeft ? "left (the right is in the objective's way)" : "right")} corner.");
             }
             return HomeLocal(_homeLeft);
+        }
+
+        [Tooltip("Step 17 F11: during the move and resize lessons the Spirit floats above the island's back centre: this high over the cap and this far in from the back edge (island-local m).")]
+        public Vector2 backPark = new Vector2(0.12f, 0.04f);
+
+        bool _backPark;
+
+        static bool BackParkLesson
+        {
+            get
+            {
+                var id = Onboarding.Lesson;
+                return id == "move" || id == "twoHands";
+            }
+        }
+
+        Vector3 BackLocal()
+        {
+            var b = island.LocalBounds;
+            return new Vector3(b.center.x, island.map.capHeight + backPark.x, b.min.z + backPark.y);
         }
 
         Vector3 HomeLocal(bool left)

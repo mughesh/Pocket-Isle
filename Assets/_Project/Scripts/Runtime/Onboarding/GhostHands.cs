@@ -36,6 +36,14 @@ namespace Diorama
         [Range(0f, 1f)] public float aboveIslandFront = 0.55f;
         [Tooltip("Above-target demos float this high over the target (m).")]
         public float aboveTargetHeight = 0.07f;
+        [Header("Thumb demos (step 17 F9)")]
+        [Tooltip("Thumb microgesture demos (thumb_* clips placed AboveIsland) sit beside the island's front rim on the dominant side, where the real hand rests, never over the map. Offset from that front corner: x outward, y up, z toward the player (world m).")]
+        public Vector3 thumbRimOffset = new Vector3(0.06f, 0.05f, 0.05f);
+        [Tooltip("Thumb demos are this much bigger than the lesson's scale (they read tiny over the map).")]
+        public float thumbScale = 1.6f;
+        [Tooltip("A gold dot on the ghost's thumb tip and this many trail dots behind it (the slide).")]
+        public int thumbTrailDots = 6;
+        public float thumbDotSize = 0.009f;
         [Tooltip("How a wrist-anchored clip (thumb gestures) is shown: where the fingers and the back of the hand point (right hand; x right, y up, z away from the player).")]
         public Vector3 wristFingers = new Vector3(-0.35f, 0.25f, 1f);
         public Vector3 wristDorsal = new Vector3(1f, 0.35f, 0.25f);
@@ -152,6 +160,7 @@ namespace Diorama
             LoadDeviceClips();
             MakePlaceholders();
             MakeDot();
+            MakeThumbDots();
             Dialogue.RegisterTarget("ghost", () => KeyPoint, k => { }, () => 0f);
             // Step 9h: the island-move ghost grabs the near rim's corner on the dominant side (island +X is the player's left).
             Dialogue.RegisterTarget("rimCorner", RimCorner, k => { }, () => 0f);
@@ -431,7 +440,8 @@ namespace Diorama
                 if (release.HasValue) release = release.Value + side * asideOffset;
             }
             float placeScale = (_request.place == GhostPlace.AtTarget || _request.place == GhostPlace.IslandSides || _request.place == GhostPlace.RimCorners) && library != null ? library.targetScale : 1f;
-            float scale = _request.scale * placeScale * Mathf.Max(0.05f, _clip.size) * Mathf.Lerp(1f, struggleScale, _struggle) * (_request.aside ? asideScale : 1f);
+            float scale = _request.scale * placeScale * Mathf.Max(0.05f, _clip.size) * Mathf.Lerp(1f, struggleScale, _struggle) * (_request.aside ? asideScale : 1f)
+                          * (ThumbDemo ? thumbScale : 1f);
 
             var a = _request.both ? _left ?? _right : _request.left ? _left ?? _right : _right ?? _left;
             var b = _request.both ? (a == _left ? _right : _left) : null;
@@ -472,8 +482,84 @@ namespace Diorama
             _releaseValid = release.HasValue;
             if (release.HasValue) _releaseWorld = release.Value;
             UpdateDot(point, t / Mathf.Max(0.01f, _clip.Duration), alpha);
+            UpdateThumbDots(ThumbDemo ? a : null, alpha, scale);
             Spark(grab, t, point, alpha, scale);
         }
+
+        // ---- step 17 F9: thumb demos ----
+
+        /// <summary>A thumb microgesture demo over the island (now shown beside the front rim, bigger, with a thumb-tip trail).</summary>
+        bool ThumbDemo => _request.place == GhostPlace.AboveIsland && _request.clip != null && _request.clip.StartsWith("thumb_", System.StringComparison.Ordinal);
+
+        Transform[] _thumbDots;
+        MeshRenderer[] _thumbRenderers;
+        MaterialPropertyBlock _thumbBlock;
+        Vector3[] _thumbTrail;
+        int _thumbHead, _thumbCount;
+
+        void MakeThumbDots()
+        {
+            int n = Mathf.Max(1, thumbTrailDots + 1);
+            _thumbDots = new Transform[n];
+            _thumbRenderers = new MeshRenderer[n];
+            _thumbTrail = new Vector3[n];
+            _thumbBlock = new MaterialPropertyBlock();
+            for (int i = 0; i < n; i++)
+            {
+                var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                go.name = i == 0 ? "Ghost Thumb Dot" : $"Ghost Thumb Trail {i}";
+                Destroy(go.GetComponent<Collider>());
+                go.transform.SetParent(transform, false);
+                _thumbDots[i] = go.transform;
+                _thumbRenderers[i] = go.GetComponent<MeshRenderer>();
+                _thumbRenderers[i].sharedMaterial = material;
+                _thumbRenderers[i].shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                _thumbRenderers[i].enabled = false;
+            }
+        }
+
+        static readonly int FillId = Shader.PropertyToID("_Fill"), RimId = Shader.PropertyToID("_Rim"),
+            FillAlphaId = Shader.PropertyToID("_FillAlpha"), GlowId = Shader.PropertyToID("_Glow");
+        static readonly Color ThumbGold = new Color(1f, 0.8f, 0.3f);
+
+        /// <summary>A glowing gold dot on the ghost thumb's tip, and a short fading trail of where it was (the slide).</summary>
+        void UpdateThumbDots(Ghost g, float alpha, float scale)
+        {
+            if (_thumbDots == null) return;
+            var tip = g != null ? g.joints[(int)HandJointId.HandThumbTip] : null;
+            bool on = tip != null && alpha > 0.002f;
+            if (!on)
+            {
+                foreach (var r in _thumbRenderers) r.enabled = false;
+                _thumbCount = 0;
+                return;
+            }
+            int n = _thumbTrail.Length;
+            _thumbHead = (_thumbHead + 1) % n;
+            _thumbTrail[_thumbHead] = tip.position;
+            _thumbCount = Mathf.Min(_thumbCount + 1, n);
+            float size = thumbDotSize * Mathf.Max(0.5f, scale);
+            for (int i = 0; i < n; i++)
+            {
+                var r = _thumbRenderers[i];
+                // Trail dots are only drawn while the tip moves (a still thumb stacks them on the dot).
+                Vector3 p = _thumbTrail[(_thumbHead - i + n) % n];
+                bool show = i < _thumbCount && (i == 0 || (p - _thumbTrail[_thumbHead]).sqrMagnitude > Sq(size * 0.4f * i));
+                r.enabled = show;
+                if (!show) continue;
+                float k = 1f - i / (float)n;
+                _thumbDots[i].position = p;
+                _thumbDots[i].localScale = Vector3.one * size * (i == 0 ? 1f + 0.2f * Mathf.Sin(Time.time * 10f) : 0.4f + 0.5f * k);
+                _thumbBlock.SetColor(FillId, ThumbGold);
+                _thumbBlock.SetColor(RimId, new Color(1f, 0.93f, 0.6f));
+                _thumbBlock.SetFloat(FillAlphaId, 0.85f);
+                _thumbBlock.SetFloat(GlowId, 1.6f);
+                _thumbBlock.SetFloat(AlphaId, alpha * (i == 0 ? 1f : k * 0.8f));
+                r.SetPropertyBlock(_thumbBlock);
+            }
+        }
+
+        static float Sq(float x) => x * x;
 
         /// <summary>Step 16: the ghost's alpha share for a hand-near amount (0 = no hand near, 1 = a hand at the target).</summary>
         public static float NearAlpha(float near, float nearAlpha) => Mathf.Lerp(1f, nearAlpha, Mathf.Clamp01(near));
@@ -535,6 +621,17 @@ namespace Diorama
                 case GhostPlace.AboveIsland:
                 {
                     if (island == null) return false;
+                    if (ThumbDemo)
+                    {
+                        // Step 17 F9: beside the front rim's dominant-side corner, where the real hand rests (island +X is
+                        // the player's left), never over the map.
+                        var half = island.FootprintHalfSize;
+                        var it = island.transform;
+                        Vector3 corner = it.TransformPoint(new Vector3(_request.left ? half.x : -half.x, island.CapTopLocal, half.y));
+                        Vector3 outward = it.right * (_request.left ? 1f : -1f);
+                        point = corner + outward * thumbRimOffset.x + Vector3.up * thumbRimOffset.y + it.forward * thumbRimOffset.z;
+                        break;
+                    }
                     var b = island.LocalBounds;
                     var local = new Vector3(b.center.x, island.CapTopLocal, b.center.z + b.extents.z * aboveIslandFront);
                     point = island.transform.TransformPoint(local) + Vector3.up * aboveIslandHeight;
@@ -743,6 +840,7 @@ namespace Diorama
                 Hidden(_left);
                 Hidden(_right);
                 if (_dotRenderer != null) _dotRenderer.enabled = false;
+                if (_thumbRenderers != null) foreach (var r in _thumbRenderers) r.enabled = false;
             }
         }
 

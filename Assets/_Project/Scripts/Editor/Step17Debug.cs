@@ -49,6 +49,28 @@ namespace Diorama.EditorTools
             Debug.Log($"[Step17Debug] Pressed '{Arg}'.");
         }
 
+        /// <summary>
+        /// Shows a ghost clip frozen at a point (arg = "clip,u[,target]"): with a target id, AtTarget (aside, as the
+        /// evolution does); without, AboveIsland. "off" ends it. Then shots: front (seated) and side.
+        /// </summary>
+        public static void GhostAt()
+        {
+            var g = Object.FindFirstObjectByType<GhostHands>();
+            if (g == null) return;
+            if (Arg == "off")
+            {
+                g.debugFreeze = -1f;
+                g.Hide();
+                return;
+            }
+            var a = Arg.Split(',');
+            float u = a.Length > 1 && float.TryParse(a[1], out var f) ? f : 1f;
+            g.debugFreeze = u;
+            if (a.Length > 2) g.Show(a[0], GhostPlace.AtTarget, a[2], 1f, DominantHand.Left, false, aside: true);
+            else g.Show(a[0], GhostPlace.AboveIsland, "ghost", 0.6f, DominantHand.Left, false);
+            Debug.Log($"[Step17Debug] Ghost {a[0]} frozen at {u:0.00}{(a.Length > 2 ? $" at {a[2]}" : "")}.");
+        }
+
         /// <summary>Opens the game menu (its private Open, as the menu stone does).</summary>
         public static void Menu()
         {
