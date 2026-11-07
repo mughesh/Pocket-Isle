@@ -116,7 +116,7 @@ namespace Diorama
 
         /// <summary>Pods may glow and be grabbed for evolving: no battle, not the lodge, no finale, no scene change, no tutorial.</summary>
         bool Available => !encounters.InBattle && !pods.InBattle && !pods.LodgeMode && !FinaleDirector.Running && !SceneSwap.IsBusy &&
-                          !Onboarding.Running && !GameMenu.IsOpen && !JournalBoard.IsOpen && !KeeperHall.ShardUp && !ShardCarried;
+                          !Onboarding.Running && !GameMenu.IsOpen && !JournalBoard.IsOpen && !KeeperHall.ShardUp && !KeeperHall.EvolutionHeld && !ShardCarried && !StatueSocket.SceneUp;
 
         static readonly string[] ShardIds = { ShardHolder.FireId, ShardHolder.WindId, ShardHolder.WaterId };
 

@@ -89,6 +89,37 @@ namespace Diorama
             return mesh;
         }
 
+        static SpiritSunrays _first;
+
+        void OnEnable()
+        {
+            if (_first == null) _first = this;
+        }
+
+        void OnDisable()
+        {
+            if (_first == this) _first = null;
+        }
+
+        /// <summary>
+        /// Nov 7: the same sunrays round anything else this frame (the Keeper's floating shard): facing the camera, turning
+        /// slowly, <paramref name="radius"/> world metres long. Needs a Spirit's sunrays in the scene for the mesh and material.
+        /// </summary>
+        public static void DrawAt(Vector3 centre, float radius, float intensity, int layer)
+        {
+            var s = _first;
+            if (s == null || s._mesh == null || s.material == null) return;
+            var cam = Camera.main;
+            if (cam == null) return;
+            var face = Quaternion.LookRotation(centre - cam.transform.position, cam.transform.up) * Quaternion.Euler(0f, 0f, -Time.time * s.spin * 1.5f * 360f);
+            var block = s._shardBlock ??= new MaterialPropertyBlock();
+            block.SetFloat(IntensityId, intensity);
+            var rp = new RenderParams(s.material) { layer = layer, shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off, matProps = block };
+            Graphics.RenderMesh(rp, s._mesh, 0, Matrix4x4.TRS(centre, face, Vector3.one * radius));
+        }
+
+        MaterialPropertyBlock _shardBlock;
+
         void LateUpdate()
         {
             bool on = !string.IsNullOrEmpty(Dialogue.CurrentObjective) && spirit.Appear > 0.5f && !SceneSwap.IsBusy;

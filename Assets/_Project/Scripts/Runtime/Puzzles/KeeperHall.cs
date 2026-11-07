@@ -117,7 +117,12 @@ namespace Diorama
         public float autoAfter = 12f;
         public float handNearHold = 0.2f;
         /// <summary>Step 11d: the shard's ghost pinches it (thumb + index), not a fist.</summary>
-        public const string ShardGhost = "pinch_lift";
+        public const string ShardGhost = "poke";
+
+        [Tooltip("Nov 7 (Mugesh: not too big): the poke ghost's size at the floating shard.")]
+        public float shardGhostScale = 0.65f;
+        [Tooltip("Nov 7: the sunrays round the floating shard (x its offer size).")]
+        public float shardRaysSize = 2.2f;
         [Tooltip("Flinches back when it stomps at the start of the battle.")]
         public LanternSpirit spirit;
 
@@ -167,7 +172,6 @@ namespace Diorama
         readonly bool[] _wasPinching = { true, true };
         readonly bool[] _wasFist = { true, true };
         float _shardWait;
-        GuideRings _shardRing;
         float _snortAt;
 
         /// <summary>The scene's Keeper hall for <paramref name="id"/>, inactive ones too (editor tools, the bridge).</summary>
@@ -213,6 +217,7 @@ namespace Diorama
         /// </summary>
         IEnumerator WaitForEvolution()
         {
+            _evolveOpen = true;
             var g = GrowthDirector.Instance;
             if (g == null) yield break;
             // The Growth director needs a frame or two to see the due pod once the battle is over.
@@ -229,6 +234,14 @@ namespace Diorama
             yield return new WaitForSeconds(1f);
             Debug.Log(waited >= evolveWaitMax ? $"[KeeperHall] Not evolved after {evolveWaitMax:0} s: the shard rises anyway." : "[KeeperHall] Evolved: the shard rises.");
         }
+
+        bool _evolveOpen;
+
+        /// <summary>
+        /// Nov 7: a Keeper is calming (its win lines, its thanks): no evolution yet, it would cut the Keeper's words off
+        /// (<see cref="WaitForEvolution"/> opens it right after).
+        /// </summary>
+        public static bool EvolutionHeld => _live.Exists(h => h != null && h._phase == Phase.Victory && !h._evolveOpen);
 
         /// <summary>Step 17 E: the Keeper's shard was taken (held by the Spirit or placed in the statue): the way out shows from then.</summary>
         public bool ShardTaken => PuzzleState.Stage(ownShard) >= 1 || PuzzleState.IsSolved(ownShard);
@@ -300,7 +313,6 @@ namespace Diorama
             if (_flame != null) Destroy(_flame.gameObject);
             if (_quad != null) Destroy(_quad);
             _shard?.Destroy();
-            _shardRing?.Destroy();
             if (realmMap != null)
             {
                 realmMap.SetPropHidden(templeGate, false);
@@ -739,6 +751,7 @@ namespace Diorama
         IEnumerator Victory()
         {
             _phase = Phase.Victory;
+            _evolveOpen = false;
             EnsureModel();
             _model.gameObject.SetActive(true);
             _model.View.Revive();
@@ -783,6 +796,9 @@ namespace Diorama
             Vector3 mouth = island.transform.TransformPoint(island.TileToLocal(forgeMouth, island.Content.capHeight + forgeMouthHeight * island.map.tileSize));
             if (fx != null) fx.Burst(mouth, 50, glowColor, TileWorld * 1.4f, 1f, TileWorld * 0.07f, Vector3.up * TileWorld);
             HallLit?.Invoke();
+            // Nov 7 (Mugesh: evolve when getting the shard from the tower): the Keeper thanks the starter here, in the hall
+            // (its line is a hall line: outside it was never said), then the pod evolves before the shard rises.
+            yield return Thanks();
             yield return WaitForEvolution();
             Debug.Log($"[KeeperHall] The {(forgeFlame ? "forge ignites" : "hall lights up")}; {ownShard} rises.");
             yield return new WaitForSeconds(0.6f);
@@ -816,8 +832,9 @@ namespace Diorama
             _shardHome = hover;
             _shardWait = 0f;
             if (!string.IsNullOrEmpty(shardLine)) Dialogue.Say(shardLine);
-            if (ghosts != null) ghosts.Show(ShardGhost, GhostPlace.AtTarget, shardTarget, 1f, DominantHand.Left, false, aside: true);
-            FocusHighlight.SetPending(() => _shardHovering ? island.transform.TransformPoint(_shardLocal) : (Vector3?)null, 0.05f * island.transform.lossyScale.x);
+            // Nov 7 (Mugesh: the gold ball under the shard looked wrong; poke it with the gold dot on the fingertip, small ghost):
+            // sunrays round the shard, no focus ball or ring, and a small poke ghost on the shard.
+            if (ghosts != null) ghosts.Show(ShardGhost, GhostPlace.AtTarget, shardTarget, shardGhostScale, DominantHand.Left, false);
             explorer.Locked = false;
             Debug.Log($"[KeeperHall] {ownShard} floats in front of the player: touch it (fingertip or palm), grab it, or look + pinch.");
         }
@@ -856,7 +873,6 @@ namespace Diorama
                 var pick = new HeadGaze.ConePick(ray, -1);
                 pick.Consider(0, world, Mathf.Max(HeadGaze.MinRadius * island.transform.lossyScale.x, 0.05f * island.transform.lossyScale.x));
                 gazed = pick.Best == 0;
-                if (gazed) FocusHighlight.Hover(world, 0.05f * island.transform.lossyScale.x);
             }
             for (int h = 0; h < 2; h++)
             {
@@ -906,16 +922,12 @@ namespace Diorama
             return false;
         }
 
-        /// <summary>Step 11d: a gold ring and glow round the floating shard while it waits.</summary>
+        /// <summary>Nov 7: sunrays round the floating shard while it waits (they replace the gold ring and ball).</summary>
         void DrawShardRing(bool on)
         {
-            if (beaconMaterial == null || island == null || island.map == null || island.Content == null) return;
-            if (_shardRing == null) _shardRing = new GuideRings("Keeper Shard Focus", island, beaconMaterial, 1, fx);
-            float tileMetres = Mathf.Max(1e-5f, island.map.tileSize * island.Zoom);
-            Vector2 tile = island.LocalToTile(_shardLocal);
-            float height = (_shardLocal.y - island.CapTopLocal) / tileMetres - 0.04f / tileMetres;
-            float pulse = 0.85f + 0.2f * Mathf.Sin(Time.time * 3f);
-            _shardRing.Draw(0, on, new Vector3(tile.x, height, tile.y), 0.1f / tileMetres, 1.4f * pulse, 0.05f / tileMetres * pulse);
+            if (!on) return;
+            float metres = BigShard * shardRaysSize * (1f + 0.08f * Mathf.Sin(Time.time * 2.6f));
+            SpiritSunrays.DrawAt(island.transform.TransformPoint(_shardLocal), metres, 0.9f, island.gameObject.layer);
         }
 
         /// <summary>The shard is taken (a hand, look + pinch, or the bridge): it flies into the holder.</summary>
@@ -923,6 +935,8 @@ namespace Diorama
         {
             if (_phase != Phase.Shard || !_shardHovering) return;
             Debug.Log($"[KeeperHall] {ownShard} taken ({how}): it charges, blasts, then flies to the Spirit.");
+            // Nov 7: "The wind shard! Touch it!" said after it was touched: the ask goes once it's done.
+            if (!string.IsNullOrEmpty(shardLine)) Dialogue.Cancel(shardLine);
             StartCoroutine(ChargeThenFly());
         }
 
@@ -1021,7 +1035,6 @@ namespace Diorama
             yield return new WaitForSeconds(waveSeconds * 0.5f + 0.2f);
             if (realm != null) realm.Remember(realmMap, 1f);
             if (save != null) save.Save($"{realmName} restored", true);
-            yield return Thanks();
         }
 
         /// <summary>
