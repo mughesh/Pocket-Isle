@@ -180,6 +180,15 @@ namespace Diorama.EditorTools
             Debug.Log(sb.ToString());
         }
 
+        /// <summary>Edit mode, step 18: rebuilds the swipe-then-tap ghost (a 0.3 s glide into the tap) and saves it.</summary>
+        public static void RebuildSwipeTap()
+        {
+            if (UnityEditor.EditorApplication.isPlaying) return;
+            var clip = Step12aSetup.BuildSwipeTap();
+            UnityEditor.AssetDatabase.SaveAssets();
+            Debug.Log(clip != null ? $"[Step18Debug] {clip.clipName}: {clip.frames.Count} frames ({clip.frames.Count / (float)clip.fps:0.00} s)." : "[Step18Debug] Swipe-tap ghost: MISSING source clips.");
+        }
+
         /// <summary>Play mode: sets a float field on the first object of a type (arg = "Type.field=value").</summary>
         public static void SetFloat()
         {

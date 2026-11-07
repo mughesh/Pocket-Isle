@@ -203,10 +203,85 @@ namespace Diorama.EditorTools
                     if (i % 4 < keepOf4) c.frames.Add(from.frames[i]);
                 for (int i = 0; i < hold; i++) c.frames.Add(from.frames[b - 1]);
             }
-            for (int s = 0; s < swipes; s++) Add(swipe, 3, s == swipes - 1 ? (swipes == 1 ? 24 : 12) : 2);
+            if (swipes == 1)
+            {
+                // Step 18 (Mugesh: the swipe and the tap looked like two separate actions): the swipe at its recorded speed
+                // (clearer), then a 0.3 s glide from its last pose into the tap's first moving frame (it held 0.8 s, then
+                // the tap's idle lead-in and a pose snap), then the tap. "Slide, glide, tap".
+                int s0 = Mathf.RoundToInt(swipe.StartTime * swipe.fps), s1 = LastMoving(swipe);
+                for (int i = s0; i <= s1; i++) c.frames.Add(swipe.frames[i]);
+                int t0 = FirstMoving(tap);
+                var from = c.frames[c.frames.Count - 1];
+                int glide = Mathf.RoundToInt(GlideSeconds * swipe.fps);
+                for (int i = 1; i <= glide; i++) c.frames.Add(Blend(from, tap.frames[t0], Mathf.SmoothStep(0f, 1f, i / (float)(glide + 1))));
+                int b = Mathf.Max(t0 + 1, tap.frames.Count - Mathf.RoundToInt(tap.trimEnd * tap.fps));
+                for (int i = t0; i < b; i++) c.frames.Add(tap.frames[i]);
+                for (int i = 0; i < 8; i++) c.frames.Add(tap.frames[b - 1]);
+                c.holdEnd = 0.6f;
+                return GhostClipTools.SaveAsset(c);
+            }
+            for (int s = 0; s < swipes; s++) Add(swipe, 3, s == swipes - 1 ? 12 : 2);
             Add(tap, 4, 8);
             c.holdEnd = 0.6f;
             return GhostClipTools.SaveAsset(c);
+        }
+
+        /// <summary>Step 18: the swipe-to-tap glide (s).</summary>
+        public const float GlideSeconds = 0.3f;
+
+        /// <summary>The frame just before the clip's joints start to move after its start (the tap's idle lead-in skipped).</summary>
+        internal static int FirstMoving(GhostHandClip clip, float degrees = 10f)
+        {
+            int a = Mathf.RoundToInt(clip.StartTime * clip.fps);
+            for (int i = a + 1; i < clip.frames.Count; i++)
+            {
+                float sum = 0f;
+                var p = clip.frames[i - 1].rot;
+                var q = clip.frames[i].rot;
+                if (p == null || q == null) return a;
+                for (int j = 0; j < p.Length && j < q.Length; j++) sum += Quaternion.Angle(p[j], q[j]);
+                if (sum >= degrees) return Mathf.Max(a, i - 2);
+            }
+            return a;
+        }
+
+        /// <summary>The last frame where the clip's joints still move (its settling tail cut), within its trim.</summary>
+        internal static int LastMoving(GhostHandClip clip, float degrees = 5f)
+        {
+            int a = Mathf.RoundToInt(clip.StartTime * clip.fps);
+            int b = Mathf.Max(a + 1, clip.frames.Count - Mathf.RoundToInt(clip.trimEnd * clip.fps)) - 1;
+            for (int i = b; i > a; i--)
+            {
+                float sum = 0f;
+                var p = clip.frames[i - 1].rot;
+                var q = clip.frames[i].rot;
+                if (p == null || q == null) return b;
+                for (int j = 0; j < p.Length && j < q.Length; j++) sum += Quaternion.Angle(p[j], q[j]);
+                if (sum >= degrees) return i;
+            }
+            return b;
+        }
+
+        static GhostFrame Blend(GhostFrame a, GhostFrame b, float t)
+        {
+            var f = new GhostFrame
+            {
+                rootPos = Vector3.Lerp(a.rootPos, b.rootPos, t),
+                rootRot = Quaternion.Slerp(a.rootRot, b.rootRot, t),
+            };
+            if (a.rot != null && b.rot != null && a.rot.Length == b.rot.Length)
+            {
+                f.rot = new Quaternion[a.rot.Length];
+                for (int i = 0; i < f.rot.Length; i++) f.rot[i] = Quaternion.Slerp(a.rot[i], b.rot[i], t);
+            }
+            else f.rot = b.rot;
+            if (a.pos != null && b.pos != null && a.pos.Length == b.pos.Length)
+            {
+                f.pos = new Vector3[a.pos.Length];
+                for (int i = 0; i < f.pos.Length; i++) f.pos[i] = Vector3.Lerp(a.pos[i], b.pos[i], t);
+            }
+            else f.pos = b.pos;
+            return f;
         }
 
         internal static Material GoldMaterial()
