@@ -84,6 +84,11 @@ namespace Diorama
         [Tooltip("Pods active (battle, lodge): a grabbable pod comes this far out of its socket (world m).")]
         public float activePopOut = 0.003f;
         public float cardSeconds = 4f;
+        [Tooltip("Step 18: exploring, a fingertip poke on a rim pod shows its card this long (s).")]
+        public float pokeCardSeconds = 3.5f;
+        [Tooltip("Step 18: the fingertip must be moving toward the pod at least this fast (m/s) as it enters, so a resting " +
+                 "hand never pokes.")]
+        public float pokeApproachSpeed = 0.12f;
 
         /// <summary>A pod was let go while it could be used: slot, island-local position and velocity.</summary>
         public event Action<int, Vector3, Vector3> Thrown;
@@ -214,6 +219,8 @@ namespace Diorama
         Mesh _quad;
         readonly bool[] _wasPinching = { true, true };
         readonly int[] _poked = { -1, -1 };
+        readonly Vector3[] _tipPrev = new Vector3[2];
+        readonly bool[] _tipHad = new bool[2];
         int _gazed = -1;
         bool _rimPaused, _laidOut;
         float _partyGrab, _socketStep;
@@ -424,9 +431,30 @@ namespace Diorama
 
         // ---- per frame ----
 
+        bool _titleHidden;
+
+        /// <summary>
+        /// Step 18: no rim pods under the title (after the finale -> Title the six party pods sat on the rim under Continue /
+        /// New journey / Settings). Hides the pods and their sockets while the title is up.
+        /// </summary>
+        bool HideForTitle()
+        {
+            bool hide = TitleScreen.Showing;
+            if (hide == _titleHidden) return hide;
+            _titleHidden = hide;
+            foreach (var p in _pods)
+                if (p != null) p.gameObject.SetActive(!hide);
+            foreach (var s in _sockets)
+                if (s != null) s.gameObject.SetActive(!hide);
+            if (hide && _card != null && _card.Visible) _card.Hide();
+            Debug.Log($"[PodRack] Rim pods {(hide ? "hidden under the title" : "back")}.");
+            return hide;
+        }
+
         void Update()
         {
             if (!_laidOut) return;
+            if (HideForTitle()) return;
             SyncParty();
             UpdateCradle();
             UpdateDropPreview();
@@ -815,9 +843,12 @@ namespace Diorama
                 var hand = HandRegistry.Get(left ? Handedness.Left : Handedness.Right);
                 bool tracked = HandLookup.TryGetJoint(hand, HandJointId.HandIndexTip, out var tip);
 
-                // Poke: a fingertip entering a pod (not while exploring: the pods are inert then).
+                // Poke: a fingertip entering a pod. Step 18: exploring too, for the card only (the rim pods stay ungrabbable;
+                // he held a hand under the rim for seconds to see an Isling's HP). Exploring, the tip must come in moving
+                // toward the pod, so a hand resting on the rim never pokes, and not from a hand that is grabbing.
                 int poked = -1;
-                if (tracked && !Explore)
+                bool busyHand = handle != null && handle.IsHandBusy(left);
+                if (tracked && (!Explore || !busyHand))
                     for (int i = 0; i < _pods.Length; i++)
                     {
                         var p = _pods[i];
@@ -825,7 +856,22 @@ namespace Diorama
                         if ((tip - p.transform.position).sqrMagnitude < Sq(p.WorldRadius * pokeRadius)) poked = i;
                     }
                 if (poked >= 0 && poked != _poked[h] && LodgeMode && !InBattle) ShowCard(poked, "poke");
+                else if (poked >= 0 && poked != _poked[h] && Explore && poked < Party.Size && _pods[poked].Isling != null && _tipHad[h] &&
+                         Time.deltaTime > 0f)
+                {
+                    var p = _pods[poked];
+                    Vector3 vel = (tip - _tipPrev[h]) / Time.deltaTime;
+                    float toward = Vector3.Dot(vel, (p.transform.position - _tipPrev[h]).normalized);
+                    if (toward >= pokeApproachSpeed * Mathf.Max(0.5f, island.transform.lossyScale.x))
+                    {
+                        ShowCard(poked, "poke while exploring", pokeCardSeconds);
+                        GameAudio.At(Diorama.Audio.AudioIds.LodgePodTick, p.transform.position);
+                    }
+                    else Debug.Log($"[PodRack] A fingertip in {p.name} but not moving toward it ({toward:0.00} m/s): no card.");
+                }
                 _poked[h] = poked;
+                _tipHad[h] = tracked;
+                if (tracked) _tipPrev[h] = tip;
 
                 // Gaze + pinch (not a pinch that grabs a pod).
                 bool pinching = tracked && hand.GetIndexFingerIsPinching();
@@ -851,7 +897,7 @@ namespace Diorama
             }
 
             for (int i = 0; i < _pods.Length; i++)
-                if (_pods[i] != null) _pods[i].Hover = i == _gazed || i == _poked[0] || i == _poked[1] ? 1f : 0f;
+                if (_pods[i] != null) _pods[i].Hover = i == _gazed || !Explore && (i == _poked[0] || i == _poked[1]) ? 1f : 0f;
         }
 
         /// <summary>
@@ -930,7 +976,9 @@ namespace Diorama
 
         static float Sq(float x) => x * x;
 
-        void ShowCard(int slot, string how)
+        void ShowCard(int slot, string how) => ShowCard(slot, how, cardSeconds);
+
+        void ShowCard(int slot, string how, float seconds)
         {
             var p = _pods[slot];
             if (_card == null || p == null || p.Isling == null || MenuUp) return;
@@ -941,7 +989,7 @@ namespace Diorama
             }
             // Follows its pod, its lower edge above the pod (the old fixed spot hid the pod and stayed put when the island moved).
             _card.Show(p.Isling, () => p != null ? p.transform.position + island.transform.up * (p.WorldRadius + PodCard.HalfHeight + 0.012f) +
-                                              island.transform.forward * World(0.02f) : (Vector3?)null, cardSeconds);
+                                              island.transform.forward * World(0.02f) : (Vector3?)null, seconds);
             _cardIslandPos = island.transform.position;
             _cardIslandRot = island.transform.rotation;
             Debug.Log($"[PodRack] Card for {p.Isling.Name} ({how}).");
