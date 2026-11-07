@@ -71,6 +71,50 @@ namespace Diorama.EditorTools
             Debug.Log($"[Step17Debug] Ghost {a[0]} frozen at {u:0.00}{(a.Length > 2 ? $" at {a[2]}" : "")}.");
         }
 
+        /// <summary>
+        /// Step 17 G: holds the main camera as a head leaning in for fine work: 28 cm in front of and 22 cm above the
+        /// island's front middle, shifted sideways by arg cm (the island's right), looking at the near half. "off" stops.
+        /// </summary>
+        public static void Lean()
+        {
+            UnityEditor.EditorApplication.update -= HoldLean;
+            if (Arg == "off") return;
+            _lean = float.TryParse(Arg, out var cm) ? cm / 100f : 0f;
+            UnityEditor.EditorApplication.update += HoldLean;
+            HoldLean();
+            Debug.Log($"[Step17Debug] Leaning in, {_lean * 100f:0} cm to the side.");
+        }
+
+        static float _lean;
+
+        static void HoldLean()
+        {
+            var cam = Camera.main;
+            var island = Object.FindFirstObjectByType<IslandBuilder>();
+            if (!UnityEditor.EditorApplication.isPlaying || cam == null || island == null)
+            {
+                UnityEditor.EditorApplication.update -= HoldLean;
+                return;
+            }
+            var t = island.transform;
+            // Fixed in the world from where the island was when the lean started (a turning island must not drag the head).
+            if (_leanAnchor == null || _leanAnchorFor != _lean)
+            {
+                _leanAnchorFor = _lean;
+                var front = t.TransformPoint(new Vector3(0f, island.CapTopLocal, island.FootprintHalfSize.y));
+                Vector3 fwd = t.forward;
+                fwd.y = 0f;
+                fwd.Normalize();
+                Vector3 right = Vector3.Cross(Vector3.up, fwd);
+                _leanAnchor = (front + fwd * 0.28f + Vector3.up * 0.22f - right * _lean, front - fwd * 0.08f);
+            }
+            cam.transform.position = _leanAnchor.Value.eye;
+            cam.transform.LookAt(_leanAnchor.Value.look);
+        }
+
+        static (Vector3 eye, Vector3 look)? _leanAnchor;
+        static float _leanAnchorFor = float.NaN;
+
         /// <summary>Opens the game menu (its private Open, as the menu stone does).</summary>
         public static void Menu()
         {

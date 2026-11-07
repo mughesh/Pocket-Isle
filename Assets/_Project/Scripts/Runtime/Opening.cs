@@ -493,6 +493,7 @@ namespace Diorama
             {
                 float u = Mathf.SmoothStep(0f, 1f, t / seconds);
                 Vector3 local = Vector3.Lerp(fromLocal, toLocal, u) + Vector3.up * (0.04f * Mathf.Sin(u * Mathf.PI));
+                IslandHandle.MarkPoseWriter("opening");
                 island.transform.SetPositionAndRotation(space != null ? space.TransformPoint(local) : local, Quaternion.Slerp(fromRot, to.rotation, u));
                 yield return null;
             }

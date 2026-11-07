@@ -367,6 +367,7 @@ namespace Diorama
             for (float e = 0f; e < recenterGlideSeconds; e += Time.unscaledDeltaTime)
             {
                 float k = GlideEase(e / recenterGlideSeconds);
+                IslandHandle.MarkPoseWriter($"placer glide: {reason}");
                 t.localPosition = Vector3.LerpUnclamped(fromPos, toPos, k);
                 t.localRotation = Quaternion.SlerpUnclamped(fromRot, toRot, k);
                 yield return null;
@@ -383,6 +384,7 @@ namespace Diorama
         public void Apply(Pose pose, string reason, string source = "rule")
         {
             if (island == null) return;
+            IslandHandle.MarkPoseWriter($"placer: {reason}");
             island.transform.SetPositionAndRotation(pose.position, pose.rotation);
             float top = pose.position.y + TopAbovePivot;
             string eye = Head != null ? $"{Head.position.y - top:F2} m below the eyes" : "";

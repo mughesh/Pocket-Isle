@@ -20,7 +20,8 @@ namespace Diorama
     /// The island always stays level (parallel to the floor).
     /// Its front (+Z: the Spirit, runes and pods side) always turns to face the head (yaw only, head position projected
     /// on the floor plane): while held, after release, and when idle if the player has shifted more than
-    /// <see cref="reFaceAngle"/> for <see cref="idleSeconds"/> (not during the battle zoom, a grab or a lesson ghost).
+    /// <see cref="reFaceAngle"/> for <see cref="idleSeconds"/> (not during the battle zoom, a grab or a lesson ghost; step 17:
+    /// that idle turn is off by default, <see cref="idleReface"/>).
     /// One hand: the island follows the hand, turning around it. Two hands: uniform scale around the hands' midpoint,
     /// scale clamped relative to the placer's scale; no manual yaw.
     /// Also reports which hands are busy with the island so microgestures can ignore them.
@@ -51,6 +52,8 @@ namespace Diorama
         public bool autoFace = true;
         [Tooltip("Easing time while held or just released (s).")]
         public float faceSeconds = 0.25f;
+        [Tooltip("Step 17 G: turn to face the head by itself when idle (off: leaning in 10 cm for fine work turned the island 10-12 deg, which read as a tilt; the island root moves only by a grab, a recenter or the first placement). The turn while held and after a release stays.")]
+        public bool idleReface;
         [Tooltip("Idle: turn back when the head is more than this far off the front (degrees)... (step 14i: was 35, a new name so the scene takes 6)")]
         public float reFaceAngle = 6f;
         [Tooltip("...for longer than this (s).")]
@@ -328,13 +331,15 @@ namespace Diorama
             bool ghost = ghosts != null && ghosts.IsShowing && !ghosts.previewing;
             if (!_turning)
             {
-                _offFor = off > reFaceAngle && !zoomed && !ghost ? _offFor + Time.deltaTime : 0f;
+                _offFor = idleReface && off > reFaceAngle && !zoomed && !ghost ? _offFor + Time.deltaTime : 0f;
                 if (_offFor < idleSeconds) return;
                 _offFor = 0f;
                 Debug.Log($"[IslandHandle] Head {off:0.0} deg off the front for {idleSeconds} s: turning to face it.");
                 StartTurn(idleTurnSeconds);
             }
             AdvanceYaw(t.position, _turnSeconds);
+            _facingWriter = _logFacingAfterTurn ? "facing turn after a release" : "idle facing turn (head off the front)";
+            _facingFrame = Time.frameCount;
             t.rotation = Quaternion.Euler(0f, _yaw, 0f);
             if (Mathf.Abs(Mathf.DeltaAngle(_yaw, target)) < 0.3f)
             {
@@ -375,6 +380,55 @@ namespace Diorama
         {
             // The Grabbable only calls UpdateTransform when a grab point moves; keep turning while the hands are still.
             if (IsGrabbed && autoFace) UpdateTransform();
+            WatchPose();
+        }
+
+        // ---- step 17 G: who moves the island root ----
+
+        /// <summary>A writer of the island root's pose says so just before (the placer, the opening); read by the pose log.</summary>
+        public static void MarkPoseWriter(string who)
+        {
+            _poseWriter = who;
+            _poseWriterFrame = Time.frameCount;
+        }
+
+        static string _poseWriter;
+        static int _poseWriterFrame = -10;
+        Vector3 _lastLocalPos;
+        Quaternion _lastLocalRot = Quaternion.identity;
+        bool _poseKnown;
+        float _poseLoggedAt = -10f;
+        string _facingWriter;
+        int _facingFrame = -10;
+
+        /// <summary>
+        /// Step 17 G: logs every change of the island root's pose in its parent (the tracking space moving it is not a
+        /// change) over 2 mm or 0.3 deg, with the writer this frame: a grab, the idle facing turn, the placer, or unknown.
+        /// </summary>
+        void WatchPose()
+        {
+            var t = Target;
+            if (!_poseKnown)
+            {
+                _lastLocalPos = t.localPosition;
+                _lastLocalRot = t.localRotation;
+                _poseKnown = true;
+                return;
+            }
+            float moved = (t.localPosition - _lastLocalPos).magnitude * (t.parent != null ? t.parent.lossyScale.x : 1f);
+            float turned = Quaternion.Angle(t.localRotation, _lastLocalRot);
+            if (moved < 0.002f && turned < 0.3f || Time.unscaledTime - _poseLoggedAt < 0.5f) return; // a smooth move logs every 0.5 s, summed
+            _poseLoggedAt = Time.unscaledTime;
+            string who = IsGrabbed ? "grab" : _facingFrame >= Time.frameCount - 1 ? _facingWriter
+                : _poseWriterFrame >= Time.frameCount - 1 ? _poseWriter : "unknown";
+            // A grab moves it every frame: log grabs only in a dev readout, not the console.
+            if (who != "grab")
+            {
+                var e = (Quaternion.Inverse(_lastLocalRot) * t.localRotation).eulerAngles;
+                Debug.Log($"[IslandHandle] Root moved {moved * 1000f:0} mm, turned {turned:0.0} deg (pitch {Mathf.DeltaAngle(0f, e.x):0.0}, yaw {Mathf.DeltaAngle(0f, e.y):0.0}, roll {Mathf.DeltaAngle(0f, e.z):0.0}) by: {who}.");
+            }
+            _lastLocalPos = t.localPosition;
+            _lastLocalRot = t.localRotation;
         }
 
         // ---- modes ----
