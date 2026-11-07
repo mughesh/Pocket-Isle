@@ -121,6 +121,58 @@ namespace Diorama.EditorTools
             Debug.Log(sb.ToString());
         }
 
+        /// <summary>
+        /// Edit mode, Nov 8 notes: the scene's ghost values (aside offset 0: the evolve ghost grabbed beside the pod; thumb
+        /// demos the pinch ghost's size; the pinch ghost further in over the island) and the statue's palm-lift ghost.
+        /// Saves the scene.
+        /// </summary>
+        public static void Nov8Scene()
+        {
+            if (UnityEditor.EditorApplication.isPlaying) return;
+            var g = Object.FindFirstObjectByType<GhostHands>(FindObjectsInactive.Include);
+            var sb = new System.Text.StringBuilder("[Step18Debug] Nov 8 scene:");
+            if (g != null)
+            {
+                UnityEditor.Undo.RecordObject(g, "Nov 8 ghosts");
+                sb.Append($" asideOffset {g.asideOffset} -> 0, thumbScale {g.thumbScale} -> 1, aboveIslandFront {g.aboveIslandFront} -> 0.25;");
+                g.asideOffset = 0f;
+                g.thumbScale = 1f;
+                g.aboveIslandFront = 0.25f;
+                g.thumbYaw = 55f;
+                g.thumbRoll = 0f;
+                if (!string.IsNullOrEmpty(Arg) && float.TryParse(Arg, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float roll))
+                {
+                    g.thumbRoll = roll;
+                    sb.Append($" thumbRoll {roll};");
+                }
+                UnityEditor.EditorUtility.SetDirty(g);
+            }
+            foreach (var s in Object.FindObjectsByType<StatueSocket>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                UnityEditor.Undo.RecordObject(s, "Nov 8 statue ghost");
+                sb.Append($" {s.id} ghost {s.ghostClip} -> {FinaleDirector.LiftClip};");
+                s.ghostClip = FinaleDirector.LiftClip;
+                UnityEditor.EditorUtility.SetDirty(s);
+            }
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+            UnityEditor.SceneManagement.EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+            Debug.Log(sb.ToString());
+        }
+
+        /// <summary>Play mode: sets a float field on the first object of a type (arg = "Type.field=value").</summary>
+        public static void SetFloat()
+        {
+            var eq = Arg.Split('=');
+            var a = eq[0].Split('.');
+            if (eq.Length != 2 || a.Length != 2) return;
+            var type = typeof(IslandBuilder).Assembly.GetType("Diorama." + a[0]);
+            var o = type != null ? Object.FindFirstObjectByType(type) : null;
+            var f = type?.GetField(a[1], BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            if (o == null || f == null) return;
+            f.SetValue(o, float.Parse(eq[1], System.Globalization.CultureInfo.InvariantCulture));
+            Debug.Log($"[Step18Debug] {Arg}.");
+        }
+
         /// <summary>Calls a private parameterless method on the first object of a type (arg = "Type.Method").</summary>
         public static void Call()
         {

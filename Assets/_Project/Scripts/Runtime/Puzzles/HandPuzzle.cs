@@ -467,6 +467,8 @@ namespace Diorama
         {
             public bool left, tracked, pinch, fist, pinchStarted, fistStarted, busy;
             public Vector3 pinchPoint, palm;
+            /// <summary>Nov 8: the palm's facing (out of the palm side; the palm joint's -Y on both hands, ISDK v207).</summary>
+            public Vector3 palmNormal;
             public bool Holding => pinch || fist;
             /// <summary>The pinch point while pinching, the palm while a fist.</summary>
             public Vector3 GripPoint => pinch ? pinchPoint : palm;
@@ -483,7 +485,9 @@ namespace Diorama
                 if (s.tracked)
                 {
                     s.pinch = hand.GetIndexFingerIsPinching() && IslandHandle.TryGetPinchPoint(hand, out s.pinchPoint);
-                    bool palm = HandLookup.TryGetJoint(hand, HandJointId.HandPalm, out s.palm);
+                    bool palm = HandLookup.TryGetJointPose(hand, HandJointId.HandPalm, out var palmPose);
+                    s.palm = palmPose.position;
+                    s.palmNormal = palm ? palmPose.rotation * Vector3.down : Vector3.up;
                     s.fist = palm && IsFist(hand, s.palm);
                 }
                 s.busy = grabGuard != null && grabGuard.IsHandBusy(left);

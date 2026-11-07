@@ -120,7 +120,10 @@ namespace Diorama
 
         // Nov 7 (Mugesh: a ghost like the finale's, full size): the ghost carries the shard to the socket, not small and aside.
         protected override bool GhostAside => false;
-        public override bool Busy => _hand >= 0 || _flying;
+        public override bool Busy => _hand >= 0 || _palm >= 0 || _flying;
+
+        /// <summary>Nov 8: a shard is being offered, carried or placed at the statue (the gold trail stays away then).</summary>
+        public static bool Engaged => All.Exists(x => x != null && (x._scene || x.Busy || x._offering || x._dreamOffer));
         /// <summary>Step 16: the offer (lesson, Spirit's offer, focus lock) only starts next to the statue (walk-up rule).</summary>
         protected override bool Available => ShardHolder.Holds(id) && NearStatue;
         /// <summary>Step 16: the view stays on the statue while it whispers (the explorer is locked then).</summary>
@@ -137,6 +140,27 @@ namespace Diorama
         public float sceneLockSeconds = 30f;
 
         bool _scene;
+
+        [Header("Nov 8: palm carry (like the finale's lift)")]
+        [Tooltip("An open palm (facing up at least Palm Up Dot) held this close to the offered shard (world m at island scale 1) lands it on the palm.")]
+        public float palmReach = 0.12f;
+        [Range(0f, 1f)] public float palmUpDot = 0.4f;
+        [Tooltip("Palm up near the shard this long before it lands (s).")]
+        public float palmLandSeconds = 0.25f;
+        [Tooltip("The beam: the palm turned toward the socket (normal . direction at least Beam Dot) within this distance (world m at island scale 1): the shard flies off the palm into it.")]
+        public float beamRange = 0.25f;
+        [Range(0f, 1f)] public float beamDot = 0.5f;
+        [Tooltip("Hand lost this long while the shard is on the palm: it flies back to the offer spot (s).")]
+        public float palmLoseSeconds = 0.6f;
+        [Tooltip("Gold dots from the carried shard to the socket.")]
+        [Range(0, 16)] public int trailDots = 9;
+
+        int _palm = -1;
+        readonly float[] _palmUpFor = new float[2];
+        float _palmLost;
+        bool _offering;
+        readonly List<BattleFx.Item> _dots = new List<BattleFx.Item>();
+        static readonly Color TrailGold = new Color(1f, 0.82f, 0.35f);
 
         /// <summary>The statue's tiles (its prop's footprint on the map; 3 x 4 if the map has no prop there).</summary>
         RectInt StatueRect
@@ -283,6 +307,9 @@ namespace Diorama
         {
             base.OnDestroy();
             All.Remove(this);
+            if (fx != null)
+                foreach (var d in _dots) fx.Release(d);
+            _dots.Clear();
             _shard?.Destroy();
             _statue?.Destroy();
             if (_ring != null) Destroy(_ring.gameObject);
@@ -298,6 +325,7 @@ namespace Diorama
         protected override void ApplyState()
         {
             _hand = -1;
+            _palm = -1;
             _flying = false;
             if (holder != null) holder.SetOut(id, false);
             SyncStatue(true);
@@ -323,16 +351,24 @@ namespace Diorama
             bool near = NearStatue;
             // Nov 7: carrying the shard up to the statue, the explorer steps round to its front first.
             if (!NearForFront || IsSolved || !held) _walkedFront = false;
-            else if (here && !_walkedFront && !_dreamOffer && _hand < 0 && !_flying && !explorer.Locked && !explorer.Destination.HasValue)
+            else if (here && !_walkedFront && !_dreamOffer && _hand < 0 && _palm < 0 && !_flying && !explorer.Locked && !explorer.Destination.HasValue)
             {
                 _walkedFront = true;
                 WalkToFront();
             }
-            if (holder != null) holder.SetOffering(id, here && !IsSolved && held && Usable && near);
+            _offering = here && !IsSolved && held && Usable && near;
+            if (holder != null) holder.SetOffering(id, _offering);
             if (_hand >= 0) Hold();
-            else if (!_flying && !IsSolved && held && Usable && near) TryGrab();
+            else if (_palm >= 0) PalmHold();
+            else if (!_flying && !IsSolved && held && Usable && near)
+            {
+                TryGrab();
+                if (_hand < 0 && !_flying) TryPalm();
+            }
             if (_hand >= 0) IslandHandle.MarkHandHeld(_hand == 0);
+            if (_palm >= 0) IslandHandle.MarkHandHeld(_palm == 0);
             Draw(here);
+            Trail(here && (_hand >= 0 || _palm >= 0));
             base.Update();
         }
 
@@ -375,6 +411,15 @@ namespace Diorama
         void Hold()
         {
             var s = _hands[_hand];
+            if (s.tracked && !s.Holding && !NearSocket(_shardWorld))
+            {
+                // Nov 8 (Mugesh: people open the hand and 'beam' it at the statue): the shard stays with the open hand.
+                _palm = _hand;
+                _hand = -1;
+                _palmLost = 0f;
+                Debug.Log($"[StatueSocket] {id}: the hand opened: the shard stays on the palm.");
+                return;
+            }
             if (!s.tracked || !s.Holding)
             {
                 _hand = -1;
@@ -384,6 +429,102 @@ namespace Diorama
                 return;
             }
             _shardWorld = Vector3.Lerp(_shardWorld, s.GripPoint + _grabOffset * 0.3f, 1f - Mathf.Exp(-Time.deltaTime / 0.05f));
+        }
+
+        float Scale => Mathf.Max(1f, island.transform.lossyScale.x);
+
+        bool NearSocket(Vector3 p) => (p - SocketWorld).magnitude <= Mathf.Max(snapRadius, forgivingSnap) * Scale;
+
+        /// <summary>Nov 8: an open palm held up under the offered shard: it lands on the palm (the finale's lift).</summary>
+        void TryPalm()
+        {
+            if (holder == null) return;
+            Vector3 cup = holder.CupWorld(id);
+            for (int h = 0; h < 2; h++)
+            {
+                var s = _hands[h];
+                bool up = s.tracked && !s.busy && !s.fist && !s.pinch && Vector3.Dot(s.palmNormal, Vector3.up) >= palmUpDot &&
+                          (s.palm - cup).magnitude <= palmReach * Scale;
+                _palmUpFor[h] = up ? _palmUpFor[h] + Time.deltaTime : 0f;
+                if (_palmUpFor[h] < palmLandSeconds) continue;
+                _palmUpFor[0] = _palmUpFor[1] = 0f;
+                _palm = h;
+                _palmLost = 0f;
+                _shardWorld = cup;
+                holder.SetOut(id, true);
+                MarkInteracted();
+                Debug.Log($"[StatueSocket] {id} lands on the {(s.left ? "left" : "right")} palm.");
+                return;
+            }
+        }
+
+        /// <summary>
+        /// Nov 8: the shard rides the palm in any pose (palm up, or turned toward the statue: the beam). Near the socket,
+        /// or beamed at it from within <see cref="beamRange"/>, it flies in; the hand lost for a while, it flies back.
+        /// </summary>
+        void PalmHold()
+        {
+            var s = _hands[_palm];
+            if (!s.tracked)
+            {
+                _palmLost += Time.deltaTime;
+                if (_palmLost < palmLoseSeconds) return;
+                _palm = -1;
+                Debug.Log("[StatueSocket] The hand was lost: the shard flies back to the Spirit's offer spot.");
+                StartCoroutine(Fly(_shardWorld, false));
+                return;
+            }
+            _palmLost = 0f;
+            if (s.Holding && !s.busy)
+            {
+                // Closed round it: carried like a grab from here.
+                _hand = _palm;
+                _palm = -1;
+                _grabOffset = _shardWorld - s.GripPoint;
+                return;
+            }
+            Vector3 sit = s.palm + s.palmNormal * (0.035f * Scale) + Vector3.up * (0.003f * Mathf.Sin(Time.time * 3f));
+            _shardWorld = Vector3.Lerp(_shardWorld, sit, 1f - Mathf.Exp(-Time.deltaTime / 0.06f));
+            Vector3 toSocket = SocketWorld - s.palm;
+            bool beam = toSocket.magnitude <= beamRange * Scale && Vector3.Dot(s.palmNormal, toSocket.normalized) >= beamDot;
+            if (!NearSocket(_shardWorld) && !beam) return;
+            _palm = -1;
+            Debug.Log($"[StatueSocket] {id} {(beam ? "beamed from the palm" : "carried on the palm")} into the socket.");
+            StartCoroutine(Fly(_shardWorld, true));
+        }
+
+        /// <summary>Nov 8: a dotted gold arc from the carried shard to the socket (the finale's lift has one).</summary>
+        void Trail(bool on)
+        {
+            if (!on || fx == null || trailDots <= 0)
+            {
+                if (_dots.Count > 0)
+                {
+                    if (fx != null)
+                        foreach (var d in _dots) fx.Release(d);
+                    _dots.Clear();
+                }
+                return;
+            }
+            while (_dots.Count < trailDots)
+            {
+                var d = fx.Get(BattleFx.Shape.Orb);
+                if (d == null) break;
+                d.Set(new Color(1f, 0.95f, 0.7f), TrailGold, 1f);
+                _dots.Add(d);
+            }
+            float inv = 1f / Mathf.Max(1e-4f, fx.transform.lossyScale.x);
+            Vector3 from = _shardWorld, to = SocketWorld;
+            Vector3 mid = (from + to) * 0.5f + Vector3.up * (Vector3.Distance(from, to) * 0.25f);
+            float drift = Time.time * 0.5f % 1f;
+            for (int i = 0; i < _dots.Count; i++)
+            {
+                float t = (i + drift) / _dots.Count;
+                Vector3 p = (1f - t) * (1f - t) * from + 2f * (1f - t) * t * mid + t * t * to;
+                _dots[i].transform.position = p;
+                _dots[i].transform.localScale = Vector3.one * (0.0045f * island.transform.lossyScale.x / 0.6f * inv);
+                _dots[i].SetAlpha(0.85f * Mathf.Sin(t * Mathf.PI));
+            }
         }
 
         /// <summary>Flies the shard to the socket (locks in) or back to the offer spot.</summary>
@@ -512,7 +653,7 @@ namespace Diorama
                 HeartVoice.position = MapToWorld(new Vector3(StatueCenter.x, voiceHeight, StatueCenter.y));
             if (_shard != null)
             {
-                bool show = here && (_hand >= 0 || _flying || solved && !HideStatue);
+                bool show = here && (_hand >= 0 || _palm >= 0 || _flying || solved && !HideStatue);
                 Vector3 world = solved && !_flying ? SocketWorld : _shardWorld;
                 // Big in the hand, socket size as it nears the socket.
                 float big = holder != null ? holder.offerMetres : 0.026f * 0.8f;
@@ -534,7 +675,7 @@ namespace Diorama
                     _block.Clear();
                     _block.SetFloat(ModeId, 1f);
                     _block.SetFloat(FillId, 1f);
-                    _block.SetFloat(IntensityId, 1.4f + 0.6f * Mathf.Sin(Time.time * 3f) + (_hand >= 0 ? 0.8f : 0f));
+                    _block.SetFloat(IntensityId, 1.4f + 0.6f * Mathf.Sin(Time.time * 3f) + (_hand >= 0 || _palm >= 0 ? 0.8f : 0f));
                     _ringRenderer.SetPropertyBlock(_block);
                 }
             }

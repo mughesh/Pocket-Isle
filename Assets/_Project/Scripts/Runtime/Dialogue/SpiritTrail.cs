@@ -114,7 +114,15 @@ namespace Diorama
 
         bool Active => explorer != null && island != null && island.world != null && !SceneSwap.IsBusy &&
                        !SceneSwap.IsInside && !TitleScreen.Showing && !Opening.InProgress && !Onboarding.Running && !GameMenu.IsOpen &&
-                       (encounters == null || !encounters.InBattle);
+                       (encounters == null || !encounters.InBattle) && !StatueSocket.Engaged && !FinaleDirector.Running;
+
+        /// <summary>
+        /// Nov 8: the trail may show now (the Spirit's idle "follow my gold trail" line is only said then). Not inside a
+        /// hall, not at the statue with a shard (Mugesh: no gold path in the statue's moments), not in the finale.
+        /// </summary>
+        public static bool CanShow => _instance != null && _instance.Active;
+        static SpiritTrail _instance;
+        void Awake() => _instance = this;
 
         /// <summary>Shows the trail toward the next goal now (false when there is none or it can't be reached).</summary>
         public bool Show(string why)

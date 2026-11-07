@@ -61,7 +61,8 @@ namespace Diorama
             _last = Time.time;
             bool objective = Dialogue.RepeatObjective();
             // Nov 7: not in a scene (the statue's whisper, the dream ahead): "follow my gold trail" made no sense there.
-            if (!objective && !string.IsNullOrEmpty(idleLine) && !Dialogue.FocalUp) Dialogue.Repeat(idleLine);
+            // Nov 8: and only where the trail can show (in a hall or at the statue there's no trail to follow).
+            if (!objective && !string.IsNullOrEmpty(idleLine) && !Dialogue.FocalUp && SpiritTrail.CanShow) Dialogue.Repeat(idleLine);
             if (spirit != null) spirit.Flinch(from - spirit.transform.forward * 0.02f, 0.01f, 0.4f);
             Debug.Log($"[SpiritPoke] {how}: {(objective ? $"repeating {Dialogue.CurrentObjective}" : "no objective, idle line")}.");
             Poked?.Invoke(objective);

@@ -227,7 +227,7 @@ MonoBehaviour:
   fx: {fileID: 1078587927}
   reach: 6
   lessonLine: hub.shard.first
-  ghostClip: grab_drop
+  ghostClip: palm_lift
   ghostScale: 1
   lessonChip: 
   counterLabel: 
@@ -259,6 +259,14 @@ MonoBehaviour:
   offerDistance: 1
   forgivingSnap: 0.12
   sceneLockSeconds: 30
+  palmReach: 0.12
+  palmUpDot: 0.4
+  palmLandSeconds: 0.25
+  beamRange: 0.25
+  beamDot: 0.5
+  palmLoseSeconds: 0.6
+  trailDots: 9
+  walkFrontFrom: 2
 --- !u!1 &78739057
 GameObject:
   m_ObjectHideFlags: 0
@@ -2092,6 +2100,8 @@ MonoBehaviour:
   pods: {fileID: 78739058}
   podReach: 0.12
   duckOffset: {x: 0, y: 0.07, z: -0.04}
+  lockedToIsland: 1
+  lockedTilt: 35
   turnAwayAngle: 30
   maxTilt: 40
   pressDepth: 0.008
@@ -2192,6 +2202,8 @@ MonoBehaviour:
   pinchReach: 0.05
   autoAfter: 12
   handNearHold: 0.2
+  shardGhostScale: 0.65
+  shardRaysSize: 2.2
   spirit: {fileID: 1847074513}
   keeperSpot: {x: 4.5, y: 2.6}
   keeperPad: {x: 4, y: 3}
@@ -2209,6 +2221,7 @@ MonoBehaviour:
   winLine: gw.keeper.win
   shardLine: gw.shard.take
   restoredLine: gw.restored
+  evolveWaitMax: 90
 --- !u!4 &388614568
 Transform:
   m_ObjectHideFlags: 0
@@ -2733,7 +2746,7 @@ MonoBehaviour:
   fx: {fileID: 1078587927}
   reach: 6
   lessonLine: hub.shard.first
-  ghostClip: grab_drop
+  ghostClip: palm_lift
   ghostScale: 1
   lessonChip: 
   counterLabel: 
@@ -2765,6 +2778,14 @@ MonoBehaviour:
   offerDistance: 1
   forgivingSnap: 0.12
   sceneLockSeconds: 30
+  palmReach: 0.12
+  palmUpDot: 0.4
+  palmLandSeconds: 0.25
+  beamRange: 0.25
+  beamDot: 0.5
+  palmLoseSeconds: 0.6
+  trailDots: 9
+  walkFrontFrom: 2
 --- !u!1 &570826974
 GameObject:
   m_ObjectHideFlags: 0
@@ -3201,6 +3222,8 @@ MonoBehaviour:
   encounters: {fileID: 1499891275}
   idleSeconds: 40
   idleGap: 120
+  staleAfter: 6
+  replayUnder: 1.5
   idleAfterArrival: 8
 --- !u!4 &733261510
 Transform:
@@ -3366,6 +3389,8 @@ MonoBehaviour:
   pinchReach: 0.05
   autoAfter: 12
   handNearHold: 0.2
+  shardGhostScale: 0.65
+  shardRaysSize: 2.2
   spirit: {fileID: 1847074513}
   keeperSpot: {x: 4.5, y: 3.4}
   keeperPad: {x: 4, y: 3}
@@ -3383,6 +3408,7 @@ MonoBehaviour:
   winLine: lm.keeper.win
   shardLine: lm.shard.take
   restoredLine: lm.restored
+  evolveWaitMax: 90
 --- !u!1 &904585642
 GameObject:
   m_ObjectHideFlags: 0
@@ -4980,6 +5006,7 @@ MonoBehaviour:
   runesOverStatue: 0.035
   endTowardPlayer: 0.55
   endAboveCap: 0.07
+  placeWaitMax: 45
 --- !u!1 &1291464261
 GameObject:
   m_ObjectHideFlags: 0
@@ -5034,7 +5061,7 @@ MonoBehaviour:
   fx: {fileID: 1078587927}
   reach: 6
   lessonLine: hub.shard.first
-  ghostClip: grab_drop
+  ghostClip: palm_lift
   ghostScale: 1
   lessonChip: 
   counterLabel: 
@@ -5066,6 +5093,14 @@ MonoBehaviour:
   offerDistance: 1
   forgivingSnap: 0.12
   sceneLockSeconds: 30
+  palmReach: 0.12
+  palmUpDot: 0.4
+  palmLandSeconds: 0.25
+  beamRange: 0.25
+  beamDot: 0.5
+  palmLoseSeconds: 0.6
+  trailDots: 9
+  walkFrontFrom: 2
 --- !u!1 &1294784575
 GameObject:
   m_ObjectHideFlags: 0
@@ -5349,13 +5384,16 @@ MonoBehaviour:
   material: {fileID: 2100000, guid: ee25ba6990f6da74d877dde8bcab8ed4, type: 2}
   library: {fileID: 11400000, guid: 7e26b85907efc8041b13452a19693a8b, type: 2}
   aboveIslandHeight: 0.12
-  aboveIslandFront: 0.55
+  aboveIslandFront: 0.25
   aboveTargetHeight: 0.07
   thumbRimOffset: {x: 0.06, y: 0.05, z: 0.05}
   thumbCenterHeight: 0.09
   sideSwipeAngle: 28
   sideSwipeSeconds: 0.75
-  thumbScale: 1.6
+  thumbScale: 1
+  thumbYaw: 55
+  thumbRoll: 0
+  keyDots: 1
   thumbTrailDots: 6
   thumbDotSize: 0.009
   wristFingers: {x: -0.35, y: 0.25, z: 1}
@@ -5376,7 +5414,7 @@ MonoBehaviour:
   handNearAlpha: 0.08
   handNearSeconds: 0.2
   asideScale: 0.6
-  asideOffset: 0.1
+  asideOffset: 0
 --- !u!4 &1421177269
 Transform:
   m_ObjectHideFlags: 0
@@ -8078,6 +8116,8 @@ MonoBehaviour:
   pinchReach: 0.05
   autoAfter: 12
   handNearHold: 0.2
+  shardGhostScale: 0.65
+  shardRaysSize: 2.2
   spirit: {fileID: 1847074513}
   keeperSpot: {x: 4.5, y: 2.7}
   keeperPad: {x: 4, y: 3}
@@ -8095,6 +8135,7 @@ MonoBehaviour:
   winLine: cinder.keeper.win
   shardLine: cinder.shard.take
   restoredLine: cinder.restored
+  evolveWaitMax: 90
 --- !u!1 &2130837833
 GameObject:
   m_ObjectHideFlags: 0

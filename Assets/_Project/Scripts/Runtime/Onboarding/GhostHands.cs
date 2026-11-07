@@ -46,8 +46,10 @@ namespace Diorama
         public float sideSwipeSeconds = 0.75f;
         [Tooltip("Thumb demos are this much bigger than the lesson's scale (they read tiny over the map).")]
         public float thumbScale = 1.6f;
-        [Tooltip("Nov 7 (Mugesh: the swipe ghost looked tilted, fingers toward the upper left): the thumb demo turned this many degrees about up (+ = clockwise from above) so the fingers point straight away.")]
-        public float thumbYaw = 30f;
+        [Tooltip("Nov 7 (Mugesh: the swipe ghost looked tilted, fingers toward the upper left; Nov 8 still tilted at 30): the thumb demo turned this many degrees about up (+ = clockwise from above) so the fingers point straight away.")]
+        public float thumbYaw = 55f;
+        [Tooltip("Nov 8 (Mugesh: still tilted, the thumb leaning left): the thumb demo rolled this many degrees about its forward axis (- = its left side up).")]
+        public float thumbRoll = 0f;
         [Tooltip("Nov 7 (Mugesh: the gold point looks really nice, use it wherever it helps): every ghost demo gets the gold dot and trail on the joint that does the work (thumb tip, pinch point, fingertip or palm), not only thumb demos.")]
         public bool keyDots = true;
         [Tooltip("A gold dot on the ghost's thumb tip and this many trail dots behind it (the slide).")]
@@ -438,7 +440,9 @@ namespace Diorama
                 loopFade = 1f;
             }
             // Step 16: a real hand near the target (or the release spot) fades the ghost so it never hides the target.
-            bool near = _request.place != GhostPlace.BesideHand && debugFreeze < 0f &&
+            // Nov 8 (Mugesh: the first pinch ghost vanished under his resting hand): demos over the island have no target
+            // to uncover, so they never fade for a hand.
+            bool near = _request.place != GhostPlace.BesideHand && _request.place != GhostPlace.AboveIsland && debugFreeze < 0f &&
                         (HandNear(point, handNearRadius) || (release.HasValue && HandNear(release.Value, handNearRadius)));
             _handNear = Mathf.MoveTowards(_handNear, near ? 1f : 0f, dt / Mathf.Max(0.01f, handNearSeconds));
             float alpha = _visible * loopFade * NearAlpha(_handNear, handNearAlpha);
@@ -759,6 +763,7 @@ namespace Diorama
             Vector3 keyInRoot = _clip.keyPinch || retarget ? PinchInRoot(g) : KeyInRoot(g, _clip.keyJoint);
             if (yaw != 0f) frame *= Quaternion.Euler(0f, yaw, 0f);
             if (ThumbDemo && thumbYaw != 0f) frame *= Quaternion.Euler(0f, thumbYaw, 0f);
+            if (ThumbDemo && thumbRoll != 0f) frame *= Quaternion.Euler(0f, 0f, thumbRoll);
             Vector3 key = view * kp + view * kr * keyInRoot;
             Vector3 origin = point + frame * (offset * scale) - frame * (key * scale);
 
