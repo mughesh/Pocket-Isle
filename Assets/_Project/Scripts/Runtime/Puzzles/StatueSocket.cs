@@ -238,6 +238,9 @@ namespace Diorama
         /// Nov 7 (the dream ahead froze: the explorer was locked, so the offer never came): the Quick Journey's ending lets
         /// this socket offer its shard while the explorer is locked at the statue, and places it quietly.
         /// </summary>
+        /// <summary>Step 18 (smoke run): this socket waits for its dreamed shard.</summary>
+        public bool DreamOffering => _dreamOffer;
+
         public void DreamOffer(bool on)
         {
             _dreamOffer = on;

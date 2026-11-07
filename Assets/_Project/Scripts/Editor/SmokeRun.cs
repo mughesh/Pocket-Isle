@@ -807,7 +807,13 @@ namespace Diorama.EditorTools
                 Keeper(P, "gw.keeper", null, ShardHolder.WindId);
                 Shard(P, ShardHolder.WindId);
                 Add(P, "end card", null, () => RuneBoard.DebugList().Contains("See the ending"), 90f, null, 1f, true);
-                Add(P, "See the ending", () => RuneBoard.DebugPress("See the ending"), () => FinaleDirector.Running, 60f, null, 1f, true);
+                // Step 18: since Nov 7 the dreamed fire and water shards wait for the player (45 s each, then by themselves):
+                // place each one as it's offered.
+                Add(P, "See the ending", () => RuneBoard.DebugPress("See the ending"), () => FinaleDirector.Running, 60f, () =>
+                {
+                    foreach (var s in UnityEngine.Object.FindObjectsByType<StatueSocket>(FindObjectsSortMode.None))
+                        if (s.DreamOffering && !s.IsSolved) s.DebugPlace();
+                }, 1.5f, true);
                 Add(P, "the finale to its end", () => FinaleDirector.Moment += OnFinaleMoment, () => _finaleDone, 420f, PumpFinale, 1.5f, false,
                     () => FinaleDirector.Instance != null ? FinaleDirector.Instance.Describe() : "no finale");
             }
