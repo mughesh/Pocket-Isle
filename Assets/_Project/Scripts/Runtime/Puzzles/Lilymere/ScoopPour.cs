@@ -578,7 +578,8 @@ namespace Diorama
                 float jelly = 1f + 0.12f * _wobble * Mathf.Sin(Time.time * 22f);
                 var local = island.transform.InverseTransformPoint(_ballWorld);
                 float metres = ballSize * Scale / Mathf.Max(1e-4f, island.transform.lossyScale.x) * (_bigBall ? pairBall : 1f);
-                _ball.PlaceLocal(local - Vector3.up * metres * 0.5f, Quaternion.Euler(0f, Time.time * 30f, 0f), metres * jelly, show);
+                metres *= BattleVeil.Scale; // step 17 D: the water ball leaves the room during a battle
+                _ball.PlaceLocal(local - Vector3.up * metres * 0.5f, Quaternion.Euler(0f, Time.time * 30f, 0f), metres * jelly, show && BattleVeil.Visible);
             }
             if (UsesBowl)
             {

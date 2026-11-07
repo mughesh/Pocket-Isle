@@ -380,7 +380,8 @@ namespace Diorama
             _ember.glowBoostB = new Vector4(carried ? 1.2f : 0.5f, 0f, 0f, 0f);
             var local = island.transform.InverseTransformPoint(_emberWorld);
             float metres = emberSize * TileWorld / Mathf.Max(1e-5f, island.transform.lossyScale.x);
-            if (carried) _ember.PlaceLocal(local, Quaternion.Euler(Time.time * 50f, Time.time * 70f, 0f), metres, true);
+            // Step 17 D: a carried ember leaves the room during a battle.
+            if (carried) _ember.PlaceLocal(local, Quaternion.Euler(Time.time * 50f, Time.time * 70f, 0f), metres * BattleVeil.Scale, BattleVeil.Visible);
             else
             {
                 _ember.windowClip = true;

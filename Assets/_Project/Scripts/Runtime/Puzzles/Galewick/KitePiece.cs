@@ -520,6 +520,9 @@ namespace Diorama
             // Tied on the crown they show only while the tower is in the island window (Mugesh, Oct 27: they hung in the air far from it).
             if (_tied) show &= TowerInWindow;
             float tileM = island.map.tileSize * island.Zoom;
+            // Step 17 D: flying and tied kites (and their strings) leave the sky during a battle (they cut through it).
+            float veil = BattleVeil.Scale;
+            bool veilOn = BattleVeil.Visible;
             var strings = new List<(Vector3 a, Vector3 b)>();
             for (int i = 0; i < _kites.Count; i++)
             {
@@ -532,11 +535,11 @@ namespace Diorama
                     continue;
                 }
                 // Up off the grass it stands up (nose up, face to the player) and grows to its flying size.
-                float grow = k.state == K.Held ? 1.4f : k.state == K.Falling ? Mathf.Lerp(flyingScale, 1f, k.t) : flyingScale;
+                float grow = (k.state == K.Held ? 1.4f : k.state == K.Falling ? Mathf.Lerp(flyingScale, 1f, k.t) : flyingScale) * veil;
                 float sway = Mathf.Sin(Time.time * 2.3f + i) * 12f;
                 var rot = Quaternion.Euler(0f, 0f, sway) * Quaternion.Euler(90f - 15f, 0f, 0f);
-                k.view.PlaceLocal(k.pos, rot, tileM * grow, show);
-                if (show && k.state != K.Falling)
+                k.view.PlaceLocal(k.pos, rot, tileM * grow, show && veilOn);
+                if (show && veilOn && k.state != K.Falling)
                     strings.Add((k.state == K.Tied ? TiedAnchor : BackpackLocal, k.pos + rot * new Vector3(0f, 0f, 0.25f) * tileM * grow));
             }
             DrawStrings(strings, show);
@@ -564,7 +567,7 @@ namespace Diorama
             const int segments = 14;
             var cam = Camera.main;
             Vector3 camLocal = cam != null ? island.transform.InverseTransformPoint(cam.transform.position) : Vector3.up * 2f;
-            float width = 0.0016f / Mathf.Max(1e-4f, island.transform.lossyScale.x);
+            float width = 0.0016f / Mathf.Max(1e-4f, island.transform.lossyScale.x) * BattleVeil.Scale;
             var verts = new List<Vector3>(list.Count * (segments + 1) * 2);
             var tris = new List<int>(list.Count * segments * 6);
             foreach (var (a, b) in list)
