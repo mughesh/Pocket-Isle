@@ -136,33 +136,38 @@ namespace Diorama
         /// a bigger party widens the arc before it moves out. The arc never
         /// goes past 100 deg either side of the front (never behind the statue).
         /// </summary>
+        /// <summary>Nov 7: how far (tiles) each further-out Isling in the row steps back toward the statue (k-1 squared).</summary>
+        public const float RowCurve = 0.2f;
+
         public static Vector2[] HallArc(Vector2 center, int n, float width, float minRadius, float gapFactor = 1.4f) =>
             HallArc(center, n, width, minRadius, gapFactor, null);
 
         /// <summary>
-        /// Nov 7 (Mugesh: an Isling stood in the explorer): with <paramref name="keepFree"/> (the explorer's tile in front
-        /// of the statue) the arc runs through that spot and leaves it empty: the party stands either side of the explorer,
-        /// one gap from it, alternating right and left.
+        /// Nov 7 (Mugesh: an Isling stood in the explorer; then, in the headset video, the party stood beside the statue and
+        /// one hid behind another from the seat): with <paramref name="keepFree"/> (the explorer's tile in front of the
+        /// statue) the party stands in a row across, either side of the explorer (right, left, right...), one gap apart,
+        /// the outer ones curving a little back toward the statue. Seen from the seat nobody stands behind anybody.
         /// </summary>
         public static Vector2[] HallArc(Vector2 center, int n, float width, float minRadius, float gapFactor, Vector2? keepFree)
         {
             if (keepFree.HasValue && n > 0)
             {
                 var spots2 = new Vector2[n];
-                Vector2 toFree = keepFree.Value - center;
-                float r0 = Mathf.Max(minRadius, toFree.magnitude);
-                float baseAngle = toFree.sqrMagnitude > 1e-6f ? Mathf.Atan2(toFree.x, toFree.y) : 0f;
+                Vector2 free = keepFree.Value;
+                // The row's line: across the statue-to-explorer direction.
+                Vector2 toFree = free - center;
+                Vector2 fwd = toFree.sqrMagnitude > 1e-6f ? toFree.normalized : Vector2.up;
+                Vector2 across = new Vector2(fwd.y, -fwd.x);
                 float gap2 = gapFactor * width;
-                int far = (n + 1) / 2; // the outermost slot index either side
-                const float maxHalf = 100f;
-                float needR2 = gap2 / (2f * Mathf.Sin(Mathf.Min(maxHalf / far, 89f) * 0.5f * Mathf.Deg2Rad));
-                float r2 = Mathf.Max(r0, needR2);
-                float step2 = 2f * Mathf.Asin(Mathf.Clamp01(gap2 / (2f * r2)));
                 for (int i = 0; i < n; i++)
                 {
                     int k = i / 2 + 1;
-                    float a = baseAngle + (i % 2 == 0 ? -1f : 1f) * k * step2;
-                    spots2[i] = center + new Vector2(Mathf.Sin(a), Mathf.Cos(a)) * r2;
+                    float side = i % 2 == 0 ? 1f : -1f;
+                    Vector2 p = free + across * (side * k * gap2) - fwd * (RowCurve * (k - 1) * (k - 1));
+                    // Never inside the statue's clearance.
+                    Vector2 off = p - center;
+                    if (off.magnitude < minRadius) p = center + off.normalized * minRadius;
+                    spots2[i] = p;
                 }
                 return spots2;
             }
@@ -218,9 +223,7 @@ namespace Diorama
         [Tooltip("Palm up this long before it lands (s).")]
         public float landSeconds = 0.35f;
         [Tooltip("Carried this close to the socket (m, real world at island scale 1): it floats in.")]
-        public float socketRadius = 0.12f;
-        /// <summary>Step 16: forgiving: within 12 cm it floats in, whatever an older scene saved.</summary>
-        public const float ForgivingRadius = 0.12f;
+        public float socketRadius = 0.06f;
         [Tooltip("Palm down or untracked this long while carried: it floats back (s).")]
         public float loseSeconds = 0.6f;
         [Tooltip("Nothing happening this long: the wait line (s).")]
@@ -271,7 +274,7 @@ namespace Diorama
             }
             else if (Now == State.OnPalm)
             {
-                if ((palm - socket).magnitude <= Mathf.Max(socketRadius, ForgivingRadius) * Mathf.Max(1f, scale) && tracked)
+                if ((palm - socket).magnitude <= socketRadius * Mathf.Max(1f, scale) && tracked)
                 {
                     Now = State.ToSocket;
                     return "spirit.finale.3";
