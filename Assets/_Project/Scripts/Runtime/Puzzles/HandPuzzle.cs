@@ -197,7 +197,10 @@ namespace Diorama
         }
 
         /// <summary>In view, the explorer near, no battle, opening or tutorial.</summary>
-        public bool Usable => InView && Reachable && !Opening.InProgress && !Onboarding.Running && (!explorer.Locked || Busy);
+        public bool Usable => InView && Reachable && !Opening.InProgress && !Onboarding.Running && (!explorer.Locked || Busy || UsableWhileLocked);
+
+        /// <summary>Nov 7: a scene that locks the explorer on purpose still lets this be used (the dream ahead's statue).</summary>
+        protected virtual bool UsableWhileLocked => false;
 
         /// <summary>One map tile in world metres right now.</summary>
         protected float TileWorld => island != null && island.map != null ? island.map.tileSize * island.Zoom * island.transform.lossyScale.x : 0.05f;

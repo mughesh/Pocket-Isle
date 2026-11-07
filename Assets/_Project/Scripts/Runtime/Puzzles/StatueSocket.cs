@@ -125,6 +125,8 @@ namespace Diorama
         protected override bool Available => ShardHolder.Holds(id) && NearStatue;
         /// <summary>Step 16: the view stays on the statue while it whispers (the explorer is locked then).</summary>
         public override bool KeepViewWhileLocked => _scene;
+        /// <summary>Nov 7: a shard's whisper scene is playing (evolution waits it out).</summary>
+        public static bool SceneUp => All.Exists(x => x != null && x._scene);
 
         [Header("Step 16")]
         [Tooltip("The offer starts with the explorer this many tiles from the statue's footprint (1 = next to it).")]
@@ -148,6 +150,75 @@ namespace Diorama
         }
 
         bool NearStatue => explorer != null && WalkUp.Distance(explorer.Tile, StatueRect) <= offerDistance;
+
+        // ---- Nov 7: the explorer steps to the statue's front to place a shard (Mugesh: wherever it stands) ----
+
+        bool _walkedFront, _dreamOffer;
+
+        [Tooltip("Nov 7: carrying a shard this close to the statue (tiles), the explorer steps round to its front.")]
+        [Min(1)] public int walkFrontFrom = 2;
+
+        bool NearForFront => explorer != null && WalkUp.Distance(explorer.Tile, StatueRect) <= walkFrontFrom;
+        protected override bool UsableWhileLocked => _dreamOffer;
+
+        /// <summary>
+        /// The walkable tile next to the statue straight in front of its face (the side its sockets are on), or the nearest
+        /// walkable one round to it. Null without a map.
+        /// </summary>
+        public Vector2Int? FrontTile()
+        {
+            if (map == null) return null;
+            var r = StatueRect;
+            var face = Quaternion.Euler(0f, statueYaw, 0f) * Vector3.forward;
+            var dir = new Vector2(-face.x, face.z).normalized;
+            Vector2 centre = r.center;
+            Vector2Int? best = null;
+            float bestScore = float.MaxValue;
+            for (int x = r.xMin - 1; x <= r.xMax; x++)
+                for (int y = r.yMin - 1; y <= r.yMax; y++)
+                {
+                    var t = new Vector2Int(x, y);
+                    if (WalkUp.Distance(t, r) != 1 || !map.CanWalk(t)) continue;
+                    var to = new Vector2(x + 0.5f, y + 0.5f) - centre;
+                    float score = 1f - Vector2.Dot(to.normalized, dir) + 0.01f * to.magnitude;
+                    if (score < bestScore)
+                    {
+                        bestScore = score;
+                        best = t;
+                    }
+                }
+            return best;
+        }
+
+        /// <summary>Walks the explorer to <see cref="FrontTile"/> (false when it's there already or can't go).</summary>
+        public bool WalkToFront()
+        {
+            var f = FrontTile();
+            if (!f.HasValue || explorer == null || explorer.Tile == f.Value) return false;
+            bool ok = explorer.GoTo(f.Value);
+            Debug.Log($"[StatueSocket] {id}: the explorer {(ok ? "steps" : "can't step")} to the statue's front (c{f.Value.x} r{f.Value.y}).");
+            return ok;
+        }
+
+        /// <summary>The explorer stands at the statue's front (or there is no front to stand at).</summary>
+        public bool AtFront
+        {
+            get
+            {
+                var f = FrontTile();
+                return !f.HasValue || explorer != null && explorer.Tile == f.Value && !explorer.Destination.HasValue;
+            }
+        }
+
+        /// <summary>
+        /// Nov 7 (the dream ahead froze: the explorer was locked, so the offer never came): the Quick Journey's ending lets
+        /// this socket offer its shard while the explorer is locked at the statue, and places it quietly.
+        /// </summary>
+        public void DreamOffer(bool on)
+        {
+            _dreamOffer = on;
+            if (on) _quiet = true;
+        }
         protected override Vector2 HomeTile => statueAnchor + Vector2.one;
 
         public override Vector3? FocusPoint => Here && ShardHolder.Holds(id) && holder != null ? holder.CupWorld(id) : (Vector3?)null;
@@ -250,6 +321,13 @@ namespace Diorama
             SyncStatue(false);
             bool held = ShardHolder.Holds(id);
             bool near = NearStatue;
+            // Nov 7: carrying the shard up to the statue, the explorer steps round to its front first.
+            if (!NearForFront || IsSolved || !held) _walkedFront = false;
+            else if (here && !_walkedFront && !_dreamOffer && _hand < 0 && !_flying && !explorer.Locked && !explorer.Destination.HasValue)
+            {
+                _walkedFront = true;
+                WalkToFront();
+            }
             if (holder != null) holder.SetOffering(id, here && !IsSolved && held && Usable && near);
             if (_hand >= 0) Hold();
             else if (!_flying && !IsSolved && held && Usable && near) TryGrab();
@@ -342,8 +420,8 @@ namespace Diorama
             if (fx != null)
             {
                 fx.Burst(SocketWorld, 24, shardColor, tile * 1.2f, 0.8f, tile * 0.05f);
-                // Step 17 I: the opening's shard burst again, tinted, with the element's flourish.
-                ShardBurst.Play(fx, SocketWorld, id, island.transform.lossyScale.x, island.transform.up);
+                // Nov 7 (Mugesh: placing it should be big too): the Keeper shard's island blast, from the socket.
+                ShardBurst.Blast(fx, island, SocketWorld, id);
                 // Moss falls away from the shoulders and head.
                 foreach (var m in new[] { new Vector3(0f, 1.52f, -0.06f), new Vector3(0f, 2.3f, 0.12f), new Vector3(0.45f, 0.72f, -0.3f) })
                 {
@@ -363,6 +441,9 @@ namespace Diorama
             }
             // Step 13: the statue whispers a memory (the Heart's voice), the Spirit answers; the third starts the finale.
             var lines = FinaleLogic.WhisperLines(id, placed);
+            // Nov 7 (Mugesh: the Spirit talked about the journal while the shard went in): the whisper is a scene, only its
+            // own lines show; other chatter waits and goes stale.
+            Dialogue.SetFocal("statue", true, lines);
             foreach (var line in lines) Dialogue.Say(line);
             Debug.Log($"[StatueSocket] Whisper: {string.Join(", ", lines)}.");
             Placed?.Invoke(this, placed);
@@ -387,6 +468,7 @@ namespace Diorama
 
         void EndScene(string why)
         {
+            Dialogue.SetFocal("statue", false);
             if (!_scene) return;
             _scene = false;
             // The finale locks the explorer itself; leave it to it.
@@ -478,12 +560,6 @@ namespace Diorama
             StartCoroutine(Fly(holder.CupWorld(id), true));
             return true;
         }
-
-        /// <summary>
-        /// Nov 7: the Quick Journey's dream ahead: the player places this shard by hand, but it locks in quietly (no whisper:
-        /// the finale follows straight after).
-        /// </summary>
-        public void QuietNextPlacement() => _quiet = true;
 
         /// <summary>Debug (bridge): the shard goes into the socket as if carried there.</summary>
         public void DebugPlace()
