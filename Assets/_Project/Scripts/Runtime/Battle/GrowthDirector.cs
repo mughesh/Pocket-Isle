@@ -116,7 +116,23 @@ namespace Diorama
 
         /// <summary>Pods may glow and be grabbed for evolving: no battle, not the lodge, no finale, no scene change, no tutorial.</summary>
         bool Available => !encounters.InBattle && !pods.InBattle && !pods.LodgeMode && !FinaleDirector.Running && !SceneSwap.IsBusy &&
-                          !Onboarding.Running && !GameMenu.IsOpen && !JournalBoard.IsOpen;
+                          !Onboarding.Running && !GameMenu.IsOpen && !JournalBoard.IsOpen && !KeeperHall.ShardUp && !ShardCarried;
+
+        static readonly string[] ShardIds = { ShardHolder.FireId, ShardHolder.WindId, ShardHolder.WaterId };
+
+        /// <summary>
+        /// Nov 7 (Mugesh: evolving between the shard and the statue looked bad): a shard is taken and not yet in the statue.
+        /// The evolution waits until it is placed (normally it already happened in the temple, KeeperHall.WaitForEvolution).
+        /// </summary>
+        public static bool ShardCarried
+        {
+            get
+            {
+                foreach (var id in ShardIds)
+                    if (PuzzleState.Stage(id) >= 1 && !PuzzleState.IsSolved(id)) return true;
+                return false;
+            }
+        }
 
         /// <summary>The Spirit may start the "ready" line: available, no menu, no other lesson pinned.</summary>
         bool Calm => Available && !Dialogue.Held && (!Dialogue.IsPinned || Dialogue.CurrentObjective == ReadyLine);

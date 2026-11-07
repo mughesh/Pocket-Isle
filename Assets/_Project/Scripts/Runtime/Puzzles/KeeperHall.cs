@@ -180,6 +180,56 @@ namespace Diorama
 
         public bool Calmed => PuzzleState.IsSolved(keeperId);
 
+        static readonly List<KeeperHall> _live = new List<KeeperHall>();
+
+        /// <summary>Nov 7: a Keeper's shard is rising, floating or flying to the Spirit (no evolution then).</summary>
+        public static bool ShardUp
+        {
+            get
+            {
+                foreach (var k in _live)
+                    if (k != null && k.isActiveAndEnabled && (k._phase == Phase.Shard || k._phase == Phase.Leaving)) return true;
+                return false;
+            }
+        }
+
+        void OnEnable()
+        {
+            if (!_live.Contains(this)) _live.Add(this);
+        }
+
+        void OnDisable() => _live.Remove(this);
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetLive() => _live.Clear();
+
+        [Tooltip("Nov 7: after the Keeper calms, a pod that is ready to evolve evolves here, before the shard rises: the hall waits this long at most (s).")]
+        public float evolveWaitMax = 90f;
+
+        /// <summary>
+        /// Nov 7 (Mugesh: evolving in the middle of placing the shard on the statue looked bad): the evolution happens in
+        /// the temple right after the Keeper battle. If a pod is due, the hall waits (shard not risen yet) until it has
+        /// evolved, or <see cref="evolveWaitMax"/>.
+        /// </summary>
+        IEnumerator WaitForEvolution()
+        {
+            var g = GrowthDirector.Instance;
+            if (g == null) yield break;
+            // The Growth director needs a frame or two to see the due pod once the battle is over.
+            for (float t = 0f; t < 1f && g.Due < 0; t += Time.deltaTime) yield return null;
+            if (g.Due < 0 && !g.Showing) yield break;
+            Debug.Log($"[KeeperHall] A pod is ready to evolve: it evolves here before {ownShard} rises.");
+            explorer.Locked = false;
+            float waited = 0f;
+            while ((g.Due >= 0 || g.Showing) && waited < evolveWaitMax)
+            {
+                waited += Time.deltaTime;
+                yield return null;
+            }
+            yield return new WaitForSeconds(1f);
+            Debug.Log(waited >= evolveWaitMax ? $"[KeeperHall] Not evolved after {evolveWaitMax:0} s: the shard rises anyway." : "[KeeperHall] Evolved: the shard rises.");
+        }
+
         /// <summary>Step 17 E: the Keeper's shard was taken (held by the Spirit or placed in the statue): the way out shows from then.</summary>
         public bool ShardTaken => PuzzleState.Stage(ownShard) >= 1 || PuzzleState.IsSolved(ownShard);
         string KeeperName => keeperSpecies != null ? keeperSpecies.displayName : keeperId;
@@ -733,6 +783,7 @@ namespace Diorama
             Vector3 mouth = island.transform.TransformPoint(island.TileToLocal(forgeMouth, island.Content.capHeight + forgeMouthHeight * island.map.tileSize));
             if (fx != null) fx.Burst(mouth, 50, glowColor, TileWorld * 1.4f, 1f, TileWorld * 0.07f, Vector3.up * TileWorld);
             HallLit?.Invoke();
+            yield return WaitForEvolution();
             Debug.Log($"[KeeperHall] The {(forgeFlame ? "forge ignites" : "hall lights up")}; {ownShard} rises.");
             yield return new WaitForSeconds(0.6f);
             yield return ShardRise();
