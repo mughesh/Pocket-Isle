@@ -100,6 +100,9 @@ namespace Diorama
         /// <summary>True while a new game's opening runs (no saving, no encounters: the party is empty).</summary>
         public static bool InProgress { get; private set; }
 
+        /// <summary>Step 18: a returning player's island is rising or its title is up (the realm's music waits).</summary>
+        public static bool ReturningUp { get; private set; }
+
         /// <summary>Step 16: only the shard floats in the room (before the island unfolds): no island ambience or music.</summary>
         public static bool ShardOnly { get; private set; }
 
@@ -182,6 +185,7 @@ namespace Diorama
             DialogueBubble.KeepClear -= StarterPodsInView;
             InProgress = false;
             ShardOnly = false;
+            ReturningUp = false;
             if (_shardMesh != null) Destroy(_shardMesh);
         }
 
@@ -200,6 +204,7 @@ namespace Diorama
 
         IEnumerator Returning()
         {
+            ReturningUp = true;
             explorer.Locked = true;
             explorer.Shrink = 0f;
             spirit.Appear = 0f;
@@ -224,6 +229,7 @@ namespace Diorama
             explorer.Shrink = 1f;
             spirit.Appear = 1f;
             if (title != null) yield return title.Returning();
+            ReturningUp = false;
             EndRise();
             _stage = Stage.Done;
         }
@@ -1178,6 +1184,7 @@ namespace Diorama
         {
             InProgress = false;
             ShardOnly = false;
+            ReturningUp = false;
         }
     }
 }

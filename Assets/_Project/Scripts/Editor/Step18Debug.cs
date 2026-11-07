@@ -189,6 +189,31 @@ namespace Diorama.EditorTools
             Debug.Log(clip != null ? $"[Step18Debug] {clip.clipName}: {clip.frames.Count} frames ({clip.frames.Count / (float)clip.fps:0.00} s)." : "[Step18Debug] Swipe-tap ghost: MISSING source clips.");
         }
 
+        /// <summary>Play mode: picks battle move arg (0-2) as if its rune were pressed; "ko" also turns on one-hit KOs.</summary>
+        public static void Move()
+        {
+            var r = Object.FindFirstObjectByType<BattleRunes>();
+            var f = typeof(BattleRunes).GetField("Chosen", BindingFlags.Instance | BindingFlags.NonPublic);
+            var d = r != null && f != null ? f.GetValue(r) as System.Action<int> : null;
+            string a = (Arg ?? "").Trim();
+            if (a == "ko")
+            {
+                DevCheats.OneHitKo = true;
+                a = "0";
+            }
+            int.TryParse(a, out int i);
+            d?.Invoke(i);
+            Debug.Log($"[Step18Debug] Move {i}{(d == null ? ": no battle runes listening" : "")}.");
+        }
+
+        /// <summary>Play mode: the party's HP (log).</summary>
+        public static void Hp()
+        {
+            var p = Object.FindFirstObjectByType<Party>();
+            if (p != null && (Arg ?? "").Trim() == "hurt") foreach (var c in p.members) c.currentHp = Mathf.Max(1, c.MaxHp / 2);
+            if (p != null) Debug.Log($"[Step18Debug] HP: {string.Join(", ", p.members.ConvertAll(c => $"{c.Name} {c.currentHp}/{c.MaxHp}"))}.");
+        }
+
         /// <summary>Play mode: sets a float field on the first object of a type (arg = "Type.field=value").</summary>
         public static void SetFloat()
         {

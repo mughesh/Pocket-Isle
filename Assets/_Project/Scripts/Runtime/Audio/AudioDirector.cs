@@ -90,6 +90,8 @@ namespace Diorama
                 _areaMusic = music;
                 _arrivalHold = Time.unscaledTime + 1.2f;
             }
+            // Under the title the realm's music waits too (it started under Continue / New journey), then the card.
+            if (_arrivalHold >= 0f && (TitleScreen.Showing || Opening.ReturningUp)) _arrivalHold = Time.unscaledTime + 1.2f;
             bool holding = _arrivalHold >= 0f && (Time.unscaledTime < _arrivalHold || RealmNameCard.Showing) && !battle;
             if (_arrivalHold >= 0f && !holding && !battle)
             {
