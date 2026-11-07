@@ -52,6 +52,7 @@ namespace Diorama
             _asking = true;
             Dialogue.Say("keeper.spar");
             runes.Clear();
+            runes.rimLocked = true; // step 17 B: rim rows sit on the rim, island-front locked
             var size = new Vector2(0.09f, 0.04f);
             var yes = runes.Add("Spar?", new Vector2(-0.055f, 0f), size, Spar);
             runes.Add("Not now", new Vector2(0.055f, 0f), size, NotNow);
@@ -66,6 +67,7 @@ namespace Diorama
         {
             runes.Hide();
             runes.Clear();
+            runes.rimLocked = true; // step 17 B: rim rows sit on the rim, island-front locked
             _asking = false;
             Debug.Log($"[KeeperRematch] {Name}: not now.");
         }
@@ -77,6 +79,7 @@ namespace Diorama
             {
                 runes.Hide();
                 runes.Clear();
+                runes.rimLocked = true; // step 17 B: rim rows sit on the rim, island-front locked
             }
             _asking = false;
             if (hall == null || hall.keeperSpecies == null || encounters == null) return;

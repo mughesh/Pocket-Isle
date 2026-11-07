@@ -132,6 +132,7 @@ namespace Diorama
             // choices: Resume (a little larger, gold inlay), Journal, Settings, the speaker as a small square tablet at the
             // end; Controls and Title live in Settings; Dev (Editor and QA builds) set apart.
             runes.Clear();
+            runes.rimLocked = true; // step 17 B: rim rows sit on the rim, island-front locked
             var size = new Vector2(0.072f, 0.034f);
             var big = new Vector2(0.08f, 0.038f);
             // Nov 4 (Mugesh: Resume and the others too close): 2.4 cm between tablets (was 0.8).
@@ -174,6 +175,7 @@ namespace Diorama
             if (JournalBoard.IsOpen && JournalBoard.Instance != null) JournalBoard.Instance.Close();
             runes.Hide();
             runes.Clear();
+            runes.rimLocked = true; // step 17 B: rim rows sit on the rim, island-front locked
             if (island != null) island.clearingDim = _dimBefore;
             if (explorer != null && !_wasLocked) explorer.Locked = false;
             if (pause != null) pause.SetMenu(false);

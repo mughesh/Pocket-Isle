@@ -409,9 +409,11 @@ namespace Diorama
             {
                 runes.Hide();
                 runes.Clear();
+                runes.rimLocked = true; // step 17 B: rim rows sit on the rim, island-front locked
                 return;
             }
             runes.Clear();
+            runes.rimLocked = true; // step 17 B: rim rows sit on the rim, island-front locked
             runes.Add("Skip", Vector2.zero, new Vector2(0.07f, 0.03f), () =>
             {
                 _skip = true;
@@ -446,6 +448,7 @@ namespace Diorama
             if (runes != null)
             {
                 runes.Clear();
+                runes.rimLocked = true; // step 17 B: rim rows sit on the rim, island-front locked
                 var size = new Vector2(0.1f, 0.042f);
                 if (!Preview)
                 {
@@ -479,6 +482,7 @@ namespace Diorama
             {
                 runes.Hide();
                 runes.Clear();
+                runes.rimLocked = true; // step 17 B: rim rows sit on the rim, island-front locked
             }
         }
 

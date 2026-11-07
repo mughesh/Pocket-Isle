@@ -46,6 +46,10 @@ namespace Diorama
         [Tooltip("The re-face turn's easing (s).")]
         public float turnSeconds = 0.4f;
         public float maxTilt = 40f;
+        [Tooltip("Step 17 B: a row on the rim (game menu, title, end card): yaw locked to the island's front, a fixed tilt, never re-faces. Set by the menus that sit on the rim; floating boards (Journal, Settings) keep face-once.")]
+        public bool rimLocked;
+        [Tooltip("Step 17 B: the rim row's fixed tilt back toward a seated head (degrees, island frame).")]
+        public float rimTilt = 35f;
 
         [Header("Input (step 14k)")]
         [Tooltip("Look at a tablet + pinch picks it. Off on the Journal (Mugesh: gaze isn't needed there): poke and the hand ray only.")]
@@ -633,6 +637,15 @@ namespace Diorama
             var b = island.LocalBounds;
             var at = Anchor?.Invoke();
             _root.localPosition = at.HasValue ? _root.parent.InverseTransformPoint(at.Value) : new Vector3(b.center.x, island.map.capHeight, b.max.z) + offset;
+            if (rimLocked)
+            {
+                // Step 17 B: anchored to the island itself (Mugesh: the menu and the island faced the head independently
+                // and the row sheared across the rim when he leaned). The island's own facing turns it with the island.
+                _yaw = 180f; // the board's +Z points away from the viewer: toward the island's back
+                _tilt = _tiltTarget = rimTilt;
+                _root.rotation = island.transform.rotation * Quaternion.Euler(rimTilt, 180f, 0f);
+                return;
+            }
             var cam = Camera.main;
             if (cam != null)
             {

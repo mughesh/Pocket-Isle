@@ -49,6 +49,15 @@ namespace Diorama.EditorTools
             Debug.Log($"[Step17Debug] Pressed '{Arg}'.");
         }
 
+        /// <summary>Opens the game menu (its private Open, as the menu stone does).</summary>
+        public static void Menu()
+        {
+            var m = Object.FindFirstObjectByType<GameMenu>();
+            if (m == null) return;
+            typeof(GameMenu).GetMethod("Open", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(m, null);
+            Debug.Log("[Step17Debug] Game menu opened.");
+        }
+
         /// <summary>Logs the island grab locks and whether the rim can be grabbed.</summary>
         public static void Locks()
         {

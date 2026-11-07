@@ -96,6 +96,7 @@ namespace Diorama
                 return;
             }
             runes.Clear();
+            runes.rimLocked = true; // step 17 B: rim rows sit on the rim, island-front locked
             var active = SaveSlots.Active;
             var other = SaveSlots.Other(active);
             var cont = runes.Add("Continue", new Vector2(-0.11f, 0f), Wide, () => _continue = true, SaveSlots.Label(active));
@@ -117,6 +118,7 @@ namespace Diorama
                 return;
             }
             runes.Clear();
+            runes.rimLocked = true; // step 17 B: rim rows sit on the rim, island-front locked
             var full = runes.Add("Full adventure", new Vector2(-0.11f, 0f), Wide, () => Pick(SaveSlot.Adventure, restart),
                 restart && SaveSlots.Exists(SaveSlot.Adventure) ? "Hold to start over" : null);
             var quick = runes.Add("Quick journey", new Vector2(0f, 0f), Wide, () => Pick(SaveSlot.Quick, restart),
@@ -183,6 +185,7 @@ namespace Diorama
             {
                 runes.Hide();
                 runes.Clear();
+                runes.rimLocked = true; // step 17 B: rim rows sit on the rim, island-front locked
             }
             if (logo != null) logo.Leave(leaveSeconds);
             yield return WaitUnscaled(leaveSeconds);
@@ -196,6 +199,7 @@ namespace Diorama
             {
                 runes.Hide();
                 runes.Clear();
+                runes.rimLocked = true; // step 17 B: rim rows sit on the rim, island-front locked
             }
             if (logo != null) logo.Hide();
             Showing = false;

@@ -254,6 +254,7 @@ namespace Diorama
         {
             if (runes == null) return;
             runes.Clear();
+            runes.rimLocked = true; // step 17 B: rim rows sit on the rim, island-front locked
             // Step 16 (judges: tiny runes above the statue): the title's tablet size and gap, in front of the statue.
             var size = EndRuneSize;
             float step = size.x + EndRuneGap;
@@ -309,6 +310,7 @@ namespace Diorama
             runes.Hide();
             Dialogue.SetFocal("end card", false);
             runes.Clear();
+            runes.rimLocked = true; // step 17 B: rim rows sit on the rim, island-front locked
             Debug.Log("[QuickJourney] Keep exploring: the full adventure's trail leads on (Cinderwood next).");
             var trail = FindFirstObjectByType<SpiritTrail>();
             if (trail != null) trail.Show("quick journey: keep exploring");
@@ -323,6 +325,7 @@ namespace Diorama
             runes.Hide();
             Dialogue.SetFocal("end card", false);
             runes.Clear();
+            runes.rimLocked = true; // step 17 B: rim rows sit on the rim, island-front locked
             _previewing = true;
             FinaleDirector.Moment -= OnFinaleMoment;
             FinaleDirector.Moment += OnFinaleMoment;
