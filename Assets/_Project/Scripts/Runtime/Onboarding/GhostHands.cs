@@ -46,6 +46,8 @@ namespace Diorama
         public float sideSwipeSeconds = 0.75f;
         [Tooltip("Thumb demos are this much bigger than the lesson's scale (they read tiny over the map).")]
         public float thumbScale = 1.6f;
+        [Tooltip("Nov 7 (Mugesh: the gold point looks really nice, use it wherever it helps): every ghost demo gets the gold dot and trail on the joint that does the work (thumb tip, pinch point, fingertip or palm), not only thumb demos.")]
+        public bool keyDots = true;
         [Tooltip("A gold dot on the ghost's thumb tip and this many trail dots behind it (the slide).")]
         public int thumbTrailDots = 6;
         public float thumbDotSize = 0.009f;
@@ -488,7 +490,7 @@ namespace Diorama
             _releaseValid = release.HasValue;
             if (release.HasValue) _releaseWorld = release.Value;
             UpdateDot(point, t / Mathf.Max(0.01f, _clip.Duration), alpha);
-            UpdateThumbDots(ThumbDemo ? a : null, alpha, scale);
+            UpdateThumbDots(keyDots || ThumbDemo ? a : null, alpha, scale);
             Spark(grab, t, point, alpha, scale);
         }
 
@@ -532,8 +534,8 @@ namespace Diorama
         void UpdateThumbDots(Ghost g, float alpha, float scale)
         {
             if (_thumbDots == null) return;
-            var tip = g != null ? g.joints[(int)HandJointId.HandThumbTip] : null;
-            bool on = tip != null && alpha > 0.002f;
+            Vector3? at = g != null ? KeyDotPoint(g) : null;
+            bool on = at.HasValue && alpha > 0.002f;
             if (!on)
             {
                 foreach (var r in _thumbRenderers) r.enabled = false;
@@ -542,7 +544,7 @@ namespace Diorama
             }
             int n = _thumbTrail.Length;
             _thumbHead = (_thumbHead + 1) % n;
-            _thumbTrail[_thumbHead] = tip.position;
+            _thumbTrail[_thumbHead] = at.Value;
             _thumbCount = Mathf.Min(_thumbCount + 1, n);
             float size = thumbDotSize * Mathf.Max(0.5f, scale);
             for (int i = 0; i < n; i++)
@@ -566,6 +568,25 @@ namespace Diorama
         }
 
         static float Sq(float x) => x * x;
+
+        /// <summary>Nov 7: where the gold dot sits on a ghost: the thumb tip (thumb demos), the pinch point (pinch and grab
+        /// clips), the index tip (pokes, flicks) or the palm (palm clips).</summary>
+        Vector3? KeyDotPoint(Ghost g)
+        {
+            Transform J(HandJointId id) => g.joints[(int)id];
+            if (_clip == null) return null;
+            string n = _clip.clipName ?? "";
+            if (n.StartsWith("thumb_", System.StringComparison.Ordinal)) return J(HandJointId.HandThumbTip) != null ? J(HandJointId.HandThumbTip).position : (Vector3?)null;
+            if (_clip.keyPinch || n.StartsWith("pinch", System.StringComparison.Ordinal) || n.StartsWith("grab", System.StringComparison.Ordinal) && n != "grab_palm_up")
+            {
+                var t = J(HandJointId.HandThumbTip);
+                var i = J(HandJointId.HandIndexTip);
+                return t != null && i != null ? (t.position + i.position) * 0.5f : (Vector3?)null;
+            }
+            var k = J(_clip.keyJoint);
+            if (k == null) k = J(HandJointId.HandPalm);
+            return k != null ? k.position : (Vector3?)null;
+        }
 
         /// <summary>Step 16: the ghost's alpha share for a hand-near amount (0 = no hand near, 1 = a hand at the target).</summary>
         public static float NearAlpha(float near, float nearAlpha) => Mathf.Lerp(1f, nearAlpha, Mathf.Clamp01(near));
