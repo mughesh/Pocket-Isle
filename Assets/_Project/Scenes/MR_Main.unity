@@ -227,7 +227,7 @@ MonoBehaviour:
   fx: {fileID: 1078587927}
   reach: 6
   lessonLine: hub.shard.first
-  ghostClip: palm_lift
+  ghostClip: grab_drop
   ghostScale: 1
   lessonChip: 
   counterLabel: 
@@ -2746,7 +2746,7 @@ MonoBehaviour:
   fx: {fileID: 1078587927}
   reach: 6
   lessonLine: hub.shard.first
-  ghostClip: palm_lift
+  ghostClip: grab_drop
   ghostScale: 1
   lessonChip: 
   counterLabel: 
@@ -5061,7 +5061,7 @@ MonoBehaviour:
   fx: {fileID: 1078587927}
   reach: 6
   lessonLine: hub.shard.first
-  ghostClip: palm_lift
+  ghostClip: grab_drop
   ghostScale: 1
   lessonChip: 
   counterLabel: 

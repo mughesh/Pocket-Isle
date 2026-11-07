@@ -262,6 +262,21 @@ namespace Diorama
 
         public Vector3 SocketWorld => MapToWorld(SocketMap);
 
+        /// <summary>The finale's wake-up shake in map tiles (the same for every socket: one statue).</summary>
+        static Vector2 ShakeMap => Shake > 0f ? new Vector2(Mathf.Sin(Time.time * 47f), Mathf.Sin(Time.time * 39f + 1f)) * Shake : Vector2.zero;
+
+        /// <summary>
+        /// Step 18: the socket moved by the shake (socketed shards hung still and clipped in and out of the shaking stone).
+        /// </summary>
+        Vector3 ShakenSocketWorld
+        {
+            get
+            {
+                var k = ShakeMap;
+                return k == Vector2.zero ? SocketWorld : MapToWorld(SocketMap + new Vector3(k.x, 0f, k.y));
+            }
+        }
+
         /// <summary>The statue's line points at the socket for the shard the Spirit carries (the wind one if only that is held).</summary>
         Vector3 LessonSocketWorld
         {
@@ -646,7 +661,7 @@ namespace Diorama
                 var look = stage >= 2 && statueAwakeRecipe != null ? statueAwakeRecipe : stage >= 1 && statueLitRecipe != null ? statueLitRecipe : statueRecipe;
                 if (look != null) _statue.SetRecipe(look);
                 float breath = stage >= 2 ? 1f + breathe * Mathf.Sin(Time.time * Mathf.PI * 2f / Mathf.Max(0.5f, breathSeconds)) : 1f;
-                Vector2 shake = Shake > 0f ? new Vector2(Mathf.Sin(Time.time * 47f), Mathf.Sin(Time.time * 39f + 1f)) * Shake : Vector2.zero;
+                Vector2 shake = ShakeMap;
                 _statue.Place(StatueCenter + shake, 0f, rot, here && PlacedCount > 0 && !HideStatue, new Vector3(1f, breath, 1f));
             }
             if (drawsStatue && HeartVoice != null && island.Content != null)
@@ -654,7 +669,7 @@ namespace Diorama
             if (_shard != null)
             {
                 bool show = here && (_hand >= 0 || _palm >= 0 || _flying || solved && !HideStatue);
-                Vector3 world = solved && !_flying ? SocketWorld : _shardWorld;
+                Vector3 world = solved && !_flying ? ShakenSocketWorld : _shardWorld;
                 // Big in the hand, socket size as it nears the socket.
                 float big = holder != null ? holder.offerMetres : 0.026f * 0.8f;
                 float near = Mathf.Clamp01((world - SocketWorld).magnitude / (0.15f * Mathf.Max(1f, island.transform.lossyScale.x)));

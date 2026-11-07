@@ -159,6 +159,27 @@ namespace Diorama.EditorTools
             Debug.Log(sb.ToString());
         }
 
+        /// <summary>
+        /// Edit mode, step 18 (Mugesh: no palm ghost for the statue, the shard is pinched or grabbed and placed): the statue
+        /// sockets' ghost back to grab_drop (or the clip in arg). Saves the scene.
+        /// </summary>
+        public static void StatueGhost()
+        {
+            if (UnityEditor.EditorApplication.isPlaying) return;
+            string clip = string.IsNullOrEmpty(Arg) ? "grab_drop" : Arg.Trim();
+            var sb = new System.Text.StringBuilder("[Step18Debug] Statue ghost:");
+            foreach (var s in Object.FindObjectsByType<StatueSocket>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                UnityEditor.Undo.RecordObject(s, "Statue ghost");
+                sb.Append($" {s.id} {s.ghostClip} -> {clip};");
+                s.ghostClip = clip;
+                UnityEditor.EditorUtility.SetDirty(s);
+            }
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+            UnityEditor.SceneManagement.EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+            Debug.Log(sb.ToString());
+        }
+
         /// <summary>Play mode: sets a float field on the first object of a type (arg = "Type.field=value").</summary>
         public static void SetFloat()
         {

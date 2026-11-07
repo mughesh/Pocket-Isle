@@ -168,6 +168,9 @@ namespace Diorama
         Mesh _quad;
         PropView _shard;
         Vector3 _shardLocal;
+        // Step 18: the shard has finished rising (before that, the pickup drew it and its sunrays at the default spot on
+        // the hall floor for a moment).
+        bool _shardRisen;
         bool _shardHovering;
         readonly bool[] _wasPinching = { true, true };
         readonly bool[] _wasFist = { true, true };
@@ -816,6 +819,7 @@ namespace Diorama
             // Step 16: higher and nearer the player (it hid behind the hall's entry arch at 0.12 m).
             Vector3 hover = new Vector3(0f, island.CapTopLocal + shardHoverHeight, half.y * shardHoverFront);
             _shardHovering = true;
+            _shardRisen = false;
             _shardFloat.Stop(0f);
             _shardFloat = AudioService.PlayLoop(AudioIds.ShardFloat, island.transform.TransformPoint(hover), 0.6f);
             for (float t = 0f; t < 1f; t += Time.deltaTime)
@@ -832,6 +836,7 @@ namespace Diorama
                 yield return null;
             }
             _shardHome = hover;
+            _shardRisen = true;
             _shardWait = 0f;
             if (!string.IsNullOrEmpty(shardLine)) Dialogue.Say(shardLine);
             // Nov 7 (Mugesh: the gold ball under the shard looked wrong; poke it with the gold dot on the fingertip, small ghost):
@@ -856,7 +861,7 @@ namespace Diorama
 
         void UpdateShardPickup()
         {
-            if (!_shardHovering) return;
+            if (!_shardHovering || !_shardRisen) return;
             _shardLocal = _shardHome + Vector3.up * (0.006f * Mathf.Sin(Time.time * 2f));
             DrawShard();
             Vector3 world = island.transform.TransformPoint(_shardLocal);
