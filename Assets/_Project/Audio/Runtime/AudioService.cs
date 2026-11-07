@@ -92,6 +92,20 @@ namespace Diorama.Audio
             s.StartMusic(cue, crossfade);
         }
 
+        /// <summary>Step 20: the music cue now chosen (playing, resting or finished once), null for none.</summary>
+        public static string CurrentMusic => _instance != null ? _instance._musicId : null;
+
+        /// <summary>Step 20: <paramref name="id"/> is the current music and is sounding (not resting, not finished).</summary>
+        public static bool IsSounding(string id) => _instance != null && id != null && _instance._musicId == id && _instance._musicSounding;
+
+        /// <summary>Step 20: the cue plays once to its end and stops (loop off, no rest).</summary>
+        public static bool PlaysOnce(string id)
+        {
+            if (string.IsNullOrEmpty(id) || !LoadTable()) return false;
+            var cue = _table.Find(id);
+            return cue != null && !cue.loop && cue.restSeconds <= 0f;
+        }
+
         /// <summary>Step 18: the cue's rest between plays (0 = it loops), or 0 for an unknown cue.</summary>
         public static float RestOf(string id)
         {
@@ -128,10 +142,12 @@ namespace Diorama.Audio
                 return;
             }
             var v = _musicA.Busy ? _musicB : _musicA;
-            bool loop = cue.restSeconds <= 0f;
+            // Step 20: a cue with loop off plays once to its end and stops (title, hub, lodge, finale).
+            bool loop = cue.loop && cue.restSeconds <= 0f;
             v.Begin(cue, clip, Vector3.zero, null, false, 1f, loop, fadeIn);
             _musicSounding = true;
-            Debug.Log($"[Audio] Music '{cue.id}' starts ({clip.name}, {clip.length:0} s, {(loop ? "looping" : $"then {cue.restSeconds:0} s rest")}, fade in {fadeIn:0.#} s).");
+            string mode = loop ? "looping" : !cue.loop ? "once" : $"then {cue.restSeconds:0} s rest";
+            Debug.Log($"[Audio] Music '{cue.id}' starts ({clip.name}, {clip.length:0} s, {mode}, fade in {fadeIn:0.#} s).");
         }
 
         /// <summary>Step 18: a delayed start or the rest is over: play; a once-through track ended: rest.</summary>
@@ -149,7 +165,11 @@ namespace Diorama.Audio
             if (!_musicSounding || _musicA.Busy || _musicB.Busy) return;
             _musicSounding = false;
             float rest = RestOf(_musicId);
-            if (rest <= 0f) return;
+            if (rest <= 0f)
+            {
+                Debug.Log($"[Audio] Music '{_musicId}' ended (once).");
+                return;
+            }
             _musicStartAt = Time.unscaledTime + rest;
             _musicFadeIn = 0f;
             Debug.Log($"[Audio] Music '{_musicId}' ended: {rest:0} s of ambience, then again.");

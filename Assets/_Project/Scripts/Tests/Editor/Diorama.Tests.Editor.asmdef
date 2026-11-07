@@ -3,6 +3,7 @@
     "rootNamespace": "Diorama.Tests",
     "references": [
         "Diorama.Runtime",
+        "Diorama.Audio",
         "Diorama.Editor",
         "Oculus.Interaction",
         "UnityEngine.TestRunner",

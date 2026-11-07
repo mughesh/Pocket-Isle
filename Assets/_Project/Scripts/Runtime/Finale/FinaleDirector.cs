@@ -423,7 +423,8 @@ namespace Diorama
             {
                 _skip = true;
                 runes.Hide();
-                Debug.Log("[FinaleDirector] Skip: on to the spark.");
+                MusicDirector.SkipFinale(); // step 20
+                Debug.Log("[FinaleDirector] Skip: on to the end.");
             });
             runes.Anchor = null;
             runes.Show(0.1f);

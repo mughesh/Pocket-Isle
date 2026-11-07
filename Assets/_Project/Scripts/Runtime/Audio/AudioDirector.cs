@@ -28,6 +28,8 @@ namespace Diorama
         // Step 18: arriving in a realm, its music waits for the realm name card, then fades in.
         MusicState _areaMusic;
         float _arrivalHold = -1f;
+        // Step 20: this battle is a Keeper's (its Keeper reference goes before the battle ends).
+        bool _keeperFight;
 
         public static void Ensure()
         {
@@ -48,6 +50,11 @@ namespace Diorama
             if (_island == null) return;
             FollowIsland();
             Pick(out string area, out string realm, out bool restored, out MusicState music);
+            // Step 20: back home from a realm, the Still Isle's welcome may play again.
+            if (realm == "StillIsle" && _realm != null && _realm != "StillIsle") MusicDirector.ArrivedHome();
+            // Step 20: the opening is quiet on the Still Isle (the title's track carries it); the title has its own track (once).
+            if (Opening.InProgress && music == MusicState.Hub) music = MusicState.None;
+            if (TitleScreen.Showing && !Opening.ShardOnly) music = MusicState.Title;
             // Step 16: while only the shard floats in the room, no island ambience or music (they start as it unfolds).
             bool shardOnly = Opening.ShardOnly;
             if (shardOnly)
@@ -70,7 +77,12 @@ namespace Diorama
             _realm = realm;
             _wasRestored = restored;
             bool battle = _encounters != null && _encounters.InBattle;
-            if (battle) music = _encounters.Keeper != null ? MusicState.BattleKeeper : MusicState.BattleWild;
+            if (battle)
+            {
+                if (_encounters.Keeper != null) _keeperFight = true;
+                music = _keeperFight ? MusicState.BattleKeeper : MusicState.BattleWild;
+            }
+            else _keeperFight = false;
             // Step 13: the finale has its own cue (silent until a track lands); the area music comes back after.
             bool finale = FinaleDirector.Running;
             if (finale != _finale)
@@ -82,6 +94,12 @@ namespace Diorama
                     if (AudioService.Has(Diorama.Audio.AudioIds.MusicFinale)) AudioService.SetMusic(Diorama.Audio.AudioIds.MusicFinale, 2f);
                     Debug.Log("[AudioDirector] Finale music (music.finale).");
                 }
+            }
+            // Step 20: the title's track starts right away (no arrival hold).
+            if (music == MusicState.Title && !finale)
+            {
+                _areaMusic = music;
+                _arrivalHold = -1f;
             }
             // Step 18: arriving in a new realm (not back from a battle or a hall), hold its music until the realm name card
             // is gone, then fade it in over 3 s.
@@ -100,7 +118,8 @@ namespace Diorama
             }
             if (!finale && !holding) MusicDirector.SetState(music);
             else if (!finale && holding && MusicDirector.State != MusicState.None && MusicDirector.State != music) MusicDirector.SetState(MusicState.None, 1.5f);
-            MusicDirector.SetHall(SceneSwap.IsInside && _area == "ForgeHall");
+            // Step 20: halls have their own rule now (temple; the realm's track after the restoration at full level).
+            MusicDirector.SetHall(false);
             MusicDirector.SetRestored(restored && realm == "Cinderwood");
             bool talking = Dialogue.IsTalking;
             MusicDirector.SetDialogue(talking);
@@ -138,16 +157,39 @@ namespace Diorama
                 "Lilymere" => MusicState.Lilymere,
                 _ => MusicState.Hub,
             };
+            // Step 20: an unrestored realm has no music (ambience only); its track comes back with the restoration, from the
+            // moment its shard is taken in the hall (the realm's own restoration may still be filling in then).
+            bool musicRestored = restored || ShardTaken(realm);
+            if (realm != "StillIsle" && !musicRestored && !MusicDirector.RealmMusicBeforeRestore) music = MusicState.None;
             if (swap != null && swap.Inside && swap.Interior != null)
             {
-                // The lodge is home (hub music); the realm halls are big stone rooms that keep the realm's music.
+                // The lodge is home (its own track, once); the realm halls are the Keepers' temples.
                 bool lodge = swap.Interior.name.Contains("Lodge");
                 area = lodge ? "Lodge" : "ForgeHall";
-                if (lodge) music = MusicState.Hub;
+                if (lodge) music = MusicState.Lodge;
+                else
+                {
+                    // Step 20: the temple track until the Keeper is calmed, then quiet until its shard is taken (the bloom).
+                    var hall = KeeperHall.Current;
+                    if (hall != null && !musicRestored) music = hall.Calmed ? MusicState.None : MusicState.Temple;
+                }
                 return;
             }
             if (realm == "StillIsle") area = "StillIsle";
             else area = realm + (restored ? "Restored" : "Faded");
+        }
+
+        /// <summary>Step 20: the realm's shard has been taken from its hall (held by the Spirit or in the statue).</summary>
+        static bool ShardTaken(string realm)
+        {
+            string id = realm switch
+            {
+                "Cinderwood" => ShardHolder.FireId,
+                "Galewick" => ShardHolder.WindId,
+                "Lilymere" => ShardHolder.WaterId,
+                _ => null,
+            };
+            return id != null && (PuzzleState.Stage(id) >= 1 || PuzzleState.IsSolved(id));
         }
 
         AmbienceProfile Profile(string name)

@@ -189,6 +189,9 @@ namespace Diorama
 
         static readonly List<KeeperHall> _live = new List<KeeperHall>();
 
+        /// <summary>Step 20 (music): the Keeper hall the player is inside, or null.</summary>
+        public static KeeperHall Current => _live.Find(h => h != null && h.isActiveAndEnabled && h.Active);
+
         /// <summary>Nov 7: a Keeper's shard is rising, floating or flying to the Spirit (no evolution then).</summary>
         public static bool ShardUp
         {
