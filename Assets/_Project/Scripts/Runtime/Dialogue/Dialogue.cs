@@ -61,6 +61,48 @@ namespace Diorama
             public bool objective;
             public string context;
             public LineKind kind;
+            /// <summary>Nov 7: seconds this line has been held back by a lesson, a focal card or a battle (it goes stale).</summary>
+            public float waited;
+        }
+
+        // ---- Nov 7: now or never (Mugesh: the Spirit's words came at the wrong time) ----
+
+        [Header("Timing (Nov 7)")]
+        [Tooltip("A story or filler line held back this long (s) by a lesson, a focal card or a battle is stale: it is dropped, not said late.")]
+        public float staleAfter = 6f;
+        [Tooltip("A line cut off by the menu or a focal card after showing this long (s) counts as read: it doesn't play again.")]
+        public float replayUnder = 1.5f;
+
+        float _currentSince;
+
+        /// <summary>A line pushed off by the menu or a focal card comes back only if it was barely read (or is a lesson's).</summary>
+        bool ComesBack(Queued q) => q.objective || _pinned.Contains(q.trigger) || Time.time - _currentSince < replayUnder;
+
+        /// <summary>
+        /// Nov 7: a story or filler line that can't show now (a lesson teaches, a focal card is up, a battle runs) ages; past
+        /// <see cref="staleAfter"/> it's dropped. A landmark's first-sight line dropped this way stays said (no "kites lying in
+        /// the grass" after they fly); other "once" lines may come again where they fit.
+        /// </summary>
+        void AgeQueue(float dt)
+        {
+            if (_queue.Count == 0) return;
+            bool pin = PinActive(), focal = FocalUp, battle = encounters != null && encounters.InBattle;
+            if (!pin && !focal && !battle) return;
+            string showing = _current.HasValue ? _current.Value.trigger : null;
+            for (int i = _queue.Count - 1; i >= 0; i--)
+            {
+                var q = _queue[i];
+                if (q.objective || _pinned.Contains(q.trigger) || q.trigger == showing || q.kind == LineKind.Objective || q.kind == LineKind.Intro) continue;
+                // A Keeper's or the Heart's own words are the scene itself: they wait, never go stale.
+                if (q.line != null && q.line.speaker != DialogueSpeaker.Spirit) continue;
+                bool held = pin || focal && !PassesFocal(q) || battle && !IsBattleLine(q.trigger, script != null ? script.Find(q.trigger) : null);
+                if (!held) continue;
+                q.waited += dt;
+                _queue[i] = q;
+                if (q.waited < staleAfter) continue;
+                bool landmark = !string.IsNullOrEmpty(q.target) && q.target.StartsWith("landmark:", StringComparison.Ordinal);
+                Drop(i, $"stale: held back {q.waited:0.#} s ({(pin ? "lesson" : focal ? "focal card" : "battle")})", !landmark);
+            }
         }
 
         // ---- step 14k: lines in context ----
@@ -585,22 +627,43 @@ namespace Diorama
         static readonly HashSet<string> Focal = new HashSet<string>();
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void ResetFocal() => Focal.Clear();
+        static void ResetFocal()
+        {
+            Focal.Clear();
+            FocalAllowed.Clear();
+        }
 
         /// <summary>
         /// Step 16: a focal card is up (evolution card, realm name card, the Quick Journey's end card, credits): the Spirit's
         /// chatter waits (the line showing goes back to the queue); objectives and the lesson teaching now still show.
         /// </summary>
-        public static void SetFocal(string who, bool on)
+        public static void SetFocal(string who, bool on) => SetFocal(who, on, null);
+
+        /// <summary>
+        /// Nov 7: a scripted scene (the statue's whisper, the dream ahead) is focal too: only its own lines
+        /// (<paramref name="allowed"/>), objectives and the lesson show; other chatter waits and goes stale.
+        /// </summary>
+        public static void SetFocal(string who, bool on, IEnumerable<string> allowed)
         {
             if (on ? Focal.Add(who) : Focal.Remove(who)) Debug.Log($"[Dialogue] Focal card {who} {(on ? "up: chatter waits" : "down")}.");
+            if (on && allowed != null) FocalAllowed[who] = new HashSet<string>(allowed);
+            else if (!on) FocalAllowed.Remove(who);
+        }
+
+        static readonly Dictionary<string, HashSet<string>> FocalAllowed = new Dictionary<string, HashSet<string>>();
+
+        static bool AllowedByFocal(string trigger)
+        {
+            foreach (var kv in FocalAllowed)
+                if (kv.Value.Contains(trigger)) return true;
+            return false;
         }
 
         /// <summary>Only while playing: a card left up when Play stopped must not hold lines in Edit mode (tests).</summary>
         public static bool FocalUp => Application.isPlaying && (Focal.Count > 0 || RealmNameCard.Showing);
 
         /// <summary>Step 16: a line that may show while a focal card is up.</summary>
-        bool PassesFocal(Queued q) => q.kind == LineKind.Objective || q.objective || _pinned.Contains(q.trigger);
+        bool PassesFocal(Queued q) => q.kind == LineKind.Objective || q.objective || _pinned.Contains(q.trigger) || AllowedByFocal(q.trigger);
 
         bool _held, _focal;
 
@@ -608,7 +671,8 @@ namespace Diorama
         {
             if (Held)
             {
-                if (_current.HasValue) _queue.Insert(0, _current.Value);
+                if (_current.HasValue && ComesBack(_current.Value)) _queue.Insert(0, _current.Value);
+                else if (_current.HasValue) Debug.Log($"[Dialogue] {_current.Value.trigger}: read already, not again after the menu.");
                 _current = null;
                 SetTarget(null);
                 if (bubble != null) bubble.Hide();
@@ -662,6 +726,15 @@ namespace Diorama
                 bubble.SetProgress(lessonLine ? _progress.x : 0, lessonLine ? _progress.y : 0);
                 bubble.Show(q.line, anchor, stays ? (string.IsNullOrEmpty(_chip) ? q.line.text : _chip) : null, q.objective || stays);
             }
+            _currentSince = Time.time;
+            // Its next lines follow it: their stale clock starts now.
+            for (int i = 0; i < _queue.Count; i++)
+                if (_queue[i].trigger == q.trigger && _queue[i].waited > 0f)
+                {
+                    var o = _queue[i];
+                    o.waited = 0f;
+                    _queue[i] = o;
+                }
             Speaking?.Invoke(q.line.speaker);
         }
 
@@ -698,12 +771,13 @@ namespace Diorama
         }
 
         /// <summary>Removes a queued line; a "once" trigger that never showed a line may fire again later.</summary>
-        void Drop(int index, string why)
+        void Drop(int index, string why, bool mayComeAgain = true)
         {
             var q = _queue[index];
             _queue.RemoveAt(index);
+            if (!mayComeAgain) _queue.RemoveAll(o => o.trigger == q.trigger);
             if (_queue.Exists(o => o.trigger == q.trigger)) return;
-            if (!_shown.Contains(q.trigger) && _said.Remove(q.trigger)) Debug.Log($"[Dialogue] {q.trigger} dropped before it showed ({why}): it can come again.");
+            if (mayComeAgain && !_shown.Contains(q.trigger) && _said.Remove(q.trigger)) Debug.Log($"[Dialogue] {q.trigger} dropped before it showed ({why}): it can come again.");
             else Debug.Log($"[Dialogue] {q.trigger} dropped ({why}).");
         }
 
@@ -714,6 +788,9 @@ namespace Diorama
 
         /// <summary>Tests: the line showing finished (as the bubble would report): the next one comes.</summary>
         public void DebugFinishLine() => Next();
+
+        /// <summary>Tests: time passes for the queue's stale clocks (as Update would).</summary>
+        public void DebugAge(float seconds) => AgeQueue(seconds);
 
         /// <summary>
         /// A battle or scene swap started (called by those events; public for tests): hint lines (priority 1 or lower)
@@ -778,7 +855,8 @@ namespace Diorama
                 _focal = focalUp;
                 if (focalUp && _current.HasValue && !PassesFocal(_current.Value))
                 {
-                    _queue.Insert(0, _current.Value);
+                    if (ComesBack(_current.Value)) _queue.Insert(0, _current.Value);
+                    else Debug.Log($"[Dialogue] {_current.Value.trigger}: read already, not again after the card.");
                     Next();
                 }
                 else if (!focalUp && !_current.HasValue) Next();
@@ -800,6 +878,7 @@ namespace Diorama
                     }
                 if (!battleNow && !_current.HasValue && _queue.Count > 0) Next();
             }
+            AgeQueue(Time.deltaTime);
             UpdateTarget();
             TryIdleHint();
         }

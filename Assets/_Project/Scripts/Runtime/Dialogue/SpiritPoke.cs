@@ -60,7 +60,8 @@ namespace Diorama
             if (Time.time - _last < cooldown) return;
             _last = Time.time;
             bool objective = Dialogue.RepeatObjective();
-            if (!objective && !string.IsNullOrEmpty(idleLine)) Dialogue.Repeat(idleLine);
+            // Nov 7: not in a scene (the statue's whisper, the dream ahead): "follow my gold trail" made no sense there.
+            if (!objective && !string.IsNullOrEmpty(idleLine) && !Dialogue.FocalUp) Dialogue.Repeat(idleLine);
             if (spirit != null) spirit.Flinch(from - spirit.transform.forward * 0.02f, 0.01f, 0.4f);
             Debug.Log($"[SpiritPoke] {how}: {(objective ? $"repeating {Dialogue.CurrentObjective}" : "no objective, idle line")}.");
             Poked?.Invoke(objective);
