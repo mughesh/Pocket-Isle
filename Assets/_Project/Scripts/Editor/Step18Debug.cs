@@ -206,6 +206,14 @@ namespace Diorama.EditorTools
             Debug.Log($"[Step18Debug] Move {i}{(d == null ? ": no battle runes listening" : "")}.");
         }
 
+        /// <summary>Turns the Dev cheats off again (Move "ko" leaves one-hit KOs on, which leaks into Edit mode tests).</summary>
+        public static void CheatsOff()
+        {
+            DevCheats.OneHitKo = false;
+            DevCheats.Invincible = false;
+            Debug.Log("[Step18Debug] Cheats off.");
+        }
+
         /// <summary>Play mode: the party's HP (log).</summary>
         public static void Hp()
         {
