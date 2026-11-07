@@ -51,7 +51,8 @@ namespace Diorama.Audio
                 case MusicState.Galewick: return AudioIds.MusicGalewick;
                 case MusicState.Lilymere: return AudioIds.MusicLilymere;
                 case MusicState.BattleWild: return AudioIds.MusicBattleWild;
-                case MusicState.BattleKeeper: return AudioIds.MusicBattleKeeper;
+                // Step 18: until a Keeper track exists, Keeper battles play the wild battle track.
+                case MusicState.BattleKeeper: return AudioService.Has(AudioIds.MusicBattleKeeper) ? AudioIds.MusicBattleKeeper : AudioIds.MusicBattleWild;
                 default: return null;
             }
         }

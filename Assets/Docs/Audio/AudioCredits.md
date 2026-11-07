@@ -66,7 +66,7 @@ Planned: Lyria (Google). Add each track here with its licence terms when it land
 | Track | Cue | By | Source tool / licence |
 |---|---|---|---|
 | First Light at the Summit (`music.galewick_1.mp3`, 116.6 s, about -11.8 LUFS) | `music.galewick` | Mugesh | **to confirm** (Step 18 test) |
-| Tall Grass Duel (`music.battle.wild_1.mp3`, 129.3 s, about -13.1 LUFS) | `music.battle.wild`, `music.battle.keeper` | Mugesh | **to confirm** (Step 18 test) |
+| Tall Grass Duel (`music.battle.wild_1.mp3`, 129.3 s, about -13.1 LUFS) | `music.battle.wild` (Keeper battles fall back to it) | Mugesh | **to confirm** (Step 18 test) |
 
 In the app the credits say "Music: Mugesh" (no tool or brand name).
 

@@ -13,8 +13,7 @@ MonoBehaviour:
   m_Name: music.battle.keeper
   m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
   id: music.battle.keeper
-  clips:
-  - {fileID: 8300000, guid: cdbf17345d7c4ad43a5b056d73ca27b1, type: 3}
+  clips: []
   volume: 0.25
   volumeJitter: 0
   pitchMin: 1
@@ -29,8 +28,8 @@ MonoBehaviour:
   maxVoices: 1
   minInterval: 0
   priority: 0
-  awaitingClips: 0
-  notes: 'Step 18: Tall Grass Duel (Mugesh) until a Keeper track exists, loops.'
+  awaitingClips: 1
+  notes: 'Step 18: no Keeper track yet; MusicDirector plays music.battle.wild (Tall Grass Duel) until one lands here.'
   review:
     status: 0
     note: 
