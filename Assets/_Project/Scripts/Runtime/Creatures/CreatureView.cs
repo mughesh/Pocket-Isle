@@ -110,6 +110,13 @@ namespace Diorama
         public float centerHeight;
         [Tooltip("Rig height when lying on its side (faint).")]
         public float sideRestHeight;
+        [Tooltip("Step 18 (Mugesh: the big water Keeper flipped over like a plane stuck in the ground): bodies this tall " +
+                 "(m at scale 1) or wider lying than standing faint by slumping (sink, squash, a small lean) instead of " +
+                 "tipping over onto their side.")]
+        public float slumpFaintHeight = 0.055f;
+
+        /// <summary>Step 18: this body slumps when it faints (big or wide ones) instead of tipping over.</summary>
+        public bool SlumpFaint => height >= slumpFaintHeight || sideRestHeight > centerHeight * 0.95f;
         public IdleStyle idle;
         public List<Piece> pieces = new List<Piece>();
         public List<Motion> motions = new List<Motion>();
@@ -521,10 +528,17 @@ namespace Diorama
             _faint = Mathf.MoveTowards(_faint, _fainted ? 1f : 0f, dt / 0.4f);
             _daze = Mathf.MoveTowards(_daze, _dazed && !_fainted ? 1f : 0f, dt / 0.4f);
             float f = Mathf.SmoothStep(0f, 1f, _faint), d = Mathf.SmoothStep(0f, 1f, _daze);
-            // Lying on its side, the body's half width is its new height above the ground.
-            y = Mathf.Lerp(y, rigPosition.y + sideRestHeight - centerHeight, f);
+            // Lying on its side, the body's half width is its new height above the ground. Step 18: big or wide bodies
+            // slump instead (they sink a little, squash and lean 16 deg; tipped over they stood on edge in the pad).
+            bool slump = SlumpFaint;
+            if (slump)
+            {
+                y -= centerHeight * 0.2f * f;
+                squash = Vector3.Scale(squash, Vector3.Lerp(Vector3.one, new Vector3(1.07f, 0.84f, 1.07f), f));
+            }
+            else y = Mathf.Lerp(y, rigPosition.y + sideRestHeight - centerHeight, f);
             y -= centerHeight * 0.12f * d; // dazed: sags a little
-            float roll = Mathf.Sin((t + _timeOffset) * (idle.swaySpeed > 0f ? idle.swaySpeed : 1.2f)) * idle.sway * (1f - f) * (1f - d) + 90f * f
+            float roll = Mathf.Sin((t + _timeOffset) * (idle.swaySpeed > 0f ? idle.swaySpeed : 1.2f)) * idle.sway * (1f - f) * (1f - d) + (slump ? 16f : 90f) * f
                          + d * (14f + 12f * Mathf.Sin((t + _timeOffset) * 1.6f));
 
             // The rig origin is at the feet; turn around the body centre instead.

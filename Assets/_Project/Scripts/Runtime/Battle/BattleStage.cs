@@ -691,6 +691,20 @@ namespace Diorama
         IEnumerator FaintSpin(StageActor a)
         {
             float yaw0 = a.yaw;
+            // Step 18: a big body (a Keeper, an evolved giant) doesn't spin and hop: it shudders, then slumps.
+            if (a.View != null && a.View.SlumpFaint)
+            {
+                yield return Tween(0.45f, p =>
+                {
+                    a.yaw = yaw0 + 7f * Mathf.Sin(p * Mathf.PI * 6f) * (1f - p);
+                    if (Time.frameCount % 2 == 0) fx.Burst(a.WorldCenter, 2, Gold, World(0.03f), 0.5f, World(0.003f), Vector3.up * World(0.02f));
+                });
+                a.yaw = yaw0;
+                a.View.Faint();
+                fx.Burst(a.WorldCenter, 22, Gold, World(0.05f), 0.8f, World(0.0035f), Vector3.up * World(0.03f));
+                yield return Wait(0.4f);
+                yield break;
+            }
             yield return Tween(0.4f, p =>
             {
                 a.yaw = yaw0 + 360f * EaseInOut(p);
