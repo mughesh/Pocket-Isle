@@ -52,6 +52,9 @@ namespace Diorama
         public Vector3 duckOffset = new Vector3(0f, 0.07f, -0.04f);
 
         [Header("Facing")]
+        [Tooltip("Nov 7 (Mugesh: the menu rows stopped turning but the moves still did): the row is fixed to the island's front at lockedTilt, never turning with the head (like RuneBoard.rimLocked).")]
+        public bool lockedToIsland = true;
+        public float lockedTilt = 35f;
         [Tooltip("Step 14i: the row faces the head at battle start, then stays; it faces it again only when the head has been " +
                  "this far round (degrees) for a second with no hand within 15 cm.")]
         public float turnAwayAngle = 30f;
@@ -599,6 +602,11 @@ namespace Diorama
                         _tilt = Mathf.Lerp(_tilt, _tiltTarget, k);
                     }
                 }
+            }
+            if (lockedToIsland)
+            {
+                _yaw = 180f;
+                _tilt = lockedTilt;
             }
             _row.rotation = island.transform.rotation * Quaternion.Euler(_tilt, _yaw, 0f);
         }
