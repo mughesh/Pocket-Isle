@@ -61,12 +61,23 @@ Originals: `D:/UNITY/projects/_audio-sources/kenney/` (outside the repo).
 (`Clips/Synth/Catch/catch.shatter_mix_vN.wav`); the Kenney originals listed above are the mix sources.
 
 ## Music
-Planned: Lyria (Google). Add each track here with its licence terms when it lands in `Clips/Music/`.
+All music: **made with Google Gemini (Lyria) by Mugesh; licence terms to be checked before submission.** Files in
+`Assets/_Project/Audio/Clips/Music/` (step 20). Loudness measured (BS.1770, integrated).
 
-| Track | Cue | By | Source tool / licence |
-|---|---|---|---|
-| First Light at the Summit (`music.galewick_1.mp3`, 116.6 s, about -11.8 LUFS) | `music.galewick` | Mugesh | **to confirm** (Step 18 test) |
-| Tall Grass Duel (`music.battle.wild_1.mp3`, 129.3 s, about -13.1 LUFS) | `music.battle.wild` (Keeper battles fall back to it) | Mugesh | **to confirm** (Step 18 test) |
+| Track | File | In-game cue | Where | Length, loudness | By / tool / licence |
+|---|---|---|---|---|---|
+| Steps Through Tall Grass | `music.galewick_1.mp3` | `music.galewick` | Galewick, restored | 120 s, -11.7 LUFS | Mugesh, Gemini (Lyria); licence to check |
+| Lanterns by the Spring | `music.cinderwood_1.mp3` | `music.cinderwood` | Cinderwood, restored | 119 s, -11.6 LUFS | Mugesh, Gemini (Lyria); licence to check |
+| Where the Lotus Blooms | `music.lilymere_1.mp3` | `music.lilymere` | Lilymere, restored | 120 s, -11.3 LUFS | Mugesh, Gemini (Lyria); licence to check |
+| Rite of the Unbroken | `music.temple_1.mp3` | `music.temple` | Keeper halls and Keeper battles | 123 s, -12.6 LUFS | Mugesh, Gemini (Lyria); licence to check |
+| Tall Grass Duel | `music.battle.wild_1.mp3` | `music.battle.wild` | wild battles | 129 s, -13.1 LUFS | Mugesh, Gemini (Lyria); licence to check |
+| First Light at the Summit, cut 0:00-0:43 | `music.title_1.mp3` | `music.title` | title screen | 43 s, -17.3 LUFS | Mugesh, Gemini (Lyria); licence to check |
+| First Light at the Summit, same cut (own copy) | `music.hub_1.mp3` | `music.hub` | Still Isle, once per arrival | 43 s, -17.3 LUFS | Mugesh, Gemini (Lyria); licence to check |
+| First Light at the Summit, from 0:41.5 | `music.finale_1.mp3` | `music.finale` | the Heart wakes -> credits | 75 s, -10.8 LUFS | Mugesh, Gemini (Lyria); licence to check |
+| Lanterns by the Spring, tail from 1:32 | `music.lodge_1.mp3` | `music.lodge` | Hearth Lodge | 27 s, -18.3 LUFS | Mugesh, Gemini (Lyria); licence to check |
+
+The uncut First Light at the Summit is only a source now: `D:/UNITY/projects/_audio-sources/music/First_Light_at_the_Summit.mp3`
+(outside the repo).
 
 In the app the credits say "Music: Mugesh" (no tool or brand name).
 
