@@ -118,7 +118,8 @@ namespace Diorama
             }
         }
 
-        protected override bool GhostAside => true;
+        // Nov 7 (Mugesh: a ghost like the finale's, full size): the ghost carries the shard to the socket, not small and aside.
+        protected override bool GhostAside => false;
         public override bool Busy => _hand >= 0 || _flying;
         /// <summary>Step 16: the offer (lesson, Spirit's offer, focus lock) only starts next to the statue (walk-up rule).</summary>
         protected override bool Available => ShardHolder.Holds(id) && NearStatue;
@@ -477,6 +478,12 @@ namespace Diorama
             StartCoroutine(Fly(holder.CupWorld(id), true));
             return true;
         }
+
+        /// <summary>
+        /// Nov 7: the Quick Journey's dream ahead: the player places this shard by hand, but it locks in quietly (no whisper:
+        /// the finale follows straight after).
+        /// </summary>
+        public void QuietNextPlacement() => _quiet = true;
 
         /// <summary>Debug (bridge): the shard goes into the socket as if carried there.</summary>
         public void DebugPlace()

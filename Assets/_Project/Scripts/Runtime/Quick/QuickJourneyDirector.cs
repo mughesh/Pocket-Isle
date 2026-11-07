@@ -335,6 +335,9 @@ namespace Diorama
         /// <summary>The other two shards, in the order they fly into the statue.</summary>
         public static readonly string[] DreamShards = { ShardHolder.FireId, ShardHolder.WaterId };
 
+        [Tooltip("Nov 7: See the ending: each dreamed shard waits this long (s) for the player to place it, then goes in by itself.")]
+        public float placeWaitMax = 45f;
+
         /// <summary>
         /// Nov 3 (Mugesh: the cut to the finale looked awkward for a judge): the Spirit dreams ahead, the fire and water
         /// shards appear with it, float out and fly into the statue one after the other (quiet: no jingle, no whispers),
@@ -353,16 +356,32 @@ namespace Diorama
             GameAudio.At(AudioIds.CardRise, from);
             Debug.Log("[QuickJourney] Dreaming ahead: the fire and water shards appear with the Spirit.");
             yield return new WaitForSeconds(2.2f);
-            int flown = 0;
+            // Nov 7 (Mugesh: not auto-placed): the shards float out one at a time and the player places each, as the wind
+            // shard. A shard not placed in placeWaitMax seconds goes in by itself (quietly).
+            int placed = 0;
             foreach (var id in DreamShards)
             {
+                if (PuzzleState.IsSolved(id)) continue;
+                PuzzleState.SetStage(id, 1);
+                Debug.Log($"[QuickJourney] Dreaming ahead: {id} floats out for the player to place.");
                 var socket = StatueSocket.FindById(id);
-                if (socket == null || !socket.FlyInQuiet()) continue;
-                flown++;
-                yield return new WaitForSeconds(1.7f);
+                if (socket != null) socket.QuietNextPlacement();
+                float waited = 0f;
+                while (!PuzzleState.IsSolved(id) && waited < placeWaitMax)
+                {
+                    waited += Time.deltaTime;
+                    yield return null;
+                }
+                if (!PuzzleState.IsSolved(id) && socket != null && socket.FlyInQuiet())
+                {
+                    Debug.Log($"[QuickJourney] {id} not placed in {placeWaitMax:0} s: it goes in by itself.");
+                    while (!PuzzleState.IsSolved(id)) yield return null;
+                }
+                placed++;
+                GameAudio.Ui(AudioIds.JingleShard);
+                yield return new WaitForSeconds(1.2f);
             }
-            if (flown > 0) GameAudio.Ui(AudioIds.JingleShard);
-            Debug.Log($"[QuickJourney] Dreaming ahead: {flown} shard(s) flew into the statue; the finale next.");
+            Debug.Log($"[QuickJourney] Dreaming ahead: {placed} shard(s) placed; the finale next.");
             for (float t = 0f; t < 8f && Dialogue.IsTalking; t += Time.deltaTime) yield return null;
             yield return new WaitForSeconds(0.8f);
             Debug.Log($"[QuickJourney] The finale: {FinaleDirector.DevPlay(false, false)}.");
