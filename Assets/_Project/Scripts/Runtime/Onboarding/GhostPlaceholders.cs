@@ -22,7 +22,13 @@ namespace Diorama
             public float swing;
             /// <summary>Thumb tip slid toward the index tip (thumb swipe).</summary>
             public float slide;
+            /// <summary>Nov 7: this key's fingers / dorsal use the rig's real axes (<see cref="MeshFix"/>); the others the old mapping.</summary>
+            public bool fix;
+            /// <summary>The root rotation (set by Evaluate for per-key clips: slerped between the keys' own rotations).</summary>
+            public Quaternion rot;
         }
+
+        static Quaternion KeyRot(Key k) => Quaternion.LookRotation(k.fingers, k.dorsal) * (k.fix ? MeshFix : Quaternion.identity);
 
         static readonly int[][] Fingers =
         {
@@ -46,12 +52,14 @@ namespace Diorama
         /// <summary>
         /// Step 17 F10: the rig's hand root has its fingers along local -Y and the back of the hand along +Z, not +Z / +Y as
         /// <see cref="Key.fingers"/> / <see cref="Key.dorsal"/> assume: "palm up, fingers forward" came out as a vertical
-        /// palm facing the player (the evolution ghost read as "stop"). These clips get the root turned so the keys mean
-        /// what they say. Only the palm-up clips (renders checked); the others were tuned by eye against the old mapping.
+        /// palm facing the player (the evolution ghost read as "stop"). Nov 7: step 17 turned whole clips, which broke the
+        /// parts tuned by eye (the evolution's reach became a "stop" palm, the finale's lift went wrong: Mugesh). Now only
+        /// keys marked <see cref="Key.fix"/> use it (the evolution's palm-up end), and the root slerps between the keys' own
+        /// rotations in those clips. palm_lift is back as it was before step 17.
         /// </summary>
         static readonly Quaternion MeshFix = Quaternion.Euler(-90f, 0f, 0f);
 
-        static bool MeshAxes(string name) => name == "grab_palm_up" || name == "palm_lift";
+        static bool PerKeyRot(string name) => name == "grab_palm_up";
 
         /// <summary>Builds a placeholder clip from the right hand's rest pose (joint-local), or null for an unknown name.</summary>
         public static GhostHandClip Make(string name, Quaternion[] bindRot, Vector3[] bindPos)
@@ -90,7 +98,7 @@ namespace Diorama
                 var frame = new GhostFrame
                 {
                     rootPos = k.pos,
-                    rootRot = Quaternion.LookRotation(k.fingers, k.dorsal) * (MeshAxes(name) ? MeshFix : Quaternion.identity),
+                    rootRot = PerKeyRot(name) ? k.rot : Quaternion.LookRotation(k.fingers, k.dorsal),
                     rot = (Quaternion[])bindRot.Clone(),
                     pos = (Vector3[])bindPos.Clone(),
                 };
@@ -118,7 +126,7 @@ namespace Diorama
 
         static Key Evaluate(List<Key> keys, float u)
         {
-            if (u <= keys[0].t) return keys[0];
+            if (u <= keys[0].t) return WithRot(keys[0]);
             for (int i = 1; i < keys.Count; i++)
             {
                 if (u > keys[i].t) continue;
@@ -138,9 +146,16 @@ namespace Diorama
                     pinky = Mathf.Lerp(a.pinky, b.pinky, k),
                     swing = Mathf.Lerp(a.swing, b.swing, k),
                     slide = Mathf.Lerp(a.slide, b.slide, k),
+                    rot = Quaternion.Slerp(KeyRot(a), KeyRot(b), k),
                 };
             }
-            return keys[keys.Count - 1];
+            return WithRot(keys[keys.Count - 1]);
+        }
+
+        static Key WithRot(Key k)
+        {
+            k.rot = KeyRot(k);
+            return k;
         }
 
         // ---- the clips ----
@@ -436,17 +451,20 @@ namespace Diorama
                     Vector3 f = new Vector3(0f, -0.45f, 1f), d = new Vector3(0f, 1f, 0.45f);
                     // Step 17 F10: ends palm flat and up, about 10 cm above the rim's front edge (was 7 cm up, 10 cm out).
                     Vector3 lift = new Vector3(0f, 0.1f, -0.05f), flat = new Vector3(0f, 0.1f, 1f);
+                    // Nov 7: only the palm-up end uses the rig's real axes (fix); the reach and grab keep the old mapping.
                     Key Cup(float t, Vector3 p, Vector3 dorsal) => new Key
                     {
-                        t = t, pos = p, fingers = flat, dorsal = dorsal,
+                        t = t, pos = p, fingers = flat, dorsal = dorsal, fix = true,
                         thumb = 0.35f, index = 0.4f, middle = 0.45f, ring = 0.5f, pinky = 0.55f, swing = 0.1f,
                     };
+                    Key end = Open(1f, lift, flat, Vector3.down, 0.25f);
+                    end.fix = true;
                     return new List<Key>
                     {
                         Open(0f, new Vector3(0f, 0.04f, -0.07f), f, d), Open(0.18f, new Vector3(0f, 0.01f, -0.02f), f, d), Open(0.26f, Vector3.zero, f, d),
                         Closed(0.34f, Vector3.zero, f, d), Closed(0.5f, lift, flat, Vector3.up),
                         Cup(0.62f, lift, new Vector3(1f, 0f, 0f)), Cup(0.74f, lift, Vector3.down), Cup(0.9f, lift, Vector3.down),
-                        Open(1f, lift, flat, Vector3.down, 0.25f),
+                        end,
                     };
                 }
                 case "palm_lift":

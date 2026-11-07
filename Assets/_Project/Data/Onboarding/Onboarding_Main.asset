@@ -157,7 +157,7 @@ MonoBehaviour:
     failWhen: 
     rewindTo: 
     praise: 1
-    ghost: thumb_swipe_forward
+    ghost: thumb_swipe_all
     place: 2
     target: ghost
     source: 
@@ -183,7 +183,7 @@ MonoBehaviour:
     failWhen: 
     rewindTo: 
     praise: 1
-    ghost: thumb_swipe_forward
+    ghost: thumb_swipe_tap
     place: 2
     target: ghost
     source: 

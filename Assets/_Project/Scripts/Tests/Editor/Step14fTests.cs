@@ -26,7 +26,7 @@ namespace Diorama.Tests
             Assert.IsTrue(far.skipAfter > 0f && far.skipAfter <= 30f, $"passes itself within 30 s ({far.skipAfter})");
             Assert.AreEqual("ahead", far.goldTileRule);
             // Step 16: the lessons show the swipe ghost only; Nov 6: the far line teaches the tap (a swipe walks until a tap).
-            Assert.AreEqual("thumb_swipe_forward", far.ghost);
+            Assert.AreEqual("thumb_swipe_tap", far.ghost); // Nov 7: swipe then tap (was the forward swipe)
             Assert.IsFalse(far.chip.ToLowerInvariant().Contains("tap"), far.chip);
             Assert.IsFalse(far.chip.ToLowerInvariant().Contains("twice"), far.chip);
             Assert.IsTrue(System.Array.IndexOf(Onboarding.Events, "swipeWalks2") >= 0);

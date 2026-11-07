@@ -37,8 +37,13 @@ namespace Diorama
         [Tooltip("Above-target demos float this high over the target (m).")]
         public float aboveTargetHeight = 0.07f;
         [Header("Thumb demos (step 17 F9)")]
-        [Tooltip("Thumb microgesture demos (thumb_* clips placed AboveIsland) sit beside the island's front rim on the dominant side, where the real hand rests, never over the map. Offset from that front corner: x outward, y up, z toward the player (world m).")]
+        [Tooltip("Unused since Nov 7 (beside the rim the ghost went dull: the real hand rests there and fades it). Was: offset from the dominant front corner.")]
         public Vector3 thumbRimOffset = new Vector3(0.06f, 0.05f, 0.05f);
+        [Tooltip("Nov 7: thumb demos float over the island's centre, this high over the cap (m at island scale 1).")]
+        public float thumbCenterHeight = 0.09f;
+        [Tooltip("Nov 7: the walk lesson's composed clip (forward swipe, then left, then right): the thumb's sweep across the index finger (degrees) and each side's seconds.")]
+        public float sideSwipeAngle = 28f;
+        public float sideSwipeSeconds = 0.75f;
         [Tooltip("Thumb demos are this much bigger than the lesson's scale (they read tiny over the map).")]
         public float thumbScale = 1.6f;
         [Tooltip("A gold dot on the ghost's thumb tip and this many trail dots behind it (the slide).")]
@@ -159,6 +164,7 @@ namespace Diorama
             }
             LoadDeviceClips();
             MakePlaceholders();
+            ComposeSwipeAll();
             MakeDot();
             MakeThumbDots();
             Dialogue.RegisterTarget("ghost", () => KeyPoint, k => { }, () => 0f);
@@ -623,13 +629,10 @@ namespace Diorama
                     if (island == null) return false;
                     if (ThumbDemo)
                     {
-                        // Step 17 F9: beside the front rim's dominant-side corner, where the real hand rests (island +X is
-                        // the player's left), never over the map.
-                        var half = island.FootprintHalfSize;
+                        // Nov 7 (Mugesh: beside the rim it went dull, the real hand rests there and fades it): over the
+                        // island's centre, big, with the gold thumb dot.
                         var it = island.transform;
-                        Vector3 corner = it.TransformPoint(new Vector3(_request.left ? half.x : -half.x, island.CapTopLocal, half.y));
-                        Vector3 outward = it.right * (_request.left ? 1f : -1f);
-                        point = corner + outward * thumbRimOffset.x + Vector3.up * thumbRimOffset.y + it.forward * thumbRimOffset.z;
+                        point = it.TransformPoint(new Vector3(0f, island.CapTopLocal, 0f)) + Vector3.up * (thumbCenterHeight * it.lossyScale.x);
                         break;
                     }
                     var b = island.LocalBounds;
@@ -963,6 +966,91 @@ namespace Diorama
                     Debug.LogError($"[GhostHands] Couldn't read {file}: {e.Message}");
                 }
             }
+        }
+
+        /// <summary>Nov 7: the walk lesson's demo: the recorded forward swipe, then a swipe left and a swipe right.</summary>
+        public const string SwipeAllClip = "thumb_swipe_all";
+
+        /// <summary>
+        /// Nov 7 (Mugesh: add the left-right swipe to the same animation): builds <see cref="SwipeAllClip"/> from the
+        /// forward swipe (recorded, or the placeholder): its frames, then the rest pose with the thumb swept across the
+        /// index finger one way and back, then the other way and back. The sweep turns the thumb's first joint about the
+        /// index finger's direction, so the tip moves across the finger, not along it.
+        /// </summary>
+        void ComposeSwipeAll()
+        {
+            var fwd = ClipNamed("thumb_swipe_forward");
+            var g = _right ?? _left;
+            if (fwd == null || fwd.frames.Count < 2 || g == null) return;
+            var clip = ScriptableObject.CreateInstance<GhostHandClip>();
+            clip.hideFlags = HideFlags.DontSave;
+            clip.name = clip.clipName = SwipeAllClip;
+            clip.anchor = fwd.anchor;
+            clip.leftHand = fwd.leftHand;
+            clip.fps = fwd.fps;
+            clip.keyJoint = fwd.keyJoint;
+            clip.keyTime = fwd.keyTime;
+            clip.placeOffset = fwd.placeOffset;
+            clip.size = fwd.size;
+            clip.travel = fwd.travel;
+            clip.holdEnd = fwd.holdEnd;
+            int from = Mathf.Clamp(Mathf.RoundToInt(fwd.StartTime * fwd.fps), 0, fwd.frames.Count - 1);
+            int to = Mathf.Clamp(fwd.frames.Count - 1 - Mathf.RoundToInt(fwd.trimEnd * fwd.fps), from, fwd.frames.Count - 1);
+            for (int i = from; i <= to; i++) clip.frames.Add(Copy(fwd.frames[i]));
+            var rest = fwd.frames[to];
+            // The index direction and the thumb base's parent frame, in the hand root's frame, from the rest pose.
+            for (int i = 0; i < JointCount; i++)
+            {
+                _rot[i] = rest.rot[i];
+                _pos[i] = rest.pos[i];
+            }
+            Vector3 along = (KeyInRoot(g, HandJointId.HandIndex3) - KeyInRoot(g, HandJointId.HandIndex1)).normalized;
+            int t1 = (int)HandJointId.HandThumb1;
+            Quaternion parent = RootRotOf(g, g.joints[t1] != null ? g.joints[t1].parent : null);
+            Vector3 axis = Quaternion.Inverse(parent) * along;
+            int n = Mathf.Max(4, Mathf.RoundToInt(sideSwipeSeconds * clip.fps));
+            int pause = Mathf.RoundToInt(0.25f * clip.fps);
+            foreach (float sign in new[] { 1f, -1f })
+            {
+                for (int i = 0; i < pause; i++) clip.frames.Add(Copy(rest));
+                for (int i = 1; i <= n; i++)
+                {
+                    float u = i / (float)n;
+                    // Out quickly (the swipe), back slowly.
+                    float k = u < 0.35f ? Mathf.SmoothStep(0f, 1f, u / 0.35f) : 1f - Mathf.SmoothStep(0f, 1f, (u - 0.35f) / 0.65f);
+                    var f = Copy(rest);
+                    f.rot[t1] = Quaternion.AngleAxis(sign * sideSwipeAngle * k, axis) * rest.rot[t1];
+                    clip.frames.Add(f);
+                }
+            }
+            for (int i = 0; i < pause; i++) clip.frames.Add(Copy(rest));
+            _placeholders[SwipeAllClip] = clip;
+            Debug.Log($"[GhostHands] {SwipeAllClip}: {clip.frames.Count} frames ({clip.Duration:0.0} s), forward then {sideSwipeAngle:0} deg left and right.");
+        }
+
+        GhostHandClip ClipNamed(string name)
+        {
+            var recorded = library != null ? library.Find(name) : null;
+            if (recorded != null && recorded.frames.Count > 1) return recorded;
+            return _placeholders.TryGetValue(name, out var p) ? p : null;
+        }
+
+        static GhostFrame Copy(GhostFrame f) => new GhostFrame
+        {
+            rootPos = f.rootPos, rootRot = f.rootRot, rot = (Quaternion[])f.rot.Clone(), pos = (Vector3[])f.pos.Clone(),
+        };
+
+        /// <summary>A joint's rotation in the hand root's frame with the joints as just sampled (_rot).</summary>
+        Quaternion RootRotOf(Ghost g, Transform t)
+        {
+            Quaternion r = Quaternion.identity;
+            while (t != null && t != g.root)
+            {
+                int i = System.Array.IndexOf(g.joints, t);
+                r = (i >= 0 ? _rot[i] : t.localRotation) * r;
+                t = t.parent;
+            }
+            return r;
         }
 
         void MakePlaceholders()
