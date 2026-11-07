@@ -646,20 +646,42 @@ namespace Diorama
         [Range(0f, 1f)] public float blipVolume = 0.75f;
         [Tooltip("Nov 3: objective cards (the lessons, the pinned goals) type with the voice too (Oct 27 made them silent).")]
         public bool objectivesBlip = true;
+        [Tooltip("Step 18: the Heart (the statue) speaks with its own voice, slower: typed characters between its blips.")]
+        [Min(1)] public int heartBlipEvery = 7;
+        [Tooltip("Step 18: and at least this long between the Heart's blips (s).")]
+        public float heartBlipGap = 0.3f;
 
         /// <summary>
-        /// The Spirit's wordless robotic voice while a line types: one blip every <see cref="blipEvery"/> characters at most,
-        /// a gentle random pitch (Spirit and Keeper each their own voice). The Heart's whispers don't tick.
+        /// The wordless voice while a line types: one blip every <see cref="blipEvery"/> characters at most, a gentle random
+        /// pitch. Step 18: each speaker its own voice (the Spirit's blip; each Keeper voice.keeper.&lt;name&gt;, else
+        /// voice.keeper); the Heart, which used to be silent, speaks slower with its bell voice.
         /// </summary>
         void Blip(int shown)
         {
-            if (_chip || _heart || _objective && !objectivesBlip || shown < _blipAt + blipEvery || shown >= _chars || Time.time < _blipTime + blipGap) return;
+            int every = _heart ? heartBlipEvery : blipEvery;
+            float gap = _heart ? heartBlipGap : blipGap;
+            if (_chip || _objective && !objectivesBlip || shown < _blipAt + every || shown >= _chars || Time.time < _blipTime + gap) return;
             _blipAt = shown;
             _blipTime = Time.time;
-            string id = _line.speaker == DialogueSpeaker.Keeper ? Diorama.Audio.AudioIds.VoiceKeeper : Diorama.Audio.AudioIds.SpiritBlip;
-            var h = GameAudio.At(id, _root.position);
+            var h = GameAudio.At(VoiceFor(_line), _root.position);
             h.SetVolume(blipVolume);
-            h.SetPitch(UnityEngine.Random.Range(0.94f, 1.06f));
+            h.SetPitch(_heart ? UnityEngine.Random.Range(0.96f, 1.02f) : UnityEngine.Random.Range(0.94f, 1.06f));
+        }
+
+        /// <summary>Step 18: the blip cue for a line's speaker.</summary>
+        public static string VoiceFor(DialogueLine line)
+        {
+            if (line == null) return Diorama.Audio.AudioIds.SpiritBlip;
+            switch (line.speaker)
+            {
+                case DialogueSpeaker.Heart:
+                    return Diorama.Audio.AudioIds.VoiceHeart;
+                case DialogueSpeaker.Keeper:
+                    var own = string.IsNullOrEmpty(line.speakerName) ? null : "voice.keeper." + line.speakerName.Trim().ToLowerInvariant();
+                    return own != null && Diorama.Audio.AudioService.Has(own) ? own : Diorama.Audio.AudioIds.VoiceKeeper;
+                default:
+                    return Diorama.Audio.AudioIds.SpiritBlip;
+            }
         }
 
         void Update()

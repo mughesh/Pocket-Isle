@@ -229,6 +229,9 @@ namespace Diorama.Audio
         public const string VoiceGaleowl = "voice.galeowl";
         public const string VoiceHeart = "voice.heart";
         public const string VoiceKeeper = "voice.keeper";
+        public const string VoiceKeeperGaleowl = "voice.keeper.galeowl";
+        public const string VoiceKeeperHearthstag = "voice.keeper.hearthstag";
+        public const string VoiceKeeperTidemother = "voice.keeper.tidemother";
         public const string WalkBump = "walk.bump";
         public const string WalkHop = "walk.hop";
         public const string WalkStop = "walk.stop";

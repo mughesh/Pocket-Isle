@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28966354f9950c5429c46b779a504dcd, type: 3}
+  m_Name: voice.keeper.tidemother
+  m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
+  id: voice.keeper.tidemother
+  clips:
+  - {fileID: 8300000, guid: f2dc40b76c523c447a38f31765b46583, type: 3}
+  - {fileID: 8300000, guid: 544b4ad675fec45438fdb475745b3561, type: 3}
+  - {fileID: 8300000, guid: 28b136c7eb2b9534e823f02d1d013b2c, type: 3}
+  - {fileID: 8300000, guid: 69b789c98dab100449ebba0ae6e9ee8d, type: 3}
+  - {fileID: 8300000, guid: 1d9db59f6a3c54e459305152ff118a84, type: 3}
+  - {fileID: 8300000, guid: b75d512be78337f4390e80b377e43ee6, type: 3}
+  volume: 0.5
+  volumeJitter: 0.05
+  pitchMin: 0.97
+  pitchMax: 1.03
+  pitchStepSemitones: 0
+  bus: 4
+  spatial: 1
+  minDistance: 0.1
+  maxDistance: 1.5
+  loop: 0
+  restSeconds: 0
+  maxVoices: 2
+  minInterval: 0.04
+  priority: 70
+  awaitingClips: 0
+  notes: 
+  review:
+    status: 0
+    note: 

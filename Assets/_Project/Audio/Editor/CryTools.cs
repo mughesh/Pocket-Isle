@@ -216,14 +216,52 @@ namespace Diorama.Audio.EditorTools
                     .Vars(6, 2f, 0.1f, 0.3f).Master(1f, 7000f),
                 cue = SynthBatch1.Voice(0.5f),
             };
+            // Step 18 (Mugesh: the statue speaks, which is special; it should sound special): the old low vowel under a soft
+            // bell (FM) and a high shimmer an octave and a fifth up, with a longer tail. It ticks slower than the others.
             yield return new SynthRecipes.Recipe
             {
                 set = Set, group = "Cries", id = "voice.heart",
-                build = patch => patch.One(0.34f,
-                        L(Buzz).Note("D3").Pitch(0f, -2f, 0.3f).Env(0.05f, 0.25f, 0f, 0.05f, 0.04f).Vib(3f, 0.2f).Formant(300f, 570f, 870f, 840f, 0.28f, 6f, 0.85f).LP(1800f),
-                        L(Sine).Note("D2").Env(0.05f, 0.3f).Gain(0.5f))
-                    .Vars(6, 1.5f, 0.1f, 0.25f).Master(1f, 6000f),
+                build = patch => patch.One(0.62f,
+                        L(Buzz).Note("D3").Pitch(0f, -2f, 0.3f).Env(0.05f, 0.25f, 0f, 0.05f, 0.04f).Vib(3f, 0.2f).Formant(300f, 570f, 870f, 840f, 0.28f, 6f, 0.85f).LP(1800f).Gain(0.7f),
+                        L(Sine).Note("D2").Env(0.05f, 0.3f).Gain(0.45f),
+                        L(Sine).Note("D5").Env(0.004f, 0.55f).Fm(3.5f, 1.4f, 0.25f).Gain(0.28f),
+                        L(Sine).Note("A5").Env(0.02f, 0.5f).Vib(5f, 0.08f).Gain(0.12f))
+                    .Vars(6, 1.5f, 0.1f, 0.25f).Master(1f, 7000f),
                 cue = SynthBatch1.Voice(0.55f),
+            };
+            // Step 18 (Mugesh: different chirps for the other talking characters): each Keeper its own voice while its lines
+            // type (they all shared voice.keeper's buzz). Galeowl, the tower's owl: a soft falling "hoo" chirp.
+            yield return new SynthRecipes.Recipe
+            {
+                set = Set, group = "Cries", id = "voice.keeper.galeowl",
+                build = patch => patch.One(0.2f,
+                        L(Sine).Note("E5").Pitch(3f, -2f, 0.12f).Env(0.012f, 0.14f, 0f, 0.04f, 0.01f).Vib(9f, 0.15f),
+                        L(Triangle).Note("E4").Pitch(3f, -2f, 0.12f).Env(0.015f, 0.12f).Gain(0.35f),
+                        L(PinkNoise).Env(0.01f, 0.08f).BP(1400f, 900f, 0.1f, 0.4f).Gain(0.12f))
+                    .Vars(6, 2f, 0.1f, 0.2f).Master(1f, 8000f),
+                cue = SynthBatch1.Voice(0.5f),
+            };
+            // Hearthstag, the forge Keeper: a warm low hum with a crackle of embers.
+            yield return new SynthRecipes.Recipe
+            {
+                set = Set, group = "Cries", id = "voice.keeper.hearthstag",
+                build = patch => patch.One(0.22f,
+                        L(Buzz).Note("C3").Pitch(1f, -1f, 0.15f).Env(0.02f, 0.16f, 0f, 0.05f, 0.02f).Formant(500f, 650f, 900f, 1050f, 0.15f, 7f, 0.85f).LP(2200f),
+                        L(Sine).Note("C2").Env(0.02f, 0.17f).Gain(0.45f),
+                        L(Silence).Env(0.01f, 0.2f).Crackle(55f, 2f, 0.35f))
+                    .Vars(6, 2f, 0.1f, 0.3f).Master(1f, 6500f),
+                cue = SynthBatch1.Voice(0.5f),
+            };
+            // Tidemother, the lake Keeper: a round "oo" with a bubble on top.
+            yield return new SynthRecipes.Recipe
+            {
+                set = Set, group = "Cries", id = "voice.keeper.tidemother",
+                build = patch => patch.One(0.24f,
+                        L(Sine).Note("G4").Pitch(-2f, 2f, 0.16f).Env(0.02f, 0.17f, 0f, 0.05f, 0.02f).Vib(6f, 0.25f),
+                        L(Buzz).Note("G3").Env(0.02f, 0.15f).Formant(300f, 320f, 700f, 650f, 0.15f, 6f, 0.9f).LP(1600f).Gain(0.35f),
+                        L(Sine).Note("D6").Pitch(-5f, 4f, 0.05f).Env(0.002f, 0.05f).At(0.1f).Gain(0.2f))
+                    .Vars(6, 2f, 0.1f, 0.2f).Master(1f, 7000f),
+                cue = SynthBatch1.Voice(0.5f),
             };
         }
 
