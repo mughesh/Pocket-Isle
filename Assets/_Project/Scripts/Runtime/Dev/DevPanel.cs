@@ -830,6 +830,7 @@ namespace Diorama
         {
             if (_root == null) return;
             if (OpenPressed()) SetOpen(!_open);
+            AutoClose();
             if (VideoMode) HideDevVisuals();
             UpdateFps();
             if (!_open)
@@ -1060,6 +1061,26 @@ namespace Diorama
             var c = cam.transform;
             _fps.transform.SetPositionAndRotation(c.position + c.forward * 0.5f - c.up * 0.12f - c.right * 0.1f, c.rotation);
             _fps.text = $"{_fpsValue:0} fps  {1000f / Mathf.Max(1f, _fpsValue):0.0} ms";
+        }
+
+        // ---- step 17 K: auto-close ----
+
+        bool _wasBattle, _wasSwap, _wasFinale;
+
+        /// <summary>
+        /// Step 17 K: the panel closes by itself when a battle starts, a scene or realm swap starts, or the finale starts
+        /// (it stayed open over the island from 08:34 to the end of the Nov 7 video).
+        /// </summary>
+        void AutoClose()
+        {
+            bool battle = GameConditions.Check("battle"), swap = SceneSwap.IsBusy, finale = FinaleDirector.Running;
+            string why = battle && !_wasBattle ? "a battle started" : swap && !_wasSwap ? "a scene swap started" : finale && !_wasFinale ? "the finale started" : null;
+            _wasBattle = battle;
+            _wasSwap = swap;
+            _wasFinale = finale;
+            if (why == null || !_open) return;
+            SetOpen(false);
+            Debug.Log($"[DevPanel] Closed by itself: {why}.");
         }
 
         // ---- bridge (Editor checks) ----
