@@ -851,6 +851,10 @@ namespace Diorama
         {
             if (_phase != Phase.Shard || !_shardHovering) return;
             Debug.Log($"[KeeperHall] {ownShard} taken ({how}): it flies to the Spirit.");
+            // Step 17 I: the opening's shard-touch burst, tinted for this element, and the touch chime.
+            Vector3 touched = island.transform.TransformPoint(_shardLocal);
+            ShardBurst.Play(fx, touched, ownShard, island.transform.lossyScale.x, island.transform.up);
+            GameAudio.At(AudioIds.ShardTouch, touched);
             _shardFloat.Stop(0.5f);
             StartCoroutine(ShardToHolder());
         }

@@ -340,7 +340,9 @@ namespace Diorama
             }
             if (fx != null)
             {
-                fx.Burst(SocketWorld, 40, shardColor, tile * 1.2f, 0.8f, tile * 0.05f);
+                fx.Burst(SocketWorld, 24, shardColor, tile * 1.2f, 0.8f, tile * 0.05f);
+                // Step 17 I: the opening's shard burst again, tinted, with the element's flourish.
+                ShardBurst.Play(fx, SocketWorld, id, island.transform.lossyScale.x, island.transform.up);
                 // Moss falls away from the shoulders and head.
                 foreach (var m in new[] { new Vector3(0f, 1.52f, -0.06f), new Vector3(0f, 2.3f, 0.12f), new Vector3(0.45f, 0.72f, -0.3f) })
                 {
