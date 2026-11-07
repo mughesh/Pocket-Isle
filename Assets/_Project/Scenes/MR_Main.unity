@@ -7971,13 +7971,26 @@ MonoBehaviour:
   hallGapFactor: 1.4
   statueClearTiles: 2
   hallCardScale: 1.8
-  bannerWidth: 0.5
-  bannerFont: 0.3
-  bannerLines: 4
-  bannerAt: {x: 0.17, y: 0.03}
-  creditsSeconds: 13
-  standee: {fileID: 0}
-  standeeHeight: 0.2
+  lanternMaterial: {fileID: 2100000, guid: 76790b4a466509d47b2ec79e7b4e1ba0, type: 2}
+  painting: {fileID: 0}
+  paintingCrop:
+    serializedVersion: 2
+    x: 0.08
+    y: 0.44
+    width: 0.88
+    height: 0.56
+  lanternReadHeight: 0.34
+  lanternForward: 0.13
+  lanternBigForward: 0.19
+  lanternSpacing: 0.175
+  lanternEvery: 2
+  lanternRise: 1.6
+  lanternHold: 3
+  lanternBigHold: 5
+  lanternBigDelay: 1.2
+  lanternLeave: 3.4
+  lanternBigLeave: 5
+  lanternBigSize: 1.6
 --- !u!1 &2107210735
 GameObject:
   m_ObjectHideFlags: 0

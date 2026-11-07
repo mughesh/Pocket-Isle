@@ -116,17 +116,17 @@ namespace Diorama.EditorTools
         static float _leanAnchorFor = float.NaN;
 
         /// <summary>
-        /// Step 17 J: plays only the finale's credits roll where the island is (arg = an optional picture path for the
-        /// standee preview, e.g. Assets/_Project/Art/Credits/character.png; the real one is CreditsPortrait.png).
+        /// Plays only the finale's credits where the island is (step 19: the sky lanterns; arg = an optional picture path
+        /// for the big lantern's painting; the real one is Assets/_Project/Art/Credits/Mugesh.png).
         /// </summary>
         public static void Credits()
         {
             var f = Object.FindFirstObjectByType<FinaleDirector>();
             if (f == null) return;
-            if (!string.IsNullOrEmpty(Arg)) f.standee = UnityEditor.AssetDatabase.LoadAssetAtPath<Texture2D>(Arg);
+            if (!string.IsNullOrEmpty(Arg)) f.painting = UnityEditor.AssetDatabase.LoadAssetAtPath<Texture2D>(Arg);
             var m = typeof(FinaleDirector).GetMethod("Credits", BindingFlags.Instance | BindingFlags.NonPublic);
             f.StartCoroutine((System.Collections.IEnumerator)m.Invoke(f, null));
-            Debug.Log($"[Step17Debug] Credits roll (standee {(f.standee != null ? f.standee.name : "none")}).");
+            Debug.Log($"[Step17Debug] Credits (painting {(f.painting != null ? f.painting.name : "none")}).");
         }
 
         /// <summary>Opens the game menu (its private Open, as the menu stone does).</summary>

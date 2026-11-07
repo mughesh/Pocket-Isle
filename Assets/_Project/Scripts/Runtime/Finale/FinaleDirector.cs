@@ -22,9 +22,10 @@ namespace Diorama
     ///    grass waves, warm motes rise into the room, a golden ring of light under the island: heart.thanks.
     /// 5. Hall of Fame: heart.friends; the party comes out of the rim pods one by one onto the path in front of the Heart,
     ///    each with a stone card (name · Lv · met in); a few Lodge Islings wander out; everyone cheers. Saved (GameSave).
-    /// 6. Credits: stone tablets rise one at a time over the island's far side, then sink.
-    /// 7. The spark returns: a tiny spark slips from the Heart's eye into the explorer's lantern and hops out as the
-    ///    guide, the Spark (<see cref="LanternSpirit.SetSpark"/>): spark.hello. Free play (<see cref="FinaleLogic.DoneId"/>).
+    /// 6. The spark returns: a tiny spark slips from the Heart's eye into the explorer's lantern and hops out as the
+    ///    guide, the Spark (<see cref="LanternSpirit.SetSpark"/>): spark.hello.
+    /// 7. Credits (step 19): the Heart releases a glowing paper sky lantern per credit; the last, big one carries Mugesh's
+    ///    framed painting; the thank-you card comes up as it rises away. Free play (<see cref="FinaleLogic.DoneId"/>).
     /// Progress is saved as the puzzle <see cref="FinaleLogic.StageId"/>; quitting in the middle restarts at the goodbye.
     /// </summary>
     public class FinaleDirector : MonoBehaviour
@@ -396,9 +397,11 @@ namespace Diorama
             ShowSkip(true);
             yield return HallOfFame();
             Beat(false);
+            // Step 19: the Spark comes back first; the credits' sky lanterns close the finale and the thank-you card comes
+            // up as the big portrait lantern rises away.
+            yield return SparkReturns();
             yield return Credits();
             ShowSkip(false);
-            yield return SparkReturns();
             Finish();
             ShowFinalCard();
         }
@@ -988,58 +991,237 @@ namespace Diorama
             }
         }
 
-        [Header("Credits banner (step 17 J)")]
-        [Tooltip("The banner's width (m at island scale 1), its type size (TMP, as the plaque's 0.2) and the lines visible at once.")]
-        public float bannerWidth = 0.5f;
-        public float bannerFont = 0.3f;
-        [Min(1)] public int bannerLines = 4;
-        [Tooltip("The banner's middle this high over the cap, this far behind the island's back edge (island-local m).")]
-        public Vector2 bannerAt = new Vector2(0.17f, 0.03f);
-        [Tooltip("The whole roll takes this long (s); Skip still ends it.")]
-        public float creditsSeconds = 13f;
-        [Tooltip("Mugesh's cut-out standee beside the banner (Nov 7: the round portrait; set at build and Play from Assets/_Project/Art/Credits/CreditsPortrait.png when it exists; empty = no standee).")]
-        public Texture2D standee;
-        [Tooltip("The standee's height (m at island scale 1).")]
-        public float standeeHeight = 0.15f;
+        [Header("Credits: sky lanterns (step 19)")]
+        [Tooltip("Diorama/Sky Lantern: the lanterns' paper, bamboo, the painting and its frame.")]
+        public Material lanternMaterial;
+        [Tooltip("The painting on the big lantern (set at build and Play from Assets/_Project/Art/Credits/Mugesh.png when it exists; empty = text only).")]
+        public Texture2D painting;
+        [Tooltip("The painting's crop of the picture (uv rect): head and shoulders.")]
+        public Rect paintingCrop = new Rect(0.08f, 0.44f, 0.88f, 0.56f);
+        [Tooltip("Reading height: the lanterns' middle this high over the cap (island m); the big one a little lower.")]
+        public float lanternReadHeight = 0.34f;
+        [Tooltip("How far in front of the Heart toward the player they stop (island m), the big one closer; the arc's spacing (left / centre / right).")]
+        public float lanternForward = 0.13f, lanternBigForward = 0.19f, lanternSpacing = 0.175f;
+        [Tooltip("A new lantern every this many seconds; rising to reading height; held there (normal / big).")]
+        public float lanternEvery = 2f, lanternRise = 1.6f, lanternHold = 3f, lanternBigHold = 5f;
+        [Tooltip("The big one waits this much longer after the last normal one, so it arrives once the others have left reading height.")]
+        public float lanternBigDelay = 1.2f;
+        [Tooltip("Leaving: seconds to drift up and fade out ~1 m over the island (normal / big).")]
+        public float lanternLeave = 3.4f, lanternBigLeave = 5f;
+        [Tooltip("The big portrait lantern's size (a normal one is 1).")]
+        public float lanternBigSize = 1.6f;
+
+        public const string LanternSound = "credits.lantern";
+
+        /// <summary>Step 19: the arc slot of normal lantern <paramref name="i"/> (-1 left, 0 centre, 1 right), so two reading at once never share a spot.</summary>
+        public static int LanternSlot(int i) => i % 3 == 0 ? -1 : i % 3 == 1 ? 0 : 1;
+
+        /// <summary>Step 19 (pure): seconds from the first launch until the big lantern starts to leave (the thank-you card's cue).</summary>
+        public static float LanternSeconds(int lanterns, float every, float rise, float bigHold, float bigDelay) =>
+            Mathf.Max(0, lanterns - 1) * every + bigDelay + rise + bigHold;
+
+        /// <summary>Step 19: when lantern <paramref name="i"/> lets go (s after the first); the big one a little later.</summary>
+        float LaunchAt(int i, bool big) => i * lanternEvery + (big ? lanternBigDelay : 0f);
 
         /// <summary>
-        /// Step 17 J (was the step 16 plaque over the Heart): a wide slate banner behind the island, the credits rolling
-        /// slowly upward through it (<see cref="bannerLines"/> at once, <see cref="creditsSeconds"/> in all), and Mugesh's
-        /// standee beside it when there is one.
+        /// Step 19 (was the step 17 J banner and standee): the Heart releases one glowing paper sky lantern per credit
+        /// (<see cref="CreditsText.Lanterns"/>). Each lifts from the forehead crystal with a small gold spark, rises in front
+        /// of the statue to reading height (a left / centre / right arc), turns to the player, holds with a slow bob and
+        /// sway, then drifts up into the room and fades. A new one every <see cref="lanternEvery"/> s. The big one (Mugesh's
+        /// framed painting over "Pocket Isle / Made by Mugesh") goes last, dead centre and closer, holds longer; this returns
+        /// as it starts to leave (the thank-you card comes up) and it finishes rising on its own. Skip fades them in 0.4 s.
         /// </summary>
         IEnumerator Credits()
         {
             SaveStep(FinaleStep.Credits);
             if (_skip) yield break;
-            var lines = CreditsText.Lines;
-            var banner = new CreditsBanner(island.transform, hudMaterial, island.gameObject.layer, lines, bannerFont, bannerWidth, bannerLines);
-            var cut = standee != null ? new CreditsStandee(island.transform, standee, island.gameObject.layer) : null;
-            Sfx(AudioIds.CreditsTablet, AudioIds.StatueSocket, BannerWorld);
-            Debug.Log($"[FinaleDirector] Credits: a banner behind the island, {lines.Length} lines rolling up, {bannerLines} at a time, {creditsSeconds:0.#} s; " +
-                      $"{(cut != null ? $"standee {standee.name}" : "no standee (no Art/Credits/CreditsPortrait.png)")}.");
-            for (float t = 0f; t < creditsSeconds && !_skip; t += Time.deltaTime)
+            if (lanternMaterial == null || fx == null || fx.particleMaterial == null)
             {
-                float alpha = Mathf.Clamp01(t / 0.6f) * Mathf.Clamp01((creditsSeconds - t) / 0.6f);
-                // Faces the player across the island (+Z away from the reader: the island's back).
-                var facing = Quaternion.LookRotation(-island.transform.forward, island.transform.up);
-                banner.Place(BannerWorld, facing, IslandScale, alpha, t / creditsSeconds);
-                if (cut != null) cut.Place(StandeeFeet(banner), facing, standeeHeight * IslandScale, alpha);
+                Debug.LogError("[FinaleDirector] Credits: no lantern material or Fx particle material on the FinaleDirector; no credits (run Step19Setup.Lanterns).");
+                yield break;
+            }
+            var credits = CreditsText.Lanterns;
+            var flying = new List<LanternFlight>();
+            for (int i = 0; i < credits.Length; i++)
+            {
+                var c = credits[i];
+                var pic = c.big ? painting : null;
+                var l = new SkyLantern(island.transform, lanternMaterial, fx.particleMaterial, island.gameObject.layer, c.title, c.subtitle,
+                                       c.big ? lanternBigSize : 1f, pic, paintingCrop);
+                flying.Add(new LanternFlight { lantern = l, slot = c.big ? 0 : LanternSlot(i), big = c.big, born = -1f });
+            }
+            Debug.Log($"[FinaleDirector] Credits: {credits.Length} sky lanterns, one every {lanternEvery:0.#} s, held {lanternHold:0.#} s " +
+                      $"(the big one {lanternBigHold:0.#} s, {(painting != null ? $"painting {painting.name}" : "no painting (no Art/Credits/Mugesh.png)")}); " +
+                      $"{SkyLantern.BodyTriangles} tris a lantern.");
+            float t0 = Time.time;
+            bool cardCue = false;
+            while (!_skip)
+            {
+                float now = Time.time - t0;
+                bool any = false;
+                for (int i = 0; i < flying.Count; i++)
+                {
+                    var f = flying[i];
+                    float launch = LaunchAt(i, f.big);
+                    if (now < launch) { any = true; continue; }
+                    if (f.born < 0f) Launch(f);
+                    if (!FlyLantern(f, now - launch)) continue;
+                    any = true;
+                    if (f.big && !cardCue && now - launch >= lanternRise + lanternBigHold) cardCue = true;
+                }
+                if (cardCue || !any) break;
                 yield return null;
             }
-            banner.Destroy();
-            cut?.Destroy();
+            if (_skip)
+            {
+                // Skip: whatever is up fades in 0.4 s.
+                for (float t = 0f; t < 0.4f; t += Time.deltaTime)
+                {
+                    float now = Time.time - t0;
+                    for (int i = 0; i < flying.Count; i++)
+                        if (flying[i].born >= 0f) FlyLantern(flying[i], now - LaunchAt(i, flying[i].big), 1f - t / 0.4f);
+                    yield return null;
+                }
+                foreach (var f in flying) f.lantern.Destroy();
+                SkyLantern.DestroyShared();
+                yield break;
+            }
+            // The big one (and anything still up) keeps rising while the thank-you card comes up.
+            StartCoroutine(LanternsLeave(flying, t0));
+            Debug.Log($"[FinaleDirector] Credits: the big lantern rises away after {Time.time - t0:0.0} s.");
         }
 
-        /// <summary>The banner's middle: behind the island's back edge, above the cap.</summary>
-        Vector3 BannerWorld => island.transform.TransformPoint(new Vector3(0f, island.CapTopLocal + bannerAt.x, -island.FootprintHalfSize.y - bannerAt.y));
-
-        /// <summary>The standee's feet: on the cap's back corner on the player's right, beside the banner's end.</summary>
-        Vector3 StandeeFeet(CreditsBanner banner)
+        class LanternFlight
         {
-            var half = island.FootprintHalfSize;
-            // Island +X is the player's left: the right end is -X.
-            float x = -Mathf.Min(half.x - 0.05f, bannerWidth * 0.5f + 0.06f);
-            return island.transform.TransformPoint(new Vector3(x, island.CapTopLocal, -half.y + 0.06f));
+            public SkyLantern lantern;
+            public int slot;
+            public bool big;
+            public float born;
+            public Vector3 from, toward, side;
+            public float yaw, startYaw;
+            public bool faced;
+            public bool logged;
+        }
+
+        void Launch(LanternFlight f)
+        {
+            f.born = Time.time;
+            f.from = heart.SocketWorld;
+            Vector3 eye = EyeWorld;
+            f.toward = Vector3.ProjectOnPlane(eye - f.from, Vector3.up);
+            if (f.toward.sqrMagnitude < 1e-6f) f.toward = island.transform.forward;
+            f.toward.Normalize();
+            f.side = Vector3.Cross(Vector3.up, f.toward);
+            f.startYaw = f.yaw = Quaternion.LookRotation(-f.toward, Vector3.up).eulerAngles.y;
+            if (fx != null) fx.Burst(f.from, 10, Gold, Unit * 0.5f, 0.5f, Unit * 0.035f);
+            Sfx(LanternSound, null, f.from);
+        }
+
+        /// <summary>
+        /// The player's head (the main camera); a seat in front of the island when there is none or it sits under the cap
+        /// (flat Play without XR: the rig at the origin).
+        /// </summary>
+        public Vector3 EyeWorld
+        {
+            get
+            {
+                var cam = Camera.main;
+                float capY = island.transform.TransformPoint(new Vector3(0f, island.CapTopLocal, 0f)).y;
+                if (cam != null && cam.transform.position.y > capY + 0.05f) return cam.transform.position;
+                return island.transform.TransformPoint(new Vector3(0.05f, island.CapTopLocal + 0.42f, island.FootprintHalfSize.y + 0.45f));
+            }
+        }
+
+        /// <summary>Where lantern <paramref name="f"/> stops to be read.</summary>
+        Vector3 ReadSpot(LanternFlight f)
+        {
+            float s = IslandScale;
+            float capY = island.transform.TransformPoint(new Vector3(0f, island.CapTopLocal, 0f)).y;
+            Vector3 flat = new Vector3(f.from.x, 0f, f.from.z);
+            float forward = f.big ? lanternBigForward : lanternForward - (f.slot != 0 ? 0.025f : 0f); // a gentle arc
+            float height = f.big ? lanternReadHeight - 0.02f : lanternReadHeight - (f.slot != 0 ? 0.012f : 0f);
+            return flat + f.toward * (forward * s) + f.side * (f.slot * lanternSpacing * s) + Vector3.up * (capY + height * s);
+        }
+
+        /// <summary>
+        /// Moves lantern <paramref name="f"/> to its place <paramref name="age"/> s after launch; false once it has gone.
+        /// <paramref name="fade"/> scales its alpha (Skip).
+        /// </summary>
+        bool FlyLantern(LanternFlight f, float age, float fade = 1f)
+        {
+            float s = IslandScale;
+            float hold = f.big ? lanternBigHold : lanternHold, leave = f.big ? lanternBigLeave : lanternLeave;
+            Vector3 read = ReadSpot(f);
+            Vector3 eye = EyeWorld;
+            Vector3 p;
+            float alpha, roll = 0f;
+            if (age < lanternRise)
+            {
+                // Out from the crystal toward the player first (never behind the statue), then up to reading height.
+                float k = 1f - (1f - age / lanternRise) * (1f - age / lanternRise);
+                Vector3 mid = f.from + f.toward * (0.1f * s) + Vector3.up * (0.02f * s);
+                p = Vector3.Lerp(Vector3.Lerp(f.from, mid, k), Vector3.Lerp(mid, read, k), k);
+                alpha = Mathf.Clamp01(age / 0.35f);
+                f.yaw = f.startYaw;
+            }
+            else
+            {
+                float t = age - lanternRise;
+                // Faces the player's head once it stops (yaw only), turning over half a second.
+                if (!f.faced)
+                {
+                    f.faced = true;
+                    Vector3 to = Vector3.ProjectOnPlane(eye - read, Vector3.up);
+                    if (to.sqrMagnitude > 1e-6f) f.startYaw = Quaternion.LookRotation(-to, Vector3.up).eulerAngles.y;
+                    if (!f.logged)
+                    {
+                        f.logged = true;
+                        float capY = island.transform.TransformPoint(new Vector3(0f, island.CapTopLocal, 0f)).y;
+                        Debug.Log($"[FinaleDirector] Lantern \"{f.lantern.Title}\" reading: {(read.y - capY) / s * 100f:0} cm over the cap, " +
+                                  $"slot {f.slot}, {Vector3.Distance(read, eye):0.00} m from the head, first line cap {f.lantern.FirstLineCap * 1000f:0.0} mm.");
+                        Moment?.Invoke("lantern:" + f.lantern.Title);
+                    }
+                }
+                f.yaw = Mathf.LerpAngle(f.yaw, f.startYaw, 1f - Mathf.Exp(-Time.deltaTime * 6f));
+                float bob = Mathf.Sin((Time.time - f.born) * 1.7f) * 0.005f * s;
+                roll = Mathf.Sin((Time.time - f.born) * 1.1f) * 2.5f;
+                if (t < hold)
+                {
+                    p = read + Vector3.up * bob;
+                    alpha = 1f;
+                }
+                else
+                {
+                    float u = (t - hold) / leave;
+                    if (u >= 1f)
+                    {
+                        if (f.lantern.transform != null && f.lantern.transform.gameObject.activeSelf) f.lantern.Place(read, f.yaw, s, 0f, 0f, eye);
+                        return false;
+                    }
+                    // Up into the room, slowly gathering speed, drifting a little outward; gone ~1 m over the island.
+                    float rise = (1f - lanternReadHeight) * s * (u * u * 0.6f + u * 0.4f);
+                    p = read + Vector3.up * (bob + rise) + f.side * (f.slot * 0.06f * s * u) + f.toward * (-0.04f * s * u);
+                    alpha = 1f - Mathf.SmoothStep(0.55f, 1f, u);
+                }
+            }
+            f.lantern.Place(p, f.yaw, s, alpha * fade, roll, eye);
+            return true;
+        }
+
+        IEnumerator LanternsLeave(List<LanternFlight> flying, float t0)
+        {
+            while (true)
+            {
+                float now = Time.time - t0;
+                bool any = false;
+                for (int i = 0; i < flying.Count; i++)
+                    if (flying[i].born >= 0f && FlyLantern(flying[i], now - LaunchAt(i, flying[i].big))) any = true;
+                if (!any) break;
+                yield return null;
+            }
+            foreach (var f in flying) f.lantern.Destroy();
+            SkyLantern.DestroyShared();
+            Debug.Log("[FinaleDirector] Credits: the last lantern is gone.");
         }
 
         /// <summary>Step 16: scroll positions to show every line once (pure).</summary>

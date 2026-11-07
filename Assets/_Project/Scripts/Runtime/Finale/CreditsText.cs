@@ -25,6 +25,35 @@ namespace Diorama
                 "Some sounds by Kenney (CC0)", "Font: Liberation Sans (SIL Open Font License)",
             };
 
+        /// <summary>Step 19: one sky lantern's credit (a bold first line, a smaller second); the last one is the big portrait lantern.</summary>
+        public struct Lantern
+        {
+            public string title, subtitle;
+            public bool big;
+
+            public Lantern(string title, string subtitle, bool big = false)
+            {
+                this.title = title;
+                this.subtitle = subtitle;
+                this.big = big;
+            }
+        }
+
+        /// <summary>
+        /// Step 19: the finale's credits, one per sky lantern, in release order; the big one (the framed portrait) last.
+        /// Same content as <see cref="Lines"/> (the Settings card keeps <see cref="Block"/>); the step 15b swap applies here too.
+        /// </summary>
+        public static Lantern[] Lanterns => new[]
+        {
+            new Lantern("Islings, realms and Keepers", "original designs"),
+            new Lantern("Music", "Mugesh"),
+            PaidSoundsDone
+                ? new Lantern("Sounds: synthesised and generated for Pocket Isle", "Some sounds: Kenney (CC0)")
+                : new Lantern("Sounds: elevenlabs.io (free plan)", "Some sounds: Kenney (CC0)"),
+            new Lantern("Font: Liberation Sans", "SIL Open Font License"),
+            new Lantern("Pocket Isle", "Made by Mugesh", true),
+        };
+
         /// <summary>The Settings card's text (blank line after the title).</summary>
         public static string Block
         {

@@ -146,7 +146,8 @@ namespace Diorama.Tests
                 StringAssert.DoesNotContain("Meta", l);
             }
             CollectionAssert.Contains(lines, CreditsText.SoundsFreePlan, "required by the free plan until step 15b");
-            float seconds = FinaleDirector.CreditSteps(lines.Length, 3) * 2.6f;
+            // Step 19: the sky lanterns, every one launched and the big one read within 20 s.
+            float seconds = FinaleDirector.LanternSeconds(CreditsText.Lanterns.Length, 2f, 1.6f, 5f, 1.2f);
             Assert.LessOrEqual(seconds, 20f);
             Assert.AreEqual(1, FinaleDirector.CreditSteps(2, 3));
         }

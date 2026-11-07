@@ -7,7 +7,8 @@ namespace Diorama.EditorTools
     /// <summary>
     /// Nov 7 (Mugesh: use the circular half-posed character, not the photo): cuts Assets/_Project/Art/Credits/Home_char.png
     /// to its dark ring (the round portrait without the orange glow round it) with a soft round edge, and writes
-    /// CreditsPortrait.png beside it (transparent outside). The credits standee uses that file (<see cref="CreditsStandeeHook"/>).
+    /// CreditsPortrait.png beside it (transparent outside). Step 19: the credits no longer use it (the big lantern paints
+    /// Mugesh.png, <see cref="CreditsPaintingHook"/>); the tool stays.
     /// Menu: Tools > Diorama > Credits > Make Round Portrait.
     /// </summary>
     public static class CreditsPortraitTool
