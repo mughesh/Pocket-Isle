@@ -140,6 +140,9 @@ namespace Diorama
             float amount = 0f;
             bool beam = false;
             var state = Dialogue.GetTarget(out var world, out var target);
+            // Nov 7 (Mugesh: the first grass's glow stayed into the battle, blown up by the zoom): a battle or a scene swap
+            // ends the lingering gold at once.
+            if (state != Dialogue.TargetState.Active && (EncounterDirector.AnyInBattle || SceneSwap.IsBusy)) _cleared = true;
             if (state == Dialogue.TargetState.Active)
             {
                 if (target != _last)

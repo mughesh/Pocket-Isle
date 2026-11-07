@@ -78,6 +78,12 @@ namespace Diorama
             if (ShrineByMap.TryGetValue(map.name, out var used)) s = used;
             else if (LastShrine.HasValue && map.name == LastShrineMap) s = LastShrine.Value;
             else return null;
+            return FrontOf(map, s);
+        }
+
+        /// <summary>The walkable tile in front of the shrine at <paramref name="s"/> (anchor) on <paramref name="map"/>, else null.</summary>
+        Vector2Int? FrontOf(WorldMap map, Vector2Int s)
+        {
             if (!map.TryGetProp(map.PropAt(s.y, s.x), out var e) || e.recipe == null || e.recipe.name != RecipeName) return null;
             var front = s + new Vector2Int(0, 2);
             if (map.CanWalk(front)) return front;
@@ -94,8 +100,36 @@ namespace Diorama
         {
             var here = OutdoorMap as WorldMap;
             var at = RespawnOn(here);
+            string how = "its last shrine";
+            if (!at.HasValue && here != null)
+            {
+                // Nov 7 (Mugesh: put them in that realm's lodge even if they never went in): the nearest awake shrine.
+                Scan();
+                float best = float.MaxValue;
+                for (int i = 0; i < _shrines.Count; i++)
+                {
+                    if (Dormant(i)) continue;
+                    var f = FrontOf(here, _shrines[i]);
+                    float d = f.HasValue ? (f.Value - explorer.Tile).sqrMagnitude : float.MaxValue;
+                    if (d >= best) continue;
+                    best = d;
+                    at = f;
+                    how = "its nearest shrine";
+                }
+            }
             explorer.Teleport(at ?? explorer.SpawnTile);
-            Debug.Log($"[HearthShrines] Respawn on {(here != null ? here.name : "?")}: {(at.HasValue ? "its last shrine" : "its arrival (no shrine used here yet)")}.");
+            bool lodgeToo = at.HasValue && swap != null && lodge != null;
+            Debug.Log($"[HearthShrines] Respawn on {(here != null ? here.name : "?")}: {(at.HasValue ? how : "its arrival (no shrine here)")}{(lodgeToo ? ", then into the lodge" : "")}.");
+            if (lodgeToo) StartCoroutine(IntoLodgeAfterLoss());
+        }
+
+        IEnumerator IntoLodgeAfterLoss()
+        {
+            yield return null;
+            while (SceneSwap.IsBusy) yield return null;
+            yield return new WaitForSeconds(0.4f);
+            if (swap != null && lodge != null && !SceneSwap.IsInside && swap.Enter(lodge, lodge.startTile))
+                Debug.Log("[HearthShrines] Lost: into the realm's lodge to rest.");
         }
 
         public IReadOnlyList<Vector2Int> Shrines => _shrines;

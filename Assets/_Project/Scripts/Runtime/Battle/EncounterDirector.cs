@@ -125,7 +125,23 @@ namespace Diorama
         [Tooltip("How long a fainted wild creature stays dazed and catchable (s).")]
         public float dazedSeconds = 8f;
 
-        public bool InBattle { get; private set; }
+        public bool InBattle
+        {
+            get => _inBattle;
+            private set
+            {
+                _inBattle = value;
+                AnyInBattle = value;
+            }
+        }
+
+        bool _inBattle;
+
+        /// <summary>Nov 7: a battle runs (for pieces with no reference to the director: the Spirit's gold highlight).</summary>
+        public static bool AnyInBattle { get; private set; }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetAnyInBattle() => AnyInBattle = false;
 
         /// <summary>In battle with the player's Isling out on its pad (its moves can be picked).</summary>
         public bool PlayerOut => InBattle && _activeSlot >= 0;
@@ -586,7 +602,7 @@ namespace Diorama
             if (battle.Result == BattleResult.Won || battle.Result == BattleResult.Caught) yield return Reward(battle, wild, rare);
             yield return stage.Outro(battle.Result);
             if (battle.Result == BattleResult.Won) Dialogue.Say("battle.win.first");
-            else if (battle.Result == BattleResult.Lost) Dialogue.Say("battle.lose.first");
+            else if (battle.Result == BattleResult.Lost) Dialogue.Say(RetryAtDoor ? "battle.lose.retry" : "battle.lose.first");
             yield return Finish(battle.Result == BattleResult.Lost);
             BattleEnded?.Invoke(battle.Result);
         }
@@ -971,19 +987,27 @@ namespace Diorama
             stage.Cleanup();
             if (lost)
             {
-                // Lost inside (a Keeper's hall): outside first, then the shrine.
+                // Nov 7 (Mugesh): Quick Journey, lost in the temple: healed, back outside in front of its door to try again.
+                // Otherwise (and lost inside a hall in the full game): outside first, then into that realm's lodge.
+                bool retry = RetryAtDoor;
                 if (SceneSwap.IsInside && SceneSwap.Current != null) SceneSwap.Current.ReturnNow();
-                bool atShrine = shrines != null && shrines.LastShrine.HasValue;
-                if (shrines != null) shrines.Respawn();
-                else explorer.Teleport(explorer.SpawnTile);
                 party.HealAll();
-                Debug.Log($"[EncounterDirector] Lost: explorer back at {(atShrine ? "the last shrine" : "spawn")}, party healed.");
+                if (retry) Debug.Log("[EncounterDirector] Lost in the temple (Quick Journey): healed, in front of its door to try again.");
+                else
+                {
+                    if (shrines != null) shrines.Respawn();
+                    else explorer.Teleport(explorer.SpawnTile);
+                    Debug.Log("[EncounterDirector] Lost: the party is healed; the explorer goes to the realm's lodge.");
+                }
             }
             _stepsSinceBattle = 0;
             explorer.Locked = false;
             MapCreature.HideAll = false;
             InBattle = false;
         }
+
+        /// <summary>Nov 7: a Quick Journey battle lost inside a Keeper's hall restarts at the temple's door (no lodge trip).</summary>
+        static bool RetryAtDoor => QuickJourney.Active && SceneSwap.IsInside;
 
         IEnumerator NewSparkle()
         {

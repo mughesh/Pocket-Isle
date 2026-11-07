@@ -651,7 +651,21 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Everyone's tired. Let's rest at the shrine.
+      text: Everyone's tired. Let's rest in the lodge.
+      context: 
+  - id: battle.lose.retry
+    once: 0
+    objective: 0
+    priority: 1
+    note: Quick Journey, lost to the Keeper
+    target: 
+    validWhile: 
+    context: 
+    kind: 0
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Everyone's healed. Let's try again!
       context: 
   - id: capture.first
     once: 1
