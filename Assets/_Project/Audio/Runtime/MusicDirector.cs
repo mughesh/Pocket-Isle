@@ -15,11 +15,15 @@ namespace Diorama.Audio
     {
         public const float AreaCrossfade = 2f, BattleCrossfade = 0.6f;
         public const float RestoredDb = 2f, DialogueDb = -4f, PauseDb = -8f, JingleDb = -4f; // Step 16: -8 -> -4 (the jingles are 9 dB quieter, so the music ducks less)
+        /// <summary>Step 18: inside a realm hall (the tower) the realm's music keeps going this much lower.</summary>
+        public const float HallDb = -6f;
+        /// <summary>Step 18: the first play on arriving in a realm fades in this long (after the realm name card).</summary>
+        public const float ArrivalFadeIn = 3f;
 
         static MusicDirector _instance;
 
         MusicState _state;
-        bool _restored, _dialogue, _paused;
+        bool _restored, _dialogue, _paused, _hall;
         float _jingleUntil, _db;
 
         static MusicDirector Instance
@@ -59,11 +63,21 @@ namespace Diorama.Audio
             if (d == null || d._state == state) return;
             bool battle = state == MusicState.BattleWild || state == MusicState.BattleKeeper;
             float fade = crossfade >= 0f ? crossfade : battle ? BattleCrossfade : AreaCrossfade;
-            Debug.Log($"[Music] {d._state} -> {state} ({fade:0.#} s).");
-            d._state = state;
             var id = CueFor(state);
+            // Step 18: after a battle, a resting track (rest > 0) doesn't snap back: its rest first, then from the top.
+            bool fromBattle = d._state == MusicState.BattleWild || d._state == MusicState.BattleKeeper;
+            float delay = fromBattle && !battle ? AudioService.RestOf(id) : 0f;
+            if (delay > 0f) fade = 1.5f;
+            Debug.Log($"[Music] {d._state} -> {state} ({fade:0.#} s{(delay > 0f ? $", after {delay:0} s of rest" : "")}).");
+            d._state = state;
             if (id == null) AudioService.StopMusic(fade);
-            else AudioService.SetMusic(id, fade);
+            else AudioService.SetMusic(id, fade, delay);
+        }
+
+        /// <summary>Step 18: inside a realm hall (not the lodge): the realm's music at <see cref="HallDb"/>.</summary>
+        public static void SetHall(bool on)
+        {
+            if (Instance != null) _instance._hall = on;
         }
 
         /// <summary>The area's realm is restored (Cinderwood plays +2 dB).</summary>
@@ -90,7 +104,7 @@ namespace Diorama.Audio
 
         void Update()
         {
-            float target = (_restored ? RestoredDb : 0f) + (_dialogue ? DialogueDb : 0f) + (_paused ? PauseDb : 0f) +
+            float target = (_restored ? RestoredDb : 0f) + (_dialogue ? DialogueDb : 0f) + (_paused ? PauseDb : 0f) + (_hall ? HallDb : 0f) +
                            (Time.unscaledTime < _jingleUntil ? JingleDb : 0f);
             // Down fast (0.25 s for 8 dB), back up slowly (2 s after a jingle, as the step asks).
             float rate = target < _db ? 32f : 4f;

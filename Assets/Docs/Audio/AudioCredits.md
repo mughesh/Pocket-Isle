@@ -63,6 +63,13 @@ Originals: `D:/UNITY/projects/_audio-sources/kenney/` (outside the repo).
 ## Music
 Planned: Lyria (Google). Add each track here with its licence terms when it lands in `Clips/Music/`.
 
+| Track | Cue | By | Source tool / licence |
+|---|---|---|---|
+| First Light at the Summit (`music.galewick_1.mp3`, 116.6 s, about -11.8 LUFS) | `music.galewick` | Mugesh | **to confirm** (Step 18 test) |
+| Tall Grass Duel (`music.battle.wild_1.mp3`, 129.3 s, about -13.1 LUFS) | `music.battle.wild`, `music.battle.keeper` | Mugesh | **to confirm** (Step 18 test) |
+
+In the app the credits say "Music: Mugesh" (no tool or brand name).
+
 ## ElevenLabs Sound Effects (gen lane, imported by Tools > Pocket Isle > Audio > Import Gen Batch)
 Source: `../_audio-sources/elevenlabs/manifest.json` (outside the repo; prompts and verdicts are there and in each cue's Review note).
 Copies: `Assets/_Project/Audio/Clips/Gen/<cueId>/`; the cues play the levelled copies in `Clips/Levelled/Gen/`.

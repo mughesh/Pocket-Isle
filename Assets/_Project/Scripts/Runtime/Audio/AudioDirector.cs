@@ -25,6 +25,9 @@ namespace Diorama
         bool _wasRestored;
         float _ambienceDuck;
         bool _sweetPaused;
+        // Step 18: arriving in a realm, its music waits for the realm name card, then fades in.
+        MusicState _areaMusic;
+        float _arrivalHold = -1f;
 
         public static void Ensure()
         {
@@ -80,7 +83,22 @@ namespace Diorama
                     Debug.Log("[AudioDirector] Finale music (music.finale).");
                 }
             }
-            if (!finale) MusicDirector.SetState(music);
+            // Step 18: arriving in a new realm (not back from a battle or a hall), hold its music until the realm name card
+            // is gone, then fade it in over 3 s.
+            if (!battle && music != _areaMusic && music != MusicState.None)
+            {
+                _areaMusic = music;
+                _arrivalHold = Time.unscaledTime + 1.2f;
+            }
+            bool holding = _arrivalHold >= 0f && (Time.unscaledTime < _arrivalHold || RealmNameCard.Showing) && !battle;
+            if (_arrivalHold >= 0f && !holding && !battle)
+            {
+                _arrivalHold = -1f;
+                if (!finale) MusicDirector.SetState(music, MusicDirector.ArrivalFadeIn);
+            }
+            if (!finale && !holding) MusicDirector.SetState(music);
+            else if (!finale && holding && MusicDirector.State != MusicState.None && MusicDirector.State != music) MusicDirector.SetState(MusicState.None, 1.5f);
+            MusicDirector.SetHall(SceneSwap.IsInside && _area == "ForgeHall");
             MusicDirector.SetRestored(restored && realm == "Cinderwood");
             bool talking = Dialogue.IsTalking;
             MusicDirector.SetDialogue(talking);

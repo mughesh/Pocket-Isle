@@ -32,6 +32,10 @@ namespace Diorama.Audio
         readonly List<Voice> _2d = new List<Voice>();
         Voice _musicA, _musicB;
         string _musicId;
+        // Step 18: a music cue waiting to start (its rest, or a delayed first play) and whether the current one is sounding.
+        float _musicStartAt = -1f, _musicFadeIn = 1.5f;
+        bool _musicSounding;
+        static readonly Dictionary<string, float> VolumeOverride = new Dictionary<string, float>();
         bool _ducked;
         float _duck = 1f;
         AnimationCurve _rolloff;
@@ -64,25 +68,91 @@ namespace Diorama.Audio
             return cue != null && cue.clips != null && cue.clips.Length > 0;
         }
 
-        /// <summary>Crossfades to a music cue (no-op if it's already playing).</summary>
-        public static void SetMusic(string id, float crossfade = 1.5f)
+        /// <summary>
+        /// Crossfades to a music cue (no-op if it's already the current one). Step 18: <paramref name="delay"/> &gt; 0 fades
+        /// the old music out now and starts this one after that many seconds (ambience only meanwhile), fading in over
+        /// <paramref name="crossfade"/>. A cue with <see cref="AudioCue.restSeconds"/> plays once, rests, plays again.
+        /// </summary>
+        public static void SetMusic(string id, float crossfade = 1.5f, float delay = 0f)
         {
             var s = Instance;
             if (s == null || id == s._musicId) return;
             var cue = Cue(id);
             if (cue == null) return;
+            s.FadeOutMusic(crossfade);
+            s._musicId = id;
+            s._musicSounding = false;
+            s._musicStartAt = -1f;
+            if (delay > 0f)
+            {
+                s._musicStartAt = Time.unscaledTime + delay;
+                s._musicFadeIn = crossfade;
+                return;
+            }
+            s.StartMusic(cue, crossfade);
+        }
+
+        /// <summary>Step 18: the cue's rest between plays (0 = it loops), or 0 for an unknown cue.</summary>
+        public static float RestOf(string id)
+        {
+            if (string.IsNullOrEmpty(id) || !LoadTable()) return 0f;
+            var cue = _table.Find(id);
+            return cue != null ? cue.restSeconds : 0f;
+        }
+
+        /// <summary>The music cue's level: the Dev panel's override if set, else the cue's volume.</summary>
+        public static float MusicVolume(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return 0f;
+            if (VolumeOverride.TryGetValue(id, out var v)) return v;
+            var key = "audio.cuevol." + id;
+            if (PlayerPrefs.HasKey(key)) return VolumeOverride[id] = PlayerPrefs.GetFloat(key);
+            var cue = LoadTable() ? _table.Find(id) : null;
+            return VolumeOverride[id] = cue != null ? cue.volume : 0f; // cached: Level asks every frame
+        }
+
+        /// <summary>Step 18 (Dev panel): sets a music cue's level live and remembers it on this device.</summary>
+        public static void SetMusicVolume(string id, float volume)
+        {
+            if (string.IsNullOrEmpty(id)) return;
+            VolumeOverride[id] = Mathf.Clamp01(volume);
+            PlayerPrefs.SetFloat("audio.cuevol." + id, VolumeOverride[id]);
+        }
+
+        void StartMusic(AudioCue cue, float fadeIn)
+        {
             var clip = cue.Pick();
             if (clip == null)
             {
-                WarnOnce(id, cue.awaitingClips ? $"[Audio] Music '{id}' has no clips yet (awaiting Lyria); silence." : $"[Audio] Music cue '{id}' has no clips.", !cue.awaitingClips);
-                s.FadeOutMusic(crossfade);
-                s._musicId = id;
+                WarnOnce(cue.id, cue.awaitingClips ? $"[Audio] Music '{cue.id}' has no clips yet (awaiting Lyria); silence." : $"[Audio] Music cue '{cue.id}' has no clips.", !cue.awaitingClips);
                 return;
             }
-            s.FadeOutMusic(crossfade);
-            var v = s._musicA.Busy ? s._musicB : s._musicA;
-            v.Begin(cue, clip, Vector3.zero, null, false, 1f, true, crossfade);
-            s._musicId = id;
+            var v = _musicA.Busy ? _musicB : _musicA;
+            bool loop = cue.restSeconds <= 0f;
+            v.Begin(cue, clip, Vector3.zero, null, false, 1f, loop, fadeIn);
+            _musicSounding = true;
+            Debug.Log($"[Audio] Music '{cue.id}' starts ({clip.name}, {clip.length:0} s, {(loop ? "looping" : $"then {cue.restSeconds:0} s rest")}, fade in {fadeIn:0.#} s).");
+        }
+
+        /// <summary>Step 18: a delayed start or the rest is over: play; a once-through track ended: rest.</summary>
+        void TickMusic()
+        {
+            if (_musicId == null) return;
+            if (_musicStartAt >= 0f)
+            {
+                if (Time.unscaledTime < _musicStartAt) return;
+                _musicStartAt = -1f;
+                var cue = Cue(_musicId);
+                if (cue != null) StartMusic(cue, _musicFadeIn);
+                return;
+            }
+            if (!_musicSounding || _musicA.Busy || _musicB.Busy) return;
+            _musicSounding = false;
+            float rest = RestOf(_musicId);
+            if (rest <= 0f) return;
+            _musicStartAt = Time.unscaledTime + rest;
+            _musicFadeIn = 0f;
+            Debug.Log($"[Audio] Music '{_musicId}' ended: {rest:0} s of ambience, then again.");
         }
 
         public static void StopMusic(float fade = 1f)
@@ -90,6 +160,8 @@ namespace Diorama.Audio
             if (_instance == null) return;
             _instance.FadeOutMusic(fade);
             _instance._musicId = null;
+            _instance._musicStartAt = -1f;
+            _instance._musicSounding = false;
         }
 
         /// <summary>Lowers music by about 6 dB (dialogue, jingles).</summary>
@@ -245,6 +317,7 @@ namespace Diorama.Audio
             foreach (var v in _2d) v.Tick(dt, 1f);
             _musicA.Tick(dt, _duck);
             _musicB.Tick(dt, _duck);
+            TickMusic();
         }
 
         void OnDestroy()
@@ -270,6 +343,7 @@ namespace Diorama.Audio
             Warned.Clear();
             DistanceScale = 1f;
             MusicGain = 1f;
+            VolumeOverride.Clear();
         }
 
         // ---- one pooled source ----
@@ -367,7 +441,8 @@ namespace Diorama.Audio
                 src.volume = Level(duck);
             }
 
-            float Level(float duck) => _base * _volume * _fade * BusVolume[(int)cue.bus] * (cue.bus == AudioBus.Music ? duck * MusicGain : 1f);
+            float Level(float duck) => (cue.bus == AudioBus.Music ? MusicVolume(cue.id) : _base) * _volume * _fade * BusVolume[(int)cue.bus] *
+                                       (cue.bus == AudioBus.Music ? duck * MusicGain : 1f);
 
             void Release()
             {

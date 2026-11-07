@@ -530,12 +530,28 @@ namespace Diorama
                     Heading("Speed");
                     Add(() => $"Time x{Time.timeScale:0}", () => Time.timeScale = Time.timeScale >= 4f ? 1f : Time.timeScale * 2f, () => Time.timeScale > 1f);
                     Add(() => $"Walk x2: {OnOff(_walkFast)}", ToggleWalk, () => _walkFast);
+                    // Step 18: the first music test, tuned on the headset (remembered on this device).
+                    Heading("Music");
+                    Add(() => $"Galewick music {Diorama.Audio.AudioService.MusicVolume(Diorama.Audio.AudioIds.MusicGalewick):0.00}", null);
+                    Add("Galewick -", () => MusicStep(Diorama.Audio.AudioIds.MusicGalewick, -0.05f));
+                    Add("Galewick +", () => MusicStep(Diorama.Audio.AudioIds.MusicGalewick, 0.05f));
+                    Add(() => $"Battle music {Diorama.Audio.AudioService.MusicVolume(Diorama.Audio.AudioIds.MusicBattleWild):0.00}", null);
+                    Add("Battle -", () => MusicStep(Diorama.Audio.AudioIds.MusicBattleWild, -0.05f));
+                    Add("Battle +", () => MusicStep(Diorama.Audio.AudioIds.MusicBattleWild, 0.05f));
                     Heading("Record");
                     Add("Record ghost", RecordGhost);
                     Add("Report bug", ReportBug);
                     break;
             }
             Layout();
+        }
+
+        void MusicStep(string id, float step)
+        {
+            float v = Mathf.Clamp01(Diorama.Audio.AudioService.MusicVolume(id) + step);
+            Diorama.Audio.AudioService.SetMusicVolume(id, v);
+            if (id == Diorama.Audio.AudioIds.MusicBattleWild) Diorama.Audio.AudioService.SetMusicVolume(Diorama.Audio.AudioIds.MusicBattleKeeper, v);
+            Status($"{id}: {v:0.00}");
         }
 
         const string Interiors = "Interiors";

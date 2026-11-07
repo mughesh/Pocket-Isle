@@ -28,6 +28,9 @@ namespace Diorama.Audio
         [Range(0.01f, 5f)] public float minDistance = 0.1f;
         [Range(0.05f, 20f)] public float maxDistance = 1.5f;
         public bool loop;
+        [Tooltip("Step 18, music only: play the track once to its end, then this many seconds of ambience only, then again " +
+                 "from the top (ear fatigue in MR). 0 = loop it.")]
+        [Min(0f)] public float restSeconds;
 
         [Header("Limits")]
         [Range(1, 16)] public int maxVoices = 4;

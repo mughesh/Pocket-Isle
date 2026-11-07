@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: music.galewick
   m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
   id: music.galewick
-  clips: []
-  volume: 0.6
+  clips:
+  - {fileID: 8300000, guid: 5c505b59616a210488c548116ab58f99, type: 3}
+  volume: 0.25
   volumeJitter: 0
   pitchMin: 1
   pitchMax: 1
@@ -24,12 +25,12 @@ MonoBehaviour:
   minDistance: 0.1
   maxDistance: 1.5
   loop: 1
+  restSeconds: 45
   maxVoices: 1
   minInterval: 0
   priority: 0
-  awaitingClips: 1
-  notes: 'Awaiting Lyria: drop the track in Clips/Music/, cut the loop with Audio
-    Lab > Loop tool, add the _loop clip here.'
+  awaitingClips: 0
+  notes: 'Step 18: First Light at the Summit (Mugesh). Plays once, 45 s rest, again.'
   review:
     status: 0
     note: 

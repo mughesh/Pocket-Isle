@@ -16,12 +16,12 @@ namespace Diorama
         public static string[] Lines => PaidSoundsDone
             ? new[]
             {
-                "Pocket Isle", "Made by Mugesh", "Islings, realms and Keepers: original designs", SoundsAfterRegen,
+                "Pocket Isle", "Made by Mugesh", "Music: Mugesh", "Islings, realms and Keepers: original designs", SoundsAfterRegen,
                 "Font: Liberation Sans (SIL Open Font License)",
             }
             : new[]
             {
-                "Pocket Isle", "Made by Mugesh", "Islings, realms and Keepers: original designs", SoundsFreePlan,
+                "Pocket Isle", "Made by Mugesh", "Music: Mugesh", "Islings, realms and Keepers: original designs", SoundsFreePlan,
                 "Some sounds by Kenney (CC0)", "Font: Liberation Sans (SIL Open Font License)",
             };
 
