@@ -46,6 +46,8 @@ namespace Diorama
         public float sideSwipeSeconds = 0.75f;
         [Tooltip("Thumb demos are this much bigger than the lesson's scale (they read tiny over the map).")]
         public float thumbScale = 1.6f;
+        [Tooltip("Nov 7 (Mugesh: the swipe ghost looked tilted, fingers toward the upper left): the thumb demo turned this many degrees about up (+ = clockwise from above) so the fingers point straight away.")]
+        public float thumbYaw = 30f;
         [Tooltip("Nov 7 (Mugesh: the gold point looks really nice, use it wherever it helps): every ghost demo gets the gold dot and trail on the joint that does the work (thumb tip, pinch point, fingertip or palm), not only thumb demos.")]
         public bool keyDots = true;
         [Tooltip("A gold dot on the ghost's thumb tip and this many trail dots behind it (the slide).")]
@@ -756,6 +758,7 @@ namespace Diorama
             _clip.Sample(retarget ? grabTime : _clip.keyTime * _clip.Duration, mirror, out var kp, out var kr, _rot, _pos);
             Vector3 keyInRoot = _clip.keyPinch || retarget ? PinchInRoot(g) : KeyInRoot(g, _clip.keyJoint);
             if (yaw != 0f) frame *= Quaternion.Euler(0f, yaw, 0f);
+            if (ThumbDemo && thumbYaw != 0f) frame *= Quaternion.Euler(0f, thumbYaw, 0f);
             Vector3 key = view * kp + view * kr * keyInRoot;
             Vector3 origin = point + frame * (offset * scale) - frame * (key * scale);
 
