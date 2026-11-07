@@ -530,14 +530,18 @@ namespace Diorama
                     Heading("Speed");
                     Add(() => $"Time x{Time.timeScale:0}", () => Time.timeScale = Time.timeScale >= 4f ? 1f : Time.timeScale * 2f, () => Time.timeScale > 1f);
                     Add(() => $"Walk x2: {OnOff(_walkFast)}", ToggleWalk, () => _walkFast);
-                    // Step 18: the first music test, tuned on the headset (remembered on this device).
+                    // Step 18/20: the music, tuned on the headset (levels remembered on this device): one row per cue.
                     Heading("Music");
-                    Add(() => $"Galewick music {Diorama.Audio.AudioService.MusicVolume(Diorama.Audio.AudioIds.MusicGalewick):0.00}", null);
-                    Add("Galewick -", () => MusicStep(Diorama.Audio.AudioIds.MusicGalewick, -0.05f));
-                    Add("Galewick +", () => MusicStep(Diorama.Audio.AudioIds.MusicGalewick, 0.05f));
-                    Add(() => $"Battle music {Diorama.Audio.AudioService.MusicVolume(Diorama.Audio.AudioIds.MusicBattleWild):0.00}", null);
-                    Add("Battle -", () => MusicStep(Diorama.Audio.AudioIds.MusicBattleWild, -0.05f));
-                    Add("Battle +", () => MusicStep(Diorama.Audio.AudioIds.MusicBattleWild, 0.05f));
+                    Add(() => $"Realm music: {(Diorama.Audio.MusicDirector.RealmMusicBeforeRestore ? "always" : "reward")}",
+                        () => Diorama.Audio.MusicDirector.RealmMusicBeforeRestore = !Diorama.Audio.MusicDirector.RealmMusicBeforeRestore,
+                        () => Diorama.Audio.MusicDirector.RealmMusicBeforeRestore);
+                    foreach (var (cue, name) in MusicRows)
+                    {
+                        string id = cue;
+                        Add(() => $"{name} {Diorama.Audio.AudioService.MusicVolume(id):0.00}", null);
+                        Add($"{name} -", () => MusicStep(id, -0.05f));
+                        Add($"{name} +", () => MusicStep(id, 0.05f));
+                    }
                     Heading("Record");
                     Add("Record ghost", RecordGhost);
                     Add("Report bug", ReportBug);
@@ -545,6 +549,20 @@ namespace Diorama
             }
             Layout();
         }
+
+        /// <summary>Step 20: the music cues the Dev panel tunes (cue id, row name).</summary>
+        static readonly (string cue, string name)[] MusicRows =
+        {
+            (Diorama.Audio.AudioIds.MusicTitle, "Title"),
+            (Diorama.Audio.AudioIds.MusicHub, "Still Isle"),
+            (Diorama.Audio.AudioIds.MusicLodge, "Lodge"),
+            (Diorama.Audio.AudioIds.MusicGalewick, "Galewick"),
+            (Diorama.Audio.AudioIds.MusicCinderwood, "Cinderwood"),
+            (Diorama.Audio.AudioIds.MusicLilymere, "Lilymere"),
+            (Diorama.Audio.AudioIds.MusicTemple, "Temple"),
+            (Diorama.Audio.AudioIds.MusicBattleWild, "Battle"),
+            (Diorama.Audio.AudioIds.MusicFinale, "Finale"),
+        };
 
         void MusicStep(string id, float step)
         {
