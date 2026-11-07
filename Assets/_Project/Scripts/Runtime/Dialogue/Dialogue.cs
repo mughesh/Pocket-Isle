@@ -783,11 +783,21 @@ namespace Diorama
                 }
                 else if (!focalUp && !_current.HasValue) Next();
             }
-            // Step 17 A4: a battle ended: overworld lines that waited it out show now.
+            // Step 17 A4: a battle ended: overworld lines that waited it out show now. Nov 7 (Mugesh: the Spirit's words
+            // sometimes didn't fit what was happening): chatter that was waiting when the battle began is stale by its end
+            // and is dropped as the battle starts (it can come again); objectives, intros and lesson lines still wait.
             bool battleNow = encounters != null && encounters.InBattle;
             if (battleNow != _battleWas)
             {
                 _battleWas = battleNow;
+                if (battleNow)
+                    for (int i = _queue.Count - 1; i >= 0; i--)
+                    {
+                        var q = _queue[i];
+                        if (q.kind == LineKind.Filler && !q.objective && !_pinned.Contains(q.trigger) &&
+                            !IsBattleLine(q.trigger, script != null ? script.Find(q.trigger) : null))
+                            Drop(i, "stale: a battle began");
+                    }
                 if (!battleNow && !_current.HasValue && _queue.Count > 0) Next();
             }
             UpdateTarget();
