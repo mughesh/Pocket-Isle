@@ -419,6 +419,23 @@ namespace Diorama
             }
         }
 
+        static readonly string[] BattlePrefixes = { "battle.", "capture.", "xp.", "evolve.", "rare.", "pod.", "party.", "keeper.", "lm.meet." };
+
+        /// <summary>
+        /// Step 17: a line that belongs in a battle: a battle-flow id (battle, capture, xp, evolve, rare, pod, party, keeper,
+        /// a landmark creature's meeting) or one whose context or validWhile asks for "battle" (the battle lessons).
+        /// </summary>
+        public static bool IsBattleLine(string id, DialogueTrigger t)
+        {
+            if (id != null)
+                foreach (var p in BattlePrefixes)
+                    if (id.StartsWith(p, System.StringComparison.Ordinal)) return true;
+            return t != null && (AsksForBattle(t.context) || AsksForBattle(t.validWhile));
+        }
+
+        static bool AsksForBattle(string expr) =>
+            !string.IsNullOrEmpty(expr) && System.Text.RegularExpressions.Regex.IsMatch(expr, @"(?<![!\w])battle\b");
+
         /// <summary>Queues a trigger's lines; force = ignore "once" (debug).</summary>
         public void Fire(string id, bool force) => Fire(id, force, force);
 
@@ -432,6 +449,12 @@ namespace Diorama
                 return;
             }
             if (t.once && _said.Contains(id) && !ignoreOnce) return;
+            // Step 17 A4: while a battle is up only battle lines play (the trail line on a Spirit poke cut into a catch).
+            if (!force && encounters != null && encounters.InBattle && !IsBattleLine(id, t))
+            {
+                Debug.Log($"[Dialogue] {id}: not during a battle (only battle lines).");
+                return;
+            }
             if (!GameConditions.Check(t.validWhile))
             {
                 if (_notNow.Add(id)) Debug.Log($"[Dialogue] {id}: not now ({t.validWhile}).");
@@ -604,7 +627,8 @@ namespace Diorama
             // lesson that doesn't apply here (the grass lesson in the lodge) doesn't hold anything up.
             bool pin = PinActive();
             bool focal = FocalUp;
-            int next = _queue.FindIndex(q => InPlace(q) && (!focal || PassesFocal(q)) &&
+            bool battleUp = encounters != null && encounters.InBattle; // step 17 A4: overworld lines wait out a battle
+            int next = _queue.FindIndex(q => InPlace(q) && (!focal || PassesFocal(q)) && (!battleUp || IsBattleLine(q.trigger, script != null ? script.Find(q.trigger) : null)) &&
                                              (pin ? _pinned.Contains(q.trigger) || q.kind == LineKind.Intro : !_pinned.Contains(q.trigger)));
             // Filler waits until the place's intro and any objective have shown.
             if (next >= 0 && _queue[next].kind == LineKind.Filler)
@@ -613,6 +637,7 @@ namespace Diorama
                                                   (!pin || _pinned.Contains(q.trigger) || q.kind == LineKind.Intro) && (pin || !_pinned.Contains(q.trigger)));
                 if (first >= 0) next = first;
             }
+            if (next >= 0 && battleUp && !IsBattleLine(_queue[next].trigger, script != null ? script.Find(_queue[next].trigger) : null)) next = -1;
             if (next < 0)
             {
                 if (bubble != null) bubble.Hide();
@@ -758,9 +783,18 @@ namespace Diorama
                 }
                 else if (!focalUp && !_current.HasValue) Next();
             }
+            // Step 17 A4: a battle ended: overworld lines that waited it out show now.
+            bool battleNow = encounters != null && encounters.InBattle;
+            if (battleNow != _battleWas)
+            {
+                _battleWas = battleNow;
+                if (!battleNow && !_current.HasValue && _queue.Count > 0) Next();
+            }
             UpdateTarget();
             TryIdleHint();
         }
+
+        bool _battleWas;
 
         void TryIdleHint()
         {

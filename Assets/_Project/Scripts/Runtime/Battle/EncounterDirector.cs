@@ -114,8 +114,10 @@ namespace Diorama
         public float autoSendSeconds = 6f;
         [Tooltip("The same during the tutorial (the send-out lesson's ghost hand shows how first).")]
         public float tutorialAutoSendSeconds = 20f;
-        [Tooltip("A catch throw homes in when it heads within this angle of the wild creature (degrees, flat).")]
-        public float catchAimAngle = 25f;
+        [Tooltip("Step 17 aim assist: a catch throw with real forward speed homes in when it heads within this angle of the wild creature (degrees, flat; was 25 as catchAimAngle). Wider = only a drop, a backward or a clearly sideways throw misses.")]
+        public float catchAssistAngle = 70f;
+        [Tooltip("Step 17: flat speed toward the wild creature a catch throw needs (world m/s); a pod let go while still = a drop.")]
+        public float catchMinForwardSpeed = 0.15f;
         [Tooltip("A send-out throw lands on the pad when it heads within this angle of it (degrees, flat); a drop above the island always does.")]
         public float sendAimAngle = 45f;
         [Tooltip("Slowest release that counts as a throw (m/s).")]
@@ -522,6 +524,7 @@ namespace Diorama
                 _waiting = false;
                 runes.SetInteractable(false);
                 pods.PartyGrab = pods.CradleGrab = false;
+                if (act.index != PodRack.CradleSlot || act.kind == ActKind.Move || act.kind == ActKind.Run) pods.CradlePulse = false;
 
                 if (act.kind == ActKind.Move) Onboarding.Mark("moveUsed");
                 else if (act.index == PodRack.CradleSlot && act.kind != ActKind.Run) Onboarding.Mark("podThrown");
@@ -534,7 +537,10 @@ namespace Diorama
                     yield return CatchThrow(act, battle, wild, h => hit = h);
                     if (!hit)
                     {
-                        prompt = $"Missed! Flick it right at {wild.Name}.";
+                        prompt = "Missed! Grab the big pod and flick it again.";
+                        // Step 17 A3: the pod is back in the cradle: it pulses until it is used (or another act is picked).
+                        yield return pods.WaitForCradlePod();
+                        pods.CradlePulse = true;
                         continue;
                     }
                     events = battle.LastCatch;
@@ -661,7 +667,7 @@ namespace Diorama
         {
             Vector3 target = stage.Wild.LocalCenter;
             bool thrown = act.kind == ActKind.PodThrow;
-            if (thrown && !Aimed(act, target, catchAimAngle))
+            if (thrown && !CatchAimed(act, target))
             {
                 Debug.Log($"[EncounterDirector] Catch throw missed ({ThrowInfo(act, target)}).");
                 runes.SetCaption("Missed!");
@@ -717,7 +723,7 @@ namespace Diorama
                 if (hit) yield break;
                 yield return pods.WaitForCradlePod();
                 pods.CradlePulse = true;
-                runes.SetCaption($"Missed! {wild.Name} is still dazed. Throw again!");
+                runes.SetCaption($"Missed! {wild.Name} is still dazed. Grab the big pod and flick it again!");
             }
             if (!battle.WildDazed) yield break;
             pods.CradlePulse = false;
@@ -741,6 +747,25 @@ namespace Diorama
 
         float WorldSpeed(Act act) => act.vel.magnitude * island.transform.lossyScale.x;
 
+        /// <summary>
+        /// Step 17 A1 aim assist: any release with real speed, heading within <see cref="catchAssistAngle"/> of the wild
+        /// creature and moving toward it, counts (the pod then flies onto it). Misses: a drop, a backward or sideways throw.
+        /// </summary>
+        bool CatchAimed(Act act, Vector3 target) => CatchAimed(WorldSpeed(act), PodRack.AimAngle(act.pos, act.vel, target),
+            ForwardSpeed(act, target), minThrowSpeed, catchAssistAngle, catchMinForwardSpeed);
+
+        /// <summary>Pure rule (tests): speed, flat angle off the target and flat speed toward it, all world.</summary>
+        public static bool CatchAimed(float speed, float angle, float forward, float minSpeed, float maxAngle, float minForward) =>
+            speed >= minSpeed && angle <= maxAngle && forward >= minForward;
+
+        /// <summary>Flat speed toward the target (world m/s; negative = away).</summary>
+        float ForwardSpeed(Act act, Vector3 target)
+        {
+            Vector2 v = new Vector2(act.vel.x, act.vel.z), d = new Vector2(target.x - act.pos.x, target.z - act.pos.z);
+            if (d.sqrMagnitude < 1e-8f) return 0f;
+            return Vector2.Dot(v, d.normalized) * island.transform.lossyScale.x;
+        }
+
         bool Aimed(Act act, Vector3 target, float maxAngle) =>
             WorldSpeed(act) >= minThrowSpeed && PodRack.AimAngle(act.pos, act.vel, target) <= maxAngle;
 
@@ -749,7 +774,7 @@ namespace Diorama
             island.FootprintContains(act.pos) && act.pos.y > island.CapTopLocal - 0.01f || Aimed(act, pad, sendAimAngle);
 
         string ThrowInfo(Act act, Vector3 target) =>
-            $"{WorldSpeed(act):0.00} m/s, {PodRack.AimAngle(act.pos, act.vel, target):0} deg off";
+            $"{WorldSpeed(act):0.00} m/s, {PodRack.AimAngle(act.pos, act.vel, target):0} deg off, {ForwardSpeed(act, target):0.00} m/s toward it";
 
         /// <summary>Longer flights for farther targets; a look + pinch starts at the pod's rest spot.</summary>
         float FlightSeconds(Act act, Vector3 target)

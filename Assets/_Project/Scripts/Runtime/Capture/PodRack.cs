@@ -966,8 +966,8 @@ namespace Diorama
             if (reaching && !_rimPaused)
             {
                 _rimPaused = true;
-                rim.enabled = false;
-                Debug.Log("[PodRack] Hand reaching for a pod: rim grab paused.");
+                // Step 17: through the handle's grab locks (it owns rim.enabled; the battle lock shares it).
+                handle.SetGrabLock("podReach", true, "a hand reaching for a pod");
             }
             else if (!reaching && _rimPaused) ResumeRim();
         }
@@ -976,8 +976,7 @@ namespace Diorama
         {
             if (!_rimPaused) return;
             _rimPaused = false;
-            var rim = handle != null ? handle.rimInteractable : null;
-            if (rim != null) rim.enabled = true;
+            if (handle != null) handle.SetGrabLock("podReach", false);
         }
 
         // ---- flights (island-local) ----

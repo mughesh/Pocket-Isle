@@ -95,6 +95,8 @@ namespace Diorama
         public float lipBelowPods = 0.02f;
         [Tooltip("A pinch point or palm this close to a pod's surface (world m) is the pod's, never the island's.")]
         public float podClearance = 0.01f;
+        [Tooltip("Step 17: a pinch this close to the cradle pod's glass (world m) goes to the pod, never the island corner under it.")]
+        public float cradlePodClearance = 0.12f;
 
         IGrabbable _grabbable;
         Grabbable _grabbableComponent;
@@ -360,6 +362,7 @@ namespace Diorama
                 if (!IsGrabbed) GameAudio.At(AudioIds.IslandRelease, Target.position);
             }
             ApplyMode(false);
+            ApplyLocks();
             Resolve(0);
             Resolve(1);
             if (DevReadout.Active)
@@ -445,9 +448,47 @@ namespace Diorama
             for (int i = 0; i < Party.Size; i++)
             {
                 var pod = pods.Pod(i);
-                if (pod != null && pod.isActiveAndEnabled && GrabZone.PodWins(p, pod.transform.position, r)) return true;
+                if (pod != null && pod.isActiveAndEnabled && GrabZone.PodWins(p, pod.transform.position, Mathf.Max(r, pod.WorldRadius + podClearance))) return true;
             }
+            // Step 17 A2: the cradle pod sits just off the near-right corner (an always-grab handle) and was missed here,
+            // so a pinch on it grabbed the island. It wins within cradlePodClearance of its glass.
+            var cradle = pods.Pod(PodRack.CradleSlot);
+            if (cradle != null && cradle.isActiveAndEnabled && GrabZone.PodWins(p, cradle.transform.position, cradle.WorldRadius + cradlePodClearance)) return true;
             return false;
+        }
+
+        // ---- step 17: grab locks ----
+
+        readonly Dictionary<string, string> _locks = new Dictionary<string, string>();
+        bool _rimLockedOff;
+
+        /// <summary>
+        /// Step 17 (A2, G14): island grab off while any lock is held (a battle, a hand puzzle, a hand reaching for a pod).
+        /// A grab already in progress is never cut; the lock takes effect at its release. Recenter and placement still move it.
+        /// </summary>
+        public void SetGrabLock(string key, bool on, string why = null)
+        {
+            if (on == _locks.ContainsKey(key)) return;
+            if (on) _locks[key] = why ?? key;
+            else _locks.Remove(key);
+            Debug.Log($"[IslandHandle] Grab lock '{key}' {(on ? "on" : "off")}{(why != null ? $" ({why})" : "")}: island grab {(GrabLocked ? "off" : "on")}.");
+        }
+
+        /// <summary>Some lock holds: no new island grab can start.</summary>
+        public bool GrabLocked => _locks.Count > 0;
+
+        public string GrabLockReasons => string.Join(", ", _locks.Values);
+
+        /// <summary>Applies the locks to the rim interactable (never while it is held).</summary>
+        void ApplyLocks()
+        {
+            SetGrabLock("battle", encounters != null && encounters.InBattle, "battle up: the cradle and party pods win");
+            if (rimInteractable == null) return;
+            bool off = GrabLocked && !IsGrabbed;
+            if (off == _rimLockedOff) return;
+            if (!off && IsGrabbed) return;
+            _rimLockedOff = off;
+            rimInteractable.enabled = !off;
         }
 
         /// <summary>Distance (world m) to the nearest handle zone (0 inside it): the frame lights by it.</summary>
@@ -485,9 +526,10 @@ namespace Diorama
             bool pinchy = hasPinch && hand.GetFingerPinchStrength(HandFinger.Index) >= pinchStrengthForPoint;
             var zp = hasPinch ? ZoneAt(pinchPoint) : Zone.None;
             var zh = hasPalm && !pinchy ? ZoneAt(palmPoint) : Zone.None;
-            bool podFirst = hasPinch && NearPod(pinchPoint);
-            bool corner = !podFirst && (zp == Zone.Corner || zh == Zone.Corner);
-            bool inZone = corner || !podFirst && (zp == Zone.Lip || zh == Zone.Lip);
+            bool podFirst = hasPinch && NearPod(pinchPoint) || hasPalm && !pinchy && NearPod(palmPoint);
+            bool locked = GrabLocked;
+            bool corner = !locked && !podFirst && (zp == Zone.Corner || zh == Zone.Corner);
+            bool inZone = corner || !locked && !podFirst && (zp == Zone.Lip || zh == Zone.Lip);
             if (inZone && !s.inZone) s.zoneSince = Time.time;
             s.inZone = inZone;
             bool pinching = tracked && hand.GetIndexFingerIsPinching();
@@ -502,6 +544,7 @@ namespace Diorama
                 {
                     string side = h == 0 ? "L" : "R";
                     s.last = s.grab ? $"pinch {side}: GRAB ({(corner ? "corner" : $"front lip {inFor:0.00} s")}{(gaze ? ", gaze on a target away from the hand" : "")})"
+                           : locked ? $"pinch {side}: select (island grab locked: {GrabLockReasons})"
                            : inZone ? $"pinch {side}: select (gaze on a target away from the hand, on the lip only {inFor:0.00} s < {grabHoverSeconds:0.00})"
                            : podFirst ? $"pinch {side}: select (a pod is in reach: pods win)"
                            : $"pinch {side}: select (not on a handle: {(hasPinch ? DistanceToHandles(pinchPoint) * 100f : -1f):0.0} cm away)";
@@ -520,8 +563,9 @@ namespace Diorama
                 h = grab != null && grab.Hand != null ? grab.Hand.Handedness == Handedness.Left ? 0 : 1 : -1;
                 _interactorSide[interactor] = h;
             }
-            if (h < 0) return true;
             if (IsHandGrabbing(h == 0)) return true;
+            if (GrabLocked) return false;
+            if (h < 0) return true;
             Resolve(h);
             return _pinch[h].grab;
         }

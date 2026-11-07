@@ -114,7 +114,8 @@ namespace Diorama
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void ResetStatics() => DebugPalm = null;
 
-        bool Hidden => SceneSwap.IsBusy || handle.ScaleFactor < 0.3f; // the opening: the island hasn't grown yet
+        // The opening: the island hasn't grown yet. Step 17: no frame while island grab is locked (battle, hand puzzle, pod reach).
+        bool Hidden => SceneSwap.IsBusy || handle.ScaleFactor < 0.3f || handle.GrabLocked && !handle.IsGrabbed;
 
         void LateUpdate()
         {
