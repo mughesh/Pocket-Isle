@@ -12,7 +12,8 @@ namespace Diorama
     /// The cradle floats above the near-right corner and holds an empty pod, twice the party pod's size, for the whole
     /// battle; a pod that shatters is replaced after <see cref="cradleRefillSeconds"/>. Grab volumes are bigger than the
     /// glass (party 5 cm, cradle 8 cm across). The party pod under the gaze (or nearest a reaching hand) grows to
-    /// <see cref="focusScale"/> with its grab volume, and its neighbours slide aside so nothing overlaps.
+    /// <see cref="focusVisualMax"/> in place and pops forward (step 17: neighbours never leave their sockets; its grab volume
+    /// grows up to <see cref="focusScale"/> without overlapping theirs).
     /// Outside battle: poke a pod, or look at it and pinch, for its stats card.
     /// In battle (flags set by <see cref="EncounterDirector"/>): pods that may be used can be grabbed (ISDK) and
     /// thrown (<see cref="Thrown"/>), or looked at + pinched (<see cref="Picked"/>). While a hand reaches for a pod
@@ -55,8 +56,13 @@ namespace Diorama
         public float cradleGrabSize = 0.08f;
 
         [Header("Rim pods grow on gaze")]
-        [Tooltip("Size of the looked-at (or reached-for) party pod relative to its rest size.")]
+        [Tooltip("Grab volume of the looked-at (or reached-for) party pod relative to its rest size (step 17: limited so it never overlaps a neighbour's; the glass grows less, see focusVisualMax).")]
         public float focusScale = 2f;
+        [Tooltip("Step 17 C: the glass of the focused pod grows at most this much (and never past its socket spacing); neighbours stay in their sockets.")]
+        public float focusVisualMax = 1.3f;
+        [Tooltip("Step 17 C: the focused pod pops forward out of the rock by this many pod radii (plus its extra size), and lifts by focusLift radii.")]
+        public float focusPopForward = 0.6f;
+        public float focusLift = 0.25f;
         [Tooltip("Time to grow (s); shrinking takes a little longer.")]
         public float growSeconds = 0.15f;
         [Tooltip("The pod stays big this long after the gaze or hand leaves (s).")]
@@ -212,7 +218,6 @@ namespace Diorama
         bool _rimPaused, _laidOut;
         float _partyGrab, _socketStep;
         readonly float[] _grow = new float[Party.Size];
-        readonly float[] _slide = new float[Party.Size];
         readonly float[] _pop = new float[Party.Size];
         int _bigSlot = -1, _evolvingSlot = -1;
         float _bigUntil;
@@ -390,15 +395,26 @@ namespace Diorama
                 return _cradlePos + Vector3.up * bob;
             }
             int i = Mathf.Clamp(slot, 0, Party.Size - 1);
-            // Slid aside for a big neighbour; a big pod comes out of the rock face by its extra radius.
+            // Step 17 C: no sliding aside: the focused pod grows in place, pops forward out of the rock and lifts a little.
             float grow = Mathf.SmoothStep(0f, 1f, _grow[i]);
             // Pods active: a grabbable pod sits a little out of its socket.
             float pop = activePopOut / Mathf.Max(1e-4f, island.transform.lossyScale.x) * Mathf.SmoothStep(0f, 1f, _pop[i]);
-            return _socketPos[i] + new Vector3(_slide[i], 0f, podPrefab.radius * (focusScale - 1f) * grow + pop);
+            float r = podPrefab.radius;
+            return _socketPos[i] + new Vector3(0f, r * focusLift * grow, r * (VisualFocusMax - 1f + focusPopForward) * grow + pop);
         }
 
         /// <summary>Rest scale of a party pod right now (1, up to <see cref="focusScale"/> while it is the big one).</summary>
-        float FocusScale(int slot) => 1f + (focusScale - 1f) * Mathf.SmoothStep(0f, 1f, _grow[slot]);
+        float FocusScale(int slot) => 1f + (VisualFocusMax - 1f) * Mathf.SmoothStep(0f, 1f, _grow[slot]);
+
+        /// <summary>Step 17 C: the focused glass's largest size: focusVisualMax, and never touching a neighbour in its socket.</summary>
+        float VisualFocusMax => Mathf.Max(1f, Mathf.Min(focusVisualMax, _socketStep > 0f && podPrefab != null ? _socketStep * 0.98f / podPrefab.radius - 1f : focusVisualMax));
+
+        /// <summary>Step 17 C: grab volume scale (up to focusScale, never overlapping a neighbour's volume).</summary>
+        float GrabFocusScale(int slot)
+        {
+            float max = _partyGrab > 0f ? Mathf.Min(focusScale, 2f * _socketStep * 0.98f / _partyGrab - 1f) : 1f;
+            return 1f + (Mathf.Max(1f, max) - 1f) * Mathf.SmoothStep(0f, 1f, _grow[slot]);
+        }
 
         public Vector3 HomeWorld(int slot) => island.transform.TransformPoint(HomeLocal(slot));
 
@@ -446,7 +462,7 @@ namespace Diorama
                     : Mathf.Max(Mathf.Max(i == GlowSlot || i == SelectedSlot ? 1f : i == DueSlot ? 0.7f + 0.8f * pulse : 0f, WaveGlow(i)), XpGlow(i));
                 // Step 9h: gold = act on this now (the lead pod to send out, the armed cradle pod; 14h: ready to evolve).
                 p.Actionable = i == GlowSlot || i == DueSlot || i == CradleSlot && (CradleGlow || CradlePulse) ? 1f : 0f;
-                if (!p.Detached && !held) p.SetGrabDiameter(i == CradleSlot ? cradleGrabSize : _partyGrab * FocusScale(i));
+                if (!p.Detached && !held) p.SetGrabDiameter(i == CradleSlot ? cradleGrabSize : _partyGrab * GrabFocusScale(i));
             }
             for (int i = 0; i < Party.Size; i++)
             {
@@ -841,7 +857,7 @@ namespace Diorama
         /// <summary>
         /// Picks the one big party pod: the one held, else the one whose card is showing, else the gazed one, else the
         /// one nearest a reaching hand; it stays big <see cref="shrinkDelay"/> after that ends. Grows it, shrinks the rest
-        /// and slides the others aside (dock style) so the big grab volume never overlaps a neighbour's.
+        /// (step 17: no sliding aside; the others stay in their sockets).
         /// </summary>
         void UpdateFocus()
         {
@@ -870,15 +886,6 @@ namespace Diorama
             {
                 bool big = i == _bigSlot && _pods[i] != null;
                 _grow[i] = Mathf.MoveTowards(_grow[i], big ? 1f : 0f, Time.deltaTime / (big ? growSeconds : growSeconds * 1.5f));
-            }
-            // Centre distance the big grab volume needs from a small neighbour's, beyond the socket step.
-            float need = Mathf.Max(0f, _partyGrab * (focusScale + 1f) * 0.5f - _socketStep);
-            for (int j = 0; j < Party.Size; j++)
-            {
-                float slide = 0f;
-                for (int k = 0; k < Party.Size; k++)
-                    if (k != j && _grow[k] > 0f) slide += Mathf.Sign(_socketPos[j].x - _socketPos[k].x) * need * Mathf.SmoothStep(0f, 1f, _grow[k]);
-                _slide[j] = slide;
             }
         }
 

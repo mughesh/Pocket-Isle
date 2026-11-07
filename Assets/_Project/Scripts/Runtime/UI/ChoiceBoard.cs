@@ -58,6 +58,7 @@ namespace Diorama
             c._no = onNo;
             var size = new Vector2(0.072f, 0.034f);
             c._runes.Clear();
+            c._runes.rimLocked = true; // step 17 B: a rim row
             var y = c._runes.Add(yes, new Vector2(-0.042f, 0f), size, () => c.Pick(true));
             y.primary = true;
             c._runes.Add(no, new Vector2(0.042f, 0f), size, () => c.Pick(false));
