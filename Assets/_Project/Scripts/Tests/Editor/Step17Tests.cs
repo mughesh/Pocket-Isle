@@ -18,6 +18,28 @@ namespace Diorama.Tests
             Assert.IsFalse(EncounterDirector.CatchAimed(0.9f, 20f, 0.05f, min, angle, fwd), "straight down: no forward speed");
         }
 
+        // ---- H: the Hall of Fame arc ----
+
+        [Test]
+        public void HallArc_NoOverlap_InFront_ClearOfStatue()
+        {
+            var c = new UnityEngine.Vector2(30f, 30f);
+            for (int n = 1; n <= 6; n++)
+            {
+                const float w = 2f, minR = 3f;
+                var spots = FinaleLogic.HallArc(c, n, w, minR);
+                Assert.AreEqual(n, spots.Length);
+                if (n > 1) Assert.GreaterOrEqual(FinaleLogic.MinGap(spots), 1.4f * w - 1e-3f, $"n={n}: centres too close");
+                foreach (var s in spots)
+                {
+                    Assert.GreaterOrEqual(UnityEngine.Vector2.Distance(s, c), minR - 1e-3f, $"n={n}: inside the statue clearance");
+                    // Never behind the statue: at most 100 deg off the front (+rows).
+                    float off = UnityEngine.Vector2.Angle(s - c, UnityEngine.Vector2.up);
+                    Assert.LessOrEqual(off, 100.01f, $"n={n}: behind the statue");
+                }
+            }
+        }
+
         // ---- A4: battle-only lines ----
 
         [Test]

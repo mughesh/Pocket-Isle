@@ -819,19 +819,31 @@ namespace Diorama
             yield return Hold(2f);
             var rosters = Rosters();
             int n = Mathf.Min(Party.Size, party.members.Count);
+            // Step 17 H: a front arc round the statue, no two footprints overlapping (they huddled on one row in front of
+            // it, Riverloom clipping into Toastling).
+            float width = PartyWidthTiles(n);
+            var spots = FinaleLogic.HallArc(Center, n, width, statueClearTiles + width * 0.5f, hallGapFactor);
+            Debug.Log($"[FinaleDirector] Hall of Fame arc: {n} Islings, widest {width:0.0} tiles, closest centres {(n > 1 ? FinaleLogic.MinGap(spots) : 0f):0.0} tiles " +
+                      $"(need {hallGapFactor * width:0.0}), radius {(n > 0 ? Vector2.Distance(spots[0], Center) : 0f):0.0} tiles.");
             for (int i = 0; i < n; i++)
             {
                 var c = party.members[i];
                 if (c == null || c.species == null || c.species.Prefab == null) continue;
                 if (_skip) break;
                 if (string.IsNullOrEmpty(c.metIn)) c.metIn = IsStarterLine(c.species) ? FinaleLogic.StillIsle : FinaleLogic.GuessMetIn(c.species, rosters);
-                var tile = new Vector2Int(Mathf.FloorToInt(Center.x - (n - 1) * 0.5f + i + 0.5f), Mathf.RoundToInt(Center.y) + 2);
+                var tile = new Vector2Int(Mathf.RoundToInt(spots[i].x), Mathf.RoundToInt(spots[i].y));
+                if (!island.FootprintContains(island.TileToLocal(spots[i], island.Content.capHeight)))
+                    Debug.LogWarning($"[FinaleDirector] Hall of Fame: {c.Name}'s spot {spots[i]} is outside the island window (party too wide for the arc).");
                 yield return ComeOut(i, tile);
                 var who = Spawn(c, tile, false);
                 if (who != null)
                 {
+                    who.tileOffset = spots[i] - tile;
                     var card = new StoneTablet($"Hall of Fame card {i}", island.transform, hudMaterial, island.gameObject.layer);
-                    card.Set(FinaleLogic.Card(c.Name, c.level, c.metIn), 0.07f, 0.1f, new Vector2(0.007f, 0.005f));
+                    // Step 17 H: 1.8x the text (they were tiny), lighter stone and darker ink.
+                    card.back = new Color(0.93f, 0.91f, 0.85f, 0.98f);
+                    card.ink = new Color(0.1f, 0.07f, 0.04f, 1f);
+                    card.Set(FinaleLogic.Card(c.Name, c.level, c.metIn), 0.07f * hallCardScale, 0.1f * hallCardScale, new Vector2(0.007f, 0.005f) * hallCardScale);
                     _labels.Add((card, who));
                     _labelHeight.Add(i % 2 == 0 ? cardHeight.x : cardHeight.y);
                     _cards.Add(card);
@@ -901,13 +913,64 @@ namespace Diorama
             return mc;
         }
 
+        [Header("Hall of Fame (step 17 H)")]
+        [Tooltip("Neighbours' centres at least this many times the widest Isling's width apart.")]
+        public float hallGapFactor = 1.4f;
+        [Tooltip("The arc starts this far (tiles) from the statue's centre, plus half the widest Isling.")]
+        public float statueClearTiles = 2f;
+        [Tooltip("Card text and panel size against the old cards.")]
+        public float hallCardScale = 1.8f;
+
+        /// <summary>The widest party Isling's footprint in map tiles (bodies are about as wide as tall, a little more).</summary>
+        float PartyWidthTiles(int n)
+        {
+            float w = 1f;
+            for (int i = 0; i < n && i < party.members.Count; i++)
+            {
+                var c = party.members[i];
+                var view = c != null && c.species != null && c.species.Prefab != null ? c.species.Prefab.GetComponent<CreatureView>() : null;
+                if (view != null && island.map != null) w = Mathf.Max(w, view.height * 1.15f / island.map.tileSize);
+            }
+            return w;
+        }
+
+        readonly List<Vector3> _labelSpots = new List<Vector3>();
+
+        /// <summary>
+        /// Cards over their Islings, every other one higher; step 17 H layout check: a card whose panel would overlap an
+        /// earlier one's (side by side as seen from the head) is raised clear of it.
+        /// </summary>
         void UpdateLabels()
         {
+            var cam = Camera.main;
+            Vector3 right = cam != null ? cam.transform.right : island.transform.right;
+            right.y = 0f;
+            right = right.sqrMagnitude > 1e-6f ? right.normalized : Vector3.right;
+            _labelSpots.Clear();
             for (int i = 0; i < _labels.Count; i++)
             {
                 var (card, who) = _labels[i];
-                if (who == null) continue;
-                card.Place(MapWorld(who.Tile, _labelHeight[i]), IslandScale, 1f);
+                if (who == null)
+                {
+                    _labelSpots.Add(Vector3.zero);
+                    continue;
+                }
+                Vector3 p = MapWorld(who.Tile + who.tileOffset, _labelHeight[i]);
+                Vector2 size = card.Size * IslandScale;
+                p.y += size.y * 0.5f; // the bigger card grows up from where the old one sat, not down into the head
+                const float margin = 0.004f;
+                for (int pass = 0; pass < 2; pass++)
+                    for (int j = 0; j < i; j++)
+                    {
+                        if (_labels[j].who == null) continue;
+                        Vector3 q = _labelSpots[j];
+                        Vector2 other = _labels[j].card.Size * IslandScale;
+                        bool sideBySide = Mathf.Abs(Vector3.Dot(p - q, right)) < (size.x + other.x) * 0.5f + margin;
+                        float needY = (size.y + other.y) * 0.5f + margin;
+                        if (sideBySide && Mathf.Abs(p.y - q.y) < needY) p.y = q.y + needY;
+                    }
+                _labelSpots.Add(p);
+                card.Place(p, IslandScale, 1f);
             }
         }
 

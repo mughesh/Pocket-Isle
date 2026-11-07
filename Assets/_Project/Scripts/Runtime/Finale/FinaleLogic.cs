@@ -128,6 +128,49 @@ namespace Diorama
 
         /// <summary>A friendly Keeper rematch: five levels over the last fight.</summary>
         public static int RematchLevel(int lastLevel) => Mathf.Max(1, lastLevel) + 5;
+
+        /// <summary>
+        /// Step 17 H: the Hall of Fame party in a front arc round the statue (map tiles: x = column, y = row, +rows toward
+        /// the player). Neighbours' centres are at least <paramref name="gapFactor"/> x <paramref name="width"/> apart, the
+        /// arc at least <paramref name="minRadius"/> out (clear of the statue);
+        /// a bigger party widens the arc before it moves out. The arc never
+        /// goes past 100 deg either side of the front (never behind the statue).
+        /// </summary>
+        public static Vector2[] HallArc(Vector2 center, int n, float width, float minRadius, float gapFactor = 1.4f)
+        {
+            var spots = new Vector2[Mathf.Max(0, n)];
+            if (n <= 0) return spots;
+            if (n == 1)
+            {
+                spots[0] = center + new Vector2(0f, minRadius);
+                return spots;
+            }
+            float gap = gapFactor * width;
+            const float maxHalfSpan = 100f;
+            // The smallest radius that fits n with the gap inside the widest arc, at least minRadius.
+            float maxStep = 2f * maxHalfSpan / (n - 1);
+            float needR = gap / (2f * Mathf.Sin(maxStep * 0.5f * Mathf.Deg2Rad));
+            // A compact arc at minRadius, wider in angle for a bigger party; out past minRadius only when the angle runs out
+            // (the gap rule wins over the island window; the caller logs a spot outside it).
+            float r = Mathf.Max(minRadius, needR);
+            float step = 2f * Mathf.Asin(Mathf.Clamp01(gap / (2f * r))) * Mathf.Rad2Deg;
+            for (int i = 0; i < n; i++)
+            {
+                float a = (i - (n - 1) * 0.5f) * step * Mathf.Deg2Rad;
+                spots[i] = center + new Vector2(Mathf.Sin(a), Mathf.Cos(a)) * r;
+            }
+            return spots;
+        }
+
+        /// <summary>Step 17 H: the smallest centre distance between any two spots (tests, logs).</summary>
+        public static float MinGap(IList<Vector2> spots)
+        {
+            float best = float.MaxValue;
+            for (int i = 0; i < spots.Count; i++)
+                for (int j = i + 1; j < spots.Count; j++)
+                    best = Mathf.Min(best, Vector2.Distance(spots[i], spots[j]));
+            return best;
+        }
     }
 
     /// <summary>

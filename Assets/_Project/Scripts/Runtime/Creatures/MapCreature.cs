@@ -16,6 +16,8 @@ namespace Diorama
         [Tooltip("Optional: keeps clear of the explorer's tile.")]
         public GestureTestPiece explorer;
         public Vector2Int homeTile;
+        /// <summary>Step 17 H: a fraction of a tile added to where it stands (the finale's arc). Not saved.</summary>
+        [System.NonSerialized] public Vector2 tileOffset;
         [Tooltip("The map it lives on; it only shows while the island shows that map. Empty = every map.")]
         public WorldMap map;
 
@@ -143,7 +145,7 @@ namespace Diorama
                 float u = (Time.time - _moveStart) / Mathf.Max(0.05f, _view.hopSeconds);
                 p = Vector2.Lerp(_from, _tile, Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(u)));
             }
-            Vector3 local = island.TileToLocal(p, island.Content.capHeight);
+            Vector3 local = island.TileToLocal(p + tileOffset, island.Content.capHeight);
             transform.localPosition = local;
             transform.localRotation = Quaternion.Euler(0f, _yaw, 0f);
             transform.localScale = Vector3.one * island.Zoom;
