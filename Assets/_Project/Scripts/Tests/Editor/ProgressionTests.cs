@@ -107,7 +107,7 @@ namespace Diorama.Tests
         }
 
         [Test]
-        public void Evolution_AtTheLevel_KeepsHpRatioLevelXpAndNickname()
+        public void Evolution_AtTheLevel_KeepsLevelXpAndNickname_FullHp()
         {
             var small = Species("Small", 40);
             var big = Species("Big", 80);
@@ -123,7 +123,7 @@ namespace Diorama.Tests
             Assert.AreEqual(12, c.level);
             Assert.AreEqual(3, c.xp);
             Assert.AreEqual("Pip", c.Name);
-            Assert.AreEqual(c.MaxHp / 2, c.currentHp, 1);
+            Assert.AreEqual(c.MaxHp, c.currentHp, "step 18: the new form comes out at full HP");
             Assert.IsFalse(Progression.CanEvolve(c), "no further form");
         }
 

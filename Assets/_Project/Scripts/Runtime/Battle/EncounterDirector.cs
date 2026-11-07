@@ -600,6 +600,7 @@ namespace Diorama
             Debug.Log($"[EncounterDirector] Battle over: {battle.Result}. {me.Name} HP {me.currentHp}/{me.MaxHp}, XP {me.xp}. " +
                       $"Party {party.members.Count}/{Party.Size}, storage {party.storage.Count}.");
             if (battle.Result == BattleResult.Won || battle.Result == BattleResult.Caught) yield return Reward(battle, wild, rare);
+            if ((battle.Result == BattleResult.Won || battle.Result == BattleResult.Caught) && battle.keeper == null) Rest();
             yield return stage.Outro(battle.Result);
             if (battle.Result == BattleResult.Won) Dialogue.Say("battle.win.first");
             else if (battle.Result == BattleResult.Lost) Dialogue.Say(RetryAtDoor ? "battle.lose.retry" : "battle.lose.first");
@@ -658,6 +659,28 @@ namespace Diorama
             yield return stage.Evolve(onPad);
             runes.SetCaption($"It became {onPad.Name}!");
             party.NotifyChanged();
+        }
+
+        /// <summary>
+        /// Step 18: a little rest after a won wild battle: every non-fainted pod gets a quarter of its HP back, with a soft
+        /// heal sound and a green "+" over its pod (chip damage added up over a realm and wiped a cozy player's party).
+        /// </summary>
+        void Rest()
+        {
+            var healed = new List<IslingInstance>();
+            Party.RestAfterWin(party.members, healed);
+            if (healed.Count == 0) return;
+            var where = Vector3.zero;
+            foreach (var c in healed)
+            {
+                var pod = pods.Pod(pods.SlotOf(c));
+                if (pod == null) continue;
+                stage.PopHealAt(pod.transform.position);
+                where = pod.transform.position;
+            }
+            if (where != Vector3.zero) GameAudio.At(Diorama.Audio.AudioIds.ShrineHeal, where);
+            party.NotifyChanged();
+            Debug.Log($"[EncounterDirector] A little rest: {healed.Count} Isling(s) got {Party.RestShare:P0} HP back.");
         }
 
         /// <summary>

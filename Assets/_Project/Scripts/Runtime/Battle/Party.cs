@@ -167,6 +167,29 @@ namespace Diorama
             return true;
         }
 
+        /// <summary>Step 18: the share of max HP a little rest after a won wild battle gives back.</summary>
+        public const float RestShare = 0.25f;
+
+        /// <summary>
+        /// Step 18: a little rest after a won wild battle (catch or knockout): every non-fainted pod gets back
+        /// <see cref="RestShare"/> of its max HP. Fainted ones stay fainted (the lodge or a loss heals them). Returns how
+        /// many got HP back.
+        /// </summary>
+        public static int RestAfterWin(IList<IslingInstance> pods, List<IslingInstance> healed = null)
+        {
+            int n = 0;
+            if (pods == null) return 0;
+            for (int i = 0; i < pods.Count && i < Size; i++)
+            {
+                var c = pods[i];
+                if (c == null || c.species == null || c.IsFainted || c.currentHp >= c.MaxHp) continue;
+                c.currentHp = Mathf.Min(c.MaxHp, c.currentHp + Mathf.CeilToInt(c.MaxHp * RestShare));
+                healed?.Add(c);
+                n++;
+            }
+            return n;
+        }
+
         public void HealAll()
         {
             foreach (var c in members)

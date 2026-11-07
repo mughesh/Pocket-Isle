@@ -1319,6 +1319,10 @@ namespace Diorama
         const float XpBarLarge = 2f;
 
         /// <summary>Step 9f: "+34" in gold rising from a world point (a benched Isling's pod on the rim).</summary>
+        /// <summary>Step 18: a small green "+" over a rim pod (a little rest after a win).</summary>
+        public void PopHealAt(Vector3 world) =>
+            hud.PopText(hud.transform.InverseTransformPoint(world) + Vector3.up * 0.012f, "+", HealColor, 1.2f, 1.6f);
+
         public void PopXpAt(Vector3 world, int amount) =>
             hud.PopText(hud.transform.InverseTransformPoint(world) + Vector3.up * 0.012f, $"+{amount}", Gold, 1.2f, 1.8f);
 

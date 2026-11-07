@@ -66,14 +66,16 @@ namespace Diorama
         /// </summary>
         public static event Action<IslingInstance, IslingSpecies> Evolved;
 
-        /// <summary>Turns the creature into its next form. Keeps the HP ratio, level, XP and nickname.</summary>
+        /// <summary>
+        /// Turns the creature into its next form. Keeps level, XP and nickname. Step 18: the new form comes out at full HP,
+        /// even from fainted (a fainted Toastling evolved into a fainted Crumbhog and came into the next battle empty).
+        /// </summary>
         public static bool Evolve(IslingInstance c)
         {
             if (!CanEvolve(c)) return false;
             var from = c.species;
-            float ratio = c.MaxHp > 0 ? c.currentHp / (float)c.MaxHp : 0f;
             c.species = c.species.evolvesTo;
-            c.currentHp = c.currentHp <= 0 ? 0 : Mathf.Clamp(Mathf.RoundToInt(ratio * c.MaxHp), 1, c.MaxHp);
+            c.Heal();
             Evolved?.Invoke(c, from);
             return true;
         }

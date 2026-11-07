@@ -45,7 +45,13 @@ namespace Diorama
         }
 
         /// <summary>HP share at or below which the HP bar turns red and catching unlocks.</summary>
-        public const float RedHpShare = 0.25f;
+        public const float RedHpShare = 0.33f; // Step 18: 0.25 -> 0.33 (the pod lights up a bit sooner)
+
+        /// <summary>
+        /// Step 18: wild (not Keeper) damage scale, so a wild Isling never knocks out a full-HP party Isling of its level
+        /// or higher in fewer than 3 hits (2 when super effective). See Step18bTests.
+        /// </summary>
+        public const float WildDamageShare = 0.75f; // swept 1.00 -> 0.60: 36, 19, 10, 7, 1, 0 fails; 0.75 is the first with none
 
         /// <summary>Catching is locked until the wild creature's HP bar is red (or it is dazed).</summary>
         public static bool CatchUnlocked(int hp, int maxHp) => hp <= maxHp * RedHpShare;

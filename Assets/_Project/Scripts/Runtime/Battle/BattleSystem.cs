@@ -91,6 +91,7 @@ namespace Diorama
         readonly List<BattleEvent> _turn = new List<BattleEvent>();
         readonly List<IslingInstance> _participants = new List<IslingInstance>();
         int _failedFlees;
+        bool _freshSwitchIn;
 
         /// <summary>Every party creature that was out in this battle, in order (fainted ones included).</summary>
         public IReadOnlyList<IslingInstance> Participants => _participants;
@@ -141,7 +142,10 @@ namespace Diorama
             }
             var playerMove = moves[moveIndex];
             var wildMove = PickWildMove();
-            bool playerFirst = PlayerGoesFirst();
+            // Step 18: the turn right after a forced switch-in, the newcomer moves first (it read as "it hit me the moment
+            // I tossed in").
+            bool playerFirst = _freshSwitchIn || PlayerGoesFirst();
+            _freshSwitchIn = false;
             var first = playerFirst ? player : wild;
             Act(first, playerFirst ? playerMove : wildMove);
             if (!IsOver) Act(Other(first), playerFirst ? wildMove : playerMove);
@@ -234,6 +238,7 @@ namespace Diorama
             if (IsOver || WildDazed || next == null || next.IsFainted || next == player.isling) return _turn;
             bool free = PlayerMustSwitch;
             PlayerMustSwitch = false;
+            _freshSwitchIn = free;
             player = new Battler(BattleSide.Player, next);
             if (!_participants.Contains(next)) _participants.Add(next);
             Raise(new BattleEvent { kind = BattleEventKind.Switched, side = BattleSide.Player });
@@ -324,7 +329,8 @@ namespace Diorama
             // Phase 2: the Keeper's shot (move 1) hits harder.
             int power = keeper != null && user == wild && keeper.Phase2 && user.Moves.Length > 0 && move == user.Moves[0]
                 ? Mathf.RoundToInt(move.power * keeper.phase2Power) : move.power;
-            int damage = BattleMath.Damage(user.isling.level, power, user.Attack, target.isling.Defense, typeMul, roll);
+            float share = keeper == null && user == wild ? BattleMath.WildDamageShare : 1f;
+            int damage = BattleMath.Damage(user.isling.level, power, user.Attack, target.isling.Defense, typeMul * share, roll);
             bool absorbed = target.shielded;
             if (absorbed)
             {
