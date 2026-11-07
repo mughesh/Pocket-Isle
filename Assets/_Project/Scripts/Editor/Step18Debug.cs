@@ -62,6 +62,33 @@ namespace Diorama.EditorTools
             BattleDebug.Render($"Logs/BattleShots/{(string.IsNullOrEmpty(Arg) ? "18_wide" : Arg)}.png", eye, Quaternion.LookRotation(look - eye, Vector3.up));
         }
 
+        /// <summary>
+        /// A close shot of a map spot (arg "name,column,row,height tiles,distance m"): from the seated head's side, the given
+        /// distance from the spot (Logs/BattleShots/name.png).
+        /// </summary>
+        public static void Look()
+        {
+            var island = Island;
+            if (island == null) return;
+            var a = Arg.Split(',');
+            if (a.Length < 5) return;
+            float F(int i) => float.Parse(a[i], System.Globalization.CultureInfo.InvariantCulture);
+            var t = island.transform;
+            Vector3 at = t.TransformPoint(island.TileToLocal(new Vector2(F(1), F(2)), island.Content.capHeight + F(3) * island.map.tileSize));
+            Vector3 head = t.position + t.rotation * new Vector3(0f, 0.55f, 0.6f);
+            Vector3 eye = at + (head - at).normalized * F(4);
+            BattleDebug.Render($"Logs/BattleShots/{a[0]}.png", eye, Quaternion.LookRotation(at - eye, Vector3.up));
+            Debug.Log($"[Step18Debug] Look {a[0]} at c{a[1]} r{a[2]}.");
+        }
+
+        /// <summary>Where the explorer and the statue's front are (log).</summary>
+        public static void Where()
+        {
+            var e = Object.FindFirstObjectByType<GestureTestPiece>();
+            var s = StatueSocket.FindById(ShardHolder.WindId);
+            Debug.Log($"[Step18Debug] Explorer c{(e != null ? e.Tile.x : -1)} r{(e != null ? e.Tile.y : -1)}, locked {(e != null && e.Locked)}; statue front {(s != null ? s.FrontTile()?.ToString() : "-")}.");
+        }
+
         /// <summary>Edit mode: wires BattleRunes.pods to the scene's PodRack and saves the scene.</summary>
         public static void WireRunes()
         {
@@ -75,6 +102,23 @@ namespace Diorama.EditorTools
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(runes.gameObject.scene);
             UnityEditor.SceneManagement.EditorSceneManager.SaveScene(runes.gameObject.scene);
             Debug.Log($"[Step18Debug] BattleRunes.pods = {pods.name}; scene saved.");
+        }
+
+        /// <summary>Edit mode: rewrites and bakes the wind tower props (Nov 7: smoother, bigger door).</summary>
+        public static void BakeTower()
+        {
+            if (UnityEditor.EditorApplication.isPlaying) return;
+            var sb = new System.Text.StringBuilder("[Step18Debug] Wind tower baked:");
+            var list = PropKit.WriteWindTowers();
+            UnityEditor.AssetDatabase.SaveAssets();
+            foreach (var r in list)
+            {
+                var rep = PropBaker.Bake(r);
+                sb.Append($" {r.name} {rep.triangles} tris (budget {r.triangleBudget});");
+            }
+            UnityEditor.AssetDatabase.SaveAssets();
+            IslandBuilder.RebuildAll();
+            Debug.Log(sb.ToString());
         }
 
         /// <summary>Calls a private parameterless method on the first object of a type (arg = "Type.Method").</summary>

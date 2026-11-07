@@ -384,18 +384,20 @@ namespace Diorama.EditorTools
 
         static PropRecipe TowerRecipe(string name, bool shut)
         {
-            var tower = Recipe(name, new Vector2Int(2, 2), true, false, 3200);
+            // Nov 7 (Mugesh: jagged, the door too small to notice): finer and smoother (resolution 60 -> 88, budget 3200 -> 5200,
+            // softer bumps) and a door about 1.4x bigger.
+            var tower = Recipe(name, new Vector2Int(2, 2), true, false, 5200);
             tower.palette = Palette(CloudStone, MillWood, Slate, Meadow, WarmWindow, SailWhite);
             tower.yawJitter = 0f;
             tower.scaleJitter = 0f;
-            tower.resolution = 60;
+            tower.resolution = 88;
             var crown = new List<SdfPrimitive>
             {
-                Cone(new Vector3(0f, 0f, 0f), new Vector3(0f, 3.6f, 0f), 0.78f, 0.62f, 0f).Bumps(0.015f, 7f),
+                Cone(new Vector3(0f, 0f, 0f), new Vector3(0f, 3.6f, 0f), 0.78f, 0.62f, 0f).Bumps(0.006f, 5f),
                 Torus(new Vector3(0f, 0.06f, 0f), 0.78f, 0.08f, Vector3.zero, 0.03f),
                 Cone(new Vector3(0f, 3.55f, 0f), new Vector3(0f, 3.95f, 0f), 0.74f, 0.74f, 0.03f),
                 Cone(new Vector3(0f, 3.7f, 0f), new Vector3(0f, 4.1f, 0f), 0.6f, 0.6f, 0f).Sub(),
-                Ell(new Vector3(0f, 0.45f, 0.76f), new Vector3(0.28f, 0.48f, 0.2f), 0.02f).Sub(),
+                Ell(new Vector3(0f, 0.63f, 0.76f), new Vector3(0.39f, 0.67f, 0.2f), 0.02f).Sub(),
                 Floor(0f),
             };
             for (int i = 0; i < 6; i++)
@@ -417,13 +419,13 @@ namespace Diorama.EditorTools
                 shut
                     ? Piece(TowerDoorShape(), PropSlot.Wood)
                     : Piece(PShape("WindTower_Inside",
-                        Ell(new Vector3(0f, 0.42f, 0.5f), new Vector3(0.27f, 0.44f, 0.05f), 0f),
+                        Ell(new Vector3(0f, 0.59f, 0.5f), new Vector3(0.38f, 0.62f, 0.05f), 0f),
                         Floor(0f)), PropSlot.Stone),
                 Piece(PShape("WindTower_Frame",
-                    Torus(new Vector3(0f, 0.45f, 0.72f), 0.3f, 0.05f, new Vector3(90f, 0f, 0f), 0f),
-                    Plane(new Vector3(0f, 0.4f, 0f), Vector3.down, 0f),
-                    Cone(new Vector3(0.3f, 0f, 0.72f), new Vector3(0.3f, 0.45f, 0.72f), 0.05f, 0.05f, 0f),
-                    Cone(new Vector3(-0.3f, 0f, 0.72f), new Vector3(-0.3f, 0.45f, 0.72f), 0.05f, 0.05f, 0f),
+                    Torus(new Vector3(0f, 0.63f, 0.72f), 0.42f, 0.06f, new Vector3(90f, 0f, 0f), 0f),
+                    Plane(new Vector3(0f, 0.56f, 0f), Vector3.down, 0f),
+                    Cone(new Vector3(0.42f, 0f, 0.72f), new Vector3(0.42f, 0.63f, 0.72f), 0.06f, 0.06f, 0f),
+                    Cone(new Vector3(-0.42f, 0f, 0.72f), new Vector3(-0.42f, 0.63f, 0.72f), 0.06f, 0.06f, 0f),
                     Floor(0f)), PropSlot.Wood),
                 Piece(PShape("WindTower_Slits", slits.ToArray()), PropSlot.Glow, PropMotion.Flicker, 0.001f),
                 Piece(PShape("WindTower_Vanes", Sails(0.85f, 0.16f, false)), PropSlot.Wood, PropMotion.Spin, 0.7f, hub),
@@ -434,10 +436,25 @@ namespace Diorama.EditorTools
         }
 
         static SdfShape TowerDoorShape() => PShape("WindTower_Door",
-            Ell(new Vector3(0f, 0.42f, 0.6f), new Vector3(0.27f, 0.44f, 0.07f), 0f),
-            Box(new Vector3(0.09f, 0.4f, 0.68f), new Vector3(0.012f, 0.36f, 0.02f), 0.005f, 0f).Sub(),
-            Box(new Vector3(-0.09f, 0.4f, 0.68f), new Vector3(0.012f, 0.36f, 0.02f), 0.005f, 0f).Sub(),
+            Ell(new Vector3(0f, 0.59f, 0.6f), new Vector3(0.38f, 0.62f, 0.07f), 0f),
+            Box(new Vector3(0.13f, 0.56f, 0.68f), new Vector3(0.014f, 0.5f, 0.02f), 0.005f, 0f).Sub(),
+            Box(new Vector3(-0.13f, 0.56f, 0.68f), new Vector3(0.014f, 0.5f, 0.02f), 0.005f, 0f).Sub(),
             Floor(0f));
+
+        /// <summary>Nov 7: rewrites and bakes only the wind tower (shut, open) and its door leaf.</summary>
+        public static List<PropRecipe> WriteWindTowers()
+        {
+            var list = new List<PropRecipe> { WindTower(), TowerRecipe("WindTowerOpen", false) };
+            var door = Recipe("WindTowerDoor", new Vector2Int(2, 2), false, false, 500);
+            door.palette = Palette(CloudStone, MillWood, CloudStone, Meadow, WarmWindow, SailWhite);
+            door.yawJitter = 0f;
+            door.scaleJitter = 0f;
+            door.resolution = 64;
+            door.pieces = new List<PropPiece> { Piece(TowerDoorShape(), PropSlot.Wood) };
+            list.Add(door);
+            foreach (var r in list) EditorUtility.SetDirty(r);
+            return list;
+        }
 
         /// <summary>Step 10b: the open tower, the door leaf, the drawbridge, the ditch water under it, the mill's gear.</summary>
         public static Dictionary<string, PropRecipe> WriteGalewickPuzzleProps()
@@ -449,7 +466,7 @@ namespace Diorama.EditorTools
             door.palette = Palette(CloudStone, MillWood, CloudStone, Meadow, WarmWindow, SailWhite);
             door.yawJitter = 0f;
             door.scaleJitter = 0f;
-            door.resolution = 48;
+            door.resolution = 64;
             door.pieces = new List<PropPiece> { Piece(TowerDoorShape(), PropSlot.Wood) };
             all["WindTowerDoor"] = door;
 

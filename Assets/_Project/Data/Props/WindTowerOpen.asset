@@ -105,6 +105,6 @@ MonoBehaviour:
   randomYaw: 0
   yawJitter: 0
   scaleJitter: 0
-  resolution: 60
-  triangleBudget: 3200
+  resolution: 88
+  triangleBudget: 5200
   bakedMesh: {fileID: 4300000, guid: ba95a0b5dd78e8d4bb42f7ccb3a1b70a, type: 2}
