@@ -230,6 +230,7 @@ namespace Diorama
             ReadHands(_hands);
             TrackGrips();
             bool usable = Usable && !_tied;
+            _grabbedThisFrame = false;
             if (usable) Grab();
             if (usable) LookPinch();
             else _gazed = -1;
@@ -292,6 +293,7 @@ namespace Diorama
                 var kite = _kites[best];
                 kite.state = K.Held;
                 kite.hand = h;
+                _grabbedThisFrame = true;
                 MarkInteracted();
                 GameAudio.At(AudioIds.KiteTug, Local2World(kite.pos));
                 Debug.Log($"[KitePiece] Kite {best} grabbed by the {(h == 0 ? "left" : "right")} {(s.pinch ? "pinch" : "fist")}.");
@@ -323,11 +325,23 @@ namespace Diorama
             return false;
         }
 
+        bool _grabbedThisFrame;
+
+        /// <summary>Nov 7 (Mugesh: picking the second kite launched the third by itself): a hand holds a kite.</summary>
+        bool AnyHeld()
+        {
+            foreach (var k in _kites)
+                if (k.state == K.Held) return true;
+            return false;
+        }
+
         void LookPinch()
         {
             _gazed = Gazed();
             if (_gazed < 0) return;
             FocusHighlight.Hover(Local2World(_kites[_gazed].pos), FocusRadius);
+            // The pinch that grabs a kite by hand is not also a look + pinch on the kite being looked at.
+            if (_grabbedThisFrame || AnyHeld()) return;
             if (!GazePinch(_hands)) return;
             MarkInteracted();
             Debug.Log($"[KitePiece] Kite {_gazed}: look + pinch, it rises by itself.");
