@@ -82,8 +82,19 @@ namespace Diorama
             _panel.transform.localScale = new Vector3(_size.x, _size.y, 1f);
         }
 
+        /// <summary>Step 17 J: an empty panel of <paramref name="size"/> (m before the Place scale); its own text stays blank.</summary>
+        public void SetBox(Vector2 size)
+        {
+            _text.text = "";
+            _size = size;
+            _panel.transform.localScale = new Vector3(_size.x, _size.y, 1f);
+        }
+
         /// <summary>Shows it at <paramref name="world"/> facing the camera, <paramref name="scale"/> times its size, faded by alpha.</summary>
-        public void Place(Vector3 world, float scale, float alpha)
+        public void Place(Vector3 world, float scale, float alpha) => Place(world, scale, alpha, null);
+
+        /// <summary>Step 17 J: as above; with <paramref name="facing"/> the panel keeps that rotation (+Z away from the reader) instead of turning to the camera.</summary>
+        public void Place(Vector3 world, float scale, float alpha, Quaternion? facing)
         {
             bool show = alpha > 0.01f && scale > 0.01f;
             if (_root.gameObject.activeSelf != show) _root.gameObject.SetActive(show);
@@ -91,7 +102,8 @@ namespace Diorama
             _root.position = world;
             _root.localScale = Vector3.one * scale / Mathf.Max(1e-4f, _root.parent != null ? _root.parent.lossyScale.x : 1f);
             var cam = Camera.main;
-            if (cam != null)
+            if (facing.HasValue) _root.rotation = facing.Value;
+            else if (cam != null)
             {
                 Vector3 away = world - cam.transform.position;
                 if (away.sqrMagnitude > 1e-6f) _root.rotation = Quaternion.LookRotation(away, Vector3.up);

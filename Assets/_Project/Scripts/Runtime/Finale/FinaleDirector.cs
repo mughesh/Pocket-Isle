@@ -88,7 +88,7 @@ namespace Diorama
         [Header("Step 16: shorter and graceful")]
         [Tooltip("Hall of Fame: seconds between Islings coming out (the serialized hallGap was 2.6).")]
         public float hallGapStep16 = 1.6f;
-        [Tooltip("Credits plaque: lines shown at once, seconds per scroll step (whole credits <= 20 s).")]
+        [Tooltip("Step 16 plaque (step 17: the credits banner replaced it; kept for its tests): lines shown at once, seconds per scroll step.")]
         [Min(1)] public int creditWindow = 3;
         public float creditStepSeconds = 2.6f;
         [Tooltip("The plaque and the thank-you card float this high over the Heart's forehead (island-local m).")]
@@ -974,37 +974,58 @@ namespace Diorama
             }
         }
 
+        [Header("Credits banner (step 17 J)")]
+        [Tooltip("The banner's width (m at island scale 1), its type size (TMP, as the plaque's 0.2) and the lines visible at once.")]
+        public float bannerWidth = 0.5f;
+        public float bannerFont = 0.3f;
+        [Min(1)] public int bannerLines = 4;
+        [Tooltip("The banner's middle this high over the cap, this far behind the island's back edge (island-local m).")]
+        public Vector2 bannerAt = new Vector2(0.17f, 0.03f);
+        [Tooltip("The whole roll takes this long (s); Skip still ends it.")]
+        public float creditsSeconds = 13f;
+        [Tooltip("Mugesh's cut-out standee beside the banner (set at build and Play from Assets/_Project/Art/Credits/Mugesh.png when it exists; empty = no standee).")]
+        public Texture2D standee;
+        [Tooltip("The standee's height (m at island scale 1).")]
+        public float standeeHeight = 0.2f;
+
         /// <summary>
-        /// Step 16: one plaque (dark slate, gold trim) over the Heart, the credits scrolling through it a few lines at a
-        /// time (<see cref="creditWindow"/>, <see cref="creditStepSeconds"/> each; the whole of it well under 20 s).
+        /// Step 17 J (was the step 16 plaque over the Heart): a wide slate banner behind the island, the credits rolling
+        /// slowly upward through it (<see cref="bannerLines"/> at once, <see cref="creditsSeconds"/> in all), and Mugesh's
+        /// standee beside it when there is one.
         /// </summary>
         IEnumerator Credits()
         {
             SaveStep(FinaleStep.Credits);
             if (_skip) yield break;
             var lines = CreditsText.Lines;
-            var plaque = new StoneTablet("Credits plaque", island.transform, hudMaterial, island.gameObject.layer);
-            plaque.Slate();
-            _cards.Add(plaque);
-            Sfx(AudioIds.CreditsTablet, AudioIds.StatueSocket, OverHeart);
-            int window = Mathf.Min(creditWindow, lines.Length);
-            int steps = CreditSteps(lines.Length, window);
-            float total = steps * creditStepSeconds;
-            Debug.Log($"[FinaleDirector] Credits: one plaque, {lines.Length} lines, {window} at a time, {total:0.0} s.");
-            float t = 0f;
-            for (int p = 0; p < steps && !_skip; p++)
+            var banner = new CreditsBanner(island.transform, hudMaterial, island.gameObject.layer, lines, bannerFont, bannerWidth, bannerLines);
+            var cut = standee != null ? new CreditsStandee(island.transform, standee, island.gameObject.layer) : null;
+            Sfx(AudioIds.CreditsTablet, AudioIds.StatueSocket, BannerWorld);
+            Debug.Log($"[FinaleDirector] Credits: a banner behind the island, {lines.Length} lines rolling up, {bannerLines} at a time, {creditsSeconds:0.#} s; " +
+                      $"{(cut != null ? $"standee {standee.name}" : "no standee (no Art/Credits/Mugesh.png)")}.");
+            for (float t = 0f; t < creditsSeconds && !_skip; t += Time.deltaTime)
             {
-                var shown = new string[window];
-                for (int i = 0; i < window; i++) shown[i] = p + i < lines.Length ? lines[p + i] : " ";
-                plaque.Set(string.Join("\n", shown), 0.2f, 0.5f, new Vector2(0.022f, 0.015f));
-                for (float s = 0f; s < creditStepSeconds && !_skip; s += Time.deltaTime, t += Time.deltaTime)
-                {
-                    float alpha = Mathf.Clamp01(t / 0.6f) * Mathf.Clamp01((total - t) / 0.6f);
-                    plaque.Place(OverHeart, IslandScale, alpha);
-                    yield return null;
-                }
+                float alpha = Mathf.Clamp01(t / 0.6f) * Mathf.Clamp01((creditsSeconds - t) / 0.6f);
+                // Faces the player across the island (+Z away from the reader: the island's back).
+                var facing = Quaternion.LookRotation(-island.transform.forward, island.transform.up);
+                banner.Place(BannerWorld, facing, IslandScale, alpha, t / creditsSeconds);
+                if (cut != null) cut.Place(StandeeFeet(banner), facing, standeeHeight * IslandScale, alpha);
+                yield return null;
             }
-            plaque.Hide();
+            banner.Destroy();
+            cut?.Destroy();
+        }
+
+        /// <summary>The banner's middle: behind the island's back edge, above the cap.</summary>
+        Vector3 BannerWorld => island.transform.TransformPoint(new Vector3(0f, island.CapTopLocal + bannerAt.x, -island.FootprintHalfSize.y - bannerAt.y));
+
+        /// <summary>The standee's feet: on the cap's back corner on the player's right, beside the banner's end.</summary>
+        Vector3 StandeeFeet(CreditsBanner banner)
+        {
+            var half = island.FootprintHalfSize;
+            // Island +X is the player's left: the right end is -X.
+            float x = -Mathf.Min(half.x - 0.05f, bannerWidth * 0.5f + 0.06f);
+            return island.transform.TransformPoint(new Vector3(x, island.CapTopLocal, -half.y + 0.06f));
         }
 
         /// <summary>Step 16: scroll positions to show every line once (pure).</summary>

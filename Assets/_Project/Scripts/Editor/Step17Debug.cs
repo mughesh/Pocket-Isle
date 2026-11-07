@@ -115,6 +115,20 @@ namespace Diorama.EditorTools
         static (Vector3 eye, Vector3 look)? _leanAnchor;
         static float _leanAnchorFor = float.NaN;
 
+        /// <summary>
+        /// Step 17 J: plays only the finale's credits roll where the island is (arg = an optional picture path for the
+        /// standee preview, e.g. Assets/_Project/Art/Credits/character.png; the real one comes from Mugesh.png).
+        /// </summary>
+        public static void Credits()
+        {
+            var f = Object.FindFirstObjectByType<FinaleDirector>();
+            if (f == null) return;
+            if (!string.IsNullOrEmpty(Arg)) f.standee = UnityEditor.AssetDatabase.LoadAssetAtPath<Texture2D>(Arg);
+            var m = typeof(FinaleDirector).GetMethod("Credits", BindingFlags.Instance | BindingFlags.NonPublic);
+            f.StartCoroutine((System.Collections.IEnumerator)m.Invoke(f, null));
+            Debug.Log($"[Step17Debug] Credits roll (standee {(f.standee != null ? f.standee.name : "none")}).");
+        }
+
         /// <summary>Opens the game menu (its private Open, as the menu stone does).</summary>
         public static void Menu()
         {
