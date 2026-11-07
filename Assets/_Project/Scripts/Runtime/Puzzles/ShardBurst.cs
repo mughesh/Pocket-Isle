@@ -84,5 +84,105 @@ namespace Diorama
             }
             Debug.Log($"[ShardBurst] {shardId}: the opening's burst, tinted, with the {(string.IsNullOrEmpty(element) ? "plain" : element)} flourish.");
         }
+
+        /// <summary>Seconds of the blast's charge (the whirl gathering into the shard) before it goes off.</summary>
+        public const float ChargeSeconds = 1.1f;
+
+        /// <summary>
+        /// Nov 7 (Mugesh: the touch effect should be strong, longer, whirling and island-wide, like the opening's): the
+        /// Keeper shard's blast. Motes whirl in round the shard and it glows up (<see cref="ChargeSeconds"/>), then a flash,
+        /// a wave ring across the whole cap, a big tinted burst with the element's flourish scaled up, and sparkles rising
+        /// over the island. About 2.8 s in all. Runs on the fx's own coroutine.
+        /// </summary>
+        public static void Blast(BattleFx fx, IslandBuilder island, Vector3 at, string shardId)
+        {
+            if (fx == null || island == null) return;
+            fx.StartCoroutine(BlastRoutine(fx, island, at, shardId));
+        }
+
+        static System.Collections.IEnumerator BlastRoutine(BattleFx fx, IslandBuilder island, Vector3 at, string shardId)
+        {
+            var t = island.transform;
+            float s = Mathf.Max(0.3f, t.lossyScale.x);
+            float inv = 1f / Mathf.Max(1e-4f, fx.transform.lossyScale.x);
+            Vector3 up = t.up;
+            var tint = Tint(shardId);
+            var bright = Color.Lerp(tint, Color.white, 0.45f);
+            Debug.Log($"[ShardBurst] {shardId}: island blast (charge {ChargeSeconds:0.0} s, then flash, wave and burst).");
+
+            // 1. Charge: motes whirl in round the shard, the glow grows.
+            var core = fx.Get(BattleFx.Shape.Orb);
+            if (core != null) core.Set(Color.white, tint, 0f, 1.5f, 1f, 0.3f);
+            float spin = Random.value * Mathf.PI * 2f;
+            float carry = 0f;
+            for (float u = 0f; u < ChargeSeconds; u += Time.deltaTime)
+            {
+                float k = u / ChargeSeconds;
+                carry += Time.deltaTime * 110f; // motes per second
+                for (; carry >= 1f; carry -= 1f)
+                {
+                    spin += 0.9f;
+                    float r = Random.Range(0.07f, 0.14f) * s * (1f - 0.4f * k);
+                    Vector3 radial = Quaternion.AngleAxis(spin * Mathf.Rad2Deg, up) * t.right;
+                    Vector3 tangent = Vector3.Cross(up, radial);
+                    Vector3 from = at + radial * r + up * (Random.Range(-0.04f, 0.04f) * s);
+                    const float life = 0.45f;
+                    // Round and in: they reach the shard about as they fade.
+                    Vector3 vel = tangent * (r * 4f) - radial * (r / life) + up * (Random.Range(-0.02f, 0.02f) * s);
+                    fx.Burst(from, 1, Random.value < 0.3f ? Color.white : bright, 0f, life, 0.004f * s, vel);
+                }
+                if (core != null)
+                {
+                    core.transform.position = at;
+                    core.transform.localScale = Vector3.one * (0.03f * s * (0.5f + k + 0.15f * Mathf.Sin(u * 30f)) * inv);
+                    core.SetAlpha(0.3f + 0.7f * k);
+                }
+                yield return null;
+            }
+            if (core != null) fx.Release(core);
+
+            // 2. The blast: a flash, a wave across the cap, the burst and the element's flourish, island-sized.
+            var flash = fx.Get(BattleFx.Shape.Orb);
+            if (flash != null) flash.Set(Color.white, tint, 1f, 1.5f, 1f, 0.3f);
+            var wave = fx.Get(BattleFx.Shape.Ring);
+            if (wave != null) wave.Set(bright, tint, 1f);
+            Vector3 cap = t.TransformPoint(new Vector3(0f, island.CapTopLocal + 0.01f, 0f));
+            Vector3 waveAt = cap + Vector3.ProjectOnPlane(at - cap, up);
+            float reach = Mathf.Max(island.FootprintHalfSize.x, island.FootprintHalfSize.y) * 1.25f * s;
+            fx.Burst(at, 110, bright, 0.42f * s, 1.3f, 0.005f * s, up * (0.05f * s), 0.05f * s);
+            Play(fx, at, shardId, s * 2.5f, up);
+            const float blastSeconds = 0.9f;
+            for (float u = 0f; u < blastSeconds; u += Time.deltaTime)
+            {
+                float k = u / blastSeconds;
+                if (flash != null)
+                {
+                    flash.transform.position = at;
+                    flash.transform.localScale = Vector3.one * (0.17f * s * Mathf.Sin(Mathf.Min(1f, k * 1.6f) * Mathf.PI * 0.5f + 0.2f) * inv);
+                    flash.SetAlpha(Mathf.Clamp01(1f - k * 1.4f));
+                }
+                if (wave != null)
+                {
+                    wave.transform.SetPositionAndRotation(waveAt, t.rotation);
+                    wave.transform.localScale = Vector3.one * (reach * (0.1f + 0.9f * Mathf.Sqrt(k)) * inv);
+                    wave.SetAlpha(0.9f * (1f - k));
+                }
+                yield return null;
+            }
+            if (flash != null) fx.Release(flash);
+            if (wave != null) fx.Release(wave);
+
+            // 3. Sparkles rising all over the island.
+            var half = island.FootprintHalfSize;
+            for (float u = 0f; u < 0.9f; u += Time.deltaTime)
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    Vector3 p = t.TransformPoint(new Vector3(Random.Range(-half.x, half.x), island.CapTopLocal + 0.02f, Random.Range(-half.y, half.y)));
+                    fx.Burst(p, 1, Random.value < 0.5f ? bright : tint, 0.01f * s, Random.Range(0.8f, 1.3f), 0.004f * s, up * (Random.Range(0.05f, 0.1f) * s));
+                }
+                yield return null;
+            }
+        }
     }
 }

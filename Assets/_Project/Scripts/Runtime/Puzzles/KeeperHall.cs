@@ -106,6 +106,16 @@ namespace Diorama
         [Range(0f, 1f)] public float shardHoverFront = 0.7f;
         [Tooltip("Not taken after this long (s): it floats to the Spirit by itself.")]
         public float shardAutoSeconds = 4f;
+        [Header("Taking the shard (Nov 7: it went at 5 cm, before a real touch)")]
+        [Tooltip("A fingertip (index) this close to the shard's centre takes it (real m; replaces shardTouchReach).")]
+        public float fingertipReach = 0.03f;
+        [Tooltip("A palm this close takes it (real m).")]
+        public float palmReach = 0.04f;
+        [Tooltip("A pinch starting, or a fist closing, this close takes it (real m; replaces shardGrabReach).")]
+        public float pinchReach = 0.05f;
+        [Tooltip("Not taken after this long (s; replaces shardAutoSeconds) it goes by itself, but not while a hand is within handNearHold of it.")]
+        public float autoAfter = 12f;
+        public float handNearHold = 0.2f;
         /// <summary>Step 11d: the shard's ghost pinches it (thumb + index), not a fist.</summary>
         public const string ShardGhost = "pinch_lift";
         [Tooltip("Flinches back when it stomps at the start of the battle.")]
@@ -782,10 +792,11 @@ namespace Diorama
             Vector3 world = island.transform.TransformPoint(_shardLocal);
             DrawShardRing(true);
             // Step 11d: not taken within a few seconds, it goes to the Spirit by itself.
-            _shardWait += Time.deltaTime;
-            if (_shardWait >= shardAutoSeconds)
+            // Nov 7: a hand on its way to it holds the clock (it used to go by itself while the hand was coming).
+            if (!HandNear(world, handNearHold * Mathf.Max(1f, island.transform.lossyScale.x))) _shardWait += Time.deltaTime;
+            if (_shardWait >= autoAfter)
             {
-                CollectShard($"by itself after {shardAutoSeconds:0.#} s");
+                CollectShard($"by itself after {autoAfter:0.#} s");
                 return;
             }
             bool gazed = false;
@@ -803,7 +814,7 @@ namespace Diorama
                 bool started = pinching && !_wasPinching[h];
                 _wasPinching[h] = pinching;
                 bool fist = hand != null && hand.IsTrackedDataValid && HandLookup.TryGetJoint(hand, HandJointId.HandPalm, out var palm) &&
-                            HandPuzzle.IsFistPose(hand, palm) && (palm - world).magnitude < shardGrabReach * 1.2f;
+                            HandPuzzle.IsFistPose(hand, palm) && (palm - world).magnitude < pinchReach * 1.2f;
                 bool fistStarted = fist && !_wasFist[h];
                 _wasFist[h] = fist;
                 // Step 16: a touch is enough (the small shard was hard to grab).
@@ -818,7 +829,7 @@ namespace Diorama
                     return;
                 }
                 if (!started) continue;
-                bool near = IslandHandle.TryGetPinchPoint(hand, out var p) && (p - world).magnitude < shardGrabReach;
+                bool near = IslandHandle.TryGetPinchPoint(hand, out var p) && (p - world).magnitude < pinchReach;
                 if (near || gazed)
                 {
                     CollectShard(near ? $"{(h == 0 ? "left" : "right")} pinch" : "look + pinch");
@@ -829,9 +840,19 @@ namespace Diorama
 
         bool TouchesShard(IHand hand, Vector3 world)
         {
-            float r = shardTouchReach * Mathf.Max(1f, island.transform.lossyScale.x);
-            return HandLookup.TryGetJoint(hand, HandJointId.HandIndexTip, out var tip) && (tip - world).magnitude < r ||
-                   HandLookup.TryGetJoint(hand, HandJointId.HandPalm, out var palm) && (palm - world).magnitude < r;
+            float k = Mathf.Max(1f, island.transform.lossyScale.x);
+            return HandLookup.TryGetJoint(hand, HandJointId.HandIndexTip, out var tip) && (tip - world).magnitude < fingertipReach * k ||
+                   HandLookup.TryGetJoint(hand, HandJointId.HandPalm, out var palm) && (palm - world).magnitude < palmReach * k;
+        }
+
+        static bool HandNear(Vector3 world, float r)
+        {
+            for (int h = 0; h < 2; h++)
+            {
+                var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
+                if (hand != null && hand.IsTrackedDataValid && HandLookup.TryGetJoint(hand, HandJointId.HandPalm, out var palm) && (palm - world).magnitude < r) return true;
+            }
+            return false;
         }
 
         /// <summary>Step 11d: a gold ring and glow round the floating shard while it waits.</summary>
@@ -850,13 +871,37 @@ namespace Diorama
         public void CollectShard(string how)
         {
             if (_phase != Phase.Shard || !_shardHovering) return;
-            Debug.Log($"[KeeperHall] {ownShard} taken ({how}): it flies to the Spirit.");
-            // Step 17 I: the opening's shard-touch burst, tinted for this element, and the touch chime.
+            Debug.Log($"[KeeperHall] {ownShard} taken ({how}): it charges, blasts, then flies to the Spirit.");
+            StartCoroutine(ChargeThenFly());
+        }
+
+        /// <summary>
+        /// Nov 7 (Mugesh: stronger, longer, whirling, island-wide, like the opening): the touched shard spins up while motes
+        /// whirl into it, then blasts across the island (<see cref="ShardBurst.Blast"/>), then flies to the Spirit.
+        /// </summary>
+        IEnumerator ChargeThenFly()
+        {
+            _phase = Phase.Leaving;
+            if (ghosts != null && ghosts.ClipName == ShardGhost) ghosts.Hide();
+            FocusHighlight.Clear();
+            DrawShardRing(false);
             Vector3 touched = island.transform.TransformPoint(_shardLocal);
-            ShardBurst.Play(fx, touched, ownShard, island.transform.lossyScale.x, island.transform.up);
+            ShardBurst.Blast(fx, island, touched, ownShard);
             GameAudio.At(AudioIds.ShardTouch, touched);
+            Vector3 home = _shardLocal;
+            float angle = Time.time * 60f;
+            for (float t = 0f; t < ShardBurst.ChargeSeconds; t += Time.deltaTime)
+            {
+                float k = t / ShardBurst.ChargeSeconds;
+                angle += Time.deltaTime * Mathf.Lerp(60f, 900f, k * k);
+                _shardLocal = home + UnityEngine.Random.insideUnitSphere * (0.003f * k);
+                if (_shard != null) _shard.PlaceLocal(_shardLocal, Quaternion.Euler(0f, angle, 0f), BigShard * (1f + 0.25f * k), true);
+                yield return null;
+            }
+            _shardLocal = home;
+            GameAudio.At(AudioIds.ShardCrack, touched);
             _shardFloat.Stop(0.5f);
-            StartCoroutine(ShardToHolder());
+            yield return ShardToHolder();
         }
 
         IEnumerator ShardToHolder()
