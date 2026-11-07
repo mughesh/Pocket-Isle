@@ -169,6 +169,9 @@ namespace Diorama
         }
 
         public bool Calmed => PuzzleState.IsSolved(keeperId);
+
+        /// <summary>Step 17 E: the Keeper's shard was taken (held by the Spirit or placed in the statue): the way out shows from then.</summary>
+        public bool ShardTaken => PuzzleState.Stage(ownShard) >= 1 || PuzzleState.IsSolved(ownShard);
         string KeeperName => keeperSpecies != null ? keeperSpecies.displayName : keeperId;
         /// <summary>Its model in the hall (null until the hall first shows).</summary>
         public StageActor Model => _model;
@@ -219,6 +222,7 @@ namespace Diorama
                 if (Tangled) ShowTangled();
                 else StartCoroutine(Meet());
             }
+            else if (Active) RiseAgainIfUntaken();
         }
 
         void OnDestroy()
@@ -425,6 +429,7 @@ namespace Diorama
                 if (restsWhenCalm) _model.View.Daze(); // resting by its forge
                 else _model.View.Revive();
                 Debug.Log($"[KeeperHall] {KeeperName} {(restsWhenCalm ? "rests" : "preens")} in its hall (calmed).");
+                RiseAgainIfUntaken();
                 return;
             }
             if (Tangled)
@@ -433,6 +438,24 @@ namespace Diorama
                 return;
             }
             StartCoroutine(Meet());
+        }
+
+        /// <summary>
+        /// Step 17 E: a save from between the calm and the pickup (the Keeper is calmed, its shard not taken): the shard rises
+        /// from the forge again, so the way out (which waits for the shard) can show.
+        /// </summary>
+        void RiseAgainIfUntaken()
+        {
+            if (!Calmed || ShardTaken || _phase != Phase.Idle || _shard == null) return;
+            Debug.Log($"[KeeperHall] {KeeperName} calmed but {ownShard} not taken (a save from between): it rises again.");
+            StartCoroutine(RiseAgain());
+        }
+
+        IEnumerator RiseAgain()
+        {
+            _phase = Phase.Shard;
+            yield return new WaitForSeconds(0.8f);
+            yield return ShardRise();
         }
 
         IEnumerator Meet()

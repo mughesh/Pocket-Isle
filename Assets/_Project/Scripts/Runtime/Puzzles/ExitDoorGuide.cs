@@ -5,7 +5,7 @@ namespace Diorama
     /// <summary>
     /// Step 12b (Note: "out door of temple doesn't look like a door"): inside any interior (the Keeper halls, the lodge)
     /// the way out reads as a door: the 11d door glow (a warm portal swirl and a gold ring on the threshold) on the exit
-    /// tiles, and a gold arrow on the floor pointing out, once its Keeper is calmed (the lodge's is always on). Oct 28 notes:
+    /// tiles, and a gold arrow on the floor pointing out, once its Keeper is calmed and (step 17) its shard taken (the lodge's is always on). Oct 28 notes:
     /// while the Keeper still needs you it stays dark (a bright arch on arrival hid the explorer and pointed the wrong way).
     /// </summary>
     public class ExitDoorGuide : MonoBehaviour
@@ -70,7 +70,8 @@ namespace Diorama
                     a = h.doorTiles[0];
                     b = h.doorTiles[h.doorTiles.Length - 1];
                     foreach (var k in _keepers)
-                        if (k != null && k.hall == room) done = PuzzleState.IsSolved(k.keeperId);
+                        // Step 17 E: only once the shard is taken (a lit door while the Keeper still talked pulled the eye from the shard).
+                        if (k != null && k.hall == room) done = PuzzleState.IsSolved(k.keeperId) && k.ShardTaken;
                     return true;
                 }
             foreach (var l in _lodges)
