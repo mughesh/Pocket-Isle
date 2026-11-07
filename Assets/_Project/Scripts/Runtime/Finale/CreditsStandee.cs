@@ -6,7 +6,7 @@ namespace Diorama
     /// Step 17 J: the maker's cut-out standee beside the credits banner: the picture as a paper/acrylic cut-out (its own
     /// alpha), a thin dark backing rim (the same silhouette a little bigger, just behind), a soft shadow lying on the cap
     /// and a gentle bob. Only when <see cref="FinaleDirector.standee"/> is set (an Editor hook assigns
-    /// Assets/_Project/Art/Credits/Mugesh.png when that file exists); otherwise nothing shows, no placeholder.
+    /// Assets/_Project/Art/Credits/CreditsPortrait.png, the round portrait, when that file exists); otherwise nothing shows, no placeholder.
     /// </summary>
     public class CreditsStandee
     {

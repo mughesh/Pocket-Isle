@@ -117,7 +117,7 @@ namespace Diorama.EditorTools
 
         /// <summary>
         /// Step 17 J: plays only the finale's credits roll where the island is (arg = an optional picture path for the
-        /// standee preview, e.g. Assets/_Project/Art/Credits/character.png; the real one comes from Mugesh.png).
+        /// standee preview, e.g. Assets/_Project/Art/Credits/character.png; the real one is CreditsPortrait.png).
         /// </summary>
         public static void Credits()
         {
