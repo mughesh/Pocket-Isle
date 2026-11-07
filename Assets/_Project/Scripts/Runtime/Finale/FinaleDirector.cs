@@ -87,10 +87,10 @@ namespace Diorama
 
         [Header("Step 16: shorter and graceful")]
         [Tooltip("Hall of Fame: seconds between Islings coming out (the serialized hallGap was 2.6).")]
-        public float hallGapStep16 = 1.6f;
+        public float hallGapStep16 = 1.2f; // Step 18: 1.6 -> 1.2
         [Tooltip("Step 16 plaque (step 17: the credits banner replaced it; kept for its tests): lines shown at once, seconds per scroll step.")]
         [Min(1)] public int creditWindow = 3;
-        public float creditStepSeconds = 2.6f;
+        public float creditStepSeconds = 2.2f; // Step 18: 2.6 -> 2.2
         [Tooltip("The plaque and the thank-you card float this high over the Heart's forehead (island-local m).")]
         public float plaqueAbove = 0.09f;
 
@@ -511,6 +511,13 @@ namespace Diorama
             Debug.Log($"[FinaleDirector] {step}.");
         }
 
+        /// <summary>
+        /// Step 18 (Mugesh: the statue's ending takes too long): the wake's socket flares 0.5 -> 0.3 s apart, the shake
+        /// 6.5 -> 4.5 s; the head lift and the eyes opening 3 -> 2 s; the pauses around the Spirit and the thanks shorter;
+        /// the Heart's lines type 16 -> 28 characters a second; the Hall of Fame gaps 1.6 -> 1.2 s; credits 2.6 -> 2.2 s a step.
+        /// </summary>
+        const float WakeFlareGap = 0.3f, WakeShakeSeconds = 4.5f;
+
         IEnumerator Wake()
         {
             SaveStep(FinaleStep.Wake);
@@ -523,12 +530,12 @@ namespace Diorama
                 var s = StatueSocket.FindById(ids[i]);
                 if (s != null && fx != null) fx.Burst(s.SocketWorld, 36, colours[i], tile * 1.4f, 0.9f, tile * 0.06f);
                 Sfx(AudioIds.HeartCrack, AudioIds.StatueSocket, s != null ? s.SocketWorld : heart.ChestWorld);
-                yield return new WaitForSeconds(0.5f);
+                yield return new WaitForSeconds(WakeFlareGap);
             }
             // Light runs up through the cracks; the statue shakes; stone flakes and moss fall.
-            for (float t = 0f; t < 6.5f; t += 0.25f)
+            for (float t = 0f; t < WakeShakeSeconds; t += 0.25f)
             {
-                StatueSocket.Shake = Mathf.Lerp(0.004f, 0.045f, t / 6.5f);
+                StatueSocket.Shake = Mathf.Lerp(0.004f, 0.045f, t / WakeShakeSeconds);
                 if (fx != null)
                 {
                     float h = Mathf.Repeat(t * 0.9f, 2.4f);
@@ -566,9 +573,9 @@ namespace Diorama
             if (AudioService.Has(AudioIds.HeartBeat)) Beat(true);
             else Sfx(AudioIds.HeartBeat, AudioIds.StatueSocket, heart.ChestWorld);
             // It breathes and lifts its head toward the player.
-            for (float t = 0f; t < 3f; t += Time.deltaTime)
+            for (float t = 0f; t < 2f; t += Time.deltaTime)
             {
-                float k = Mathf.SmoothStep(0f, 1f, t / 3f);
+                float k = Mathf.SmoothStep(0f, 1f, t / 2f);
                 heart.lift = 10f * k;
                 heart.look = 0.7f * k;
                 yield return null;
@@ -580,7 +587,7 @@ namespace Diorama
         {
             SaveStep(FinaleStep.Understanding);
             _holding = true;
-            for (float t = 0f; t < 1.5f; t += Time.deltaTime)
+            for (float t = 0f; t < 0.8f; t += Time.deltaTime)
             {
                 _hold = WaitPoint;
                 yield return null;
@@ -756,9 +763,9 @@ namespace Diorama
             SaveStep(FinaleStep.EyesOpen);
             Sfx(AudioIds.HeartWings, AudioIds.StatueSocket, heart.ChestWorld);
             heart.look = 1f;
-            for (float t = 0f; t < 3f; t += Time.deltaTime)
+            for (float t = 0f; t < 2f; t += Time.deltaTime)
             {
-                float k = Mathf.SmoothStep(0f, 1f, t / 3f);
+                float k = Mathf.SmoothStep(0f, 1f, t / 2f);
                 heart.eyes = Mathf.Clamp01(t / 0.6f);
                 heart.wings = k;
                 heart.blaze = Mathf.Sin(k * Mathf.PI) * 0.8f;
@@ -770,7 +777,7 @@ namespace Diorama
             // The hub answers: the gates bloom, the grass waves, warm motes rise, a golden ring under the island.
             StartCoroutine(HubAnswers(9f));
             yield return Line("heart.thanks", 12f);
-            yield return new WaitForSeconds(2f);
+            yield return new WaitForSeconds(0.8f);
         }
 
         IEnumerator HubAnswers(float seconds)
@@ -820,7 +827,7 @@ namespace Diorama
         {
             SaveStep(FinaleStep.HallOfFame);
             Dialogue.Say("heart.friends");
-            yield return Hold(2f);
+            yield return Hold(1.2f);
             var rosters = Rosters();
             int n = Mathf.Min(Party.Size, party.members.Count);
             // Step 17 H: a front arc round the statue, no two footprints overlapping (they huddled on one row in front of
@@ -880,7 +887,7 @@ namespace Diorama
                 MapCreature.HopNear(hub, Center, 10f);
                 yield return Hold(0.7f);
             }
-            yield return Hold(2f);
+            yield return Hold(1.2f);
             foreach (var (card, _) in _labels) card.Hide();
             _labels.Clear();
             _labelHeight.Clear();

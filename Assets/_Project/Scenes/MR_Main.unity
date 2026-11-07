@@ -326,6 +326,8 @@ MonoBehaviour:
   rimGuardDistance: 0.07
   activePopOut: 0.003
   cardSeconds: 4
+  pokeCardSeconds: 3.5
+  pokeApproachSpeed: 0.12
   dueBreathe: 0.18
   dueBreatheHz: 0.8
 --- !u!4 &78739059
@@ -746,7 +748,7 @@ MonoBehaviour:
   heartGlow: {r: 0.98, g: 0.82, b: 0.45, a: 1}
   heartText: {r: 0.42, g: 0.3, b: 0.12, a: 1}
   heartFontScale: 1.12
-  heartCharsPerSecond: 16
+  heartCharsPerSecond: 28
   heartFadeChars: 7
   sideWidth: 0.6
   sideMaxLines: 2
@@ -768,6 +770,8 @@ MonoBehaviour:
   blipGap: 0.12
   blipVolume: 0.75
   objectivesBlip: 1
+  heartBlipEvery: 7
+  heartBlipGap: 0.3
 --- !u!4 &232676578
 Transform:
   m_ObjectHideFlags: 0
@@ -7960,9 +7964,9 @@ MonoBehaviour:
     and synthesised'
   - 'Music: to come'
   - Thank you for playing.
-  hallGapStep16: 1.6
+  hallGapStep16: 1.2
   creditWindow: 3
-  creditStepSeconds: 2.6
+  creditStepSeconds: 2.2
   plaqueAbove: 0.09
   hallGapFactor: 1.4
   statueClearTiles: 2

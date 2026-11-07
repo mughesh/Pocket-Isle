@@ -66,7 +66,7 @@ namespace Diorama
         [Tooltip("Text size as a share of the font size.")]
         public float heartFontScale = 1.12f;
         [Tooltip("Letters per second (slow: it whispers).")]
-        public float heartCharsPerSecond = 16f;
+        public float heartCharsPerSecond = 28f; // Step 18: 16 -> 28 (the ending took too long)
         [Tooltip("Each letter fades in over this many letters' time.")]
         public float heartFadeChars = 7f;
 

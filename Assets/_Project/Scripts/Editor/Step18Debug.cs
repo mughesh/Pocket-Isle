@@ -180,6 +180,34 @@ namespace Diorama.EditorTools
             Debug.Log(sb.ToString());
         }
 
+        /// <summary>
+        /// Edit mode, step 18 (the statue's ending takes too long): the scene's serialized pacing (the Heart's typing speed,
+        /// the Hall of Fame gap, the credit steps). Saves the scene.
+        /// </summary>
+        public static void FinalePace()
+        {
+            if (UnityEditor.EditorApplication.isPlaying) return;
+            var sb = new System.Text.StringBuilder("[Step18Debug] Finale pace:");
+            foreach (var b in Object.FindObjectsByType<DialogueBubble>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                UnityEditor.Undo.RecordObject(b, "Finale pace");
+                sb.Append($" heartCharsPerSecond {b.heartCharsPerSecond} -> 28;");
+                b.heartCharsPerSecond = 28f;
+                UnityEditor.EditorUtility.SetDirty(b);
+            }
+            foreach (var f in Object.FindObjectsByType<FinaleDirector>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                UnityEditor.Undo.RecordObject(f, "Finale pace");
+                sb.Append($" hallGapStep16 {f.hallGapStep16} -> 1.2, creditStepSeconds {f.creditStepSeconds} -> 2.2;");
+                f.hallGapStep16 = 1.2f;
+                f.creditStepSeconds = 2.2f;
+                UnityEditor.EditorUtility.SetDirty(f);
+            }
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+            UnityEditor.SceneManagement.EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+            Debug.Log(sb.ToString());
+        }
+
         /// <summary>Edit mode, step 18: rebuilds the swipe-then-tap ghost (a 0.3 s glide into the tap) and saves it.</summary>
         public static void RebuildSwipeTap()
         {
