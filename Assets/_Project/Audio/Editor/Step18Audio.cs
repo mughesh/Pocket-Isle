@@ -25,11 +25,8 @@ namespace Diorama.Audio.EditorTools
                     Debug.LogError($"[Step18Audio] {id}: no {(patch == null ? "patch" : "recipe")}.");
                     continue;
                 }
-                if (id == "voice.heart")
-                {
-                    SynthRecipes.Apply(patch, recipe);
-                    EditorUtility.SetDirty(patch);
-                }
+                SynthRecipes.Apply(patch, recipe);
+                EditorUtility.SetDirty(patch);
                 SynthBaker.Bake(patch);
                 Debug.Log($"[Step18Audio] Baked {id} ({patch.variants} variants, {patch.duration:0.00} s).");
             }
