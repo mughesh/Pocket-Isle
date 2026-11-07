@@ -44,6 +44,13 @@ namespace Diorama
         public Color captionText = new Color(1f, 0.95f, 0.84f);
         public Color captionPill = new Color(0.13f, 0.1f, 0.08f, 0.86f);
 
+        [Header("Clear of the pods (Nov 7: the moves were in the way of the rim pods)")]
+        [Tooltip("The rim pods: a hand below the row and this close to a pod (island-local m) means it is reaching for a pod.")]
+        public PodRack pods;
+        public float podReach = 0.12f;
+        [Tooltip("Then the row moves this far (island-local m: up, toward the island's back) until the hand leaves.")]
+        public Vector3 duckOffset = new Vector3(0f, 0.07f, -0.04f);
+
         [Header("Facing")]
         [Tooltip("Step 14i: the row faces the head at battle start, then stays; it faces it again only when the head has been " +
                  "this far round (degrees) for a second with no hand within 15 cm.")]
@@ -102,7 +109,42 @@ namespace Diorama
         int _hovered = -1;
         readonly bool[] _wasPinching = new bool[2];
         StageActor _avoidA, _avoidB;
-        float _avoid;
+        float _avoid, _duck;
+        bool _ducked;
+
+        /// <summary>
+        /// Nov 7: a hand under the row (lower than its bottom edge) and near a rim pod or the cradle pod is reaching for a
+        /// pod, not a move: the row gets out of its way (<see cref="duckOffset"/>).
+        /// </summary>
+        bool ReachingForPod()
+        {
+            if (pods == null || island == null || _row == null) return false;
+            var t = island.transform;
+            float bottom = _row.localPosition.y - runeSize.y * 0.5f;
+            bool reaching = false;
+            for (int h = 0; h < 2 && !reaching; h++)
+            {
+                var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
+                if (hand == null || !hand.IsTrackedDataValid) continue;
+                foreach (var joint in new[] { HandJointId.HandIndexTip, HandJointId.HandPalm })
+                {
+                    if (!HandLookup.TryGetJoint(hand, joint, out var w)) continue;
+                    Vector3 p = t.InverseTransformPoint(w);
+                    if (p.y > bottom) continue;
+                    for (int i = 0; i <= Party.Size && !reaching; i++)
+                    {
+                        var pod = pods.Pod(i);
+                        if (pod != null && pod.isActiveAndEnabled && (t.InverseTransformPoint(pod.transform.position) - p).magnitude < podReach) reaching = true;
+                    }
+                }
+            }
+            if (reaching != _ducked)
+            {
+                _ducked = reaching;
+                Debug.Log(reaching ? "[BattleRunes] A hand reaches for a pod under the row: the moves step up and back." : "[BattleRunes] The hand left the pods: the moves come back.");
+            }
+            return reaching;
+        }
         float _yaw, _tilt, _tiltTarget;
         readonly BoardFacing _facing = new BoardFacing();
         bool _loggedPokeHover, _loggedPokeSelect, _reportedInteractors;
@@ -524,7 +566,8 @@ namespace Diorama
             var b = island.LocalBounds;
             var cam = Camera.main;
             if (cam != null && Covers(cam.transform.position)) _avoid = Mathf.MoveTowards(_avoid, 1f, Time.deltaTime * 3f);
-            _row.localPosition = new Vector3(b.center.x, island.map.capHeight, b.max.z) + offset + avoidOffset * _avoid;
+            _duck = Mathf.MoveTowards(_duck, ReachingForPod() ? 1f : 0f, Time.deltaTime * (_duck < 0.5f ? 6f : 2f));
+            _row.localPosition = new Vector3(b.center.x, island.map.capHeight, b.max.z) + offset + avoidOffset * _avoid + duckOffset * Mathf.SmoothStep(0f, 1f, _duck);
             if (cam != null)
             {
                 // Head direction projected on the island, as a yaw in island space (the row's front looks toward -Z).
