@@ -426,7 +426,11 @@ namespace Diorama
             // Step 16: the thank-you card's Title goes back itself; otherwise give it time to be read.
             for (float t = 0f; t < 20f && FinaleDirector.FinalCardUp; t += Time.deltaTime) yield return null;
             yield return new WaitForSeconds(1f);
-            Debug.Log("[QuickJourney] The ending is over: back to the title (the quick save as it was).");
+            // Nov 8 (Mugesh: Keep exploring after the credits went to the title menu): the dream was a preview, so the scene
+            // reloads the quick save as it was; Keep exploring goes straight back into it, past the title.
+            bool keep = FinaleDirector.KeptExploring;
+            TitleScreen.ContinueOnce = keep;
+            Debug.Log($"[QuickJourney] The ending is over: {(keep ? "back to the journey (Keep exploring, the title skipped)" : "back to the title")} (the quick save as it was).");
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
 

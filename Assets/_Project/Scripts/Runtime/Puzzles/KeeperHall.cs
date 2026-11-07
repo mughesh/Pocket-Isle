@@ -226,9 +226,11 @@ namespace Diorama
             Debug.Log($"[KeeperHall] A pod is ready to evolve: it evolves here before {ownShard} rises.");
             explorer.Locked = false;
             float waited = 0f;
-            while ((g.Due >= 0 || g.Showing) && waited < evolveWaitMax)
+            // Nov 8 (Mugesh: the menu opened mid-wait and the evolution was skipped): wait until it has really evolved
+            // (Pending), not until the pod stops glowing (Due goes -1 while a menu is open). Paused time doesn't count.
+            while ((g.Pending || g.Showing) && waited < evolveWaitMax)
             {
-                waited += Time.deltaTime;
+                if (!GameMenu.IsOpen) waited += Time.deltaTime;
                 yield return null;
             }
             yield return new WaitForSeconds(1f);

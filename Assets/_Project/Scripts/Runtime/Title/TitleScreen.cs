@@ -69,9 +69,16 @@ namespace Diorama
 
         // ---- returning player ----
 
+        /// <summary>Nov 8: the next returning start skips the title (set before a reload; static, so it survives it).</summary>
+        public static bool ContinueOnce;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetContinueOnce() => ContinueOnce = false;
+
         /// <summary>Called as the island starts rising: the logo rises with it.</summary>
         public void BeginReturning(float seconds)
         {
+            if (ContinueOnce) return;
             Showing = true;
             if (logo != null && island != null)
                 logo.Rise(new Vector3(island.LocalBounds.center.x, island.CapTopLocal - 0.05f, island.LocalBounds.center.z), seconds, false);
@@ -80,6 +87,13 @@ namespace Diorama
         /// <summary>Continue / New journey / Settings; returns on Continue (New journey reloads the scene instead).</summary>
         public IEnumerator Returning()
         {
+            if (ContinueOnce)
+            {
+                // Nov 8: back from the Quick Journey's dreamed ending with Keep exploring: no title, straight on.
+                ContinueOnce = false;
+                Debug.Log($"[Title] Keep exploring after the ending: Continue ({SaveSlots.Label(SaveSlots.Active)}) without the title.");
+                yield break;
+            }
             Showing = true;
             _continue = false;
             ShowReturning();

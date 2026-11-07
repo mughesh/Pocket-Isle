@@ -100,6 +100,8 @@ namespace Diorama
         public static bool Preview { get; private set; }
         /// <summary>Step 16: the "Thank you for playing" card is up (Keep exploring / Title).</summary>
         public static bool FinalCardUp { get; private set; }
+        /// <summary>Nov 8: the thank-you card's Keep exploring was picked (the Quick Journey's dream goes back to the journey).</summary>
+        public static bool KeptExploring { get; private set; }
         bool _skip;
         StoneTablet _thanks;
         public static FinaleDirector Instance { get; private set; }
@@ -439,6 +441,7 @@ namespace Diorama
         void ShowFinalCard()
         {
             FinalCardUp = true;
+            KeptExploring = false;
             Dialogue.SetFocal("final card", true);
             _thanks = new StoneTablet("Thank you card", island.transform, hudMaterial, island.gameObject.layer);
             _thanks.Slate();
@@ -488,6 +491,7 @@ namespace Diorama
 
         void KeepExploring()
         {
+            KeptExploring = true;
             CloseFinalCard();
             Debug.Log("[FinaleDirector] Keep exploring: free play with the Spark.");
         }

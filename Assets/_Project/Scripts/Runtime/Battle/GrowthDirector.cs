@@ -47,6 +47,12 @@ namespace Diorama
         /// <summary>The pod due to evolve now (glowing), or -1.</summary>
         public int Due { get; private set; } = -1;
 
+        /// <summary>
+        /// Nov 8: a party member can evolve now, whether or not it may glow this moment (a menu open, a line playing).
+        /// The Keeper hall waits on this, not on <see cref="Due"/> (the menu made Due -1 and the hall thought it was done).
+        /// </summary>
+        public bool Pending => party != null && Progression.NextDue(party.members) >= 0;
+
         /// <summary>The evolution show is playing.</summary>
         public bool Showing
         {
