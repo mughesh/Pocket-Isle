@@ -126,6 +126,18 @@ float DioramaPropSink(float2 mapXZ)
     return max(DioramaClearingShape(mapXZ), corridor) * _DioramaClearingSize.z;
 }
 
+// Step 18: grass also lies down between the player and the battle (tall blades at the front hid the player's Isling and
+// its HP): the clearing plus a corridor toward the player as wide as the clearing's length, so both pads are covered.
+float DioramaGrassClear(float2 mapXZ)
+{
+    if (_DioramaClearingSize.z <= 0.0) return 0.0;
+    float2 a = _DioramaClearing.xy, b = _DioramaClearingView.xy, p = mapXZ - a, ab = b - a;
+    float t = saturate(dot(p, ab) / max(dot(ab, ab), 1e-6));
+    float w = max(_DioramaClearingView.z, _DioramaClearingSize.x);
+    float corridor = 1.0 - smoothstep(w * 0.8, w * 1.1, length(p - ab * t));
+    return max(DioramaClearingShape(mapXZ), corridor) * _DioramaClearingSize.z;
+}
+
 // Darkens and desaturates content outside the clearing while a battle is on (the rocky base doesn't call this).
 float3 DioramaFocus(float3 col, float2 mapXZ)
 {

@@ -128,12 +128,13 @@ Shader "Diorama/Grass"
                 world.xyz += bend * 0.95 * k;
                 world.y -= gust * 0.45 * k;
 
-                // Battle clearing: blades bend away from its centre and shrink to a fifth of their height.
-                float clear = _WindowClip > 0.5 ? DioramaClearing(mapBase.xz) : 0.0;
+                // Battle clearing: blades bend away from its centre and shrink to 15% of their height. Step 18: also in
+                // front of it, toward the player (DioramaGrassClear).
+                float clear = _WindowClip > 0.5 ? DioramaGrassClear(mapBase.xz) : 0.0;
                 if (clear > 0.0)
                 {
                     float2 away = base.xz - _DioramaClearingWorld.xz;
-                    world = base + (world - base) * lerp(1.0, 0.2, clear);
+                    world = base + (world - base) * lerp(1.0, 0.15, clear);
                     world.xz += normalize(away + 0.0001) * clear * 0.5 * k;
                 }
 
