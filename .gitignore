@@ -83,3 +83,7 @@ Assets/Docs/ConceptArt/
 
 # Device builds (Tools > Pocket Isle > Device)
 /Builds/
+
+# Signing keys never go in the repo
+*.keystore
+*.jks

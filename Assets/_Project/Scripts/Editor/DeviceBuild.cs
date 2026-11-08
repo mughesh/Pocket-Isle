@@ -37,31 +37,16 @@ namespace Diorama.EditorTools
         [MenuItem("Tools/Pocket Isle/Build QA APK", priority = 70)]
         public static void BuildQa() => Build(false, QaApkPath, "POCKET_DEV");
 
-        /// <summary>
-        /// Step 9e: the release build, dev panel compiled out. Audio hookup: the only build the audio release check guards
-        /// (it refuses while any cue still plays a free-plan clip).
-        /// </summary>
-        [MenuItem("Tools/Pocket Isle/Build Release APK", priority = 71)]
-        public static void BuildReleaseApk()
-        {
-            SessionState.SetBool(ReleaseGuardKey, true);
-            try
-            {
-                Build(false);
-            }
-            finally
-            {
-                SessionState.SetBool(ReleaseGuardKey, false);
-            }
-        }
+        // Step 15a: Build Release APK moved to ReleaseBuild (signing, version code, permissions). It arms the audio
+        // release guard (refuses while any cue still plays a free-plan clip).
 
         /// <summary>Diorama.Audio.EditorTools.ReleaseBuildGuard.ArmedKey (no assembly reference needed).</summary>
-        const string ReleaseGuardKey = "PocketIsle.ReleaseBuild";
+        internal const string ReleaseGuardKey = "PocketIsle.ReleaseBuild";
 
         static void Build(bool development) => Build(development, ApkPath);
 
         /// <param name="defines">Extra scripting defines for this build only (the project settings are untouched).</param>
-        static void Build(bool development, string path, params string[] defines)
+        internal static void Build(bool development, string path, params string[] defines)
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)
             {

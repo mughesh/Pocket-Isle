@@ -60,9 +60,10 @@ namespace Diorama.EditorTools
             Row("Android defines", string.IsNullOrEmpty(defines) ? "(none)" : defines, !defines.Contains("POCKET_DEV"),
                 "remove POCKET_DEV from the Android defines (the QA build adds it per build; the release build must not have it)");
             Row("POCKET_DEV in the release build", "Build Release APK passes no extra defines; Build QA APK adds POCKET_DEV for that build only", true);
-            bool keystore = PlayerSettings.Android.useCustomKeystore && !string.IsNullOrEmpty(PlayerSettings.Android.keystoreName);
-            Row("Keystore", keystore ? $"{Path.GetFileName(PlayerSettings.Android.keystoreName)} alias {PlayerSettings.Android.keyaliasName}" : "not set (debug key)",
-                keystore, "Publishing Settings > Keystore Manager: create one, keep it and its passwords OUT of git (back it up; losing it = no updates)");
+            // Step 15a: Build Release APK switches the custom keystore on for its own build only (QA builds keep the debug key).
+            bool keystore = File.Exists(ReleaseBuild.KeystorePath) && PlayerSettings.Android.keystoreName == ReleaseBuild.KeystorePath;
+            Row("Keystore", keystore ? $"{Path.GetFileName(PlayerSettings.Android.keystoreName)} alias {PlayerSettings.Android.keyaliasName} (used by Build Release APK)" : "not set (debug key)",
+                keystore, "create it outside the repo and point Publishing Settings at it (Assets/Docs/Release-Howto.md); back it up, losing it = no updates");
             Row("App name", PlayerSettings.productName, !string.IsNullOrEmpty(PlayerSettings.productName) && PlayerSettings.productName != "New Unity Project");
             Row("Company", PlayerSettings.companyName, !string.IsNullOrEmpty(PlayerSettings.companyName) && PlayerSettings.companyName != "DefaultCompany");
             var icons = PlayerSettings.GetIcons(NamedBuildTarget.Unknown, IconKind.Application);
