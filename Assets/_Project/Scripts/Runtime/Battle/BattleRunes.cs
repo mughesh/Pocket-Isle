@@ -48,9 +48,9 @@ namespace Diorama
         [Tooltip("The row sits on the arena's front band, never in front of the rim. Off = the old place in front of the rim (offset, avoidOffset).")]
         public bool overArena = true;
         [Tooltip("The row's front edge this far inside the tile footprint's front edge (island-local m).")]
-        public float arenaInset = 0.034f;
-        [Tooltip("The row's front edge this far over the cap (island-local m; 0.046 is about 2.8 cm at the island's usual 0.6 size).")]
-        public float arenaHover = 0.046f;
+        public float arenaInset = 0.04f;
+        [Tooltip("The row's front edge this far over the cap (island-local m; 0.03 is about 1.8 cm at the island's usual 0.6 size).")]
+        public float arenaHover = 0.03f;
 
         [Header("Clear of the pods (Nov 7: the moves were in the way of the rim pods)")]
         [Tooltip("The rim pods: a hand below the row and this close to a pod (island-local m) means it is reaching for a pod.")]
@@ -667,6 +667,8 @@ namespace Diorama
             return new Vector3(x, island.map.capHeight + arenaHover + half * Mathf.Cos(rad), island.FootprintHalfSize.y - arenaInset - half * Mathf.Sin(rad));
         }
 
+        // A little past the row end, so the near label (BattleHud.ClearCaption) is not lifted into its Isling.
+        const float captionPastRow = 0.035f;
         float _captionX;
 
         /// <summary>
@@ -676,7 +678,7 @@ namespace Diorama
         void PlaceCaption(Camera cam, bool snap)
         {
             if (_caption == null || _captionPill == null) return;
-            float reach = Mathf.Max(0f, HalfRow - _captionPill.transform.localScale.x * 0.5f);
+            float reach = Mathf.Max(0f, HalfRow - _captionPill.transform.localScale.x * 0.5f) + captionPastRow;
             float target = 0f;
             if (cam != null && _avoidA != null)
             {
