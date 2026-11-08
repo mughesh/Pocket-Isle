@@ -506,6 +506,18 @@ namespace Diorama
                 if (_card.Visible && ((island.transform.position - _cardIslandPos).sqrMagnitude > 0.02f * 0.02f ||
                                       Quaternion.Angle(island.transform.rotation, _cardIslandRot) > 4f))
                     CloseCard();
+                // Step 21 (Mugesh: hide the poked card when I do something else): a card opened by a poke while exploring
+                // closes on the next thing done: a swipe, a walk (touch or look + pinch a tile), a battle, a grab of the island.
+                if (_card.Visible && _exploreCard)
+                {
+                    string other = OtherInteraction();
+                    if (other != null)
+                    {
+                        _card.Hide();
+                        _exploreCard = false;
+                        Debug.Log($"[PodRack] Card closed ({other}).");
+                    }
+                }
                 // Nov 3: the menu's runes sit over the pods; the card overlapped them.
                 if (_card.Visible && MenuUp)
                 {
@@ -978,8 +990,39 @@ namespace Diorama
 
         void ShowCard(int slot, string how) => ShowCard(slot, how, cardSeconds);
 
+        // ---- step 21: the exploring card gives way to the next interaction ----
+
+        bool _exploreCard;
+        GestureTestPiece _explorer;
+        Vector2Int _cardTile;
+        bool _swiped, _walkSet;
+
+        void WatchExplorer()
+        {
+            if (_explorer != null) return;
+            _explorer = FindFirstObjectByType<GestureTestPiece>();
+            if (_explorer == null) return;
+            _explorer.Swiped += _ => _swiped = true;
+            _explorer.DestinationChanged += d => { if (d.HasValue) _walkSet = true; };
+        }
+
+        /// <summary>What the player did since the exploring card opened (null = nothing yet).</summary>
+        string OtherInteraction()
+        {
+            if (InBattle) return "a battle";
+            if (handle != null && handle.IsGrabbed) return "the island is held";
+            if (_swiped) return "a swipe";
+            if (_walkSet) return "a walk";
+            if (_explorer != null && _explorer.Tile != _cardTile) return "the explorer moved";
+            return null;
+        }
+
         void ShowCard(int slot, string how, float seconds)
         {
+            WatchExplorer();
+            _exploreCard = how == "poke while exploring";
+            _swiped = _walkSet = false;
+            if (_explorer != null) _cardTile = _explorer.Tile;
             var p = _pods[slot];
             if (_card == null || p == null || p.Isling == null || MenuUp) return;
             if (_card.Visible && _card.Showing == p.Isling && how == "gaze + pinch")

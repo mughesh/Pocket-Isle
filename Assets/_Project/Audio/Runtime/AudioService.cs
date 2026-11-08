@@ -406,6 +406,8 @@ namespace Diorama.Audio
                 src.priority = c.priority;
                 src.clip = clip;
                 src.loop = loop;
+                // Step 21: the pause holds every sound but the UI bus (the menu's own taps).
+                src.ignoreListenerPause = c.bus == AudioBus.UI;
                 src.pitch = pitch;
                 src.volume = Level(1f);
                 src.Play();
@@ -451,7 +453,7 @@ namespace Diorama.Audio
                     Release();
                     return;
                 }
-                if (!src.isPlaying && !AudioListener.pause)
+                if (!src.isPlaying && (!AudioListener.pause || src.ignoreListenerPause))
                 {
                     Release();
                     return;

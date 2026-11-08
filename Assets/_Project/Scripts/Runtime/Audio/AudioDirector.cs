@@ -62,6 +62,13 @@ namespace Diorama
                 area = "(shard)";
                 music = MusicState.None;
             }
+            // Step 21 (Mugesh: the song kept playing while he poked the shard; my step 20 carry-over broke the Nov 6 rule):
+            // the title's track doesn't carry into the shard moment, it fades out as the shard arrives.
+            if (shardOnly && AudioService.IsSounding(Diorama.Audio.AudioIds.MusicTitle))
+            {
+                AudioService.StopMusic(2f);
+                Debug.Log("[AudioDirector] Only the shard: music.title fades out (2 s).");
+            }
             if (area != _area && shardOnly)
             {
                 AmbienceDirector.SetArea(null, 0.5f);

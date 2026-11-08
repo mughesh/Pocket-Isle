@@ -119,6 +119,21 @@ namespace Diorama
         /// Nov 7: a hand under the row (lower than its bottom edge) and near a rim pod or the cradle pod is reaching for a
         /// pod, not a move: the row gets out of its way (<see cref="duckOffset"/>).
         /// </summary>
+        /// <summary>
+        /// Step 21: a hand reaches for a pod, holds one, or let go of one under <see cref="PodGrace"/> s ago: rune picks by
+        /// poke or gaze + pinch are ignored (the grab's pinch and the lift through the row are not move presses).
+        /// </summary>
+        bool PodBusy => _ducked || (pods != null && pods.AnyHeld) || Time.unscaledTime < _podFreeAt;
+
+        public const float PodGrace = 0.5f;
+
+        static bool Takeable(PodView pod)
+        {
+            var g = pod.GetComponent<PodGrab>();
+            return g != null && (g.CanGrab || g.IsHeld);
+        }
+        float _podFreeAt;
+
         bool ReachingForPod()
         {
             if (pods == null || island == null || _row == null) return false;
@@ -137,7 +152,9 @@ namespace Diorama
                     for (int i = 0; i <= Party.Size && !reaching; i++)
                     {
                         var pod = pods.Pod(i);
-                        if (pod != null && pod.isActiveAndEnabled && (t.InverseTransformPoint(pod.transform.position) - p).magnitude < podReach) reaching = true;
+                        // Step 21 (Mugesh: Run didn't work after the first move): only a pod a hand can take counts. The
+                        // empty sockets sit right under Run, so a finger going for Run ducked the row away from it.
+                        if (pod != null && pod.isActiveAndEnabled && Takeable(pod) && (t.InverseTransformPoint(pod.transform.position) - p).magnitude < podReach) reaching = true;
                     }
                 }
             }
@@ -341,7 +358,11 @@ namespace Diorama
                 _loggedPokeSelect = true;
                 Debug.Log($"[BattleRunes] Poke select on rune {index + 1} (first time).");
             }
-            if (_interactable && !GamePause.IsPaused && _runes[index].shown && _runes[index].appear > 0.6f) Pick(index, "poke");
+            if (_interactable && !GamePause.IsPaused && _runes[index].shown && _runes[index].appear > 0.6f)
+            {
+                if (PodBusy) Debug.Log($"[BattleRunes] Poke on rune {index + 1} ignored: a hand is on a pod (switch).");
+                else Pick(index, "poke");
+            }
         }
 
         /// <summary>
@@ -493,6 +514,10 @@ namespace Diorama
 
         void Update()
         {
+            // Step 21 (Mugesh, battle + menu shot: the menu row lay over the moves and the battle line): the battle row
+            // and its line step aside while the game menu (or its Journal / Settings) is open, and come back on close.
+            bool menu = GameMenu.IsOpen;
+            if (_row.gameObject.activeSelf == menu) _row.gameObject.SetActive(!menu);
             PlaceRow(false);
             int was = _hovered;
             _hovered = _interactable ? GazeHover() : -1;
@@ -533,7 +558,11 @@ namespace Diorama
                     continue;
                 }
                 bool pinching = hand.GetIndexFingerIsPinching();
-                bool busy = grabGuard != null && grabGuard.IsHandBusy(h == 0);
+                // Step 21 (Mugesh: picking a pod to switch pressed a move, he could never switch): the pod grab is a pinch
+                // too, so no gaze pick while a hand reaches for, holds or has just let go of a pod.
+                bool busy = grabGuard != null && grabGuard.IsHandBusy(h == 0) || PodBusy;
+                if (pinching && !_wasPinching[h] && PodBusy && _hovered >= 0)
+                    Debug.Log($"[BattleRunes] Pinch on rune {_hovered + 1} ignored: a hand is on a pod (switch).");
                 if (pinching && !_wasPinching[h] && !busy && _hovered >= 0) Pick(_hovered, $"gaze + pinch ({(h == 0 ? "left" : "right")})");
                 _wasPinching[h] = pinching;
                 if (!_interactable) return;
@@ -569,7 +598,9 @@ namespace Diorama
             var b = island.LocalBounds;
             var cam = Camera.main;
             if (cam != null && Covers(cam.transform.position)) _avoid = Mathf.MoveTowards(_avoid, 1f, Time.deltaTime * 3f);
-            _duck = Mathf.MoveTowards(_duck, ReachingForPod() ? 1f : 0f, Time.deltaTime * (_duck < 0.5f ? 6f : 2f));
+            bool reach = ReachingForPod();
+            if (reach || (pods != null && pods.AnyHeld)) _podFreeAt = Time.unscaledTime + PodGrace;
+            _duck = Mathf.MoveTowards(_duck, reach ? 1f : 0f, Time.deltaTime * (_duck < 0.5f ? 6f : 2f));
             _row.localPosition = new Vector3(b.center.x, island.map.capHeight, b.max.z) + offset + avoidOffset * _avoid + duckOffset * Mathf.SmoothStep(0f, 1f, _duck);
             if (cam != null)
             {

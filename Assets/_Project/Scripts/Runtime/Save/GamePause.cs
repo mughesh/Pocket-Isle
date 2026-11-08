@@ -58,9 +58,10 @@ namespace Diorama
             if (paused == IsPaused) return;
             IsPaused = paused;
             Time.timeScale = paused ? 0f : 1f;
-            // Audio hookup: only the app pause silences everything; the game menu keeps its own sounds, the music dips
-            // under it (MusicDirector) and the ambience goes on.
-            AudioListener.pause = _app || _focus;
+            // Step 21 (Mugesh: the pause menu didn't mute anything): every pause holds all sound where it is (music,
+            // ambience, voices, effects) and resumes it on close; the menu's own UI bus sounds still play
+            // (AudioService: UI voices ignore the listener pause).
+            AudioListener.pause = paused;
             Debug.Log($"[GamePause] {(paused ? "Paused" : "Resumed")} ({why}).");
         }
 
