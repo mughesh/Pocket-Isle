@@ -114,12 +114,15 @@ namespace Diorama.Audio
             return cue != null ? cue.restSeconds : 0f;
         }
 
+        // Step 23: a new key, so values saved from the Dev panel before the mix pass don't hide the new levels.
+        const string CueVolKey = "audio.cuevol23.";
+
         /// <summary>The music cue's level: the Dev panel's override if set, else the cue's volume.</summary>
         public static float MusicVolume(string id)
         {
             if (string.IsNullOrEmpty(id)) return 0f;
             if (VolumeOverride.TryGetValue(id, out var v)) return v;
-            var key = "audio.cuevol." + id;
+            var key = CueVolKey + id;
             if (PlayerPrefs.HasKey(key)) return VolumeOverride[id] = PlayerPrefs.GetFloat(key);
             var cue = LoadTable() ? _table.Find(id) : null;
             return VolumeOverride[id] = cue != null ? cue.volume : 0f; // cached: Level asks every frame
@@ -130,7 +133,7 @@ namespace Diorama.Audio
         {
             if (string.IsNullOrEmpty(id)) return;
             VolumeOverride[id] = Mathf.Clamp01(volume);
-            PlayerPrefs.SetFloat("audio.cuevol." + id, VolumeOverride[id]);
+            PlayerPrefs.SetFloat(CueVolKey + id, VolumeOverride[id]);
         }
 
         void StartMusic(AudioCue cue, float fadeIn)
@@ -378,6 +381,20 @@ namespace Diorama.Audio
             public int generation;
             float _base, _fade = 1f, _fadeTarget = 1f, _fadeRate, _volume = 1f, _pitchBase = 1f, _pitchMul = 1f;
             bool _stopping;
+            AudioLowPassFilter _lowPass;
+
+            /// <summary>Step 23: the voice's low-pass in Hz; 0 turns it off.</summary>
+            public void SetLowPass(float hz)
+            {
+                if (hz <= 0f)
+                {
+                    if (_lowPass != null) _lowPass.enabled = false;
+                    return;
+                }
+                if (_lowPass == null) _lowPass = src.gameObject.AddComponent<AudioLowPassFilter>();
+                _lowPass.enabled = true;
+                _lowPass.cutoffFrequency = hz;
+            }
 
             public Voice(AudioSource s) => src = s;
 
@@ -410,6 +427,7 @@ namespace Diorama.Audio
                 src.ignoreListenerPause = c.bus == AudioBus.UI;
                 src.pitch = pitch;
                 src.volume = Level(1f);
+                SetLowPass(c.lowPassHz);
                 src.Play();
             }
 
@@ -447,6 +465,7 @@ namespace Diorama.Audio
                         if (looping) Stop(0.15f);
                     }
                 }
+                if (!_stopping && cue.maxSeconds > 0f && Time.unscaledTime - started >= cue.maxSeconds) Stop(0.05f);
                 if (_fadeRate > 0f) _fade = Mathf.MoveTowards(_fade, _fadeTarget, _fadeRate * dt);
                 if (_stopping && _fade <= 0f)
                 {
@@ -470,6 +489,7 @@ namespace Diorama.Audio
             {
                 src.Stop();
                 src.clip = null;
+                SetLowPass(0f);
                 cue = null;
                 follow = null;
                 following = false;
@@ -496,6 +516,12 @@ namespace Diorama.Audio
         public void Stop(float fade = 0.15f)
         {
             if (IsValid) _voice.Stop(fade);
+        }
+
+        /// <summary>Step 23: a low-pass on this voice in Hz; 0 = off.</summary>
+        public void SetLowPass(float hz)
+        {
+            if (IsValid) _voice.SetLowPass(hz);
         }
 
         /// <summary>Multiplies the cue's picked volume (0..1+).</summary>

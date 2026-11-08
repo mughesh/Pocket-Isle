@@ -29,14 +29,14 @@ namespace Diorama.Audio.EditorTools
         /// <summary>Cue id, volume, mode (once = plays to its end and stops; rest = once, then rest, then again; loop).</summary>
         static readonly (string id, float volume, bool loop, float rest, string note)[] Levels =
         {
-            ("music.title", 0.25f, false, 0f, "Step 20: title screen, once (cut from First Light 0:00-0:43, fades itself)."),
-            ("music.hub", 0.25f, false, 0f, "Step 20: Still Isle, once per arrival from a realm or a load (same cut as the title, own copy)."),
-            ("music.lodge", 0.18f, false, 0f, "Step 20: Hearth Lodge, once on entering (Lanterns by the Spring tail from 1:32, 27 s)."),
-            ("music.finale", 0.4f, false, 0f, "Step 20: the Heart wakes -> credits, once (First Light from the swell at 0:41.5)."),
-            ("music.galewick", 0.25f, true, 45f, "Step 20: Steps Through Tall Grass. Galewick restored only (unless Realm music: always)."),
-            ("music.cinderwood", 0.25f, true, 45f, "Step 20: Lanterns by the Spring. Cinderwood restored only (unless Realm music: always)."),
-            ("music.lilymere", 0.25f, true, 45f, "Step 20: Where the Lotus Blooms. Lilymere restored only (unless Realm music: always)."),
-            ("music.temple", 0.25f, true, 0f, "Step 20: Rite of the Unbroken. Keeper halls and Keeper battles (same cue: no restart); loops."),
+            ("music.title", 0.42f, false, 0f, "Step 20: title screen, once (cut from First Light 0:00-0:43, fades itself)."),
+            ("music.hub", 0.40f, false, 0f, "Step 20: Still Isle, once per arrival from a realm or a load (same cut as the title, own copy)."),
+            ("music.lodge", 0.35f, false, 0f, "Step 20: Hearth Lodge, once on entering (Lanterns by the Spring tail from 1:32, 27 s)."),
+            ("music.finale", 0.38f, false, 0f, "Step 20: the Heart wakes -> credits, once (First Light from the swell at 0:41.5)."),
+            ("music.galewick", 0.30f, true, 45f, "Step 20: Steps Through Tall Grass. Galewick restored only (unless Realm music: always)."),
+            ("music.cinderwood", 0.28f, true, 45f, "Step 20: Lanterns by the Spring. Cinderwood restored only (unless Realm music: always)."),
+            ("music.lilymere", 0.30f, true, 45f, "Step 20: Where the Lotus Blooms. Lilymere restored only (unless Realm music: always)."),
+            ("music.temple", 0.28f, true, 0f, "Step 20: Rite of the Unbroken. Keeper halls and Keeper battles (same cue: no restart); loops."),
         };
 
         [MenuItem("Tools/Pocket Isle/Audio/Step 20: Music In", priority = 120)]

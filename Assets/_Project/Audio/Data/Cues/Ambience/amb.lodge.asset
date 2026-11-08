@@ -14,9 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
   id: amb.lodge
   clips:
-  - {fileID: 8300000, guid: 5abea66a7df2a7e4da61f49466c07d6e, type: 3}
   - {fileID: 8300000, guid: 133b3d5073bcb2340b8dfade280dffe5, type: 3}
-  volume: 0.8
+  volume: 0.505
   volumeJitter: 0
   pitchMin: 1
   pitchMax: 1
@@ -26,6 +25,9 @@ MonoBehaviour:
   minDistance: 0.1
   maxDistance: 1.5
   loop: 1
+  restSeconds: 0
+  lowPassHz: 0
+  maxSeconds: 0
   maxVoices: 1
   minInterval: 0
   priority: 40

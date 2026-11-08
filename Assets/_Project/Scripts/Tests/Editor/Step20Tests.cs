@@ -11,9 +11,9 @@ namespace Diorama.Tests
 
         static readonly (string id, float volume, bool loop, float rest)[] Expected =
         {
-            ("music.title", 0.25f, false, 0f), ("music.hub", 0.25f, false, 0f), ("music.lodge", 0.18f, false, 0f),
-            ("music.finale", 0.4f, false, 0f), ("music.galewick", 0.25f, true, 45f), ("music.cinderwood", 0.25f, true, 45f),
-            ("music.lilymere", 0.25f, true, 45f), ("music.temple", 0.25f, true, 0f),
+            ("music.title", 0.42f, false, 0f), ("music.hub", 0.40f, false, 0f), ("music.lodge", 0.35f, false, 0f),
+            ("music.finale", 0.38f, false, 0f), ("music.galewick", 0.30f, true, 45f), ("music.cinderwood", 0.28f, true, 45f),
+            ("music.lilymere", 0.30f, true, 45f), ("music.temple", 0.28f, true, 0f),
         };
 
         [Test]

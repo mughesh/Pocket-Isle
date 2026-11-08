@@ -27,7 +27,7 @@ namespace Diorama
         bool _sweetPaused;
         // Step 18: arriving in a realm, its music waits for the realm name card, then fades in.
         MusicState _areaMusic;
-        float _arrivalHold = -1f;
+        float _arrivalHold = -1f, _arrivalFade = MusicDirector.ArrivalFadeIn;
         // Step 20: this battle is a Keeper's (its Keeper reference goes before the battle ends).
         bool _keeperFight;
 
@@ -112,8 +112,11 @@ namespace Diorama
             // is gone, then fade it in over 3 s.
             if (!battle && music != _areaMusic && music != MusicState.None)
             {
+                // Step 23: the bloom (the temple's track gave way to the realm's as its shard is taken) comes in right away, faster.
+                bool bloom = _areaMusic == MusicState.Temple && area == "ForgeHall" && music != MusicState.Temple;
+                _arrivalFade = bloom ? MusicDirector.BloomFadeIn : MusicDirector.ArrivalFadeIn;
                 _areaMusic = music;
-                _arrivalHold = Time.unscaledTime + 1.2f;
+                _arrivalHold = Time.unscaledTime + (bloom ? 0f : 1.2f);
             }
             // Under the title the realm's music waits too (it started under Continue / New journey), then the card.
             if (_arrivalHold >= 0f && (TitleScreen.Showing || Opening.ReturningUp)) _arrivalHold = Time.unscaledTime + 1.2f;
@@ -121,10 +124,10 @@ namespace Diorama
             if (_arrivalHold >= 0f && !holding && !battle)
             {
                 _arrivalHold = -1f;
-                if (!finale) MusicDirector.SetState(music, MusicDirector.ArrivalFadeIn);
+                if (!finale) MusicDirector.SetState(music, _arrivalFade);
             }
             if (!finale && !holding) MusicDirector.SetState(music);
-            else if (!finale && holding && MusicDirector.State != MusicState.None && MusicDirector.State != music) MusicDirector.SetState(MusicState.None, 1.5f);
+            else if (!finale && holding && MusicDirector.State != MusicState.None && MusicDirector.State != music) MusicDirector.SetState(MusicState.None, MusicDirector.State == MusicState.Lodge ? MusicDirector.LodgeExitFade : 1.5f);
             // Step 20: halls have their own rule now (temple; the realm's track after the restoration at full level).
             MusicDirector.SetHall(false);
             MusicDirector.SetRestored(restored && realm == "Cinderwood");
@@ -132,6 +135,11 @@ namespace Diorama
             MusicDirector.SetDialogue(talking);
             MusicDirector.SetPaused(GamePause.IsPaused || GameMenu.IsOpen);
             float duck = battle ? -6f : talking ? -3f : 0f;
+            // Step 23: the birds were fighting the climax.
+            if (area == "StillIsle" && AudioService.IsSounding(Diorama.Audio.AudioIds.MusicFinale)) duck = -6f;
+            // Step 23: a gentle low-pass under the title and the Still Isle's welcome, so the piano sits on top.
+            bool piano = area == "StillIsle" && (TitleScreen.Showing || AudioService.IsSounding(Diorama.Audio.AudioIds.MusicTitle) || AudioService.IsSounding(Diorama.Audio.AudioIds.MusicHub));
+            AmbienceDirector.LowPass(piano ? 1200f : 0f);
             if (duck != _ambienceDuck || battle != _sweetPaused)
             {
                 AmbienceDirector.Duck(duck, duck < _ambienceDuck ? 0.4f : 0.8f, battle);

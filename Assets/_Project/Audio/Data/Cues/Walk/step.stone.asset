@@ -14,12 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
   id: step.stone
   clips:
-  - {fileID: 8300000, guid: 5c4529a634e2a5a42a28e03380b71878, type: 3}
-  - {fileID: 8300000, guid: b3722cc7daf44e04ea67120090978d54, type: 3}
-  - {fileID: 8300000, guid: 410f6356038ebe04d97c2bc477857859, type: 3}
-  - {fileID: 8300000, guid: 71486c6bb3daaa144bdb53d48314603e, type: 3}
-  - {fileID: 8300000, guid: ca0a6e2b0082fad49ac40ec6d168399c, type: 3}
-  - {fileID: 8300000, guid: c8a86e9c783a11140a088222f9e9f10f, type: 3}
   - {fileID: 8300000, guid: 33c7735af90390746bb54ca91a4c1c4e, type: 3}
   - {fileID: 8300000, guid: d141abe2b4f5c4d47976dfc56711d8ab, type: 3}
   - {fileID: 8300000, guid: a287510f31bb1604389d8ed673237341, type: 3}
@@ -44,16 +38,19 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 29c19bd99b2937b4ab63dc5bf4d0369e, type: 3}
   - {fileID: 8300000, guid: 7205c06d612cc8a4188eaa88c190ef56, type: 3}
   - {fileID: 8300000, guid: 5fd3b4c4672bb3f4e90c56c08cf3df05, type: 3}
-  volume: 0.8
+  volume: 0.4
   volumeJitter: 0.1
-  pitchMin: 0.95
-  pitchMax: 1.05
+  pitchMin: 0.92
+  pitchMax: 1.08
   pitchStepSemitones: 0
   bus: 2
   spatial: 1
   minDistance: 0.1
   maxDistance: 1.5
   loop: 0
+  restSeconds: 0
+  lowPassHz: 2000
+  maxSeconds: 0.3
   maxVoices: 3
   minInterval: 0.06
   priority: 150

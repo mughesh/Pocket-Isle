@@ -15,7 +15,7 @@ MonoBehaviour:
   id: music.title
   clips:
   - {fileID: 8300000, guid: 50bce0ee95002ae49b9709d66b8f0a94, type: 3}
-  volume: 0.25
+  volume: 0.42
   volumeJitter: 0
   pitchMin: 1
   pitchMax: 1

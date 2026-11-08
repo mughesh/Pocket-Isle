@@ -15,7 +15,7 @@ MonoBehaviour:
   id: music.lilymere
   clips:
   - {fileID: 8300000, guid: 464caa7b27d36e04ea7291f9153455b7, type: 3}
-  volume: 0.25
+  volume: 0.3
   volumeJitter: 0
   pitchMin: 1
   pitchMax: 1

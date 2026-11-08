@@ -1043,7 +1043,9 @@ namespace Diorama
             while (SceneSwap.IsBusy) yield return null;
             yield return new WaitForSeconds(0.3f);
             if (realm != null) realm.Wave(waveOrigin, waveSeconds);
-            GameAudio.Ui(AudioIds.RestoreSwell);
+            // Step 23: Galewick's restoration is a meadow breeze; the chord swell stays for the other realms.
+            bool breeze = realmMap != null && realmMap.name.Contains("Galewick") && AudioService.Has(AudioIds.RestoreBreeze);
+            GameAudio.Ui(breeze ? AudioIds.RestoreBreeze : AudioIds.RestoreSwell);
             Debug.Log("[KeeperHall] The restoration wave ripples out from the temple.");
             if (fx != null)
             {

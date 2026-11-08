@@ -43,6 +43,9 @@ namespace Diorama.Audio
         AudioHandle _bed;
         float _duckDb, _duckFrom, _duckTo, _duckT = 1f, _duckTime;
         bool _sweetPaused;
+        // Step 23: the bed's low-pass (the piano sits on top on the Still Isle). Open = no filter.
+        const float LowPassOpen = 20000f;
+        float _lowPassTarget = LowPassOpen, _lowPass = LowPassOpen;
         readonly List<float> _next = new List<float>();
         readonly List<List<AudioHandle>> _live = new List<List<AudioHandle>>();
 
@@ -101,6 +104,12 @@ namespace Diorama.Audio
             Debug.Log($"[Ambience] Area {profile.name}: bed '{profile.bed}', {profile.sweeteners.Count} sweetener sets.");
         }
 
+        /// <summary>Step 23: glides the bed to a low-pass at this many Hz; 0 opens it again.</summary>
+        public static void LowPass(float hz)
+        {
+            if (Instance != null) _instance._lowPassTarget = hz > 0f ? hz : LowPassOpen;
+        }
+
         /// <summary>Lowers the bed by amountDb (e.g. -6 for battle and dialogue; 0 = back to normal) over fade seconds.</summary>
         public static void Duck(float amountDb, float fade = 0.5f, bool pauseSweeteners = false)
         {
@@ -121,6 +130,13 @@ namespace Diorama.Audio
 
         void Update()
         {
+            if (_lowPass != _lowPassTarget || _lowPass < LowPassOpen)
+            {
+                // Over about a second, in octaves.
+                _lowPass = Mathf.Exp(Mathf.MoveTowards(Mathf.Log(_lowPass), Mathf.Log(_lowPassTarget), 3f * Time.unscaledDeltaTime));
+                if (Mathf.Abs(_lowPass - _lowPassTarget) < 1f) _lowPass = _lowPassTarget;
+                _bed.SetLowPass(_lowPass >= LowPassOpen ? 0f : _lowPass);
+            }
             if (_duckT < 1f)
             {
                 _duckT = Mathf.Min(1f, _duckT + Time.unscaledDeltaTime / _duckTime);
@@ -139,7 +155,7 @@ namespace Diorama.Audio
                 if (live.Count >= s.maxAtOnce || string.IsNullOrEmpty(s.cue)) continue;
                 var h = AudioService.Play(s.cue, SweetenerPoint());
                 if (!h.IsValid) continue;
-                h.SetVolume(s.volume * (1f - s.volumeJitter * Random.value));
+                h.SetVolume(s.volume * (1f - s.volumeJitter * Random.value) * Mathf.Pow(10f, _duckDb / 20f)); // step 23: the birds duck with the bed
                 h.SetPitch(1f + s.pitchJitter * Random.Range(-1f, 1f));
                 live.Add(h);
             }

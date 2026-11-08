@@ -28,6 +28,10 @@ namespace Diorama.Audio
         public const float HallDb = -6f;
         /// <summary>Step 18: the first play on arriving in a realm fades in this long (after the realm name card).</summary>
         public const float ArrivalFadeIn = 3f;
+        /// <summary>Step 23: the realm's track fading in as its shard is taken (the bloom).</summary>
+        public const float BloomFadeIn = 1.8f;
+        /// <summary>Step 23: leaving the lodge, its track fades this long.</summary>
+        public const float LodgeExitFade = 1.8f;
 
         static MusicDirector _instance;
 
@@ -124,6 +128,7 @@ namespace Diorama.Audio
             if (delay > 0f) fade = 1.5f;
             // Step 20: the Keeper calmed (the hall goes quiet until the shard is taken).
             if ((d._state == MusicState.BattleKeeper || d._state == MusicState.Temple) && id == null && crossfade < 0f) fade = CalmFade;
+            if (d._state == MusicState.Lodge && id == null && crossfade < 0f) fade = LodgeExitFade;
             // Step 20: the title and the finale aren't cut by silence: they play to their end (they fade themselves).
             string current = AudioService.CurrentMusic;
             bool carry = id == null && (current == AudioIds.MusicTitle || current == AudioIds.MusicFinale) && AudioService.IsSounding(current);

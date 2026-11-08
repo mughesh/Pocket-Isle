@@ -26,34 +26,34 @@ MonoBehaviour:
     label: 
     instrument: 0
     model: 0
-    wave: 3
-    note: A3
+    wave: 1
+    note: A4
     hz: 440
     gate: 0
     startOffset: 0
     gain: 0.6
-    pitchStart: 7
+    pitchStart: 5
     pitchEnd: 0
-    pitchTime: 0.05
+    pitchTime: 0.04
     pitchCurve: 1
     amp:
       attack: 0.002
       hold: 0
-      decay: 0.45
+      decay: 0.4
       sustain: 0
       release: 0.05
-    vibratoRate: 9
-    vibratoDepth: 0.25
+    vibratoRate: 0
+    vibratoDepth: 0
     vibratoDelay: 0
     tremoloRate: 0
     tremoloDepth: 0
     fmRatio: 0
     fmIndex: 0
     fmDecay: 0
-    filter: 1
-    cutoffStart: 2400
-    cutoffEnd: 700
-    cutoffTime: 0.4
+    filter: 0
+    cutoffStart: 2000
+    cutoffEnd: 2000
+    cutoffTime: 0.2
     cutoffCurve: 1
     resonance: 0.1
     formant: 0
@@ -144,15 +144,15 @@ MonoBehaviour:
     label: 
     instrument: 0
     model: 0
-    wave: 1
-    note: A4
+    wave: 0
+    note: E5
     hz: 440
     gate: 0
     startOffset: 0
-    gain: 0.35
-    pitchStart: 5
+    gain: 0.25
+    pitchStart: 0
     pitchEnd: 0
-    pitchTime: 0.04
+    pitchTime: 0.1
     pitchCurve: 1
     amp:
       attack: 0.002
@@ -286,9 +286,9 @@ MonoBehaviour:
     fmRatio: 0
     fmIndex: 0
     fmDecay: 0
-    filter: 0
-    cutoffStart: 2000
-    cutoffEnd: 2000
+    filter: 2
+    cutoffStart: 300
+    cutoffEnd: 300
     cutoffTime: 0.2
     cutoffCurve: 1
     resonance: 0.1
@@ -385,7 +385,7 @@ MonoBehaviour:
     hz: 1100
     gate: 0
     startOffset: 0
-    gain: 0.35
+    gain: 0.2
     pitchStart: 5
     pitchEnd: -5
     pitchTime: 0.2

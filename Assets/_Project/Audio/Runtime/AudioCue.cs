@@ -31,6 +31,10 @@ namespace Diorama.Audio
         [Tooltip("Step 18, music only: play the track once to its end, then this many seconds of ambience only, then again " +
                  "from the top (ear fatigue in MR). 0 = loop it.")]
         [Min(0f)] public float restSeconds;
+        [Tooltip("Step 23: a low-pass on this cue's voice, Hz (0 = none). Footsteps: takes the hiss off.")]
+        [Min(0f)] public float lowPassHz;
+        [Tooltip("Step 23: cut off (50 ms fade) after this many seconds, 0 = play the whole clip. Footsteps: short and tiny.")]
+        [Min(0f)] public float maxSeconds;
 
         [Header("Limits")]
         [Range(1, 16)] public int maxVoices = 4;

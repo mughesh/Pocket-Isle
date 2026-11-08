@@ -102,20 +102,26 @@ namespace Diorama.Audio.EditorTools
                     Sparkle(0.5f))
                 .Notes(Run(9, 4, 0.35f, 0.1f, 0.25f, 3, 0.25f, 0.35f)).Vars(2, 1f, 0.1f, 0.15f));
 
-            New("Galewick", "knot.pull", Ok, SynthBatch1.Sfx(0.8f, 80, 2), p => p.One(0.35f,
-                    M("Friction/Rope creak", 540f).Do(l =>
-                    {
-                        l.friction.rateStart = 40f;
-                        l.friction.rateEnd = 15f;
-                        l.friction.rateTime = 0.2f;
-                    }).Env(0.005f, 0.22f).Gain(0.7f),
-                    Mn("Modal/Wood knock", "B5").Do(l => l.modal.exciterMs = 1.5f).At(0.2f).Gain(0.45f)).Vars(3, 1.5f, 0.1f, 0.15f));
+            // Step 23: re-voiced as a rope creak of woody ticks (400-900 Hz); the old friction layer was all low buzz.
+            New("Galewick", "knot.pull", Ok, SynthBatch1.Sfx(0.8f, 80, 2), p => p.One(0.4f,
+                    Mn("Modal/Wood knock", "G4").Do(l => l.modal.exciterMs = 1.5f).HP(300f).Gain(0.4f),
+                    Mn("Modal/Wood knock", "C5").Do(l => l.modal.exciterMs = 1.5f).HP(300f).At(0.07f).Gain(0.45f),
+                    Mn("Modal/Wood knock", "A4").Do(l => l.modal.exciterMs = 1.5f).HP(300f).At(0.15f).Gain(0.45f),
+                    Mn("Modal/Wood knock", "E5").Do(l => l.modal.exciterMs = 1.2f).HP(300f).At(0.24f).Gain(0.5f),
+                    L(PinkNoise).Filt(SynthFilter.BandPass, 500f, 850f, 0.3f, 0.5f).Env(0.01f, 0.28f).Gain(0.12f)).Vars(3, 1.5f, 0.1f, 0.15f));
 
             New("Galewick", "keeper.knot.snap", Good, SynthBatch1.Sfx(0.8f, 40, 2), p => p.One(0.7f,
-                    L(SoftSaw).Note("A3").Pitch(7f, 0f, 0.05f).LP(2400f, 700f, 0.4f).Env(0.002f, 0.45f).Vib(9f, 0.25f).Gain(0.6f),
-                    L(Triangle).Note("A4").Pitch(5f, 0f, 0.04f).Env(0.002f, 0.3f).Gain(0.35f),
-                    Mn("Modal/Wood knock", "E5").Do(l => l.modal.exciterMs = 0.8f).Gain(0.6f),
-                    Whoosh(5f, -5f, 0.2f, 0.005f, 0.2f, 1100f).Gain(0.35f)).Vars(2, 1f));
+                    L(Triangle).Note("A4").Pitch(5f, 0f, 0.04f).Env(0.002f, 0.4f).Gain(0.6f), // step 23: a soft pluck, the low saw buzzed
+                    L(Sine).Note("E5").Env(0.002f, 0.3f).Gain(0.25f),
+                    Mn("Modal/Wood knock", "E5").Do(l => l.modal.exciterMs = 0.8f).HP(300f).Gain(0.6f),
+                    Whoosh(5f, -5f, 0.2f, 0.005f, 0.2f, 1100f).Gain(0.2f)).Vars(2, 1f));
+
+            // Step 23: Galewick's restoration: a slow breeze (band-limited, its band moving) with a wooden chime at the peak.
+            New("Realm", "restore.breeze", Good, SynthBatch1.Sfx(0.8f, 30, 1, 0f, 3f), p => p.One(4.2f,
+                    L(PinkNoise).Filt(SynthFilter.BandPass, 350f, 1100f, 2.2f, 0.45f).Env(1.5f, 2.5f).Gain(0.5f),
+                    Mn("Modal/Wood knock", "D5").Do(l => l.modal.exciterMs = 2f).At(1.4f).Gain(0.3f),
+                    Mn("Modal/Wood knock", "A5").Do(l => l.modal.exciterMs = 2f).At(1.62f).Gain(0.28f),
+                    Mn("Modal/Wood knock", "F#5").Do(l => l.modal.exciterMs = 2f).At(1.9f).Gain(0.24f))).Tier(LoudnessTier.Big);
 
             New("Galewick", "tower.door", Ok, SynthBatch1.Sfx(0.8f, 20, 1, 0f, 3f), p => p.One(2.2f,
                     M("Friction/Wood creak", 420f).Do(l =>

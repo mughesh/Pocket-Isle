@@ -170,7 +170,7 @@ namespace Diorama
             var fromLight = LightNow();
             var toLight = LightFor(to.theme, kind == Kind.Enter);
             island.rimTheme = to.theme;
-            GameAudio.At(AudioIds.SceneSink, island.transform.position);
+            var sinkSound = GameAudio.At(AudioIds.SceneSink, island.transform.position);
             for (float t = 0f; t < half; t += Time.deltaTime)
             {
                 float k = Mathf.SmoothStep(0f, 1f, t / half);
@@ -185,7 +185,7 @@ namespace Diorama
             double b0 = Time.realtimeSinceStartupAsDouble;
             SwapAtBottom(to, tile, facing, kind);
             island.Prepare();
-            GameAudio.At(AudioIds.SceneRise, island.transform.position);
+            var riseSound = GameAudio.At(AudioIds.SceneRise, island.transform.position);
             double bottomMs = (Time.realtimeSinceStartupAsDouble - b0) * 1000.0;
             for (float t = 0f; t < half; t += Time.deltaTime)
             {
@@ -200,6 +200,9 @@ namespace Diorama
             island.swapSink = 0f;
             explorer.Shrink = 1f;
             SetLight(fromLight, toLight, 1f);
+            // Step 23: what's left of the whoosh fades once the new area is up (a handle already finished is a no-op).
+            sinkSound.Stop(0.3f);
+            riseSound.Stop(0.3f);
             explorer.Locked = false;
             Busy = false;
             string what = kind == Kind.Enter ? $"Inside {to.name}" : kind == Kind.Return ? $"Back outside on {to.name}" : $"Travelled to {to.name}";

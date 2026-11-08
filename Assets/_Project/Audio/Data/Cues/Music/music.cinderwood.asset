@@ -15,7 +15,7 @@ MonoBehaviour:
   id: music.cinderwood
   clips:
   - {fileID: 8300000, guid: 347d5f01cf0343841a4edb6dac0667e9, type: 3}
-  volume: 0.25
+  volume: 0.28
   volumeJitter: 0
   pitchMin: 1
   pitchMax: 1

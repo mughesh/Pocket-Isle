@@ -28,6 +28,10 @@ namespace Diorama.Audio.EditorTools
         /// <summary>Step 22: cues that skip their generated takes (restore.swell's two noise whooshes sounded like a wave on a shore).</summary>
         static readonly System.Collections.Generic.HashSet<string> SynthOnly = new System.Collections.Generic.HashSet<string> { "restore.swell" };
 
+        /// <summary>Step 23: one source family per cue: these flagged cues drop their synth noise variants and keep the natural takes.</summary>
+        static readonly System.Collections.Generic.HashSet<string> NoSynth = new System.Collections.Generic.HashSet<string>
+            { "step.grass", "step.path", "step.stone", "step.wood", "amb.lodge", "scene.rise", "scene.sink" };
+
         [MenuItem("Tools/Pocket Isle/Audio/Sync Cues (create, clips, table, AudioIds)", priority = 91)]
         public static void SyncAll()
         {
@@ -96,7 +100,7 @@ namespace Diorama.Audio.EditorTools
                 var clips = new List<AudioClip>();
                 patches.TryGetValue(r.id, out var patch);
                 if (!string.IsNullOrEmpty(r.mixWith) && patch != null) clips.AddRange(MixBaker.Clips(patch, r));
-                else if (patch != null) clips.AddRange(SynthBaker.Clips(patch));
+                else if (patch != null && !NoSynth.Contains(r.id)) clips.AddRange(SynthBaker.Clips(patch));
                 var tier = AudioTiers.ForCue(cue, patch);
                 float trim = AudioTiers.TrimFor(cue, patch);
                 clips.AddRange(LevelledClips.For(ExtraClips(r.extraClips), tier, trim, relevel, !cue.loop));

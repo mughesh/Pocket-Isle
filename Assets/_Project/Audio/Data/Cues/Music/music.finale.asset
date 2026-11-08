@@ -15,7 +15,7 @@ MonoBehaviour:
   id: music.finale
   clips:
   - {fileID: 8300000, guid: 0b437c8145ed0384390ae99b14d81a0b, type: 3}
-  volume: 0.4
+  volume: 0.38
   volumeJitter: 0
   pitchMin: 1
   pitchMax: 1

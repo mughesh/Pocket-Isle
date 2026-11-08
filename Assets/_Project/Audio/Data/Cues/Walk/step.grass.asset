@@ -14,12 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
   id: step.grass
   clips:
-  - {fileID: 8300000, guid: 90d75567d9122c54c9f2b05939d83c66, type: 3}
-  - {fileID: 8300000, guid: b2de40dfe0818ed40b53fae6aa852c6d, type: 3}
-  - {fileID: 8300000, guid: 4a2cb2463e4474f4586cbf97a17b03b9, type: 3}
-  - {fileID: 8300000, guid: 5f22e0611847ff04faf5bc79d066bd08, type: 3}
-  - {fileID: 8300000, guid: 0f3167a133c7efd4a8e9a98cb2b8e244, type: 3}
-  - {fileID: 8300000, guid: 59e56e620293f7640b242864d13a124c, type: 3}
   - {fileID: 8300000, guid: 46d0708348327b84da00cfd0d994498a, type: 3}
   - {fileID: 8300000, guid: 3856bca68d687e5448cbaab012539246, type: 3}
   - {fileID: 8300000, guid: e38de5f139aa6754aad35f690485a6b2, type: 3}
@@ -36,16 +30,19 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 944450355dddb2c4fb56567eaa9beb0d, type: 3}
   - {fileID: 8300000, guid: e4830bca6bda2c84ea2be2c6cb2f39df, type: 3}
   - {fileID: 8300000, guid: 59d424df12010ef428676c0e40dc2331, type: 3}
-  volume: 0.8
+  volume: 0.4
   volumeJitter: 0.1
-  pitchMin: 0.95
-  pitchMax: 1.05
+  pitchMin: 0.92
+  pitchMax: 1.08
   pitchStepSemitones: 0
   bus: 2
   spatial: 1
   minDistance: 0.1
   maxDistance: 1.5
   loop: 0
+  restSeconds: 0
+  lowPassHz: 2000
+  maxSeconds: 0.3
   maxVoices: 3
   minInterval: 0.06
   priority: 150

@@ -188,6 +188,7 @@ namespace Diorama.Audio
         public const string PondTap = "pond.tap";
         public const string RainHard = "rain.hard";
         public const string RainSoft = "rain.soft";
+        public const string RestoreBreeze = "restore.breeze";
         public const string RestoreSwell = "restore.swell";
         public const string RuneHold = "rune.hold";
         public const string RuneHover = "rune.hover";

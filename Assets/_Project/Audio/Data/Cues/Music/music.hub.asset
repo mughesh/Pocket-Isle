@@ -15,7 +15,7 @@ MonoBehaviour:
   id: music.hub
   clips:
   - {fileID: 8300000, guid: f6d53a365470ca941b2bd96cc3d4d78d, type: 3}
-  volume: 0.25
+  volume: 0.4
   volumeJitter: 0
   pitchMin: 1
   pitchMax: 1
