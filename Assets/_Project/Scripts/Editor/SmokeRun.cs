@@ -233,6 +233,7 @@ namespace Diorama.EditorTools
                 if (EditorApplication.isPaused) EditorApplication.isPaused = false; // Error Pause must not freeze the run
                 SkipLongLines();
                 WatchProgress();
+                WatchRules();
                 bool done = false;
                 try { done = b.done == null ? Elapsed >= b.timeout : b.done(); }
                 catch (Exception e) { Note("exception", $"beat check threw {e.GetType().Name}: {e.Message}"); }
@@ -303,6 +304,29 @@ namespace Diorama.EditorTools
                 {
                     _lineSince = Now;
                     d.DebugFinishLine();
+                }
+            }
+
+            // Step 21: Mugesh's notes as rules (Assets/Docs/Regressions.md), watched the whole run; a broken one is noted
+            // "rule" (once per beat), so a later step can't quietly undo an earlier fix.
+            double _shardMusicSince = -1, _menuSince = -1;
+
+            void WatchRules()
+            {
+                // R1 (Nov 6, broken by step 20): no music while only the shard floats.
+                bool shardMusic = Opening.ShardOnly && Diorama.Audio.AudioService.CurrentMusic != null;
+                if (!shardMusic) _shardMusicSince = -1;
+                else if (_shardMusicSince < 0) _shardMusicSince = Now;
+                else if (Now - _shardMusicSince > 3) Note("rule", $"R1 music {Diorama.Audio.AudioService.CurrentMusic} while only the shard floats");
+                // R2, R3 (Nov 8): the menu pauses every sound; in a battle the battle row steps aside.
+                if (!GameMenu.IsOpen) _menuSince = -1;
+                else if (_menuSince < 0) _menuSince = Now;
+                else if (Now - _menuSince > 1)
+                {
+                    if (!AudioListener.pause) Note("rule", "R2 the menu is open but sound isn't paused");
+                    var runes = UnityEngine.Object.FindFirstObjectByType<BattleRunes>();
+                    var row = runes != null ? runes.transform.Find("Rune Row") : null;
+                    if (InBattle && row != null && row.gameObject.activeInHierarchy) Note("rule", "R3 the menu is open over the battle row");
                 }
             }
 
