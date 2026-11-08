@@ -1,13 +1,6 @@
-- There is no ghost hands for swipe and tap to stop. Should we remove that as the character is already stoping by itself. 
-- many times the lanter's text is obstructing. like when the pod is to be picked an dropped to catch new isling, the instruction that came, it was right in front of me over my own isling, hiding the whole isling behghind. I am not able to see where to drop the pod. Lantern and tit text shall be bit more towards the right. this might be happening in many other cases as well. 
-- hand gets stuck in the menu button sometimes. only after closng the menu releases it. The hand used to interact the button gets stuck in that button
-- using meta recenter works. but it disapears the island for a moment and shows it again. I thought it would smoothly move the island to the point. 
-- after the battle, the shard can be floating bit aboive. Right now it gets behind the entry arch, hides from my view. 
-- Interacting to it, it can work even if the user just touched it. the current intstuction is confusing, and the grab is not working well for this small object. 
-- When entering still isle with a shard, the option to place it comes, the shard is floating. I am not even in the closer view of the statue. Also, it goes out of focus when I do this and the character is far away. We need that auto focus thing we have for the hand interactions here too. 
-- When doing this shard placement, lets lock the character for a while. I was able to enter the lodge and move around when the statue was talking. 
-- When starting the app, I am able to hear the island sound when i am just seeing the shard. I am supposed touch the shard and not to hear these sounds at this point. We need a more curious sound for this. This is highly needed. Anything realted to the first few minutes of experience is important. 
-- There are many number of smaller clump of ltall grasses. I dont see any of the islings there. The frequency of them coming and the places it can come can be slightly increased. 
-- Ending drags. About 70 s on a static island with tiny credits in speech bubbles, then it closes on a blank white island. without any skip button
-- Credits name “ElevenLabs, Kenney (CC0)”. Your checklist says to avoid brand names in the app. I guess we will remove this when we got the subscription
-- We should defenitely work on adding a grab lock button. It can be below the grab line on the rim. 
+- Swiping ghost hands. It looks like the thumb is moving in all four direction. But not as a thumb swiping on the index finger. I think it is better if I record this if you cannot make this. Me recording it and you editing it to make some cuts to make it short could work better
+- The ghost hands over the attack panel button. It goes stright in the angle of, from users eye to the button. It is very big and obstructs the whole area. It is very close to my eye. for button poke on this, we can rather use a highlighter instead of this big hangs. 
+- the ghost hands at the starting shard select. It could come little tilted. the angle of it very perpendicular to my view, it doesnt look well like a hand in this way. let it do the poke from a side. 
+- the dialogues when the tower creature talking, the bubble is pointing on the lantern and not the creature, looks like the lantern is talking. 
+- galewick breathing sound when exiting tower, it sounded like a sea wave hittin shore. 
+- golden path in lilymere is point to the river, and not changing. Check image

@@ -1,9 +1,11 @@
-- new golden border text panel sometimes feel blocky
-- The panel interupting button press. I am unable to select it easily. This happens in many other cases as well. 
-- walking golden step's image looks good but it is revered
-- the golden path shows the direction, but it could be on the road itself instead of showing the shortest path. It goes too odd of a route. 
-- Clouds on the path is too high. It could be on the road itslef. 
-- your road remodel of the cloud road looks like it blocked th road. 
-- every temple's entry door is default bright, hiding the character. No need to show them glow in the temples as it highlights the wrong motive at this point. Also, we can keep the door on the right.
-- lillymere and the wind area has the same color pallete. Any way we can change it to some kind of a blue shade for the lilymere, that doenst look too bad considering the water bodies. ? I also feel it will look unnatural. I let you think onthis. 
-- new walking looks good, but it should be bit faster. The pinch to wak has a speed, lets keep tha same to this as well. 
+- the song continuously playing when I press the start new quick journey. It doesnt need to play when I am at poking the shard.
+- swiping ghost hands needs rework. it is not having the corect swipe animation and tilted. 
+- poking pods works, let it hide the name card if another interaction is done
+- pause menu is not muting any of the audio
+- While in battle, I try to switch to another pod, I pick that but it registers as a button click of the moves. I could never change my isling.
+- This is how it looks when I press menu while in battle. [check image]. everything is overlapped. 
+- run button doesnt work after doing the first move. 
+- shard pick and place on the statue, ghost hands is wrong. it pick and places somewhere down, not on the statue. 
+- no sound is coming when statue is talking. I thought we are gonna use some sound similar to the lantern's chatter, but more better in connection to that statue. 
+- at ending standoff, islings are spread out, but it goes inside the objects. U need to work on this better. Check image. 
+- end credits lanters are coming from the center of island. It is too close. Let is come from behind the island and go up, like the panel we had before. 
