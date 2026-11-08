@@ -50,6 +50,8 @@ namespace Diorama
         public string firstWalkLesson = "walk";
         [Tooltip("Diorama/Toon material for the shard (mossy stone, gold cracks).")]
         public Material shardMaterial;
+        [Tooltip("Step 22: gold motes per second leaving the shard's cracks.")]
+        public float crackSparksPerSecond = 14f;
 
         [Header("Starters (left to right as the player sees them)")]
         public IslingSpecies[] starters = new IslingSpecies[3];
@@ -530,6 +532,26 @@ namespace Diorama
             _shardCollider.sharedMesh = _shardMesh;
             _spinAngle = 0f;
             _nudge = _nudgeVel = Vector3.zero;
+            _crackPoints.Clear();
+            if (shardMaterial != null)
+                CrackField.FindPoints(_shardMesh, shardMaterial.GetFloat("_CrackScale"), shardMaterial.GetFloat("_CrackWidth"), 90, _crackPoints);
+            if (_crackPoints.Count == 0) Debug.LogError("[Opening] No crack points on the shard: no particles will rise from it.", this);
+        }
+
+        readonly List<CrackField.Point> _crackPoints = new List<CrackField.Point>();
+        float _sparkDue;
+
+        /// <summary>Step 22: gold motes leaving random points on the cracks, out along the surface, then drifting up.</summary>
+        void EmitCrackSparks()
+        {
+            if (fx == null || _crackPoints.Count == 0 || crackSparksPerSecond <= 0f) return;
+            _sparkDue += Time.deltaTime * crackSparksPerSecond;
+            for (; _sparkDue >= 1f; _sparkDue -= 1f)
+            {
+                var p = _crackPoints[UnityEngine.Random.Range(0, _crackPoints.Count)];
+                Vector3 n = _shard.TransformDirection(p.normal);
+                fx.Burst(_shard.TransformPoint(p.position), 1, new Color(1f, 0.6f, 0.16f), 0.006f, 1.5f, 0.005f, n * 0.05f + Vector3.up * 0.025f);
+            }
         }
 
         float _shardRadius;
@@ -554,6 +576,7 @@ namespace Diorama
         void MoveShard(Vector3 basePos, float spinSpeed)
         {
             float dt = Time.deltaTime;
+            EmitCrackSparks();
             _spinSpeed = Mathf.MoveTowards(_spinSpeed, spinSpeed, dt * 0.6f);
             _spinAngle = Mathf.Repeat(_spinAngle + _spinSpeed * 40f * dt, 360f);
             // Damped spring back to the base position (semi-implicit Euler, stable at these rates).

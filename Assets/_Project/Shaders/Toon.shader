@@ -42,9 +42,9 @@ Shader "Diorama/Toon"
         _CrackScale ("Crack Scale", Float) = 2.5
         _CrackWidth ("Crack Width", Float) = 0.04
         _CrackPulse ("Crack Pulse", Range(0, 1)) = 0
-        _CrackDepth ("Crack Depth (0 = painted on)", Range(0, 0.6)) = 0
-        _CrackFlow ("Crack Flow (specks)", Range(0, 1)) = 0
-        _CrackInner ("Crack Inner Glow", Range(0, 1)) = 0
+        _CrackDepth ("Crack Depth (0 = painted on; about one crack width)", Range(0, 0.6)) = 0
+        _CrackFlow ("Crack Fluid Speed", Range(0, 1)) = 0
+        _CrackInner ("Crack Bevel (stone tilts into the crack)", Range(0, 2)) = 0
 
         [Header(Lighting)]
         _Spec ("Specular Glint", Range(0, 2)) = 0.3
@@ -62,6 +62,7 @@ Shader "Diorama/Toon"
 
         [Header(Outline (own Outline pass, also read by Diorama Toon Outline))]
         _OutlineWidth ("Outline Width", Float) = 0.035
+        [ToggleUI] _OutlineRadial ("Outline From Centre (hard-edged, roundish meshes)", Float) = 0
         _OutlineColor ("Outline Colour", Color) = (0.1, 0.1, 0.1, 1)
 
         [Header(Battle clearing (island content))]
@@ -167,6 +168,14 @@ Shader "Diorama/Toon"
                 float3 L = _MainLightPosition.xyz;
                 if (dot(L, L) < 1e-4) L = normalize(float3(-0.45, 0.85, 0.5));
                 float3 n = normalize(i.normalWS);
+                bool deepCracks = _CrackOn > 0.5 && _CrackDepth > 0.001;
+                float crackE = 0.0, crackEdge = 0.0;
+                if (deepCracks)
+                {
+                    float3 crackDir;
+                    crackE = ToonCrackField(pO, crackDir, crackEdge);
+                    n = ToonCrackBevel(n, pO, crackE, normalize(crackDir - nO * dot(crackDir, nO) + 1e-5), crackEdge);
+                }
                 float3 v = normalize(GetCameraPositionWS() - i.positionWS);
                 float ndl = dot(n, L);
                 float band = 0.58 + 0.27 * smoothstep(-0.08, 0.0, ndl) + 0.15 * smoothstep(0.45, 0.52, ndl);
@@ -176,11 +185,8 @@ Shader "Diorama/Toon"
                 float3 h = normalize(L + v);
                 col += smoothstep(0.93, 0.95, dot(n, h)) * _Spec * 0.55;
                 col += c * _Emissive;
-                if (_CrackOn > 0.5)
-                {
-                    float3 vO = normalize(TransformWorldToObject(GetCameraPositionWS()) - pO);
-                    col = _CrackDepth > 0.001 ? ToonDeepCracks(col, pO, vO) : ToonLava(col, pO);
-                }
+                if (deepCracks) col = ToonDeepCracks(col, pO, normalize(TransformWorldToObject(GetCameraPositionWS()) - pO), nO, crackE, crackEdge);
+                else if (_CrackOn > 0.5) col = ToonLava(col, pO);
                 if (_Ripple > 0.001)
                 {
                     // Step 11a: restored water. Two slow wave trains in map space (tiles) cross into soft bright bands,
@@ -248,7 +254,10 @@ Shader "Diorama/Toon"
                 }
                 float widen;
                 o.color = DioramaOutlineFocus(_OutlineColor.rgb, TransformObjectToWorld(float3(0.0, 0.0, 0.0)), widen);
-                float3 p = ToonDeform(v.positionOS.xyz, v.normalOS) + v.normalOS * _OutlineWidth * widen;
+                // Radial = one clean shell at rest. When the outline widens (hover / highlight, the gold state) it goes back to
+                // the face normals, so a hard-edged mesh bursts into separate gold pieces (Mugesh likes that on the shard).
+                float3 outward = _OutlineRadial > 0.5 ? lerp(normalize(v.positionOS.xyz), v.normalOS, saturate((widen - 1.25) / 0.2)) : v.normalOS;
+                float3 p = ToonDeform(v.positionOS.xyz, v.normalOS) + outward * _OutlineWidth * widen;
                 o.positionCS = TransformWorldToHClip(ToonWindowVertex(TransformObjectToWorld(p), o.islandPos));
                 return o;
             }

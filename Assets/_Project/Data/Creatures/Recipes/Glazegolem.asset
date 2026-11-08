@@ -33,9 +33,9 @@ MonoBehaviour:
     crackScale: 1.4
     crackWidth: 0.05
     crackPulse: 1
-    crackDepth: 0.1
+    crackDepth: 0.03
     crackFlow: 0.8
-    crackInner: 0.25
+    crackInner: 1
     patches:
     - center: {x: 0, y: 0.6, z: 0}
       radius: 0.17

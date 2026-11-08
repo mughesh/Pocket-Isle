@@ -521,9 +521,9 @@ MonoBehaviour:
       crackScale: 1.8
       crackWidth: 0.045
       crackPulse: 0.8
-      crackDepth: 0.08
-      crackFlow: 0.7
-      crackInner: 0.2
+      crackDepth: 0.022
+      crackFlow: 0.8
+      crackInner: 1
       patches: []
       patchColors: []
       spec: 0.25

@@ -60,6 +60,7 @@ CBUFFER_START(UnityPerMaterial)
     float4 _PatchColor0; float4 _PatchColor1; float4 _PatchColor2; float4 _PatchColor3; float4 _PatchColor4; float4 _PatchColor5;
 
     float  _OutlineWidth;
+    float  _OutlineRadial; // step 22: 1 = push the hull out from the centre, so hard-edged meshes (the shard) don't split at corners
     float4 _OutlineColor;
 
     float  _ClearSink;  // 1 = prop (tree, rock): sinks inside the battle clearing and its view corridor
@@ -153,54 +154,136 @@ float3 ToonLava(float3 col, float3 pO)
     return lerp(col, lava, glow);
 }
 
-// Step 22 (Mugesh, Nov 8: the shard's cracks look like one flat painted texture; the lava Islings too): cracks with
-// depth. The crack field is sampled again inside the body along the view ray (object space), wider and hotter the
-// deeper, so the glow sits down in the crack and slides against the surface lines as the head moves. Specks of light
-// drift up through the cracks; a faint glow shows through the stone around them (_CrackInner). The surface keeps a
-// dark lip, so each crack reads as a groove. Cost: four crack lookups instead of one, only where _CrackDepth > 0.
-float3 ToonDeepCracks(float3 col, float3 pO, float3 vO)
+// Step 22 (second pass; Mugesh, Nov 8: keep the old stone and gold, give the cracks depth and something flowing in
+// them). The same crack lines as ToonLava, carved in: the stone beside a crack tilts toward it before the toon lighting
+// (a procedural normal map, _CrackInner), and inside the opening the view ray walks down the groove (_CrackDepth, about
+// one crack width), so you see the far wall and the fluid floor shift as the head moves. Fluid: noise scrolling up
+// (_CrackFlow = speed). The particles that leave the cracks are real ones (Opening.EmitCrackSparks, CrackField.cs).
+// Plates around fixed points on a sphere: every crack is a plane through the body's centre, so it always cuts straight
+// through the surface. (A 3D cell pattern has planes in any direction; a face lying along one smears into a blob.)
+// Returns the distance to the nearest crack, scaled like ToonCrackDistance so _CrackWidth means the same.
+// dirO: toward that crack. edge: 0..1, the same on both sides of one crack segment (main cracks and thin ones).
+// Keep CrackField.cs the same.
+static const float3 ToonCrackSites[26] =
 {
-    float t = _Time.y + _TimeOffset;
-    float pulse = 1.0 + 0.4 * _CrackPulse * sin(t * 2.0 - pO.y * 4.0);
-    float3 hot = lerp(_CrackColor.rgb, float3(1.0, 0.95, 0.7), 0.45);
+    float3(0.3904, 0.9202, -0.0294),
+    float3(-0.3486, 0.9195, 0.1817),
+    float3(-0.0362, 0.8626, -0.5046),
+    float3(0.299, 0.8641, 0.4049),
+    float3(-0.7035, 0.7046, -0.0932),
+    float3(0.7092, 0.5774, -0.4045),
+    float3(-0.1175, 0.536, 0.836),
+    float3(-0.411, 0.221, -0.8845),
+    float3(0.8539, 0.3199, 0.4104),
+    float3(-0.7146, 0.4479, 0.5373),
+    float3(0.5001, 0.404, -0.766),
+    float3(0.2273, 0.2827, 0.9319),
+    float3(-0.8282, 0.2246, -0.5134),
+    float3(0.9793, -0.0393, -0.1984),
+    float3(-0.7018, -0.212, 0.6801),
+    float3(-0.2828, -0.2451, -0.9273),
+    float3(0.6745, -0.1757, 0.7171),
+    float3(-0.8823, -0.4385, 0.1712),
+    float3(0.6976, -0.3805, -0.6071),
+    float3(-0.185, -0.4214, 0.8878),
+    float3(-0.5818, -0.5196, -0.6257),
+    float3(0.8022, -0.5833, 0.1276),
+    float3(-0.5068, -0.7526, 0.4204),
+    float3(0.2779, -0.7833, -0.5561),
+    float3(0.2587, -0.834, 0.4873),
+    float3(-0.3655, -0.8966, -0.2499)
+};
 
-    // The surface: a dark lip around each crack (a groove) and its opening.
-    float e0 = ToonCrackDistance(pO);
-    float w0 = _CrackWidth * saturate(sin(dot(pO, float3(1.7, 2.3, 1.1)) * 2.6) * 0.9 + 0.75);
-    float open = 1.0 - smoothstep(w0 * 0.45, w0 + 0.003, e0);
-    float lip = 1.0 - smoothstep(w0, w0 * 2.6 + 0.01, e0);
-    col *= lerp(1.0, 0.35, lip * (1.0 - open));
-
-    // Down inside: the same cracks further along the view ray, a little wider and hotter each layer, dimmer through
-    // more stone. Inside the opening all of it shows; around it only _CrackInner of it.
-    float3 inner = 0.0;
-    float near = 0.0;
-    [unroll] for (int k = 1; k <= 3; k++)
+float ToonCrackField(float3 pO, out float3 dirO, out float edge)
+{
+    // Three scales of wobble: broken lines, not smooth arcs.
+    float3 p = pO + sin(pO.yzx * 9.0) * 0.03 + sin(pO.zxy * 23.0 + 1.3) * 0.0125 + sin(pO.yzx * 57.0 + 0.7) * 0.005;
+    float3 d = normalize(p);
+    int best = 0;
+    float top = -2.0;
+    for (int i = 0; i < 26; i++)
     {
-        float3 q = pO - vO * (_CrackDepth * k / 3.0);
-        float e = ToonCrackDistance(q);
-        float w = w0 * (1.0 + 0.3 * k);
-        float core = 1.0 - smoothstep(w * 0.15, w * 0.6, e);
-        float halo = 1.0 - smoothstep(w * 0.6, w * 1.6, e);
-        float through = lerp(_CrackInner, 1.0, open) / (1.0 + 0.6 * k);
-        inner += (hot * core + _CrackColor.rgb * halo * 0.22) * through;
-        near = max(near, halo);
+        float c = dot(d, ToonCrackSites[i]);
+        if (c > top) { top = c; best = i; }
     }
-    // The crack's own bright floor right under the opening.
-    inner += hot * open * 0.9;
+    float3 a = ToonCrackSites[best];
+    float e = 8.0;
+    dirO = float3(1.0, 0.0, 0.0);
+    edge = 0.0;
+    for (int j = 0; j < 26; j++)
+    {
+        if (j == best) continue;
+        float3 ab = a - ToonCrackSites[j];
+        float len = length(ab);
+        float g = dot(d, ab) / len;
+        if (g < e) { e = g; dirO = -ab / len; edge = ToonHash3((a + ToonCrackSites[j]) * 17.0).y; }
+    }
+    return max(e, 0.0) * length(p) * 2.0 * _CrackScale;
+}
 
-    // Specks: a moving cell grid halfway down; a few cells hold a twinkling point drifting upward, only in the cracks.
-    float3 m = pO - vO * (_CrackDepth * 0.5);
-    float3 sp = (m - float3(0.0, t * 0.09, 0.0)) * (_CrackScale * 4.0);
-    float3 cell = floor(sp);
-    float3 r = ToonHash3(cell);
-    float3 f = frac(sp) - 0.5 - (r - 0.5) * 0.5;
-    float speck = step(0.55, r.x) * smoothstep(0.16, 0.02, length(f)) * (0.5 + 0.5 * sin(t * (2.0 + 3.0 * r.y) + r.z * 20.0));
-    speck *= max(near, open) * _CrackFlow;
+// Swells and thins gently; never closes (a line that fades out reads as a scratch, not a crack).
+float ToonCrackWidth(float3 pO, float edge)
+{
+    return _CrackWidth * lerp(0.5, 1.4, smoothstep(0.25, 0.8, edge)) * (0.8 + 0.2 * sin(dot(pO, float3(1.7, 2.3, 1.1)) * 2.6));
+}
 
-    col += inner * pulse;
-    col += float3(1.0, 0.97, 0.85) * speck * 1.6;
-    return col;
+float ToonNoise3(float3 p)
+{
+    float3 i = floor(p);
+    float3 f = frac(p);
+    f = f * f * (3.0 - 2.0 * f);
+    return lerp(
+        lerp(lerp(ToonHash3(i).x, ToonHash3(i + float3(1, 0, 0)).x, f.x), lerp(ToonHash3(i + float3(0, 1, 0)).x, ToonHash3(i + float3(1, 1, 0)).x, f.x), f.y),
+        lerp(lerp(ToonHash3(i + float3(0, 0, 1)).x, ToonHash3(i + float3(1, 0, 1)).x, f.x), lerp(ToonHash3(i + float3(0, 1, 1)).x, ToonHash3(i + float3(1, 1, 1)).x, f.x), f.y),
+        f.z);
+}
+
+// The normal-map part: world normal tilted toward the crack over the bevel beside it. Call before lighting.
+float3 ToonCrackBevel(float3 nW, float3 pO, float e, float3 side, float edge)
+{
+    float w = ToonCrackWidth(pO, edge);
+    float slope = 1.0 - smoothstep(w, w * 2.4 + 0.012, e);
+    return normalize(nW + TransformObjectToWorldDir(side, false) * slope * _CrackInner);
+}
+
+float3 ToonDeepCracks(float3 col, float3 pO, float3 vO, float3 nO, float e0, float edge)
+{
+    float w0 = ToonCrackWidth(pO, edge);
+    float open = 1.0 - smoothstep(w0 * 0.86, w0, e0);
+    float pulse = 1.0 + 0.4 * _CrackPulse * sin((_Time.y + _TimeOffset) * 2.0 - pO.y * 4.0);
+
+    // Stone: a thin dark edge, then the crack's warm light spilling over it.
+    // Main cracks and hot stretches light the stone; thin ones and dim stretches stay dark.
+    float lip = 1.0 - smoothstep(w0, w0 * 2.2 + 0.006, e0);
+    float bleed = 1.0 - smoothstep(w0, w0 * 4.0 + 0.02, e0);
+    float heat = bleed > 0.001 ? smoothstep(0.35, 0.72, ToonNoise3(pO * 6.0 + 3.1)) * smoothstep(0.3, 0.8, edge) : 0.0;
+    col *= lerp(1.0, 0.34, lip * (1.0 - open));
+    col += _CrackColor.rgb * bleed * bleed * 0.55 * heat * pulse * (1.0 - open);
+    if (open <= 0.001) return col;
+
+    // Down the groove, slanting with the view; the first step that leaves the crack has hit a wall.
+    float3 ray = vO / max(dot(vO, nO), 0.3) * _CrackDepth;
+    float hit = 1.0;
+    [unroll] for (int k = 3; k >= 1; k--)
+    {
+        float3 skipDir;
+        float skipEdge;
+        if (ToonCrackField(pO - ray * (k / 3.0), skipDir, skipEdge) > w0 * (1.0 - 0.08 * k)) hit = (k - 1.0) / 3.0 + 0.001;
+    }
+
+    float t = (_Time.y + _TimeOffset) * _CrackFlow;
+    float3 fp = pO - ray * hit;
+    float3 c1 = fp * 15.0 + float3(0.0, -t * 2.4, 0.0);
+    c1.xz += sin(fp.y * 18.0 + t * 0.7) * 0.5;
+    float flow = ToonNoise3(c1) * 0.65 + ToonNoise3(c1 * 2.1 + float3(t * 0.6, -t * 1.5, t * 0.4)) * 0.35;
+
+    float3 crust = _CrackColor.rgb * 0.72;
+    float3 hot = lerp(_CrackColor.rgb, float3(1.0, 0.97, 0.75), 0.85);
+    float centre = 1.0 - smoothstep(w0 * 0.1, w0 * 0.7, e0);
+    float3 fluid = lerp(crust, _CrackColor.rgb, smoothstep(0.32, 0.52, flow));
+    fluid = lerp(fluid, hot, saturate(centre * lerp(0.25, 0.9, heat) + smoothstep(0.56, 0.7, flow))) * pulse * lerp(0.72, 1.0, heat);
+    float3 wall = _CrackColor.rgb * lerp(0.3, 0.85, hit);
+    return lerp(col, hit >= 1.0 ? fluid : wall, open);
 }
 
 float3 ToonPatch(float3 c, float4 patch, float4 color, float3 pO)

@@ -448,9 +448,9 @@ MonoBehaviour:
       crackScale: 1.4
       crackWidth: 0.05
       crackPulse: 1
-      crackDepth: 0.12
+      crackDepth: 0.03
       crackFlow: 1
-      crackInner: 0.35
+      crackInner: 1
       patches:
       - {x: 0, y: 0.6, z: 0, w: 0.17}
       patchColors:

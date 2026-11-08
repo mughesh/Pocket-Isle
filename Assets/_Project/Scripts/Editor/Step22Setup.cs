@@ -15,10 +15,12 @@ namespace Diorama.EditorTools
         /// <summary>(recipe / prefab name, depth, flow, inner glow).</summary>
         static readonly (string name, float depth, float flow, float inner)[] Islings =
         {
-            ("Glazegolem", 0.1f, 0.8f, 0.25f),
-            ("Kilngolem", 0.12f, 1f, 0.35f), // evolves from Glazegolem: its cracks are inherited, its prefab still holds its own style
-            ("Cindercap", 0.08f, 0.7f, 0.2f),
-            ("Cinderbloom", 0.08f, 0.7f, 0.2f),
+            // Depth is about one crack width (_CrackWidth / _CrackScale * 0.6). Kilngolem evolves from Glazegolem: its cracks
+            // are inherited, its prefab still holds its own style.
+            ("Glazegolem", 0.03f, 0.8f, 1f),
+            ("Kilngolem", 0.03f, 1f, 1f),
+            ("Cindercap", 0.02f, 0.8f, 1f),
+            ("Cinderbloom", 0.022f, 0.8f, 1f),
         };
 
         [MenuItem("Tools/Pocket Isle/Step 22/Deep Cracks (shard + lava Islings)")]
@@ -31,17 +33,18 @@ namespace Diorama.EditorTools
                 return;
             }
             m.SetFloat("_CrackOn", 1f);
-            m.SetFloat("_CrackDepth", 0.3f);
+            m.SetFloat("_CrackDepth", 0.022f);
             m.SetFloat("_CrackFlow", 1f);
-            m.SetFloat("_CrackInner", 0.45f);
-            m.SetFloat("_CrackScale", 2.6f);
-            m.SetFloat("_CrackWidth", 0.05f);
-            m.SetFloat("_CrackPulse", 0.6f);
-            // A smoky crystal (was grey stone with a green top) so the veins inside read.
-            m.SetColor("_BaseColor", new Color(0.26f, 0.25f, 0.3f));
-            m.SetColor("_TopColor", new Color(0.4f, 0.38f, 0.46f));
-            m.SetFloat("_Emissive", 0.25f);
-            m.SetFloat("_Spec", 0.9f);
+            m.SetFloat("_CrackInner", 1.3f);
+            m.SetFloat("_CrackScale", 3.2f);
+            m.SetFloat("_CrackWidth", 0.075f);
+            m.SetFloat("_CrackPulse", 0f);
+            // The original mossy stone and gold (the island's theme).
+            m.SetColor("_BaseColor", new Color(0.62f, 0.6f, 0.55f));
+            m.SetColor("_TopColor", new Color(0.5f, 0.64f, 0.37f));
+            m.SetFloat("_Emissive", 0.2f);
+            m.SetFloat("_Spec", 0.3f);
+            m.SetFloat("_OutlineRadial", 1f);
             EditorUtility.SetDirty(m);
 
             int recipes = 0, pieces = 0;
@@ -80,7 +83,7 @@ namespace Diorama.EditorTools
                 EditorUtility.SetDirty(prefab);
             }
             AssetDatabase.SaveAssets();
-            Debug.Log($"[Step22Setup] Deep cracks: the shard (depth 0.3, flow 1, inner 0.45), {recipes} recipes, {pieces} cracked prefab pieces.");
+            Debug.Log($"[Step22Setup] Deep cracks: the shard (depth 0.022, fluid 1, bevel 1.3), {recipes} recipes, {pieces} cracked prefab pieces.");
         }
     }
 }

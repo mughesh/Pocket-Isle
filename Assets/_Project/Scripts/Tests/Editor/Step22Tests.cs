@@ -38,6 +38,20 @@ namespace Diorama.Tests
         }
 
         [Test]
+        public void CrackField_FindsPointsOnlyInTheCracks()
+        {
+            var mesh = new Mesh { vertices = new[] { new Vector3(-1f, -1f, 0.2f), new Vector3(1f, -1f, 0.2f), new Vector3(0f, 1f, 0.2f) }, triangles = new[] { 0, 1, 2 } };
+            try
+            {
+                var found = new System.Collections.Generic.List<CrackField.Point>();
+                CrackField.FindPoints(mesh, 3.2f, 0.075f, 40, found);
+                Assert.AreEqual(40, found.Count);
+                foreach (var p in found) Assert.Less(CrackField.Distance(p.position, 3.2f), 0.075f);
+            }
+            finally { Object.DestroyImmediate(mesh); }
+        }
+
+        [Test]
         public void RoomGap_GrowsAsTheIslandShrinks()
         {
             var go = new GameObject("board");

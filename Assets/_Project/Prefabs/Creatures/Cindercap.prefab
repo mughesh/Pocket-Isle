@@ -756,9 +756,9 @@ MonoBehaviour:
       crackScale: 1.7
       crackWidth: 0.04
       crackPulse: 0.7
-      crackDepth: 0.08
-      crackFlow: 0.7
-      crackInner: 0.2
+      crackDepth: 0.02
+      crackFlow: 0.8
+      crackInner: 1
       patches: []
       patchColors: []
       spec: 0.2
