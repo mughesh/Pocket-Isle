@@ -61,22 +61,41 @@ namespace Diorama.EditorTools
             var g = Object.FindFirstObjectByType<GhostHands>();
             var island = Object.FindFirstObjectByType<IslandBuilder>();
             if (g == null || island == null) return;
-            g.Show(GhostHands.SwipeAllClip, GhostPlace.AboveIsland, null, 0.6f, false, false);
+            string clip = string.IsNullOrEmpty(Arg) ? GhostHands.SwipeAllTapClip : Arg;
+            g.Show(clip, GhostPlace.AboveIsland, null, 0.6f, false, false);
             var t = island.transform;
             var eye = t.position + t.rotation * new Vector3(0f, 0.5f, 0.42f);
-            var at = t.position + t.rotation * new Vector3(0f, 0.12f, 0f);
+            // Flat Play has no head: the main camera sits at the origin. Put it on the seat, as the headset would be, since
+            // the demo faces the head.
+            if (Camera.main != null) Camera.main.transform.SetPositionAndRotation(eye, Quaternion.LookRotation(t.position - eye, Vector3.up));
+            g.debugFreeze = 0f;
+            g.DebugPose();
+            float dur = Mathf.Max(0.1f, g.ClipDuration);
+            string prev = "-";
+            float since = 0f;
+            bool shot = false;
             int n = 0;
-            foreach (float u in new[] { 0.05f, 0.2f, 0.55f, 0.8f })
+            // Walk the clip in 1/30 s steps (the arrow follows the stroke as it plays) and shoot 0.3 s into each stroke.
+            for (float s = 0f; s <= dur; s += 1f / 30f)
             {
-                g.debugFreeze = u;
+                g.debugFreeze = s / dur;
                 g.DebugPose();
-                var m = g.LastMeasured;
-                Debug.Log($"[Step21Debug] Swipe ghost at {u:0.00}: measured fingers {m.fingers:F2}, back {m.back:F2} (clip frame); {g.DebugInfo()}");
-                BattleDebug.Render($"Logs/BattleShots/21_swipe_{n}.png", eye, Quaternion.LookRotation(at - eye, Vector3.up));
-                var close = Vector3.Lerp(eye, at, 0.65f);
+                string now = g.StrokeNow;
+                if (now[0] != prev[0])
+                {
+                    prev = now;
+                    since = 0f;
+                    shot = false;
+                }
+                since += 1f / 30f;
+                if (shot || now == "-" || since < 0.3f) continue;
+                shot = true;
+                var dot = GameObject.Find("Ghost Thumb Dot");
+                var at = dot != null ? dot.transform.position : t.position;
+                Debug.Log($"[Step21Debug] Swipe ghost {clip} at {s:0.00} s: stroke {now}, thumb tip {at:F3}.");
+                BattleDebug.Render($"Logs/BattleShots/21_swipe_{n}.png", eye, Quaternion.LookRotation(t.position - eye, Vector3.up));
+                var close = Vector3.Lerp(eye, at, 0.6f);
                 BattleDebug.Render($"Logs/BattleShots/21_swipe_{n}_close.png", close, Quaternion.LookRotation(at - close, Vector3.up));
-                var side = at + t.rotation * new Vector3(0.35f, 0.05f, 0f);
-                BattleDebug.Render($"Logs/BattleShots/21_swipe_{n}_side.png", side, Quaternion.LookRotation(at - side, Vector3.up));
                 n++;
             }
             g.debugFreeze = -1f;

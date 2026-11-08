@@ -5392,11 +5392,16 @@ MonoBehaviour:
   aboveTargetHeight: 0.07
   thumbRimOffset: {x: 0.06, y: 0.05, z: 0.05}
   thumbCenterHeight: 0.09
-  sideSwipeAngle: 28
+  sideSwipeAngle: 40
   sideSwipeSeconds: 0.75
   thumbScale: 1
   thumbYaw: 0
   thumbRoll: 0
+  thumbBeside: 1
+  thumbBesideSpot: {x: 0.02, y: 0.13, z: 0.06}
+  thumbArrows: 1
+  arrowLength: 0.07
+  arrowWidth: 0.035
   measuredWrist: 1
   keyDots: 1
   thumbTrailDots: 6

@@ -58,6 +58,10 @@ namespace Diorama.EditorTools
             so.FindProperty("wristBack").vector3Value = new Vector3(0.75f, 0.6f, -0.15f);
             so.FindProperty("thumbYaw").floatValue = 0f;
             so.FindProperty("thumbRoll").floatValue = 0f;
+            // Step 21 (video): bigger sweeps across the finger, the demo beside the island with arrows.
+            so.FindProperty("sideSwipeAngle").floatValue = 40f;
+            so.FindProperty("thumbBeside").boolValue = true;
+            so.FindProperty("thumbArrows").boolValue = true;
             so.ApplyModifiedPropertiesWithoutUndo();
             EditorSceneManager.MarkSceneDirty(g.gameObject.scene);
             EditorSceneManager.SaveScene(g.gameObject.scene);

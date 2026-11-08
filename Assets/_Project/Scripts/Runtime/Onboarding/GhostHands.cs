@@ -50,6 +50,15 @@ namespace Diorama
         public float thumbYaw = 55f;
         [Tooltip("Nov 8 (Mugesh: still tilted, the thumb leaning left): the thumb demo rolled this many degrees about its forward axis (- = its left side up).")]
         public float thumbRoll = 0f;
+        [Header("Step 21: thumb demos beside the island, with arrows")]
+        [Tooltip("Mugesh (video, Nov 8): over the island's middle the swipe ghost read as a big hand lying on the map. Thumb demos float " +
+                 "beside the island on the dominant hand's side instead, facing the player: this far out past the side rim, this high over " +
+                 "the cap, this far toward the player from the middle (island m at scale 1).")]
+        public bool thumbBeside = true;
+        public Vector3 thumbBesideSpot = new Vector3(0.02f, 0.13f, 0.06f);
+        [Tooltip("A gold arrow for each swipe stroke (the way the explorer walks for it): length and width at the ghost's scale.")]
+        public bool thumbArrows = true;
+        public float arrowLength = 0.07f, arrowWidth = 0.035f;
         [Tooltip("Step 21 (Mugesh, 4th time: the swipe ghost tilted): a wrist-anchored clip is turned so the hand's own measured " +
                  "fingers (wrist to middle knuckle) point along Wrist Fingers and its measured back of the hand along Wrist Back. " +
                  "Before, the wrist joint's axes were assumed to be fingers = z, back = y; they aren't, so the hand came out tilted " +
@@ -502,6 +511,7 @@ namespace Diorama
             if (release.HasValue) _releaseWorld = release.Value;
             UpdateDot(point, t / Mathf.Max(0.01f, _clip.Duration), alpha);
             UpdateThumbDots(keyDots || ThumbDemo ? a : null, alpha, scale);
+            UpdateArrow(ThumbDemo ? a : null, t, alpha, scale, frame);
             Spark(grab, t, point, alpha, scale);
         }
 
@@ -568,7 +578,9 @@ namespace Diorama
                 if (!show) continue;
                 float k = 1f - i / (float)n;
                 _thumbDots[i].position = p;
-                _thumbDots[i].localScale = Vector3.one * size * (i == 0 ? 1f + 0.2f * Mathf.Sin(Time.time * 10f) : 0.4f + 0.5f * k);
+                // Step 21: a tap stroke pulses the dot big (the tap's mark; swipes get the arrow).
+                float pulse = _tapPulse ? 1.8f + 0.6f * Mathf.Sin(Time.time * 14f) : 1f + 0.2f * Mathf.Sin(Time.time * 10f);
+                _thumbDots[i].localScale = Vector3.one * size * (i == 0 ? pulse : 0.4f + 0.5f * k);
                 _thumbBlock.SetColor(FillId, ThumbGold);
                 _thumbBlock.SetColor(RimId, new Color(1f, 0.93f, 0.6f));
                 _thumbBlock.SetFloat(FillAlphaId, 0.85f);
@@ -659,6 +671,18 @@ namespace Diorama
                 case GhostPlace.AboveIsland:
                 {
                     if (island == null) return false;
+                    if (ThumbDemo && thumbBeside)
+                    {
+                        // Step 21: beside the island on the dominant side (island +X is the player's left), raised, facing the head.
+                        var it2 = island.transform;
+                        var half = island.FootprintHalfSize;
+                        float sx = _request.left ? 1f : -1f;
+                        point = it2.TransformPoint(new Vector3(sx * (half.x + thumbBesideSpot.x), island.CapTopLocal + thumbBesideSpot.y, thumbBesideSpot.z));
+                        var look2 = point - head;
+                        look2.y = 0f;
+                        frame = look2.sqrMagnitude > 1e-6f ? Quaternion.LookRotation(look2, Vector3.up) : Quaternion.identity;
+                        return true;
+                    }
                     if (ThumbDemo)
                     {
                         // Nov 7 (Mugesh: beside the rim it went dull, the real hand rests there and fades it): over the
@@ -1042,21 +1066,8 @@ namespace Diorama
             var fwd = ClipNamed("thumb_swipe_forward");
             var g = _right ?? _left;
             if (fwd == null || fwd.frames.Count < 2 || g == null) return;
-            var clip = ScriptableObject.CreateInstance<GhostHandClip>();
-            clip.hideFlags = HideFlags.DontSave;
-            clip.name = clip.clipName = SwipeAllClip;
-            clip.anchor = fwd.anchor;
-            clip.leftHand = fwd.leftHand;
-            clip.fps = fwd.fps;
-            clip.keyJoint = fwd.keyJoint;
-            clip.keyTime = fwd.keyTime;
-            clip.placeOffset = fwd.placeOffset;
-            clip.size = fwd.size;
-            clip.travel = fwd.travel;
-            clip.holdEnd = fwd.holdEnd;
             int from = Mathf.Clamp(Mathf.RoundToInt(fwd.StartTime * fwd.fps), 0, fwd.frames.Count - 1);
             int to = Mathf.Clamp(fwd.frames.Count - 1 - Mathf.RoundToInt(fwd.trimEnd * fwd.fps), from, fwd.frames.Count - 1);
-            for (int i = from; i <= to; i++) clip.frames.Add(Copy(fwd.frames[i]));
             var rest = fwd.frames[to];
             // The index direction and the thumb base's parent frame, in the hand root's frame, from the rest pose.
             for (int i = 0; i < JointCount; i++)
@@ -1068,24 +1079,199 @@ namespace Diorama
             int t1 = (int)HandJointId.HandThumb1;
             Quaternion parent = RootRotOf(g, g.joints[t1] != null ? g.joints[t1].parent : null);
             Vector3 axis = Quaternion.Inverse(parent) * along;
-            int n = Mathf.Max(4, Mathf.RoundToInt(sideSwipeSeconds * clip.fps));
-            int pause = Mathf.RoundToInt(0.25f * clip.fps);
-            foreach (float sign in new[] { 1f, -1f })
+            var tap = ClipNamed("thumb_tap");
+
+            // Step 21 (Mugesh, video: a swipe and a tap, tilted, on the island): the walk lesson shows all four swipes,
+            // forward, back, left, right, each marked with its arrow; the far lesson the same, then a tap (the dot pulses).
+            foreach (bool withTap in new[] { false, true })
             {
-                for (int i = 0; i < pause; i++) clip.frames.Add(Copy(rest));
-                for (int i = 1; i <= n; i++)
+                var clip = ScriptableObject.CreateInstance<GhostHandClip>();
+                clip.hideFlags = HideFlags.DontSave;
+                clip.name = clip.clipName = withTap ? SwipeAllTapClip : SwipeAllClip;
+                clip.anchor = fwd.anchor;
+                clip.leftHand = fwd.leftHand;
+                clip.fps = fwd.fps;
+                clip.keyJoint = fwd.keyJoint;
+                clip.keyTime = 0f;
+                clip.placeOffset = fwd.placeOffset;
+                clip.size = fwd.size;
+                clip.travel = fwd.travel;
+                clip.holdEnd = fwd.holdEnd;
+                var segs = new List<Stroke>();
+                int pause = Mathf.RoundToInt(0.3f * clip.fps);
+                void Rest(int n)
                 {
-                    float u = i / (float)n;
-                    // Out quickly (the swipe), back slowly.
-                    float k = u < 0.35f ? Mathf.SmoothStep(0f, 1f, u / 0.35f) : 1f - Mathf.SmoothStep(0f, 1f, (u - 0.35f) / 0.65f);
-                    var f = Copy(rest);
-                    f.rot[t1] = Quaternion.AngleAxis(sign * sideSwipeAngle * k, axis) * rest.rot[t1];
-                    clip.frames.Add(f);
+                    for (int i = 0; i < n; i++) clip.frames.Add(Copy(rest));
                 }
+                void Mark(char kind, int start) => segs.Add(new Stroke { t0 = start / clip.fps, t1 = (clip.frames.Count - 1) / clip.fps, kind = kind });
+                // Forward (the recorded slide), then back (the same slide played backward).
+                Rest(pause);
+                int s0 = clip.frames.Count;
+                for (int i = from; i <= to; i++) clip.frames.Add(Copy(fwd.frames[i]));
+                Mark('F', s0);
+                Rest(pause);
+                s0 = clip.frames.Count;
+                for (int i = to; i >= from; i--) clip.frames.Add(Copy(fwd.frames[i]));
+                Mark('B', s0);
+                // Across the index finger one way, then the other (which way is left is measured as it plays).
+                int steps = Mathf.Max(4, Mathf.RoundToInt(sideSwipeSeconds * clip.fps));
+                foreach (float sign in new[] { 1f, -1f })
+                {
+                    Rest(pause);
+                    s0 = clip.frames.Count;
+                    for (int i = 1; i <= steps; i++)
+                    {
+                        float u = i / (float)steps;
+                        // Out quickly (the swipe), back slowly.
+                        float k = u < 0.35f ? Mathf.SmoothStep(0f, 1f, u / 0.35f) : 1f - Mathf.SmoothStep(0f, 1f, (u - 0.35f) / 0.65f);
+                        var f = Copy(rest);
+                        f.rot[t1] = Quaternion.AngleAxis(sign * sideSwipeAngle * k, axis) * rest.rot[t1];
+                        clip.frames.Add(f);
+                    }
+                    Mark('S', s0);
+                }
+                if (withTap && tap != null && tap.frames.Count > 1)
+                {
+                    // The tap's thumb only, on the same resting hand (no jump of the wrist between the clips).
+                    Rest(pause);
+                    s0 = clip.frames.Count;
+                    int ta = Mathf.Clamp(Mathf.RoundToInt(tap.StartTime * tap.fps), 0, tap.frames.Count - 1);
+                    int tb = Mathf.Clamp(tap.frames.Count - 1 - Mathf.RoundToInt(tap.trimEnd * tap.fps), ta, tap.frames.Count - 1);
+                    for (int i = ta; i <= tb; i++)
+                    {
+                        var f = Copy(rest);
+                        foreach (var j in ThumbJoints)
+                        {
+                            int k = (int)j;
+                            if (k < tap.frames[i].rot.Length) f.rot[k] = tap.frames[i].rot[k];
+                        }
+                        clip.frames.Add(f);
+                    }
+                    Mark('T', s0);
+                }
+                Rest(pause);
+                _placeholders[clip.name] = clip;
+                _strokes[clip] = segs;
+                Debug.Log($"[GhostHands] {clip.name}: {clip.frames.Count} frames ({clip.Duration:0.0} s): forward, back, {sideSwipeAngle:0} deg across both ways{(withTap ? ", tap" : "")}; " +
+                          $"strokes {string.Join(" ", segs.ConvertAll(x => $"{x.kind} {x.t0:0.00}-{x.t1:0.00}"))}.");
             }
-            for (int i = 0; i < pause; i++) clip.frames.Add(Copy(rest));
-            _placeholders[SwipeAllClip] = clip;
-            Debug.Log($"[GhostHands] {SwipeAllClip}: {clip.frames.Count} frames ({clip.Duration:0.0} s), forward then {sideSwipeAngle:0} deg left and right.");
+        }
+
+        static readonly HandJointId[] ThumbJoints = { HandJointId.HandThumb1, HandJointId.HandThumb2, HandJointId.HandThumb3, HandJointId.HandThumbTip };
+
+        /// <summary>Step 21: the far lesson's demo: the four swipes, then a tap.</summary>
+        public const string SwipeAllTapClip = "thumb_swipe_all_tap";
+
+        /// <summary>Step 21: one stroke of a composed thumb demo (clip seconds): F forward, B back, S across (its side
+        /// measured as it plays: -1 left, +1 right, 0 not yet), T tap.</summary>
+        class Stroke
+        {
+            public float t0, t1;
+            public char kind;
+            public int side;
+            public Vector3 start;
+        }
+
+        readonly Dictionary<GhostHandClip, List<Stroke>> _strokes = new Dictionary<GhostHandClip, List<Stroke>>();
+
+        // ---- step 21: the stroke arrow ----
+
+        MeshRenderer _arrow;
+        MaterialPropertyBlock _arrowBlock;
+        Stroke _arrowStroke;
+        float _arrowShow;
+        bool _tapPulse;
+
+        /// <summary>Step 21 (bridge): the stroke playing now ("F", "B", "S-1" / "S1", "T") or "-".</summary>
+        public string StrokeNow => _arrowStroke == null ? "-" : _arrowStroke.kind == 'S' ? "S" + _arrowStroke.side : _arrowStroke.kind.ToString();
+
+        static Mesh ArrowMesh()
+        {
+            // Flat, +Z forward, length 1 (shaft to 0.62, head to 1), width 1 at the head; both faces.
+            var v = new List<Vector3>
+            {
+                new Vector3(-0.18f, 0f, 0f), new Vector3(0.18f, 0f, 0f), new Vector3(0.18f, 0f, 0.62f), new Vector3(-0.18f, 0f, 0.62f),
+                new Vector3(-0.5f, 0f, 0.6f), new Vector3(0.5f, 0f, 0.6f), new Vector3(0f, 0f, 1f),
+            };
+            var tris = new List<int> { 0, 3, 2, 0, 2, 1, 4, 6, 5 };
+            int count = tris.Count;
+            for (int i = 0; i < count; i += 3) tris.AddRange(new[] { tris[i], tris[i + 2], tris[i + 1] });
+            var m = new Mesh { name = "Ghost Stroke Arrow" };
+            m.SetVertices(v);
+            m.SetTriangles(tris, 0);
+            var n = new Vector3[v.Count];
+            for (int i = 0; i < n.Length; i++) n[i] = Vector3.up;
+            m.normals = n;
+            m.RecalculateBounds();
+            return m;
+        }
+
+        /// <summary>
+        /// Step 21: while a stroke of a composed thumb demo plays, a gold arrow lies flat beside the hand pointing the way
+        /// the explorer walks for it (forward = away from you, back = toward you, across = left or right as the thumb
+        /// moves); a tap gets no arrow (the thumb dot pulses instead).
+        /// </summary>
+        void UpdateArrow(Ghost g, float t, float alpha, float scale, Quaternion frame)
+        {
+            if (!thumbArrows || g == null || _clip == null || !_strokes.TryGetValue(_clip, out var segs) || alpha <= 0.002f)
+            {
+                if (_arrow != null) _arrow.enabled = false;
+                _arrowStroke = null;
+                _tapPulse = false;
+                return;
+            }
+            if (_arrow == null)
+            {
+                var go = new GameObject("Ghost Stroke Arrow");
+                go.transform.SetParent(transform, false);
+                go.AddComponent<MeshFilter>().sharedMesh = ArrowMesh();
+                _arrow = go.AddComponent<MeshRenderer>();
+                _arrow.sharedMaterial = material;
+                _arrow.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                _arrowBlock = new MaterialPropertyBlock();
+            }
+            var tip = KeyDotPoint(g);
+            Stroke now = null;
+            foreach (var st in segs)
+                if (t >= st.t0 && t <= st.t1 + 0.25f) now = st;
+            _tapPulse = now != null && now.kind == 'T';
+            if (now != _arrowStroke)
+            {
+                _arrowStroke = now;
+                _arrowShow = 0f;
+                if (now != null && tip.HasValue) now.start = tip.Value;
+            }
+            if (now == null || now.kind == 'T' || !tip.HasValue)
+            {
+                _arrow.enabled = false;
+                return;
+            }
+            Vector3 fwd = frame * Vector3.forward, right = frame * Vector3.right;
+            if (now.kind == 'S' && now.side == 0)
+            {
+                float dx = Vector3.Dot(tip.Value - now.start, right);
+                if (Mathf.Abs(dx) > 0.003f * scale) now.side = dx > 0f ? 1 : -1;
+            }
+            Vector3 dir = now.kind == 'F' ? fwd : now.kind == 'B' ? -fwd : now.side != 0 ? right * now.side : Vector3.zero;
+            if (dir == Vector3.zero)
+            {
+                _arrow.enabled = false;
+                return;
+            }
+            _arrowShow = Mathf.MoveTowards(_arrowShow, 1f, Mathf.Max(Time.deltaTime, debugFreeze >= 0f ? 1f : 0f) / 0.15f);
+            float len = arrowLength * scale;
+            // Beside the hand on the player's side, a little under the thumb, centred on the stroke.
+            Vector3 at = now.start + Vector3.down * (0.025f * scale) - fwd * (0.035f * scale) - dir * (len * 0.5f);
+            var tr = _arrow.transform;
+            tr.SetPositionAndRotation(at, Quaternion.LookRotation(dir, Vector3.up));
+            tr.localScale = new Vector3(arrowWidth * scale, 1f, len * Mathf.SmoothStep(0.3f, 1f, _arrowShow));
+            _arrowBlock.SetColor(FillId, ThumbGold);
+            _arrowBlock.SetColor(RimId, new Color(1f, 0.93f, 0.6f));
+            _arrowBlock.SetFloat(FillAlphaId, 0.9f);
+            _arrowBlock.SetFloat(GlowId, 1.2f);
+            _arrowBlock.SetFloat(AlphaId, alpha * _arrowShow);
+            _arrow.SetPropertyBlock(_arrowBlock);
+            _arrow.enabled = true;
         }
 
         GhostHandClip ClipNamed(string name)

@@ -10,7 +10,7 @@ smoke run watches the ones it can (R1 quiet shard, R2 menu pauses sound, R3 menu
 | # | Note | Repeat? | Status | Cause / fix | Commit |
 |---|---|---|---|---|---|
 | 1 | Song plays while poking the shard | **my step 20 regression** | done | step 20 let the title track play to its end; it now fades (2 s) as the shard arrives. Smoke rule R1 | `3e3ceeb` |
-| 2 | Swipe ghost tilted, wrong motion | **4th time** | partly | the ghost added a 55° yaw on top of a leaning finger direction. Now: the pose comes from the hand's own measured fingers / back of the hand, set to fingers straight away, back of the hand up and out, no yaw. The sweep motion itself is unchanged | `554a8b8` |
+| 2 | Swipe ghost tilted, wrong motion | **4th time** | done after your video (section E) | the ghost added a 55° yaw on top of a leaning finger direction. Now: the pose comes from the hand's own measured fingers / back of the hand, set to fingers straight away, back of the hand up and out, no yaw. The sweep motion itself is unchanged | `554a8b8` |
 | 3 | Poked pod card stays up | new | done | it closes on the next swipe, walk, battle or island grab | `3e3ceeb` |
 | 4 | Pause doesn't mute | new | done | the menu paused only the music (-8 dB). Now every sound pauses; the menu's own UI taps still play | `3e3ceeb` |
 | 5 | Switching pods presses a move | new | done | your log: "Grabbed Pod 2" then "Picked move 2 by gaze + pinch". The grab's pinch picked the rune you looked at. No rune pick while a hand reaches for, holds or just let go (0.5 s) of a pod | `3e3ceeb` |
@@ -26,18 +26,29 @@ smoke run watches the ones it can (R1 quiet shard, R2 menu pauses sound, R3 menu
 - `Run-21-img/21_battle.png` / `21_menu_battle.png`: a battle, then the menu open over it (the move row and line step aside).
 - `21_hall_final.png`: Hall of Fame, 4 Islings, none in or behind a prop or tall grass (two moved: log "Isling 3 moved (18.77, 19.80) -> (19.08, 18.85)").
 - `21_lanterns_read.png` / `21_lanterns_wide.png`: lanterns over the back edge at step 19's size.
-- `21_swipe_1_close.png`: the swipe ghost mid-sweep from the seat.
+- `21_swipe_strokes.png`: the swipe demo 0.3 s into each stroke from the seat: forward, back, left, right, tap (top), and the whole island (bottom).
+
+## E. The swipe ghost, after your video (13:15)
+Your video showed what my flat shots couldn't: the hand lay on the map like a big hand on the table, the motion was a
+single swipe and a tap, and the thumb moved ~2 cm (unreadable at that distance).
+- **Where:** it floats beside the island on your dominant side (13 cm over the cap, just past the side rim), facing your
+  head, not over the map (`GhostHands.thumbBeside`, `thumbBesideSpot`).
+- **What:** both walk lessons now show all four swipes, forward, back, left, right; the far lesson then a tap
+  (`thumb_swipe_all`, `thumb_swipe_all_tap`). Across sweeps 40 deg (was 28).
+- **Arrows:** each swipe has a gold arrow beside the hand pointing the way the explorer walks (forward = away, back =
+  toward you, left, right). The tap gets no arrow; the gold thumb dot pulses big instead. The left/right arrow follows the
+  thumb's real movement, so it can't point the wrong way.
+- Why it kept failing: I placed it on the map to stop your resting hand fading it, and I judged a motion from single frames
+  in flat shots. The flat Editor camera even sits inside the island, so "facing you" was facing the wrong spot; the shots
+  now put the camera at the seat.
 
 ## Not done / for you
-- **Swipe ghost: I can't prove "not tilted" from flat shots.** If it's still wrong, record your own swipe: Dev panel > Tools > Record
-  ghost (it records the clips not yet recorded; to redo `thumb_swipe_forward`, delete its asset first or tell me and I'll add a
-  "re-record" button). Then the ghost plays your real hand.
 - Lantern text is smaller to the eye than step 19's (they're ~0.73 m away, was ~0.58). If it's hard to read, say so and I'll
   bring them closer, not bigger.
 
 ## Headset test (play order)
 1. **New Quick Journey**: the title music fades as the shard arrives; poking the shard is quiet.
-2. Swipe lesson: the ghost hand is upright, back of the hand toward you, fingers away. Not tilted?
+2. Swipe lessons: the ghost hand floats beside the island on your right, upright, not on the map. It swipes forward, back, left, right, each with a gold arrow the way you'd walk; the second lesson ends with a tap (the dot pulses).
 3. Exploring: poke a rim pod (card shows), then swipe: the card closes.
 4. **Battle**: grab another pod and throw it: it switches, no move fires. Log: `Poke/Pinch on rune N ignored: a hand is on a pod`.
 5. Battle, after a move: press **Run** (poke): it works.

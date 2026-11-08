@@ -43,7 +43,7 @@ namespace Diorama
         /// <summary>Step 12a, Nov 3: the Controls card's controls, in order.</summary>
         public static readonly Control[] Controls =
         {
-            new Control("Walk", "<b>Swipe</b> your thumb along your finger: a few steps", "thumb_swipe_forward", 0.6f),
+            new Control("Walk", "<b>Swipe</b> your thumb along your finger: a few steps", GhostHands.SwipeAllClip, 0.6f),
             new Control("Keep going", "<b>Swipe twice</b> quickly: keep walking. <b>Tap</b>: stop", "thumb_swipe_twice_tap", 0.6f),
             new Control("Go there", "<b>Look</b> at a spot and <b>pinch</b>: go there", "pinch", 0.6f),
             new Control("Pick up", "<b>Pinch</b> things on the island to pick them up", "pinch_drop", 0.9f),
