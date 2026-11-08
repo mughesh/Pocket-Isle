@@ -14,7 +14,8 @@ namespace Diorama
     public static class TempleRules
     {
         public const int GalewickIslings = 4, OtherIslings = 6;
-        public const float AskAgainSeconds = 3f;
+        /// <summary>Step 24: only a debounce (was 3 s of silent refusals): a bump after "Not yet" asks again at once.</summary>
+        public const float AskAgainSeconds = 1f;
         public const string WarnLine = "temple.warn", GoIn = "Go in", NotYet = "Not yet";
 
         /// <summary>Islings suggested at a temple door (0 = no warning).</summary>
@@ -36,6 +37,13 @@ namespace Diorama
             return n;
         }
 
+        /// <summary>Step 24: why a bump doesn't ask: null = ask now.</summary>
+        public static string NotAsking(bool boardOpen, float now, float asked) =>
+            boardOpen ? "Go in / Not yet is already up" : now - asked < AskAgainSeconds ? "asked under a second ago" : null;
+
+        /// <summary>Step 24: every refused entry says why in the log.</summary>
+        public static void Refused(Object door, string why) => Debug.Log($"[TempleDoor] refused: {(door != null ? door.name : "door")}: {why}.", door);
+
         static Party _party;
 
         /// <summary>
@@ -54,11 +62,16 @@ namespace Diorama
             }
             int carried = Carried(_party);
             if (CanEnter(carried, needed)) return true;
-            if (ChoiceBoard.IsOpen || Time.time - asked < AskAgainSeconds) return false;
+            string notAsking = NotAsking(ChoiceBoard.IsOpen, Time.time, asked);
+            if (notAsking != null)
+            {
+                Refused(door, notAsking);
+                return false;
+            }
             asked = Time.time;
             Dialogue.SetVar("keeper", keeper);
             Dialogue.SetVar("n", needed.ToString());
-            Dialogue.Say(WarnLine);
+            Dialogue.Repeat(WarnLine);
             string name = door != null ? door.name : "door";
             Debug.Log($"[TempleRules] {name}: {carried} Isling(s) in the pods, most guardians bring {needed}: Go in / Not yet.");
             if (!ChoiceBoard.Ask(GoIn, () =>

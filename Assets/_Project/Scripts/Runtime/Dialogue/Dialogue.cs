@@ -94,7 +94,7 @@ namespace Diorama
                 var q = _queue[i];
                 if (q.objective || _pinned.Contains(q.trigger) || q.trigger == showing || q.kind == LineKind.Objective || q.kind == LineKind.Intro) continue;
                 // A Keeper's or the Heart's own words are the scene itself: they wait, never go stale.
-                if (q.line != null && q.line.speaker != DialogueSpeaker.Spirit) continue;
+                if (q.line != null && q.line.speaker != DialogueSpeaker.Spirit || q.trigger == TempleRules.WarnLine) continue;
                 bool held = pin || focal && !PassesFocal(q) || battle && !IsBattleLine(q.trigger, script != null ? script.Find(q.trigger) : null);
                 if (!held) continue;
                 q.waited += dt;
@@ -872,7 +872,7 @@ namespace Diorama
                     for (int i = _queue.Count - 1; i >= 0; i--)
                     {
                         var q = _queue[i];
-                        if (q.kind == LineKind.Filler && !q.objective && !_pinned.Contains(q.trigger) &&
+                        if (q.kind == LineKind.Filler && q.trigger != TempleRules.WarnLine && !q.objective && !_pinned.Contains(q.trigger) &&
                             !IsBattleLine(q.trigger, script != null ? script.Find(q.trigger) : null))
                             Drop(i, "stale: a battle began");
                     }

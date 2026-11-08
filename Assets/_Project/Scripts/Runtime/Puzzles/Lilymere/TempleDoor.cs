@@ -75,12 +75,18 @@ namespace Diorama
 
         void OnBump(Vector2Int blocked)
         {
-            if (!Here || !AtFront(explorer.Tile)) return;
+            if (island == null || island.world != map || !AtFront(explorer.Tile)) return;
+            if (!Here)
+            {
+                TempleRules.Refused(this, "the scene is changing");
+                return;
+            }
             if (!IsOpen)
             {
-                if (Time.time - _nagged < 8f) return;
+                TempleRules.Refused(this, $"shut until {openWhen}");
+                if (Time.time - _nagged < TempleRules.AskAgainSeconds) return;
                 _nagged = Time.time;
-                if (!string.IsNullOrEmpty(shutLine)) Dialogue.Say(shutLine);
+                if (!string.IsNullOrEmpty(shutLine)) Dialogue.Repeat(shutLine);
                 return;
             }
             // Step 14h: a small team gets a warning and Go in / Not yet (TempleRules).

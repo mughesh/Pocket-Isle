@@ -84,7 +84,7 @@ namespace Diorama
         float _doorHeat, _sink;
         bool _open, _opening;
         bool _warnedHall;
-        float _fewNagged = -99f;
+        float _fewNagged = -99f, _shutSaidAt = -99f;
         float _coldSaidAt = -99f;
 
         WorldMap Map => pump != null ? pump.map : null;
@@ -110,7 +110,11 @@ namespace Diorama
             pump.Stroked += OnStroked;
             pump.Cooled += OnCooled;
             pump.BlockedStroke += OnBlockedStroke;
-            if (explorer != null) explorer.OnStep += OnStep;
+            if (explorer != null)
+            {
+                explorer.OnStep += OnStep;
+                explorer.OnBump += OnBump;
+            }
             PuzzleState.Restored += Apply;
             Apply();
         }
@@ -123,7 +127,11 @@ namespace Diorama
                 pump.Cooled -= OnCooled;
                 pump.BlockedStroke -= OnBlockedStroke;
             }
-            if (explorer != null) explorer.OnStep -= OnStep;
+            if (explorer != null)
+            {
+                explorer.OnStep -= OnStep;
+                explorer.OnBump -= OnBump;
+            }
             PuzzleState.Restored -= Apply;
             _body?.Destroy();
             _frame?.Destroy();
@@ -372,6 +380,33 @@ namespace Diorama
         void OnStep(Vector2Int tile)
         {
             if (!_open || !pump.Here || tile.y != door.y || tile.x < door.x || tile.x > door.x + 2) return;
+            TryEnter(tile);
+        }
+
+        /// <summary>
+        /// Step 24: the forge only listened to steps, so after "Not yet" the explorer stood on the threshold and bumping
+        /// the doorway did nothing. A bump on the door's row now asks again, and a bump on the shut door says why.
+        /// </summary>
+        void OnBump(Vector2Int blocked)
+        {
+            if (!pump.Here) return;
+            var at = explorer.Tile;
+            bool onThreshold = at.y == door.y && at.x >= door.x && at.x <= door.x + 2;
+            bool intoDoor = blocked.y == door.y && blocked.x >= door.x && blocked.x <= door.x + 2;
+            if (!onThreshold && !intoDoor) return;
+            if (_open)
+            {
+                TryEnter(at);
+                return;
+            }
+            TempleRules.Refused(this, _opening ? "the door is opening" : "the braziers aren't all lit");
+            if (_opening || Time.time - _shutSaidAt < TempleRules.AskAgainSeconds) return;
+            _shutSaidAt = Time.time;
+            if (!string.IsNullOrEmpty(coldLine)) Dialogue.Repeat(coldLine);
+        }
+
+        void TryEnter(Vector2Int tile)
+        {
             if (hall == null || swap == null)
             {
                 if (!_warnedHall) Debug.LogWarning("[ForgeBellows] The forge doorway leads nowhere yet (no Forge Hall map).", this);

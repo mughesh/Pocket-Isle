@@ -130,10 +130,11 @@ namespace Diorama
                 // Step 14h: a small team gets a warning and Go in / Not yet (TempleRules).
                 if (TempleRules.Gate(true, "Galeowl", ref _fewNagged, this, Enter)) Enter();
             }
-            else if (!_opening) Try();
+            else if (_opening) TempleRules.Refused(this, "the door is opening");
+            else Try(true);
         }
 
-        void Try()
+        void Try(bool bump = false)
         {
             int flying = kites.FlyingCount;
             if (TowerRules.Opens(flying, true))
@@ -141,10 +142,14 @@ namespace Diorama
                 StartCoroutine(Open());
                 return;
             }
-            if (Time.time - _nagged < 8f) return;
+            if (bump) TempleRules.Refused(this, $"{flying} of {TowerRules.KitesNeeded} kites flying");
+            // Step 24: walking past keeps the slow nag; a bump is deliberate and always answers.
+            if (Time.time - _nagged < (bump ? TempleRules.AskAgainSeconds : 8f)) return;
             _nagged = Time.time;
             Debug.Log($"[TowerDoor] At the door with {flying} kite(s): needs {TowerRules.KitesNeeded}.");
-            if (!string.IsNullOrEmpty(needKitesLine)) Dialogue.Say(needKitesLine);
+            if (string.IsNullOrEmpty(needKitesLine)) return;
+            if (bump) Dialogue.Repeat(needKitesLine);
+            else Dialogue.Say(needKitesLine);
         }
 
         IEnumerator Open()
