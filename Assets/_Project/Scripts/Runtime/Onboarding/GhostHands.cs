@@ -50,6 +50,11 @@ namespace Diorama
         public float thumbYaw = 55f;
         [Tooltip("Nov 8 (Mugesh: still tilted, the thumb leaning left): the thumb demo rolled this many degrees about its forward axis (- = its left side up).")]
         public float thumbRoll = 0f;
+        [Tooltip("Step 21 (Mugesh, 4th time: the swipe ghost tilted): a wrist-anchored clip is turned so the hand's own measured " +
+                 "fingers (wrist to middle knuckle) point along Wrist Fingers and its measured back of the hand along Wrist Back. " +
+                 "Before, the wrist joint's axes were assumed to be fingers = z, back = y; they aren't, so the hand came out tilted " +
+                 "and Thumb Yaw / Thumb Roll were guesses on top. With this on they are ignored.")]
+        public bool measuredWrist = true;
         [Tooltip("Nov 7 (Mugesh: the gold point looks really nice, use it wherever it helps): every ghost demo gets the gold dot and trail on the joint that does the work (thumb tip, pinch point, fingertip or palm), not only thumb demos.")]
         public bool keyDots = true;
         [Tooltip("A gold dot on the ghost's thumb tip and this many trail dots behind it (the slide).")]
@@ -752,7 +757,7 @@ namespace Diorama
             float grabTime = -1f, float releaseTime = -1f, Vector3? release = null)
         {
             bool mirror = _clip.leftHand != g.left;
-            var view = _clip.anchor == GhostAnchor.Wrist ? WristView(g.left) : Quaternion.identity;
+            var view = Quaternion.identity;
             var offset = _clip.placeOffset;
             if (g.left) offset = GhostHandClip.Mirror(offset);
             bool retarget = grabTime >= 0f;
@@ -760,10 +765,11 @@ namespace Diorama
 
             // Where the key joint is at the key time (the grab), relative to the clip frame's origin.
             _clip.Sample(retarget ? grabTime : _clip.keyTime * _clip.Duration, mirror, out var kp, out var kr, _rot, _pos);
+            if (_clip.anchor == GhostAnchor.Wrist) view = measuredWrist ? MeasuredWristView(g, kr) : WristView(g.left);
             Vector3 keyInRoot = _clip.keyPinch || retarget ? PinchInRoot(g) : KeyInRoot(g, _clip.keyJoint);
             if (yaw != 0f) frame *= Quaternion.Euler(0f, yaw, 0f);
-            if (ThumbDemo && thumbYaw != 0f) frame *= Quaternion.Euler(0f, thumbYaw, 0f);
-            if (ThumbDemo && thumbRoll != 0f) frame *= Quaternion.Euler(0f, 0f, thumbRoll);
+            if (ThumbDemo && !measuredWrist && thumbYaw != 0f) frame *= Quaternion.Euler(0f, thumbYaw, 0f);
+            if (ThumbDemo && !measuredWrist && thumbRoll != 0f) frame *= Quaternion.Euler(0f, 0f, thumbRoll);
             Vector3 key = view * kp + view * kr * keyInRoot;
             Vector3 origin = point + frame * (offset * scale) - frame * (key * scale);
 
@@ -847,6 +853,31 @@ namespace Diorama
             }
             return p;
         }
+
+        /// <summary>
+        /// Step 21: the turn that puts this hand's measured fingers (wrist to middle knuckle) on <see cref="wristFingers"/> and
+        /// its measured back of the hand on <see cref="wristBack"/> (mirrored for a left ghost), from the joints as just
+        /// sampled at the key time with the root turned by <paramref name="rootRot"/>. No axis convention assumed.
+        /// </summary>
+        Quaternion MeasuredWristView(Ghost g, Quaternion rootRot)
+        {
+            Vector3 wrist = rootRot * KeyInRoot(g, HandJointId.HandWristRoot);
+            Vector3 middle = rootRot * KeyInRoot(g, HandJointId.HandMiddle1);
+            Vector3 index = rootRot * KeyInRoot(g, HandJointId.HandIndex1);
+            Vector3 little = rootRot * KeyInRoot(g, HandJointId.HandPinky1);
+            Vector3 fingers = middle - wrist;
+            Vector3 across = index - little;
+            if (fingers.sqrMagnitude < 1e-8f || across.sqrMagnitude < 1e-8f) return WristView(g.left);
+            // Right hand: little -> index knuckle x fingers = the back of the hand; a left hand's is the other way.
+            Vector3 back = Vector3.Cross(across, fingers) * (g.left ? -1f : 1f);
+            var want = WristView(g.left);
+            var have = Quaternion.LookRotation(fingers, back);
+            LastMeasured = (fingers.normalized, back.normalized);
+            return want * Quaternion.Inverse(have);
+        }
+
+        /// <summary>Step 21 (bridge): the last measured fingers / back directions in the clip frame.</summary>
+        public (Vector3 fingers, Vector3 back) LastMeasured { get; private set; }
 
         Quaternion WristView(bool left)
         {

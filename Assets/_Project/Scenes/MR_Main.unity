@@ -5395,12 +5395,13 @@ MonoBehaviour:
   sideSwipeAngle: 28
   sideSwipeSeconds: 0.75
   thumbScale: 1
-  thumbYaw: 55
+  thumbYaw: 0
   thumbRoll: 0
+  measuredWrist: 1
   keyDots: 1
   thumbTrailDots: 6
   thumbDotSize: 0.009
-  wristFingers: {x: -0.35, y: 0.25, z: 1}
+  wristFingers: {x: 0, y: 0.2, z: 1}
   wristDorsal: {x: 1, y: 0.35, z: 0.25}
   wristBack: {x: 0.75, y: 0.6, z: -0.15}
   bothSpread: 0.18

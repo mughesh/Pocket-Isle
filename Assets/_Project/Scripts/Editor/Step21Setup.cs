@@ -36,5 +36,32 @@ namespace Diorama.EditorTools
             EditorSceneManager.SaveScene(f.gameObject.scene);
             Debug.Log($"[Step21Setup] Lanterns: far scale {f.lanternFarScale}, back height {f.lanternBackHeight}, drop {f.lanternBackDrop}, out {f.lanternBackOut}; scene saved.");
         }
+
+        /// <summary>
+        /// The swipe ghost (Mugesh, 4th time: tilted): the hand's measured fingers straight away from the player (a little
+        /// up), the back of the hand up and out (palm in and down, never toward the face); no Thumb Yaw on top (it was 55,
+        /// a correction stacked on a lean in Wrist Fingers).
+        /// </summary>
+        [MenuItem("Tools/Pocket Isle/Setup/Step 21 swipe ghost")]
+        public static void SwipeGhost()
+        {
+            if (Application.isPlaying) return;
+            var g = Object.FindFirstObjectByType<GhostHands>(FindObjectsInactive.Include);
+            if (g == null)
+            {
+                Debug.LogError("[Step21Setup] No GhostHands in the open scene.");
+                return;
+            }
+            var so = new SerializedObject(g);
+            so.FindProperty("measuredWrist").boolValue = true;
+            so.FindProperty("wristFingers").vector3Value = new Vector3(0f, 0.2f, 1f);
+            so.FindProperty("wristBack").vector3Value = new Vector3(0.75f, 0.6f, -0.15f);
+            so.FindProperty("thumbYaw").floatValue = 0f;
+            so.FindProperty("thumbRoll").floatValue = 0f;
+            so.ApplyModifiedPropertiesWithoutUndo();
+            EditorSceneManager.MarkSceneDirty(g.gameObject.scene);
+            EditorSceneManager.SaveScene(g.gameObject.scene);
+            Debug.Log($"[Step21Setup] Swipe ghost: measured wrist, fingers {g.wristFingers}, back {g.wristBack}, yaw {g.thumbYaw}; scene saved.");
+        }
     }
 }

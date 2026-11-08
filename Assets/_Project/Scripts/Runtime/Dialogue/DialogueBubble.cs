@@ -702,9 +702,12 @@ namespace Diorama
                 return;
             }
             float t = Time.time - _shownAt;
-            _text.maxVisibleCharacters = _chip ? 99999 : WholeWords(VisibleChars(_chars, t, CharsPerSecond, _instant));
+            int shown = _chip ? 99999 : WholeWords(VisibleChars(_chars, t, CharsPerSecond, _instant));
+            _text.maxVisibleCharacters = shown;
             if (_heart && !_chip) FadeLetters(t);
-            Blip(_text.maxVisibleCharacters);
+            // Step 21 (Mugesh: no sound when the statue talks): the blip reads the letters reached, not the text's
+            // maxVisibleCharacters: the Heart's letter fade sets that to 99999, so its bell voice never played (step 18).
+            Blip(shown);
             _appear = Mathf.Min(1f, t / 0.15f);
             Place(false);
             if (_chipText == null && Time.time >= _endAt)

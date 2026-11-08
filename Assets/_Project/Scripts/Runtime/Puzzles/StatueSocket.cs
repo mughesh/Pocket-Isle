@@ -120,6 +120,13 @@ namespace Diorama
 
         // Nov 7 (Mugesh: a ghost like the finale's, full size): the ghost carries the shard to the socket, not small and aside.
         protected override bool GhostAside => false;
+
+        /// <summary>
+        /// Step 21 (Mugesh, 3rd time: the ghost picked the shard and put it down below, not on the statue): the ghost
+        /// grabs at the offered shard and lets go at the socket. Without a drop point the grab_drop clip played in place at
+        /// the offer spot, so its put-down went straight down.
+        /// </summary>
+        public override Vector3? GhostDropPoint => Here && ShardHolder.Holds(id) ? SocketWorld : (Vector3?)null;
         public override bool Busy => _hand >= 0 || _palm >= 0 || _flying;
 
         /// <summary>Nov 8: a shard is being offered, carried or placed at the statue (the gold trail stays away then).</summary>
