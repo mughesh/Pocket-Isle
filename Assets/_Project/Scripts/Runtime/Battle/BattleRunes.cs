@@ -44,6 +44,14 @@ namespace Diorama
         public Color captionText = new Color(1f, 0.95f, 0.84f);
         public Color captionPill = new Color(0.13f, 0.1f, 0.08f, 0.86f);
 
+        [Header("Over the arena (step 24: in front of the rim the island looked like it was behind a counter)")]
+        [Tooltip("The row sits on the arena's front band, never in front of the rim. Off = the old place in front of the rim (offset, avoidOffset).")]
+        public bool overArena = true;
+        [Tooltip("The row's front edge this far inside the tile footprint's front edge (island-local m).")]
+        public float arenaInset = 0.034f;
+        [Tooltip("The row's front edge this far over the cap (island-local m; 0.046 is about 2.8 cm at the island's usual 0.6 size).")]
+        public float arenaHover = 0.046f;
+
         [Header("Clear of the pods (Nov 7: the moves were in the way of the rim pods)")]
         [Tooltip("The rim pods: a hand below the row and this close to a pod (island-local m) means it is reaching for a pod.")]
         public PodRack pods;
@@ -134,6 +142,9 @@ namespace Diorama
         }
         float _podFreeAt;
 
+        static readonly HandJointId[] TipOnly = { HandJointId.HandIndexTip };
+        static readonly HandJointId[] TipAndPalm = { HandJointId.HandIndexTip, HandJointId.HandPalm };
+
         bool ReachingForPod()
         {
             if (pods == null || island == null || _row == null) return false;
@@ -144,7 +155,8 @@ namespace Diorama
             {
                 var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
                 if (hand == null || !hand.IsTrackedDataValid) continue;
-                foreach (var joint in new[] { HandJointId.HandIndexTip, HandJointId.HandPalm })
+                // Step 24: over the arena the palm of a hand poking a move is right above the pods, so only the fingertip counts (R5).
+                foreach (var joint in overArena ? TipOnly : TipAndPalm)
                 {
                     if (!HandLookup.TryGetJoint(hand, joint, out var w)) continue;
                     Vector3 p = t.InverseTransformPoint(w);
@@ -597,11 +609,14 @@ namespace Diorama
             if (island == null || island.map == null) return;
             var b = island.LocalBounds;
             var cam = Camera.main;
-            if (cam != null && Covers(cam.transform.position)) _avoid = Mathf.MoveTowards(_avoid, 1f, Time.deltaTime * 3f);
+            // Step 24: over the arena the row has nowhere to dodge to (avoidOffset would push it back over the rim).
+            if (!overArena && cam != null && Covers(cam.transform.position)) _avoid = Mathf.MoveTowards(_avoid, 1f, Time.deltaTime * 3f);
             bool reach = ReachingForPod();
             if (reach || (pods != null && pods.AnyHeld)) _podFreeAt = Time.unscaledTime + PodGrace;
             _duck = Mathf.MoveTowards(_duck, reach ? 1f : 0f, Time.deltaTime * (_duck < 0.5f ? 6f : 2f));
-            _row.localPosition = new Vector3(b.center.x, island.map.capHeight, b.max.z) + offset + avoidOffset * _avoid + duckOffset * Mathf.SmoothStep(0f, 1f, _duck);
+            Vector3 rest = overArena ? ArenaRest(b.center.x) : new Vector3(b.center.x, island.map.capHeight, b.max.z) + offset + avoidOffset * _avoid;
+            _row.localPosition = rest + duckOffset * Mathf.SmoothStep(0f, 1f, _duck);
+            if (overArena) PlaceCaption(cam, snap);
             if (cam != null)
             {
                 // Head direction projected on the island, as a yaw in island space (the row's front looks toward -Z).
@@ -640,6 +655,39 @@ namespace Diorama
                 _tilt = lockedTilt;
             }
             _row.rotation = island.transform.rotation * Quaternion.Euler(_tilt, _yaw, 0f);
+        }
+
+        /// <summary>
+        /// Step 24: the row's centre with its bottom (front) edge <see cref="arenaInset"/> inside the footprint's front edge and
+        /// <see cref="arenaHover"/> over the cap. The row leans back by <see cref="lockedTilt"/>, so the bottom edge is its nearest.
+        /// </summary>
+        Vector3 ArenaRest(float x)
+        {
+            float rad = lockedTilt * Mathf.Deg2Rad, half = runeSize.y * 0.5f;
+            return new Vector3(x, island.map.capHeight + arenaHover + half * Mathf.Cos(rad), island.FootprintHalfSize.y - arenaInset - half * Mathf.Sin(rad));
+        }
+
+        float _captionX;
+
+        /// <summary>
+        /// Step 24: the row is closer to the player's Isling now, so the battle line can't sit over the middle: it goes to the
+        /// end of the row away from the Isling, as seen from the head.
+        /// </summary>
+        void PlaceCaption(Camera cam, bool snap)
+        {
+            if (_caption == null || _captionPill == null) return;
+            float reach = Mathf.Max(0f, HalfRow - _captionPill.transform.localScale.x * 0.5f);
+            float target = 0f;
+            if (cam != null && _avoidA != null)
+            {
+                Vector3 o = _row.InverseTransformPoint(cam.transform.position), q = _row.InverseTransformPoint(_avoidA.WorldCenter);
+                if (q.z > 0f && o.z < 0f) target = Vector3.Lerp(o, q, -o.z / (q.z - o.z)).x >= 0f ? -reach : reach;
+            }
+            _captionX = snap ? target : Mathf.MoveTowards(_captionX, target, Time.deltaTime * 0.6f);
+            var c = _caption.transform.localPosition;
+            _caption.transform.localPosition = new Vector3(_captionX, c.y, c.z);
+            var p = _captionPill.transform.localPosition;
+            _captionPill.transform.localPosition = new Vector3(_captionX, p.y, p.z);
         }
 
         /// <summary>True when the row (runes and caption) sits between the head and either creature's body.</summary>
