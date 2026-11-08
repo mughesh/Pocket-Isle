@@ -431,14 +431,15 @@ namespace Diorama
                 {
                     // Step 11d: Lilymere's scoop. Shown with both hands (mirrored, side by side): palms up and softly
                     // cupped, they dip into the water, lift out together, then tip over (rolling outward) to pour.
-                    seconds = 3.2f;
+                    seconds = 3.8f;
                     keyTime = 0.3f;
                     Vector3 f = new Vector3(0f, 0.1f, 1f), up = Vector3.down, tip = new Vector3(1f, 0.35f, 0f);
                     return new List<Key>
                     {
                         Open(0f, new Vector3(0f, 0.05f, -0.02f), f, up, 0.3f), Open(0.22f, new Vector3(0f, -0.012f, 0f), f, up, 0.34f),
                         Open(0.36f, new Vector3(0f, -0.012f, 0f), f, up, 0.36f), Open(0.58f, new Vector3(0f, 0.06f, 0.01f), f, up, 0.36f),
-                        Open(0.7f, new Vector3(0f, 0.065f, 0.02f), f, up, 0.36f), Open(0.86f, new Vector3(0.01f, 0.06f, 0.02f), f, tip, 0.3f),
+                        Open(0.66f, new Vector3(0f, 0.065f, 0.02f), f, up, 0.36f), Open(0.74f, new Vector3(0.003f, 0.064f, 0.02f), f, Vector3.Slerp(up, tip, 0.3f), 0.34f),
+                        Open(0.84f, new Vector3(0.007f, 0.062f, 0.02f), f, Vector3.Slerp(up, tip, 0.6f), 0.32f), Open(0.92f, new Vector3(0.01f, 0.06f, 0.02f), f, tip, 0.3f),
                         Open(1f, new Vector3(0f, 0.05f, -0.02f), f, up, 0.3f),
                     };
                 }
@@ -485,15 +486,16 @@ namespace Diorama
                     // Step 12c: Lilymere's scoop carried to the cliff bowl. Both hands (mirrored, side by side), palms up
                     // and cupped: they dip into the inlet, lift out together, carry (the ghost moves them from the inlet
                     // to the bowl between 0.3 and 0.74), then tip over (rolling outward) to pour, and rise again.
-                    seconds = 4.4f;
+                    seconds = 5f;
                     keyTime = 0.3f;
                     Vector3 f = new Vector3(0f, 0.1f, 1f), up = Vector3.down, tip = new Vector3(1f, 0.35f, 0f);
                     return new List<Key>
                     {
                         Open(0f, new Vector3(0f, 0.05f, -0.02f), f, up, 0.3f), Open(0.16f, new Vector3(0f, -0.012f, 0f), f, up, 0.34f),
                         Open(0.3f, new Vector3(0f, -0.012f, 0f), f, up, 0.36f), Open(0.42f, new Vector3(0f, 0.05f, 0f), f, up, 0.36f),
-                        Open(0.74f, new Vector3(0f, 0.05f, 0f), f, up, 0.36f), Open(0.86f, new Vector3(0.01f, 0.045f, 0f), f, tip, 0.3f),
-                        Open(0.93f, new Vector3(0.01f, 0.045f, 0f), f, tip, 0.3f), Open(1f, new Vector3(0f, 0.06f, 0f), f, up, 0.3f),
+                        Open(0.72f, new Vector3(0f, 0.05f, 0f), f, up, 0.36f), Open(0.79f, new Vector3(0.003f, 0.048f, 0f), f, Vector3.Slerp(up, tip, 0.3f), 0.34f),
+                        Open(0.87f, new Vector3(0.007f, 0.046f, 0f), f, Vector3.Slerp(up, tip, 0.6f), 0.32f), Open(0.93f, new Vector3(0.01f, 0.045f, 0f), f, tip, 0.3f),
+                        Open(1f, new Vector3(0f, 0.06f, 0f), f, up, 0.3f),
                     };
                 }
                 case "hands_up":

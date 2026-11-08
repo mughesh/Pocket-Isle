@@ -78,7 +78,8 @@ namespace Diorama
         WaterScoop _scoop;
         PropView _ball, _basinWater, _running, _frozen, _bowlWater;
         PalmWater _palmWater;
-        float _sheetAmount = 1f, _streamFlow;
+        float _sheetAmount = 1f, _streamFlow, _splashAt;
+        bool _pourSounded;
         Vector3 _streamTo;
         bool _floating;
         AudioSource _audio;
@@ -229,6 +230,7 @@ namespace Diorama
             }
             else _gazed = -1;
             Carry();
+            PourAsTilted();
             FallSound();
             Draw();
             base.Update();
@@ -340,6 +342,8 @@ namespace Diorama
                     _ballVel = Vector3.zero;
                     _bigBall = _scoop.Holder == WaterScoop.Both;
                     _sheetAmount = 1f;
+                    _streamFlow = 0f;
+                    _pourSounded = false;
                     GameAudio.At(AudioIds.PondTap, _ballWorld);
                     break;
                 case ScoopState.Pouring:
@@ -351,6 +355,9 @@ namespace Diorama
                     Splash(_ballWorld, 14);
                     GameAudio.At(AudioIds.WaterSpill, _ballWorld);
                     _scoop.Reset();
+                    _streamFlow = 0f;
+                    _pourSounded = false;
+                    _fill = _scoop.Pours / (float)Mathf.Max(1, poursNeeded); // what had landed of this handful goes with it
                     break;
                 case ScoopState.Empty:
                     if (from == ScoopState.Dipped) Debug.Log($"[ScoopPour] {id}: the hand turned over in the water: nothing scooped.");
@@ -412,6 +419,28 @@ namespace Diorama
 
         // ---- carrying ----
 
+        /// <summary>Step 24: while the water is held the stream, the hand's water and the bowl's level follow the tilt.</summary>
+        void PourAsTilted()
+        {
+            if (_scoop == null || _scoop.State != ScoopState.Held || _pouring) return;
+            _streamTo = PourWorld(UsesBowl ? bowlFloor - bowlRim + 0.1f : 0.2f);
+            _sheetAmount = _scoop.Water;
+            _streamFlow = Mathf.MoveTowards(_streamFlow, _scoop.Flow, Time.deltaTime * 5f);
+            _fill = (_scoop.Pours + Mathf.Min(1f, _scoop.Landed / Mathf.Max(0.01f, _scoop.landedNeeded))) / Mathf.Max(1, poursNeeded);
+            if (_streamFlow <= 0.05f) return;
+            if (!_pourSounded)
+            {
+                _pourSounded = true;
+                GameAudio.Play(AudioIds.WaterPour, _streamTo, _audio, PuzzleSounds.Whoosh, volume * 0.5f);
+            }
+            if (fx != null && Here && Time.time >= _splashAt)
+            {
+                _splashAt = Time.time + 0.12f;
+                float tile = TileWorld;
+                fx.Burst(_streamTo, 1 + Mathf.RoundToInt(_streamFlow * 2f), new Color(0.62f, 0.88f, 0.95f, 0.95f), tile * 0.05f, 0.35f, tile * 0.05f, island.transform.up * tile * 0.5f);
+            }
+        }
+
         void Carry(bool pouring = false)
         {
             if (_scoop == null || !pouring && (_scoop.State != ScoopState.Held || _pouring))
@@ -451,7 +480,8 @@ namespace Diorama
             var to = PourWorld(UsesBowl ? bowlFloor - bowlRim + 0.1f : 0.2f);
             _streamTo = to;
             float tile = TileWorld;
-            GameAudio.Play(AudioIds.WaterPour, to, _audio, PuzzleSounds.Whoosh, volume * 0.5f);
+            if (!_pourSounded) GameAudio.Play(AudioIds.WaterPour, to, _audio, PuzzleSounds.Whoosh, volume * 0.5f);
+            float amountFrom = _sheetAmount, flowFrom = _streamFlow;
             float fillFrom = _fill, fillTo = _scoop.Pours / (float)Mathf.Max(1, poursNeeded);
             for (float t = 0f; t < 0.8f; t += Time.deltaTime)
             {
@@ -462,8 +492,9 @@ namespace Diorama
                 {
                     // Step 12c: the water stays in the hands and pours out as a stream, the sheet thinning.
                     Carry(true);
-                    _sheetAmount = 1f - Mathf.SmoothStep(0f, 1f, u);
-                    _streamFlow = Mathf.Clamp01(Mathf.Min(u * 6f, (1f - u) * 4f));
+                    _sheetAmount = amountFrom * (1f - Mathf.SmoothStep(0f, 1f, u));
+                    // Step 24: a pour that built up with the tilt carries on from its own flow and tails off.
+                    _streamFlow = flowFrom > 0.05f ? flowFrom * (1f - u) : Mathf.Clamp01(Mathf.Min(u * 6f, (1f - u) * 4f));
                 }
                 _fill = Mathf.Lerp(fillFrom, fillTo, Mathf.SmoothStep(0f, 1f, u));
                 if (fx != null && Here)
@@ -472,6 +503,7 @@ namespace Diorama
             }
             _fill = fillTo;
             _streamFlow = 0f;
+            _pourSounded = false;
             _floating = false;
             if (fx != null && Here) fx.Burst(to, 16, new Color(0.75f, 0.95f, 1f), tile * 0.6f, 0.6f, tile * 0.05f, island.transform.up * tile * 0.6f);
             PuzzleState.SetStage(id, _scoop.Pours);
@@ -636,11 +668,13 @@ namespace Diorama
                 axis = Vector3.Cross(normal, island.transform.forward);
                 halfLong = halfWide = palmPool;
             }
-            // A cupped palm faces up; keep the sheet level-ish even as the hands roll, so it reads as water.
-            normal = Vector3.Slerp(up, normal, 0.35f);
-            var centre = _ballWorld;
-            _palmWater.Sheet(true, centre, axis, normal, halfLong, halfWide, sheetDome, _wobble, _sheetAmount, _streamTo - centre);
-            _palmWater.Stream(_pouring && _streamFlow > 0.01f, _palmWater.LowEdge, _streamTo, 0.012f, _streamFlow, Camera.main);
+            // Step 24: gravity: the water stays level as the palm tilts and slides toward the low side. Two hands rolling apart
+            // have no low side of their own (their normals cancel): there the water leaves toward the bowl.
+            var downhill = Vector3.ProjectOnPlane(normal, up);
+            var centre = _ballWorld + downhill * Mathf.Min(halfLong, halfWide) * 0.6f;
+            _palmWater.Sheet(true, centre, axis, up, halfLong, halfWide, sheetDome, _wobble, _sheetAmount, downhill.sqrMagnitude > 0.04f ? downhill : _streamTo - centre);
+            bool flowing = _pouring || _scoop.State == ScoopState.Held;
+            _palmWater.Stream(flowing && _streamFlow > 0.01f, _palmWater.LowEdge, _streamTo, 0.012f * Mathf.Lerp(0.3f, 1f, _streamFlow), _streamFlow, Camera.main);
         }
 
         void Splash(Vector3 at, int count)

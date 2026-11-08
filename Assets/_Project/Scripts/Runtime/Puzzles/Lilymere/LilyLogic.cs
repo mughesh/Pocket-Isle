@@ -314,6 +314,17 @@ namespace Diorama
         public float cupUp = 0.55f, keepUp = 0.1f, tipUp = -0.35f, dipDepth = 0.01f, liftHeight = 0.02f, lostGrace = 0.3f;
         public int poursNeeded = 2;
 
+        /// <summary>Step 24: palm up where the stream starts (cos 20 deg) and is full (cos 60 deg); seconds a full stream empties the hand; share of a handful that must land for a pour to count.</summary>
+        public float flowStartUp = 0.94f, flowFullUp = 0.5f, pourSeconds = 1.4f, landedNeeded = 0.7f;
+
+        /// <summary>Step 24: what is left in the hand (1 = a full scoop), what has landed in the bowl, and the stream now (all 0..1).</summary>
+        public float Water { get; private set; } = 1f;
+        public float Landed { get; private set; }
+        public float Flow { get; private set; }
+
+        /// <summary>Step 24: the stream at a palm tilt: nothing near level, a dribble from about 20 degrees, full at about 60.</summary>
+        public float FlowAt(float up) => Mathf.InverseLerp(flowStartUp, flowFullUp, up);
+
         public ScoopState State { get; private set; } = ScoopState.Empty;
         public int Holder { get; private set; } = -1;
         public int Pours { get; private set; }
@@ -359,7 +370,12 @@ namespace Diorama
                 {
                     var x = Hold(hands);
                     if (!x.tracked || x.up < keepUp) Reset();
-                    else if (!x.overWater || x.aboveWater >= liftHeight) State = ScoopState.Held;
+                    else if (!x.overWater || x.aboveWater >= liftHeight)
+                    {
+                        State = ScoopState.Held;
+                        Water = 1f;
+                        Landed = Flow = 0f;
+                    }
                     break;
                 }
                 case ScoopState.Held:
@@ -367,22 +383,37 @@ namespace Diorama
                     var x = Hold(hands);
                     if (!x.tracked)
                     {
+                        Flow = 0f;
                         _lost += dt;
                         if (_lost >= lostGrace) State = ScoopState.Spilled;
                         break;
                     }
                     _lost = 0f;
-                    if (x.up > tipUp) break;
-                    if (x.overBasin && !Full)
+                    bool canPour = x.overBasin && !Full;
+                    if (x.up <= tipUp)
                     {
-                        State = ScoopState.Pouring;
-                        Pours++;
+                        // Turned right over: all of it goes at once.
+                        if (canPour) Count();
+                        else State = ScoopState.Spilled;
+                        break;
                     }
-                    else State = ScoopState.Spilled;
+                    // Step 24: it pours as the hand tilts, over the bowl only (a carry is never punished for a tilted palm).
+                    Flow = canPour ? FlowAt(x.up) : 0f;
+                    if (Flow <= 0f) break;
+                    float d = Mathf.Min(Water, Flow * dt / Mathf.Max(0.01f, pourSeconds));
+                    Water -= d;
+                    Landed += d;
+                    if (Landed >= landedNeeded) Count();
                     break;
                 }
             }
             return State;
+        }
+
+        void Count()
+        {
+            State = ScoopState.Pouring;
+            Pours++;
         }
 
         Hand Hold(Hand[] hands) => Holder >= 0 && Holder < hands.Length ? hands[Holder] : default;
@@ -402,6 +433,8 @@ namespace Diorama
             State = ScoopState.Empty;
             Holder = -1;
             _lost = 0f;
+            Water = 1f;
+            Landed = Flow = 0f;
         }
 
         public void Restore(int pours)
