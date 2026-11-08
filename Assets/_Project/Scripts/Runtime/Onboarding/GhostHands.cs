@@ -56,6 +56,9 @@ namespace Diorama
                  "the cap, this far toward the player from the middle (island m at scale 1).")]
         public bool thumbBeside = true;
         public Vector3 thumbBesideSpot = new Vector3(0.02f, 0.13f, 0.06f);
+        [Tooltip("Step 21 (Mugesh, after the side spot: keep it over the island's centre, up): the demo floats this high over the cap's centre, facing the head (wins over Thumb Beside).")]
+        public bool thumbOverCentre = true;
+        public float thumbCentreUp = 0.18f;
         [Tooltip("A gold arrow for each swipe stroke (the way the explorer walks for it): length and width at the ghost's scale.")]
         public bool thumbArrows = true;
         public float arrowLength = 0.07f, arrowWidth = 0.035f;
@@ -679,6 +682,16 @@ namespace Diorama
                 case GhostPlace.AboveIsland:
                 {
                     if (island == null) return false;
+                    if (ThumbDemo && thumbOverCentre)
+                    {
+                        // Over the island's centre, raised clear of the map, facing the head (upright, never lying on it).
+                        var it3 = island.transform;
+                        point = it3.TransformPoint(new Vector3(0f, island.CapTopLocal, 0f)) + Vector3.up * (thumbCentreUp * it3.lossyScale.x);
+                        var look3 = point - head;
+                        look3.y = 0f;
+                        frame = look3.sqrMagnitude > 1e-6f ? Quaternion.LookRotation(look3, Vector3.up) : Quaternion.identity;
+                        return true;
+                    }
                     if (ThumbDemo && thumbBeside)
                     {
                         // Step 21: beside the island on the dominant side (island +X is the player's left), raised, facing the head.
@@ -1153,10 +1166,11 @@ namespace Diorama
             Hold(rest, Frames(strokePause));
             foreach (var s in strokes)
             {
-                // Forward / back: the recording's own most-forward and most-back poses (a real thumb's reach); left / right
-                // are solved across the finger from the neutral.
+                // Forward / back (Mugesh: the recorded thumb's own reach didn't show): the whole thumb slides along the
+                // finger from its base, a little more than a real thumb, so it reads; left / right are solved across the
+                // finger from the neutral.
                 float miss = 0f;
-                var end = s.kind == 'F' ? Blend(Copy(rest), fwdF, 1f) : s.kind == 'B' ? Blend(Copy(rest), backF, 1f)
+                var end = s.kind == 'F' || s.kind == 'B' ? SlideThumb(g, rest, s.dir * s.dist)
                     : SolveThumbTip(g, rest, restTip + s.dir * s.dist, out miss);
                 solved += $" {s.kind} {miss * 1000f:0.0} mm off";
                 int s0 = clip.frames.Count;
@@ -1233,6 +1247,23 @@ namespace Diorama
         {
             var f = Copy(a);
             for (int i = 0; i < f.rot.Length; i++) f.rot[i] = Quaternion.Slerp(a.rot[i], b.rot[i], k);
+            for (int i = 0; i < f.pos.Length && i < b.pos.Length; i++) f.pos[i] = Vector3.Lerp(a.pos[i], b.pos[i], k);
+            return f;
+        }
+
+        /// <summary>Step 21: the rest pose with the thumb's base moved by <paramref name="offset"/> (hand root frame), so
+        /// the whole thumb slides along the finger.</summary>
+        GhostFrame SlideThumb(Ghost g, GhostFrame rest, Vector3 offset)
+        {
+            var f = Copy(rest);
+            for (int i = 0; i < JointCount; i++)
+            {
+                _rot[i] = rest.rot[i];
+                _pos[i] = rest.pos[i];
+            }
+            int t1 = (int)HandJointId.HandThumb1;
+            var parent = RootRotOf(g, g.joints[t1] != null ? g.joints[t1].parent : null);
+            f.pos[t1] = rest.pos[t1] + Quaternion.Inverse(parent) * offset;
             return f;
         }
 

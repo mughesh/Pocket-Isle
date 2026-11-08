@@ -78,6 +78,9 @@ namespace Diorama.EditorTools
             }
             so.FindProperty("arrowMaterial").objectReferenceValue = mat;
             so.FindProperty("fixedThumbPose").boolValue = true;
+            so.FindProperty("thumbOverCentre").boolValue = true;
+            so.FindProperty("thumbCentreUp").floatValue = 0.18f;
+            so.FindProperty("swipeAlong").floatValue = 0.016f;
             so.FindProperty("thumbRootEuler").vector3Value = new Vector3(-18.1f, -13.1f, -88.5f);
             so.FindProperty("arrowLength").floatValue = 0.07f;
             so.FindProperty("arrowWidth").floatValue = 0.035f;

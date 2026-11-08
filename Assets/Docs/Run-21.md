@@ -54,13 +54,18 @@ single swipe and a tap, and the thumb moved ~2 cm (unreadable at that distance).
   head, a soft glow under it. It starts at the thumb tip on the index finger and runs along the swipe line, growing with
   the stroke. `21_swipe_strokes.png`: the loop every 0.13 s from the seat.
 
+### E3. After your headset check (14:05): forward / back show, the demo over the centre
+- Forward / back: the whole thumb slides 1.6 cm along the finger from its base (your recorded thumb's own reach didn't
+  show). A little more than a real thumb, so it reads.
+- Over the island's centre, 18 cm up, facing you (`thumbOverCentre`, `thumbCentreUp`), not on the right side.
+
 ## Not done / for you
 - Lantern text is smaller to the eye than step 19's (they're ~0.73 m away, was ~0.58). If it's hard to read, say so and I'll
   bring them closer, not bigger.
 
 ## Headset test (play order)
 1. **New Quick Journey**: the title music fades as the shard arrives; poking the shard is quiet.
-2. Swipe lessons: the ghost hand floats beside the island on your right, upright, not on the map. It loops left, right, forward, back, each with a glowing arrow from the thumb tip along the swipe.
+2. Swipe lessons: the ghost hand floats over the island's centre, upright, clear of the map. It loops left, right, forward, back, each with a glowing arrow from the thumb tip along the swipe.
 3. Exploring: poke a rim pod (card shows), then swipe: the card closes.
 4. **Battle**: grab another pod and throw it: it switches, no move fires. Log: `Poke/Pinch on rune N ignored: a hand is on a pod`.
 5. Battle, after a move: press **Run** (poke): it works.

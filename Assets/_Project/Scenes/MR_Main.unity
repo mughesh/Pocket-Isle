@@ -5399,12 +5399,14 @@ MonoBehaviour:
   thumbRoll: 0
   thumbBeside: 1
   thumbBesideSpot: {x: 0.02, y: 0.13, z: 0.06}
+  thumbOverCentre: 1
+  thumbCentreUp: 0.18
   thumbArrows: 1
   arrowLength: 0.07
   arrowWidth: 0.035
   arrowMaterial: {fileID: 2100000, guid: ed1bcd466faefdb498397df553959d5f, type: 2}
   swipeAcross: 0.016
-  swipeAlong: 0.02
+  swipeAlong: 0.016
   strokeOut: 0.22
   strokeHold: 0.15
   strokeBack: 0.25
