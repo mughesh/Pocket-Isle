@@ -285,6 +285,41 @@ namespace Diorama
             }
         }
 
+        /// <summary>
+        /// Step 22: glowing cracks opening over the whole body, on any species (0 = its own look, 1 = fully open): the moment
+        /// before an evolution. A creature with cracks of its own keeps them and they widen.
+        /// </summary>
+        public void SetEvolveCracks(float amount)
+        {
+            if (_blocks == null || _blocks.Length != pieces.Count) ApplyStyles();
+            if (amount <= 0f)
+            {
+                ApplyStyles();
+                return;
+            }
+            // Body pieces only: on an ear or a tail the pattern radiates from a pivot at its base and smears.
+            float largest = 0f;
+            foreach (var q in pieces)
+                if (q != null && q.renderer != null) largest = Mathf.Max(largest, q.renderer.bounds.size.magnitude);
+            for (int i = 0; i < pieces.Count; i++)
+            {
+                var p = pieces[i];
+                if (p == null || p.renderer == null || _blocks[i] == null || p.renderer.bounds.size.magnitude < largest * 0.6f) continue;
+                var s = p.style;
+                float scale = s.cracks && s.crackScale > 0f ? s.crackScale : 1.6f;
+                float width = s.cracks && s.crackWidth > 0f ? s.crackWidth * (1f + 0.6f * amount) : 0.06f * amount;
+                _blocks[i].SetFloat(CrackOnId, 1f);
+                _blocks[i].SetVector(CrackColorId, (s.cracks ? s.crackColor : new Color(1f, 0.78f, 0.35f)).linear);
+                _blocks[i].SetFloat(CrackScaleId, scale);
+                _blocks[i].SetFloat(CrackWidthId, Mathf.Max(width, 1e-3f));
+                _blocks[i].SetFloat(CrackPulseId, 0.8f);
+                _blocks[i].SetFloat(CrackDepthId, width / scale * 0.6f);
+                _blocks[i].SetFloat(CrackFlowId, 1f);
+                _blocks[i].SetFloat(CrackInnerId, Mathf.Clamp01(amount * 2f));
+                p.renderer.SetPropertyBlock(_blocks[i]);
+            }
+        }
+
         /// <summary>Writes every piece's palette and zones into its property block.</summary>
         public void ApplyStyles()
         {

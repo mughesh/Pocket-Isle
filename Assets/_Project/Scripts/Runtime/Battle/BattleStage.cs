@@ -1426,6 +1426,15 @@ namespace Diorama
             float same = old.Height / Mathf.Max(1e-4f, nu.Height);
 
             var rise = AudioService.PlayLoop(AudioIds.EvoRise, old.transform, 0.3f);
+            // Step 22: gold cracks open over the body and motes rise from it, then the white flash takes over.
+            float motes = 0f;
+            yield return Tween(1.2f, p =>
+            {
+                old.View.SetEvolveCracks(p * p);
+                motes += Time.deltaTime * (6f + 24f * p);
+                for (; motes >= 1f; motes -= 1f)
+                    fx.Burst(old.WorldCenter + UnityEngine.Random.insideUnitSphere * old.Height * 0.45f, 1, Gold, World(0.008f), 0.8f, World(0.0035f), Vector3.up * World(0.04f));
+            });
             yield return Tween(0.5f, p => old.View.SetFlash(p));
             nu.View.SetFlash(1f);
             float[] holds = { 0.5f, 0.42f, 0.34f, 0.26f, 0.2f, 0.14f, 0.1f };

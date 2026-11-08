@@ -18,6 +18,8 @@ namespace Diorama.EditorTools
         public static void CrystalShots()
         {
             string name = string.IsNullOrEmpty(Arg) ? "shard" : Arg;
+            bool evolve = name.StartsWith("evo:"); // the evolution's cracks, fully open
+            if (evolve) name = name.Substring(4);
             var at = new Vector3(0f, 60f, 0f);
             GameObject go;
             float size;
@@ -48,6 +50,7 @@ namespace Diorama.EditorTools
                 go = Object.Instantiate(prefab);
                 var view = go.GetComponentInChildren<CreatureView>(true);
                 if (view != null) view.SendMessage("Awake", SendMessageOptions.DontRequireReceiver);
+                if (view != null && evolve) view.SetEvolveCracks(1f);
                 size = 0.16f;
             }
             go.transform.position = at;
@@ -60,7 +63,7 @@ namespace Diorama.EditorTools
                 for (int i = 0; i < 4; i++)
                 {
                     var dir = Quaternion.Euler(12f, i * 90f + 20f, 0f) * Vector3.back;
-                    var eye = c + dir * Mathf.Max(size * 2.2f, b.extents.magnitude * 2.6f);
+                    var eye = c + dir * (name == "shard" ? Mathf.Max(size * 2.2f, b.extents.magnitude * 2.6f) : b.extents.magnitude * 1.5f);
                     BattleDebug.Render($"Logs/BattleShots/22_crystal_{name}_{i}.png", eye, Quaternion.LookRotation(c - eye, Vector3.up));
                 }
             }

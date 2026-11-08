@@ -423,18 +423,18 @@ MonoBehaviour:
   pieces:
   - renderer: {fileID: 2659799003730405135}
     style:
-      baseColor: {r: 0.12156863, g: 0.3529412, b: 0.4, a: 1}
-      top: {r: 0.12156863, g: 0.3529412, b: 0.4, a: 1}
+      baseColor: {r: 0.41568627, g: 0.16470588, b: 0.10980392, a: 1}
+      top: {r: 0.41568627, g: 0.16470588, b: 0.10980392, a: 1}
       gradient: 0
       belly: 0
-      bellyColor: {r: 0.24313726, g: 0.6039216, b: 0.61960787, a: 1}
+      bellyColor: {r: 0.6627451, g: 0.32941176, b: 0.18039216, a: 1}
       bellyDirection: {x: 0, y: 0, z: 1}
       bellyAt: 0
       bellyMaxY: 0
       bellyDrips: 0
       bellyDripLength: 0
       socks: 0
-      socksColor: {r: 0.12156863, g: 0.3529412, b: 0.4, a: 1}
+      socksColor: {r: 0.41568627, g: 0.16470588, b: 0.10980392, a: 1}
       socksY: 0
       tip: 0
       tipColor: {r: 0.47843137, g: 0.2901961, b: 0.14117648, a: 1}
@@ -461,15 +461,15 @@ MonoBehaviour:
       breatheSpeed: 1.4
       jiggle: 0
       outlineWidth: 0.035
-      outlineColor: {r: 0.048887342, g: 0.18501961, b: 0.21270749, a: 0.28}
+      outlineColor: {r: 0.22193683, g: 0.074267951, b: 0.041965384, a: 0.28}
       pivotY: -0.76
   - renderer: {fileID: 1616991627182728833}
     style:
-      baseColor: {r: 0.12156863, g: 0.3529412, b: 0.4, a: 1}
-      top: {r: 0.12156863, g: 0.3529412, b: 0.4, a: 1}
+      baseColor: {r: 0.41568627, g: 0.16470588, b: 0.10980392, a: 1}
+      top: {r: 0.41568627, g: 0.16470588, b: 0.10980392, a: 1}
       gradient: 0
       belly: 0
-      bellyColor: {r: 0.12156863, g: 0.3529412, b: 0.4, a: 1}
+      bellyColor: {r: 0.41568627, g: 0.16470588, b: 0.10980392, a: 1}
       bellyDirection: {x: 0, y: 0, z: 1}
       bellyAt: 0
       bellyMaxY: 9
@@ -479,7 +479,7 @@ MonoBehaviour:
       socksColor: {r: 0, g: 0, b: 0, a: 0}
       socksY: 0
       tip: 0
-      tipColor: {r: 0.12156863, g: 0.3529412, b: 0.4, a: 1}
+      tipColor: {r: 0.41568627, g: 0.16470588, b: 0.10980392, a: 1}
       tipAxis: {x: 0, y: 1, z: 0}
       tipAt: 0
       spots: 0
@@ -501,15 +501,15 @@ MonoBehaviour:
       breatheSpeed: 0
       jiggle: 0
       outlineWidth: 0.022
-      outlineColor: {r: 0.048887342, g: 0.18501961, b: 0.21270749, a: 0.28}
+      outlineColor: {r: 0.22193683, g: 0.074267951, b: 0.041965384, a: 0.28}
       pivotY: 0
   - renderer: {fileID: 5528307658569458937}
     style:
-      baseColor: {r: 0.12156863, g: 0.3529412, b: 0.4, a: 1}
-      top: {r: 0.12156863, g: 0.3529412, b: 0.4, a: 1}
+      baseColor: {r: 0.41568627, g: 0.16470588, b: 0.10980392, a: 1}
+      top: {r: 0.41568627, g: 0.16470588, b: 0.10980392, a: 1}
       gradient: 0
       belly: 0
-      bellyColor: {r: 0.12156863, g: 0.3529412, b: 0.4, a: 1}
+      bellyColor: {r: 0.41568627, g: 0.16470588, b: 0.10980392, a: 1}
       bellyDirection: {x: 0, y: 0, z: 1}
       bellyAt: 0
       bellyMaxY: 9
@@ -519,7 +519,7 @@ MonoBehaviour:
       socksColor: {r: 0, g: 0, b: 0, a: 0}
       socksY: 0
       tip: 0
-      tipColor: {r: 0.12156863, g: 0.3529412, b: 0.4, a: 1}
+      tipColor: {r: 0.41568627, g: 0.16470588, b: 0.10980392, a: 1}
       tipAxis: {x: 0, y: 1, z: 0}
       tipAt: 0
       spots: 0
@@ -541,15 +541,15 @@ MonoBehaviour:
       breatheSpeed: 0
       jiggle: 0
       outlineWidth: 0.025
-      outlineColor: {r: 0.048887342, g: 0.18501961, b: 0.21270749, a: 0.28}
+      outlineColor: {r: 0.22193683, g: 0.074267951, b: 0.041965384, a: 0.28}
       pivotY: 0
   - renderer: {fileID: 5157845405770873084}
     style:
-      baseColor: {r: 0.12156863, g: 0.3529412, b: 0.4, a: 1}
-      top: {r: 0.12156863, g: 0.3529412, b: 0.4, a: 1}
+      baseColor: {r: 0.41568627, g: 0.16470588, b: 0.10980392, a: 1}
+      top: {r: 0.41568627, g: 0.16470588, b: 0.10980392, a: 1}
       gradient: 0
       belly: 0
-      bellyColor: {r: 0.12156863, g: 0.3529412, b: 0.4, a: 1}
+      bellyColor: {r: 0.41568627, g: 0.16470588, b: 0.10980392, a: 1}
       bellyDirection: {x: 0, y: 0, z: 1}
       bellyAt: 0
       bellyMaxY: 9
@@ -559,7 +559,7 @@ MonoBehaviour:
       socksColor: {r: 0, g: 0, b: 0, a: 0}
       socksY: 0
       tip: 0
-      tipColor: {r: 0.12156863, g: 0.3529412, b: 0.4, a: 1}
+      tipColor: {r: 0.41568627, g: 0.16470588, b: 0.10980392, a: 1}
       tipAxis: {x: 0, y: 1, z: 0}
       tipAt: 0
       spots: 0
@@ -581,7 +581,7 @@ MonoBehaviour:
       breatheSpeed: 0
       jiggle: 0
       outlineWidth: 0.025
-      outlineColor: {r: 0.048887342, g: 0.18501961, b: 0.21270749, a: 0.28}
+      outlineColor: {r: 0.22193683, g: 0.074267951, b: 0.041965384, a: 0.28}
       pivotY: 0
   - renderer: {fileID: 5936932551404257304}
     style:
@@ -589,7 +589,7 @@ MonoBehaviour:
       top: {r: 0.47843137, g: 0.2901961, b: 0.14117648, a: 1}
       gradient: 0
       belly: 0
-      bellyColor: {r: 0.12156863, g: 0.3529412, b: 0.4, a: 1}
+      bellyColor: {r: 0.41568627, g: 0.16470588, b: 0.10980392, a: 1}
       bellyDirection: {x: 0, y: 0, z: 1}
       bellyAt: 0
       bellyMaxY: 9
@@ -599,7 +599,7 @@ MonoBehaviour:
       socksColor: {r: 0, g: 0, b: 0, a: 0}
       socksY: 0
       tip: 0
-      tipColor: {r: 0.12156863, g: 0.3529412, b: 0.4, a: 1}
+      tipColor: {r: 0.41568627, g: 0.16470588, b: 0.10980392, a: 1}
       tipAxis: {x: 0, y: 1, z: 0}
       tipAt: 0
       spots: 0
@@ -629,7 +629,7 @@ MonoBehaviour:
       top: {r: 0.18039216, g: 0.16470589, b: 0.15686275, a: 1}
       gradient: 0
       belly: 0
-      bellyColor: {r: 0.12156863, g: 0.3529412, b: 0.4, a: 1}
+      bellyColor: {r: 0.41568627, g: 0.16470588, b: 0.10980392, a: 1}
       bellyDirection: {x: 0, y: 0, z: 1}
       bellyAt: 0
       bellyMaxY: 9
@@ -639,7 +639,7 @@ MonoBehaviour:
       socksColor: {r: 0, g: 0, b: 0, a: 0}
       socksY: 0
       tip: 0
-      tipColor: {r: 0.12156863, g: 0.3529412, b: 0.4, a: 1}
+      tipColor: {r: 0.41568627, g: 0.16470588, b: 0.10980392, a: 1}
       tipAxis: {x: 0, y: 1, z: 0}
       tipAt: 0
       spots: 0
@@ -669,7 +669,7 @@ MonoBehaviour:
       top: {r: 0.18039216, g: 0.16470589, b: 0.15686275, a: 1}
       gradient: 1
       belly: 0
-      bellyColor: {r: 0.12156863, g: 0.3529412, b: 0.4, a: 1}
+      bellyColor: {r: 0.41568627, g: 0.16470588, b: 0.10980392, a: 1}
       bellyDirection: {x: 0, y: 0, z: 1}
       bellyAt: 0
       bellyMaxY: 9
@@ -679,7 +679,7 @@ MonoBehaviour:
       socksColor: {r: 0, g: 0, b: 0, a: 0}
       socksY: 0
       tip: 0
-      tipColor: {r: 0.12156863, g: 0.3529412, b: 0.4, a: 1}
+      tipColor: {r: 0.41568627, g: 0.16470588, b: 0.10980392, a: 1}
       tipAxis: {x: 0, y: 1, z: 0}
       tipAt: 0
       spots: 0
