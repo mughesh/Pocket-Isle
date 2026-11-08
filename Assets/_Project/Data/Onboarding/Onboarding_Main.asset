@@ -183,7 +183,7 @@ MonoBehaviour:
     failWhen: 
     rewindTo: 
     praise: 1
-    ghost: thumb_swipe_all
+    ghost: thumb_swipe_left_tap
     place: 2
     target: ghost
     source: 

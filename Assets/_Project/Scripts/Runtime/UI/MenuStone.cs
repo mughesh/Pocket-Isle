@@ -63,7 +63,8 @@ namespace Diorama
             mr.SetPropertyBlock(block);
         }
 
-        public static bool Shown => !GameMenu.IsOpen && !Opening.InProgress && !TitleScreen.Showing && !SceneSwap.IsBusy &&
+        // Step 22: shown in the opening too once the island is up (the menu opens there now), not while only the shard floats.
+        public static bool Shown => !GameMenu.IsOpen && !(Opening.InProgress && Opening.ShardOnly) && !TitleScreen.Showing && !SceneSwap.IsBusy &&
                                     !FinaleDirector.Running && !JournalBoard.IsOpen && !SettingsBoard.IsOpen;
 
         void LateUpdate()

@@ -113,12 +113,13 @@ namespace Diorama
             runes.rimLocked = true; // step 17 B: rim rows sit on the rim, island-front locked
             var active = SaveSlots.Active;
             var other = SaveSlots.Other(active);
-            var cont = runes.Add("Continue", new Vector2(-0.11f, 0f), Wide, () => _continue = true, SaveSlots.Label(active));
+            // Step 22 (Nov 8: buttons a few mm apart): 2.4 cm between tablets on the board (was 1.0).
+            var cont = runes.Add("Continue", new Vector2(-0.124f, 0f), Wide, () => _continue = true, SaveSlots.Label(active));
             cont.primary = true;
             runes.Add("New journey", new Vector2(0f, 0f), Wide, () => ShowSlotChoice(true));
-            runes.Add("Settings", new Vector2(0.1f, -0.004f), Small, OpenSettings);
+            runes.Add("Settings", new Vector2(0.109f, -0.004f), Small, OpenSettings);
             if (SaveSlots.Exists(other))
-                runes.Add($"or: {SaveSlots.Label(other)}", new Vector2(-0.11f, -0.042f), new Vector2(0.1f, 0.026f), () => SwitchTo(other));
+                runes.Add($"or: {SaveSlots.Label(other)}", new Vector2(-0.124f, -0.056f), new Vector2(0.1f, 0.026f), () => SwitchTo(other));
             runes.DefaultFocus = cont;
             runes.Show();
         }
@@ -133,14 +134,14 @@ namespace Diorama
             }
             runes.Clear();
             runes.rimLocked = true; // step 17 B: rim rows sit on the rim, island-front locked
-            var full = runes.Add("Full adventure", new Vector2(-0.11f, 0f), Wide, () => Pick(SaveSlot.Adventure, restart),
+            var full = runes.Add("Full adventure", new Vector2(-0.124f, 0f), Wide, () => Pick(SaveSlot.Adventure, restart),
                 restart && SaveSlots.Exists(SaveSlot.Adventure) ? "Hold to start over" : null);
             var quick = runes.Add("Quick journey", new Vector2(0f, 0f), Wide, () => Pick(SaveSlot.Quick, restart),
                 restart && SaveSlots.Exists(SaveSlot.Quick) ? "Hold to start over" : "about 10 min");
             full.hold = restart && SaveSlots.Exists(SaveSlot.Adventure);
             quick.hold = restart && SaveSlots.Exists(SaveSlot.Quick);
-            if (restart) runes.Add("Back", new Vector2(0.1f, -0.004f), Small, ShowReturning);
-            else runes.Add("Settings", new Vector2(0.1f, -0.004f), Small, OpenSettings);
+            if (restart) runes.Add("Back", new Vector2(0.109f, -0.004f), Small, ShowReturning);
+            else runes.Add("Settings", new Vector2(0.109f, -0.004f), Small, OpenSettings);
             runes.DefaultFocus = null;
             runes.Show();
         }

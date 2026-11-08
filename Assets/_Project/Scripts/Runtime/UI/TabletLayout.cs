@@ -12,6 +12,9 @@ namespace Diorama
     public static class TabletLayout
     {
         public const float MinGap = 0.008f;
+        /// <summary>Step 22 (Mugesh, Nov 8: menu tablets a few mm apart, almost touching): the gap as seen in the room (m),
+        /// whatever the island's size. The island starts at 0.6 and shrinks to half that, so 8 mm local was ~5 mm or less.</summary>
+        public const float MinRoomGap = 0.012f;
         /// <summary>The gap left while one tablet of a pair is grown by its hover (and pulse).</summary>
         public const float HoverGap = 0.002f;
 

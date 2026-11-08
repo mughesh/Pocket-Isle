@@ -59,7 +59,9 @@ namespace Diorama
         static readonly Vector2 Pebble = new Vector2(0.022f, 0.022f);
         static readonly Vector2 Choice = new Vector2(0.048f, 0.025f);
         static readonly Vector2 Wide = new Vector2(0.074f, 0.028f);
-        const float RowGap = 0.043f, LabelX = -0.16f, FirstX = -0.045f, PebbleStep = 0.036f, ChoiceStep = 0.062f, WideStep = 0.09f;
+        // Step 22 (Mugesh, Nov 8: buttons a few mm apart): every gap 2.2 cm on the board (1.3 cm in the room at the
+        // island's 0.6 start; TabletLayout.MinRoomGap); was 1.4.
+        const float RowGap = 0.048f, LabelX = -0.16f, FirstX = -0.045f, PebbleStep = 0.044f, ChoiceStep = 0.07f, WideStep = 0.096f;
 
         Action _closed;
         TextMeshPro _creditText;
@@ -117,7 +119,7 @@ namespace Diorama
             _creditText = null;
             _pebbles.Clear();
             float top = 7f * RowGap;
-            runes.AddBacking(new Vector2(0f, top * 0.5f + 0.004f), new Vector2(0.37f, top + 0.06f));
+            runes.AddBacking(new Vector2(0f, top * 0.5f + 0.004f), new Vector2(0.4f, top + 0.06f));
             runes.AddText("<b>Settings</b>", new Vector2(0f, top + 0.004f), runes.fontSize * 1.1f);
             if (_toTitle != null)
             {

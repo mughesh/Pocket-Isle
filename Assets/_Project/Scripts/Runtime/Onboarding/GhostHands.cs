@@ -591,7 +591,9 @@ namespace Diorama
                 if (!show) continue;
                 float k = 1f - i / (float)n;
                 _thumbDots[i].position = p;
-                _thumbDots[i].localScale = Vector3.one * size * (i == 0 ? 1f + 0.2f * Mathf.Sin(Time.time * 10f) : 0.4f + 0.5f * k);
+                // Step 22: a tap pulses the dot big (swipes get the arrow).
+                float pulse = _tapPulse ? 1.8f + 0.6f * Mathf.Sin(Time.time * 14f) : 1f + 0.2f * Mathf.Sin(Time.time * 10f);
+                _thumbDots[i].localScale = Vector3.one * size * (i == 0 ? pulse : 0.4f + 0.5f * k);
                 _thumbBlock.SetColor(FillId, ThumbGold);
                 _thumbBlock.SetColor(RimId, new Color(1f, 0.93f, 0.6f));
                 _thumbBlock.SetFloat(FillAlphaId, 0.85f);
@@ -1144,9 +1146,16 @@ namespace Diorama
             {
                 ('L', -dorsal, swipeAcross), ('R', dorsal, swipeAcross), ('F', along, swipeAlong), ('B', -along, swipeAlong),
             };
+            Build(SwipeAllClip, strokes, false);
+            // Step 22 (Mugesh, Nov 8: the swipe-and-tap lesson showed the four swipes and no tap): one swipe left with its
+            // arrow, then the recorded tap's thumb on the same resting hand (the dot pulses).
+            Build(SwipeTapClip, new[] { strokes[0] }, true);
+
+            void Build(string clipName, (char kind, Vector3 dir, float dist)[] list, bool withTap)
+            {
             var clip = ScriptableObject.CreateInstance<GhostHandClip>();
             clip.hideFlags = HideFlags.DontSave;
-            clip.name = clip.clipName = SwipeAllClip;
+            clip.name = clip.clipName = clipName;
             clip.anchor = fwd.anchor;
             clip.leftHand = fwd.leftHand;
             clip.fps = 30f;
@@ -1164,7 +1173,7 @@ namespace Diorama
             }
             string solved = "";
             Hold(rest, Frames(strokePause));
-            foreach (var s in strokes)
+            foreach (var s in list)
             {
                 // Forward / back (Mugesh: the recorded thumb's own reach didn't show): the whole thumb slides along the
                 // finger from its base, a little more than a real thumb, so it reads; left / right are solved across the
@@ -1181,11 +1190,42 @@ namespace Diorama
                 segs.Add(new Stroke { t0 = s0 / clip.fps, t1 = (s0 + outN + Frames(strokeHold)) / clip.fps, kind = s.kind, dir = s.dir, restTip = restTip });
                 Hold(rest, Frames(strokePause));
             }
+            var tap = withTap ? ClipNamed("thumb_tap") : null;
+            if (tap != null && tap.frames.Count > 1)
+            {
+                int ta = Mathf.Clamp(Mathf.RoundToInt(tap.StartTime * tap.fps), 0, tap.frames.Count - 1);
+                int tb = Mathf.Clamp(tap.frames.Count - 1 - Mathf.RoundToInt(tap.trimEnd * tap.fps), ta, tap.frames.Count - 1);
+                GhostFrame TapAt(int i)
+                {
+                    var f = Copy(rest);
+                    foreach (var j in TapJoints)
+                        if ((int)j < tap.frames[i].rot.Length) f.rot[(int)j] = tap.frames[i].rot[(int)j];
+                    return f;
+                }
+                // Into the tap's first thumb pose, the tap at the recording's pace, back to rest: no jump between them.
+                int s0 = clip.frames.Count;
+                var first = TapAt(ta);
+                int inN = Frames(0.12f), outN = Frames(0.15f);
+                for (int i = 1; i <= inN; i++) clip.frames.Add(Blend(rest, first, Mathf.SmoothStep(0f, 1f, i / (float)inN)));
+                float stepT = tap.fps / clip.fps;
+                for (float fi = ta; fi <= tb; fi += stepT) clip.frames.Add(TapAt(Mathf.Min(tb, Mathf.RoundToInt(fi))));
+                var last = clip.frames[clip.frames.Count - 1];
+                for (int i = 1; i <= outN; i++) clip.frames.Add(Blend(last, rest, Mathf.SmoothStep(0f, 1f, i / (float)outN)));
+                segs.Add(new Stroke { t0 = s0 / clip.fps, t1 = clip.frames.Count / clip.fps, kind = 'T', dir = Vector3.zero, restTip = restTip });
+                Hold(rest, Frames(strokePause * 2f));
+            }
+            else if (withTap) Debug.LogError("[GhostHands] No thumb_tap clip (recorded or placeholder): the swipe-and-tap demo has no tap.", this);
             _placeholders[clip.name] = clip;
             _strokes[clip] = segs;
-            Debug.Log($"[GhostHands] {clip.name}: {clip.frames.Count} frames ({clip.Duration:0.0} s), looping left, right, forward, back " +
+            Debug.Log($"[GhostHands] {clip.name}: {clip.frames.Count} frames ({clip.Duration:0.0} s), looping {string.Join(", ", segs.ConvertAll(x => x.kind.ToString()))} " +
                       $"({swipeAcross * 100f:0.0} / {swipeAlong * 100f:0.0} cm at hand size); recorded half travel {neutralMiss * 1000f:0.0} mm, solved:{solved}.");
+            }
         }
+
+        /// <summary>Step 22: the far lesson's demo: a swipe left with its arrow, then a tap.</summary>
+        public const string SwipeTapClip = "thumb_swipe_left_tap";
+
+        static readonly HandJointId[] TapJoints = { HandJointId.HandThumb1, HandJointId.HandThumb2, HandJointId.HandThumb3, HandJointId.HandThumbTip };
 
         /// <summary>The thumb's joints, base to tip, that the stroke solver turns.</summary>
         static readonly HandJointId[] ThumbChain = { HandJointId.HandThumb1, HandJointId.HandThumb2, HandJointId.HandThumb3 };
@@ -1304,6 +1344,7 @@ namespace Diorama
         Mesh _arrowMesh;
         MaterialPropertyBlock _arrowBlock;
         Stroke _arrowStroke;
+        bool _tapPulse;
         float _arrowShow;
         static readonly int ArrowAlphaId = Shader.PropertyToID("_Alpha");
 
@@ -1367,6 +1408,7 @@ namespace Diorama
             {
                 if (_arrow != null) _arrow.enabled = false;
                 _arrowStroke = null;
+                _tapPulse = false;
                 return;
             }
             if (_arrow == null)
@@ -1390,7 +1432,8 @@ namespace Diorama
                 _arrowStroke = now;
                 _arrowShow = 0f;
             }
-            if (now == null || g.root == null)
+            _tapPulse = now != null && now.kind == 'T';
+            if (now == null || g.root == null || now.kind == 'T')
             {
                 _arrow.enabled = false;
                 return;

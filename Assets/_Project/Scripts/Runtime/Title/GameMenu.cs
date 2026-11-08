@@ -27,6 +27,8 @@ namespace Diorama
         public GamePause pause;
         public EncounterDirector encounters;
         public Onboarding onboarding;
+        [Tooltip("Step 22: the space between the menu's tablets as seen in the room (m), whatever the island's size.")]
+        public float roomGap = 0.022f;
         [Tooltip("Island dimming while the menu is open (the battle space uses 0.25).")]
         [Range(0f, 0.8f)] public float dim = 0.45f;
         [Tooltip("The hint line once the lessons are done.")]
@@ -86,9 +88,15 @@ namespace Diorama
         public void TryOpen()
         {
             if (IsOpen) return;
-            if (Opening.InProgress || TitleScreen.Showing || SceneSwap.IsBusy)
+            // Step 22 (Mugesh, Nov 8: the menu did nothing in the shard poke and the intro, with no sign why): it opens in
+            // the opening once the island is up (Resume, Settings, the speaker; no Journal, no Title until the starter is
+            // chosen and the game saves). While only the shard floats the island is shrunk to nothing and the menu lives on
+            // its rim: a soft sound says "not now" instead of nothing.
+            bool early = Opening.InProgress && (Opening.ShardOnly || island == null || island.transform.localScale.x < 0.05f);
+            if (early || TitleScreen.Showing || SceneSwap.IsBusy)
             {
-                Debug.Log($"[GameMenu] Not now ({(Opening.InProgress ? "the opening" : TitleScreen.Showing ? "the title" : "a scene swap")}).");
+                Debug.Log($"[GameMenu] Not now ({(early ? "the shard, before the island is up" : TitleScreen.Showing ? "the title" : "a scene swap")}).");
+                GameAudio.Ui(Diorama.Audio.AudioIds.MenuClose);
                 return;
             }
             if (handle != null && handle.IsGrabbed)
@@ -135,15 +143,19 @@ namespace Diorama
             runes.rimLocked = true; // step 17 B: rim rows sit on the rim, island-front locked
             var size = new Vector2(0.072f, 0.034f);
             var big = new Vector2(0.08f, 0.038f);
-            // Nov 4 (Mugesh: Resume and the others too close): 2.4 cm between tablets (was 0.8).
-            const float gap = 0.024f, side = 0.034f, apart = 0.04f;
+            // Nov 4 (Mugesh: Resume and the others too close): 2.4 cm between tablets (was 0.8). Nov 8 (still a few mm): the
+            // gap is set in the room, not on the island: at the island's 0.6 start 2.4 cm local was 1.4 cm, smaller again
+            // when he shrinks it.
+            float boardScale = Mathf.Max(0.05f, runes.transform.lossyScale.x);
+            float gap = Mathf.Clamp(roomGap / boardScale, 0.024f, 0.07f);
+            const float side = 0.034f, apart = 0.04f;
             float width = big.x + 2f * (size.x + gap) + gap + side;
             float x = -width * 0.5f;
             var resume = runes.Add("Resume", new Vector2(x + big.x * 0.5f, 0f), big, () => Close("Resume"));
             resume.primary = true;
             x += big.x + gap;
-            // Step 14h: the Isling Journal.
-            runes.Add("Journal", new Vector2(x + size.x * 0.5f, 0f), size, OpenJournal);
+            // Step 14h: the Isling Journal. Step 22: not in the opening (nothing caught yet; the same slot stays empty).
+            if (!Opening.InProgress) runes.Add("Journal", new Vector2(x + size.x * 0.5f, 0f), size, OpenJournal);
             x += size.x + gap;
             runes.Add("Settings", new Vector2(x + size.x * 0.5f, 0f), size, OpenSettings);
             x += size.x + gap;
@@ -190,7 +202,7 @@ namespace Diorama
             settings.Open(() =>
             {
                 if (IsOpen) runes.Show();
-            }, FinaleDirector.Running ? null : (System.Action)ToTitle);
+            }, FinaleDirector.Running || Opening.InProgress ? null : (System.Action)ToTitle); // step 22: no Title mid-opening (it doesn't save)
         }
 
         /// <summary>Step 14h: the Isling Journal, back to the menu on Close.</summary>

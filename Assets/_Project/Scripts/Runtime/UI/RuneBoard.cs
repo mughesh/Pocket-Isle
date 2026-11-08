@@ -430,8 +430,12 @@ namespace Diorama
             foreach (var r in _runes)
                 if (r.root != null && r.root.gameObject.activeSelf)
                     rects.Add(new TabletLayout.Rect { label = r.label, center = r.center, size = r.size, grow = HoverGrow });
-            return TabletLayout.Problems(rects);
+            return TabletLayout.Problems(rects, MinGapLocal);
         }
+
+        /// <summary>Step 22: the smallest gap allowed in board-local m: the local rule, or the room rule at this board's
+        /// size, whichever is wider.</summary>
+        public float MinGapLocal => Mathf.Max(TabletLayout.MinGap, TabletLayout.MinRoomGap / Mathf.Max(1e-3f, transform.lossyScale.x));
 
         /// <summary>Step 14j: the last layout problems of every board, by board name (the bridge's layout check reads it).</summary>
         public static readonly Dictionary<string, List<string>> LayoutLog = new Dictionary<string, List<string>>();
@@ -450,7 +454,7 @@ namespace Diorama
             var problems = LayoutProblems();
             string key = name + (_runes.Count > 0 ? $" ({_runes[0].label}...)" : "");
             LayoutLog[key] = problems;
-            if (problems.Count > 0) Debug.LogWarning($"[RuneBoard] {key}: tablets too close (rule: {TabletLayout.MinGap * 1000f:0} mm):\n  " + string.Join("\n  ", problems), this);
+            if (problems.Count > 0) Debug.LogWarning($"[RuneBoard] {key}: tablets too close (rule: {MinGapLocal * 1000f:0} mm local = {TabletLayout.MinRoomGap * 1000f:0} mm in the room):\n  " + string.Join("\n  ", problems), this);
         }
 
         void Update()
