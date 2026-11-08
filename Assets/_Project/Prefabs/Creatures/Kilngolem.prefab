@@ -411,6 +411,7 @@ MonoBehaviour:
   height: 0.0696
   centerHeight: 0.0348
   sideRestHeight: 0.023416098
+  slumpFaintHeight: 0.055
   idle:
     breathe: 0.008
     breatheSpeed: 1.4
@@ -447,6 +448,9 @@ MonoBehaviour:
       crackScale: 1.4
       crackWidth: 0.05
       crackPulse: 1
+      crackDepth: 0.12
+      crackFlow: 1
+      crackInner: 0.35
       patches:
       - {x: 0, y: 0.6, z: 0, w: 0.17}
       patchColors:
@@ -486,6 +490,9 @@ MonoBehaviour:
       crackScale: 0
       crackWidth: 0
       crackPulse: 0
+      crackDepth: 0
+      crackFlow: 0
+      crackInner: 0
       patches: []
       patchColors: []
       spec: 0.35
@@ -523,6 +530,9 @@ MonoBehaviour:
       crackScale: 0
       crackWidth: 0
       crackPulse: 0
+      crackDepth: 0
+      crackFlow: 0
+      crackInner: 0
       patches: []
       patchColors: []
       spec: 0.3
@@ -560,6 +570,9 @@ MonoBehaviour:
       crackScale: 0
       crackWidth: 0
       crackPulse: 0
+      crackDepth: 0
+      crackFlow: 0
+      crackInner: 0
       patches: []
       patchColors: []
       spec: 0.3
@@ -597,6 +610,9 @@ MonoBehaviour:
       crackScale: 0
       crackWidth: 0
       crackPulse: 0
+      crackDepth: 0
+      crackFlow: 0
+      crackInner: 0
       patches: []
       patchColors: []
       spec: 0.2
@@ -634,6 +650,9 @@ MonoBehaviour:
       crackScale: 0
       crackWidth: 0
       crackPulse: 0
+      crackDepth: 0
+      crackFlow: 0
+      crackInner: 0
       patches: []
       patchColors: []
       spec: 0.2
@@ -671,6 +690,9 @@ MonoBehaviour:
       crackScale: 0
       crackWidth: 0
       crackPulse: 0
+      crackDepth: 0
+      crackFlow: 0
+      crackInner: 0
       patches: []
       patchColors: []
       spec: 0

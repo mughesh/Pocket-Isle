@@ -16,6 +16,7 @@ namespace Diorama.EditorTools
         static readonly (string name, float depth, float flow, float inner)[] Islings =
         {
             ("Glazegolem", 0.1f, 0.8f, 0.25f),
+            ("Kilngolem", 0.12f, 1f, 0.35f), // evolves from Glazegolem: its cracks are inherited, its prefab still holds its own style
             ("Cindercap", 0.08f, 0.7f, 0.2f),
             ("Cinderbloom", 0.08f, 0.7f, 0.2f),
         };
