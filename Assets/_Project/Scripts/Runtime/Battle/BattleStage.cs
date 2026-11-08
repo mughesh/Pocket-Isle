@@ -169,7 +169,7 @@ namespace Diorama
         {
             hud.RemoveBar(_wildBar);
             // Step 14k: in front of its pad (between the pads), clear of the near Isling.
-            _wildBar = hud.AddBar(_wild, wild.Name, wild.level, wild.currentHp, wild.MaxHp, 0f, false, () => PadRadiusLocal(_wildPad));
+            _wildBar = hud.AddBar(_wild, wild.Name, wild.level, wild.currentHp, wild.MaxHp, 0f, false, () => PadRadiusLocal(_wildPad), !(wild.species != null && wild.species.keeper));
         }
 
         bool _wildKeeper;

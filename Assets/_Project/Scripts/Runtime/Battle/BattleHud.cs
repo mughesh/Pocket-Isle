@@ -133,7 +133,7 @@ namespace Diorama
         /// An HP bar with name and level for <paramref name="actor"/>, in front of its pad (<paramref name="padRadius"/>,
         /// island-local, or <paramref name="padRadiusNow"/> live). <paramref name="near"/> = the party's Isling.
         /// </summary>
-        public Bar AddBar(StageActor actor, string name, int level, int hp, int max, float padRadius = 0f, bool near = false, System.Func<float> padRadiusNow = null)
+        public Bar AddBar(StageActor actor, string name, int level, int hp, int max, float padRadius = 0f, bool near = false, System.Func<float> padRadiusNow = null, bool showLevel = true)
         {
             var root = new GameObject($"HP {name}").transform;
             root.SetParent(transform, false);
@@ -147,7 +147,7 @@ namespace Diorama
             quad.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
 
             var label = MakeText(root, labelFontSize);
-            label.text = $"<b>{name}</b>  <size=80%>Lv {level}</size>";
+            label.text = LabelText(name, level, showLevel);
             label.transform.localPosition = new Vector3(0f, barSize.y * 0.5f + labelFontSize * 0.055f, 0f);
             label.fontSharedMaterial = TextOnTop(label);
 
@@ -162,6 +162,10 @@ namespace Diorama
             Paint(bar);
             return bar;
         }
+
+        /// <summary>Step 24: a Keeper's label is its name only (a Lv 12 Isling against a "Lv 4" boss read wrong).</summary>
+        public static string LabelText(string name, int level, bool showLevel) =>
+            showLevel ? $"<b>{name}</b>  <size=80%>Lv {level}</size>" : $"<b>{name}</b>";
 
         /// <summary>Removes one bar (a creature left the field).</summary>
         public void RemoveBar(Bar bar)
@@ -213,7 +217,7 @@ namespace Diorama
         public void SetLevel(Bar bar, string name, int level, int hp, int max)
         {
             if (bar == null) return;
-            bar.label.text = $"<b>{name}</b>  <size=80%>Lv {level}</size>";
+            bar.label.text = LabelText(name, level, true);
             float share = bar.shown / Mathf.Max(1, bar.max);
             bar.max = Mathf.Max(1, max);
             bar.shown = share * bar.max;
