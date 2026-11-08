@@ -195,6 +195,72 @@ namespace Diorama
             return spots;
         }
 
+        /// <summary>
+        /// Step 21: the map tiles an Isling <paramref name="width"/> tiles wide covers at <paramref name="spot"/> (its
+        /// footprint's corners and centre, rounded). A footprint is clear when every one is walkable.
+        /// </summary>
+        public static List<Vector2Int> Footprint(Vector2 spot, float width)
+        {
+            float h = Mathf.Max(0.25f, width * 0.5f - 0.1f);
+            var tiles = new List<Vector2Int>();
+            for (int dx = -1; dx <= 1; dx++)
+                for (int dy = -1; dy <= 1; dy++)
+                {
+                    var t = new Vector2Int(Mathf.RoundToInt(spot.x + dx * h), Mathf.RoundToInt(spot.y + dy * h));
+                    if (!tiles.Contains(t)) tiles.Add(t);
+                }
+            return tiles;
+        }
+
+        public static bool Clear(Vector2 spot, float width, Func<Vector2Int, bool> walkable)
+        {
+            foreach (var t in Footprint(spot, width))
+                if (!walkable(t)) return false;
+            return true;
+        }
+
+        /// <summary>
+        /// Step 21 (Mugesh, Nov 8 ending shot: the Islings stood inside the stone lanterns and the lodge; step 17 only kept
+        /// them apart from each other): the nearest spot to <paramref name="want"/> whose whole footprint is walkable, at
+        /// least <paramref name="gap"/> from every spot in <paramref name="taken"/>, off <paramref name="keepFree"/> and
+        /// <paramref name="ok"/> (the island window). Rings out to <paramref name="maxSearch"/> tiles in quarter tiles;
+        /// null when nothing fits.
+        /// </summary>
+        public static Vector2? FreeSpot(Vector2 want, float width, Func<Vector2Int, bool> walkable, IList<Vector2> taken, float gap,
+            Vector2? keepFree = null, Func<Vector2, bool> ok = null, float maxSearch = 4f, Func<Vector2Int, bool> openInFront = null)
+        {
+            bool Fits(Vector2 p)
+            {
+                if (!Clear(p, width, walkable)) return false;
+                // Seen from the seat (+rows toward the player): no prop on the row in front of the footprint.
+                if (openInFront != null)
+                    foreach (var t in Footprint(p, width))
+                        if (!openInFront(t + Vector2Int.up)) return false;
+                if (ok != null && !ok(p)) return false;
+                if (keepFree.HasValue && Vector2.Distance(p, keepFree.Value) < width * 0.5f + 0.5f) return false;
+                if (taken != null)
+                    foreach (var t in taken)
+                        if (Vector2.Distance(p, t) < gap) return false;
+                return true;
+            }
+            if (Fits(want)) return want;
+            for (float r = 0.25f; r <= maxSearch + 1e-4f; r += 0.25f)
+            {
+                int steps = Mathf.Max(8, Mathf.RoundToInt(2f * Mathf.PI * r / 0.25f));
+                Vector2? best = null;
+                for (int k = 0; k < steps; k++)
+                {
+                    float a = k * Mathf.PI * 2f / steps;
+                    var p = want + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * r;
+                    if (!Fits(p)) continue;
+                    // On a ring, prefer toward the player (+rows): nobody steps behind the statue or a prop.
+                    if (!best.HasValue || p.y > best.Value.y) best = p;
+                }
+                if (best.HasValue) return best;
+            }
+            return null;
+        }
+
         /// <summary>Step 17 H: the smallest centre distance between any two spots (tests, logs).</summary>
         public static float MinGap(IList<Vector2> spots)
         {

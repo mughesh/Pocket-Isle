@@ -20,6 +20,37 @@ namespace Diorama.EditorTools
                       $"(state {MusicDirector.State}), shard only {Opening.ShardOnly}.");
         }
 
+        static bool _armed;
+
+        /// <summary>The whole ending (Step19Debug.Ending) plus a seat shot of the Hall of Fame as the Spark comes out
+        /// (Logs/BattleShots/21_hall.png), every Isling's spot then on the cap.</summary>
+        public static void Ending()
+        {
+            if (!_armed)
+            {
+                _armed = true;
+                FinaleDirector.Moment += OnMoment;
+                UnityEditor.EditorApplication.playModeStateChanged += s =>
+                {
+                    if (s != UnityEditor.PlayModeStateChange.ExitingPlayMode) return;
+                    FinaleDirector.Moment -= OnMoment;
+                    _armed = false;
+                };
+            }
+            Step19Debug.Ending();
+        }
+
+        static void OnMoment(string moment)
+        {
+            if (moment != "spark.out") return;
+            var f = FinaleDirector.Instance;
+            if (f == null) return;
+            Vector3 eye = f.EyeWorld;
+            Vector3 at = f.island.transform.position;
+            BattleDebug.Render("Logs/BattleShots/21_hall.png", eye, Quaternion.LookRotation(at - eye, Vector3.up));
+            Debug.Log("[Step21Debug] Hall of Fame shot: Logs/BattleShots/21_hall.png.");
+        }
+
         /// <summary>Opens the game menu (arg "close" closes it), then logs.</summary>
         public static void Menu()
         {

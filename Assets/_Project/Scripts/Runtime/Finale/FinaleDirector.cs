@@ -89,6 +89,8 @@ namespace Diorama
         [Header("Step 16: shorter and graceful")]
         [Tooltip("Hall of Fame: seconds between Islings coming out (the serialized hallGap was 2.6).")]
         public float hallGapStep16 = 1.2f; // Step 18: 1.6 -> 1.2
+        [Tooltip("Step 21: Hall of Fame: seconds between Islings popping out (after each one's short flight from its pod), and the flight's length.")]
+        public float hallPopGap = 0.15f, hallComeOut = 0.35f;
         [Tooltip("Step 16 plaque (step 17: the credits banner replaced it; kept for its tests): lines shown at once, seconds per scroll step.")]
         [Min(1)] public int creditWindow = 3;
         public float creditStepSeconds = 2.2f; // Step 18: 2.6 -> 2.2
@@ -841,6 +843,20 @@ namespace Diorama
             Vector2? keepFree = explorer != null ? (Vector2)explorer.Tile : (Vector2?)null;
             var spots = FinaleLogic.HallArc(Center, n, width, statueClearTiles + width * 0.5f, hallGapFactor, keepFree);
             if (keepFree.HasValue) Debug.Log($"[FinaleDirector] Hall of Fame: the explorer's tile {explorer.Tile} stays free (the party stands either side).");
+            // Step 21: every spot's whole footprint on walkable tiles (not in a stone lantern, the lodge or the statue).
+            _hallPlaced.Clear();
+            for (int i = 0; i < n; i++)
+            {
+                var free = FinaleLogic.FreeSpot(spots[i], width, Standable, _hallPlaced, hallGapFactor * width, keepFree, InIsland, 4f, OpenInFront)
+                           ?? FinaleLogic.FreeSpot(spots[i], width, Walkable, _hallPlaced, hallGapFactor * width, keepFree, InIsland);
+                if (!free.HasValue) Debug.LogWarning($"[FinaleDirector] Hall of Fame: no clear spot near {spots[i]} for Isling {i + 1} (kept; may touch a prop).");
+                else if (free.Value != spots[i])
+                {
+                    Debug.Log($"[FinaleDirector] Hall of Fame: Isling {i + 1} moved {spots[i]} -> {free.Value} (a prop under its footprint).");
+                    spots[i] = free.Value;
+                }
+                _hallPlaced.Add(spots[i]);
+            }
             Debug.Log($"[FinaleDirector] Hall of Fame arc: {n} Islings, widest {width:0.0} tiles, closest centres {(n > 1 ? FinaleLogic.MinGap(spots) : 0f):0.0} tiles " +
                       $"(need {hallGapFactor * width:0.0}), radius {(n > 0 ? Vector2.Distance(spots[0], Center) : 0f):0.0} tiles.");
             for (int i = 0; i < n; i++)
@@ -868,7 +884,8 @@ namespace Diorama
                     GameAudio.At(AudioIds.UiSaved, MapWorld(tile, 1f));
                     Debug.Log($"[FinaleDirector] Hall of Fame: {c.Name} Lv {c.level}, met in {c.metIn}.");
                 }
-                yield return Hold(Mathf.Min(hallGap, hallGapStep16));
+                // Step 21 (Mugesh: ~2 s an Isling, pop them one after another): a short beat, not 1.2 s.
+                yield return Hold(hallPopGap);
             }
             // A few of the Lodge's Islings wander out too.
             int guests = 0;
@@ -878,10 +895,20 @@ namespace Diorama
                 if (c == null || c.species == null || c.species.Prefab == null) continue;
                 int side = guests % 2 == 0 ? -1 : 1;
                 var tile = new Vector2Int(Mathf.RoundToInt(Center.x) + side * (4 + guests / 2), Mathf.RoundToInt(Center.y) + 1 + guests);
+                // Step 21: a guest stands on a walkable tile clear of the party and the explorer (one stood in a lantern).
+                var guestTile = GuestTile(tile);
+                if (!guestTile.HasValue)
+                {
+                    Debug.Log($"[FinaleDirector] Hall of Fame: no clear tile for guest {c.Name} near {tile}: it stays home.");
+                    continue;
+                }
+                if (guestTile.Value != tile) Debug.Log($"[FinaleDirector] Hall of Fame: guest {c.Name} moved {tile} -> {guestTile.Value} (blocked or crowded).");
+                tile = guestTile.Value;
+                _hallPlaced.Add(tile);
                 if (_skip) break;
                 Spawn(c, tile, true);
                 guests++;
-                yield return Hold(0.6f);
+                yield return Hold(0.3f);
             }
             if (save != null) save.AddHallOfFame();
             // Everyone cheers.
@@ -903,13 +930,45 @@ namespace Diorama
             Vector3 to = MapWorld(tile, 0.3f);
             Vector3 from = pods != null && pods.SlotWorld(slot).HasValue ? pods.SlotWorld(slot).Value : to + Vector3.up * 0.05f;
             GameAudio.At(AudioIds.UiSaved, from);
-            for (float t = 0f; t < 0.6f; t += 0.05f)
+            for (float t = 0f; t < hallComeOut; t += 0.05f)
             {
-                float k = t / 0.6f;
+                float k = t / hallComeOut;
                 if (fx != null) fx.Burst(Vector3.Lerp(from, to, k) + Vector3.up * (0.05f * IslandScale * Mathf.Sin(k * Mathf.PI)), 3, Gold, 0.01f, 0.4f, Unit * 0.05f);
                 yield return new WaitForSeconds(0.05f);
             }
             if (fx != null) fx.Burst(to, 20, Color.white, Unit * 1.2f, 0.6f, Unit * 0.06f);
+        }
+
+        readonly List<Vector2> _hallPlaced = new List<Vector2>();
+
+        bool Walkable(Vector2Int t) => island.Content != null && island.Content.CanWalk(t);
+
+        /// <summary>Step 21: walkable and not tall grass (an Isling in tall grass is half hidden from the seat).</summary>
+        bool Standable(Vector2Int t) => Walkable(t) && island.Content.At(t.y, t.x) != IslandMap.TallGrass;
+
+        /// <summary>Step 21: nothing that blocks the view on this tile (walkable, or open ground off the map).</summary>
+        bool OpenInFront(Vector2Int t) => Walkable(t) || island.Content != null && island.Content.At(t.y, t.x) == IslandMap.Empty;
+
+        bool InIsland(Vector2 p) => island.FootprintContains(island.TileToLocal(p, island.Content.capHeight));
+
+        /// <summary>Step 21: the nearest walkable tile to <paramref name="want"/> with its neighbours free (a guest wanders
+        /// one tile), 1.5 tiles from the party, the guests and the explorer, inside the window.</summary>
+        Vector2Int? GuestTile(Vector2Int want)
+        {
+            for (int r = 0; r <= 4; r++)
+                for (int dy = r; dy >= -r; dy--)
+                    for (int dx = -r; dx <= r; dx++)
+                    {
+                        if (Mathf.Max(Mathf.Abs(dx), Mathf.Abs(dy)) != r) continue;
+                        var t = want + new Vector2Int(dx, dy);
+                        if (!Standable(t) || !OpenInFront(t + Vector2Int.up) || !InIsland(t)) continue;
+                        if (explorer != null && Vector2.Distance(t, explorer.Tile) < 1.5f) continue;
+                        bool crowded = false;
+                        foreach (var p in _hallPlaced)
+                            if (Vector2.Distance(p, t) < 1.5f) crowded = true;
+                        if (!crowded) return t;
+                    }
+            return null;
         }
 
         MapCreature Spawn(IslingInstance c, Vector2Int tile, bool wander)
@@ -999,10 +1058,8 @@ namespace Diorama
         public Texture2D painting;
         [Tooltip("The painting's crop of the picture (uv rect): head and shoulders.")]
         public Rect paintingCrop = new Rect(0.08f, 0.44f, 0.88f, 0.56f);
-        [Tooltip("Reading height: the lanterns' middle this high over the cap (island m); the big one a little lower.")]
-        public float lanternReadHeight = 0.34f;
-        [Tooltip("How far in front of the Heart toward the player they stop (island m), the big one closer; the arc's spacing (left / centre / right).")]
-        public float lanternForward = 0.13f, lanternBigForward = 0.19f, lanternSpacing = 0.175f;
+        [Tooltip("The arc's spacing (left / centre / right, island m at a normal lantern's size; x lanternFarScale).")]
+        public float lanternSpacing = 0.175f;
         [Tooltip("A new lantern every this many seconds; rising to reading height; held there (normal / big).")]
         public float lanternEvery = 2f, lanternRise = 1.6f, lanternHold = 3f, lanternBigHold = 5f;
         [Tooltip("The big one waits this much longer after the last normal one, so it arrives once the others have left reading height.")]
@@ -1011,6 +1068,13 @@ namespace Diorama
         public float lanternLeave = 3.4f, lanternBigLeave = 5f;
         [Tooltip("The big portrait lantern's size (a normal one is 1).")]
         public float lanternBigSize = 1.6f;
+        [Header("Step 21: from behind the island (Mugesh: out of the island's middle was too close)")]
+        [Tooltip("They rise from this far below the cap, this far behind the island's back edge (island m), where the step 17 banner stood.")]
+        public float lanternBackDrop = 0.16f, lanternBackOut = 0.05f;
+        [Tooltip("Their middle stops this high over the cap, over the back edge (island m), clear over the statue from the seat.")]
+        public float lanternBackHeight = 0.3f;
+        [Tooltip("Farther from the head than step 19's spot over the Heart, a size multiplier (Nov 8: 1.8 and 1.3 looked too big, almost the island's size: 1). Spacing scales too.")]
+        public float lanternFarScale = 1f;
 
         public const string LanternSound = "credits.lantern";
 
@@ -1107,14 +1171,15 @@ namespace Diorama
         void Launch(LanternFlight f)
         {
             f.born = Time.time;
-            f.from = heart.SocketWorld;
+            // Step 21: up from behind the island's back edge, below the cap (the island hides it until it clears the
+            // rim), like the step 17 banner; it stops over the back edge, not over the Heart.
+            f.from = BackLocal(f, -lanternBackDrop);
             Vector3 eye = EyeWorld;
             f.toward = Vector3.ProjectOnPlane(eye - f.from, Vector3.up);
             if (f.toward.sqrMagnitude < 1e-6f) f.toward = island.transform.forward;
             f.toward.Normalize();
             f.side = Vector3.Cross(Vector3.up, f.toward);
             f.startYaw = f.yaw = Quaternion.LookRotation(-f.toward, Vector3.up).eulerAngles.y;
-            if (fx != null) fx.Burst(f.from, 10, Gold, Unit * 0.5f, 0.5f, Unit * 0.035f);
             Sfx(LanternSound, null, f.from);
         }
 
@@ -1133,16 +1198,18 @@ namespace Diorama
             }
         }
 
-        /// <summary>Where lantern <paramref name="f"/> stops to be read.</summary>
-        Vector3 ReadSpot(LanternFlight f)
+        /// <summary>Step 21: a point over (or under) the island's back edge in lantern <paramref name="f"/>'s slot (left /
+        /// centre / right as seen from the seat), <paramref name="height"/> over the cap (island m).</summary>
+        Vector3 BackLocal(LanternFlight f, float height)
         {
-            float s = IslandScale;
-            float capY = island.transform.TransformPoint(new Vector3(0f, island.CapTopLocal, 0f)).y;
-            Vector3 flat = new Vector3(f.from.x, 0f, f.from.z);
-            float forward = f.big ? lanternBigForward : lanternForward - (f.slot != 0 ? 0.025f : 0f); // a gentle arc
-            float height = f.big ? lanternReadHeight - 0.02f : lanternReadHeight - (f.slot != 0 ? 0.012f : 0f);
-            return flat + f.toward * (forward * s) + f.side * (f.slot * lanternSpacing * s) + Vector3.up * (capY + height * s);
+            float x = -f.slot * lanternSpacing * lanternFarScale; // the seat looks along -Z: its left is +X
+            return island.transform.TransformPoint(new Vector3(x, island.CapTopLocal + height, -island.FootprintHalfSize.y - lanternBackOut));
         }
+
+        /// <summary>Where lantern <paramref name="f"/> stops to be read: over the back edge, the side ones a little lower (a gentle arc).</summary>
+        Vector3 ReadSpot(LanternFlight f) => BackLocal(f, lanternBackHeight - (f.big ? 0.02f : f.slot != 0 ? 0.02f : 0f));
+
+        float LanternScale => IslandScale * lanternFarScale;
 
         /// <summary>
         /// Moves lantern <paramref name="f"/> to its place <paramref name="age"/> s after launch; false once it has gone.
@@ -1150,7 +1217,7 @@ namespace Diorama
         /// </summary>
         bool FlyLantern(LanternFlight f, float age, float fade = 1f)
         {
-            float s = IslandScale;
+            float s = LanternScale;
             float hold = f.big ? lanternBigHold : lanternHold, leave = f.big ? lanternBigLeave : lanternLeave;
             Vector3 read = ReadSpot(f);
             Vector3 eye = EyeWorld;
@@ -1158,11 +1225,10 @@ namespace Diorama
             float alpha, roll = 0f;
             if (age < lanternRise)
             {
-                // Out from the crystal toward the player first (never behind the statue), then up to reading height.
+                // Step 21: straight up from behind the back edge, easing into reading height (a slight sway on the way).
                 float k = 1f - (1f - age / lanternRise) * (1f - age / lanternRise);
-                Vector3 mid = f.from + f.toward * (0.1f * s) + Vector3.up * (0.02f * s);
-                p = Vector3.Lerp(Vector3.Lerp(f.from, mid, k), Vector3.Lerp(mid, read, k), k);
-                alpha = Mathf.Clamp01(age / 0.35f);
+                p = Vector3.Lerp(f.from, read, k) + f.side * (Mathf.Sin(k * Mathf.PI) * 0.01f * s);
+                alpha = Mathf.Clamp01(age / 0.5f);
                 f.yaw = f.startYaw;
             }
             else
@@ -1178,8 +1244,9 @@ namespace Diorama
                     {
                         f.logged = true;
                         float capY = island.transform.TransformPoint(new Vector3(0f, island.CapTopLocal, 0f)).y;
-                        Debug.Log($"[FinaleDirector] Lantern \"{f.lantern.Title}\" reading: {(read.y - capY) / s * 100f:0} cm over the cap, " +
-                                  $"slot {f.slot}, {Vector3.Distance(read, eye):0.00} m from the head, first line cap {f.lantern.FirstLineCap * 1000f:0.0} mm.");
+                        Debug.Log($"[FinaleDirector] Lantern \"{f.lantern.Title}\" reading: {(read.y - capY) / IslandScale * 100f:0} cm over the cap, " +
+                                  $"slot {f.slot}, {Vector3.Distance(read, eye):0.00} m from the head, first line cap {f.lantern.FirstLineCap * lanternFarScale * 1000f:0.0} mm " +
+                                  $"({Mathf.Atan2(f.lantern.FirstLineCap * s, Vector3.Distance(read, eye)) * Mathf.Rad2Deg:0.00} deg).");
                         Moment?.Invoke("lantern:" + f.lantern.Title);
                     }
                 }
@@ -1200,7 +1267,7 @@ namespace Diorama
                         return false;
                     }
                     // Up into the room, slowly gathering speed, drifting a little outward; gone ~1 m over the island.
-                    float rise = (1f - lanternReadHeight) * s * (u * u * 0.6f + u * 0.4f);
+                    float rise = 0.7f * IslandScale * (u * u * 0.6f + u * 0.4f);
                     p = read + Vector3.up * (bob + rise) + f.side * (f.slot * 0.06f * s * u) + f.toward * (-0.04f * s * u);
                     alpha = 1f - Mathf.SmoothStep(0.55f, 1f, u);
                 }

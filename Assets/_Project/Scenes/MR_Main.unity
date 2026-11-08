@@ -7965,6 +7965,8 @@ MonoBehaviour:
   - 'Music: to come'
   - Thank you for playing.
   hallGapStep16: 1.2
+  hallPopGap: 0.15
+  hallComeOut: 0.35
   creditWindow: 3
   creditStepSeconds: 2.2
   plaqueAbove: 0.09
@@ -7979,9 +7981,6 @@ MonoBehaviour:
     y: 0.44
     width: 0.88
     height: 0.56
-  lanternReadHeight: 0.34
-  lanternForward: 0.13
-  lanternBigForward: 0.19
   lanternSpacing: 0.175
   lanternEvery: 2
   lanternRise: 1.6
@@ -7991,6 +7990,10 @@ MonoBehaviour:
   lanternLeave: 3.4
   lanternBigLeave: 5
   lanternBigSize: 1.6
+  lanternBackDrop: 0.16
+  lanternBackOut: 0.05
+  lanternBackHeight: 0.3
+  lanternFarScale: 1
 --- !u!1 &2107210735
 GameObject:
   m_ObjectHideFlags: 0
