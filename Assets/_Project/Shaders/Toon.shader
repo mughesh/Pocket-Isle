@@ -42,6 +42,9 @@ Shader "Diorama/Toon"
         _CrackScale ("Crack Scale", Float) = 2.5
         _CrackWidth ("Crack Width", Float) = 0.04
         _CrackPulse ("Crack Pulse", Range(0, 1)) = 0
+        _CrackDepth ("Crack Depth (0 = painted on)", Range(0, 0.6)) = 0
+        _CrackFlow ("Crack Flow (specks)", Range(0, 1)) = 0
+        _CrackInner ("Crack Inner Glow", Range(0, 1)) = 0
 
         [Header(Lighting)]
         _Spec ("Specular Glint", Range(0, 2)) = 0.3
@@ -173,7 +176,11 @@ Shader "Diorama/Toon"
                 float3 h = normalize(L + v);
                 col += smoothstep(0.93, 0.95, dot(n, h)) * _Spec * 0.55;
                 col += c * _Emissive;
-                if (_CrackOn > 0.5) col = ToonLava(col, pO);
+                if (_CrackOn > 0.5)
+                {
+                    float3 vO = normalize(TransformWorldToObject(GetCameraPositionWS()) - pO);
+                    col = _CrackDepth > 0.001 ? ToonDeepCracks(col, pO, vO) : ToonLava(col, pO);
+                }
                 if (_Ripple > 0.001)
                 {
                     // Step 11a: restored water. Two slow wave trains in map space (tiles) cross into soft bright bands,

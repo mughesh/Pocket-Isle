@@ -40,6 +40,7 @@ namespace Diorama
         public float crackScale;
         public float crackWidth;
         public float crackPulse;
+        public float crackDepth, crackFlow, crackInner;
 
         [Tooltip("xyz = centre, w = radius (0 = off).")]
         public Vector4[] patches;
@@ -155,6 +156,9 @@ namespace Diorama
         static readonly int CrackScaleId = Shader.PropertyToID("_CrackScale");
         static readonly int CrackWidthId = Shader.PropertyToID("_CrackWidth");
         static readonly int CrackPulseId = Shader.PropertyToID("_CrackPulse");
+        static readonly int CrackDepthId = Shader.PropertyToID("_CrackDepth");
+        static readonly int CrackFlowId = Shader.PropertyToID("_CrackFlow");
+        static readonly int CrackInnerId = Shader.PropertyToID("_CrackInner");
         static readonly int SockOnId = Shader.PropertyToID("_SockOn");
         static readonly int SockColorId = Shader.PropertyToID("_SockColor");
         static readonly int SockYId = Shader.PropertyToID("_SockY");
@@ -307,6 +311,9 @@ namespace Diorama
                 block.SetFloat(CrackScaleId, s.crackScale > 0f ? s.crackScale : 2.5f);
                 block.SetFloat(CrackWidthId, s.crackWidth > 0f ? s.crackWidth : 0.04f);
                 block.SetFloat(CrackPulseId, s.crackPulse);
+                block.SetFloat(CrackDepthId, s.crackDepth);
+                block.SetFloat(CrackFlowId, s.crackFlow);
+                block.SetFloat(CrackInnerId, s.crackInner);
                 block.SetFloat(SockOnId, s.socks ? 1f : 0f);
                 block.SetVector(SockColorId, s.socksColor.linear);
                 block.SetFloat(SockYId, s.socksY);

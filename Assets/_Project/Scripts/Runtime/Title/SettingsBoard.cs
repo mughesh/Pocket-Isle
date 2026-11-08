@@ -243,7 +243,7 @@ namespace Diorama
             // Step 14j: one row by the layout rule (was 7.8 cm tablets 5 mm apart).
             const float rowWidth = 0.415f;
             var xs = new List<float>();
-            var size = TabletLayout.Row(n, rowWidth, new Vector2(0.078f, 0.034f), RuneBoard.HoverGrow, xs);
+            var size = TabletLayout.Row(n, rowWidth, new Vector2(0.078f, 0.034f), RuneBoard.HoverGrow, xs, runes.MinGapLocal); // step 22: the room gap
             float step = rowWidth / n;
             for (int i = 0; i < n; i++)
             {

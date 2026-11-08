@@ -172,7 +172,7 @@ namespace Diorama
 
             // Element tablets with their counts, then Close; the element showing is gold. Step 14j: one row by the layout
             // rule (fixed gaps, sized to fit the book's width).
-            var tab = TabletLayout.Row(Journal.Elements.Length + 1, Width - 0.02f, Tab, RuneBoard.HoverGrow, TabX);
+            var tab = TabletLayout.Row(Journal.Elements.Length + 1, Width - 0.02f, Tab, RuneBoard.HoverGrow, TabX, runes.MinGapLocal); // step 22: the room gap
             for (int k = 0; k < Journal.Elements.Length; k++)
             {
                 var e = Journal.Elements[k];

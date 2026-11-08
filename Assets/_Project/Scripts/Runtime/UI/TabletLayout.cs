@@ -57,7 +57,7 @@ namespace Diorama
         /// most <paramref name="maxWidth"/> wide, gaps of at least MinGap plus what a looked-at tablet grows. Returns the
         /// tablet size; <paramref name="centers"/> gets the x of each.
         /// </summary>
-        public static Vector2 Row(int count, float maxWidth, Vector2 maxSize, float grow, List<float> centers)
+        public static Vector2 Row(int count, float maxWidth, Vector2 maxSize, float grow, List<float> centers, float minGap = MinGap)
         {
             centers.Clear();
             if (count <= 0) return maxSize;
@@ -65,11 +65,11 @@ namespace Diorama
             float w = maxSize.x;
             for (int k = 0; k < 2; k++)
             {
-                float gap = Mathf.Max(MinGap, HoverGap + w * grow * 0.5f) + 0.0005f;
+                float gap = Mathf.Max(minGap, HoverGap + w * grow * 0.5f) + 0.0005f;
                 float fit = (maxWidth - gap * (count - 1)) / count;
                 w = Mathf.Min(maxSize.x, fit);
             }
-            float g = Mathf.Max(MinGap, HoverGap + w * grow * 0.5f) + 0.0005f;
+            float g = Mathf.Max(minGap, HoverGap + w * grow * 0.5f) + 0.0005f;
             float step = w + g, start = -step * (count - 1) * 0.5f;
             for (int i = 0; i < count; i++) centers.Add(start + step * i);
             return new Vector2(w, maxSize.y);

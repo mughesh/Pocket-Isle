@@ -90,6 +90,12 @@ namespace Diorama
         public float crackScale;
         public float crackWidth;
         [Range(0f, 1f)] public float crackPulse;
+        [Tooltip("Step 22: how deep the crack glow sits in the body (shape units; 0 = painted on). Crystal and lava: 0.1-0.3.")]
+        [Range(0f, 0.6f)] public float crackDepth;
+        [Tooltip("Step 22: specks of light drifting up through the cracks.")]
+        [Range(0f, 1f)] public float crackFlow;
+        [Tooltip("Step 22: how much of the inner glow shows through the surface around the cracks.")]
+        [Range(0f, 1f)] public float crackInner;
 
         [Tooltip("Up to 6 round patches (mirrored ones count twice). Later ones paint over earlier ones.")]
         public List<PatternPatch> patches;

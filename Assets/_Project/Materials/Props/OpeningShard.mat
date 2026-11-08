@@ -33,20 +33,24 @@ Material:
     - _Breathe: 0
     - _BreatheSpeed: 2.6
     - _ClearSink: 0
+    - _CrackDepth: 0.3
+    - _CrackFlow: 1
+    - _CrackInner: 0.45
     - _CrackOn: 1
-    - _CrackPulse: 0
-    - _CrackScale: 3.2
+    - _CrackPulse: 0.6
+    - _CrackScale: 2.6
     - _CrackWidth: 0.05
     - _DeformPivotY: 0
-    - _Emissive: 0.2
+    - _Emissive: 0.25
     - _Flash: 0
     - _Grad: 1
     - _Jiggle: 0
     - _OriginJitter: 0
     - _OutlineWidth: 0.03
+    - _Ripple: 0
     - _SockOn: 0
     - _SockY: -9
-    - _Spec: 0.3
+    - _Spec: 0.9
     - _SpotOn: 0
     - _SpotScale: 9
     - _TimeOffset: 0
@@ -54,7 +58,7 @@ Material:
     - _TipOn: 0
     - _WindowClip: 0
     m_Colors:
-    - _BaseColor: {r: 0.62, g: 0.6, b: 0.55, a: 1}
+    - _BaseColor: {r: 0.26, g: 0.25, b: 0.3, a: 1}
     - _BellyColor: {r: 1, g: 1, b: 1, a: 1}
     - _BellyDir: {r: 0, g: 0, b: 1, a: 0}
     - _ClearColor: {r: 0, g: 0, b: 0, a: 0}
@@ -76,7 +80,7 @@ Material:
     - _SpotColor: {r: 0, g: 0, b: 0, a: 1}
     - _TipAxis: {r: 0, g: 1, b: 0, a: 0}
     - _TipColor: {r: 0, g: 0, b: 0, a: 1}
-    - _TopColor: {r: 0.5, g: 0.64, b: 0.37, a: 1}
+    - _TopColor: {r: 0.4, g: 0.38, b: 0.46, a: 1}
     - _WindowOrigin: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
