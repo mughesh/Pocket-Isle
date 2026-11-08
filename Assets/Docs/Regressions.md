@@ -23,6 +23,8 @@ catches a break: a test, a smoke-run rule (`Note "rule"` in the smoke report, wa
 | R16 | A card opened by poking a rim pod while exploring closes on the next swipe, walk, battle or island grab. | Nov 8 notes | headset |
 | R17 | Every rune row keeps its tablets apart **as seen in the room**: 1.2 cm at the island's real size (the check used 8 mm on the island, ~5 mm in the room at 0.6, so "almost touching" passed). Nothing overlaps the pods or the Journal tablet. | Nov 4, Nov 8 notes (2nd time) | smoke "menu layout" (`TabletLayout.MinRoomGap`), `Step22Tests`; `Step22Debug.MenuShot` |
 | R18 | The menu never fails silently: it opens in the opening once the island is up (no Journal, no Title); while only the shard floats a soft sound says not now. | Nov 8 notes | headset; log `[GameMenu] Not now (...)` |
+| R19 | The battle moves sit over the arena, never in front of the rim; from the seat they hide no Isling, HP label or pod, and stay about 4 cm from the pods. | Nov 9 notes | `Step24Debug.Seat` in a field and a Keeper battle |
+| R20 | A door never refuses silently: a bump always answers (line or Go in / Not yet, 1 s debounce at most) and the log says why. | Nov 9 notes | `Step24Tests`; log `[TempleDoor] refused:` |
 
 ## How to use
 - A new note that repeats one of these: say which rule broke and why the check missed it, then fix the check too.
