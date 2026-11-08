@@ -42,13 +42,25 @@ single swipe and a tap, and the thumb moved ~2 cm (unreadable at that distance).
   in flat shots. The flat Editor camera even sits inside the island, so "facing you" was facing the wrong spot; the shots
   now put the camera at the seat.
 
+### E2. After your stills (13:45): your pose, real strokes, a new arrow
+- **Pose:** the one you set by hand (OpenXRRightHand rotation -18.1 / 33.6 / -88.5 at 13:41, head at (-0.05, 1.22, 0.27)),
+  stored relative to the head-facing frame: `GhostHands.thumbRootEuler` (-18.1, -13.1, -88.5), `fixedThumbPose` on. The
+  skeleton reads it as: knuckles away from you, palm facing left, back of the hand right, thumb on top.
+- **Motion:** looping left, right, forward, back (3.8 s), no tap. Forward / back use your recorded swipe's own most-forward
+  and most-back thumb (about 2 cm of travel); left / right are solved on the skeleton across the back of the hand (1.6 cm).
+  My E version swept the thumb around the index finger, which reads as a tap; and it took "forward" from the curled index,
+  which points sideways, so every stroke was a quarter turn off.
+- **Arrow:** a new glowing ribbon (`Diorama/Stroke Arrow`, `Materials/StrokeArrow.mat`): clear at the tail, bright at the
+  head, a soft glow under it. It starts at the thumb tip on the index finger and runs along the swipe line, growing with
+  the stroke. `21_swipe_strokes.png`: the loop every 0.13 s from the seat.
+
 ## Not done / for you
 - Lantern text is smaller to the eye than step 19's (they're ~0.73 m away, was ~0.58). If it's hard to read, say so and I'll
   bring them closer, not bigger.
 
 ## Headset test (play order)
 1. **New Quick Journey**: the title music fades as the shard arrives; poking the shard is quiet.
-2. Swipe lessons: the ghost hand floats beside the island on your right, upright, not on the map. It swipes forward, back, left, right, each with a gold arrow the way you'd walk; the second lesson ends with a tap (the dot pulses).
+2. Swipe lessons: the ghost hand floats beside the island on your right, upright, not on the map. It loops left, right, forward, back, each with a glowing arrow from the thumb tip along the swipe.
 3. Exploring: poke a rim pod (card shows), then swipe: the card closes.
 4. **Battle**: grab another pod and throw it: it switches, no move fires. Log: `Poke/Pinch on rune N ignored: a hand is on a pod`.
 5. Battle, after a move: press **Run** (poke): it works.

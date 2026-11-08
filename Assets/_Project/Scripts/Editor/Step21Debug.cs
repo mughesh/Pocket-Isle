@@ -61,7 +61,7 @@ namespace Diorama.EditorTools
             var g = Object.FindFirstObjectByType<GhostHands>();
             var island = Object.FindFirstObjectByType<IslandBuilder>();
             if (g == null || island == null) return;
-            string clip = string.IsNullOrEmpty(Arg) ? GhostHands.SwipeAllTapClip : Arg;
+            string clip = string.IsNullOrEmpty(Arg) ? GhostHands.SwipeAllClip : Arg;
             g.Show(clip, GhostPlace.AboveIsland, null, 0.6f, false, false);
             var t = island.transform;
             var eye = t.position + t.rotation * new Vector3(0f, 0.5f, 0.42f);
@@ -70,6 +70,14 @@ namespace Diorama.EditorTools
             if (Camera.main != null) Camera.main.transform.SetPositionAndRotation(eye, Quaternion.LookRotation(t.position - eye, Vector3.up));
             g.debugFreeze = 0f;
             g.DebugPose();
+            {
+                var look = g.transform.position;
+                var dot0 = GameObject.Find("Ghost Thumb Dot");
+                var p0 = dot0 != null ? dot0.transform.position : t.position;
+                var fl = p0 - eye;
+                fl.y = 0f;
+                Debug.Log($"[Step21Debug] Swipe ghost axes at rest (head frame): {g.DebugAxes(Quaternion.LookRotation(fl, Vector3.up))}.");
+            }
             float dur = Mathf.Max(0.1f, g.ClipDuration);
             string prev = "-";
             float since = 0f;
@@ -81,6 +89,15 @@ namespace Diorama.EditorTools
                 g.debugFreeze = s / dur;
                 g.DebugPose();
                 string now = g.StrokeNow;
+                // Every 1/15 s a frame from the seat, closer in (Logs/BattleShots/seq/), to judge the motion as a sequence.
+                if (Mathf.RoundToInt(s * 30f) % 2 == 0)
+                {
+                    var dot0 = GameObject.Find("Ghost Thumb Dot");
+                    var at0 = dot0 != null ? dot0.transform.position : t.position;
+                    System.IO.Directory.CreateDirectory("Logs/BattleShots/seq");
+                    var cl = Vector3.Lerp(eye, at0, 0.55f);
+                    BattleDebug.Render($"Logs/BattleShots/seq/s_{Mathf.RoundToInt(s * 30f):000}.png", cl, Quaternion.LookRotation(at0 - cl, Vector3.up));
+                }
                 if (now[0] != prev[0])
                 {
                     prev = now;

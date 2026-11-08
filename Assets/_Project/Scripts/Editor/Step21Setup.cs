@@ -62,6 +62,25 @@ namespace Diorama.EditorTools
             so.FindProperty("sideSwipeAngle").floatValue = 40f;
             so.FindProperty("thumbBeside").boolValue = true;
             so.FindProperty("thumbArrows").boolValue = true;
+            // Step 21 (Mugesh's stills): the glowing arrow's material, the pose he set by hand, the four strokes.
+            const string matPath = "Assets/_Project/Materials/StrokeArrow.mat";
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(matPath);
+            if (mat == null)
+            {
+                var shader = Shader.Find("Diorama/Stroke Arrow");
+                if (shader == null)
+                {
+                    Debug.LogError("[Step21Setup] No shader Diorama/Stroke Arrow.");
+                    return;
+                }
+                mat = new Material(shader) { name = "StrokeArrow" };
+                AssetDatabase.CreateAsset(mat, matPath);
+            }
+            so.FindProperty("arrowMaterial").objectReferenceValue = mat;
+            so.FindProperty("fixedThumbPose").boolValue = true;
+            so.FindProperty("thumbRootEuler").vector3Value = new Vector3(-18.1f, -13.1f, -88.5f);
+            so.FindProperty("arrowLength").floatValue = 0.07f;
+            so.FindProperty("arrowWidth").floatValue = 0.035f;
             so.ApplyModifiedPropertiesWithoutUndo();
             EditorSceneManager.MarkSceneDirty(g.gameObject.scene);
             EditorSceneManager.SaveScene(g.gameObject.scene);

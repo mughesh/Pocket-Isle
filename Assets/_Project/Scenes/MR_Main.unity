@@ -5402,6 +5402,15 @@ MonoBehaviour:
   thumbArrows: 1
   arrowLength: 0.07
   arrowWidth: 0.035
+  arrowMaterial: {fileID: 2100000, guid: ed1bcd466faefdb498397df553959d5f, type: 2}
+  swipeAcross: 0.016
+  swipeAlong: 0.02
+  strokeOut: 0.22
+  strokeHold: 0.15
+  strokeBack: 0.25
+  strokePause: 0.25
+  fixedThumbPose: 1
+  thumbRootEuler: {x: -18.1, y: -13.1, z: -88.5}
   measuredWrist: 1
   keyDots: 1
   thumbTrailDots: 6
