@@ -79,6 +79,8 @@ namespace Diorama
         public float targetLift;
         [Tooltip("Ghost size: 1 = real hand, 0.6 for the demos above the island.")]
         public float ghostScale = 1f;
+        [Tooltip("Step 22: the ghost turned around its target, facing the head: x = wrist up (degrees), y = from the dominant hand's side (degrees). 0 = the clip's own angle.")]
+        public Vector2 ghostTurn;
         [Tooltip("Show both hands (mirrored).")]
         public bool bothHands;
         [Tooltip("Both hands: how far apart (m). 0 = the ghost's default.")]

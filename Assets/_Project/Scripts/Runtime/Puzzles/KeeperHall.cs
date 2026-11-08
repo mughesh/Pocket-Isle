@@ -398,6 +398,7 @@ namespace Diorama
             if (active) EnsureModel();
             bool show = active && _phase != Phase.Fighting && !encounters.InBattle;
             if (_model != null) _model.gameObject.SetActive(show);
+            UpdateSpeech(active);
             UpdateFlame(forgeFlame && active && (Calmed || _phase == Phase.Victory || _phase == Phase.Shard));
             if (_phase == Phase.Fighting) UpdateBattleLook();
             if (_phase == Phase.Shard) UpdateShardPickup();
@@ -408,6 +409,22 @@ namespace Diorama
                 if (!restsWhenCalm) Preen();
             }
             if (show && !Calmed && _phase == Phase.Idle && approachRestart > 0f && !Tangled && !encounters.InBattle && Time.time > _restartAt) Approach();
+        }
+
+        Transform _speech;
+
+        /// <summary>Step 22: the Keeper's lines sit above the Keeper (the hall's model, or the one on the battle stage).</summary>
+        void UpdateSpeech(bool active)
+        {
+            var actor = _model != null && _model.gameObject.activeSelf ? _model : encounters.InBattle ? stage.Wild : null;
+            if (!active || actor == null)
+            {
+                if (!active && _speech != null) Destroy(_speech.gameObject); // lines elsewhere go back to the Spirit's anchor
+                return;
+            }
+            if (_speech == null) _speech = new GameObject($"{KeeperName} Speech").transform;
+            _speech.position = actor.WorldCenter + Vector3.up * actor.Height * 0.55f;
+            Dialogue.RegisterSpeaker(DialogueSpeaker.Keeper, _speech);
         }
 
         /// <summary>Calmed and awake: it ruffles and bobs now and then.</summary>

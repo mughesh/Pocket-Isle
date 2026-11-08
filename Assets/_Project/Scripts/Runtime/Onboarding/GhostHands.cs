@@ -139,6 +139,7 @@ namespace Diorama
             public string target, source;
             public float scale, spread, lift;
             public bool left, both, aside;
+            public Vector2 turn;
         }
 
         /// <summary>A clip's grab and release (seconds into the trimmed clip), found once from its thumb-index gap.</summary>
@@ -239,7 +240,7 @@ namespace Diorama
                 Hide();
                 return;
             }
-            Show(l.ghost, l.place, l.target, l.ghostScale, DominantHand.Left, l.bothHands, l.ghostSpread, l.source, l.targetLift);
+            Show(l.ghost, l.place, l.target, l.ghostScale, DominantHand.Left, l.bothHands, l.ghostSpread, l.source, l.targetLift, turn: l.ghostTurn);
         }
 
         /// <summary>The near rim's corner on the dominant side, a little below the cap (where a hand takes the rocky edge).</summary>
@@ -271,7 +272,7 @@ namespace Diorama
                 Show(onboarding != null && onboarding.script != null ? onboarding.script.handsGhost : "hands_up", GhostPlace.AboveIsland, null, 0.8f, false, true);
                 return;
             }
-            if (_hasSaved) Show(_saved.clip, _saved.place, _saved.target, _saved.scale, _saved.left, _saved.both, _saved.spread);
+            if (_hasSaved) Show(_saved.clip, _saved.place, _saved.target, _saved.scale, _saved.left, _saved.both, _saved.spread, turn: _saved.turn);
             else Hide();
             _hasSaved = false;
         }
@@ -283,7 +284,7 @@ namespace Diorama
         /// <param name="source">Step 9h, grab clips: where the grab lands; <paramref name="target"/> is then where the release lands.</param>
         /// <param name="lift">The release spot sits this far above the target (m).</param>
         /// <param name="aside">Step 16: smaller and off to the dominant side of the target (finale lift, evolution, shard).</param>
-        public void Show(string clip, GhostPlace place, string target, float scale, bool left, bool both, float spread = 0f, string source = null, float lift = 0f, bool aside = false)
+        public void Show(string clip, GhostPlace place, string target, float scale, bool left, bool both, float spread = 0f, string source = null, float lift = 0f, bool aside = false, Vector2 turn = default)
         {
             var c = Find(clip);
             if (c == null)
@@ -295,7 +296,7 @@ namespace Diorama
             _request = new Request
             {
                 clip = clip, place = place, target = target, source = source, scale = Mathf.Max(0.1f, scale), left = left, both = both,
-                spread = spread, lift = lift, aside = aside,
+                spread = spread, lift = lift, aside = aside, turn = turn,
             };
             _clip = c;
             _showing = true;
@@ -479,6 +480,14 @@ namespace Diorama
                 Vector3 side = AsideDir(point, _request.left);
                 point += side * asideOffset;
                 if (release.HasValue) release = release.Value + side * asideOffset;
+            }
+            if (_request.turn != Vector2.zero && Camera.main != null)
+            {
+                // Step 22: seen from the head, coming in from the dominant hand's side with the wrist raised: head-on it foreshortens into a claw.
+                var along = point - Camera.main.transform.position;
+                along.y = 0f;
+                if (along.sqrMagnitude > 1e-6f)
+                    frame = Quaternion.LookRotation(along, Vector3.up) * Quaternion.Euler(_request.turn.x, _request.left ? _request.turn.y : -_request.turn.y, 0f);
             }
             float placeScale = (_request.place == GhostPlace.AtTarget || _request.place == GhostPlace.IslandSides || _request.place == GhostPlace.RimCorners) && library != null ? library.targetScale : 1f;
             float scale = _request.scale * placeScale * Mathf.Max(0.05f, _clip.size) * Mathf.Lerp(1f, struggleScale, _struggle) * (_request.aside ? asideScale : 1f)

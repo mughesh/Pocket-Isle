@@ -932,9 +932,9 @@ namespace Diorama
                 }
                 yield return pods.Shatter(slot, ElementStyle.Of(wild.Element).main);
                 yield return stage.BreakFree();
-                if (battle.IsOver)
+                if (battle.Result == BattleResult.Won)
                 {
-                    // A rare one woke up in the pod and ran off.
+                    // A rare one woke up in the pod and ran off. (Step 22: not when its counterattack beat the player: that's Lost.)
                     runes.SetCaption($"{wild.Name} broke free and ran off!");
                     yield return stage.FadeWild();
                 }
@@ -1015,6 +1015,7 @@ namespace Diorama
                 bool retry = RetryAtDoor;
                 if (SceneSwap.IsInside && SceneSwap.Current != null) SceneSwap.Current.ReturnNow();
                 party.HealAll();
+                StartCoroutine(HealedMoment());
                 if (retry) Debug.Log("[EncounterDirector] Lost in the temple (Quick Journey): healed, in front of its door to try again.");
                 else
                 {
@@ -1027,6 +1028,27 @@ namespace Diorama
             explorer.Locked = false;
             MapCreature.HideAll = false;
             InBattle = false;
+        }
+
+        /// <summary>
+        /// Step 22: the heal after a loss happens during the trip, so it's shown on arrival (warm wave over the pods, a "+" on
+        /// each, the shrine's sound): the same pods read full HP and the player sees why.
+        /// </summary>
+        IEnumerator HealedMoment()
+        {
+            yield return null;
+            while (SceneSwap.IsBusy) yield return null;
+            yield return new WaitForSeconds(0.5f); // HearthShrines goes on into the lodge after 0.4 s
+            while (SceneSwap.IsBusy) yield return null;
+            yield return new WaitForSeconds(0.5f);
+            pods.WarmWave();
+            foreach (var c in party.members)
+            {
+                var pod = c != null ? pods.Pod(pods.SlotOf(c)) : null;
+                if (pod != null) stage.PopHealAt(pod.transform.position);
+            }
+            GameAudio.Ui(Diorama.Audio.AudioIds.ShrineHeal);
+            Debug.Log("[EncounterDirector] Healed moment after the loss.");
         }
 
         /// <summary>Nov 7: a Quick Journey battle lost inside a Keeper's hall restarts at the temple's door (no lodge trip).</summary>

@@ -25,6 +25,9 @@ namespace Diorama.Audio.EditorTools
             AudioLabWindow.ExtraRows = CueOnlyRows;
         }
 
+        /// <summary>Step 22: cues that skip their generated takes (restore.swell's two noise whooshes sounded like a wave on a shore).</summary>
+        static readonly System.Collections.Generic.HashSet<string> SynthOnly = new System.Collections.Generic.HashSet<string> { "restore.swell" };
+
         [MenuItem("Tools/Pocket Isle/Audio/Sync Cues (create, clips, table, AudioIds)", priority = 91)]
         public static void SyncAll()
         {
@@ -98,7 +101,7 @@ namespace Diorama.Audio.EditorTools
                 float trim = AudioTiers.TrimFor(cue, patch);
                 clips.AddRange(LevelledClips.For(ExtraClips(r.extraClips), tier, trim, relevel, !cue.loop));
                 // Gen batch variants (GenImporter) sit next to the synth ones.
-                clips.AddRange(LevelledClips.For(ExtraClips(new[] { "Clips/Gen/" + r.id + "/" }), tier, trim, relevel, !cue.loop));
+                if (!SynthOnly.Contains(r.id)) clips.AddRange(LevelledClips.For(ExtraClips(new[] { "Clips/Gen/" + r.id + "/" }), tier, trim, relevel, !cue.loop));
                 if (!cue.clips.SequenceEqual(clips))
                 {
                     cue.clips = clips.ToArray();

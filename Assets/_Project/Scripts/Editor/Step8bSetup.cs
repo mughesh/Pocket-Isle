@@ -145,7 +145,7 @@ namespace Diorama.EditorTools
                 new LessonData
                 {
                     id = "shard", line = "intro.shard", chip = "Touch it", startWhen = "opening.shard", delay = 1.5f, validWhile = "opening.shard",
-                    doneWhen = "shardTouched", ghost = "poke", place = GhostPlace.AtTarget, target = "shardFront",
+                    doneWhen = "shardTouched", ghost = "poke", place = GhostPlace.AtTarget, target = "shardFront", ghostTurn = new Vector2(15f, 35f),
                 },
                 new LessonData
                 {
@@ -220,7 +220,7 @@ namespace Diorama.EditorTools
                     // Step 8c: poke is taught (look + pinch still works).
                     id = "rune", line = "battle.first", chip = "Poke a rune", again = "lesson.rune.again", startWhen = "battle.out", validWhile = "battle",
                     doneWhen = "moveUsed", failWhen = battleFail, rewindTo = "grass",
-                    ghost = "poke", place = GhostPlace.AtTarget, target = "nearestRune",
+                    target = "nearestRune", // step 22: no ghost, it filled the view; the rune's own pulse shows it
                 },
                 new LessonData
                 {

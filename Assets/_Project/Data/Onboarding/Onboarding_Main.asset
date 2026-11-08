@@ -33,6 +33,7 @@ MonoBehaviour:
     source: 
     targetLift: 0
     ghostScale: 1
+    ghostTurn: {x: 15, y: 35}
     bothHands: 0
     ghostSpread: 0
     goldPath: 
@@ -59,6 +60,7 @@ MonoBehaviour:
     source: 
     targetLift: 0
     ghostScale: 0.6
+    ghostTurn: {x: 0, y: 0}
     bothHands: 0
     ghostSpread: 0
     goldPath: 
@@ -85,6 +87,7 @@ MonoBehaviour:
     source: rimCorner
     targetLift: 0
     ghostScale: 1
+    ghostTurn: {x: 0, y: 0}
     bothHands: 0
     ghostSpread: 0
     goldPath: 
@@ -111,6 +114,7 @@ MonoBehaviour:
     source: 
     targetLift: 0
     ghostScale: 1
+    ghostTurn: {x: 0, y: 0}
     bothHands: 1
     ghostSpread: 0
     goldPath: 
@@ -137,6 +141,7 @@ MonoBehaviour:
     source: starterPod:#
     targetLift: 0
     ghostScale: 1
+    ghostTurn: {x: 0, y: 0}
     bothHands: 0
     ghostSpread: 0
     goldPath: 
@@ -163,6 +168,7 @@ MonoBehaviour:
     source: 
     targetLift: 0
     ghostScale: 0.6
+    ghostTurn: {x: 0, y: 0}
     bothHands: 0
     ghostSpread: 0
     goldPath: 
@@ -189,6 +195,7 @@ MonoBehaviour:
     source: 
     targetLift: 0
     ghostScale: 0.6
+    ghostTurn: {x: 0, y: 0}
     bothHands: 0
     ghostSpread: 0
     goldPath: 
@@ -215,6 +222,7 @@ MonoBehaviour:
     source: 
     targetLift: 0
     ghostScale: 0.6
+    ghostTurn: {x: 0, y: 0}
     bothHands: 0
     ghostSpread: 0
     goldPath: 
@@ -241,6 +249,7 @@ MonoBehaviour:
     source: 
     targetLift: 0
     ghostScale: 1
+    ghostTurn: {x: 0, y: 0}
     bothHands: 0
     ghostSpread: 0
     goldPath: firstGrass
@@ -267,6 +276,7 @@ MonoBehaviour:
     source: leadPod
     targetLift: 0.05
     ghostScale: 1
+    ghostTurn: {x: 0, y: 0}
     bothHands: 0
     ghostSpread: 0
     goldPath: 
@@ -287,12 +297,13 @@ MonoBehaviour:
     failWhen: battleFailed
     rewindTo: grass
     praise: 1
-    ghost: poke
-    place: 1
+    ghost: 
+    place: 0
     target: nearestRune
     source: 
     targetLift: 0
     ghostScale: 1
+    ghostTurn: {x: 0, y: 0}
     bothHands: 0
     ghostSpread: 0
     goldPath: 
@@ -319,6 +330,7 @@ MonoBehaviour:
     source: cradle
     targetLift: 0
     ghostScale: 1
+    ghostTurn: {x: 0, y: 0}
     bothHands: 0
     ghostSpread: 0
     goldPath: 
@@ -345,6 +357,7 @@ MonoBehaviour:
     source: 
     targetLift: 0
     ghostScale: 1
+    ghostTurn: {x: 0, y: 0}
     bothHands: 0
     ghostSpread: 0
     goldPath: 
