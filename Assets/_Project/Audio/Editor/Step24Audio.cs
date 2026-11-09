@@ -15,7 +15,7 @@ namespace Diorama.Audio.EditorTools
     public static class Step24Audio
     {
         const string Set = "Step24";
-        const string Archive = "_free_archive";
+        internal const string Archive = "_free_archive";
         public static readonly string[] Speakers = { "galeowl", "hearthstag", "tidemother", "heart" };
         public static readonly string[] Jingles = { "jingle.catch", "jingle.levelup", "jingle.victory", "jingle.evolve", "jingle.shard", "jingle.keeper" };
 
@@ -75,7 +75,7 @@ namespace Diorama.Audio.EditorTools
             return moved;
         }
 
-        static bool Move(string from, string to)
+        internal static bool Move(string from, string to)
         {
             if (!File.Exists(from)) return false;
             EnsureFolder(Path.GetDirectoryName(to).Replace('\\', '/'));
