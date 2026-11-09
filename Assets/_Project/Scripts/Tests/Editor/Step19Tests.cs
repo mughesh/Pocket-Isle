@@ -22,8 +22,9 @@ namespace Diorama.Tests
                 StringAssert.DoesNotContain("Unity", x.title + x.subtitle);
                 StringAssert.DoesNotContain("Meta", x.title + x.subtitle);
             }
-            // The free plan's required credit is on a lantern too (until step 15b).
-            Assert.IsTrue(System.Array.Exists(l, x => x.title.Contains("elevenlabs.io")));
+            // Step 25: the paid sounds are in, so no lantern carries the free plan's line.
+            Assert.IsFalse(System.Array.Exists(l, x => (x.title + x.subtitle).Contains("elevenlabs.io")));
+            Assert.IsFalse(CreditsText.Block.Contains("free plan"));
         }
 
         [Test]

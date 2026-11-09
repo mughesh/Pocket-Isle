@@ -145,7 +145,8 @@ namespace Diorama.Tests
                 StringAssert.DoesNotContain("Unity", l);
                 StringAssert.DoesNotContain("Meta", l);
             }
-            CollectionAssert.Contains(lines, CreditsText.SoundsFreePlan, "required by the free plan until step 15b");
+            CollectionAssert.Contains(lines, CreditsText.SoundsAfterRegen, "step 25: the paid sounds are in");
+            CollectionAssert.DoesNotContain(lines, CreditsText.SoundsFreePlan);
             // Step 19: the sky lanterns, every one launched and the big one read within 20 s.
             float seconds = FinaleDirector.LanternSeconds(CreditsText.Lanterns.Length, 2f, 1.6f, 5f, 1.2f);
             Assert.LessOrEqual(seconds, 20f);

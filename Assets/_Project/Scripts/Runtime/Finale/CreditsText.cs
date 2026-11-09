@@ -8,7 +8,7 @@ namespace Diorama
     public static class CreditsText
     {
         /// <summary>Step 15b (paid sound regeneration) done: the free-plan line goes.</summary>
-        public static readonly bool PaidSoundsDone = false;
+        public static readonly bool PaidSoundsDone = true;
 
         public const string SoundsFreePlan = "Sounds made with elevenlabs.io (free plan)";
         public const string SoundsAfterRegen = "Sounds: synthesised and generated for Pocket Isle; some sounds by Kenney (CC0)";
