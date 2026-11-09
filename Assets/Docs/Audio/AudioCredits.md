@@ -89,6 +89,6 @@ Copies: `Assets/_Project/Audio/Clips/Gen/<cueId>/`; the cues play the levelled c
 |---|---|---|
 | Free (`_FREE` in the name) | **No commercial licence; attribution required.** Editor listening only. The release check and `ReleaseBuildGuard` block release builds while any cue holds one. | all 35 clips of the Oct 27 batch (beds, Cinderwood, walk.bump) |
 | Free (`_FREE`), batch 2 (Oct 28, step audio-D) | same | 36 clips: beds `amb.galewick*` / `amb.lilymere*`, rain, waterfall, frogs, water scoop / pour / spill, ice, lagoon, `tower.door`, `voice.galeowl`, `firebox.roar`, `log.drop` (3 more), `heart.crack`, `heart.hum` |
-| Paid | "Generated with ElevenLabs Sound Effects, paid plan (commercial licence)" | none yet |
+| Paid | "Generated with ElevenLabs Sound Effects, paid plan (commercial licence)". Starter plan, November 2026, model `eleven_text_to_sound_v2` (not marked beta or alpha in ElevenLabs' docs, Nov 9 2026). | **every Gen clip a cue plays now**: 532 clips. Source: `../_audio-sources/elevenlabs-paid/` (`manifest.json`, one sidecar per take with its model id, `ledger.csv`) |
 
-Before release: regenerate the clips Mugesh keeps on a paid month (same prompts, from the manifest) or remove them from the cues.
+The free clips are in `Clips/Gen/_free_archive/` and `Clips/Levelled/Gen/_free_archive/`: no cue reads them, so they stay out of builds. `restore.swell`'s free takes also remain unplayed in their own folder (synth only since step 22).

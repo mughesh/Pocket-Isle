@@ -1,28 +1,39 @@
-# Run 24 (Nov 9 night): step 24 A-D
+# Run 24 (Nov 9): step 24 A-D, then the paid audio
 
 ## Read this first
-- **The paid ElevenLabs work did not run. 0 credits spent.** The API key is set, but it lacks the `user_read` permission, so the API could not report a paid tier (HTTP 401, `missing_permissions`). The run rule says skip in that case.
-- **Not merged, not pushed.** Release Check fails with **235 free-plan clips**, which only the paid regen can clear. The run rule says don't merge if anything fails.
-- `step-24` is local, 5 commits on top of `step-23`. Flat Editor only: nothing heard or felt on a headset.
+- **Paid audio ran: all five priorities done, 14,279 of 40,000 credits, 10 credits per second.** It needed a new API key with User: Read, so it ran after the first report. See `Audio/Regen-Report.md`.
+- **Nobody has heard the new sounds.** Takes were picked by measurement.
+- Flat Editor only: nothing heard or felt on a headset. A device build is still needed.
 
 | Check | Result |
 |---|---|
-| Tests | 370/370 |
+| Tests | 372/372 |
 | Smoke run | 84 ok, 0 failed, 1 known note (opening wait) |
-| Release Check | **FAIL: 235 free-plan clips** |
-
-## What you need to do
-1. **To run the audio:** ElevenLabs > API keys > edit this key > set **User** to Read (Sound Effects must stay allowed), then rerun `Assets/Docs/Prompts/run-nov9-night.md`.
-2. **To publish A-D without the audio** (your call: the Release Check stays red), in Git Bash:
-
-`git checkout master && git merge --ff-only step-24 && git push origin master`
-
-Local `master` is at `51479e7`, `origin/master` is still at `1f7eff1`, so this also publishes steps 18-23.
+| Release Check | **PASS: 0 free clips** |
 
 ## Listening list, in play order
-**No new sounds this run, so no new switches.** "Jingles: synth / acoustic" and "Voices: blip / new" were not added (they need the new clips). The step 23 Part 1 list in `Run-23.md` is still the one to hear.
+Dev panel > Tools > **Sound A/B** has the two switches. Both start on the old sound and are remembered on the device.
 
-The only sound change: `water.pour` now starts when the stream starts, not when the pour counts.
+| # | Where | Listen for | Switch |
+|---|---|---|---|
+| 1 | Title, first island | Still Isle bed: **only one take passed, check it isn't too thin** | none |
+| 2 | Walk on grass, path, stone | New tiny steps mixed with Kenney's; similar level | none |
+| 3 | Lodge (wood floor) | Sparse fire pops; steps on wood | none |
+| 4 | Area change | Airy swish instead of grinding soil | none |
+| 5 | Galewick walk | Bed and wildlife | none |
+| 6 | First battle and catch | Hits and move sounds; **`hit.weak` is synth only now**; catch jingle | **Jingles: synth / acoustic** |
+| 7 | Level up, evolve | Jingles | **Jingles** |
+| 8 | Tower knots | Rope creak and pluck (no synth now) | none |
+| 9 | Tower Keeper's first line | Owl call, then hoots as it types | **Voices: blip / new** |
+| 10 | Keeper beaten, shard | Keeper and shard jingles | **Jingles** |
+| 11 | Galewick restored | One warm gust, then the new restored bed | none |
+| 12 | Cinderwood, Lilymere, forge | Regenerated beds; `amb.cinderwood` first (more low end) | none |
+| 13 | Hearthstag and Tidemother halls | Stag and whale calls and grains | **Voices** |
+| 14 | The Heart | Bell-like call and murmurs, **no moo** (fewest grains) | **Voices** |
+
+Log for the switches: none. The Spirit keeps its blip in both modes. An entrance call plays on a speaker's first line, or after 30 s without its lines.
+
+The sound change from D: `water.pour` now starts when the stream starts, not when the pour counts.
 
 ## Shots from the seat
 | | Before | After |
