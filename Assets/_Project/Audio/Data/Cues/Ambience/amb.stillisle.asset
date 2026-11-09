@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
   id: amb.stillisle
   clips:
-  - {fileID: 8300000, guid: 47cd037a7772d8b4896847894d6bbcb3, type: 3}
+  - {fileID: 8300000, guid: 29a6147e5adcbe2498c4d3112c6c5b2b, type: 3}
   volume: 0.534
   volumeJitter: 0
   pitchMin: 1
@@ -26,7 +26,7 @@ MonoBehaviour:
   maxDistance: 1.5
   loop: 1
   restSeconds: 0
-  lowPassHz: 0
+  lowPassHz: 1200
   maxSeconds: 0
   maxVoices: 1
   minInterval: 0

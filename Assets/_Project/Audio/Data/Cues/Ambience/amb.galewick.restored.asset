@@ -14,7 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
   id: amb.galewick.restored
   clips:
-  - {fileID: 8300000, guid: 3e11e25879a24f74288b9af7a4a4f6a4, type: 3}
   - {fileID: 8300000, guid: 70a590bafe7dc464d95fa7e2529acfc6, type: 3}
   volume: 0.8
   volumeJitter: 0
