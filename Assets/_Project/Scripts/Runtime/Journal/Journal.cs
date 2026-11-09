@@ -16,6 +16,24 @@ namespace Diorama
 
         public static readonly Element[] Elements = { Element.Fire, Element.Water, Element.Wind };
 
+        /// <summary>
+        /// Step 27: the tab the Journal opens on: the realm the player is in; elsewhere (the Still Isle, the lodge) the
+        /// element with the most Islings found, and on a tie or none found Wind, the first realm (pure).
+        /// </summary>
+        public static Element OpeningTab(string place, int fire, int water, int wind)
+        {
+            switch (place)
+            {
+                case "galewick": return Element.Wind;
+                case "cinderwood": return Element.Fire;
+                case "lilymere": return Element.Water;
+            }
+            int best = Mathf.Max(fire, Mathf.Max(water, wind));
+            int atBest = (fire == best ? 1 : 0) + (water == best ? 1 : 0) + (wind == best ? 1 : 0);
+            if (best <= 0 || atBest > 1) return Element.Wind;
+            return fire == best ? Element.Fire : water == best ? Element.Water : Element.Wind;
+        }
+
         public const string SpiritId = "LanternSpirit", FirstLine = "journal.first";
 
         /// <summary>The game's caught / seen id sets (GameSave sets these). Empty until a game is loaded.</summary>

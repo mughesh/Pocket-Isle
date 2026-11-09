@@ -98,7 +98,7 @@ namespace Diorama
 
         // ---- open, close ----
 
-        /// <summary>Opens on the first element with Islings found (Fire first); <paramref name="closed"/> runs on Close.</summary>
+        /// <summary>Opens on the tab for where the player is (<see cref="Journal.OpeningTab"/>); <paramref name="closed"/> runs on Close.</summary>
         public void Open(Action closed)
         {
             _data = JournalData.Load();
@@ -111,11 +111,25 @@ namespace Diorama
             IsOpen = true;
             _picked = -1;
             _page = 0;
+            var found = Journal.CaughtIds();
+            _element = Journal.OpeningTab(RealmHere(), Journal.Found(_data.entries, found, Element.Fire), Journal.Found(_data.entries, found, Element.Water),
+                Journal.Found(_data.entries, found, Element.Wind));
             GameAudio.Ui(AudioIds.MenuOpen);
             Build();
             var caught = Journal.CaughtIds();
             Debug.Log($"[Journal] Open: found {Journal.Found(_data.entries, caught)} / {Journal.Total(_data.entries)} " +
                       $"(Fire {Count(Element.Fire)}, Water {Count(Element.Water)}, Wind {Count(Element.Wind)}).");
+        }
+
+        /// <summary>The place word for the opening tab: a Keeper's hall counts as its realm.</summary>
+        static string RealmHere()
+        {
+            string now = Places.Now;
+            if (now != "hall") return now;
+            var swap = SceneSwap.Current;
+            var outdoor = swap != null ? swap.Outdoor : null;
+            if (outdoor == null) return now;
+            return outdoor.name.StartsWith("WorldMap_", StringComparison.Ordinal) ? outdoor.name.Substring(9).ToLowerInvariant() : now;
         }
 
         public void Close()
