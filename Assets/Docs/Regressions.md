@@ -25,6 +25,11 @@ catches a break: a test, a smoke-run rule (`Note "rule"` in the smoke report, wa
 | R18 | The menu never fails silently: it opens in the opening once the island is up (no Journal, no Title); while only the shard floats a soft sound says not now. | Nov 8 notes | headset; log `[GameMenu] Not now (...)` |
 | R19 | The battle moves sit over the arena, never in front of the rim; from the seat they hide no Isling, HP label or pod, and stay about 4 cm from the pods. | Nov 9 notes | `Step24Debug.Seat` in a field and a Keeper battle |
 | R20 | A door never refuses silently: a bump always answers (line or Go in / Not yet, 1 s debounce at most) and the log says why. | Nov 9 notes | `Step24Tests`; log `[TempleDoor] refused:` |
+| R21 | Every way into an open door works: walking in, look + pinch, a fingertip. The chip sits beside the door, never over it. | Nov 9 playtest | `Step27Tests`; smoke `RunOnly` "Step27 shots"; headset for real hands |
+| R22 | The Spirit moves when its target changes, not per line: at least 5 s parked, glides 0.6 s, doesn't follow the head. | Nov 9 playtest | `Step27Tests` (SpiritPark); headset |
+| R23 | Filler and idle hints: none in lessons, hand moments, battles or the first 3 minutes. | Nov 9 playtest | `Step27Tests` (ChatterQuiet) |
+| R24 | No tall grass within 1.5 tiles of any door, or 2 rows toward the seat. | Nov 9 playtest | `Step27Tests` on the real maps |
+| R25 | Don't import `Script_v1.md` over the dialogue asset: the asset has lines the file lacks. | Nov 9, step 27 | by hand |
 
 ## How to use
 - A new note that repeats one of these: say which rule broke and why the check missed it, then fix the check too.

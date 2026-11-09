@@ -500,6 +500,80 @@ namespace Diorama.EditorTools
                 BuildCinderwood();
                 BuildLilymere();
                 BuildQuick();
+                if (_only != null && _only.Any(o => o.StartsWith("Step27", StringComparison.OrdinalIgnoreCase))) Step27Shots();
+            }
+
+            // ---- step 27: seat shots of every door (bridge: RunOnly with arg "Step27 shots,<tag>") ----
+
+            void Step27Shots()
+            {
+                const string P = "Step27 shots";
+                string tag = _only.Length > 1 ? _only[1] : "shot";
+                Add(P, "preset (reload, Continue)", () =>
+                {
+                    DevCheats.WildOff = true;
+                    GameState.Instance.QuickPreset(GameState.QuickStage.Gift);
+                }, () => QuickJourney.Active && !TitleScreen.Showing && Elapsed > 6, 60f, () => { if (TitleScreen.Showing) RuneBoard.DebugPress("Continue"); }, 2f, true);
+                Add(P, "seat camera, every door open", () =>
+                {
+                    BattleDebug.SeatCamera();
+                    DevCheats.Invincible = true;
+                    DevCheats.WildOff = true;
+                    PuzzleState.Solve(TowerDoor.TowerId, 1);
+                    PuzzleState.Solve(GameState.BellowsId, 9);
+                    PuzzleState.Solve(LilymereLagoon.RisenId, 2);
+                    PuzzleState.Restore(PuzzleState.ToSaved());
+                }, () => true, 3f);
+                foreach (var (label, spot) in new[]
+                         {
+                             ("tower", "GW: tower"), ("forge", "CW: forge door"), ("temple", "LM: temple"),
+                             ("gate_wind", "Hub: wind gate"), ("gate_fire", "Hub: fire gate"), ("gate_water", "Hub: water gate"),
+                         })
+                {
+                    string l = label, s = spot;
+                    Add(P, $"shot {l}", () => Go(s), () =>
+                    {
+                        if (Elapsed < 4 || SceneSwap.IsBusy) return false;
+                        Step27Debug.Shot($"27_{tag}_{l}");
+                        return true;
+                    }, 20f);
+                }
+                void PickIn(string name, string spot, Vector2Int from, Action pick) =>
+                    Add(P, $"look + pinch walks into {name}", () => Go(spot), () =>
+                    {
+                        if (Places.Now == "hall" && !SceneSwap.IsBusy && Elapsed > 3) return true;
+                        if (Elapsed > 2 && Elapsed < 2.6 && !SceneSwap.IsBusy && Places.Now != "hall")
+                        {
+                            GameState.Instance.explorer.Teleport(from, new Vector2Int(0, -1));
+                            pick();
+                        }
+                        return false;
+                    }, 25f, null, 0.8f, false, () => $"explorer c{GameState.Instance.explorer.Tile.x} r{GameState.Instance.explorer.Tile.y}, place {Places.Now}");
+                PickIn("the tower", "GW: tower", new Vector2Int(18, 9), () => UnityEngine.Object.FindFirstObjectByType<TowerDoor>().DebugPick());
+                PickIn("the forge", "CW: forge door", new Vector2Int(21, 8), () => UnityEngine.Object.FindFirstObjectByType<ForgeBellows>().DebugPick());
+                PickIn("the lake temple", "LM: temple", new Vector2Int(21, 12), () => UnityEngine.Object.FindFirstObjectByType<TempleDoor>().DebugPick());
+                Add(P, "shot tower from the side", () =>
+                {
+                    Go("GW: tower");
+                }, () =>
+                {
+                    if (Elapsed < 2 || SceneSwap.IsBusy) return false;
+                    GameState.Instance.explorer.Teleport(new Vector2Int(13, 9), new Vector2Int(0, -1));
+                    if (Elapsed < 4) return false;
+                    Step27Debug.Shot($"27_{tag}_tower_side");
+                    return true;
+                }, 20f);
+                Add(P, "gazed door", () =>
+                {
+                    Go("GW: tower");
+                    Step27Debug.HoldGaze(true);
+                }, () =>
+                {
+                    if (Elapsed < 4 || SceneSwap.IsBusy) return false;
+                    Step27Debug.Shot($"27_{tag}_gaze_door");
+                    Step27Debug.HoldGaze(false);
+                    return true;
+                }, 20f);
             }
 
             // ---- a new adventure ----
@@ -566,6 +640,7 @@ namespace Diorama.EditorTools
                 switch (ob.CurrentId)
                 {
                     case "pinch": ob.DebugPinch(); break;
+                    case Onboarding.PracticeLesson: ob.DebugPracticeStop(); break;
                     case "starter": if (o != null) o.DebugChoose(0); break;
                     case "grass":
                     case "send":
