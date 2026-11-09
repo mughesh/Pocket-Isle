@@ -15,6 +15,7 @@ namespace Diorama
     public class TowerDoor : MonoBehaviour
     {
         public const string TowerId = "gw.tower";
+        const string KeeperId = "gw.keeper";
 
         public WorldMap map;
         public IslandBuilder island;
@@ -50,6 +51,7 @@ namespace Diorama
 
         PropView _open, _door;
         DoorGlow _glow;
+        DoorEntry _entry;
         GuideRings _hooks;
         AudioSource _audio;
         LoopAnchor _vaneSound;
@@ -76,6 +78,8 @@ namespace Diorama
             _door = new PropView("Wind Tower Door", island, doorRecipe);
             _glow = new DoorGlow("Wind Tower Door", island, glowMaterial, fx);
             _hooks = new GuideRings("Wind Tower Hook", island, glowMaterial, 3, fx);
+            _entry = new DoorEntry(this, island, explorer, () => Here, () => _isOpen, () => !PuzzleState.IsSolved(KeeperId), AtFront, new RectInt(tower.x, tower.y, 2, 2), front,
+                () => new Vector3(Center.x + portalOffset.x, portalOffset.y, tower.y + portalOffset.z), 1.6f, Use);
             explorer.OnStep += OnStep;
             explorer.OnBump += OnBump;
             PuzzleState.Restored += Apply;
@@ -93,6 +97,7 @@ namespace Diorama
             _open?.Destroy();
             _door?.Destroy();
             _glow?.Destroy();
+            _entry?.Destroy();
             _hooks?.Destroy();
             if (map != null) map.SetPropHidden(tower, false);
         }
@@ -125,6 +130,12 @@ namespace Diorama
         void OnBump(Vector2Int blocked)
         {
             if (!Here || !AtFront(explorer.Tile)) return;
+            Use();
+        }
+
+        /// <summary>Walking into the door, or (step 27) look + pinch or a poke once the explorer stands at it.</summary>
+        void Use()
+        {
             if (_isOpen)
             {
                 // Step 14h: a small team gets a warning and Go in / Not yet (TempleRules).
@@ -216,7 +227,8 @@ namespace Diorama
             _door.Place(Center, -1.2f * _sink, Quaternion.identity, here && drawOpen && _sink < 0.999f);
             // Step 11d: an open door glows like the forge's; before the kites are tied, the crown shows three empty hooks.
             _glow?.Draw(here && _isOpen, new Vector3(Center.x + portalOffset.x, portalOffset.y, tower.y + portalOffset.z), portalSize,
-                front.Length > 0 ? (Vector2)front[0] : Center + Vector2.up * 2f);
+                front.Length > 0 ? (Vector2)front[0] : Center + Vector2.up * 2f, _entry != null ? _entry.Boost : 0f);
+            _entry?.Tick();
             if (_hooks != null && kites != null)
             {
                 bool hooks = here && !_isOpen && !_opening;
@@ -235,6 +247,9 @@ namespace Diorama
 
         Vector3 MapWorld(Vector3 m) =>
             island.transform.TransformPoint(island.TileToLocal(new Vector2(m.x, m.z), island.Content.capHeight + m.y * island.map.tileSize));
+
+        /// <summary>Debug (bridge): look + pinch on the door.</summary>
+        public void DebugPick() => _entry?.Pick("bridge");
 
         /// <summary>Debug (bridge): try the door as if the explorer just arrived.</summary>
         public void DebugTry() => Try();

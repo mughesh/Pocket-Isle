@@ -285,6 +285,48 @@ MonoBehaviour:
       speakerName: Spirit
       text: Your explorer walks until you tap your thumb.
       context: 
+  - id: lesson.practice
+    once: 0
+    objective: 1
+    priority: 1
+    note: 'step 27: three gold stops, tap to stop on or next to the gold tile'
+    target: ghost
+    validWhile: canWalk
+    context: outside & !battle
+    kind: 1
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Swipe to walk. Tap your thumb to stop on the gold!
+      context:
+  - id: lesson.practice.nice
+    once: 0
+    objective: 1
+    priority: 1
+    note: 'step 27: a good stop'
+    target: 
+    validWhile: canWalk
+    context: outside & !battle
+    kind: 1
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Nice stop!
+      context:
+  - id: lesson.practice.done
+    once: 0
+    objective: 0
+    priority: 1
+    note: 'step 27: the last stop'
+    target: 
+    validWhile: canWalk
+    context: outside & !battle
+    kind: 0
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Perfect!
+      context:
   - id: lesson.walk.help
     once: 0
     objective: 1
@@ -1279,6 +1321,20 @@ MonoBehaviour:
       speakerName: Spirit
       text: The forge is waking up!
       context: 
+  - id: cinder.forge.walkin
+    once: 1
+    objective: 0
+    priority: 1
+    note: 'step 27: the door has finished opening'
+    target: 
+    validWhile: 
+    context: cinderwood
+    kind: 0
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: The forge is open! Walk in.
+      context:
   - id: cinder.hall.first
     once: 1
     objective: 0
@@ -1843,7 +1899,7 @@ MonoBehaviour:
       context: 
     - speaker: 0
       speakerName: Spirit
-      text: The tower's open! Let's go in.
+      text: The tower is open! Walk in.
       context: 
   - id: gw.meet.kitelet
     once: 1
@@ -2353,8 +2409,22 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: The temple door is open! Let's go in.
+      text: The temple is open! Walk in.
       context: 
+  - id: door.noway
+    once: 0
+    objective: 0
+    priority: 1
+    note: 'step 27: look + pinch on a door with no walkable way there'
+    target: 
+    validWhile: 
+    context: 
+    kind: 0
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: I can't get there from here. Let's walk closer.
+      context:
   - id: lm.keeper.meet
     once: 1
     objective: 0

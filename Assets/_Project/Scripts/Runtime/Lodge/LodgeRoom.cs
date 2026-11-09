@@ -78,6 +78,7 @@ namespace Diorama
         readonly PodView[] _comb = new PodView[6];
         readonly bool[] _wasPinching = { true, true };
         readonly int[] _poked = { -1, -1 };
+        readonly bool[] _doorPoked = new bool[2];
         IslingCard _card;
         Mesh _quad;
         LodgeIsling _inspected, _gazed;
@@ -829,6 +830,15 @@ namespace Diorama
                                 (tip - _pageArrow.position).sqrMagnitude < Sq(0.3f * TileWorld);
                 if (pagePoke && !_pagePoked[h]) NextPage("poke");
                 _pagePoked[h] = pagePoke;
+
+                // Step 27: a fingertip on the arch leaves too (not a resting palm: step 9h).
+                bool doorPoke = tracked && !(grabGuard != null && grabGuard.IsHandBusy(left)) && (tip - DoorWorld(0.4f)).sqrMagnitude < Sq(0.6f * TileWorld);
+                if (doorPoke && !_doorPoked[h])
+                {
+                    Debug.Log("[LodgeRoom] Poked the door arch.");
+                    Leave();
+                }
+                _doorPoked[h] = doorPoke;
 
                 bool pinching = tracked && hand.GetIndexFingerIsPinching();
                 bool busy = grabGuard != null && grabGuard.IsHandBusy(left);

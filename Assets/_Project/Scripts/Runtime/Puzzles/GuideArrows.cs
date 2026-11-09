@@ -120,6 +120,9 @@ namespace Diorama
         readonly Mesh _quad;
         float _on;
 
+        /// <summary>Step 27: the portal's share taller and the intensity added at full boost.</summary>
+        public const float TallerBy = 0.4f, BrighterBy = 1.2f;
+
         public DoorGlow(string name, IslandBuilder island, Material material, BattleFx fx)
         {
             _island = island;
@@ -140,29 +143,31 @@ namespace Diorama
 
         /// <summary>
         /// The doorway's middle (column, height in tiles of its centre, row), its size in tiles (width, height), the
-        /// threshold tile where the ring goes, and whether the door is open (it fades in over half a second).
+        /// threshold tile where the ring goes, and whether the door is open (it fades in over half a second). Step 27:
+        /// <paramref name="boost"/> 0..1 (<see cref="DoorEntry.Boost"/>) makes the portal taller (its foot stays put) and brighter.
         /// </summary>
-        public void Draw(bool open, Vector3 doorway, Vector2 size, Vector2 threshold)
+        public void Draw(bool open, Vector3 doorway, Vector2 size, Vector2 threshold, float boost = 0f)
         {
             if (_portal == null) return;
             _on = Mathf.MoveTowards(_on, open ? 1f : 0f, Time.deltaTime * 2f);
             var content = _island.Content;
             float t = _island.map != null ? _island.map.tileSize : 0.05f;
-            Vector3 local = content != null ? _island.TileToLocal(new Vector2(doorway.x, doorway.z), content.capHeight + doorway.y * t) : default;
+            float taller = size.y * TallerBy * boost;
+            Vector3 local = content != null ? _island.TileToLocal(new Vector2(doorway.x, doorway.z), content.capHeight + (doorway.y + taller * 0.5f) * t) : default;
             bool show = _on > 0.01f && content != null && _island.FootprintContains(_island.TileToLocal(new Vector2(doorway.x, doorway.z), content.capHeight));
             if (_portal.gameObject.activeSelf != show) _portal.gameObject.SetActive(show);
             if (show)
             {
                 _portal.localPosition = local;
                 _portal.localRotation = Quaternion.identity;
-                _portal.localScale = new Vector3(size.x, size.y, 1f) * (t * _island.Zoom);
+                _portal.localScale = new Vector3(size.x, size.y + taller, 1f) * (t * _island.Zoom);
                 _block.Clear();
                 _block.SetFloat(ModeId, 4f);
-                _block.SetFloat(IntensityId, 1.5f * _on);
+                _block.SetFloat(IntensityId, (1.5f + BrighterBy * boost) * _on);
                 _renderer.SetPropertyBlock(_block);
             }
             float pulse = 0.85f + 0.2f * Mathf.Sin(Time.time * 3f);
-            _ring.Draw(0, _on > 0.5f, new Vector3(threshold.x, 0.05f, threshold.y), 1.5f, 1.3f * pulse, 0.35f * pulse);
+            _ring.Draw(0, _on > 0.5f, new Vector3(threshold.x, 0.05f, threshold.y), 1.5f, (1.3f + 0.6f * boost) * pulse, 0.35f * pulse);
         }
 
         public bool Showing => _on > 0.01f;

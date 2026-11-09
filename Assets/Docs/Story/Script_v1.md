@@ -55,6 +55,12 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
   - Spirit: Swipe to go. Tap your thumb to stop.
 - `lesson.walk.far.again` · in outside & !battle · objective · while canWalk · → ghost
   - Spirit: Your explorer walks until you tap your thumb.
+- `lesson.practice` · in outside & !battle · objective · while canWalk · → ghost (step 27: three gold stops, tap to stop on or next to the gold tile)
+  - Spirit: Swipe to walk. Tap your thumb to stop on the gold!
+- `lesson.practice.nice` · in outside & !battle · objective · while canWalk (step 27: a good stop)
+  - Spirit: Nice stop!
+- `lesson.practice.done` · in outside & !battle · story · while canWalk (step 27: the last stop)
+  - Spirit: Perfect!
 - `lesson.walk.help` · in outside & !battle · objective · while canWalk · → ghost
   - Spirit: Or look at a spot and pinch.
 - `lesson.stop` · in outside & !battle · story · while canWalk · → ghost
@@ -188,6 +194,8 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
 - `cinder.brazier.three` · in cinderwood · story · Spirit: Three!
 - `cinder.forge.open` · in cinderwood · story · once (step 9b: all three braziers lit, the door glows and opens)
   - Spirit: The forge is waking up!
+- `cinder.forge.walkin` · in cinderwood · story · once (step 27: the door has finished opening)
+  - Spirit: The forge is open! Walk in.
 - `cinder.hall.first` · in hall · intro · once · → hallKeeper (step 9b: first time inside the Forge Hall; Hearthstag comes in 9c)
   - Spirit: Something huge sleeps here... not yet.
 - `cinder.keeper.first` · in hall · story · once · → hearthstag (step 9c: first time in the Forge Hall; then the Keeper battle)
@@ -270,7 +278,7 @@ Step 10b, the hand moments (lesson lines stay pinned as a chip until the moment 
   - Spirit: The tower needs all three kites.
 - `gw.tower.open` · in galewick · story · once (the kites tie onto the crown, the vanes turn)
   - Spirit: The kites caught the wind. The door is opening!
-  - Spirit: The tower's open! Let's go in.
+  - Spirit: The tower is open! Walk in.
 - `gw.meet.kitelet` · in battle · story · once (step 10c: the first wild Kitelet)
   - Spirit: A Kitelet! It wants to fly, but there's no wind.
 - `gw.meet.zeppelope` · in battle · story · once (step 10c: the rare Zeppelope)
@@ -352,7 +360,9 @@ Step 11b, the hand moments (lesson lines stay pinned as a chip until the moment 
 - `lm.temple.shut` · in lilymere · story (step 11c: at the lake temple's door before the lagoon rises)
   - Spirit: The temple's sunk. The water's too low to open it.
 - `lm.temple.open` · in lilymere · story · once (the lagoon rises: the temple door surfaces and glows)
-  - Spirit: The temple door is open! Let's go in.
+  - Spirit: The temple is open! Walk in.
+- `door.noway` · in any · story (step 27: look + pinch on a door with no walkable way there)
+  - Spirit: I can't get there from here. Let's walk closer.
 - `lm.keeper.meet` · in hall · story · once · → tidemother (step 11c: in the lake temple, she clutches the hoarded water)
   - Tidemother: Stay back! This water is all that's left. I won't lose it again!
   - Spirit: She's so scared. Let's calm her down.

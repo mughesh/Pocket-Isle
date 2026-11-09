@@ -72,12 +72,15 @@ namespace Diorama
         [Header("Lines")]
         public string[] brazierLines = { "cinder.brazier.one", "cinder.brazier.two", "cinder.brazier.three" };
         public string openLine = "cinder.forge.open";
+        [Tooltip("Step 27: said once the door has finished opening.")]
+        public string walkInLine = "cinder.forge.walkin";
         [Tooltip("Step 10f: pumped while the firebox is cold (said at most every few seconds).")]
         public string coldLine = "cw.forge.cold";
         [Range(0f, 1f)] public float volume = 0.7f;
 
         PropView _body, _frame, _leaf;
         DoorGlow _glow;
+        DoorEntry _entry;
         PropView[] _braziers;
         AudioSource _audio;
         int _shown;          // strokes the braziers show (a pulse has to arrive first)
@@ -114,6 +117,9 @@ namespace Diorama
             {
                 explorer.OnStep += OnStep;
                 explorer.OnBump += OnBump;
+                var walkTo = new[] { new Vector2Int(door.x + 1, door.y + 1), new Vector2Int(door.x, door.y + 1), new Vector2Int(door.x + 2, door.y + 1) };
+                _entry = new DoorEntry(this, island, explorer, () => pump.Here, () => _open && _sink > 0.9f, () => !PuzzleState.IsSolved(GameState.KeeperId), AtDoor,
+                    new RectInt(door.x, door.y, 3, 1), walkTo, () => new Vector3(door.x + 1f + portalOffset.x, portalOffset.y, door.y + portalOffset.z), 1.6f, UseDoor);
             }
             PuzzleState.Restored += Apply;
             Apply();
@@ -137,6 +143,7 @@ namespace Diorama
             _frame?.Destroy();
             _leaf?.Destroy();
             _glow?.Destroy();
+            _entry?.Destroy();
             if (_braziers != null)
                 foreach (var b in _braziers) b?.Destroy();
             var map = Map;
@@ -182,7 +189,8 @@ namespace Diorama
             _leaf.restoredSelf = _doorHeat;
             _leaf.Place(doorCenter, -sinkDepth * _sink, Quaternion.identity, here && _sink < 0.999f);
             _glow?.Draw(here && _open && _sink > 0.9f, new Vector3(doorCenter.x + portalOffset.x, portalOffset.y, door.y + portalOffset.z), portalSize,
-                new Vector2(doorCenter.x, door.y + 1f));
+                new Vector2(doorCenter.x, door.y + 1f), _entry != null ? _entry.Boost : 0f);
+            _entry?.Tick();
         }
 
         void DrawBrazier(int i, bool here)
@@ -366,6 +374,7 @@ namespace Diorama
             _opening = false;
             Map.SetPropOpen(door, true);
             Debug.Log("[ForgeBellows] The forge door is open (walk in).");
+            if (!string.IsNullOrEmpty(walkInLine)) Dialogue.Say(walkInLine);
         }
 
         void Sparks(int count)
@@ -394,9 +403,22 @@ namespace Diorama
             bool onThreshold = at.y == door.y && at.x >= door.x && at.x <= door.x + 2;
             bool intoDoor = blocked.y == door.y && blocked.x >= door.x && blocked.x <= door.x + 2;
             if (!onThreshold && !intoDoor) return;
+            UseDoor();
+        }
+
+        /// <summary>Step 27: the row in front of the door (and its corners) or the threshold.</summary>
+        bool AtDoor(Vector2Int tile) => tile.y == door.y && tile.x >= door.x && tile.x <= door.x + 2 ||
+                                        tile.y == door.y + 1 && tile.x >= door.x - 1 && tile.x <= door.x + 3;
+
+        /// <summary>Debug (bridge): look + pinch on the door.</summary>
+        public void DebugPick() => _entry?.Pick("bridge");
+
+        /// <summary>Walking into the door, or (step 27) look + pinch or a poke once the explorer stands at it.</summary>
+        void UseDoor()
+        {
             if (_open)
             {
-                TryEnter(at);
+                TryEnter(explorer.Tile);
                 return;
             }
             TempleRules.Refused(this, _opening ? "the door is opening" : "the braziers aren't all lit");

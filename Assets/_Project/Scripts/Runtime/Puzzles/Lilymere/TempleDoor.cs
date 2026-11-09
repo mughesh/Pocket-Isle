@@ -26,8 +26,10 @@ namespace Diorama
         public Vector2Int hallEntry = new Vector2Int(4, 8);
         public string shutLine = "lm.temple.shut";
         public string openLine = "lm.temple.open";
+        const string KeeperId = "lm.keeper";
 
         DoorGlow _glow;
+        DoorEntry _entry;
         float _nagged = -99f, _fewNagged = -99f;
         bool _wasOpen;
 
@@ -43,6 +45,9 @@ namespace Diorama
                 return;
             }
             _glow = new DoorGlow("Lake Temple Door", island, glowMaterial, fx);
+            var f = front.Length > 0 ? front[0] : Vector2Int.RoundToInt(new Vector2(doorway.x, doorway.z + 1f));
+            _entry = new DoorEntry(this, island, explorer, () => Here, () => IsOpen, () => !PuzzleState.IsSolved(KeeperId), AtFront, new RectInt(f.x - 1, f.y - 1, 3, 1), front,
+                () => doorway, 1.3f, Use);
             explorer.OnBump += OnBump;
             explorer.OnStep += OnStep;
             _wasOpen = IsOpen;
@@ -56,6 +61,7 @@ namespace Diorama
                 explorer.OnStep -= OnStep;
             }
             _glow?.Destroy();
+            _entry?.Destroy();
         }
 
         /// <summary>Step 14k: the walk-up rule: the front tiles and the front diagonals (one more each side).</summary>
@@ -76,6 +82,12 @@ namespace Diorama
         void OnBump(Vector2Int blocked)
         {
             if (island == null || island.world != map || !AtFront(explorer.Tile)) return;
+            Use();
+        }
+
+        /// <summary>Walking into the door, or (step 27) look + pinch or a poke once the explorer stands at it.</summary>
+        void Use()
+        {
             if (!Here)
             {
                 TempleRules.Refused(this, "the scene is changing");
@@ -110,8 +122,12 @@ namespace Diorama
             bool open = IsOpen;
             if (open && !_wasOpen && Here && !string.IsNullOrEmpty(openLine)) Dialogue.Say(openLine);
             _wasOpen = open;
-            _glow?.Draw(Here && open, doorway, portalSize, front.Length > 0 ? (Vector2)front[0] : new Vector2(doorway.x, doorway.z + 1f));
+            _glow?.Draw(Here && open, doorway, portalSize, front.Length > 0 ? (Vector2)front[0] : new Vector2(doorway.x, doorway.z + 1f), _entry != null ? _entry.Boost : 0f);
+            _entry?.Tick();
         }
+
+        /// <summary>Debug (bridge): look + pinch on the door.</summary>
+        public void DebugPick() => _entry?.Pick("bridge");
 
         /// <summary>Debug (bridge): into the temple now (if open).</summary>
         public void DebugEnter()
