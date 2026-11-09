@@ -14,6 +14,8 @@ namespace Diorama
     /// Step 14a: it parks just above the interaction point instead (the target's radius plus <see cref="aboveOffset"/>,
     /// a little toward the player), so it sits over the ghost hand or the thing to touch without covering either; its
     /// bubble sits above it.
+    /// Step 27 (a player: the text "keeps moving spots"): it moves when the target changes, not per line, stays put at least
+    /// <see cref="parkSeconds"/> once parked and glides over <see cref="glideSeconds"/> (<see cref="SpiritPark"/>).
     /// </summary>
     public class LanternSpirit : MonoBehaviour
     {
@@ -33,7 +35,12 @@ namespace Diorama
         public float shineBrighten = 0.35f;
 
         [Header("Flying to a target")]
-        public float flySeconds = 0.5f;
+        [Tooltip("Step 27: seconds a move glides.")]
+        public float glideSeconds = 0.6f;
+        [Tooltip("Step 27: it stays put at least this long once parked (s).")]
+        public float parkSeconds = 5f;
+        [Tooltip("Step 27: the parked spot is kept unless the wanted spot moved this far (island-local metres).")]
+        public float staysWithin = 0.06f;
         [Tooltip("Arc height of a flight (island-local metres).")]
         public float flyArc = 0.02f;
         [Tooltip("Old (before step 14a): parking beside the target.")]
@@ -106,7 +113,10 @@ namespace Diorama
         Transform _model, _anchor;
         float _speak, _speakTarget;
         bool _away, _clamped, _battle;
-        Vector3 _targetWorld, _flyFrom, _lastGoal;
+        Vector3 _targetWorld, _flyFrom;
+        object _targetKey;
+        bool _forceMove;
+        readonly SpiritPark _park = new SpiritPark();
         float _targetRadius;
         float _flyStart = -999f, _lingerUntil = -999f;
 
@@ -131,7 +141,7 @@ namespace Diorama
             lantern.SetParent(go.transform, false);
             lantern.localPosition = Vector3.up * (_view != null ? _view.centerHeight : 0.02f);
             FocusHighlight.SetLantern(lantern);
-            if (island != null && island.map != null) transform.localPosition = _lastGoal = HomeLocal();
+            if (island != null && island.map != null) transform.localPosition = HomeLocal();
             ObjectiveArea.HookBubble();
         }
 
@@ -152,11 +162,7 @@ namespace Diorama
             if (battle != _battle)
             {
                 _battle = battle;
-                if (!_away)
-                {
-                    _flyFrom = transform.localPosition;
-                    _flyStart = Time.time;
-                }
+                _forceMove = true; // the battle spot and back aren't a hop: they move at once
                 Debug.Log(battle ? "[LanternSpirit] Battle: waiting beside the near rim (right side, left if the right is in the way)." : "[LanternSpirit] Battle over: back to the corner.");
             }
             var held = hold != null ? hold() : null;
@@ -173,6 +179,7 @@ namespace Diorama
             _flyFrom = transform.localPosition;
             _flyStart = Time.time;
             _away = false;
+            _forceMove = true;
             var cam = Camera.main;
             if (cam == null) return;
             Vector3 look = cam.transform.position - transform.position;
@@ -188,6 +195,7 @@ namespace Diorama
             if (state == Dialogue.TargetState.Active)
             {
                 _targetWorld = world;
+                _targetKey = target;
                 _targetRadius = target != null && target.radius != null ? Mathf.Max(0f, target.radius()) : 0f;
                 _lingerUntil = Time.time + lingerSeconds;
                 away = true;
@@ -196,9 +204,7 @@ namespace Diorama
             if (away != _away)
             {
                 _away = away;
-                _flyFrom = transform.localPosition;
-                _flyStart = Time.time;
-                Debug.Log(away ? "[LanternSpirit] Flying to the line's target." : "[LanternSpirit] Drifting home.");
+                Debug.Log(away ? "[LanternSpirit] A line's target: flying when parked long enough." : "[LanternSpirit] Target gone: drifting home when parked long enough.");
             }
         }
 
@@ -210,19 +216,20 @@ namespace Diorama
             if (backPark != _backPark)
             {
                 _backPark = backPark;
-                _flyFrom = transform.localPosition;
-                _flyStart = Time.time;
+                _forceMove = true;
                 Debug.Log(backPark ? $"[LanternSpirit] Lesson {Onboarding.Lesson}: parked above the back centre (clear of the corner handles)." : "[LanternSpirit] Back from the back centre.");
             }
-            Vector3 goal = backPark ? BackLocal() : _away ? TargetLocal(_targetWorld) : HomeLocal();
-            // A target that jumps (a pod flies off, a new target) starts a fresh flight from here.
-            if (_away && (goal - _lastGoal).magnitude > 0.06f && Time.time - _flyStart > flySeconds)
+            Vector3 wanted = backPark ? BackLocal() : _away ? TargetLocal(_targetWorld) : HomeLocal();
+            object key = backPark ? "back" : _away ? _targetKey : _battle ? "battle" : _homeLeft ? "homeLeft" : (object)"home";
+            // Step 27: one goal at a time; a new target waits out the park, and the head moving doesn't count as a move.
+            if (_park.Update(key, wanted, Time.time, _forceMove, parkSeconds, staysWithin, glideSeconds))
             {
                 _flyFrom = transform.localPosition;
                 _flyStart = Time.time;
             }
-            _lastGoal = goal;
-            float u = Mathf.Clamp01((Time.time - _flyStart) / Mathf.Max(0.05f, flySeconds));
+            _forceMove = false;
+            Vector3 goal = _park.Goal;
+            float u = Mathf.Clamp01((Time.time - _flyStart) / Mathf.Max(0.05f, glideSeconds));
             float k = Mathf.SmoothStep(0f, 1f, u);
             float lift = Mathf.Sin(t * bobSpeed * Mathf.PI * 2f) * bobHeight + speakLift * Mathf.SmoothStep(0f, 1f, _speak);
             Vector3 pos = u < 1f ? Vector3.Lerp(_flyFrom, goal, k) + Vector3.up * (flyArc * Mathf.Sin(u * Mathf.PI)) : goal;

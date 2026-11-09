@@ -90,6 +90,8 @@ namespace Diorama
         [Tooltip("Step 9h reading pace: a line stays up at least holdBase + holdPerChar x characters after it is typed in.")]
         public float holdBase = 1.5f;
         public float holdPerChar = 0.06f;
+        /// <summary>Step 27: the least a line stays up after it finished typing, even with a more important line waiting.</summary>
+        public const float ReadBase = 1.2f, ReadPerChar = 0.05f;
 
         [Header("Lesson chip (step 9h)")]
         [Tooltip("A lesson line that stays (pinned) shrinks to its hint chip after this long (s).")]
@@ -567,7 +569,7 @@ namespace Diorama
         public void FinishSoon()
         {
             if (!_showing || _chipText != null) return;
-            _endAt = Mathf.Min(_endAt, Mathf.Max(Time.time, _shownAt + HoldSeconds(_chars, holdBase, holdPerChar)));
+            _endAt = Mathf.Min(_endAt, Mathf.Max(Time.time, _shownAt + _typeSeconds + HoldSeconds(_chars, ReadBase, ReadPerChar)));
         }
 
         void Paint(MeshRenderer r, Color back, float aspect, float radius, float border, Color? edge = null)

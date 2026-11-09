@@ -49,6 +49,18 @@ namespace Diorama
         public float idleSeconds = 40f;
         public float idleGap = 120f;
 
+        /// <summary>Step 27: idle hints come half as often as idleGap says.</summary>
+        public const float IdleGapScale = 2f;
+        /// <summary>Step 27: no filler at all this long after the game starts (s).</summary>
+        public const float QuietFirstSeconds = 180f;
+
+        /// <summary>Step 27: no filler or idle hints while a lesson or hand moment teaches, in a battle, or in the first minutes (pure).</summary>
+        public static bool ChatterQuiet(bool lesson, bool pinned, bool battle, float playedSeconds) =>
+            lesson || pinned || battle || playedSeconds < QuietFirstSeconds;
+
+        float _startedAt;
+        bool _fillerTurn;
+
         static Dialogue _instance;
 
         struct Queued
@@ -390,6 +402,7 @@ namespace Diorama
         void Start()
         {
             _lastInput = Time.time;
+            _startedAt = Time.time;
             if (encounters != null)
             {
                 GameConditions.Register("battle", () => encounters != null && encounters.InBattle);
@@ -513,6 +526,22 @@ namespace Diorama
                 Debug.Log($"[Dialogue] {id}: filler, skipped (clean hints).");
                 return;
             }
+            // Step 27: filler said on its own (a poke or a door's warning asks for its line: those use Repeat) is half as frequent
+            // and never over a lesson, a hand moment, a battle or the first minutes. Its "once" stays unsaid.
+            if (Application.isPlaying && !force && !ignoreOnce && !t.objective && t.kind == LineKind.Filler)
+            {
+                if (ChatterQuiet(Onboarding.Running, _pinned.Count > 0, encounters != null && encounters.InBattle, Time.time - _startedAt))
+                {
+                    Debug.Log($"[Dialogue] {id}: filler, skipped (lesson, puzzle, battle or the first minutes).");
+                    return;
+                }
+                _fillerTurn = !_fillerTurn;
+                if (!_fillerTurn)
+                {
+                    Debug.Log($"[Dialogue] {id}: filler, skipped (half as often).");
+                    return;
+                }
+            }
             _notNow.Remove(id);
             if (IsQueuedOrShowing(id) && !force) return;
             _said.Add(id);
@@ -552,8 +581,8 @@ namespace Diorama
             {
                 // The lower lines that wait go; the one showing ends once it has been readable (reading pace).
                 _queue.RemoveAll(q => q.priority < t.priority);
-                if (_current.Value.priority <= 0) _current = null;
-                else if (bubble != null) bubble.FinishSoon();
+                // Step 27: an idle hint keeps its reading time too (it was replaced at once).
+                if (bubble != null) bubble.FinishSoon();
             }
             int at = _queue.FindIndex(q => q.priority < t.priority);
             // Step 14k: a place's intro goes ahead of every story and filler line (only objectives and intros stay in front);
@@ -890,7 +919,8 @@ namespace Diorama
             if (script == null || script.idleHints.Count == 0 || _current.HasValue || _queue.Count > 0) return;
             // Step 9g: Settings > Spirit hints > Fewer.
             if (GameSettings.FewerHints || CleanHints) return;
-            if (Time.time - _lastInput < idleSeconds || Time.time - _lastIdle < idleGap) return;
+            if (Time.time - _lastInput < idleSeconds || Time.time - _lastIdle < idleGap * IdleGapScale) return;
+            if (ChatterQuiet(Onboarding.Running, _pinned.Count > 0, encounters != null && encounters.InBattle, Time.time - _startedAt)) return;
             if (encounters != null && encounters.InBattle || explorer != null && explorer.Locked || Onboarding.Running) return;
             // Step 14k: not right after arriving (the place's intro and objectives first), and only hints valid here.
             if (Time.time - _placeSince < idleAfterArrival || SceneSwap.IsBusy) return;
@@ -952,6 +982,7 @@ namespace Diorama
         {
             _lastInput = -999f;
             _lastIdle = -999f;
+            _startedAt = -999f;
             TryIdleHint();
         }
     }
