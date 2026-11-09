@@ -391,6 +391,5 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: amb.forgehall_3
-      ok (ember crackles over a strong rumble (low share 0.98); high-pass ~150 Hz
-      in Unity)'
+    note: 'Gen vs synth: pick. Gen lane: amb.forgehall_3 ok (regen of amb.forgehall_3,
+      1 tries, penalty 0.0)'

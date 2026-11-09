@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
   id: scene.rise
   clips:
-  - {fileID: 8300000, guid: 29dd20530b981bc48ac0bafac134f6a6, type: 3}
-  - {fileID: 8300000, guid: ac1e6a05da80e514bbd1c379e413caa8, type: 3}
+  - {fileID: 8300000, guid: 5a188a4e370f8bf4f880addff38f3c4c, type: 3}
+  - {fileID: 8300000, guid: eabcf1ca5e3d0a7428109523964254c2, type: 3}
+  - {fileID: 8300000, guid: 456479dcdfeb0c34c95865f77aaf4fb6, type: 3}
   volume: 0.4
   volumeJitter: 0.05
   pitchMin: 0.98

@@ -391,6 +391,6 @@ MonoBehaviour:
   confidence: 1
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: catch.toRim_1
-      good (glassy clink and small bounces); catch.toRim_2 good (clink and short
-      rattle); catch.toRim_3 ok (clink rattle, quieter)'
+    note: 'Gen vs synth: pick. Gen lane: catch.toRim_1 ok (regen of catch.toRim_1,
+      1 tries, penalty 0.0); catch.toRim_2 ok (regen of catch.toRim_2, 1 tries, penalty
+      0.0); catch.toRim_3 ok (regen of catch.toRim_3, 1 tries, penalty 0.0)'

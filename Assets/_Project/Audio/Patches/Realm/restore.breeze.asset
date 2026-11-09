@@ -509,4 +509,7 @@ MonoBehaviour:
   confidence: 1
   review:
     status: 0
-    note: 
+    note: 'Gen vs synth: pick. Gen lane: restore.breeze_23 ok (new take, -24 dB above
+      250 Hz, low share 0.00); restore.breeze_22 ok (new take, -29 dB above 250 Hz,
+      low share 0.00); restore.breeze_21 ok (new take, -32 dB above 250 Hz, low share
+      0.00)'

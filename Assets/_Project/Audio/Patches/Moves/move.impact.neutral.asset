@@ -627,5 +627,6 @@ MonoBehaviour:
   confidence: 1
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: move.impact.neutral_1
-      good (soft thump, 87 clipped samples); move.impact.neutral_3 good (soft thump)'
+    note: 'Gen vs synth: pick. Gen lane: move.impact.neutral_1 ok (regen of move.impact.neutral_1,
+      1 tries, penalty 0.0); move.impact.neutral_3 ok (regen of move.impact.neutral_3,
+      1 tries, penalty 0.0)'

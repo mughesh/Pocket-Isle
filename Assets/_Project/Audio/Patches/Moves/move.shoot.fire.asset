@@ -273,6 +273,6 @@ MonoBehaviour:
   confidence: 1
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: move.shoot.fire_1
-      good (short fiery whoosh, 7 clipped samples); move.shoot.fire_3 ok (fast whoosh,
-      sub heavy, 24 clipped)'
+    note: 'Gen vs synth: pick. Gen lane: move.shoot.fire_101 ok (regen of move.shoot.fire_1,
+      2 tries, penalty 0.0); move.shoot.fire_3 ok (regen of move.shoot.fire_3, 1
+      tries, penalty 0.0)'

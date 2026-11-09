@@ -155,5 +155,5 @@ MonoBehaviour:
   confidence: 1
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: ember.crackle_1
-      good (10 s loop of sparse ember pops, quiet original)'
+    note: 'Gen vs synth: pick. Gen lane: ember.crackle_1 ok (regen of ember.crackle_1,
+      1 tries, penalty 0.0)'

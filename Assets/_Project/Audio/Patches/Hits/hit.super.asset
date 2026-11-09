@@ -524,6 +524,6 @@ MonoBehaviour:
   confidence: 1
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: hit.super_1
-      ok (bonk with ring, 116 clipped); hit.super_2 good (bright ringing bonk, sparkly);
-      hit.super_3 ok (bright bonk, 204 clipped)'
+    note: 'Gen vs synth: pick. Gen lane: hit.super_1 ok (regen of hit.super_1, 1
+      tries, penalty 0.5); hit.super_2 ok (regen of hit.super_2, 1 tries, penalty
+      0.0); hit.super_3 ok (regen of hit.super_3, 1 tries, penalty 0.0)'

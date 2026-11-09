@@ -1,0 +1,129 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28966354f9950c5429c46b779a504dcd, type: 3}
+  m_Name: voice.grain.galeowl
+  m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
+  id: voice.grain.galeowl
+  clips:
+  - {fileID: 8300000, guid: a6c8f827bfc5db44e93fc84466721ab8, type: 3}
+  - {fileID: 8300000, guid: 2147f915cca34cd4390593a7483530ea, type: 3}
+  - {fileID: 8300000, guid: 6b825fc5365150449b50a5b30049aab9, type: 3}
+  - {fileID: 8300000, guid: ac3bd3744ae34b846ad005a096cbc9bd, type: 3}
+  - {fileID: 8300000, guid: fa5608446d438a648b34109ffb9d7e6a, type: 3}
+  - {fileID: 8300000, guid: 03ae42fd3ff161a40b510b8e4648200e, type: 3}
+  - {fileID: 8300000, guid: d7303e7ec25b25f46a420e11ffdcb1d7, type: 3}
+  - {fileID: 8300000, guid: cf10d56ce1a0cbb4eb4a9612aca92681, type: 3}
+  - {fileID: 8300000, guid: 081b9ca32ef25c64a8b8010270aa86f2, type: 3}
+  - {fileID: 8300000, guid: 1c53aeaf1e67b154b9ee226a87525289, type: 3}
+  - {fileID: 8300000, guid: 56edd90430b7d1443a5c98695e7494ec, type: 3}
+  - {fileID: 8300000, guid: 41fa66e90de84f441a250589af422368, type: 3}
+  - {fileID: 8300000, guid: 2381bd9929e1379419080b3eeb7b203e, type: 3}
+  - {fileID: 8300000, guid: 971a403d01896794c895cdfc096fb889, type: 3}
+  - {fileID: 8300000, guid: 40ad1041db3f50840a73b0f8680cdabd, type: 3}
+  - {fileID: 8300000, guid: 11e5ccc2adc5f974bb2b9071b56b63eb, type: 3}
+  - {fileID: 8300000, guid: 380046c67a687aa4aa7601f275f7ca92, type: 3}
+  - {fileID: 8300000, guid: 50eb900ce4018194c8d9ff2b0c550aa0, type: 3}
+  - {fileID: 8300000, guid: c6d11352dc123a2488e001e46c3fb474, type: 3}
+  - {fileID: 8300000, guid: 7e9d69465bb0b64418fd2a9567109cbd, type: 3}
+  - {fileID: 8300000, guid: 308d2cb173c9cf94090d0f6b0568fbe0, type: 3}
+  - {fileID: 8300000, guid: 24363a8cd8b59a344a7f4be99b1408de, type: 3}
+  - {fileID: 8300000, guid: a7503ef03412edd4186f02d3722d5c19, type: 3}
+  - {fileID: 8300000, guid: 8c48b8aaabe3e8c488f02568a36c0ee7, type: 3}
+  - {fileID: 8300000, guid: c8e8c0e906b9afe4d8679b1055c52923, type: 3}
+  - {fileID: 8300000, guid: 1b4a83e29dcb9db43ba78c20b7e6d330, type: 3}
+  - {fileID: 8300000, guid: 938aac118efc72840b88143b11fd7041, type: 3}
+  - {fileID: 8300000, guid: a51662fa34e2ad144bbb12edae055d3e, type: 3}
+  - {fileID: 8300000, guid: 878515e76cac5f44883c8a40cc507456, type: 3}
+  - {fileID: 8300000, guid: 3b5cce001d320ac468195985a9f63ea0, type: 3}
+  - {fileID: 8300000, guid: 77340e54bf3b0724a9c3346abb8f9994, type: 3}
+  - {fileID: 8300000, guid: 08aaaed0026909347a44ac91f0ba8f74, type: 3}
+  - {fileID: 8300000, guid: c010f15cb2aa2d849ac9fba5f8a10d97, type: 3}
+  - {fileID: 8300000, guid: 560764f183f7b4e40b1ac71c297be612, type: 3}
+  - {fileID: 8300000, guid: 899dedb60a12c124e8e25c0892c82a59, type: 3}
+  - {fileID: 8300000, guid: a41c0a9f052e9c640bc4b903368451c9, type: 3}
+  - {fileID: 8300000, guid: 16777bd35034413459c35b9075debda4, type: 3}
+  - {fileID: 8300000, guid: e91d65aed5e8d5242af2bacd36c83065, type: 3}
+  - {fileID: 8300000, guid: 27c920af6f20ba34a915db660af3c77f, type: 3}
+  - {fileID: 8300000, guid: beebb48d190cd89439b04030f2432d29, type: 3}
+  - {fileID: 8300000, guid: d0925284a14025544a009315fb8302bb, type: 3}
+  - {fileID: 8300000, guid: ed37ee2129848934aa1ea05479ba50af, type: 3}
+  - {fileID: 8300000, guid: ac804844f5457de4fb2a901225a25532, type: 3}
+  - {fileID: 8300000, guid: e4df076b3a1cc964782e776e95741686, type: 3}
+  - {fileID: 8300000, guid: b7f210f2105da2d4fad0dccc13b11f8e, type: 3}
+  - {fileID: 8300000, guid: 97b09c8a41fa04042bb9d7d3338b1ec6, type: 3}
+  volume: 0.5
+  volumeJitter: 0.05
+  pitchMin: 0.97
+  pitchMax: 1.03
+  pitchStepSemitones: 0
+  bus: 4
+  spatial: 1
+  minDistance: 0.1
+  maxDistance: 1.5
+  loop: 0
+  restSeconds: 0
+  lowPassHz: 0
+  maxSeconds: 0
+  maxVoices: 2
+  minInterval: 0.04
+  priority: 70
+  awaitingClips: 0
+  notes: 
+  review:
+    status: 0
+    note: 'Gen vs synth: pick. Gen lane: voice.grain.galeowl_2_s1 ok (new take, -14
+      dB above 250 Hz, low share 0.00); voice.grain.galeowl_2_s2 ok (new take, -14
+      dB above 250 Hz, low share 0.00); voice.grain.galeowl_2_s3 ok (new take, -14
+      dB above 250 Hz, low share 0.00); voice.grain.galeowl_2_s4 ok (new take, -14
+      dB above 250 Hz, low share 0.00); voice.grain.galeowl_2_s5 ok (new take, -14
+      dB above 250 Hz, low share 0.00); voice.grain.galeowl_2_s6 ok (new take, -14
+      dB above 250 Hz, low share 0.00); voice.grain.galeowl_2_s7 ok (new take, -14
+      dB above 250 Hz, low share 0.00); voice.grain.galeowl_2_s8 ok (new take, -14
+      dB above 250 Hz, low share 0.00); voice.grain.galeowl_2_s9 ok (new take, -14
+      dB above 250 Hz, low share 0.00); voice.grain.galeowl_2_s10 ok (new take, -14
+      dB above 250 Hz, low share 0.00); voice.grain.galeowl_2_s11 ok (new take, -14
+      dB above 250 Hz, low share 0.00); voice.grain.galeowl_2_s12 ok (new take, -14
+      dB above 250 Hz, low share 0.00); voice.grain.galeowl_2_s13 ok (new take, -14
+      dB above 250 Hz, low share 0.00); voice.grain.galeowl_1_s1 ok (new take, -17
+      dB above 250 Hz, low share 0.00); voice.grain.galeowl_1_s2 ok (new take, -17
+      dB above 250 Hz, low share 0.00); voice.grain.galeowl_1_s3 ok (new take, -17
+      dB above 250 Hz, low share 0.00); voice.grain.galeowl_1_s4 ok (new take, -17
+      dB above 250 Hz, low share 0.00); voice.grain.galeowl_1_s5 ok (new take, -17
+      dB above 250 Hz, low share 0.00); voice.grain.galeowl_1_s6 ok (new take, -17
+      dB above 250 Hz, low share 0.00); voice.grain.galeowl_1_s7 ok (new take, -17
+      dB above 250 Hz, low share 0.00); voice.grain.galeowl_1_s8 ok (new take, -17
+      dB above 250 Hz, low share 0.00); voice.grain.galeowl_1_s9 ok (new take, -17
+      dB above 250 Hz, low share 0.00); voice.grain.galeowl_1_s10 ok (new take, -17
+      dB above 250 Hz, low share 0.00); voice.grain.galeowl_1_s11 ok (new take, -17
+      dB above 250 Hz, low share 0.00); voice.grain.galeowl_1_s12 ok (new take, -17
+      dB above 250 Hz, low share 0.00); voice.grain.galeowl_1_s13 ok (new take, -17
+      dB above 250 Hz, low share 0.00); voice.grain.galeowl_1_s14 ok (new take, -17
+      dB above 250 Hz, low share 0.00); voice.grain.galeowl_1_s15 ok (new take, -17
+      dB above 250 Hz, low share 0.00); voice.grain.galeowl_1_s16 ok (new take, -17
+      dB above 250 Hz, low share 0.00); voice.grain.galeowl_3_s1 ok (new take, -19
+      dB above 250 Hz, low share 0.01); voice.grain.galeowl_3_s2 ok (new take, -19
+      dB above 250 Hz, low share 0.01); voice.grain.galeowl_3_s3 ok (new take, -19
+      dB above 250 Hz, low share 0.01); voice.grain.galeowl_3_s4 ok (new take, -19
+      dB above 250 Hz, low share 0.01); voice.grain.galeowl_3_s5 ok (new take, -19
+      dB above 250 Hz, low share 0.01); voice.grain.galeowl_3_s6 ok (new take, -19
+      dB above 250 Hz, low share 0.01); voice.grain.galeowl_3_s7 ok (new take, -19
+      dB above 250 Hz, low share 0.01); voice.grain.galeowl_3_s8 ok (new take, -19
+      dB above 250 Hz, low share 0.01); voice.grain.galeowl_3_s9 ok (new take, -19
+      dB above 250 Hz, low share 0.01); voice.grain.galeowl_3_s10 ok (new take, -19
+      dB above 250 Hz, low share 0.01); voice.grain.galeowl_3_s11 ok (new take, -19
+      dB above 250 Hz, low share 0.01); voice.grain.galeowl_3_s12 ok (new take, -19
+      dB above 250 Hz, low share 0.01); voice.grain.galeowl_3_s13 ok (new take, -19
+      dB above 250 Hz, low share 0.01); voice.grain.galeowl_3_s14 ok (new take, -19
+      dB above 250 Hz, low share 0.01); voice.grain.galeowl_3_s15 ok (new take, -19
+      dB above 250 Hz, low share 0.01); voice.grain.galeowl_3_s16 ok (new take, -19
+      dB above 250 Hz, low share 0.01); voice.grain.galeowl_3_s17 ok (new take, -19
+      dB above 250 Hz, low share 0.01)'

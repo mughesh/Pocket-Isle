@@ -391,5 +391,5 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: rain.hard_1
-      good (dense even rain, steady, loops clean)'
+    note: 'Gen vs synth: pick. Gen lane: rain.hard_1 ok (regen of rain.hard_1, 1
+      tries, penalty 0.0)'

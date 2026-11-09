@@ -18,9 +18,9 @@ MonoBehaviour:
   - {fileID: 8300000, guid: fdc8a7f74d931a3469223df1c6d67ed3, type: 3}
   - {fileID: 8300000, guid: 89ba5352ece89884ab43f677339f19f6, type: 3}
   - {fileID: 8300000, guid: 09f8748a23dd69f4ebda6044a86705b7, type: 3}
-  - {fileID: 8300000, guid: 64cd5388955be8d429af3d42c85049ac, type: 3}
-  - {fileID: 8300000, guid: ef2c6d628f1740d489fd1186aa6d702b, type: 3}
-  - {fileID: 8300000, guid: 264be4142b5d7c14cbbf4159f6bdbd5e, type: 3}
+  - {fileID: 8300000, guid: 0ca227ff89c297245bd7b3d2ede64c2a, type: 3}
+  - {fileID: 8300000, guid: 258f25dcaa567404d9067163d404edde, type: 3}
+  - {fileID: 8300000, guid: 63fb7b98876bea342a0c6ecf4894a7fd, type: 3}
   volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97
@@ -31,6 +31,9 @@ MonoBehaviour:
   minDistance: 0.1
   maxDistance: 1.5
   loop: 0
+  restSeconds: 0
+  lowPassHz: 0
+  maxSeconds: 0
   maxVoices: 2
   minInterval: 0.03
   priority: 60

@@ -155,8 +155,13 @@ MonoBehaviour:
   confidence: 1
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: sw.crackle_1_s1
-      good (7 ember pops); sw.crackle_1_s2 good (7 ember pops); sw.crackle_1_s3 good
-      (7 ember pops); sw.crackle_1_s4 good (7 ember pops); sw.crackle_1_s5 good (7
-      ember pops); sw.crackle_1_s6 good (7 ember pops); sw.crackle_1_s7 good (7 ember
-      pops)'
+    note: 'Gen vs synth: pick. Gen lane: sw.crackle_101_s1 ok (regen of sw.crackle_1,
+      2 tries, penalty 0.0); sw.crackle_101_s2 ok (regen of sw.crackle_1, 2 tries,
+      penalty 0.0); sw.crackle_101_s3 ok (regen of sw.crackle_1, 2 tries, penalty
+      0.0); sw.crackle_101_s4 ok (regen of sw.crackle_1, 2 tries, penalty 0.0); sw.crackle_101_s5
+      ok (regen of sw.crackle_1, 2 tries, penalty 0.0); sw.crackle_101_s6 ok (regen
+      of sw.crackle_1, 2 tries, penalty 0.0); sw.crackle_101_s7 ok (regen of sw.crackle_1,
+      2 tries, penalty 0.0); sw.crackle_101_s8 ok (regen of sw.crackle_1, 2 tries,
+      penalty 0.0); sw.crackle_101_s9 ok (regen of sw.crackle_1, 2 tries, penalty
+      0.0); sw.crackle_101_s10 ok (regen of sw.crackle_1, 2 tries, penalty 0.0);
+      sw.crackle_101_s11 ok (regen of sw.crackle_1, 2 tries, penalty 0.0)'

@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
   id: scene.sink
   clips:
-  - {fileID: 8300000, guid: 4198cccc41751e64f80ae33b040827d5, type: 3}
-  - {fileID: 8300000, guid: ddbb173ec4c299a4a9d68c5badec6291, type: 3}
+  - {fileID: 8300000, guid: 7538a69314f25e14fafd95e893fb2549, type: 3}
+  - {fileID: 8300000, guid: e092d8d340d9bce43bbe7b5e1042a95d, type: 3}
+  - {fileID: 8300000, guid: 6386e395e07c31c479313ee120993efe, type: 3}
   volume: 0.4
   volumeJitter: 0.05
   pitchMin: 0.98

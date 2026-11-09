@@ -273,6 +273,6 @@ MonoBehaviour:
   confidence: 1
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: pod.throw_1
-      ok (whoosh with glassy clinks mixed in); pod.throw_2 good (airy whoosh ending
-      in a click); pod.throw_3 good (clean bright whoosh)'
+    note: 'Gen vs synth: pick. Gen lane: pod.throw_1 ok (regen of pod.throw_1, 1
+      tries, penalty 0.0); pod.throw_2 ok (regen of pod.throw_2, 1 tries, penalty
+      0.0); pod.throw_3 ok (regen of pod.throw_3, 1 tries, penalty 0.0)'

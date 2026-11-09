@@ -273,5 +273,5 @@ MonoBehaviour:
   confidence: 1
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: move.lunge_5
-      ok (swish with sub pulse, 94 clipped; synth whoosh likely better)'
+    note: 'Gen vs synth: pick. Gen lane: move.lunge_5 ok (regen of move.lunge_5,
+      1 tries, penalty 0.0)'

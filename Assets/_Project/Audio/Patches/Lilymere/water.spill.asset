@@ -391,5 +391,6 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: water.spill_1
-      good (splash and a second splat, drips); water.spill_2 ok (small splash, short)'
+    note: 'Gen vs synth: pick. Gen lane: water.spill_1 ok (regen of water.spill_1,
+      1 tries, penalty 0.0); water.spill_2 ok (regen of water.spill_2, 1 tries, penalty
+      0.0)'

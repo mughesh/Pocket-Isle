@@ -155,6 +155,5 @@ MonoBehaviour:
   confidence: 1
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: sw.gust_2
-      ok (airy gust over sub wobble: HPF ~200 Hz); sw.gust_3 ok (softer gust over
-      sub: HPF ~200 Hz)'
+    note: 'Gen vs synth: pick. Gen lane: sw.gust_2 ok (regen of sw.gust_2, 1 tries,
+      penalty 0.0); sw.gust_3 ok (regen of sw.gust_3, 1 tries, penalty 0.0)'

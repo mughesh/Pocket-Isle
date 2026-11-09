@@ -155,5 +155,5 @@ MonoBehaviour:
   confidence: 1
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: shrine.flame_1
-      ok (low steady flicker, little crackle; HPF ~120 Hz)'
+    note: 'Gen vs synth: pick. Gen lane: shrine.flame_101 ok (regen of shrine.flame_1,
+      2 tries, penalty 0.4)'

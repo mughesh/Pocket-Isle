@@ -14,7 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
   id: restore.breeze
   clips:
-  - {fileID: 8300000, guid: 7c68b00c381c1114d92fe9cfedae0482, type: 3}
+  - {fileID: 8300000, guid: 365cf5ff470742940963fccceff0cbc5, type: 3}
+  - {fileID: 8300000, guid: fa91b82c7997b3d43b1ba8d851cb03ca, type: 3}
+  - {fileID: 8300000, guid: f99c7624ce3880249a77167631d1f13f, type: 3}
   volume: 0.8
   volumeJitter: 0.05
   pitchMin: 1

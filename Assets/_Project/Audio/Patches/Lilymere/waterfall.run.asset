@@ -391,5 +391,5 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: waterfall.run_1
-      good (bright steady trickle and splash, steady)'
+    note: 'Gen vs synth: pick. Gen lane: waterfall.run_1 ok (regen of waterfall.run_1,
+      1 tries, penalty 0.0)'

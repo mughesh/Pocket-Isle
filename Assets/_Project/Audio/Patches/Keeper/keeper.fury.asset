@@ -391,6 +391,6 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: keeper.fury_4
-      good (fire whoosh, no clipping; sub heavy, HPF ~100 Hz); keeper.fury_5 good
-      (fire surge, cleanest peak); keeper.fury_6 ok (fast attack whoosh, short)'
+    note: 'Gen vs synth: pick. Gen lane: keeper.fury_4 ok (regen of keeper.fury_4,
+      1 tries, penalty 0.0); keeper.fury_5 ok (regen of keeper.fury_5, 1 tries, penalty
+      0.0); keeper.fury_6 ok (regen of keeper.fury_6, 1 tries, penalty 0.0)'

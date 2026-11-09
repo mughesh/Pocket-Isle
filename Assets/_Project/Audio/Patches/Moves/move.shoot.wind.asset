@@ -273,5 +273,5 @@ MonoBehaviour:
   confidence: 1
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: move.shoot.wind_4
-      ok (whoosh with sub pulse, 209 clipped; synth whoosh likely better)'
+    note: 'Gen vs synth: pick. Gen lane: move.shoot.wind_4 ok (regen of move.shoot.wind_4,
+      1 tries, penalty 0.0)'

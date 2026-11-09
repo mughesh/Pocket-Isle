@@ -15,9 +15,9 @@ MonoBehaviour:
   id: island.unfold
   clips:
   - {fileID: 8300000, guid: b2471962886cb284ca986146a3616416, type: 3}
-  - {fileID: 8300000, guid: abbd3a7dfbcaec84ea8ff22ec0e89781, type: 3}
-  - {fileID: 8300000, guid: d346883ac865d0a47a5d3e1a76a0a493, type: 3}
-  - {fileID: 8300000, guid: ec7ae817e748e4b49976c44be35b5188, type: 3}
+  - {fileID: 8300000, guid: c712514065ad93743b07b2dd8aaf8488, type: 3}
+  - {fileID: 8300000, guid: 5e4efd46c105f604bbdb72ee1d3cf9a7, type: 3}
+  - {fileID: 8300000, guid: 396b4afa371b3764d809ca3d650a8d71, type: 3}
   volume: 0.8
   volumeJitter: 0.05
   pitchMin: 1
@@ -28,6 +28,9 @@ MonoBehaviour:
   minDistance: 0.1
   maxDistance: 3
   loop: 0
+  restSeconds: 0
+  lowPassHz: 0
+  maxSeconds: 0
   maxVoices: 1
   minInterval: 0.03
   priority: 20

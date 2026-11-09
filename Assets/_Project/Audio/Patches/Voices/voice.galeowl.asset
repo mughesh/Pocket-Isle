@@ -509,5 +509,5 @@ MonoBehaviour:
   confidence: 1
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: voice.galeowl_2
-      good (two soft clean hoots, hoo-hoo)'
+    note: 'Gen vs synth: pick. Gen lane: voice.galeowl_2 ok (regen of voice.galeowl_2,
+      1 tries, penalty 0.0)'

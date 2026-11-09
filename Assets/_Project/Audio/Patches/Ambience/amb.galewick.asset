@@ -155,6 +155,5 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: amb.galewick_2
-      ok (steady soft hilltop air, low share 0.48: high-pass ~150 Hz; quiet original,
-      level copy +16 dB)'
+    note: 'Gen vs synth: pick. Gen lane: amb.galewick_2 ok (regen of amb.galewick_2,
+      1 tries, penalty 0.0)'

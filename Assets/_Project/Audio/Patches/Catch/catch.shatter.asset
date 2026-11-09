@@ -406,6 +406,7 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: catch.shatter_1
-      good (light crack and tinkle); catch.shatter_2 good (crack and sparkly shards);
-      catch.shatter_3 ok (single crack, little sparkle)'
+    note: 'Gen vs synth: pick. Gen lane: catch.shatter_1 ok (regen of catch.shatter_1,
+      1 tries, penalty 0.0); catch.shatter_2 ok (regen of catch.shatter_2, 1 tries,
+      penalty 0.4); catch.shatter_3 ok (regen of catch.shatter_3, 1 tries, penalty
+      0.0)'

@@ -15,9 +15,9 @@ MonoBehaviour:
   id: enc.rustle
   clips:
   - {fileID: 8300000, guid: 2dde606764a732f4eb8baf738169ea55, type: 3}
-  - {fileID: 8300000, guid: 2bdc36cfaae44204ab98ee0eaf2a16aa, type: 3}
-  - {fileID: 8300000, guid: 0de9e20260490c747b6ca9e8e5886420, type: 3}
-  - {fileID: 8300000, guid: 597b5a627087c9942897c734bcce534b, type: 3}
+  - {fileID: 8300000, guid: 0c3891cf551a7d74d9f1409a68e027e5, type: 3}
+  - {fileID: 8300000, guid: c99800c53429dac48a962cf4a4fb3448, type: 3}
+  - {fileID: 8300000, guid: df2e16695fb3d69409b0b95391dbf713, type: 3}
   volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97
@@ -28,6 +28,9 @@ MonoBehaviour:
   minDistance: 0.1
   maxDistance: 1.5
   loop: 0
+  restSeconds: 0
+  lowPassHz: 0
+  maxSeconds: 0
   maxVoices: 2
   minInterval: 0.03
   priority: 80

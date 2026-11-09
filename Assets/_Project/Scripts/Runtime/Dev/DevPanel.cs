@@ -530,6 +530,11 @@ namespace Diorama
                     Heading("Speed");
                     Add(() => $"Time x{Time.timeScale:0}", () => Time.timeScale = Time.timeScale >= 4f ? 1f : Time.timeScale * 2f, () => Time.timeScale > 1f);
                     Add(() => $"Walk x2: {OnOff(_walkFast)}", ToggleWalk, () => _walkFast);
+                    Heading("Sound A/B");
+                    Add(() => $"Jingles: {(Diorama.Audio.AudioAB.AcousticJingles ? "acoustic" : "synth")}",
+                        () => Diorama.Audio.AudioAB.AcousticJingles = !Diorama.Audio.AudioAB.AcousticJingles, () => Diorama.Audio.AudioAB.AcousticJingles);
+                    Add(() => $"Voices: {(Diorama.Audio.AudioAB.NewVoices ? "new" : "blip")}",
+                        () => Diorama.Audio.AudioAB.NewVoices = !Diorama.Audio.AudioAB.NewVoices, () => Diorama.Audio.AudioAB.NewVoices);
                     // Step 18/20: the music, tuned on the headset (levels remembered on this device): one row per cue.
                     Heading("Music");
                     Add(() => $"Realm music: {(Diorama.Audio.MusicDirector.RealmMusicBeforeRestore ? "always" : "reward")}",

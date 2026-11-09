@@ -391,7 +391,6 @@ MonoBehaviour:
   confidence: 1
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: move.charge_1
-      good (noise swell with rising tone, magical); move.charge_2 ok (noise swell,
-      rising low tone, 1 s fade); move.charge_3 ok (warbly tonal sweeps, may read
-      sci-fi)'
+    note: 'Gen vs synth: pick. Gen lane: move.charge_1 ok (regen of move.charge_1,
+      1 tries, penalty 0.0); move.charge_2 ok (regen of move.charge_2, 1 tries, penalty
+      0.0); move.charge_103 ok (regen of move.charge_3, 2 tries, penalty 0.0)'

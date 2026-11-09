@@ -155,6 +155,6 @@ MonoBehaviour:
   confidence: 1
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: pond.tap_1
-      ok (two soft plips); pond.tap_2 ok (plip with small lead taps); pond.tap_3
-      good (single clear plip)'
+    note: 'Gen vs synth: pick. Gen lane: pond.tap_1 ok (regen of pond.tap_1, 1 tries,
+      penalty 0.0); pond.tap_2 ok (regen of pond.tap_2, 1 tries, penalty 0.0); pond.tap_3
+      ok (regen of pond.tap_3, 1 tries, penalty 0.2)'

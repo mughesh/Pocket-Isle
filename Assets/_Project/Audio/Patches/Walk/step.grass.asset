@@ -391,17 +391,39 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: step.grass_2_s1
-      ok (~8 soft crunchy steps, slices include a few fragments: audition and prune);
-      step.grass_2_s2 ok (~8 soft crunchy steps, slices include a few fragments:
-      audition and prune); step.grass_2_s3 ok (~8 soft crunchy steps, slices include
-      a few fragments: audition and prune); step.grass_2_s4 ok (~8 soft crunchy steps,
-      slices include a few fragments: audition and prune); step.grass_2_s5 ok (~8
-      soft crunchy steps, slices include a few fragments: audition and prune); step.grass_2_s6
-      ok (~8 soft crunchy steps, slices include a few fragments: audition and prune);
-      step.grass_2_s7 ok (~8 soft crunchy steps, slices include a few fragments:
-      audition and prune); step.grass_2_s8 ok (~8 soft crunchy steps, slices include
-      a few fragments: audition and prune); step.grass_2_s9 ok (~8 soft crunchy steps,
-      slices include a few fragments: audition and prune); step.grass_2_s10 ok (~8
-      soft crunchy steps, slices include a few fragments: audition and prune); step.grass_2_s11
-      ok (~8 soft crunchy steps, slices include a few fragments: audition and prune)'
+    note: 'Gen vs synth: pick. Gen lane: step.grass_23_s1 ok (new take, -49 dB above
+      250 Hz, low share 0.00); step.grass_23_s2 ok (new take, -49 dB above 250 Hz,
+      low share 0.00); step.grass_23_s3 ok (new take, -49 dB above 250 Hz, low share
+      0.00); step.grass_23_s4 ok (new take, -49 dB above 250 Hz, low share 0.00);
+      step.grass_23_s5 ok (new take, -49 dB above 250 Hz, low share 0.00); step.grass_23_s6
+      ok (new take, -49 dB above 250 Hz, low share 0.00); step.grass_23_s7 ok (new
+      take, -49 dB above 250 Hz, low share 0.00); step.grass_23_s8 ok (new take,
+      -49 dB above 250 Hz, low share 0.00); step.grass_23_s9 ok (new take, -49 dB
+      above 250 Hz, low share 0.00); step.grass_23_s10 ok (new take, -49 dB above
+      250 Hz, low share 0.00); step.grass_23_s11 ok (new take, -49 dB above 250 Hz,
+      low share 0.00); step.grass_23_s12 ok (new take, -49 dB above 250 Hz, low share
+      0.00); step.grass_21_s1 ok (new take, -52 dB above 250 Hz, low share 0.00);
+      step.grass_21_s2 ok (new take, -52 dB above 250 Hz, low share 0.00); step.grass_21_s3
+      ok (new take, -52 dB above 250 Hz, low share 0.00); step.grass_21_s4 ok (new
+      take, -52 dB above 250 Hz, low share 0.00); step.grass_21_s5 ok (new take,
+      -52 dB above 250 Hz, low share 0.00); step.grass_21_s6 ok (new take, -52 dB
+      above 250 Hz, low share 0.00); step.grass_21_s7 ok (new take, -52 dB above
+      250 Hz, low share 0.00); step.grass_21_s8 ok (new take, -52 dB above 250 Hz,
+      low share 0.00); step.grass_21_s9 ok (new take, -52 dB above 250 Hz, low share
+      0.00); step.grass_21_s10 ok (new take, -52 dB above 250 Hz, low share 0.00);
+      step.grass_21_s11 ok (new take, -52 dB above 250 Hz, low share 0.00); step.grass_21_s12
+      ok (new take, -52 dB above 250 Hz, low share 0.00); step.grass_21_s13 ok (new
+      take, -52 dB above 250 Hz, low share 0.00); step.grass_22_s1 ok (new take,
+      -53 dB above 250 Hz, low share 0.00); step.grass_22_s2 ok (new take, -53 dB
+      above 250 Hz, low share 0.00); step.grass_22_s3 ok (new take, -53 dB above
+      250 Hz, low share 0.00); step.grass_22_s4 ok (new take, -53 dB above 250 Hz,
+      low share 0.00); step.grass_22_s5 ok (new take, -53 dB above 250 Hz, low share
+      0.00); step.grass_22_s6 ok (new take, -53 dB above 250 Hz, low share 0.00);
+      step.grass_22_s7 ok (new take, -53 dB above 250 Hz, low share 0.00); step.grass_22_s8
+      ok (new take, -53 dB above 250 Hz, low share 0.00); step.grass_22_s9 ok (new
+      take, -53 dB above 250 Hz, low share 0.00); step.grass_22_s10 ok (new take,
+      -53 dB above 250 Hz, low share 0.00); step.grass_22_s11 ok (new take, -53 dB
+      above 250 Hz, low share 0.00); step.grass_22_s12 ok (new take, -53 dB above
+      250 Hz, low share 0.00); step.grass_22_s13 ok (new take, -53 dB above 250 Hz,
+      low share 0.00); step.grass_22_s14 ok (new take, -53 dB above 250 Hz, low share
+      0.00)'

@@ -387,7 +387,8 @@ namespace Diorama
             _showing = true;
             if (_progressTotal > 0) LayoutDots();
             // Audio-D: an objective card gets one soft chime instead of ticks; the Heart's whisper starts with a breathy hum.
-            if (_heart) GameAudio.At(Diorama.Audio.AudioIds.HeartHum, anchor != null ? anchor.position : _root.position);
+            bool called = PlayEntranceCall(line, anchor != null ? anchor.position : _root.position);
+            if (_heart && !called) GameAudio.At(Diorama.Audio.AudioIds.HeartHum, anchor != null ? anchor.position : _root.position);
             else if (_objective && string.IsNullOrEmpty(chip)) GameAudio.At(Diorama.Audio.AudioIds.SpiritFocus, _root.position).SetVolume(0.6f);
             for (int i = 0; i < 2; i++) _wasPinching[i] = true; // a pinch already held doesn't skip
             Place(true);
@@ -635,6 +636,32 @@ namespace Diorama
 
         int _blipAt;
         float _blipTime;
+        string _lastCaller;
+        float _lastCallerLine = -999f;
+
+        /// <summary>"heart" or a Keeper's lower-case name; null for the Spirit and anyone without new voices.</summary>
+        public static string SpeakerKey(DialogueLine line)
+        {
+            if (line == null) return null;
+            if (line.speaker == DialogueSpeaker.Heart) return "heart";
+            if (line.speaker == DialogueSpeaker.Keeper && !string.IsNullOrEmpty(line.speakerName)) return line.speakerName.Trim().ToLowerInvariant();
+            return null;
+        }
+
+        /// <summary>New voices only: a speaker's call on its first line of a scene (another speaker before it, or a long silence). True when it played.</summary>
+        bool PlayEntranceCall(DialogueLine line, Vector3 at)
+        {
+            if (!Diorama.Audio.AudioAB.NewVoices || _chip || _objective) return false;
+            var key = SpeakerKey(line);
+            if (key == null) return false;
+            bool first = key != _lastCaller || Time.unscaledTime - _lastCallerLine > entranceAfterSeconds;
+            _lastCaller = key;
+            _lastCallerLine = Time.unscaledTime;
+            var cue = Diorama.Audio.AudioAB.CallCue(key);
+            if (!first || !Diorama.Audio.AudioService.Has(cue)) return false;
+            GameAudio.At(cue, at);
+            return true;
+        }
 
         [Header("Typing voice (Nov 3)")]
         [Tooltip("Typed characters between blips. Oct 27: 6 (every 3 felt too busy); Nov 3 (Mugesh: bring the robotic voice " +
@@ -642,6 +669,10 @@ namespace Diorama
         [Min(1)] public int blipEvery = 4;
         [Tooltip("And never closer than this (seconds), however fast the letters come (Oct 27: 0.2).")]
         public float blipGap = 0.12f;
+        [Tooltip("Step 24: new voices: at least this long between grains (a grain is 0.15-0.3 s, a blip far shorter).")]
+        public float grainGap = 0.2f;
+        [Tooltip("Step 24: new voices: this long after a speaker's last line, its next line counts as a new scene and gets the entrance call again (s).")]
+        public float entranceAfterSeconds = 30f;
         [Tooltip("Blip volume (the first version: 1; Oct 27: 0.55).")]
         [Range(0f, 1f)] public float blipVolume = 0.75f;
         [Tooltip("Nov 3: objective cards (the lessons, the pinned goals) type with the voice too (Oct 27 made them silent).")]
@@ -660,6 +691,7 @@ namespace Diorama
         {
             int every = _heart ? heartBlipEvery : blipEvery;
             float gap = _heart ? heartBlipGap : blipGap;
+            if (Diorama.Audio.AudioAB.NewVoices && SpeakerKey(_line) != null) gap = Mathf.Max(gap, grainGap);
             if (_chip || _objective && !objectivesBlip || shown < _blipAt + every || shown >= _chars || Time.time < _blipTime + gap) return;
             _blipAt = shown;
             _blipTime = Time.time;
@@ -672,6 +704,11 @@ namespace Diorama
         public static string VoiceFor(DialogueLine line)
         {
             if (line == null) return Diorama.Audio.AudioIds.SpiritBlip;
+            if (Diorama.Audio.AudioAB.NewVoices)
+            {
+                var key = SpeakerKey(line);
+                if (key != null && Diorama.Audio.AudioService.Has(Diorama.Audio.AudioAB.GrainCue(key))) return Diorama.Audio.AudioAB.GrainCue(key);
+            }
             switch (line.speaker)
             {
                 case DialogueSpeaker.Heart:

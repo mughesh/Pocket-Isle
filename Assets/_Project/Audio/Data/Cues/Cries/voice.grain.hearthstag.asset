@@ -1,0 +1,93 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28966354f9950c5429c46b779a504dcd, type: 3}
+  m_Name: voice.grain.hearthstag
+  m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
+  id: voice.grain.hearthstag
+  clips:
+  - {fileID: 8300000, guid: 2bbbb1af97c268445b05a1955669bcfe, type: 3}
+  - {fileID: 8300000, guid: 4e2ea198ce2375940ab95d2b0b2b8a13, type: 3}
+  - {fileID: 8300000, guid: 169e23ffa601c584282f48720cd1ba82, type: 3}
+  - {fileID: 8300000, guid: c2f15db8dd3b51b43b9e4c45e6905bbb, type: 3}
+  - {fileID: 8300000, guid: 6e82d812bce4dff43a05b9261cd2df17, type: 3}
+  - {fileID: 8300000, guid: 0e746f42af67bc44ba1a2c04650296d4, type: 3}
+  - {fileID: 8300000, guid: 9ea088399fc416f47aa27d298f749b7e, type: 3}
+  - {fileID: 8300000, guid: 56c73083fb1dc564c9cb9f8c14901e67, type: 3}
+  - {fileID: 8300000, guid: c94fe831e060369448ff3eee6686c27b, type: 3}
+  - {fileID: 8300000, guid: 16c9eae651002c14db048ff9ac473471, type: 3}
+  - {fileID: 8300000, guid: 0d38cf771e8d4774782fa6300ebedb7a, type: 3}
+  - {fileID: 8300000, guid: b6245001c311f5842bfb083cd1540e3f, type: 3}
+  - {fileID: 8300000, guid: 497c14a6502e0894583e51ba60c88c0f, type: 3}
+  - {fileID: 8300000, guid: 2b464d29b0cd21944a1b0908419865bc, type: 3}
+  - {fileID: 8300000, guid: 7bc26a20d4b79ec4a8a0404b9b5e6495, type: 3}
+  - {fileID: 8300000, guid: 72dbcf53dc101bf448b3e2da7ff39283, type: 3}
+  - {fileID: 8300000, guid: 4e1b5f5d8b358dc4e94ee92b0f42d194, type: 3}
+  - {fileID: 8300000, guid: a20d04d3160aea744b0fd28abe621c42, type: 3}
+  - {fileID: 8300000, guid: 5e3f18aa3ec7d0b4eb011f8c7a4daeec, type: 3}
+  - {fileID: 8300000, guid: 5bca3b2a3431d454581022237857cdde, type: 3}
+  - {fileID: 8300000, guid: ab75e7211fdfb8046937c40b05e08093, type: 3}
+  - {fileID: 8300000, guid: 5133104ff63cfde46a96b2f75c9c78de, type: 3}
+  - {fileID: 8300000, guid: a9c7a440593404b428b784fe8c4dea8a, type: 3}
+  - {fileID: 8300000, guid: 8ee5844d3d1959e41a3c96d457c9117c, type: 3}
+  - {fileID: 8300000, guid: 061ff04b81b0c1c41bc6ffb93919b006, type: 3}
+  - {fileID: 8300000, guid: b833d045b601f0547a502ee584056cec, type: 3}
+  - {fileID: 8300000, guid: acf1100c674a69b4c8ba7c163ab66235, type: 3}
+  - {fileID: 8300000, guid: e917b8bab87513241a3935202e5ccf57, type: 3}
+  volume: 0.5
+  volumeJitter: 0.05
+  pitchMin: 0.97
+  pitchMax: 1.03
+  pitchStepSemitones: 0
+  bus: 4
+  spatial: 1
+  minDistance: 0.1
+  maxDistance: 1.5
+  loop: 0
+  restSeconds: 0
+  lowPassHz: 0
+  maxSeconds: 0
+  maxVoices: 2
+  minInterval: 0.04
+  priority: 70
+  awaitingClips: 0
+  notes: 
+  review:
+    status: 0
+    note: 'Gen vs synth: pick. Gen lane: voice.grain.hearthstag_3_s1 ok (new take,
+      -32 dB above 250 Hz, low share 0.45); voice.grain.hearthstag_3_s2 ok (new take,
+      -32 dB above 250 Hz, low share 0.45); voice.grain.hearthstag_3_s3 ok (new take,
+      -32 dB above 250 Hz, low share 0.45); voice.grain.hearthstag_3_s4 ok (new take,
+      -32 dB above 250 Hz, low share 0.45); voice.grain.hearthstag_3_s5 ok (new take,
+      -32 dB above 250 Hz, low share 0.45); voice.grain.hearthstag_3_s6 ok (new take,
+      -32 dB above 250 Hz, low share 0.45); voice.grain.hearthstag_3_s7 ok (new take,
+      -32 dB above 250 Hz, low share 0.45); voice.grain.hearthstag_3_s8 ok (new take,
+      -32 dB above 250 Hz, low share 0.45); voice.grain.hearthstag_3_s9 ok (new take,
+      -32 dB above 250 Hz, low share 0.45); voice.grain.hearthstag_3_s10 ok (new
+      take, -32 dB above 250 Hz, low share 0.45); voice.grain.hearthstag_3_s11 ok
+      (new take, -32 dB above 250 Hz, low share 0.45); voice.grain.hearthstag_3_s12
+      ok (new take, -32 dB above 250 Hz, low share 0.45); voice.grain.hearthstag_3_s13
+      ok (new take, -32 dB above 250 Hz, low share 0.45); voice.grain.hearthstag_3_s14
+      ok (new take, -32 dB above 250 Hz, low share 0.45); voice.grain.hearthstag_3_s15
+      ok (new take, -32 dB above 250 Hz, low share 0.45); voice.grain.hearthstag_3_s16
+      ok (new take, -32 dB above 250 Hz, low share 0.45); voice.grain.hearthstag_3_s17
+      ok (new take, -32 dB above 250 Hz, low share 0.45); voice.grain.hearthstag_1_s1
+      ok (new take, -50 dB above 250 Hz, low share 0.51); voice.grain.hearthstag_1_s2
+      ok (new take, -50 dB above 250 Hz, low share 0.51); voice.grain.hearthstag_1_s3
+      ok (new take, -50 dB above 250 Hz, low share 0.51); voice.grain.hearthstag_1_s4
+      ok (new take, -50 dB above 250 Hz, low share 0.51); voice.grain.hearthstag_1_s5
+      ok (new take, -50 dB above 250 Hz, low share 0.51); voice.grain.hearthstag_1_s6
+      ok (new take, -50 dB above 250 Hz, low share 0.51); voice.grain.hearthstag_1_s7
+      ok (new take, -50 dB above 250 Hz, low share 0.51); voice.grain.hearthstag_1_s8
+      ok (new take, -50 dB above 250 Hz, low share 0.51); voice.grain.hearthstag_1_s9
+      ok (new take, -50 dB above 250 Hz, low share 0.51); voice.grain.hearthstag_1_s10
+      ok (new take, -50 dB above 250 Hz, low share 0.51); voice.grain.hearthstag_1_s11
+      ok (new take, -50 dB above 250 Hz, low share 0.51)'

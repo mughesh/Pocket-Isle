@@ -18,19 +18,22 @@ MonoBehaviour:
   - {fileID: 8300000, guid: cc759759efe44b647b76f94fe1323d72, type: 3}
   - {fileID: 8300000, guid: b5392a6f7b53a8e409a2ac00552ebb09, type: 3}
   - {fileID: 8300000, guid: 5e3ce50a81b804546a50bfac564d55a1, type: 3}
-  - {fileID: 8300000, guid: 173fabde937f07640a8e57921555f36a, type: 3}
-  - {fileID: 8300000, guid: ead06f57e30318e4c9cfcce06afd9f59, type: 3}
-  - {fileID: 8300000, guid: c52028ed813249142a963d9c87e91d07, type: 3}
-  - {fileID: 8300000, guid: ae681c05f763aba43b69f35cdf2ee6eb, type: 3}
-  - {fileID: 8300000, guid: 5e1f8914eb185dc4ebca7dcdc5daa3b8, type: 3}
-  - {fileID: 8300000, guid: 403f810938dbb7c4db3d49a502713fcc, type: 3}
-  - {fileID: 8300000, guid: f91d938e6de4a2647ad30e6ba3a32c0b, type: 3}
-  - {fileID: 8300000, guid: 271329260b35b5745b289b03be8469c5, type: 3}
-  - {fileID: 8300000, guid: 45bccbbf808594c4f90917d029504686, type: 3}
-  - {fileID: 8300000, guid: 7e447f790c55340459672216d73c6d8f, type: 3}
-  - {fileID: 8300000, guid: b28d9205261c95448b045899bd6609c6, type: 3}
-  - {fileID: 8300000, guid: 863ed8ae8dff67647816102ab3328622, type: 3}
-  - {fileID: 8300000, guid: cd6e175c83b63044ab092c9467894a70, type: 3}
+  - {fileID: 8300000, guid: 520135b0ffbf42d488707b6cddbb07b7, type: 3}
+  - {fileID: 8300000, guid: 4f8203324a6c3b04c83f7d4b76a959fb, type: 3}
+  - {fileID: 8300000, guid: 64d82cbf120dc4b4695e4afb20d57289, type: 3}
+  - {fileID: 8300000, guid: a4cc7ca403c9c4b479cd0c497d201fd2, type: 3}
+  - {fileID: 8300000, guid: 2d3aa513fdb6dbe478ebc5f79f601934, type: 3}
+  - {fileID: 8300000, guid: d78f581c46dbb7b45b936ed1dc26de7e, type: 3}
+  - {fileID: 8300000, guid: 100ba88cac6f80f4bba6050a78a3a16f, type: 3}
+  - {fileID: 8300000, guid: c6d21515cd419da4cb5d989f7bbe4cc5, type: 3}
+  - {fileID: 8300000, guid: cc82939713c267147abcbafd29bf2c54, type: 3}
+  - {fileID: 8300000, guid: 7a9efd16cdcfabb469b7d01570dc67ff, type: 3}
+  - {fileID: 8300000, guid: a37df7d19aa351a4fb3f24b863e728c4, type: 3}
+  - {fileID: 8300000, guid: e0e23edc08ec0674dbcefebcfcdf2a06, type: 3}
+  - {fileID: 8300000, guid: 3fd787ae43c52734cab14cd38fa6730c, type: 3}
+  - {fileID: 8300000, guid: a4a06d700453e9948bfbe7b454ac47f4, type: 3}
+  - {fileID: 8300000, guid: 1301a80acb394634698a5c3c12831ca5, type: 3}
+  - {fileID: 8300000, guid: e456692fdd22efa439eb9b0135a59ea9, type: 3}
   volume: 0.8
   volumeJitter: 0.2
   pitchMin: 0.96
@@ -41,6 +44,9 @@ MonoBehaviour:
   minDistance: 0.1
   maxDistance: 1.5
   loop: 0
+  restSeconds: 0
+  lowPassHz: 0
+  maxSeconds: 0
   maxVoices: 3
   minInterval: 0.1
   priority: 220

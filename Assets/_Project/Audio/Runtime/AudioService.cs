@@ -257,7 +257,7 @@ namespace Diorama.Audio
         {
             var s = Instance;
             if (s == null) return default;
-            var cue = Cue(id);
+            var cue = Cue(AudioAB.Resolve(id));
             if (cue == null) return default;
             float now = Time.unscaledTime;
             if (!loop && now - cue.lastPlayTime < cue.minInterval) return default;

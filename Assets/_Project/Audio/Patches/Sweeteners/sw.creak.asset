@@ -155,20 +155,17 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: sw.creak_1_s1
-      ok (16 slices: ratchety creaks and single wood clicks; prune clicks); sw.creak_1_s2
-      ok (16 slices: ratchety creaks and single wood clicks; prune clicks); sw.creak_1_s3
-      ok (16 slices: ratchety creaks and single wood clicks; prune clicks); sw.creak_1_s4
-      ok (16 slices: ratchety creaks and single wood clicks; prune clicks); sw.creak_1_s5
-      ok (16 slices: ratchety creaks and single wood clicks; prune clicks); sw.creak_1_s6
-      ok (16 slices: ratchety creaks and single wood clicks; prune clicks); sw.creak_1_s7
-      ok (16 slices: ratchety creaks and single wood clicks; prune clicks); sw.creak_1_s8
-      ok (16 slices: ratchety creaks and single wood clicks; prune clicks); sw.creak_1_s9
-      ok (16 slices: ratchety creaks and single wood clicks; prune clicks); sw.creak_1_s10
-      ok (16 slices: ratchety creaks and single wood clicks; prune clicks); sw.creak_1_s11
-      ok (16 slices: ratchety creaks and single wood clicks; prune clicks); sw.creak_1_s12
-      ok (16 slices: ratchety creaks and single wood clicks; prune clicks); sw.creak_1_s13
-      ok (16 slices: ratchety creaks and single wood clicks; prune clicks); sw.creak_1_s14
-      ok (16 slices: ratchety creaks and single wood clicks; prune clicks); sw.creak_1_s15
-      ok (16 slices: ratchety creaks and single wood clicks; prune clicks); sw.creak_1_s16
-      ok (16 slices: ratchety creaks and single wood clicks; prune clicks)'
+    note: 'Gen vs synth: pick. Gen lane: sw.creak_1_s1 ok (regen of sw.creak_1, 1
+      tries, penalty 0.0); sw.creak_1_s2 ok (regen of sw.creak_1, 1 tries, penalty
+      0.0); sw.creak_1_s3 ok (regen of sw.creak_1, 1 tries, penalty 0.0); sw.creak_1_s4
+      ok (regen of sw.creak_1, 1 tries, penalty 0.0); sw.creak_1_s5 ok (regen of
+      sw.creak_1, 1 tries, penalty 0.0); sw.creak_1_s6 ok (regen of sw.creak_1, 1
+      tries, penalty 0.0); sw.creak_1_s7 ok (regen of sw.creak_1, 1 tries, penalty
+      0.0); sw.creak_1_s8 ok (regen of sw.creak_1, 1 tries, penalty 0.0); sw.creak_1_s9
+      ok (regen of sw.creak_1, 1 tries, penalty 0.0); sw.creak_1_s10 ok (regen of
+      sw.creak_1, 1 tries, penalty 0.0); sw.creak_1_s11 ok (regen of sw.creak_1,
+      1 tries, penalty 0.0); sw.creak_1_s12 ok (regen of sw.creak_1, 1 tries, penalty
+      0.0); sw.creak_1_s13 ok (regen of sw.creak_1, 1 tries, penalty 0.0); sw.creak_1_s14
+      ok (regen of sw.creak_1, 1 tries, penalty 0.0); sw.creak_1_s15 ok (regen of
+      sw.creak_1, 1 tries, penalty 0.0); sw.creak_1_s16 ok (regen of sw.creak_1,
+      1 tries, penalty 0.0)'

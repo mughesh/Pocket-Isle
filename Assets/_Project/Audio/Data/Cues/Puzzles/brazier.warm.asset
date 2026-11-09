@@ -15,8 +15,8 @@ MonoBehaviour:
   id: brazier.warm
   clips:
   - {fileID: 8300000, guid: 41fe7897d160367488935b46f1936550, type: 3}
-  - {fileID: 8300000, guid: e1cefea2b4abd2640a314e5f849f49ad, type: 3}
-  - {fileID: 8300000, guid: 899c29b63bd2d634bbe4afcd41c62517, type: 3}
+  - {fileID: 8300000, guid: 20d4022f79854d1499a22ef790617993, type: 3}
+  - {fileID: 8300000, guid: 04bbb7ff0ee43774da12dc8f7a364995, type: 3}
   volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97
@@ -27,6 +27,9 @@ MonoBehaviour:
   minDistance: 0.1
   maxDistance: 1.5
   loop: 0
+  restSeconds: 0
+  lowPassHz: 0
+  maxSeconds: 0
   maxVoices: 1
   minInterval: 0.03
   priority: 60

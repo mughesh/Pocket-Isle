@@ -15,12 +15,12 @@ MonoBehaviour:
   id: log.drop
   clips:
   - {fileID: 8300000, guid: d9f9fa5cc51a108478b334222155fd8d, type: 3}
-  - {fileID: 8300000, guid: 6b9c6f09f25a83248a8b8e30112e0981, type: 3}
-  - {fileID: 8300000, guid: 193f1a14f8e7ae7409cf7c6577d0034f, type: 3}
-  - {fileID: 8300000, guid: 99736f63fc1bd234c86dd2b3ef8aaee3, type: 3}
-  - {fileID: 8300000, guid: c67b1e3b3f0ff6f47ab34bc4fbe9302d, type: 3}
-  - {fileID: 8300000, guid: 1a7da9cf0daf69e489748047867ec9b6, type: 3}
-  - {fileID: 8300000, guid: 2d8c5f70482aa57439b80ac89c8abfee, type: 3}
+  - {fileID: 8300000, guid: a3ff451f638ea0d4caec2c70a221b470, type: 3}
+  - {fileID: 8300000, guid: 2ca94bf9815149c46bbf53a34ff6ef3b, type: 3}
+  - {fileID: 8300000, guid: e498f2631f1bef24d88b6f85985f9f00, type: 3}
+  - {fileID: 8300000, guid: ea3b82a9e246e324e98a7c2259030461, type: 3}
+  - {fileID: 8300000, guid: 70573629a9f488b4e9ba9d8134afc97e, type: 3}
+  - {fileID: 8300000, guid: e65159f471d4b5647b16c0ce3896c3c2, type: 3}
   volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97
@@ -31,6 +31,9 @@ MonoBehaviour:
   minDistance: 0.1
   maxDistance: 1.5
   loop: 0
+  restSeconds: 0
+  lowPassHz: 0
+  maxSeconds: 0
   maxVoices: 1
   minInterval: 0.03
   priority: 40

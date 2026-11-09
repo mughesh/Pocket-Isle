@@ -1,0 +1,189 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28966354f9950c5429c46b779a504dcd, type: 3}
+  m_Name: voice.grain.tidemother
+  m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
+  id: voice.grain.tidemother
+  clips:
+  - {fileID: 8300000, guid: c50785a6bb9950c4ebcc74def3be2e44, type: 3}
+  - {fileID: 8300000, guid: bd69520352d81f14ba2b11585a99ccf9, type: 3}
+  - {fileID: 8300000, guid: c3335af9972c9f542bd388b08a50d595, type: 3}
+  - {fileID: 8300000, guid: 108b82332dd50054d9fbede65bf24ef3, type: 3}
+  - {fileID: 8300000, guid: 0746ae9a51c5b184a9f2ec5e57b17300, type: 3}
+  - {fileID: 8300000, guid: fbea04094179f314f88c7d2ba32aa6cc, type: 3}
+  - {fileID: 8300000, guid: 65780f3bc85d98d40b1ed59b6224b5a8, type: 3}
+  - {fileID: 8300000, guid: 7a89f6a4da7403145899f044ea40a9b9, type: 3}
+  - {fileID: 8300000, guid: 5b439971d9d023b40a566f1fe5dfb539, type: 3}
+  - {fileID: 8300000, guid: 0c95bb5d2c5558346bb2330684f379a9, type: 3}
+  - {fileID: 8300000, guid: 55a5773a5db7dbc43b9d15dfe613474f, type: 3}
+  - {fileID: 8300000, guid: db1ad68cc5a6ba5478e5906965ff2d50, type: 3}
+  - {fileID: 8300000, guid: d0757660eafd66e49a5d0e2b8af3e74f, type: 3}
+  - {fileID: 8300000, guid: 2629f93bf20bea7449d757e84623d7c7, type: 3}
+  - {fileID: 8300000, guid: c36e9be21c500434dbf77a02bafd60f8, type: 3}
+  - {fileID: 8300000, guid: be1aac2190060304d866e0ebc31bf9ff, type: 3}
+  - {fileID: 8300000, guid: c8d8889aa64977e46bc1244ae232f260, type: 3}
+  - {fileID: 8300000, guid: 138bb796ac917bc458e63332f57af06d, type: 3}
+  - {fileID: 8300000, guid: 414d8afff9f09fb4da03b11fc4efb579, type: 3}
+  - {fileID: 8300000, guid: 9fafd76f739d44f49ae57ac5b529050f, type: 3}
+  - {fileID: 8300000, guid: 45eb4c3e813c96848831a2ef87a16068, type: 3}
+  - {fileID: 8300000, guid: f25311ece113fe94a9e42def119db48d, type: 3}
+  - {fileID: 8300000, guid: cdf359bf0f8f20d4dac687c922c5cc86, type: 3}
+  - {fileID: 8300000, guid: b64000efbfdb46d42ba95b1840803b15, type: 3}
+  - {fileID: 8300000, guid: 5bc18be5931dc444da9202d7b3f2a168, type: 3}
+  - {fileID: 8300000, guid: 4ba973d0d16abd64194f2db0bd0a1f67, type: 3}
+  - {fileID: 8300000, guid: 8cd0fb2a908496f4e835d7f694c80df1, type: 3}
+  - {fileID: 8300000, guid: 9987dae5214b66140ba0f68ab84e35a1, type: 3}
+  - {fileID: 8300000, guid: 87eb24da8121e2d4f9793f761f2439f4, type: 3}
+  - {fileID: 8300000, guid: 2cdc4ae3dc634f842b91aa26f2918291, type: 3}
+  - {fileID: 8300000, guid: 5e0925de0bf9c8349b569b2b52ef1e01, type: 3}
+  - {fileID: 8300000, guid: 658705a8ddfb03240bd5d5e79878e55e, type: 3}
+  - {fileID: 8300000, guid: f6a3aa6374fe30443853f23f661927dc, type: 3}
+  - {fileID: 8300000, guid: 2e1bff67be736a44b8fd2e16ee6910ba, type: 3}
+  - {fileID: 8300000, guid: d7b9b448c496916448f66f2d29b4d976, type: 3}
+  - {fileID: 8300000, guid: ddac87b2c141258469feec0ce2dabbb5, type: 3}
+  - {fileID: 8300000, guid: 787187a424168da44adfa4a54f0a8c69, type: 3}
+  - {fileID: 8300000, guid: 31079b82b69936f4d9c673dd32ea3fae, type: 3}
+  - {fileID: 8300000, guid: 9c08bf9c14c36ef42925651698fb6a9e, type: 3}
+  - {fileID: 8300000, guid: 82831e5198d84c4439fa95330339de9b, type: 3}
+  - {fileID: 8300000, guid: f46490d604f189544b6512a455476c1d, type: 3}
+  - {fileID: 8300000, guid: 8fbe9e76768831d4890c8b0777c62d44, type: 3}
+  - {fileID: 8300000, guid: 780424aad2a09eb46aa15b08aef54702, type: 3}
+  - {fileID: 8300000, guid: b23f5f02331f39940b1788a14f7d7471, type: 3}
+  - {fileID: 8300000, guid: 255e39c2d2710934f802068865c25a6c, type: 3}
+  - {fileID: 8300000, guid: 003a95220f226094b96a968813000c8f, type: 3}
+  - {fileID: 8300000, guid: fa900dec52b26a648920fa150d47eb7b, type: 3}
+  - {fileID: 8300000, guid: 6aa4139b6decdd442a91c9dff8723c58, type: 3}
+  - {fileID: 8300000, guid: 3dce428a388cabe4db89d2acea609bee, type: 3}
+  - {fileID: 8300000, guid: f1713972c824e2345a9fae8e7d269c8c, type: 3}
+  - {fileID: 8300000, guid: 0adfa4e6fac25984b9cb8aedb94bf73b, type: 3}
+  - {fileID: 8300000, guid: 157e0a52d2bd1aa4eb9706c65a280ce7, type: 3}
+  - {fileID: 8300000, guid: fffa18f8ff9b11d4ea13c7c039656fcd, type: 3}
+  - {fileID: 8300000, guid: a4e1cdb4eaa22cc46843cd6113a76af3, type: 3}
+  - {fileID: 8300000, guid: 6d170af7d0a6975429d2bccda5f7ed2a, type: 3}
+  - {fileID: 8300000, guid: bc618e172ca66a44bb687ffcdcb418be, type: 3}
+  - {fileID: 8300000, guid: 1d2b71310c9d7f44981b3d7b4da946b3, type: 3}
+  - {fileID: 8300000, guid: 96dad68caa2fb584ca12540b9585cfe5, type: 3}
+  - {fileID: 8300000, guid: 6c4f47b76c5172444a2684d076530f2d, type: 3}
+  - {fileID: 8300000, guid: ed03a3025263ef943ab04cccd22d0e9a, type: 3}
+  - {fileID: 8300000, guid: 92986fda2272c6e48a82703a42937642, type: 3}
+  - {fileID: 8300000, guid: f397e66d7be2bd5479c8d41d4d46f7cf, type: 3}
+  - {fileID: 8300000, guid: 88df8506dc9c4d446bc185348e38b931, type: 3}
+  - {fileID: 8300000, guid: 3151a81cf65d7b4498ac1b76c9ea170b, type: 3}
+  - {fileID: 8300000, guid: ad8863cc7481edd459bc4c94db534d70, type: 3}
+  - {fileID: 8300000, guid: 2261d4c2b4f34364e96b0ad26cc43c17, type: 3}
+  - {fileID: 8300000, guid: 055eb4d96374c594fb0e10221bbf803f, type: 3}
+  - {fileID: 8300000, guid: 405b995cb35ecd44c91e58075b60eb6e, type: 3}
+  - {fileID: 8300000, guid: 3271a20272ce2c442872a3a2b8b97618, type: 3}
+  - {fileID: 8300000, guid: c8fb5cab08c59e347a1df9d1ad5d980a, type: 3}
+  - {fileID: 8300000, guid: 61ca4b17e9e239f4092d7dde07ea4c35, type: 3}
+  - {fileID: 8300000, guid: 110cd0cbd78d14240ba3829185ca0ca5, type: 3}
+  - {fileID: 8300000, guid: e61fc2b6c4b74274782e80853344cb74, type: 3}
+  - {fileID: 8300000, guid: 71f25101a1ad7f14a87ecd6d9289050b, type: 3}
+  - {fileID: 8300000, guid: ff101132e489c004f8eec6ba3c5c8606, type: 3}
+  - {fileID: 8300000, guid: 7dde14845efdb4448a1bad24f3a57a34, type: 3}
+  volume: 0.5
+  volumeJitter: 0.05
+  pitchMin: 0.97
+  pitchMax: 1.03
+  pitchStepSemitones: 0
+  bus: 4
+  spatial: 1
+  minDistance: 0.1
+  maxDistance: 1.5
+  loop: 0
+  restSeconds: 0
+  lowPassHz: 0
+  maxSeconds: 0
+  maxVoices: 2
+  minInterval: 0.04
+  priority: 70
+  awaitingClips: 0
+  notes: 
+  review:
+    status: 0
+    note: 'Gen vs synth: pick. Gen lane: voice.grain.tidemother_2_s1 ok (new take,
+      -32 dB above 250 Hz, low share 0.18); voice.grain.tidemother_2_s2 ok (new take,
+      -32 dB above 250 Hz, low share 0.18); voice.grain.tidemother_2_s3 ok (new take,
+      -32 dB above 250 Hz, low share 0.18); voice.grain.tidemother_2_s4 ok (new take,
+      -32 dB above 250 Hz, low share 0.18); voice.grain.tidemother_2_s5 ok (new take,
+      -32 dB above 250 Hz, low share 0.18); voice.grain.tidemother_2_s6 ok (new take,
+      -32 dB above 250 Hz, low share 0.18); voice.grain.tidemother_2_s7 ok (new take,
+      -32 dB above 250 Hz, low share 0.18); voice.grain.tidemother_2_s8 ok (new take,
+      -32 dB above 250 Hz, low share 0.18); voice.grain.tidemother_2_s9 ok (new take,
+      -32 dB above 250 Hz, low share 0.18); voice.grain.tidemother_2_s10 ok (new
+      take, -32 dB above 250 Hz, low share 0.18); voice.grain.tidemother_2_s11 ok
+      (new take, -32 dB above 250 Hz, low share 0.18); voice.grain.tidemother_2_s12
+      ok (new take, -32 dB above 250 Hz, low share 0.18); voice.grain.tidemother_2_s13
+      ok (new take, -32 dB above 250 Hz, low share 0.18); voice.grain.tidemother_2_s14
+      ok (new take, -32 dB above 250 Hz, low share 0.18); voice.grain.tidemother_2_s15
+      ok (new take, -32 dB above 250 Hz, low share 0.18); voice.grain.tidemother_2_s16
+      ok (new take, -32 dB above 250 Hz, low share 0.18); voice.grain.tidemother_2_s17
+      ok (new take, -32 dB above 250 Hz, low share 0.18); voice.grain.tidemother_2_s18
+      ok (new take, -32 dB above 250 Hz, low share 0.18); voice.grain.tidemother_2_s19
+      ok (new take, -32 dB above 250 Hz, low share 0.18); voice.grain.tidemother_2_s20
+      ok (new take, -32 dB above 250 Hz, low share 0.18); voice.grain.tidemother_2_s21
+      ok (new take, -32 dB above 250 Hz, low share 0.18); voice.grain.tidemother_2_s22
+      ok (new take, -32 dB above 250 Hz, low share 0.18); voice.grain.tidemother_2_s23
+      ok (new take, -32 dB above 250 Hz, low share 0.18); voice.grain.tidemother_2_s24
+      ok (new take, -32 dB above 250 Hz, low share 0.18); voice.grain.tidemother_2_s25
+      ok (new take, -32 dB above 250 Hz, low share 0.18); voice.grain.tidemother_1_s1
+      ok (new take, -33 dB above 250 Hz, low share 0.56); voice.grain.tidemother_1_s2
+      ok (new take, -33 dB above 250 Hz, low share 0.56); voice.grain.tidemother_1_s3
+      ok (new take, -33 dB above 250 Hz, low share 0.56); voice.grain.tidemother_1_s4
+      ok (new take, -33 dB above 250 Hz, low share 0.56); voice.grain.tidemother_1_s5
+      ok (new take, -33 dB above 250 Hz, low share 0.56); voice.grain.tidemother_1_s6
+      ok (new take, -33 dB above 250 Hz, low share 0.56); voice.grain.tidemother_1_s7
+      ok (new take, -33 dB above 250 Hz, low share 0.56); voice.grain.tidemother_1_s8
+      ok (new take, -33 dB above 250 Hz, low share 0.56); voice.grain.tidemother_1_s9
+      ok (new take, -33 dB above 250 Hz, low share 0.56); voice.grain.tidemother_1_s10
+      ok (new take, -33 dB above 250 Hz, low share 0.56); voice.grain.tidemother_1_s11
+      ok (new take, -33 dB above 250 Hz, low share 0.56); voice.grain.tidemother_1_s12
+      ok (new take, -33 dB above 250 Hz, low share 0.56); voice.grain.tidemother_1_s13
+      ok (new take, -33 dB above 250 Hz, low share 0.56); voice.grain.tidemother_1_s14
+      ok (new take, -33 dB above 250 Hz, low share 0.56); voice.grain.tidemother_1_s15
+      ok (new take, -33 dB above 250 Hz, low share 0.56); voice.grain.tidemother_1_s16
+      ok (new take, -33 dB above 250 Hz, low share 0.56); voice.grain.tidemother_1_s17
+      ok (new take, -33 dB above 250 Hz, low share 0.56); voice.grain.tidemother_1_s18
+      ok (new take, -33 dB above 250 Hz, low share 0.56); voice.grain.tidemother_1_s19
+      ok (new take, -33 dB above 250 Hz, low share 0.56); voice.grain.tidemother_1_s20
+      ok (new take, -33 dB above 250 Hz, low share 0.56); voice.grain.tidemother_1_s21
+      ok (new take, -33 dB above 250 Hz, low share 0.56); voice.grain.tidemother_1_s22
+      ok (new take, -33 dB above 250 Hz, low share 0.56); voice.grain.tidemother_1_s23
+      ok (new take, -33 dB above 250 Hz, low share 0.56); voice.grain.tidemother_1_s24
+      ok (new take, -33 dB above 250 Hz, low share 0.56); voice.grain.tidemother_1_s25
+      ok (new take, -33 dB above 250 Hz, low share 0.56); voice.grain.tidemother_3_s1
+      ok (new take, -42 dB above 250 Hz, low share 0.22); voice.grain.tidemother_3_s2
+      ok (new take, -42 dB above 250 Hz, low share 0.22); voice.grain.tidemother_3_s3
+      ok (new take, -42 dB above 250 Hz, low share 0.22); voice.grain.tidemother_3_s4
+      ok (new take, -42 dB above 250 Hz, low share 0.22); voice.grain.tidemother_3_s5
+      ok (new take, -42 dB above 250 Hz, low share 0.22); voice.grain.tidemother_3_s6
+      ok (new take, -42 dB above 250 Hz, low share 0.22); voice.grain.tidemother_3_s7
+      ok (new take, -42 dB above 250 Hz, low share 0.22); voice.grain.tidemother_3_s8
+      ok (new take, -42 dB above 250 Hz, low share 0.22); voice.grain.tidemother_3_s9
+      ok (new take, -42 dB above 250 Hz, low share 0.22); voice.grain.tidemother_3_s10
+      ok (new take, -42 dB above 250 Hz, low share 0.22); voice.grain.tidemother_3_s11
+      ok (new take, -42 dB above 250 Hz, low share 0.22); voice.grain.tidemother_3_s12
+      ok (new take, -42 dB above 250 Hz, low share 0.22); voice.grain.tidemother_3_s13
+      ok (new take, -42 dB above 250 Hz, low share 0.22); voice.grain.tidemother_3_s14
+      ok (new take, -42 dB above 250 Hz, low share 0.22); voice.grain.tidemother_3_s15
+      ok (new take, -42 dB above 250 Hz, low share 0.22); voice.grain.tidemother_3_s16
+      ok (new take, -42 dB above 250 Hz, low share 0.22); voice.grain.tidemother_3_s17
+      ok (new take, -42 dB above 250 Hz, low share 0.22); voice.grain.tidemother_3_s18
+      ok (new take, -42 dB above 250 Hz, low share 0.22); voice.grain.tidemother_3_s19
+      ok (new take, -42 dB above 250 Hz, low share 0.22); voice.grain.tidemother_3_s20
+      ok (new take, -42 dB above 250 Hz, low share 0.22); voice.grain.tidemother_3_s21
+      ok (new take, -42 dB above 250 Hz, low share 0.22); voice.grain.tidemother_3_s22
+      ok (new take, -42 dB above 250 Hz, low share 0.22); voice.grain.tidemother_3_s23
+      ok (new take, -42 dB above 250 Hz, low share 0.22); voice.grain.tidemother_3_s24
+      ok (new take, -42 dB above 250 Hz, low share 0.22); voice.grain.tidemother_3_s25
+      ok (new take, -42 dB above 250 Hz, low share 0.22); voice.grain.tidemother_3_s26
+      ok (new take, -42 dB above 250 Hz, low share 0.22)'

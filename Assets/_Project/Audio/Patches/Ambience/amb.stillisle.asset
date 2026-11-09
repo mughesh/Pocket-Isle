@@ -273,6 +273,5 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: amb.stillisle_1
-      good (breeze bed with sparse small birds, gentle; quiet original, level copy
-      +33 dB)'
+    note: 'Gen vs synth: pick. Gen lane: amb.stillisle_22 ok (new take, -53 dB above
+      250 Hz, low share 0.00)'

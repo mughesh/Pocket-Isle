@@ -391,5 +391,5 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: move.impact.wind_6
-      good (clean airy puff burst)'
+    note: 'Gen vs synth: pick. Gen lane: move.impact.wind_6 ok (regen of move.impact.wind_6,
+      3 tries, penalty 4.2)'

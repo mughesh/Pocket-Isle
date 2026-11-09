@@ -273,5 +273,6 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: amb.lodge_2
-      ok (clear hearth crackle, a few loud pops; rumble heavy, high-pass ~150 Hz)'
+    note: 'Gen vs synth: pick. Gen lane: amb.lodge_23 ok (new take, -39 dB above
+      250 Hz, low share 0.02); amb.lodge_22 ok (new take, -44 dB above 250 Hz, low
+      share 0.18)'

@@ -15,7 +15,7 @@ MonoBehaviour:
   id: amb.cinderwood.restored
   clips:
   - {fileID: 8300000, guid: d59382074e346e6468e967eacd74ec33, type: 3}
-  - {fileID: 8300000, guid: ed1565369852de94ea59d5ce518f0982, type: 3}
+  - {fileID: 8300000, guid: c7e07e3fb0f172841b294e992b44a5aa, type: 3}
   volume: 0.8
   volumeJitter: 0
   pitchMin: 1
@@ -26,6 +26,9 @@ MonoBehaviour:
   minDistance: 0.1
   maxDistance: 1.5
   loop: 1
+  restSeconds: 0
+  lowPassHz: 0
+  maxSeconds: 0
   maxVoices: 1
   minInterval: 0
   priority: 40

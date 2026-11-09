@@ -273,17 +273,31 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: step.stone_1_s1
-      good (14 slices of crisp stone taps (heel-toe pairs)); step.stone_1_s2 good
-      (14 slices of crisp stone taps (heel-toe pairs)); step.stone_1_s3 good (14
-      slices of crisp stone taps (heel-toe pairs)); step.stone_1_s4 good (14 slices
-      of crisp stone taps (heel-toe pairs)); step.stone_1_s5 good (14 slices of crisp
-      stone taps (heel-toe pairs)); step.stone_1_s6 good (14 slices of crisp stone
-      taps (heel-toe pairs)); step.stone_1_s7 good (14 slices of crisp stone taps
-      (heel-toe pairs)); step.stone_1_s8 good (14 slices of crisp stone taps (heel-toe
-      pairs)); step.stone_1_s9 good (14 slices of crisp stone taps (heel-toe pairs));
-      step.stone_1_s10 good (14 slices of crisp stone taps (heel-toe pairs)); step.stone_1_s11
-      good (14 slices of crisp stone taps (heel-toe pairs)); step.stone_1_s12 good
-      (14 slices of crisp stone taps (heel-toe pairs)); step.stone_1_s13 good (14
-      slices of crisp stone taps (heel-toe pairs)); step.stone_1_s14 good (14 slices
-      of crisp stone taps (heel-toe pairs))'
+    note: 'Gen vs synth: pick. Gen lane: step.stone_12_s1 ok (new take, -38 dB above
+      250 Hz, low share 0.00); step.stone_12_s2 ok (new take, -38 dB above 250 Hz,
+      low share 0.00); step.stone_12_s3 ok (new take, -38 dB above 250 Hz, low share
+      0.00); step.stone_12_s4 ok (new take, -38 dB above 250 Hz, low share 0.00);
+      step.stone_12_s5 ok (new take, -38 dB above 250 Hz, low share 0.00); step.stone_12_s6
+      ok (new take, -38 dB above 250 Hz, low share 0.00); step.stone_12_s7 ok (new
+      take, -38 dB above 250 Hz, low share 0.00); step.stone_12_s8 ok (new take,
+      -38 dB above 250 Hz, low share 0.00); step.stone_13_s1 ok (new take, -45 dB
+      above 250 Hz, low share 0.02); step.stone_13_s2 ok (new take, -45 dB above
+      250 Hz, low share 0.02); step.stone_13_s3 ok (new take, -45 dB above 250 Hz,
+      low share 0.02); step.stone_13_s4 ok (new take, -45 dB above 250 Hz, low share
+      0.02); step.stone_13_s5 ok (new take, -45 dB above 250 Hz, low share 0.02);
+      step.stone_13_s6 ok (new take, -45 dB above 250 Hz, low share 0.02); step.stone_13_s7
+      ok (new take, -45 dB above 250 Hz, low share 0.02); step.stone_13_s8 ok (new
+      take, -45 dB above 250 Hz, low share 0.02); step.stone_11_s1 ok (new take,
+      -46 dB above 250 Hz, low share 0.03); step.stone_11_s2 ok (new take, -46 dB
+      above 250 Hz, low share 0.03); step.stone_11_s3 ok (new take, -46 dB above
+      250 Hz, low share 0.03); step.stone_11_s4 ok (new take, -46 dB above 250 Hz,
+      low share 0.03); step.stone_11_s5 ok (new take, -46 dB above 250 Hz, low share
+      0.03); step.stone_11_s6 ok (new take, -46 dB above 250 Hz, low share 0.03);
+      step.stone_11_s7 ok (new take, -46 dB above 250 Hz, low share 0.03); step.stone_11_s8
+      ok (new take, -46 dB above 250 Hz, low share 0.03); step.stone_11_s9 ok (new
+      take, -46 dB above 250 Hz, low share 0.03); step.stone_11_s10 ok (new take,
+      -46 dB above 250 Hz, low share 0.03); step.stone_11_s11 ok (new take, -46 dB
+      above 250 Hz, low share 0.03); step.stone_11_s12 ok (new take, -46 dB above
+      250 Hz, low share 0.03); step.stone_11_s13 ok (new take, -46 dB above 250 Hz,
+      low share 0.03); step.stone_11_s14 ok (new take, -46 dB above 250 Hz, low share
+      0.03); step.stone_11_s15 ok (new take, -46 dB above 250 Hz, low share 0.03)'

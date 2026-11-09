@@ -391,6 +391,5 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: amb.lilymere.restored_1
-      ok (faint lapping with soft frog/bird bands; very quiet original (+28 dB level
-      copy), listen for hiss)'
+    note: 'Gen vs synth: pick. Gen lane: amb.lilymere.restored_101 ok (regen of amb.lilymere.restored_1,
+      2 tries, penalty 0.0)'

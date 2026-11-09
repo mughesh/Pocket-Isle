@@ -775,5 +775,6 @@ MonoBehaviour:
   confidence: 1
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: lagoon.rise_1
-      good (steady gurgling fill ~3.2 s); lagoon.rise_2 ok (gurgle with clipped splashes)'
+    note: 'Gen vs synth: pick. Gen lane: lagoon.rise_1 ok (regen of lagoon.rise_1,
+      1 tries, penalty 2.0); lagoon.rise_2 ok (regen of lagoon.rise_2, 1 tries, penalty
+      0.0)'

@@ -273,4 +273,29 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 
+    note: 'Gen vs synth: pick. Gen lane: step.wood_12_s1 ok (new take, -32 dB above
+      250 Hz, low share 0.12); step.wood_12_s2 ok (new take, -32 dB above 250 Hz,
+      low share 0.12); step.wood_12_s3 ok (new take, -32 dB above 250 Hz, low share
+      0.12); step.wood_12_s4 ok (new take, -32 dB above 250 Hz, low share 0.12);
+      step.wood_12_s5 ok (new take, -32 dB above 250 Hz, low share 0.12); step.wood_12_s6
+      ok (new take, -32 dB above 250 Hz, low share 0.12); step.wood_12_s7 ok (new
+      take, -32 dB above 250 Hz, low share 0.12); step.wood_12_s8 ok (new take, -32
+      dB above 250 Hz, low share 0.12); step.wood_12_s9 ok (new take, -32 dB above
+      250 Hz, low share 0.12); step.wood_12_s10 ok (new take, -32 dB above 250 Hz,
+      low share 0.12); step.wood_13_s1 ok (new take, -34 dB above 250 Hz, low share
+      0.19); step.wood_13_s2 ok (new take, -34 dB above 250 Hz, low share 0.19);
+      step.wood_13_s3 ok (new take, -34 dB above 250 Hz, low share 0.19); step.wood_13_s4
+      ok (new take, -34 dB above 250 Hz, low share 0.19); step.wood_13_s5 ok (new
+      take, -34 dB above 250 Hz, low share 0.19); step.wood_13_s6 ok (new take, -34
+      dB above 250 Hz, low share 0.19); step.wood_13_s7 ok (new take, -34 dB above
+      250 Hz, low share 0.19); step.wood_13_s8 ok (new take, -34 dB above 250 Hz,
+      low share 0.19); step.wood_13_s9 ok (new take, -34 dB above 250 Hz, low share
+      0.19); step.wood_13_s10 ok (new take, -34 dB above 250 Hz, low share 0.19);
+      step.wood_11_s1 ok (new take, -37 dB above 250 Hz, low share 0.04); step.wood_11_s2
+      ok (new take, -37 dB above 250 Hz, low share 0.04); step.wood_11_s3 ok (new
+      take, -37 dB above 250 Hz, low share 0.04); step.wood_11_s4 ok (new take, -37
+      dB above 250 Hz, low share 0.04); step.wood_11_s5 ok (new take, -37 dB above
+      250 Hz, low share 0.04); step.wood_11_s6 ok (new take, -37 dB above 250 Hz,
+      low share 0.04); step.wood_11_s7 ok (new take, -37 dB above 250 Hz, low share
+      0.04); step.wood_11_s8 ok (new take, -37 dB above 250 Hz, low share 0.04);
+      step.wood_11_s9 ok (new take, -37 dB above 250 Hz, low share 0.04)'

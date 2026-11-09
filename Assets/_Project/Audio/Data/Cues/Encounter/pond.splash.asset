@@ -15,9 +15,9 @@ MonoBehaviour:
   id: pond.splash
   clips:
   - {fileID: 8300000, guid: 7ca9e66e89f566148aaa764c6cc9f811, type: 3}
-  - {fileID: 8300000, guid: 5c27c9f094fe7564b96b8cb89594db7d, type: 3}
-  - {fileID: 8300000, guid: 59ab9f04e3faf2443b463d8f5d19ab0c, type: 3}
-  - {fileID: 8300000, guid: d64dfc295c76b924aa5e86d203af0cb5, type: 3}
+  - {fileID: 8300000, guid: 7dd45263bf44e6c45a9dd7e6da376014, type: 3}
+  - {fileID: 8300000, guid: a379aa6ae7a4b3843bc05ed3fc915da8, type: 3}
+  - {fileID: 8300000, guid: 97b4f9ca2a40a1e40b42b38748497848, type: 3}
   volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97
@@ -28,6 +28,9 @@ MonoBehaviour:
   minDistance: 0.1
   maxDistance: 1.5
   loop: 0
+  restSeconds: 0
+  lowPassHz: 0
+  maxSeconds: 0
   maxVoices: 2
   minInterval: 0.03
   priority: 90

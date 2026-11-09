@@ -14,14 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
   id: sw.bird
   clips:
-  - {fileID: 8300000, guid: 6c7215b9fb1961f469b1d60ba88c613a, type: 3}
-  - {fileID: 8300000, guid: 47a5e88a8cd4ba540b804e95276238dd, type: 3}
-  - {fileID: 8300000, guid: c2f370dcb6f8e6649a2fd6aff6a42507, type: 3}
-  - {fileID: 8300000, guid: 8ccbd6590669fd146b80aa058df14298, type: 3}
-  - {fileID: 8300000, guid: e1ca22be5a3dff4458b1cdbaa6a77ea7, type: 3}
-  - {fileID: 8300000, guid: 5aef62a50e178024a84b92bd0bfb0d27, type: 3}
-  - {fileID: 8300000, guid: 3eb483e18ba9a2b459b4d5dab26031cc, type: 3}
-  - {fileID: 8300000, guid: 3997dd9d145025f4a9e08eb15018d877, type: 3}
+  - {fileID: 8300000, guid: 61f043c8fda784c4da7e16b16eb89438, type: 3}
+  - {fileID: 8300000, guid: 2dcc311e37535604daedafa667eaaa96, type: 3}
+  - {fileID: 8300000, guid: 486a89c24a3c4c549965ce6c2a6f3e37, type: 3}
+  - {fileID: 8300000, guid: 58f077f8c26bf074abb5b17b5e7ea50c, type: 3}
+  - {fileID: 8300000, guid: 58d505022ea60bc42872bf3dbc189d30, type: 3}
+  - {fileID: 8300000, guid: a4331e05626bf6d49a809e7b37fba446, type: 3}
+  - {fileID: 8300000, guid: 6865640c9f82441428c4d91c9e890f91, type: 3}
+  - {fileID: 8300000, guid: 2de4168b0e03f974a8528dcb4060a1ed, type: 3}
+  - {fileID: 8300000, guid: 3582704ce03aa3245a4451f262ec23da, type: 3}
   volume: 0.8
   volumeJitter: 0.2
   pitchMin: 0.96
@@ -32,6 +33,9 @@ MonoBehaviour:
   minDistance: 0.1
   maxDistance: 1.5
   loop: 0
+  restSeconds: 0
+  lowPassHz: 0
+  maxSeconds: 0
   maxVoices: 3
   minInterval: 0.1
   priority: 220
@@ -39,12 +43,11 @@ MonoBehaviour:
   notes: Awaiting the gen batch (Import Gen Batch).
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: sw.bird_1_s1
-      good (5 songbird phrases cut into 8 slices; slices are phrase parts); sw.bird_1_s2
-      good (5 songbird phrases cut into 8 slices; slices are phrase parts); sw.bird_1_s3
-      good (5 songbird phrases cut into 8 slices; slices are phrase parts); sw.bird_1_s4
-      good (5 songbird phrases cut into 8 slices; slices are phrase parts); sw.bird_1_s5
-      good (5 songbird phrases cut into 8 slices; slices are phrase parts); sw.bird_1_s6
-      good (5 songbird phrases cut into 8 slices; slices are phrase parts); sw.bird_1_s7
-      good (5 songbird phrases cut into 8 slices; slices are phrase parts); sw.bird_1_s8
-      good (5 songbird phrases cut into 8 slices; slices are phrase parts)'
+    note: 'Gen vs synth: pick. Gen lane: sw.bird_1_s1 ok (regen of sw.bird_1, 1 tries,
+      penalty 0.0); sw.bird_1_s2 ok (regen of sw.bird_1, 1 tries, penalty 0.0); sw.bird_1_s3
+      ok (regen of sw.bird_1, 1 tries, penalty 0.0); sw.bird_1_s4 ok (regen of sw.bird_1,
+      1 tries, penalty 0.0); sw.bird_1_s5 ok (regen of sw.bird_1, 1 tries, penalty
+      0.0); sw.bird_1_s6 ok (regen of sw.bird_1, 1 tries, penalty 0.0); sw.bird_1_s7
+      ok (regen of sw.bird_1, 1 tries, penalty 0.0); sw.bird_1_s8 ok (regen of sw.bird_1,
+      1 tries, penalty 0.0); sw.bird_1_s9 ok (regen of sw.bird_1, 1 tries, penalty
+      0.0)'

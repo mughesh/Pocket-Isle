@@ -273,6 +273,6 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: amb.galewick.restored_1
-      ok (steady breezy wind bed, mostly low (share 0.93): high-pass ~150 Hz; larks
-      and creaks barely there (sweeteners add them))'
+    note: 'Gen vs synth: pick. Gen lane: amb.galewick.restored_21 ok (new take, -49
+      dB above 250 Hz, low share 0.00); amb.galewick.restored_22 ok (new take, -49
+      dB above 250 Hz, low share 0.34)'

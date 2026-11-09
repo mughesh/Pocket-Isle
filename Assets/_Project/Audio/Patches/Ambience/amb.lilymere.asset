@@ -273,5 +273,5 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: amb.lilymere_2
-      ok (dry reed rustle bed, very quiet original (+10 dB level copy), steady)'
+    note: 'Gen vs synth: pick. Gen lane: amb.lilymere_2 ok (regen of amb.lilymere_2,
+      1 tries, penalty 0.0)'

@@ -627,7 +627,7 @@ MonoBehaviour:
   confidence: 3
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: keeper.stomp_4
-      ok (crunchy dirt hit plus pebble tail; small for a stag, layer synth low thump);
-      keeper.stomp_5 ok (sharp hit, long dirt tail, quieter); keeper.stomp_6 ok (crunchy
-      hit and pebbles, light)'
+    note: 'Gen vs synth: pick. Gen lane: keeper.stomp_4 ok (regen of keeper.stomp_4,
+      1 tries, penalty 0.0); keeper.stomp_5 ok (regen of keeper.stomp_5, 1 tries,
+      penalty 0.0); keeper.stomp_6 ok (regen of keeper.stomp_6, 1 tries, penalty
+      0.0)'

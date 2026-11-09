@@ -16,9 +16,9 @@ MonoBehaviour:
   clips:
   - {fileID: 8300000, guid: fe2af4714b7ddee42ab2af0f73cbe576, type: 3}
   - {fileID: 8300000, guid: fa6157efde93bf9408ab514643298880, type: 3}
-  - {fileID: 8300000, guid: 8ce90305d2f459742acfa5217a7f6bff, type: 3}
-  - {fileID: 8300000, guid: 8b7de8301d5e1da49970b483eed2b9aa, type: 3}
-  - {fileID: 8300000, guid: e57aa34c9b7866944b74de0308ed1914, type: 3}
+  - {fileID: 8300000, guid: 5dfa39c9c28ea964195263f6fa8ca3e7, type: 3}
+  - {fileID: 8300000, guid: 8ebe2fffdb0d38048bc496102c22e0fe, type: 3}
+  - {fileID: 8300000, guid: 24bbcba3a06db7b4986e2ab0c1b4b3e4, type: 3}
   volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97
@@ -29,6 +29,9 @@ MonoBehaviour:
   minDistance: 0.1
   maxDistance: 1.5
   loop: 0
+  restSeconds: 0
+  lowPassHz: 0
+  maxSeconds: 0
   maxVoices: 1
   minInterval: 0.03
   priority: 30

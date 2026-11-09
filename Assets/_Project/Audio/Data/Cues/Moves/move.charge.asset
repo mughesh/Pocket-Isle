@@ -15,9 +15,9 @@ MonoBehaviour:
   id: move.charge
   clips:
   - {fileID: 8300000, guid: 4429b5449604174478ed0690513b41a4, type: 3}
-  - {fileID: 8300000, guid: 0917562c1c03d72498a15486b72b3cec, type: 3}
-  - {fileID: 8300000, guid: 04a9dee72f5ff634595cf66c4bbe76a0, type: 3}
-  - {fileID: 8300000, guid: 33cb1b83779592a48913d623fd135ec4, type: 3}
+  - {fileID: 8300000, guid: 285bbea9e12695645b0f3eddb6693667, type: 3}
+  - {fileID: 8300000, guid: b548d1981f40c6b43b39a06c8c76e82a, type: 3}
+  - {fileID: 8300000, guid: 946f34a7aa633fb4780681ce50764cc7, type: 3}
   volume: 0.8
   volumeJitter: 0.05
   pitchMin: 0.97
@@ -28,6 +28,9 @@ MonoBehaviour:
   minDistance: 0.1
   maxDistance: 1.5
   loop: 0
+  restSeconds: 0
+  lowPassHz: 0
+  maxSeconds: 0
   maxVoices: 2
   minInterval: 0.03
   priority: 80

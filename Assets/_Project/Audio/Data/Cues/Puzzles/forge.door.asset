@@ -15,8 +15,8 @@ MonoBehaviour:
   id: forge.door
   clips:
   - {fileID: 8300000, guid: e625d832cadf6994ab905606233af552, type: 3}
-  - {fileID: 8300000, guid: 216eade5987c5814aa7e975bd954e016, type: 3}
-  - {fileID: 8300000, guid: ef41fcab3c7c00245be87634cab0f045, type: 3}
+  - {fileID: 8300000, guid: b7f4f9a614ade51479d9f5d188a2fbf8, type: 3}
+  - {fileID: 8300000, guid: 96fe57ea841ba8e469cc2bda9f7a5985, type: 3}
   volume: 0.8
   volumeJitter: 0.05
   pitchMin: 1
@@ -27,6 +27,9 @@ MonoBehaviour:
   minDistance: 0.1
   maxDistance: 3
   loop: 0
+  restSeconds: 0
+  lowPassHz: 0
+  maxSeconds: 0
   maxVoices: 1
   minInterval: 0.03
   priority: 40

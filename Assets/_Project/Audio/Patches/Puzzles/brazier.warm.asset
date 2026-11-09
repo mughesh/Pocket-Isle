@@ -391,5 +391,6 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: brazier.warm_1
-      good (hiss burst decaying); brazier.warm_2 ok (small crackle pops, little hiss)'
+    note: 'Gen vs synth: pick. Gen lane: brazier.warm_1 ok (regen of brazier.warm_1,
+      1 tries, penalty 0.9); brazier.warm_2 ok (regen of brazier.warm_2, 1 tries,
+      penalty 0.0)'

@@ -509,6 +509,6 @@ MonoBehaviour:
   confidence: 1
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: ice.crack_1
-      good (crisp spreading cracks building up); ice.crack_2 good (separate crisp
-      cracks)'
+    note: 'Gen vs synth: pick. Gen lane: ice.crack_1 ok (regen of ice.crack_1, 1
+      tries, penalty 0.0); ice.crack_2 ok (regen of ice.crack_2, 1 tries, penalty
+      0.0)'

@@ -509,5 +509,5 @@ MonoBehaviour:
   confidence: 1
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: faint_1
-      ok (tap plus faint rustle); faint_3 good (soft plop with short tail)'
+    note: 'Gen vs synth: pick. Gen lane: faint_101 ok (regen of faint_1, 2 tries,
+      penalty 0.0); faint_103 ok (regen of faint_3, 2 tries, penalty 0.0)'

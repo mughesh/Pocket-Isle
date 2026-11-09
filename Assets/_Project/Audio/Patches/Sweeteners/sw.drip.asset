@@ -155,13 +155,16 @@ MonoBehaviour:
   confidence: 1
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: sw.drip_1_s1
-      good (13 drip slices, pitched plinks); sw.drip_1_s2 good (13 drip slices, pitched
-      plinks); sw.drip_1_s3 good (13 drip slices, pitched plinks); sw.drip_1_s4 good
-      (13 drip slices, pitched plinks); sw.drip_1_s5 good (13 drip slices, pitched
-      plinks); sw.drip_1_s6 good (13 drip slices, pitched plinks); sw.drip_1_s7 good
-      (13 drip slices, pitched plinks); sw.drip_1_s8 good (13 drip slices, pitched
-      plinks); sw.drip_1_s9 good (13 drip slices, pitched plinks); sw.drip_1_s10
-      good (13 drip slices, pitched plinks); sw.drip_1_s11 good (13 drip slices,
-      pitched plinks); sw.drip_1_s12 good (13 drip slices, pitched plinks); sw.drip_1_s13
-      good (13 drip slices, pitched plinks)'
+    note: 'Gen vs synth: pick. Gen lane: sw.drip_1_s1 ok (regen of sw.drip_1, 1 tries,
+      penalty 0.0); sw.drip_1_s2 ok (regen of sw.drip_1, 1 tries, penalty 0.0); sw.drip_1_s3
+      ok (regen of sw.drip_1, 1 tries, penalty 0.0); sw.drip_1_s4 ok (regen of sw.drip_1,
+      1 tries, penalty 0.0); sw.drip_1_s5 ok (regen of sw.drip_1, 1 tries, penalty
+      0.0); sw.drip_1_s6 ok (regen of sw.drip_1, 1 tries, penalty 0.0); sw.drip_1_s7
+      ok (regen of sw.drip_1, 1 tries, penalty 0.0); sw.drip_1_s8 ok (regen of sw.drip_1,
+      1 tries, penalty 0.0); sw.drip_1_s9 ok (regen of sw.drip_1, 1 tries, penalty
+      0.0); sw.drip_1_s10 ok (regen of sw.drip_1, 1 tries, penalty 0.0); sw.drip_1_s11
+      ok (regen of sw.drip_1, 1 tries, penalty 0.0); sw.drip_1_s12 ok (regen of sw.drip_1,
+      1 tries, penalty 0.0); sw.drip_1_s13 ok (regen of sw.drip_1, 1 tries, penalty
+      0.0); sw.drip_1_s14 ok (regen of sw.drip_1, 1 tries, penalty 0.0); sw.drip_1_s15
+      ok (regen of sw.drip_1, 1 tries, penalty 0.0); sw.drip_1_s16 ok (regen of sw.drip_1,
+      1 tries, penalty 0.0)'

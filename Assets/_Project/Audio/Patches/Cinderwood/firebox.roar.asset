@@ -627,5 +627,5 @@ MonoBehaviour:
   confidence: 1
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: firebox.roar_2
-      ok (breathy fire with a late whoomph at 1 s)'
+    note: 'Gen vs synth: pick. Gen lane: firebox.roar_102 ok (regen of firebox.roar_2,
+      2 tries, penalty 0.0)'

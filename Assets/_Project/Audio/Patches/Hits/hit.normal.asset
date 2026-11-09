@@ -509,6 +509,6 @@ MonoBehaviour:
   confidence: 1
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: hit.normal_1
-      ok (long tonal boing, quite musical); hit.normal_2 good (short cartoon bonk-boing);
-      hit.normal_3 ok (bonk with tonal ring)'
+    note: 'Gen vs synth: pick. Gen lane: hit.normal_1 ok (regen of hit.normal_1,
+      1 tries, penalty 0.0); hit.normal_2 ok (regen of hit.normal_2, 1 tries, penalty
+      0.0); hit.normal_103 ok (regen of hit.normal_3, 2 tries, penalty 0.0)'

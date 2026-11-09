@@ -745,6 +745,6 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: move.slam_1
-      good (thud plus dusty bounces, 46 clipped); move.slam_2 ok (thud and dust,
-      quieter); move.slam_3 good (thud with dust tail)'
+    note: 'Gen vs synth: pick. Gen lane: move.slam_1 ok (regen of move.slam_1, 3
+      tries, penalty 5.5); move.slam_2 ok (regen of move.slam_2, 1 tries, penalty
+      0.0); move.slam_203 ok (regen of move.slam_3, 3 tries, penalty 2.9)'

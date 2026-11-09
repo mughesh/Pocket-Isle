@@ -391,7 +391,7 @@ MonoBehaviour:
   confidence: 1
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: brazier.light_1
-      ok (long whoomph, sub heavy, 43 clipped samples; HPF ~100 Hz); brazier.light_2
-      good (short whoomph then crackles; sub heavy, HPF ~100 Hz); brazier.light_3
-      ok (whoomph with tail crackles, sub heavy)'
+    note: 'Gen vs synth: pick. Gen lane: brazier.light_1 ok (regen of brazier.light_1,
+      1 tries, penalty 0.0); brazier.light_102 ok (regen of brazier.light_2, 2 tries,
+      penalty 0.0); brazier.light_3 ok (regen of brazier.light_3, 1 tries, penalty
+      0.0)'

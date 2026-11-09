@@ -15,7 +15,7 @@ MonoBehaviour:
   id: steam.hiss
   clips:
   - {fileID: 8300000, guid: 5a6e63c376a50ef429dce1837ddd1bc1, type: 3}
-  - {fileID: 8300000, guid: e3411fc8774daf7489f04e2144a31d4a, type: 3}
+  - {fileID: 8300000, guid: 51fa038d2cf141a4683abe14f329e8ff, type: 3}
   volume: 0.8
   volumeJitter: 0
   pitchMin: 1
@@ -26,6 +26,9 @@ MonoBehaviour:
   minDistance: 0.1
   maxDistance: 2
   loop: 1
+  restSeconds: 0
+  lowPassHz: 0
+  maxSeconds: 0
   maxVoices: 4
   minInterval: 0
   priority: 60

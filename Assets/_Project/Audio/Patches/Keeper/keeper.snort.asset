@@ -391,6 +391,7 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: keeper.snort_1
-      good (broadband breathy snort 0.6 s); keeper.snort_2 ok (softer snort); keeper.snort_3
-      good (snort with short lead-in breath, 5 clipped samples)'
+    note: 'Gen vs synth: pick. Gen lane: keeper.snort_1 ok (regen of keeper.snort_1,
+      1 tries, penalty 0.0); keeper.snort_2 ok (regen of keeper.snort_2, 1 tries,
+      penalty 0.0); keeper.snort_3 ok (regen of keeper.snort_3, 1 tries, penalty
+      0.0)'

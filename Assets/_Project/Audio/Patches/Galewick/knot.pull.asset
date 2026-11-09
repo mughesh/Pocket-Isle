@@ -627,4 +627,6 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 
+    note: 'Gen vs synth: pick. Gen lane: knot.pull_3 ok (new take, -29 dB above 250
+      Hz, low share 0.02); knot.pull_1 ok (new take, -31 dB above 250 Hz, low share
+      0.00); knot.pull_2 ok (new take, -38 dB above 250 Hz, low share 0.00)'

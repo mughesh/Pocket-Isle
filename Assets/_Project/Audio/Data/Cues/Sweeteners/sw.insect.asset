@@ -14,15 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
   id: sw.insect
   clips:
-  - {fileID: 8300000, guid: b189b5204789f4945a9858af386206d6, type: 3}
-  - {fileID: 8300000, guid: 3bea8673059812e44a6b0ecb0669960e, type: 3}
-  - {fileID: 8300000, guid: ee55dce72d62f86458cd5764f0991741, type: 3}
-  - {fileID: 8300000, guid: 7d10156a642bd2c4fa8c4190ad5e5ee1, type: 3}
-  - {fileID: 8300000, guid: 4ec6e7689fa320647a78b7d4f2613b56, type: 3}
-  - {fileID: 8300000, guid: 856ca0d69769b5740b83d7776c1e68f5, type: 3}
-  - {fileID: 8300000, guid: 501d43f289aed514a8611175de1a089a, type: 3}
-  - {fileID: 8300000, guid: 85c0711b0c3ac084385ae0a1527a3d39, type: 3}
-  - {fileID: 8300000, guid: 8eeac333bdea47d44915e7f43db1dbfa, type: 3}
+  - {fileID: 8300000, guid: 8dc59251df2e18f48bf35476d34f1420, type: 3}
+  - {fileID: 8300000, guid: 290671647b90de141b97b69aab336a35, type: 3}
+  - {fileID: 8300000, guid: b6b0894c4002a934e97e09a0999fd84d, type: 3}
+  - {fileID: 8300000, guid: f0cb7773a7ef5414b9a2820f1003ab9f, type: 3}
+  - {fileID: 8300000, guid: 8207e9c761dacd94888fde2750f82a9b, type: 3}
+  - {fileID: 8300000, guid: 6e933ef7af740f449b4fde6b9fa19ab5, type: 3}
+  - {fileID: 8300000, guid: fea33891783f84e4b86a04df348d50f5, type: 3}
+  - {fileID: 8300000, guid: 489b46b300e141b43bd5612f38a514bd, type: 3}
+  - {fileID: 8300000, guid: 7c21d2120247aee42a017691b53f4822, type: 3}
   volume: 0.8
   volumeJitter: 0.2
   pitchMin: 0.96
@@ -33,6 +33,9 @@ MonoBehaviour:
   minDistance: 0.1
   maxDistance: 1.5
   loop: 0
+  restSeconds: 0
+  lowPassHz: 0
+  maxSeconds: 0
   maxVoices: 3
   minInterval: 0.1
   priority: 220
@@ -40,11 +43,11 @@ MonoBehaviour:
   notes: Awaiting the gen batch (Import Gen Batch).
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: sw.insect_1_s1
-      good (9 cricket chirp bursts, ~4.5 kHz); sw.insect_1_s2 good (9 cricket chirp
-      bursts, ~4.5 kHz); sw.insect_1_s3 good (9 cricket chirp bursts, ~4.5 kHz);
-      sw.insect_1_s4 good (9 cricket chirp bursts, ~4.5 kHz); sw.insect_1_s5 good
-      (9 cricket chirp bursts, ~4.5 kHz); sw.insect_1_s6 good (9 cricket chirp bursts,
-      ~4.5 kHz); sw.insect_1_s7 good (9 cricket chirp bursts, ~4.5 kHz); sw.insect_1_s8
-      good (9 cricket chirp bursts, ~4.5 kHz); sw.insect_1_s9 good (9 cricket chirp
-      bursts, ~4.5 kHz)'
+    note: 'Gen vs synth: pick. Gen lane: sw.insect_1_s1 ok (regen of sw.insect_1,
+      1 tries, penalty 0.0); sw.insect_1_s2 ok (regen of sw.insect_1, 1 tries, penalty
+      0.0); sw.insect_1_s3 ok (regen of sw.insect_1, 1 tries, penalty 0.0); sw.insect_1_s4
+      ok (regen of sw.insect_1, 1 tries, penalty 0.0); sw.insect_1_s5 ok (regen of
+      sw.insect_1, 1 tries, penalty 0.0); sw.insect_1_s6 ok (regen of sw.insect_1,
+      1 tries, penalty 0.0); sw.insect_1_s7 ok (regen of sw.insect_1, 1 tries, penalty
+      0.0); sw.insect_1_s8 ok (regen of sw.insect_1, 1 tries, penalty 0.0); sw.insect_1_s9
+      ok (regen of sw.insect_1, 1 tries, penalty 0.0)'

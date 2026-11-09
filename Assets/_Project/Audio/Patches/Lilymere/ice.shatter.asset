@@ -770,6 +770,6 @@ MonoBehaviour:
   confidence: 1
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: ice.shatter_1
-      ok (tinkly break, softer); ice.shatter_2 good (one clear shatter with tinkle
-      tail)'
+    note: 'Gen vs synth: pick. Gen lane: ice.shatter_1 ok (regen of ice.shatter_1,
+      1 tries, penalty 0.0); ice.shatter_2 ok (regen of ice.shatter_2, 1 tries, penalty
+      0.0)'

@@ -5,6 +5,26 @@ namespace Diorama.Tests
     public class Step24Tests
     {
         [Test]
+        public void Jingle_SwapsOnlyWhenSwitchedOn_AndTheTwinExists()
+        {
+            System.Func<string, bool> has = id => id == "jingle.catch.acoustic";
+            Assert.AreEqual("jingle.catch", Diorama.Audio.AudioAB.JingleFor("jingle.catch", false, has));
+            Assert.AreEqual("jingle.catch.acoustic", Diorama.Audio.AudioAB.JingleFor("jingle.catch", true, has));
+            Assert.AreEqual("jingle.shard", Diorama.Audio.AudioAB.JingleFor("jingle.shard", true, has));
+            Assert.AreEqual("hit.normal", Diorama.Audio.AudioAB.JingleFor("hit.normal", true, id => true));
+            Assert.AreEqual("jingle.catch.acoustic", Diorama.Audio.AudioAB.JingleFor("jingle.catch.acoustic", true, id => true));
+        }
+
+        [Test]
+        public void SpeakerKey_KeepersAndHeartOnly_SpiritKeepsItsBlip()
+        {
+            Assert.AreEqual("galeowl", DialogueBubble.SpeakerKey(new DialogueLine { speaker = DialogueSpeaker.Keeper, speakerName = " Galeowl " }));
+            Assert.AreEqual("heart", DialogueBubble.SpeakerKey(new DialogueLine { speaker = DialogueSpeaker.Heart }));
+            Assert.IsNull(DialogueBubble.SpeakerKey(new DialogueLine { speaker = DialogueSpeaker.Keeper }));
+            Assert.IsNull(DialogueBubble.SpeakerKey(new DialogueLine { speaker = DialogueSpeaker.Spirit, speakerName = "Spirit" }));
+        }
+
+        [Test]
         public void KeeperLabel_HasNoLevel_OthersDo()
         {
             StringAssert.DoesNotContain("Lv", BattleHud.LabelText("Galeowl", 4, false));

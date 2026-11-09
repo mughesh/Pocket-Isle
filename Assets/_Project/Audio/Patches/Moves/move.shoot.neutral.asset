@@ -391,6 +391,7 @@ MonoBehaviour:
   confidence: 1
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: move.shoot.neutral_1
-      good (whoosh build into pop); move.shoot.neutral_2 ok (whoosh then sharp pop,
-      28 clipped); move.shoot.neutral_3 ok (two pops, little whoosh)'
+    note: 'Gen vs synth: pick. Gen lane: move.shoot.neutral_1 ok (regen of move.shoot.neutral_1,
+      1 tries, penalty 0.0); move.shoot.neutral_2 ok (regen of move.shoot.neutral_2,
+      1 tries, penalty 0.0); move.shoot.neutral_3 ok (regen of move.shoot.neutral_3,
+      1 tries, penalty 0.0)'

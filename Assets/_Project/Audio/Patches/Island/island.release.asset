@@ -509,6 +509,6 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: island.release_1
-      ok (two soft settles); island.release_3 good (stone set down plus small settle
-      clicks)'
+    note: 'Gen vs synth: pick. Gen lane: island.release_1 ok (regen of island.release_1,
+      1 tries, penalty 0.0); island.release_103 ok (regen of island.release_3, 2
+      tries, penalty 1.8)'

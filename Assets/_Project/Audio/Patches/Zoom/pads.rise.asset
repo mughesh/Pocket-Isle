@@ -391,6 +391,6 @@ MonoBehaviour:
   confidence: 2
   review:
     status: 0
-    note: 'Gen vs synth: pick. Free-plan clips: listening only. Gen lane: pads.rise_4
-      good (crunchy dirt push with pebbles; HPF ~100 Hz); pads.rise_6 ok (crunchy
-      dirt push, one spike (8 clipped))'
+    note: 'Gen vs synth: pick. Gen lane: pads.rise_4 ok (regen of pads.rise_4, 1
+      tries, penalty 0.0); pads.rise_106 ok (regen of pads.rise_6, 2 tries, penalty
+      0.0)'

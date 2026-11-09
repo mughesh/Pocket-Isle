@@ -15,7 +15,7 @@ MonoBehaviour:
   id: amb.lilymere
   clips:
   - {fileID: 8300000, guid: 5e8c8086388ae7a488a966093538dd29, type: 3}
-  - {fileID: 8300000, guid: 386bd803f608113458c63e94bb01338b, type: 3}
+  - {fileID: 8300000, guid: fc12159e972e78846aa3650cd4d535da, type: 3}
   volume: 0.8
   volumeJitter: 0
   pitchMin: 1
@@ -26,6 +26,9 @@ MonoBehaviour:
   minDistance: 0.1
   maxDistance: 1.5
   loop: 1
+  restSeconds: 0
+  lowPassHz: 0
+  maxSeconds: 0
   maxVoices: 1
   minInterval: 0
   priority: 40
