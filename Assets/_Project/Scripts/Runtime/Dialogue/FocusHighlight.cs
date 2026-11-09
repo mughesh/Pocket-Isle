@@ -11,7 +11,9 @@ namespace Diorama
     /// old beam line to the target crossed the scene and looked bad). After the line the gold stays for
     /// <see cref="lingerSeconds"/> (or until the target disappears or <see cref="Clear"/> is called); a hint step still
     /// waiting (<see cref="SetPending"/>) then gets a softer pulse every <see cref="softPulseGap"/> seconds.
-    /// White = what the gaze is on: selectables call <see cref="Hover"/> each frame; a thin white outline, never gold.
+    /// White = what the gaze is on: selectables call <see cref="Hover"/> each frame; a warm white outline, never gold. Step 27
+    /// (the outline alone was almost always missed): thicker, a soft glow, a <see cref="PinchIcon"/> just above the target
+    /// and one quiet tick as the gaze arrives (once per target, rate-limited).
     /// Both go to the shader globals in DioramaWindow.hlsl.
     /// </summary>
     public class FocusHighlight : MonoBehaviour
@@ -19,7 +21,16 @@ namespace Diorama
         [Tooltip("Diorama/Lantern Beam material (halo on the target, short cone below the lantern).")]
         public Material beamMaterial;
         public Color gold = new Color(1f, 0.74f, 0.16f);
-        public Color hoverColor = new Color(1f, 1f, 1f);
+        [Tooltip("Step 27: warm white, what the gaze is on.")]
+        public Color gazeColor = new Color(1f, 0.95f, 0.82f);
+        [Tooltip("Step 27: the glow round what the gaze is on (0..3).")]
+        public float gazeGlow = 0.45f;
+        [Tooltip("Step 27: the pinch icon's size and its gap above the target (m at island scale 1).")]
+        public float pinchIconSize = 0.05f, pinchIconGap = 0.015f;
+        [Tooltip("Step 27: a hand this close to the target (m) fades the icon: it's already there.")]
+        public float pinchIconHandNear = 0.08f;
+        [Tooltip("Step 27: the gaze-enter tick: its least gap (s) and volume.")]
+        public float tickGap = 0.35f, tickVolume = 0.35f;
         [Tooltip("The gold stays this long after the line ends (s).")]
         public float lingerSeconds = 6f;
         [Tooltip("A hint step still waiting pulses softly this often (s).")]
@@ -54,7 +65,13 @@ namespace Diorama
         float _lastEnded = -999f, _beam, _haloRadius;
         Vector3 _beamTo;
         Mesh _coneMesh, _haloMesh;
-        MeshRenderer _coneRenderer, _haloRenderer;
+        MeshRenderer _coneRenderer, _haloRenderer, _gazeHalo;
+        PinchIcon _pinchIcon;
+        GestureTestPiece _explorer;
+        Vector3 _tickedAt = Vector3.positiveInfinity;
+        float _tickedRadius, _tickTime = -99f, _lastGazeAt = -99f, _iconAlpha;
+        static readonly int ColorId = Shader.PropertyToID("_Color");
+        static readonly int CoreId = Shader.PropertyToID("_Core");
         MaterialPropertyBlock _block;
         readonly Vector3[] _verts = new Vector3[4];
 
@@ -104,6 +121,12 @@ namespace Diorama
             _block = new MaterialPropertyBlock();
             _coneRenderer = MakeQuad("Lantern Cone", out _coneMesh, true);
             _haloRenderer = MakeQuad("Lantern Halo", out _haloMesh, false);
+            _gazeHalo = MakeQuad("Gaze Halo", out var gazeMesh, false);
+            _gazeHaloMesh = gazeMesh;
+            _explorer = FindFirstObjectByType<GestureTestPiece>();
+            var bubble = FindFirstObjectByType<DialogueBubble>(FindObjectsInactive.Include);
+            if (bubble != null && bubble.hudMaterial != null) _pinchIcon = new PinchIcon(transform, bubble.hudMaterial);
+            else Debug.LogError("[FocusHighlight] No DialogueBubble with a HUD material: no pinch icon.", this);
         }
 
         MeshRenderer MakeQuad(string name, out Mesh mesh, bool dynamic)
@@ -129,7 +152,11 @@ namespace Diorama
         {
             if (_coneMesh != null) Destroy(_coneMesh);
             if (_haloMesh != null) Destroy(_haloMesh);
+            if (_gazeHaloMesh != null) Destroy(_gazeHaloMesh);
+            _pinchIcon?.Destroy();
         }
+
+        Mesh _gazeHaloMesh;
 
         float Scale => island != null ? island.transform.lossyScale.x : 1f;
 
@@ -187,10 +214,72 @@ namespace Diorama
             // ---- white hover ----
             bool hovering = _hoverFrame >= Time.frameCount - 1;
             Shader.SetGlobalVector(HoverId, hovering ? new Vector4(_hoverPoint.x, _hoverPoint.y, _hoverPoint.z, _hoverRadius) : Vector4.zero);
-            Shader.SetGlobalColor(HoverColorId, new Color(hoverColor.r, hoverColor.g, hoverColor.b, hovering ? 1f : 0f));
+            Shader.SetGlobalColor(HoverColorId, new Color(gazeColor.r, gazeColor.g, gazeColor.b, hovering ? 1f : 0f));
+            GazeExtras(hovering);
 
             UpdateBeam(beam || Time.time - _lastEnded < beamLinger && !_cleared && _last != null);
             BeamSound();
+        }
+
+        /// <summary>Step 27: the glow, the pinch icon and the tick for what the gaze is on.</summary>
+        void GazeExtras(bool hovering)
+        {
+            var cam = Camera.main;
+            bool on = hovering && cam != null;
+            bool handNear = on && HandNear(_hoverPoint);
+            _iconAlpha = Mathf.MoveTowards(_iconAlpha, on && !handNear ? 1f : 0f, Time.deltaTime * 6f);
+            if (on)
+            {
+                _lastGazeAt = Time.time;
+                if (!handNear && (_hoverPoint - _tickedAt).magnitude > Mathf.Max(_tickedRadius, _hoverRadius) && Time.time - _tickTime >= tickGap)
+                {
+                    GameAudio.At(Diorama.Audio.AudioIds.RuneHover, _hoverPoint).SetVolume(tickVolume);
+                    _tickTime = Time.time;
+                    _tickedAt = _hoverPoint;
+                    _tickedRadius = _hoverRadius;
+                }
+            }
+            else if (Time.time - _lastGazeAt > 1f) _tickedAt = Vector3.positiveInfinity; // looked away a while: the same target ticks again
+            if (_gazeHalo != null)
+            {
+                _gazeHalo.gameObject.SetActive(on);
+                if (on)
+                {
+                    var t = _gazeHalo.transform;
+                    t.SetPositionAndRotation(_hoverPoint, Quaternion.LookRotation(_hoverPoint - cam.transform.position, Vector3.up));
+                    float parent = t.parent != null ? t.parent.lossyScale.x : 1f;
+                    t.localScale = Vector3.one * (_hoverRadius * 1.5f / Mathf.Max(1e-5f, parent));
+                    _block.Clear();
+                    _block.SetFloat(IntensityId, gazeGlow);
+                    _block.SetFloat(RadialId, 1f);
+                    _block.SetColor(ColorId, gazeColor);
+                    _block.SetColor(CoreId, gazeColor);
+                    _gazeHalo.SetPropertyBlock(_block);
+                }
+            }
+            if (_pinchIcon == null) return;
+            if (!on)
+            {
+                _pinchIcon.Draw(_iconAt, pinchIconSize * Scale, _iconAlpha, cam != null ? cam.transform.position : _iconAt);
+                return;
+            }
+            Vector3? explorer = _explorer != null ? _explorer.transform.position : (Vector3?)null;
+            _iconAt = _pinchIcon.Place(_hoverPoint, _hoverRadius, pinchIconGap * Scale, pinchIconSize * Scale * 0.5f, cam.transform.position, explorer, 0.03f * Scale);
+            _pinchIcon.Draw(_iconAt, pinchIconSize * Scale, _iconAlpha, cam.transform.position);
+        }
+
+        Vector3 _iconAt;
+
+        /// <summary>Step 27: a fingertip is already at the target (the icon has nothing to add).</summary>
+        bool HandNear(Vector3 point)
+        {
+            for (int h = 0; h < 2; h++)
+            {
+                var hand = HandRegistry.Get(h == 0 ? Oculus.Interaction.Input.Handedness.Left : Oculus.Interaction.Input.Handedness.Right);
+                if (hand != null && hand.IsTrackedDataValid && HandLookup.TryGetJoint(hand, Oculus.Interaction.Input.HandJointId.HandIndexTip, out var tip) &&
+                    (tip - point).magnitude < pinchIconHandNear * Mathf.Max(0.5f, Scale)) return true;
+            }
+            return false;
         }
 
         LoopAnchor _beamSound;

@@ -371,7 +371,7 @@ Shader "Diorama/Prop"
                 float3 p = PropMotion(v.positionOS.xyz, nOS, v.uv0, v.uv1, PropHash(), flicker, size);
                 float2 focus = DioramaFocusAmounts(TransformObjectToWorld(float3(0.0, 0.0, 0.0)));
                 o.focus = float3(focus, 0.0);
-                p += nOS * _OutlineWidth * size * (1.0 + 1.3 * focus.x + 0.45 * focus.y);
+                p += nOS * _OutlineWidth * size * (1.0 + 1.3 * focus.x + 1.0 * focus.y); // step 27: hover 0.45 -> 1.0
                 o.positionWS = PropWindowVertex(p, o.islandPos);
                 o.positionCS = TransformWorldToHClip(o.positionWS);
                 o.slot = v.uv0.x;

@@ -61,7 +61,7 @@ float3 DioramaOutlineFocus(float3 col, float3 originWS, out float widthScale)
 {
     float2 k = DioramaFocusAmounts(originWS);
     float seen = DioramaInSphere(_DioramaSeen, originWS) * _DioramaSeenColor.a * (1.0 - k.x);
-    widthScale = 1.0 + 1.3 * k.x + 0.45 * k.y + 0.25 * seen;
+    widthScale = 1.0 + 1.3 * k.x + 1.0 * k.y + 0.25 * seen; // step 27: hover 0.45 -> 1.0 (a thin outline was missed)
     col = lerp(col, _DioramaHoverColor.rgb, k.y);
     col = lerp(col, _DioramaSeenColor.rgb, seen);
     return lerp(col, _DioramaHighlightColor.rgb, k.x);
