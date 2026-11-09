@@ -383,9 +383,10 @@ namespace Diorama.Audio
             bool _stopping;
             AudioLowPassFilter _lowPass;
 
-            /// <summary>Step 23: the voice's low-pass in Hz; 0 turns it off.</summary>
+            /// <summary>Step 23: the voice's low-pass in Hz; 0 turns it off. Step 25: a cue's own low-pass is a ceiling (the Still Isle bed never opens past its 1.2 kHz).</summary>
             public void SetLowPass(float hz)
             {
+                if (cue != null && cue.lowPassHz > 0f && (hz <= 0f || hz > cue.lowPassHz)) hz = cue.lowPassHz;
                 if (hz <= 0f)
                 {
                     if (_lowPass != null) _lowPass.enabled = false;
@@ -489,8 +490,8 @@ namespace Diorama.Audio
             {
                 src.Stop();
                 src.clip = null;
-                SetLowPass(0f);
                 cue = null;
+                SetLowPass(0f);
                 follow = null;
                 following = false;
                 looping = false;
