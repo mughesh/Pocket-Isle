@@ -64,7 +64,7 @@ MonoBehaviour:
   - species: {fileID: 11400000, guid: 4e0827bf455d6eb4c853967a75296d1d, type: 2}
     from: {fileID: 0}
     cell: 12
-    hint: 
+    hint: Cinderwood, the forest
   - species: {fileID: 11400000, guid: dee1246386885fe4692153f955a5bf48, type: 2}
     from: {fileID: 11400000, guid: 4e0827bf455d6eb4c853967a75296d1d, type: 2}
     cell: 13

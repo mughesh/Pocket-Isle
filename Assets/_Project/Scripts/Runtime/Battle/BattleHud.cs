@@ -276,9 +276,14 @@ namespace Diorama
         void LateUpdate()
         {
             var cam = Camera.main;
+            // Nov 10 (playtest): these draw over everything (step 14j), so they showed through the menu, Settings and the
+            // Journal laid over the island. The battle is paused behind those boards: nothing here needs reading.
+            bool behindBoard = Dialogue.Held;
             foreach (var b in _bars)
             {
-                if (b.root == null || b.actor == null) continue;
+                if (b.root == null) continue;
+                if (b.root.gameObject.activeSelf == behindBoard) b.root.gameObject.SetActive(!behindBoard);
+                if (b.actor == null) continue;
                 Place(b, cam);
                 Face(b.root, cam);
                 bool paint = false;
@@ -307,6 +312,7 @@ namespace Diorama
                     _pops.RemoveAt(i);
                     continue;
                 }
+                if (p.text.gameObject.activeSelf == behindBoard) p.text.gameObject.SetActive(!behindBoard);
                 p.text.transform.localPosition = p.from + Vector3.up * (p.rise * Mathf.Sin(u * Mathf.PI * 0.5f));
                 var c = p.color;
                 c.a = 1f - u * u;

@@ -57,6 +57,26 @@ namespace Diorama.Tests
             }
         }
 
+        /// <summary>Nov 10: every starter also lives in the wild, in its own element's realm, and the Journal says where.</summary>
+        [Test]
+        public void Starters_AlsoLiveInTheWild()
+        {
+            foreach (var (species, table) in new[]
+                     {
+                         ("Kilnpot", "Battle/Cinderwood/Encounters_Forest"), ("Kilnpot", "Battle/Cinderwood/Encounters_Field"),
+                         ("Kilnpot", "Battle/Cinderwood/Encounters_Cinderwood"), ("Pufflet", "Battle/Galewick/Encounters_GwArrival"),
+                         ("Pebbloop", "Battle/Lilymere/Encounters_LmArrival"),
+                     })
+            {
+                var t = AssetDatabase.LoadAssetAtPath<EncounterTable>($"Assets/_Project/Data/{table}.asset");
+                Assert.IsNotNull(t, table);
+                bool found = false;
+                foreach (var e in t.entries)
+                    found |= e.species != null && e.species.name == species && e.weight > 0f && !e.rare;
+                Assert.IsTrue(found, $"{species} in {table}");
+            }
+        }
+
         [Test]
         public void BaseForms_LiveInCinderwoodTables()
         {

@@ -30,6 +30,8 @@ catches a break: a test, a smoke-run rule (`Note "rule"` in the smoke report, wa
 | R23 | Filler and idle hints: none in lessons, hand moments, battles or the first 3 minutes. | Nov 9 playtest | `Step27Tests` (ChatterQuiet) |
 | R24 | No tall grass within 1.5 tiles of any door, or 2 rows toward the seat. | Nov 9 playtest | `Step27Tests` on the real maps |
 | R25 | Don't import `Script_v1.md` over the dialogue asset: the asset has lines the file lacks. | Nov 9, step 27 | by hand |
+| R26 | Anything drawn with no depth test (battle labels, pops) hides while the menu, Settings or the Journal is over the island. | Nov 10 playtest | SmokeRun `MenuOverBattle` |
+| R27 | Every starter also lives in the wild, in its own element's realm. | Nov 10 playtest | `FireRosterTests.Starters_AlsoLiveInTheWild` |
 
 ## How to use
 - A new note that repeats one of these: say which rule broke and why the check missed it, then fix the check too.

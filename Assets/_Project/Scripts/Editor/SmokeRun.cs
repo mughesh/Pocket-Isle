@@ -501,6 +501,36 @@ namespace Diorama.EditorTools
                 BuildLilymere();
                 BuildQuick();
                 if (_only != null && _only.Any(o => o.StartsWith("Step27", StringComparison.OrdinalIgnoreCase))) Step27Shots();
+                if (_only != null && _only.Any(o => o.StartsWith("MenuOverBattle", StringComparison.OrdinalIgnoreCase))) MenuOverBattle();
+            }
+
+            // ---- Nov 10: the battle's on-top labels hide behind the menu (bridge: RunOnly with arg "MenuOverBattle") ----
+
+            void MenuOverBattle()
+            {
+                const string P = "MenuOverBattle";
+                static bool Labels(bool shown)
+                {
+                    var hud = UnityEngine.Object.FindFirstObjectByType<BattleHud>();
+                    if (hud == null) return false;
+                    var bars = hud.transform.Cast<Transform>().Where(t => t.name.StartsWith("HP ")).ToList();
+                    return bars.Count > 0 && bars.All(t => t.gameObject.activeSelf == shown);
+                }
+                Add(P, "preset (reload, Continue)", () => GameState.Instance.QuickPreset(GameState.QuickStage.Gift),
+                    () => QuickJourney.Active && !TitleScreen.Showing && Elapsed > 6, 60f, () => { if (TitleScreen.Showing) RuneBoard.DebugPress("Continue"); }, 2f, true);
+                Add(P, "a battle, its labels up", () =>
+                {
+                    BattleDebug.SeatCamera();
+                    DevCheats.Invincible = true;
+                    BattleDebug.Grass();
+                }, () => InBattle && Elapsed > 6 && Labels(true), 40f, null, 0.8f, true);
+                Add(P, "the menu hides them", () => Menu?.TryOpen(), () =>
+                {
+                    if (!GameMenu.IsOpen || Elapsed < 1.5 || !Labels(false)) return false;
+                    Step27Debug.Shot("menu_over_battle");
+                    return true;
+                }, 12f, null, 0.8f, true);
+                Add(P, "closing brings them back", () => Menu?.Close("smoke"), () => !GameMenu.IsOpen && Elapsed > 1 && Labels(true), 12f, null, 0.8f, true);
             }
 
             // ---- step 27: seat shots of every door (bridge: RunOnly with arg "Step27 shots,<tag>") ----
