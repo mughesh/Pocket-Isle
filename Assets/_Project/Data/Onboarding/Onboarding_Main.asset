@@ -202,6 +202,33 @@ MonoBehaviour:
     goldTileSteps: 0
     goldTileRule: ahead
     tutorialGrass: 0
+  - id: practice
+    line: lesson.practice
+    again:
+    chip: "Swipe to walk \xB7 Tap to stop"
+    help:
+    helpAfter: 30
+    startWhen: canWalk
+    delay: 0.8
+    doneWhen: practiceDone
+    validWhile:
+    skipAfter: 0
+    failWhen:
+    rewindTo:
+    praise: 0
+    ghost: thumb_tap
+    place: 2
+    target: ghost
+    source:
+    targetLift: 0
+    ghostScale: 0.6
+    ghostTurn: {x: 0, y: 0}
+    bothHands: 0
+    ghostSpread: 0
+    goldPath:
+    goldTileSteps: 0
+    goldTileRule:
+    tutorialGrass: 0
   - id: look
     line: lesson.look
     again: lesson.look.again

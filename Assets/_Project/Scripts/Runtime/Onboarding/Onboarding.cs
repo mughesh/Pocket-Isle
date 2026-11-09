@@ -74,7 +74,19 @@ namespace Diorama
             "swipeWalks2",
             // Step 16: the two-hand lesson passes after twoHandsPassSeconds (one-handed players never get stuck).
             "twoHandsTimedOut",
+            // Step 27: the practice stops are done, or the time is up (never a wall).
+            "practiceDone",
         };
+
+        /// <summary>Step 27: the swipe-and-tap practice (three gold stops, two in the Quick Journey).</summary>
+        public const string PracticeLesson = "practice";
+        [Tooltip("Step 27: the practice passes after this long (s), however many stops were made.")]
+        public float practicePassSeconds = 60f;
+        [Tooltip("Step 27: a good stop's short line, and the practice's last line.")]
+        public string practiceNiceLine = "lesson.practice.nice", practiceDoneLine = "lesson.practice.done";
+        float _practiceFor;
+        int _practiced, _practiceBest;
+        bool Practising => CurrentId == PracticeLesson && Current != null;
 
         [Tooltip("Step 16: the two-hand (turn, resize) lesson passes after this long without a two-hand grab (s).")]
         public float twoHandsPassSeconds = 8f;
@@ -271,6 +283,7 @@ namespace Diorama
         {
             if (_runner == null || !_runner.IsRunning) return;
             if (++_steps >= walkSteps) _runner.Mark("walked3");
+            if (Practising) PracticeStep(tile);
             // A tile walked by a swipe (a smart step or a walk-on), not by look + pinch (that walks to a destination).
             if (_runner.Current != null && _runner.Current.id == WalkLesson && !explorer.Destination.HasValue)
             {
@@ -291,6 +304,7 @@ namespace Diorama
             _runner.Mark("stopped");
             // Step 14f: any tap that stops a walk (it waited for a walk-on, and players couldn't tell one from a step).
             if (_runner.Current != null && _runner.Current.id == FarLesson) _runner.Mark("tapStopped");
+            if (Practising) PracticeStop();
         }
 
         void OnSwiped(bool walkOn)
@@ -302,7 +316,7 @@ namespace Diorama
 
         /// <summary>Step 12a: a smart step stops on the lesson's gold tile.</summary>
         WalkStop GoldStop(Vector2Int from, Vector2Int next) =>
-            Running && _goldTile.HasValue && next == _goldTile.Value ? WalkStop.On : WalkStop.None;
+            Running && _goldTile.HasValue && next == _goldTile.Value && CurrentId != PracticeLesson ? WalkStop.On : WalkStop.None;
 
         void OnBattleEnded(BattleResult result)
         {
@@ -339,6 +353,16 @@ namespace Diorama
                 }
             }
             else _twoHandsFor = 0f;
+            if (Practising)
+            {
+                _practiceFor += Time.deltaTime;
+                if (_practiceFor >= practicePassSeconds && _practiceFor - Time.deltaTime < practicePassSeconds)
+                {
+                    Debug.Log($"[Onboarding] practice: {_practiced} stop(s) in {practicePassSeconds:0} s: it passes.");
+                    _runner.Mark("practiceDone");
+                }
+            }
+            else _practiceFor = 0f;
             var outcome = _runner.Tick(Time.deltaTime);
             switch (outcome)
             {
@@ -422,17 +446,20 @@ namespace Diorama
             _lineAway = 0f;
             _smartAtShow = explorer != null ? explorer.SmartStepsTaken : 0;
             _swipeTiles = _walkOns = _swipeWalks = 0;
-            if (!string.IsNullOrEmpty(l.goldTileRule)) PickSmartGoldTile(l.goldTileRule);
+            if (l.id == PracticeLesson) StartPractice();
+            else if (!string.IsNullOrEmpty(l.goldTileRule)) PickSmartGoldTile(l.goldTileRule);
             else if (l.goldTileSteps > 0) PickGoldTile(l.goldTileSteps);
             if (!string.IsNullOrEmpty(l.goldPath) && _goldPath == null) _goldPath = StartCoroutine(GoldPath(l));
             // Step 9h: one instruction at a time, and it stays until the lesson is done.
             if (!string.IsNullOrEmpty(l.line))
             {
                 bool pinch = l.id == pinchLesson;
-                Dialogue.Pin(new[] { l.line, l.again, l.help, script.handsLine, pinch ? pinchOnceLine : null }, l.chip);
+                bool practice = l.id == PracticeLesson;
+                Dialogue.Pin(new[] { l.line, l.again, l.help, script.handsLine, pinch ? pinchOnceLine : null }, l.chip, practice ? new[] { practiceNiceLine } : null);
                 // Step 14a: a counted lesson shows its progress dots (two pinches).
                 if (pinch) Dialogue.SetProgress(0, pinchCount);
                 else if (l.id == WalkLesson) Dialogue.SetProgress(0, swipeTiles);
+                else if (practice) Dialogue.SetProgress(0, StopPractice.Goal(QuickJourney.Active));
                 Dialogue.Repeat(l.line);
             }
             LessonShown?.Invoke(l);
@@ -467,6 +494,7 @@ namespace Diorama
             // The lesson's line and chip close; the praise comes first, then the lines that waited for the lesson.
             // Step 14a: the pinch lesson ends on its own "Perfect!".
             Dialogue.Unpin(done && l.id == pinchLesson && !string.IsNullOrEmpty(pinchDoneLine) ? pinchDoneLine
+                : done && l.id == PracticeLesson && _practiced >= StopPractice.Goal(QuickJourney.Active) ? practiceDoneLine
                 : praise ? script.praise[_praiseIndex++ % script.praise.Count] : null);
             foreach (var id in new[] { l.line, l.again, l.help })
                 if (!string.IsNullOrEmpty(id)) Dialogue.Cancel(id);
@@ -475,7 +503,7 @@ namespace Diorama
                 StopCoroutine(_goldPath);
                 _goldPath = null;
             }
-            if (l.goldTileSteps > 0 || !string.IsNullOrEmpty(l.goldTileRule)) _goldTile = null;
+            if (l.goldTileSteps > 0 || !string.IsNullOrEmpty(l.goldTileRule) || l.id == PracticeLesson) _goldTile = null;
             if (done && l.praise) GameAudio.Ui(Diorama.Audio.AudioIds.UiLesson);
             if (HandsMissing) SetHandsMissing(false);
             if (_shown) LessonEnded?.Invoke(l, done);
@@ -632,6 +660,84 @@ namespace Diorama
             Debug.Log(_goldTile.HasValue
                 ? $"[Onboarding] Gold tile ({rule}) c{_goldTile.Value.x} r{_goldTile.Value.y} from c{explorer.Tile.x} r{explorer.Tile.y}."
                 : $"[Onboarding] No {rule} gold tile in view: the lesson finishes after a few smart steps.");
+        }
+
+        // ---- step 27: swipe to walk, tap to stop, on the gold ----
+
+        void StartPractice()
+        {
+            _practiced = 0;
+            _practiceFor = 0f;
+            PickPracticeTile();
+        }
+
+        /// <summary>The next gold tile, along the path ahead (where the explorer faces first), in view, never tall grass.</summary>
+        void PickPracticeTile()
+        {
+            _goldTile = null;
+            var world = island.world;
+            if (world == null || explorer == null) return;
+            int want = StopPractice.Distance(_practiced);
+            var plan = new List<Vector2Int>();
+            var ways = new[] { explorer.Facing, new Vector2Int(0, -1), new Vector2Int(-1, 0), new Vector2Int(1, 0), new Vector2Int(0, 1) };
+            float best = float.MinValue;
+            for (int w = 0; w < ways.Length; w++)
+            {
+                SmartStep.Plan(world, explorer.Tile, ways[w], true, 12, null, plan);
+                int n = 0;
+                while (n < plan.Count && island.FootprintContains(island.TileToLocal(plan[n], island.Content.capHeight))) n++;
+                if (n < StopPractice.Nearest) continue;
+                var pick = plan[Mathf.Min(want, n) - 1];
+                if (world.At(pick) == IslandMap.TallGrass) continue;
+                float score = Mathf.Min(want, n) + (world.At(pick) == IslandMap.Path ? 1f : 0f) + (w == 0 ? 3f : 0f) - (ways[w] == -explorer.Facing ? 6f : 0f);
+                if (score <= best) continue;
+                best = score;
+                _goldTile = pick;
+            }
+            _practiceBest = _goldTile.HasValue ? StopPractice.Distance(explorer.Tile, _goldTile.Value) : 0;
+            Debug.Log(_goldTile.HasValue
+                ? $"[Onboarding] Practice: gold tile c{_goldTile.Value.x} r{_goldTile.Value.y}, {want} along from c{explorer.Tile.x} r{explorer.Tile.y}."
+                : "[Onboarding] Practice: no gold tile in view: the time limit passes the lesson.");
+        }
+
+        /// <summary>Walked past the gold tile: a new one ahead, no fail state.</summary>
+        void PracticeStep(Vector2Int tile)
+        {
+            if (!_goldTile.HasValue) return;
+            int d = StopPractice.Distance(tile, _goldTile.Value);
+            _practiceBest = Mathf.Min(_practiceBest, d);
+            if (!StopPractice.WalkedPast(d, _practiceBest)) return;
+            Debug.Log("[Onboarding] Practice: walked past the gold tile: a new one ahead.");
+            PickPracticeTile();
+        }
+
+        /// <summary>A thumb tap stopped the walk: on or next to the gold tile counts.</summary>
+        void PracticeStop()
+        {
+            if (!_goldTile.HasValue || !StopPractice.Landed(explorer.Tile, _goldTile.Value)) return;
+            _practiced++;
+            int goal = StopPractice.Goal(QuickJourney.Active);
+            Debug.Log($"[Onboarding] Practice: stop {_practiced}/{goal} on c{explorer.Tile.x} r{explorer.Tile.y}.");
+            if (fx != null)
+                fx.Burst(island.transform.TransformPoint(island.TileToLocal(_goldTile.Value, island.Content.capHeight)), 18, sparkleColor, 0.06f, 0.5f, 0.004f, Vector3.up * 0.03f);
+            GameAudio.Ui(Diorama.Audio.AudioIds.UiLesson);
+            Dialogue.SetProgress(_practiced, goal);
+            if (_practiced >= goal)
+            {
+                _goldTile = null;
+                _runner.Mark("practiceDone");
+                return;
+            }
+            Dialogue.Repeat(practiceNiceLine);
+            PickPracticeTile();
+        }
+
+        /// <summary>Debug (bridge): a good stop.</summary>
+        public void DebugPracticeStop()
+        {
+            if (!Practising || !_goldTile.HasValue) return;
+            explorer.Teleport(_goldTile.Value, explorer.Facing);
+            PracticeStop();
         }
 
         // ---- the gold tile's look (step 12a) ----
