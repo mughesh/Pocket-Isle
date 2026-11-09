@@ -4,6 +4,7 @@
     "references": [
         "Diorama.Runtime",
         "Diorama.Audio",
+        "Diorama.Audio.Editor",
         "Diorama.Editor",
         "Oculus.Interaction",
         "UnityEngine.TestRunner",

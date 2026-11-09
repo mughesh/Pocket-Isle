@@ -43,19 +43,21 @@ namespace Diorama.Audio.EditorTools
         }
 
         /// <summary>
-        /// Release check: fails while any cue plays a free-plan ElevenLabs clip (no commercial licence), listing them; also
+        /// Release check: fails while any cue plays a free-plan ElevenLabs clip (no commercial licence) or a free file sits outside the archive, listing them; also
         /// runs the cue validation. Logs/AudioLab/release.txt. Returns true when it passes.
         /// </summary>
         [MenuItem("Tools/Pocket Isle/Audio/Release Check", priority = 94)]
         public static bool ReleaseCheck()
         {
             var free = GenImporter.FreeClipsInCues();
+            var stray = Step25Audio.StrayFreeFiles(); // step 25: a free file outside the archive fails too, cue or no cue
             var table = AudioCueTools.BuildTable();
             var validation = AudioCueTools.Validate(table);
             var sb = new StringBuilder();
-            bool pass = free.Count == 0;
-            sb.AppendLine(pass ? "PASS release check" : $"FAIL release check: {free.Count} free-plan clips in cues (no commercial licence). Regenerate on a paid plan or remove them:");
+            bool pass = free.Count == 0 && stray.Count == 0;
+            sb.AppendLine(pass ? "PASS release check" : $"FAIL release check: {free.Count} free-plan clips in cues, {stray.Count} free-plan files outside _free_archive (no commercial licence). Regenerate on a paid plan or remove them:");
             foreach (var f in free) sb.AppendLine("  " + f);
+            foreach (var f in stray) sb.AppendLine("  outside the archive: " + f);
             sb.AppendLine(validation);
             Directory.CreateDirectory(Path.GetDirectoryName(ReportPath));
             File.WriteAllText("Logs/AudioLab/release.txt", sb.ToString());
