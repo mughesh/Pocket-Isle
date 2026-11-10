@@ -346,7 +346,7 @@ MonoBehaviour:
   viewZoom: 1
   theme: {fileID: 11400000, guid: 00eb863b1cab9d949bbc2afcd309ad65, type: 2}
   grassTable: {fileID: 11400000, guid: b05def27f8e958143a5d2f774c2cea3d, type: 2}
-  waterTable: {fileID: 0}
+  waterTable: {fileID: 11400000, guid: ed6aa36b63a833e4698ffb9b5da5958a, type: 2}
   zones: '............................................................
 
     ........ttttttttttttttttttttttt.............................
@@ -550,5 +550,13 @@ MonoBehaviour:
     radius: 0
   - name: healBloom
     tile: {x: 18, y: 11}
+    line: 
+    radius: 0
+  - name: fishSpot1
+    tile: {x: 36, y: 30}
+    line: 
+    radius: 0
+  - name: fishSpot2
+    tile: {x: 25, y: 33}
     line: 
     radius: 0

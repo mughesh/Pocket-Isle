@@ -144,7 +144,7 @@ namespace Diorama.EditorTools
             {
                 new LessonData
                 {
-                    id = "shard", line = "intro.shard", chip = "Touch it", startWhen = "opening.shard", delay = 1.5f, validWhile = "opening.shard",
+                    id = "shard", line = "intro.shard", chip = "Poke the shard", startWhen = "opening.shard", delay = 1.5f, validWhile = "opening.shard",
                     doneWhen = "shardTouched", ghost = "poke", place = GhostPlace.AtTarget, target = "shardFront", ghostTurn = new Vector2(15f, 35f),
                 },
                 new LessonData
@@ -167,12 +167,12 @@ namespace Diorama.EditorTools
                 {
                     // Step 9h: right after moving the island (was after the first battle): both hands pinch the near corners
                     // and pull apart (the move recording, the left hand mirrored).
-                    id = "twoHands", line = "lesson.twoHands", chip = "Two hands", startWhen = "opening.twoHands", validWhile = "opening.twoHands",
+                    id = "twoHands", line = "lesson.twoHands", chip = "Grab with two hands", startWhen = "opening.twoHands", validWhile = "opening.twoHands",
                     delay = 0.5f, doneWhen = "twoHandGrab", skipAfter = 45f, ghost = "grab_rim_slide", place = GhostPlace.RimCorners, bothHands = true,
                 },
                 new LessonData
                 {
-                    id = "starter", line = "intro.starter", chip = "Look + pinch", again = "lesson.starter.again", startWhen = "opening.starters",
+                    id = "starter", line = "intro.starter", chip = "Look at it, then pinch", again = "lesson.starter.again", startWhen = "opening.starters",
                     // Step 9h: "Look at one and pinch, or grab it." follows the short line and stays.
                     help = "lesson.starter.again", helpAfter = 3.5f,
                     // Step 9h: grabs the looked-at pod (else the next one each loop) and sets it on the rim socket.
@@ -184,7 +184,7 @@ namespace Diorama.EditorTools
                 // tiles (dots count them), then walk on and tap to stop (the tap was never taught). The turn lesson went.
                 new LessonData
                 {
-                    id = Onboarding.WalkLesson, line = "lesson.walk", chip = "Swipe", again = "lesson.walk.again", help = "lesson.walk.help", helpAfter = 30f,
+                    id = Onboarding.WalkLesson, line = "lesson.walk", chip = "Swipe to walk", again = "lesson.walk.again", help = "lesson.walk.help", helpAfter = 30f,
                     startWhen = "canWalk", delay = 1.5f, doneWhen = "swipeWalked",
                     ghost = "thumb_swipe_forward", place = GhostPlace.AboveIsland, target = "ghost", ghostScale = 0.6f,
                 },
@@ -199,18 +199,18 @@ namespace Diorama.EditorTools
                 },
                 new LessonData
                 {
-                    id = "look", line = "lesson.look", chip = "Look + pinch", again = "lesson.look.again", startWhen = "canWalk", delay = 0.8f,
+                    id = "look", line = "lesson.look", chip = "Look at it, then pinch", again = "lesson.look.again", startWhen = "canWalk", delay = 0.8f,
                     doneWhen = "atGoldTile | gazeWalk", goldTileSteps = 3,
                     ghost = "pinch", place = GhostPlace.AboveTarget, target = "goldTile", ghostScale = 0.6f,
                 },
                 new LessonData
                 {
-                    id = "grass", line = "lesson.grass", chip = "Into the grass", again = "lesson.grass.again", startWhen = "canWalk", delay = 0.8f,
+                    id = "grass", line = "lesson.grass", chip = "Walk into the grass", again = "lesson.grass.again", startWhen = "canWalk", delay = 0.8f,
                     doneWhen = "grassBattle", praise = false, target = "landmark:firstGrass", goldPath = "firstGrass", tutorialGrass = true,
                 },
                 new LessonData
                 {
-                    id = "send", line = "pod.first", chip = "Toss the pod", again = "lesson.send.again", startWhen = "battle.send", validWhile = "battle.send",
+                    id = "send", line = "pod.first", chip = "Grab the pod, toss it", again = "lesson.send.again", startWhen = "battle.send", validWhile = "battle.send",
                     doneWhen = "sentOut", failWhen = battleFail, rewindTo = "grass",
                     // Step 9h: grabs the real lead pod and lets go over the near pad.
                     ghost = "grab_toss", place = GhostPlace.AtTarget, source = "leadPod", target = "nearPad", targetLift = 0.05f,
@@ -218,13 +218,13 @@ namespace Diorama.EditorTools
                 new LessonData
                 {
                     // Step 8c: poke is taught (look + pinch still works).
-                    id = "rune", line = "battle.first", chip = "Poke a rune", again = "lesson.rune.again", startWhen = "battle.out", validWhile = "battle",
+                    id = "rune", line = "battle.first", chip = "Choose your attack", again = "lesson.rune.again", startWhen = "battle.out", validWhile = "battle",
                     doneWhen = "moveUsed", failWhen = battleFail, rewindTo = "grass",
                     target = "nearestRune", // step 22: no ghost, it filled the view; the rune's own pulse shows it
                 },
                 new LessonData
                 {
-                    id = "catch", line = "capture.first", chip = "Flick the pod", again = "lesson.catch.again", startWhen = "wildRed", validWhile = "battle",
+                    id = "catch", line = "capture.first", chip = "Flick the pod at it", again = "lesson.catch.again", startWhen = "wildRed", validWhile = "battle",
                     doneWhen = "podThrown", failWhen = battleFail, rewindTo = "grass",
                     ghost = "grab_flick", place = GhostPlace.AtTarget, source = "cradle",
                 },

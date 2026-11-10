@@ -43,6 +43,7 @@ namespace Diorama
             _audio = gameObject.AddComponent<AudioSource>();
             _audio.playOnAwake = false;
             _audio.spatialBlend = 0f;
+            piece.autoDropOverIsland = true; // step 29: let go anywhere over the island = into its spot
             piece.Lifted += OnLifted;
             piece.Landed += OnLanded;
             PuzzleState.Restored += Apply;

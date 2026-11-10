@@ -25,7 +25,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Something's here. Touch it?
+      text: Something's here! Poke it.
       context: 
   - id: intro.arrive
     once: 1
@@ -54,7 +54,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Grab a corner, then move me wherever is comfy.
+      text: Grab a corner. Move the island somewhere comfy.
       context: 
   - id: intro.starter
     once: 1
@@ -68,7 +68,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Pick an Isling friend!
+      text: Pick a friend! Look at a pod and pinch.
       context: 
   - id: starter.kilnpot
     once: 0
@@ -142,7 +142,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Tap your thumb and finger together. Like this!
+      text: Pinch your thumb and finger. Like this!
       context: 
   - id: lesson.pinch.once
     once: 0
@@ -184,7 +184,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Grab a corner, then move it.
+      text: Grab a corner and move the island.
       context: 
   - id: lesson.starter.again
     once: 0
@@ -198,7 +198,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Look at one and pinch, or grab it.
+      text: Look at a pod and pinch. Or grab it.
       context: 
   - id: lesson.walk
     once: 0
@@ -269,7 +269,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Swipe to go. Tap your thumb to stop.
+      text: Swipe to walk. Tap your thumb to stop.
       context: 
   - id: lesson.walk.far.again
     once: 0
@@ -283,7 +283,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Your explorer walks until you tap your thumb.
+      text: Tap your thumb to stop walking.
       context: 
   - id: lesson.practice
     once: 0
@@ -395,7 +395,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: The glowing spot. Look, then pinch!
+      text: Look at the glowing spot, then pinch!
       context: 
   - id: lesson.grass
     once: 0
@@ -409,7 +409,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Islings hide in tall grass. Let's peek!
+      text: Islings hide in tall grass. Walk in!
       context: 
   - id: lesson.grass.again
     once: 0
@@ -423,7 +423,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Follow the gold tiles into the tall grass.
+      text: Follow the gold path into the tall grass.
       context: 
   - id: lesson.send.again
     once: 0
@@ -437,7 +437,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Toss your friend's pod onto the island!
+      text: Grab your friend's pod. Toss it onto the island!
       context: 
   - id: lesson.rune.again
     once: 0
@@ -451,7 +451,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Poke a rune!
+      text: Choose your attack! Poke one.
       context: 
   - id: lesson.catch.again
     once: 0
@@ -465,7 +465,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Grab the big pod and flick it!
+      text: Catch it! Flick the big pod at it.
       context: 
   - id: lesson.twoHands
     once: 0
@@ -637,7 +637,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Grab your friend's pod from the rim and toss it in!
+      text: Grab your friend's pod. Toss it onto the island!
       context: 
   - id: battle.first
     once: 1
@@ -651,7 +651,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Poke a rune to attack!
+      text: Choose your attack! Poke one.
       context: 
   - id: battle.types
     once: 1
@@ -721,7 +721,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: It's weak now. Grab the big pod and flick it!
+      text: It's weak now. Catch it! Flick the pod at it.
       context: 
   - id: capture.locked
     once: 1
@@ -807,7 +807,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: '{name} is glowing! Take its pod and hold it on your open palm.'
+      text: '{name} is glowing! Hold its pod on your open palm.'
       context: 
   - id: evolve.done
     once: 0
@@ -1108,7 +1108,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Thorns on the trail! Pick up that ember and drop it on them.
+      text: Thorns! Touch the ember, then poke the thorns.
       context: 
   - id: cw.vine.tip
     once: 0
@@ -1123,7 +1123,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Now drop it on the vine!
+      text: Now poke the thorns!
       context: 
   - id: cw.vine.done
     once: 1
@@ -1221,7 +1221,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Maybe your big hands could move it?
+      text: Grab the log and lift it away.
       context: 
   - id: cinder.log.done
     once: 1
@@ -1263,7 +1263,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Bellows! Poke them to send heat to the braziers.
+      text: Bellows! Poke them again and again.
       context: 
   - id: cinder.brazier.one
     once: 0
@@ -1463,7 +1463,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: The village flame is fading! Keep it warm with your hands.
+      text: The flame is fading! Hold your hands round it.
       context: 
   - id: cw.flame.cold
     once: 1
@@ -1506,7 +1506,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Smoke! Light the lanterns again.
+      text: Smoke! Poke the lanterns to light them.
       context: 
   - id: cw.lanterns.done
     once: 1
@@ -1534,7 +1534,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Another ember! Drop it in the forge's mouth.
+      text: Touch the ember, then poke the fire.
       context: 
   - id: cw.ember.tip
     once: 0
@@ -1549,7 +1549,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Now tip it into the forge's mouth!
+      text: Now poke the fire!
       context: 
   - id: cw.forge.cold
     once: 0
@@ -1638,7 +1638,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Clouds are stuck on the path. Sweep your hand to get the wind going!
+      text: Clouds on the path! Sweep them away with your hand.
       context: 
   - id: gw.arrive.done
     once: 1
@@ -1750,7 +1750,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: The mill is stuck. Give its sails a flick!
+      text: The mill is stuck! Flick its sails.
       context: 
   - id: gw.mill.done
     once: 1
@@ -1796,7 +1796,7 @@ MonoBehaviour:
       context: 
     - speaker: 0
       speakerName: Spirit
-      text: Pinch one and lift it up into the sky.
+      text: Pinch a kite and lift it up.
       context: 
   - id: gw.kites.one
     once: 0
@@ -1941,7 +1941,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: It's all tangled up! Pull the knots apart.
+      text: All tangled! Pinch a knot and pull.
       context: 
   - id: gw.keeper.meet
     once: 1
@@ -2126,8 +2126,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: The stream's run dry, and the lily pads are stuck in the mud! Hold your
-        hand over it like a little cloud.
+      text: The stream's dry! Hold your hand over it like a cloud.
       context: 
   - id: lm.arrive.stream.done
     once: 1
@@ -2253,7 +2252,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: The channel's too wide. Nudge the lily pads together!
+      text: Too wide! Poke the lily pads together.
       context: 
   - id: lm.pads.done
     once: 1
@@ -2381,7 +2380,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: '{keeper} is strong. Most guardians bring {n} friends.'
+      text: '{keeper} is strong. Bring at least {n} Islings.'
       context: 
   - id: lm.temple.shut
     once: 0
@@ -2587,7 +2586,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Put the shard in the statue. Something's calling it.
+      text: Grab the shard. Put it in the statue.
       context: 
   - id: hub.shard.placed
     once: 1
@@ -2812,7 +2811,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Lift me up to the gold crystal on its forehead.
+      text: Hold me up to the crystal on its forehead.
       context: 
   - id: spirit.finale.wait
     once: 0

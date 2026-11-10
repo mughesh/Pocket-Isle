@@ -109,8 +109,14 @@ namespace Diorama
             SetProgressQuiet(_strokes.Strokes / (float)_strokes.needed);
         }
 
+        bool _wasBlocked;
+
         protected override void Update()
         {
+            // Step 29 (playtest: no ghost at the bellows): pokes while the firebox was cold used the lesson up; when it
+            // wakes, the ghost and the chip show again until the first real pump.
+            if (_wasBlocked && !Blocked && !IsSolved) RearmLesson();
+            _wasBlocked = Blocked;
             ReadHands(_hands);
             bool usable = Usable && !IsSolved;
             float pressed = usable ? Press() : 0f;

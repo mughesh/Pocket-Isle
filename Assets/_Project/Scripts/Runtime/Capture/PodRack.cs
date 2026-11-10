@@ -190,6 +190,21 @@ namespace Diorama
         }
 
         /// <summary>Step 14h: the stats card for a creature at a moving point (the palm), for <paramref name="seconds"/>.</summary>
+        /// <summary>Step 29 E21: the starter pick's stat card over a floating pod.</summary>
+        public void ShowStarterCard(IslingInstance c, Func<Vector3?> where, float seconds)
+        {
+            if (_card == null || c == null || MenuUp) return;
+            _card.ShowStarter(c, where, seconds);
+            _cardIslandPos = island.transform.position;
+            _cardIslandRot = island.transform.rotation;
+        }
+
+        /// <summary>Step 29 E21: closes the card if it shows this Isling.</summary>
+        public void HideCardOf(IslingInstance c)
+        {
+            if (_card != null && _card.Visible && _card.Showing == c) _card.Hide();
+        }
+
         public void ShowCardFor(IslingInstance c, Func<Vector3?> where, float seconds)
         {
             if (_card == null || c == null || MenuUp) return;

@@ -14,13 +14,13 @@ Names are placeholders. The step 5c dialogue system loads this (convert to data 
 ## Opening (Still Isle)
 Step 9h: less text before the starter (one line each; the lesson lines stay up until the lesson is done).
 - `intro.shard` · in hub · objective · once · → shard (only if the shard isn't touched within 3 s)
-  - Spirit: Something's here. Touch it?
+  - Spirit: Something's here! Poke it.
 - `intro.arrive` · in hub · intro · once
   - Spirit: Hello, big one! I'm a Lantern Spirit.
 - `lesson.move` · in outside · objective · once · → rim (step 14i: the move lesson's line, was `intro.world`; chip "Grab a corner" in 14j; the ghost pinches a corner and moves it)
-  - Spirit: Grab a corner, then move me wherever is comfy.
+  - Spirit: Grab a corner. Move the island somewhere comfy.
 - `intro.starter` · in hub · objective · once · → starterPods
-  - Spirit: Pick an Isling friend!
+  - Spirit: Pick a friend! Look at a pod and pinch.
 - `starter.kilnpot` · in hub · story · Spirit: Kilnpot! Warm as a fresh-baked pot.
 - `starter.pebbloop` · in hub · story · Spirit: Pebbloop! Bubbly, and very round.
 - `starter.pufflet` · in hub · story · Spirit: Pufflet! Light as a cloud, twice as fluffy.
@@ -34,15 +34,15 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
 `.again` line only comes if the line was closed (its condition paused it). Shard, move and starter use the Opening lines above; send out, pick a move and catch use
 `pod.first`, `battle.first` and `capture.first` below.
 - `lesson.pinch` · in outside · objective · while tutorial · → ghost (step 9h, after `intro.arrive`: the ghost pinches beside your own hand)
-  - Spirit: Tap your thumb and finger together. Like this!
+  - Spirit: Pinch your thumb and finger. Like this!
 - `lesson.pinch.once` · in outside · objective · while tutorial · → ghost (step 14a: after the first of the two pinches; chip "Pinch again")
   - Spirit: Nice! Once more.
 - `lesson.pinch.done` · in outside · story (step 14a: the pinch lesson's praise)
   - Spirit: Perfect!
 - `lesson.move.again` · in outside · objective · → rim
-  - Spirit: Grab a corner, then move it.
+  - Spirit: Grab a corner and move the island.
 - `lesson.starter.again` · in hub · objective · → starterPods
-  - Spirit: Look at one and pinch, or grab it.
+  - Spirit: Look at a pod and pinch. Or grab it.
 - `lesson.walk` · in outside & !battle · objective · while canWalk · → ghost (Nov 3: any direction, dots count 4 tiles walked)
   - Spirit: Swipe your thumb along your finger to walk.
 - `lesson.walk.again` · in outside & !battle · objective · while canWalk · → ghost
@@ -52,9 +52,9 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
 - `lesson.walk.turn.again` · in outside & !battle · objective · while canWalk · → ghost
   - Spirit: Swipe, and I'll follow the path.
 - `lesson.walk.far` · in outside & !battle · objective · while canWalk · → ghost (step 14f: done on a tap stop, the gold tile or two swipe walks; Nov 6: a swipe walks until a tap)
-  - Spirit: Swipe to go. Tap your thumb to stop.
+  - Spirit: Swipe to walk. Tap your thumb to stop.
 - `lesson.walk.far.again` · in outside & !battle · objective · while canWalk · → ghost
-  - Spirit: Your explorer walks until you tap your thumb.
+  - Spirit: Tap your thumb to stop walking.
 - `lesson.practice` · in outside & !battle · objective · while canWalk · → ghost (step 27: three gold stops, tap to stop on or next to the gold tile)
   - Spirit: Swipe to walk. Tap your thumb to stop on the gold!
 - `lesson.practice.nice` · in outside & !battle · objective · while canWalk (step 27: a good stop)
@@ -70,17 +70,17 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
 - `lesson.look` · in outside & !battle · objective · while canWalk · → goldTile
   - Spirit: Look at the glowing spot and pinch.
 - `lesson.look.again` · in outside & !battle · objective · while canWalk · → goldTile
-  - Spirit: The glowing spot. Look, then pinch!
+  - Spirit: Look at the glowing spot, then pinch!
 - `lesson.grass` · in outside & !battle · objective · while canWalk · → landmark:firstGrass
-  - Spirit: Islings hide in tall grass. Let's peek!
+  - Spirit: Islings hide in tall grass. Walk in!
 - `lesson.grass.again` · in outside & !battle · objective · while canWalk · → landmark:firstGrass
-  - Spirit: Follow the gold tiles into the tall grass.
+  - Spirit: Follow the gold path into the tall grass.
 - `lesson.send.again` · in battle · objective · while battle · → leadPod
-  - Spirit: Toss your friend's pod onto the island!
+  - Spirit: Grab your friend's pod. Toss it onto the island!
 - `lesson.rune.again` · in battle · objective · while battle · → nearestRune
-  - Spirit: Poke a rune!
+  - Spirit: Choose your attack! Poke one.
 - `lesson.catch.again` · in battle · objective · while battle · → cradle
-  - Spirit: Grab the big pod and flick it!
+  - Spirit: Catch it! Flick the big pod at it.
 - `lesson.twoHands` · in outside · objective · while !battle · → islandRim (step 14i: right after the move lesson, both slots; chip "Two hands")
   - Spirit: Grab two corners and pull apart to make it bigger.
 - `lesson.hands` · in any · story · while tutorial
@@ -104,15 +104,15 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
 - `tut.grass` · in outside · story · once · while encounters: Spirit: Tall grass rustles when an Isling is hiding in it.
 - `tut.pond` · in outside · story · once · while encounters & !battle (first time next to water): Spirit: Face the water and tap. Something might bite!
 - `pod.first` · in battle · objective · once · → leadPod (encounter start)
-  - Spirit: Grab your friend's pod from the rim and toss it in!
+  - Spirit: Grab your friend's pod. Toss it onto the island!
 - `battle.first` · in battle · objective · once · → nearestRune
-  - Spirit: Poke a rune to attack!
+  - Spirit: Choose your attack! Poke one.
 - `battle.types` · in battle · story · once (first super or not-very effective hit)
   - Spirit: Water beats Fire. Fire beats Wind. Wind beats Water.
 - `battle.win.first` · in any · story · once: Spirit: You did it! Your friend is getting stronger.
 - `battle.lose.first` · in any · story · once: Spirit: Everyone's tired. Let's rest at the shrine.
 - `capture.first` · in battle · objective · once · → cradle (first time the wild HP bar is red)
-  - Spirit: It's weak now. Grab the big pod and flick it!
+  - Spirit: It's weak now. Catch it! Flick the pod at it.
 - `capture.locked` · in battle · story · once · → cradle (a pod thrown above red shatters)
   - Spirit: Weaken it first!
 - `capture.dazed.first` · in battle · story · once · → cradle (first dazed wild Isling)
@@ -122,7 +122,7 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
 - `evolve.first` · in any · story · once · → nearPad (first evolution)
   - Spirit: Look at that! They've grown into something new.
 - `evolve.ready` · in any · objective · → evolvePod (step 14h: a pod Isling is ready to evolve and it's calm; pinned until it evolves, chip "Pod on your palm", "Turn your palm up" once held; Nov 4: a ghost hand grabs the pod and turns palm up; {name} = its name)
-  - Spirit: {name} is glowing! Take its pod and hold it on your open palm.
+  - Spirit: {name} is glowing! Hold its pod on your open palm.
 - `evolve.done` · in any · story (step 14h: after an evolution in the palm; {name} = the new form)
   - Spirit: {name}! So strong now.
 - `journal.first` · in any · story · once · while !tutorial (step 14h: the first "New Isling!" toast)
@@ -166,9 +166,9 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
 - `cw.arrive` · in cinderwood · intro · once (step 14c: the arrival line; Nov 3: a thorny vine blocks the trail ahead)
   - Spirit: Cinderwood... it used to glow all night.
 - `cw.vine` · in cinderwood · objective · → puzzle:cw.arrive (Nov 3: lesson at the arrival plaza's ember vent, the vine across the trail; chip "Pick it up!")
-  - Spirit: Thorns on the trail! Pick up that ember and drop it on them.
+  - Spirit: Thorns! Touch the ember, then poke the thorns.
 - `cw.vine.tip` · in cinderwood · objective · → vine (Nov 3: the ember picked up; the Spirit points at the vine, chip "Drop it on the vine!")
-  - Spirit: Now drop it on the vine!
+  - Spirit: Now poke the thorns!
 - `cw.vine.done` · in cinderwood · story · once (Nov 3: the ember dropped on the vine: it burns away)
   - Spirit: Whoosh! The way is open.
 - `cinder.village.first` · in cinderwood · story · once · → landmark:plaza (step 9a: first time the explorer comes near the village plaza)
@@ -182,13 +182,13 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
 - `cinder.ruins.first` · in cinderwood · story · once · → landmark:ruins (first time in the kiln ruins)
   - Spirit: Old kilns. Something glazed is moving in the grass...
 - `cinder.log.hands` · in cinderwood · objective · once · → puzzle:cinder.log (step 9b: right after cinder.log.first; the ghost shows the lift)
-  - Spirit: Maybe your big hands could move it?
+  - Spirit: Grab the log and lift it away.
 - `cinder.log.done` · in cinderwood · story · once (step 9b: the log set down on a ledge, the trail open)
   - Spirit: You're strong! Let's go on.
 - `cw.temple` · in cinderwood · story · once (first time at the temple door)
   - Spirit: The forge temple. Something big is breathing in there.
 - `cinder.bellows.first` · in cinderwood · objective · once · → puzzle:cinder.bellows (step 9b: first time the bellows are in reach; the ghost pokes the pad)
-  - Spirit: Bellows! Poke them to send heat to the braziers.
+  - Spirit: Bellows! Poke them again and again.
 - `cinder.brazier.one` · in cinderwood · story · Spirit: One!
 - `cinder.brazier.two` · in cinderwood · story · Spirit: Two!
 - `cinder.brazier.three` · in cinderwood · story · Spirit: Three!
@@ -214,19 +214,19 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
 
 Step 10f, Cinderwood's new hand moments (lesson lines stay pinned as a chip until the moment works once):
 - `cw.flame` · in cinderwood · objective · → puzzle:cw.flame (lesson at the kiln village's shrine, its flame nearly out; chip "Cup it!")
-  - Spirit: The village flame is fading! Keep it warm with your hands.
+  - Spirit: The flame is fading! Hold your hands round it.
 - `cw.flame.cold` · in cinderwood · story · once · → shrine (trying to rest at the shrine before it's rekindled)
   - Spirit: It's too weak to rest by. Warm it up first!
 - `cw.flame.done` · in cinderwood · story · once (the flame rekindled: the warmth rolls over the plaza)
   - Spirit: It's burning! Look, the whole village is waking up.
 - `cw.lanterns` · in cinderwood · objective · → puzzle:cw.hollow (lesson at the smoky hollow, once the village flame is rekindled; chip "Lanterns n/6"; step 14c: short, the arrival taught it)
-  - Spirit: Smoke! Light the lanterns again.
+  - Spirit: Smoke! Poke the lanterns to light them.
 - `cw.lanterns.done` · in cinderwood · story · once (every lantern lit: the smoke burns off the path)
   - Spirit: The smoke's burning away! The path is clear.
 - `cw.ember` · in cinderwood · objective · → puzzle:cw.ember (lesson at the forge's ember vent, before the bellows; chip "Pick it up!")
-  - Spirit: Another ember! Drop it in the forge's mouth.
+  - Spirit: Touch the ember, then poke the fire.
 - `cw.ember.tip` · in cinderwood · objective · → firebox (step 12b: the ember picked up; the Spirit points at the firebox, chip "Tip it in!")
-  - Spirit: Now tip it into the forge's mouth!
+  - Spirit: Now poke the fire!
 - `cw.forge.cold` · in cinderwood · story · (the bellows pumped while the firebox is cold; at most every 8 s)
   - Spirit: The forge is stone cold. It needs a spark first.
 - `cw.ember.done` · in cinderwood · story · once (the ember dropped into the firebox: it roars)
@@ -241,7 +241,7 @@ Step 10f, Cinderwood's new hand moments (lesson lines stay pinned as a chip unti
 - `gw.arrive` · in galewick · intro · once (step 14a: a few tiles past the arrival, the cloud puffs on the path ahead)
   - Spirit: Galewick... the air isn't moving at all.
 - `gw.arrive.clouds` · in galewick · objective · → puzzle:gw.arrive (step 14a: the realm's signature gesture right after the portal; chip "Sweep", then "Clouds n/2")
-  - Spirit: Clouds are stuck on the path. Sweep your hand to get the wind going!
+  - Spirit: Clouds on the path! Sweep them away with your hand.
 - `gw.arrive.done` · in galewick · story · once (step 14a: the last puff gone, a gust ripples across the meadow)
   - Spirit: There's the wind! Feel it run through the grass?
 - `gw.village.first` · in galewick · story · once · → landmark:plaza (first time near the village plaza)
@@ -259,14 +259,14 @@ Step 10f, Cinderwood's new hand moments (lesson lines stay pinned as a chip unti
 
 Step 10b, the hand moments (lesson lines stay pinned as a chip until the moment works once):
 - `gw.mill` · in galewick · objective · → puzzle:gw.mill (lesson at the big mill; chip "Flick!")
-  - Spirit: The mill is stuck. Give its sails a flick!
+  - Spirit: The mill is stuck! Flick its sails.
 - `gw.mill.done` · in galewick · story · once (three flicks: the sails keep turning, the drawbridge comes down)
   - Spirit: There it goes! The bridge is coming down.
 - `gw.kites` · in galewick · story · → puzzle:gw.kites (lesson in the kite field; chip "Pull it up!")
   - Spirit: Kites! Lift one up into the sky.
 - `gw.kites.task` · in galewick · objective · → puzzle:gw.kites (step 11d: the kite field's lesson says the task; chip "Kites n/3")
   - Spirit: The tower needs kites. Let's fly all three!
-  - Spirit: Pinch one and lift it up into the sky.
+  - Spirit: Pinch a kite and lift it up.
 - `gw.kites.one` · in galewick · story · Spirit: One!
 - `gw.kites.two` · in galewick · story · Spirit: Two!
 - `gw.kites.three` · in galewick · story · Spirit: All three!
@@ -286,7 +286,7 @@ Step 10b, the hand moments (lesson lines stay pinned as a chip until the moment 
 
 Step 10d / 10e, the tower hall:
 - `gw.keeper.knots` · in hall · objective · → galeowl (lesson in the tower hall; chip "Pull apart!")
-  - Spirit: It's all tangled up! Pull the knots apart.
+  - Spirit: All tangled! Pinch a knot and pull.
 - `gw.keeper.meet` · in hall · story · once · → galeowl (all three knots undone: it shakes free and flares up)
   - Galeowl: Stay still! If the wind blows, the pieces blow away!
   - Spirit: It's scared. Let's calm it down!
@@ -319,7 +319,7 @@ if the starter hasn't evolved; the starter becomes ready to evolve, `{name}` = t
   - Spirit: Lilymere... the lagoon used to reach right up to here.
   - Spirit: Half the water is gone, and nothing ripples.
 - `lm.arrive.stream` · in lilymere · objective · → puzzle:lm.stream (step 14a: the empty stream by the arrival; chip "Palm down", then "Pads n/4")
-  - Spirit: The stream's run dry, and the lily pads are stuck in the mud! Hold your hand over it like a little cloud.
+  - Spirit: The stream's dry! Hold your hand over it like a cloud.
 - `lm.arrive.stream.done` · in lilymere · story · once (step 14a: the stream runs, the pads float into a bridge)
   - Spirit: Look, the pads are floating! A bridge, just for us.
 - `lm.village.first` · in lilymere · story · once · → landmark:village (first time near the stilt village)
@@ -339,7 +339,7 @@ if the starter hasn't evolved; the starter becomes ready to evolve, `{name}` = t
 
 Step 11b, the hand moments (lesson lines stay pinned as a chip until the moment works once):
 - `lm.pads` · in lilymere · objective · → puzzle:lm.pads (lesson at the lily channel; chip "Push!")
-  - Spirit: The channel's too wide. Nudge the lily pads together!
+  - Spirit: Too wide! Poke the lily pads together.
 - `lm.pads.done` · in lilymere · story · once (all three pads locked into a path)
   - Spirit: A lily pad bridge! Hop across.
 - `lm.rain` · in lilymere · objective · → puzzle:lm.rain (at the lotus garden; chip "Palm down!"; step 14a: short, the stream taught it)
@@ -356,7 +356,7 @@ Step 11b, the hand moments (lesson lines stay pinned as a chip until the moment 
 - `lm.meet.bottlewhale` · in battle · story · once (step 11c: the rare Bottlewhale)
   - Spirit: A Bottlewhale! Look, there's a tiny ship inside it!
 - `temple.warn` · in realm · story (step 14h: at a temple door with fewer Islings in the pods than suggested: Galewick 4, the others 6; Go in / Not yet show; not in the Quick Journey)
-  - Spirit: {keeper} is strong. Most guardians bring {n} friends.
+  - Spirit: {keeper} is strong. Bring at least {n} Islings.
 - `lm.temple.shut` · in lilymere · story (step 11c: at the lake temple's door before the lagoon rises)
   - Spirit: The temple's sunk. The water's too low to open it.
 - `lm.temple.open` · in lilymere · story · once (the lagoon rises: the temple door surfaces and glows)
@@ -390,7 +390,7 @@ Step 11b, the hand moments (lesson lines stay pinned as a chip until the moment 
 
 ## Statue and finale
 - `hub.shard.first` · in hub · objective · once · → statueSocket (step 9c: in the hub holding a shard)
-  - Spirit: Put the shard in the statue. Something's calling it.
+  - Spirit: Grab the shard. Put it in the statue.
 - `hub.shard.placed` · in hub · story · once (the shard locks in): Spirit: I... feel warmer. Strange.
 - `hub.shard.more` · in hub · story · once: Spirit: Two more shards are out there.
 - `statue.two` · in hub · story · once (step 10e: the second shard locks into the statue)
@@ -425,7 +425,7 @@ The third shard wakes the statue: it becomes the Heart of the World. Walking, wi
 - `spirit.finale.2` · in any · objective (pinned; chip "Hold out your hand")
   - Spirit: I have to go back. Will you take me?
 - `spirit.finale.hand` · in any · objective (the Spirit sits on your palm; chip "To the crystal"; step 14h: Mugesh read "the Heart" as his own heart)
-  - Spirit: Lift me up to the gold crystal on its forehead.
+  - Spirit: Hold me up to the crystal on its forehead.
 - `spirit.finale.wait` · in any · story (30 s and nothing happened: it never forces it)
   - Spirit: It's okay. Whenever you're ready.
 - `spirit.finale.3` · in any · story (as it leaves your palm)

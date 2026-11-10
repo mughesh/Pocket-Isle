@@ -14,8 +14,16 @@ namespace Diorama
     /// </summary>
     public static class BugReport
     {
-        public const int LogLines = 300;
-        static readonly Queue<string> _log = new Queue<string>(LogLines + 1);
+        public const int LogLines = 6000;
+        /// <summary>Step 29 I: the report keeps the last this many seconds of log (capped at <see cref="LogLines"/> lines).</summary>
+        public const float LogSeconds = 120f;
+        static readonly Queue<(float at, string line)> _log = new Queue<(float, string)>(512);
+
+        /// <summary>Drops lines older than <paramref name="seconds"/> before <paramref name="now"/> and over <paramref name="max"/> (pure).</summary>
+        public static void Trim(Queue<(float at, string line)> log, float now, float seconds, int max)
+        {
+            while (log.Count > 0 && (log.Count > max || now - log.Peek().at > seconds)) log.Dequeue();
+        }
 
         public static string Root => Path.Combine(Application.persistentDataPath, "bugreports");
 
@@ -41,8 +49,9 @@ namespace Diorama
             }
             lock (_log)
             {
-                _log.Enqueue(line);
-                while (_log.Count > LogLines) _log.Dequeue();
+                float now = Time.realtimeSinceStartup;
+                _log.Enqueue((now, line));
+                Trim(_log, now, LogSeconds, LogLines);
             }
         }
 
@@ -57,7 +66,11 @@ namespace Diorama
                 if (state != null && state.save != null) state.save.Save("bug report");
                 if (File.Exists(GameSave.SavePath)) File.Copy(GameSave.SavePath, Path.Combine(dir, "save.json"), true);
                 string[] lines;
-                lock (_log) lines = _log.ToArray();
+                lock (_log)
+                {
+                    Trim(_log, Time.realtimeSinceStartup, LogSeconds, LogLines);
+                    lines = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Select(_log, x => x.line));
+                }
                 File.WriteAllLines(Path.Combine(dir, "log.txt"), lines);
                 var sb = new StringBuilder();
                 sb.AppendLine($"Pocket Isle bug report {DateTime.Now:yyyy-MM-dd HH:mm:ss}");

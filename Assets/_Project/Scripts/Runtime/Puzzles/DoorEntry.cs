@@ -16,7 +16,7 @@ namespace Diorama
     {
         /// <summary>Within this many tiles of the door the signifier shows.</summary>
         public const int NearTiles = 4;
-        public const string ChipText = "Walk in, or look at the door and pinch";
+        public const string ChipText = "Walk in, or look and pinch";
         public const string NoWayLine = "door.noway";
         const float PokeCooldown = 1.2f, WaveGap = 1.4f, WaveStep = 0.1f, ChipWidth = 0.15f;
 

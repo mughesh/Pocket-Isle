@@ -137,6 +137,10 @@ namespace Diorama
         bool _hasResolved;
         bool _objective;
         bool _heart;
+        static bool _heartCalled;
+
+        /// <summary>Step 29 H: the Heart's call plays again (a new game, tests).</summary>
+        public static void ResetHeartCall() => _heartCalled = false;
         Mesh _targetMesh;
         BoundsClipper _clipper;
         PokeInteractable _poke;
@@ -194,6 +198,7 @@ namespace Diorama
         {
             _root = new GameObject("Bubble").transform;
             _root.SetParent(transform, false);
+            KeepTextAway.On(_root); // step 29 G
 
             // Poke surface at the root (the front faces the head along -Z, so the plane normal faces backward);
             // the visual sits a little in front and presses in.
@@ -391,8 +396,19 @@ namespace Diorama
             _showing = true;
             if (_progressTotal > 0) LayoutDots();
             // Audio-D: an objective card gets one soft chime instead of ticks; the Heart's whisper starts with a breathy hum.
-            bool called = PlayEntranceCall(line, anchor != null ? anchor.position : _root.position);
-            if (_heart && !called) GameAudio.At(Diorama.Audio.AudioIds.HeartHum, anchor != null ? anchor.position : _root.position);
+            bool called = !_heart && PlayEntranceCall(line, anchor != null ? anchor.position : _root.position);
+            // Step 29 H (Mugesh: the new Heart call is worse than the old deep synth "moooo"): the first time the Heart
+            // speaks, the old synth call, once: the Spirit's blip two octaves down with a bell ping. Then only soft murmurs.
+            if (_heart && !_heartCalled)
+            {
+                _heartCalled = true;
+                var at = anchor != null ? anchor.position : _root.position;
+                var call = GameAudio.At(Diorama.Audio.AudioIds.SpiritBlip, at);
+                call.SetPitch(0.25f);
+                call.SetVolume(1f);
+                GameAudio.At(Diorama.Audio.AudioIds.SparkChime, at).SetVolume(0.45f);
+                Debug.Log("[DialogueBubble] The Heart's entrance call (synth, two octaves down, bell ping).");
+            }
             else if (_objective && string.IsNullOrEmpty(chip)) GameAudio.At(Diorama.Audio.AudioIds.SpiritFocus, _root.position).SetVolume(0.6f);
             for (int i = 0; i < 2; i++) _wasPinching[i] = true; // a pinch already held doesn't skip
             Place(true);
@@ -694,6 +710,8 @@ namespace Diorama
         public bool objectivesBlip = true;
         [Tooltip("Step 18: the Heart (the statue) speaks with its own voice, slower: typed characters between its blips.")]
         [Min(1)] public int heartBlipEvery = 7;
+        [Tooltip("Step 29 H: the Heart's typing murmurs, this share of the blip volume (subtle).")]
+        [Range(0f, 1f)] public float heartMurmur = 0.55f;
         [Tooltip("Step 18: and at least this long between the Heart's blips (s).")]
         public float heartBlipGap = 0.3f;
 
@@ -710,8 +728,8 @@ namespace Diorama
             if (_chip || _objective && !objectivesBlip || shown < _blipAt + every || shown >= _chars || Time.time < _blipTime + gap) return;
             _blipAt = shown;
             _blipTime = Time.time;
-            var h = GameAudio.At(VoiceFor(_line), _root.position);
-            h.SetVolume(blipVolume);
+            var h = GameAudio.At(_heart ? Diorama.Audio.AudioIds.VoiceHeart : VoiceFor(_line), _root.position);
+            h.SetVolume(_heart ? blipVolume * heartMurmur : blipVolume);
             h.SetPitch(_heart ? UnityEngine.Random.Range(0.96f, 1.02f) : UnityEngine.Random.Range(0.94f, 1.06f));
         }
 

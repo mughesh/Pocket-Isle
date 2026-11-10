@@ -16,7 +16,7 @@ MonoBehaviour:
   - id: shard
     line: intro.shard
     again: 
-    chip: Touch it
+    chip: Poke the shard
     help: 
     helpAfter: 30
     startWhen: opening.shard
@@ -97,7 +97,7 @@ MonoBehaviour:
   - id: twoHands
     line: lesson.twoHands
     again: 
-    chip: Two hands
+    chip: Grab with two hands
     help: 
     helpAfter: 30
     startWhen: opening.twoHands
@@ -124,7 +124,7 @@ MonoBehaviour:
   - id: starter
     line: intro.starter
     again: lesson.starter.again
-    chip: Look + pinch
+    chip: Look at it, then pinch
     help: lesson.starter.again
     helpAfter: 3.5
     startWhen: opening.starters
@@ -151,7 +151,7 @@ MonoBehaviour:
   - id: walk
     line: lesson.walk
     again: lesson.walk.again
-    chip: Swipe
+    chip: Swipe to walk
     help: lesson.walk.help
     helpAfter: 30
     startWhen: canWalk
@@ -178,7 +178,7 @@ MonoBehaviour:
   - id: far
     line: lesson.walk.far
     again: lesson.walk.far.again
-    chip: Swipe
+    chip: Swipe to walk
     help: 
     helpAfter: 30
     startWhen: canWalk
@@ -232,7 +232,7 @@ MonoBehaviour:
   - id: look
     line: lesson.look
     again: lesson.look.again
-    chip: Look + pinch
+    chip: Look at it, then pinch
     help: 
     helpAfter: 30
     startWhen: canWalk
@@ -259,7 +259,7 @@ MonoBehaviour:
   - id: grass
     line: lesson.grass
     again: lesson.grass.again
-    chip: Into the grass
+    chip: Walk into the grass
     help: 
     helpAfter: 30
     startWhen: canWalk
@@ -286,7 +286,7 @@ MonoBehaviour:
   - id: send
     line: pod.first
     again: lesson.send.again
-    chip: Toss the pod
+    chip: Grab the pod, toss it
     help: 
     helpAfter: 30
     startWhen: battle.send
@@ -313,7 +313,7 @@ MonoBehaviour:
   - id: rune
     line: battle.first
     again: lesson.rune.again
-    chip: Poke a rune
+    chip: Choose your attack
     help: 
     helpAfter: 30
     startWhen: battle.out
@@ -340,7 +340,7 @@ MonoBehaviour:
   - id: catch
     line: capture.first
     again: lesson.catch.again
-    chip: Flick the pod
+    chip: Flick the pod at it
     help: 
     helpAfter: 30
     startWhen: wildRed

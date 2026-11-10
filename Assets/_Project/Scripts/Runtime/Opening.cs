@@ -137,6 +137,7 @@ namespace Diorama
         Vector3 _nudge, _nudgeVel;
         readonly bool[] _wasTouching = new bool[2];
         readonly List<PodView> _starterPods = new List<PodView>();
+        int _cardPod = -1;
         int _gazedPod = -1, _saidPod = -1, _chosen = -1, _wiggledPod = -1;
         float _gazeSince;
         AudioHandle _shardHum;
@@ -964,6 +965,7 @@ namespace Diorama
                 var pod = Instantiate(pods.podPrefab, island.transform, false);
                 pod.name = $"Starter Pod {starters[i].name}";
                 pod.Show(new IslingInstance(starters[i], starterLevel));
+                pod.faceHead = true; // step 29: faces the player with a small hop, no spinning
                 pod.transform.localPosition = statue;
                 // BaseScale, not localScale: PodView rewrites localScale from it every frame (held pods shrank to rim size).
                 pod.BaseScale = Vector3.zero;
@@ -1003,6 +1005,17 @@ namespace Diorama
                     GameAudio.At(AudioIds.PodWiggle, _starterPods[_gazedPod].transform.position);
             }
             if (pods != null) pods.SetExternalGaze(this, _gazedPod >= 0);
+            // Step 29 E21: the looked-at starter's stat card (name, element, strengths, signature move) over its pod.
+            if (pods != null && _gazedPod != _cardPod)
+            {
+                if (_cardPod >= 0 && _cardPod < _starterPods.Count && _starterPods[_cardPod] != null) pods.HideCardOf(_starterPods[_cardPod].Isling);
+                _cardPod = _gazedPod;
+                if (_cardPod >= 0 && _cardPod < _starterPods.Count && _starterPods[_cardPod] != null)
+                {
+                    var pod = _starterPods[_cardPod];
+                    pods.ShowStarterCard(pod.Isling, () => pod != null ? pod.transform.position + island.transform.up * (pod.WorldRadius * 1.6f + PodCard.HalfHeight) : (Vector3?)null, 60f);
+                }
+            }
             if (_gazedPod >= 0 && _gazedPod != _saidPod && Time.time - _gazeSince > 0.35f)
             {
                 _saidPod = _gazedPod;

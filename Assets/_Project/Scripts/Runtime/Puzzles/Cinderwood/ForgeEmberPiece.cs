@@ -96,7 +96,7 @@ namespace Diorama
         [Tooltip("Step 12b: said (the Spirit points at the firebox) when the ember is picked up, at most every 12 s.")]
         public string tipLine = "cw.ember.tip";
         [Tooltip("Step 12b: the pinned chip while the ember is carried.")]
-        public string tipChip = "Tip it in!";
+        public string tipChip = "Drop it in the fire";
         float _tipSaidAt = -99f;
 
         protected override void Start()

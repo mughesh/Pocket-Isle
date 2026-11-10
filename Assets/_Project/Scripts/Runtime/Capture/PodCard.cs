@@ -55,6 +55,7 @@ namespace Diorama
         {
             _progression = progression;
             _root = new GameObject("Pod Card").transform;
+            KeepTextAway.On(_root); // step 29 G
             _panel = Quad("Panel", hud, quad, new Vector3(Width, Height, 1f), Vector3.zero, 0);
             SetPanelWidth(Width);
             _bar = Quad("HP Bar", hud, quad, new Vector3(BarWidth, BarHeight, 1f), new Vector3(0f, -0.0035f, -0.0005f), 1);
@@ -156,6 +157,7 @@ namespace Diorama
             string tipText = HealTip(c);
             bool tip = tipText.Length > 0;
             float panel = FitName(c.Name);
+            _tip.color = new Color(0.62f, 0.2f, 0.12f, 1f);
             _tip.gameObject.SetActive(tip);
             if (tip)
             {
@@ -188,6 +190,56 @@ namespace Diorama
                 _next.text = cap ? "max" : $"→ {c.level + 1}";
             }
             Place();
+        }
+
+        /// <summary>Step 29 E21: element strengths in plain words ("Fire · strong vs Wind, weak vs Water"), pure.</summary>
+        public static string TypeLine(Element e)
+        {
+            var strong = new System.Collections.Generic.List<string>();
+            var weak = new System.Collections.Generic.List<string>();
+            foreach (Element o in System.Enum.GetValues(typeof(Element)))
+            {
+                if (o == e || o == Element.Neutral) continue;
+                if (TypeChart.Beats(e, o)) strong.Add(o.ToString());
+                if (TypeChart.Beats(o, e)) weak.Add(o.ToString());
+            }
+            string line = e.ToString();
+            if (strong.Count > 0) line += " · strong vs " + string.Join(", ", strong);
+            if (weak.Count > 0) line += (strong.Count > 0 ? ", " : " · ") + "weak vs " + string.Join(", ", weak);
+            return line;
+        }
+
+        /// <summary>Step 29 E21: the move a starter is known for: its first damaging move of its own element, else its first.</summary>
+        public static MoveData Signature(IslingSpecies s)
+        {
+            if (s == null || s.moves == null) return null;
+            foreach (var m in s.moves)
+                if (m != null && m.element == s.element && m.kind != MoveKind.Support) return m;
+            foreach (var m in s.moves)
+                if (m != null) return m;
+            return null;
+        }
+
+        /// <summary>Step 29 E21: the starter pick's card: name in its element colour, strengths, its signature move.</summary>
+        public void ShowStarter(IslingInstance c, System.Func<Vector3?> anchor, float seconds)
+        {
+            Show(c, anchor, seconds);
+            if (!Visible || c == null || c.species == null) return;
+            var col = ElementStyle.Of(c.Element).main;
+            string hex = ColorUtility.ToHtmlStringRGB(Color.Lerp(col, Ink, 0.25f));
+            _name.text = $"<b><color=#{hex}>{c.Name}</color></b>";
+            _info.text = $"<color=#{hex}>{TypeLine(c.Element)}</color>";
+            var sig = Signature(c.species);
+            _tip.gameObject.SetActive(sig != null);
+            if (sig != null)
+            {
+                _tip.color = Ink;
+                _tip.text = $"Signature move: <b>{sig.Name}</b>";
+                float panel = Mathf.Max(_panel.transform.localScale.x, _info.GetPreferredValues(_info.text).x + 2f * Pad);
+                _info.rectTransform.sizeDelta = new Vector2(panel - 2f * Pad, _info.rectTransform.sizeDelta.y);
+                _tip.rectTransform.sizeDelta = new Vector2(panel - 2f * Pad, TipHeight);
+                SetPanelWidth(panel, true);
+            }
         }
 
         public void Hide()

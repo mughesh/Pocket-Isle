@@ -665,7 +665,7 @@ namespace Diorama
         void TapWhileStanding()
         {
             var front = _tile + _facing;
-            if (Map.At(front.y, front.x) == IslandMap.Water && !Onboarding.LessonWalking)
+            if (Fishing.CanFish(Map, _tile, front) && !Onboarding.LessonWalking)
             {
                 _last += " - fishing";
                 GameAudio.At(AudioIds.PondTap, TileWorld(front));

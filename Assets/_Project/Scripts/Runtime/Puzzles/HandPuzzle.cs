@@ -272,6 +272,15 @@ namespace Diorama
         }
 
         /// <summary>First touch this session: the lesson is over.</summary>
+        /// <summary>Step 29: show the lesson again (ghost + chip), as if never touched (the bellows once the forge wakes).</summary>
+        protected void RearmLesson()
+        {
+            if (!Interacted) return;
+            Interacted = false;
+            _lessonComplete = false;
+            Debug.Log($"[{GetType().Name}] {id}: lesson re-armed.");
+        }
+
         protected void MarkInteracted()
         {
             if (!Interacted) Debug.Log($"[{GetType().Name}] {id}: first touch{(LessonShowing ? ", lesson over" : "")}.");

@@ -315,9 +315,33 @@ namespace Diorama
             Hovered = _lifted ? CarryLogic.PickSpot(new Vector2(_pos.x, _pos.z), _spotTiles, snapRadius) : -1;
         }
 
+        [Tooltip("Step 29 (playtest: the log never landed): let go anywhere over the island after lifting it and it drops into the nearest spot (a short arc).")]
+        public bool autoDropOverIsland;
+
+        /// <summary>Step 29: the nearest spot to a map point (pure; -1 = none).</summary>
+        public static int NearestSpot(Vector2 at, IList<Vector2> spots)
+        {
+            int best = -1;
+            for (int i = 0; i < spots.Count; i++)
+                if (best < 0 || (spots[i] - at).sqrMagnitude < (spots[best] - at).sqrMagnitude) best = i;
+            return best;
+        }
+
         void Drop()
         {
             int spot = _lifted ? CarryLogic.PickSpot(new Vector2(_pos.x, _pos.z), _spotTiles, snapRadius) : -1;
+            if (spot < 0 && _lifted && autoDropOverIsland && island != null && island.Content != null &&
+                island.FootprintContains(island.TileToLocal(new Vector2(_pos.x, _pos.z), island.Content.capHeight)))
+            {
+                spot = NearestSpot(new Vector2(_pos.x, _pos.z), _spotTiles);
+                if (spot >= 0)
+                {
+                    Debug.Log($"[CarryPiece] {id}: let go over the island: it drops into spot {spot} by itself.");
+                    Release(true);
+                    StartCoroutine(MoveTo(spot, 0.7f, true));
+                    return;
+                }
+            }
             Debug.Log($"[CarryPiece] {id}: released {(spot >= 0 ? $"over spot {spot}" : _lifted ? "away from the spots: back home" : "before it was lifted")}.");
             Release(true);
             StartCoroutine(MoveTo(spot, spot >= 0 ? dropSeconds : _lifted ? fallBackSeconds : 0.2f, false));

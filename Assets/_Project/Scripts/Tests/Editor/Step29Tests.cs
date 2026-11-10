@@ -289,5 +289,77 @@ namespace Diorama.Tests
             Assert.AreEqual(EmberState.Falling, carry.Feed(0.6f, Hands(tracked: false)), "lost for a second: back");
             Assert.AreEqual(-1, carry.Holder);
         }
+        // ---- D20, E, G, I ----
+
+        [Test]
+        public void Fishing_NeverFromABridge_OnlyFromABank()
+        {
+            var map = Map("XXXXXX", "XGGGGX", "XWPWWX", "XWPWWX", "XGPGGX", "XXXXXX");
+            Assert.IsTrue(Fishing.Bridge(map, new Vector2Int(2, 2)), "water both sides: a bridge");
+            Assert.IsFalse(Fishing.CanFish(map, new Vector2Int(2, 2), new Vector2Int(1, 2)), "no fishing off the bridge");
+            Assert.IsFalse(Fishing.IsBank(map, new Vector2Int(2, 3)), "no pond line on the bridge");
+            Assert.IsTrue(Fishing.IsBank(map, new Vector2Int(3, 1)), "grass above the water is a bank");
+            Assert.IsTrue(Fishing.CanFish(map, new Vector2Int(3, 1), new Vector2Int(3, 2)));
+            var gw = AssetDatabase.LoadAssetAtPath<WorldMap>("Assets/_Project/Data/WorldMap_Galewick.asset");
+            Assert.IsNotNull(gw.waterTable, "Galewick can be fished");
+            Assert.AreEqual(2, Fishing.Spots(gw).Count(), "two marked banks by the river");
+            foreach (var t in Fishing.Spots(gw)) Assert.IsTrue(Fishing.IsBank(gw, t), $"c{t.x} r{t.y} is a real bank");
+        }
+
+        [Test]
+        public void Encounters_CaughtWeighLess_WhileOneIsUncaught_RareStaysRare()
+        {
+            var a = ScriptableObject.CreateInstance<IslingSpecies>();
+            var b = ScriptableObject.CreateInstance<IslingSpecies>();
+            var r = ScriptableObject.CreateInstance<IslingSpecies>();
+            var table = ScriptableObject.CreateInstance<EncounterTable>();
+            try
+            {
+                table.entries = new[]
+                {
+                    new EncounterTable.Entry { species = a, minLevel = 2, maxLevel = 2, weight = 50f },
+                    new EncounterTable.Entry { species = b, minLevel = 2, maxLevel = 2, weight = 45f },
+                    new EncounterTable.Entry { species = r, minLevel = 2, maxLevel = 2, weight = 5f, rare = true },
+                };
+                var odds = table.Odds(s => s == a, 1f);
+                Assert.AreEqual(15f / 65f, odds[0], 1e-3f, "caught: x0.3");
+                Assert.AreEqual(5f / 65f, odds[2], 1e-3f, "rare keeps its weight");
+                var all = table.Odds(s => s != r, 1f);
+                Assert.AreEqual(50f / 100f, all[0], 1e-3f, "every common caught: back to normal");
+            }
+            finally
+            {
+                Object.DestroyImmediate(a); Object.DestroyImmediate(b); Object.DestroyImmediate(r); Object.DestroyImmediate(table);
+            }
+        }
+
+        [Test]
+        public void Starter_TypeLine_AndSignature()
+        {
+            Assert.AreEqual("Fire · strong vs Wind, weak vs Water", PodCard.TypeLine(Element.Fire));
+            Assert.AreEqual("Water · strong vs Fire, weak vs Wind", PodCard.TypeLine(Element.Water));
+        }
+
+        [Test]
+        public void Text_NeverCloserThan45cm_KeepsItsSize()
+        {
+            var head = Vector3.zero;
+            var p = KeepTextAway.Pushed(head, new Vector3(0f, 0f, 0.25f), 0.45f, out float k);
+            Assert.AreEqual(0.45f, p.magnitude, 1e-4f, "slides back along the view ray");
+            Assert.AreEqual(0.45f / 0.25f, k, 1e-4f, "grows by the same ratio");
+            var far = KeepTextAway.Pushed(head, new Vector3(0f, 0.1f, 0.6f), 0.45f, out float k2);
+            Assert.AreEqual(1f, k2);
+            Assert.AreEqual(new Vector3(0f, 0.1f, 0.6f), far);
+        }
+
+        [Test]
+        public void BugReport_KeepsTheLastTwoMinutes()
+        {
+            var q = new Queue<(float at, string line)>();
+            for (int i = 0; i < 300; i++) q.Enqueue((i, "line " + i));
+            BugReport.Trim(q, 300f, 120f, 6000);
+            Assert.AreEqual(120, q.Count);
+            Assert.AreEqual("line 180", q.Peek().line);
+        }
     }
 }

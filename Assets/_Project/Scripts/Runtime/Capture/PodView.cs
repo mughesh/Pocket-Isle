@@ -23,6 +23,10 @@ namespace Diorama
         public float miniHeight = 0.017f;
         [Tooltip("Degrees per second.")]
         public float spinSpeed = 30f;
+        [Tooltip("Step 29 (starter pick): the Isling inside faces the head with a small idle hop instead of spinning.")]
+        public bool faceHead;
+        Vector3 _miniRest;
+        bool _miniRestSet;
 
         [Header("Colours")]
         public Color emptyTint = new Color(0.78f, 0.9f, 1f);
@@ -165,7 +169,20 @@ namespace Diorama
                     if (fainted) _miniView.Faint();
                     else _miniView.Revive();
                 }
-                if (!fainted)
+                if (!fainted && faceHead && Camera.main != null)
+                {
+                    if (!_miniRestSet)
+                    {
+                        _miniRest = miniAnchor.localPosition;
+                        _miniRestSet = true;
+                    }
+                    var up = transform.up;
+                    var to = Vector3.ProjectOnPlane(Camera.main.transform.position - miniAnchor.position, up);
+                    if (to.sqrMagnitude > 1e-6f) miniAnchor.rotation = Quaternion.LookRotation(to, up);
+                    float hop = Mathf.Max(0f, Mathf.Sin(Time.time * 4.2f + transform.GetInstanceID() * 0.37f));
+                    miniAnchor.localPosition = _miniRest + Vector3.up * (miniHeight * 0.18f * hop * hop);
+                }
+                else if (!fainted)
                 {
                     _spin = (_spin + spinSpeed * Time.deltaTime) % 360f;
                     miniAnchor.localRotation = Quaternion.Euler(0f, _spin, 0f);

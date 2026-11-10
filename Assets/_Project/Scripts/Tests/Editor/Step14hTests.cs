@@ -362,7 +362,7 @@ namespace Diorama.Tests
             CollectionAssert.Contains(GhostPlaceholders.Names, FinaleDirector.LiftClip);
             var s = UnityEditor.AssetDatabase.LoadAssetAtPath<DialogueScript>("Assets/_Project/Data/Dialogue/Script_v1.asset");
             if (s == null) return;
-            StringAssert.Contains("gold crystal on its forehead", s.Find("spirit.finale.hand").lines[0].text);
+            StringAssert.Contains("crystal on its forehead", s.Find("spirit.finale.hand").lines[0].text);
         }
 
         [Test]

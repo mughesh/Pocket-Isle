@@ -119,7 +119,8 @@ namespace Diorama.Tests
                 Assert.IsTrue(table.Roll(rnd, out var c, out _, s => s == caught, 2f));
                 if (c.species == fresh) freshCount++;
             }
-            Assert.AreEqual(2f / 3f, freshCount / (float)rolls, 0.04f, "uncaught: 2 of 3 rolls");
+            // Step 29 E22: a caught species also weighs 0.3 while the table has an uncaught one: 2 / (2 + 0.3).
+            Assert.AreEqual(2f / 2.3f, freshCount / (float)rolls, 0.04f, "uncaught: about 87% of rolls");
         }
 
         [Test]

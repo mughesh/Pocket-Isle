@@ -48,6 +48,7 @@ namespace Diorama
         {
             _root = new GameObject(name).transform;
             _root.gameObject.layer = layer;
+            KeepTextAway.On(_root); // step 29 G: chips and tablets
             _root.SetParent(parent, false);
             _quad = BattleHud.VerticalQuad();
             var panel = new GameObject("Panel");

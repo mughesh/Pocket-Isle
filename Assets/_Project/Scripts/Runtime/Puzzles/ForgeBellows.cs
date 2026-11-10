@@ -95,6 +95,8 @@ namespace Diorama
 
         void Start()
         {
+            // Step 29: the chip shows with the ghost from the start (it fades when a hand comes near, GhostHands).
+            if (pump != null && string.IsNullOrEmpty(pump.lessonChip)) pump.lessonChip = "Poke the bellows again and again";
             if (pump == null || island == null || Map == null || braziers == null || braziers.Length == 0)
             {
                 Debug.LogError("[ForgeBellows] Needs its PumpPiece (with a map), the island and the brazier tiles (Set Up MR_Main (9b puzzles)).", this);

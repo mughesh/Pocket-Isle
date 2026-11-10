@@ -465,13 +465,8 @@ namespace Diorama
         void OnStep(Vector2Int tile)
         {
             var map = explorer.island.Content;
-            foreach (var d in new[] { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right })
-            {
-                var n = tile + d;
-                if (map.At(n.y, n.x) != IslandMap.Water) continue;
-                Say("tut.pond");
-                return;
-            }
+            // Step 29 (playtest: said on the Galewick bridge, where fishing can't work): only on a real bank.
+            if (Fishing.IsBank(map, tile)) Say("tut.pond");
         }
 
         static readonly string[] BattlePrefixes = { "battle.", "capture.", "xp.", "evolve.", "rare.", "pod.", "party.", "keeper.", "lm.meet." };

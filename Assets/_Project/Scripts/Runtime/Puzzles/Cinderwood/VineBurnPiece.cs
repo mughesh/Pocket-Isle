@@ -50,7 +50,7 @@ namespace Diorama
         [Tooltip("Said (the Spirit points at the vine) when the ember is picked up, at most every 12 s.")]
         public string tipLine = "cw.vine.tip";
         [Tooltip("The pinned chip while the ember is carried.")]
-        public string tipChip = "Drop it on the vine!";
+        public string tipChip = "Drop it on the thorns";
         public string doneLine = "cw.vine.done";
         [Range(0f, 1f)] public float volume = 0.7f;
 
@@ -60,7 +60,7 @@ namespace Diorama
         [Tooltip("Step 29: a fingertip this close (m) touches the ember.")]
         public float touchRadius = 0.03f;
         FingerFlame _flame;
-        string _fingerChip = "Now poke the fire";
+        string _fingerChip = "Now poke the thorns";
         readonly HandState[] _hands = new HandState[2];
         readonly EmberCarry.Hand[] _in = new EmberCarry.Hand[2];
         readonly Vector3[] _grip = new Vector3[2];

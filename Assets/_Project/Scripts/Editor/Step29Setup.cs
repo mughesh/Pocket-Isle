@@ -17,6 +17,137 @@ namespace Diorama.EditorTools
         {
             RingMaterial();
             Blooms();
+            FishingSpots();
+        }
+
+        const string GwWaterPath = "Assets/_Project/Data/Battle/Galewick/Encounters_GwWater.asset";
+
+        /// <summary>
+        /// Step 29 D20: Galewick had no water table (a tap at its river did nothing). A small one from Lilymere's water species
+        /// at Galewick's levels, two marked banks by the river (soft ripples), and the scene's <see cref="FishSpots"/>.
+        /// </summary>
+        public static void FishingSpots()
+        {
+            if (EditorApplication.isPlaying)
+            {
+                Debug.LogError("[Step29Setup] Stop Play first.");
+                return;
+            }
+            var gw = AssetDatabase.LoadAssetAtPath<WorldMap>("Assets/_Project/Data/WorldMap_Galewick.asset");
+            var lm = AssetDatabase.LoadAssetAtPath<EncounterTable>("Assets/_Project/Data/Battle/Lilymere/Encounters_LmWater.asset");
+            if (gw == null || lm == null)
+            {
+                Debug.LogError("[Step29Setup] Galewick map or Lilymere's water table missing.");
+                return;
+            }
+            var table = AssetDatabase.LoadAssetAtPath<EncounterTable>(GwWaterPath);
+            if (table == null)
+            {
+                table = ScriptableObject.CreateInstance<EncounterTable>();
+                AssetDatabase.CreateAsset(table, GwWaterPath);
+            }
+            table.habitat = Habitat.Water;
+            var entries = new List<EncounterTable.Entry>();
+            for (int i = 0; i < lm.entries.Length && i < 2; i++)
+            {
+                var e = lm.entries[i];
+                e.minLevel = 6;
+                e.maxLevel = 8;
+                e.weight = i == 0 ? 60 : 40;
+                e.rare = false;
+                entries.Add(e);
+            }
+            table.entries = entries.ToArray();
+            EditorUtility.SetDirty(table);
+            gw.waterTable = table;
+
+            // Two banks by the river: walkable, not a bridge, not tall grass, no prop, facing water, apart from each other.
+            gw.landmarks.RemoveAll(l => l.name != null && l.name.StartsWith(Fishing.SpotPrefix));
+            var picks = new List<Vector2Int>();
+            var bridge = new List<Vector2Int>();
+            for (int r = 0; r < gw.Rows; r++)
+                for (int c = 0; c < gw.Columns; c++)
+                    if (gw.At(r, c) == IslandMap.Path && Fishing.Bridge(gw, new Vector2Int(c, r))) bridge.Add(new Vector2Int(c, r));
+            Vector2 cross = bridge.Count > 0 ? new Vector2((float)bridge.Average(t => t.x), (float)bridge.Average(t => t.y)) : new Vector2(gw.Columns * 0.5f, gw.Rows * 0.5f);
+            var banks = new List<Vector2Int>();
+            for (int r = 0; r < gw.Rows; r++)
+                for (int c = 0; c < gw.Columns; c++)
+                {
+                    var t = new Vector2Int(c, r);
+                    if (!Fishing.IsBank(gw, t) || gw.At(t) == IslandMap.TallGrass || gw.PropAt(r, c) != IslandMap.Empty) continue;
+                    if (gw.landmarks.Any(l => l.tile == t) || gw.gates.Any(g => g.Covers(t) || g.Front(0) == t || g.Front(1) == t)) continue;
+                    float d = Vector2.Distance(cross, t);
+                    if (d < 4f || d > 12f) continue;
+                    banks.Add(t);
+                }
+            foreach (var t in banks.OrderBy(t => Mathf.Abs(Vector2.Distance(cross, t) - 6f)))
+            {
+                if (picks.Any(p => Mathf.Abs(p.x - t.x) < 6)) continue;
+                picks.Add(t);
+                if (picks.Count == 2) break;
+            }
+            for (int i = 0; i < picks.Count; i++)
+                gw.landmarks.Add(new Landmark { name = $"{Fishing.SpotPrefix}{i + 1}", tile = picks[i] });
+            EditorUtility.SetDirty(gw);
+            AssetDatabase.SaveAssets();
+            Debug.Log($"[Step29Setup] Galewick water table set; fishing banks: {string.Join(", ", picks.Select(t => $"c{t.x} r{t.y}"))} (bridge at c{cross.x:0} r{cross.y:0}).");
+
+            var scene = EditorSceneManager.GetActiveScene();
+            if (!scene.path.EndsWith("MR_Main.unity")) scene = EditorSceneManager.OpenScene(ScenePath);
+            var spots = Object.FindFirstObjectByType<FishSpots>(FindObjectsInactive.Include);
+            if (spots == null) spots = new GameObject("Fish Spots").AddComponent<FishSpots>();
+            spots.island = Object.FindFirstObjectByType<IslandBuilder>(FindObjectsInactive.Include);
+            spots.fx = Object.FindFirstObjectByType<BattleFx>(FindObjectsInactive.Include);
+            EditorUtility.SetDirty(spots);
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+        }
+
+        /// <summary>
+        /// Step 29 F: the hand moments' chips in the scene, plainer (one action, verb first, the thing named). By the old
+        /// text, so a re-run changes nothing. Logs before -> after.
+        /// </summary>
+        public static void Chips()
+        {
+            var map = new Dictionary<string, string>
+            {
+                { "Push!", "Poke the pads together" }, { "Palm down!", "Turn your palm down" }, { "Sweep!", "Sweep the clouds away" },
+                { "Sweep", "Sweep the clouds away" }, { "Cup it!", "Hold your hands round it" }, { "Palm down", "Hold your palm over it" },
+                { "Touch them!", "Poke the lanterns" }, { "Pull it up!", "Pinch a kite, lift it" }, { "Scoop!", "Scoop water, pour it" },
+                { "Pull apart!", "Pinch a knot, pull" }, { "Flick!", "Flick the sails" },
+            };
+            var counters = new Dictionary<string, string> { { "Sweep \u00b7 Clouds", "Clouds" }, { "Palm down \u00b7 Pads", "Pads" } };
+            var scene = EditorSceneManager.GetActiveScene();
+            var log = new System.Text.StringBuilder();
+            foreach (var p in Object.FindObjectsByType<HandPuzzle>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                string was = p.lessonChip;
+                if (p is ForgeEmberPiece || p is VineBurnPiece) p.lessonChip = "Touch the ember";
+                else if (p is CarryPiece && was == "Pick it up!") p.lessonChip = "Grab the log, lift it";
+                else if (!string.IsNullOrEmpty(was) && map.TryGetValue(was, out var now)) p.lessonChip = now;
+                string c = p.counterLabel;
+                foreach (var kv in counters)
+                    if (c == System.Text.RegularExpressions.Regex.Unescape(kv.Key)) p.counterLabel = kv.Value;
+                if (was != p.lessonChip || c != p.counterLabel)
+                {
+                    log.Append($"\n  {p.GetType().Name} {p.id}: '{was}' -> '{p.lessonChip}'{(c != p.counterLabel ? $", counter '{c}' -> '{p.counterLabel}'" : "")}");
+                    EditorUtility.SetDirty(p);
+                }
+            }
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+            Debug.Log($"[Step29Setup] Chips:{log}");
+        }
+
+        /// <summary>Step 29: the healing bloom's height in the scene (tiles).</summary>
+        public static void BloomHeight()
+        {
+            var bloom = Object.FindFirstObjectByType<HealBloom>(FindObjectsInactive.Include);
+            if (bloom == null) return;
+            bloom.heightTiles = 1.4f;
+            EditorUtility.SetDirty(bloom);
+            EditorSceneManager.MarkSceneDirty(bloom.gameObject.scene);
+            EditorSceneManager.SaveScene(bloom.gameObject.scene);
         }
 
         /// <summary>Resources/PodRing.mat (Diorama/Pod Ring), loaded by PodRack at runtime.</summary>

@@ -508,6 +508,9 @@ namespace Diorama.EditorTools
 
             // ---- step 29: HP rings, the pod card's line, a healing bloom, the tired warning (bridge: RunOnly with arg "Step29") ----
 
+            bool _chose29;
+            double _choseAt29;
+
             void Step29()
             {
                 const string P = "Step29";
@@ -584,6 +587,46 @@ namespace Diorama.EditorTools
                     var b = UnityEngine.Object.FindFirstObjectByType<HealBloom>();
                     return $"heals {(b != null ? b.Heals : -1)}, full {AllFull()}";
                 });
+
+                // Seat shots for the report: a fishing bank (ripples), a junction stop (chevrons), the battle's two turns.
+                Add(P, "shot: a Galewick fishing bank", () =>
+                {
+                    var e = GameState.Instance.explorer;
+                    var banks = Fishing.Spots(e.island.world).ToList();
+                    if (banks.Count > 1) e.Teleport(banks[1], new Vector2Int(0, -1));
+                }, () =>
+                {
+                    if (Elapsed < 2.5) return false;
+                    Step27Debug.Shot("29_fishbank");
+                    return true;
+                }, 8f);
+                Add(P, "a battle: the moves sink on the wild turn", () =>
+                {
+                    DevCheats.Invincible = true;
+                    BattleDebug.Grass();
+                }, () =>
+                {
+                    var d = Director;
+                    if (d != null && d.AwaitingSendOut && Party_ != null) d.DebugPick(Mathf.Max(0, Party_.NextFighter(-1)));
+                    var runes = UnityEngine.Object.FindFirstObjectByType<BattleRunes>();
+                    if (d == null || !d.InBattle || !d.PlayerOut || runes == null || Elapsed < 6) return false;
+                    if (runes.Up > 0.95f && !_chose29)
+                    {
+                        Step27Debug.Shot("29_yourturn");
+                        _chose29 = true;
+                        runes.Choose(0);
+                        _choseAt29 = Elapsed;
+                        return false;
+                    }
+                    if (_chose29 && Elapsed - _choseAt29 > 1.1 && runes.Up < 0.05f)
+                    {
+                        runes.Choose(1); // off-turn: only a shake
+                        Step27Debug.Shot("29_offturn");
+                        if (runes.OffTurnPresses == 0) Note("problem", "Step29: an off-turn press did not shake");
+                        return true;
+                    }
+                    return false;
+                }, 60f, null, 0.2f, false);
             }
 
             // ---- Nov 10: moves, battle line and name labels never overlap, from several heads (bridge: RunOnly with arg "BattleLayout") ----

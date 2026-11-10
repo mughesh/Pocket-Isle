@@ -28,13 +28,45 @@ namespace Diorama
         /// Picks an entry by weight and a level in its range. False when the table is empty.
         /// Species not caught yet (<paramref name="isCaught"/> false) count <paramref name="uncaughtWeight"/> times.
         /// </summary>
+        /// <summary>Step 29 E22: a caught species while the table has an uncaught one.</summary>
+        public const float CaughtWeight = 0.3f;
+
+        /// <summary>One entry's weight before the rare scale (pure; step 29 E22).</summary>
+        public static float WeightOf(Entry e, Func<IslingSpecies, bool> isCaught, bool anyUncaught, float uncaughtWeight)
+        {
+            if (e.species == null) return 0f;
+            if (e.rare || isCaught == null) return e.weight;
+            bool caught = isCaught(e.species);
+            return e.weight * (caught ? (anyUncaught ? CaughtWeight : 1f) : uncaughtWeight);
+        }
+
+        /// <summary>Each entry's chance (0..1) with this caught set (the report's odds; rare at its own weight).</summary>
+        public float[] Odds(Func<IslingSpecies, bool> isCaught, float uncaughtWeight)
+        {
+            bool anyUncaught = false;
+            if (isCaught != null)
+                foreach (var e in entries)
+                    if (e.species != null && !e.rare && e.weight > 0f && !isCaught(e.species)) anyUncaught = true;
+            var w = new float[entries.Length];
+            float total = 0f;
+            for (int i = 0; i < entries.Length; i++) total += w[i] = WeightOf(entries[i], isCaught, anyUncaught, uncaughtWeight);
+            for (int i = 0; i < w.Length; i++) w[i] = total > 0f ? w[i] / total : 0f;
+            return w;
+        }
+
         public bool Roll(SeededRandom rnd, out IslingInstance creature, out bool rare, Func<IslingSpecies, bool> isCaught = null, float uncaughtWeight = 1f)
         {
             creature = null;
             rare = false;
             // Step 9g: the Quick Journey has no rare surprises in Cinderwood (QuickJourneyConfig.rareWeight).
             float rareScale = DevCheats.RareBoost * QuickJourney.RareScale;
-            float Weight(Entry e) => e.species == null ? 0f : e.weight * (isCaught != null && !isCaught(e.species) ? uncaughtWeight : 1f) * (e.rare ? rareScale : 1f);
+            // Step 29 E22 (playtests: the same Isling again and again): a species already caught weighs CaughtWeight while
+            // the table still has an uncaught one; rare entries keep their weight (rare stays rare).
+            bool anyUncaught = false;
+            if (isCaught != null)
+                foreach (var e in entries)
+                    if (e.species != null && !e.rare && e.weight > 0f && !isCaught(e.species)) anyUncaught = true;
+            float Weight(Entry e) => WeightOf(e, isCaught, anyUncaught, uncaughtWeight) * (e.rare ? rareScale : 1f);
             float total = 0f;
             foreach (var e in entries) total += Weight(e);
             if (total <= 0f) return false;

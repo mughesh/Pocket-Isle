@@ -7,7 +7,7 @@ namespace Diorama
     /// <summary>
     /// Nov 4 / step 14h: at a temple door with fewer Islings in the pods than most guardians bring (Galewick's tower
     /// <see cref="GalewickIslings"/>, the forge and the lake temple <see cref="OtherIslings"/>), the Spirit warns
-    /// (<see cref="WarnLine"/>: "{keeper} is strong. Most guardians bring {n} friends.") and two tablets ask
+    /// (<see cref="WarnLine"/>: "{keeper} is strong. Bring at least {n} Islings.") and two tablets ask
     /// <b>Go in</b> / <b>Not yet</b>. Go in enters as usual: a warning, never a wall (the Keeper is tuned to the team,
     /// <see cref="KeeperScaling"/>). No warning in the Quick Journey.
     /// </summary>
