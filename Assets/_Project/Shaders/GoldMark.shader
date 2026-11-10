@@ -1,7 +1,8 @@
 // Step 12a: gold guidance marks lying on the island (premultiplied alpha, so a thin dark outline can darken sand, wheat
 // or the cracked bed and the gold never blends into pale ground). Modes: 0 = a glowing tile (rounded square), 1 = a pair
 // of footprints walking along +v, 2 = a soft ring (the stop tile). _Phase (0..1 along a trail) and _Pulse (0/1) make a
-// pulse travel toward the goal; _Alpha fades a mark in and out.
+// pulse travel toward the goal; _Alpha fades a mark in and out. Step 29: mode 3 = a chevron pointing +v (the walk preview
+// and the junction arrows, drawn white / soft cyan through the colour properties: gold is only for "where to go next").
 Shader "Diorama/GoldMark"
 {
     Properties
@@ -10,7 +11,7 @@ Shader "Diorama/GoldMark"
         _Core ("Core", Color) = (1, 0.95, 0.62, 1)
         _Outline ("Outline", Color) = (0.16, 0.08, 0.0, 1)
         _Intensity ("Intensity", Range(0, 3)) = 1.4
-        _Mode ("Mode (0 tile, 1 footprints, 2 ring)", Float) = 0
+        _Mode ("Mode (0 tile, 1 footprints, 2 ring, 3 chevron)", Float) = 0
         _Phase ("Trail Phase", Range(0, 1)) = 0
         _Pulse ("Travelling Pulse", Range(0, 1)) = 0
         _Alpha ("Alpha", Range(0, 1)) = 1
@@ -92,6 +93,13 @@ Shader "Diorama/GoldMark"
                 return min(min(heel, ball), toes);
             }
 
+            float Segment(float2 p, float2 a, float2 b)
+            {
+                float2 pa = p - a, ba = b - a;
+                float h = saturate(dot(pa, ba) / dot(ba, ba));
+                return length(pa - ba * h);
+            }
+
             half4 frag(Varyings i) : SV_Target
             {
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
@@ -99,7 +107,13 @@ Shader "Diorama/GoldMark"
                 float2 p = i.uv * 2.0 - 1.0;
                 float d;
                 float glow;
-                if (_Mode > 1.5)
+                if (_Mode > 2.5)
+                {
+                    // Chevron: a thick V pointing +v.
+                    d = min(Segment(p, float2(-0.5, -0.2), float2(0.0, 0.32)), Segment(p, float2(0.5, -0.2), float2(0.0, 0.32))) - 0.14;
+                    glow = saturate(1.0 - max(d, 0.0) / 0.18) * 0.25;
+                }
+                else if (_Mode > 1.5)
                 {
                     // Ring: a band round the middle.
                     d = abs(length(p) - 0.74) - 0.1;

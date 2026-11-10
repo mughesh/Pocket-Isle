@@ -170,6 +170,57 @@ namespace Diorama
         HandPuzzle[] _pieces;
         float _piecesAt = -99f;
 
+        [Tooltip("Step 29: the swipe walk stops on the edge of tall grass until the player has met a wild Isling.")]
+        public bool stopAtFirstGrass = true;
+
+        /// <summary>Step 29: true once the first-grass stop is no longer wanted (a wild Isling met; set by the game).</summary>
+        public static Func<bool> GrassEdgeMetCheck;
+        static bool GrassEdgeMet => GrassEdgeMetCheck != null && GrassEdgeMetCheck();
+
+        /// <summary>Why the last plan's interactable stop happened (tests, log).</summary>
+        public string LastStopReason { get; private set; }
+
+        /// <summary>Step 29: extra footprints the walk stops beside (healing blooms add theirs), per map.</summary>
+        public static readonly List<Func<WorldMap, IEnumerable<RectInt>>> StopProviders = new List<Func<WorldMap, IEnumerable<RectInt>>>();
+
+        readonly List<RectInt> _stopFootprints = new List<RectInt>();
+        WorldMap _stopMap;
+        float _stopAt = -99f;
+
+        /// <summary>Doors (tower, forge, lake temple), hearth shrines and anything a provider adds, on this map (cached 5 s).</summary>
+        List<RectInt> StopFootprints(WorldMap world)
+        {
+            if (world == _stopMap && Time.unscaledTime - _stopAt < 5f) return _stopFootprints;
+            _stopMap = world;
+            _stopAt = Time.unscaledTime;
+            _stopFootprints.Clear();
+            _stopFootprints.AddRange(DoorFootprints(world));
+            foreach (var p in StopProviders)
+                if (p != null) _stopFootprints.AddRange(p(world));
+            return _stopFootprints;
+        }
+
+        /// <summary>The Keeper doors and hearth shrines on a map, from the map and the scene's door scripts.</summary>
+        public static List<RectInt> DoorFootprints(WorldMap world)
+        {
+            var list = new List<RectInt>();
+            if (world == null) return list;
+            for (int r = 0; r < world.Rows; r++)
+                for (int c = 0; c < world.Columns; c++)
+                    if (world.TryGetProp(world.PropAt(r, c), out var e) && e.recipe != null && e.recipe.name == HearthShrines.RecipeName)
+                    {
+                        var f = WorldMap.FootprintOf(e);
+                        list.Add(new RectInt(c, r, f.x, f.y));
+                    }
+            var tower = FindFirstObjectByType<TowerDoor>(FindObjectsInactive.Include);
+            if (tower != null && tower.map == world) list.Add(new RectInt(tower.tower.x, tower.tower.y, 2, 2));
+            var forge = FindFirstObjectByType<ForgeBellows>(FindObjectsInactive.Include);
+            if (forge != null && forge.pump != null && forge.pump.map == world) list.Add(new RectInt(forge.door.x, forge.door.y, 3, 1));
+            var temple = FindFirstObjectByType<TempleDoor>(FindObjectsInactive.Include);
+            if (temple != null && temple.map == world && temple.front.Length > 0) list.Add(new RectInt(temple.front[0].x - 1, temple.front[0].y - 1, 3, 1));
+            return list;
+        }
+
         Transform _cube;
         ExplorerView _view;
 
@@ -220,6 +271,9 @@ namespace Diorama
 
         /// <summary>False while a battle or the battle zoom is on, or a hand moment holds it (no walking, no GoTo).</summary>
         public bool CanMove => !_locked && !_heldStill && !Zoomed;
+
+        /// <summary>Step 29: standing (no step in progress, no heading).</summary>
+        public bool IsStill => _stepT >= 1f && _heading == Vector2Int.zero;
 
         /// <summary>
         /// Step 14f: a hand moment that needs every pinch (untangling Galeowl) holds the explorer still: gestures and walks
@@ -512,7 +566,10 @@ namespace Diorama
             _continuous = continuous;
             PlanFrom = _tile;
             bool open = swipeWalksUntilTap;
-            PlanEnd = SmartStep.Plan(Map, _tile, way, continuous || open, open ? untilTapTiles : continuous ? 60 : smartTiles, PlanStop, _plan, open);
+            // Step 29 (playtests: nobody could stop at corners and got lost): the open walk follows bends by itself and
+            // stops at real junctions (per corridor, roads are two wide), one tile before doors, shrines, blooms and hand
+            // moments, at the first tall grass edge ever, and at blocked tiles. A tap still stops it anywhere.
+            PlanEnd = SmartStep.Plan(Map, _tile, way, continuous || open, open ? untilTapTiles : continuous ? 60 : smartTiles, PlanStop, _plan, false, open);
             _planIndex = 0;
             _running = false;
             PlanChanged?.Invoke();
@@ -552,7 +609,10 @@ namespace Diorama
             return s;
         }
 
-        /// <summary>Stop before a gate's tiles; stop on the tile that first brings an unsolved hand moment within reach.</summary>
+        /// <summary>
+        /// Stop before a gate's tiles; stop on the tile that first brings an unsolved hand moment within reach; step 29:
+        /// stop on the first tile next to a door, a shrine or a healing bloom, and on the first tall grass ever.
+        /// </summary>
         WalkStop BuiltInStop(Vector2Int from, Vector2Int next)
         {
             var world = island.world;
@@ -560,6 +620,17 @@ namespace Diorama
             foreach (var g in world.gates)
                 if (g.Covers(next) && !g.Covers(from)) return WalkStop.Before;
             if (SceneSwap.IsInside) return WalkStop.None;
+            foreach (var fp in StopFootprints(world))
+                if (WalkUp.Distance(next, fp) == 1 && WalkUp.Distance(from, fp) > 1)
+                {
+                    LastStopReason = $"next to c{fp.x} r{fp.y}";
+                    return WalkStop.On;
+                }
+            if (stopAtFirstGrass && !GrassEdgeMet && world.At(next) == IslandMap.TallGrass && world.At(from) != IslandMap.TallGrass)
+            {
+                LastStopReason = "first tall grass";
+                return WalkStop.On;
+            }
             if (_pieces == null || Time.unscaledTime - _piecesAt > 5f)
             {
                 _pieces = FindObjectsByType<HandPuzzle>(FindObjectsSortMode.None);

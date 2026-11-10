@@ -1,0 +1,195 @@
+using System.Collections.Generic;
+using System.Linq;
+using NUnit.Framework;
+using UnityEditor;
+using UnityEngine;
+
+namespace Diorama.Tests
+{
+    /// <summary>Step 29: two-wide roads (A0), corridor junctions and stops (A), and the rest of the Nov 10 playtest fixes.</summary>
+    public class Step29Tests
+    {
+        static readonly Vector2Int E = new Vector2Int(1, 0), W = new Vector2Int(-1, 0), N = new Vector2Int(0, -1), S = new Vector2Int(0, 1);
+
+        static IslandMap Map(params string[] rows)
+        {
+            var m = ScriptableObject.CreateInstance<IslandMap>();
+            m.SetLayout(string.Join("\n", rows));
+            return m;
+        }
+
+        static (string end, List<Vector2Int> tiles) Walk(IslandMap map, Vector2Int from, Vector2Int dir,
+            System.Func<Vector2Int, Vector2Int, WalkStop> stop = null)
+        {
+            var tiles = new List<Vector2Int>();
+            string end = SmartStep.Plan(map, from, dir, true, 200, stop, tiles, false, true);
+            return (end, tiles);
+        }
+
+        // ---- A0: widening ----
+
+        [Test]
+        public void Widen_OneWideRoad_GetsALaneOnOneSide()
+        {
+            var rows = new[] { "XXXXXXXX", "XGGGGGGX", "XPPPPPPX", "XGGGGGGX", "XXXXXXXX" };
+            var res = EditorTools.Step29Paths.Widen(rows, t => false, t => false);
+            Assert.AreEqual(6, res.Widened.Count);
+            int y = res.Widened[0].y;
+            Assert.IsTrue(res.Widened.All(t => t.y == y), "one consistent side");
+            Assert.IsTrue(y == 1 || y == 3);
+        }
+
+        [Test]
+        public void Widen_NeverOpensAWayRoundABlocker_AndKeepsBridges()
+        {
+            // The road crosses water: both sides wet = a bridge, kept.
+            var bridge = EditorTools.Step29Paths.Widen(new[] { "XXXXX", "XWWWX", "XPPPX", "XWWWX", "XXXXX" }, t => false, t => false);
+            Assert.AreEqual(0, bridge.Widened.Count);
+            Assert.AreEqual(1, bridge.Exceptions.Count);
+            // Trees on one side join the road's area; a tree touching another walkable area does not open.
+            var rows = new[] { "XXXXXXX", "XGGFGGX", "XFFFFFX", "XPPPPPX", "XFFFFFX", "XXXXXXX" };
+            var res = EditorTools.Step29Paths.Widen(rows, t => false, t => false);
+            foreach (var t in res.Widened)
+                Assert.AreNotEqual(2, t.y, $"c{t.x} r{t.y} would join the road to the grass above");
+        }
+
+        [Test]
+        public void RealMaps_HaveNoOneWideRoadsLeft_ExceptTheListed()
+        {
+            // Listed exceptions and spots left one wide (Run-29 A0): Lilymere's lagoon crossing (c22 r13-15) and the path
+            // through tall grass (c46 r44-47), Cinderwood c48 r23 and c13-14 r50.
+            var allowed = new HashSet<(string, int, int)>
+            {
+                ("WorldMap_Lilymere", 22, 13), ("WorldMap_Lilymere", 22, 14), ("WorldMap_Lilymere", 22, 15),
+                ("WorldMap_Lilymere", 46, 44), ("WorldMap_Lilymere", 46, 45), ("WorldMap_Lilymere", 46, 46), ("WorldMap_Lilymere", 46, 47),
+                ("WorldMap_Cinderwood", 48, 23), ("WorldMap_Cinderwood", 13, 50), ("WorldMap_Cinderwood", 14, 50),
+                // Lane gaps: the lane tile is a landmark or a scene script's tile on grass or tall grass (left as it is),
+                // so the corridor is still two walkable tiles wide there.
+                ("WorldMap_Galewick", 22, 7), ("WorldMap_Galewick", 43, 19), ("WorldMap_Galewick", 38, 27), ("WorldMap_Galewick", 36, 40),
+                ("WorldMap_Galewick", 35, 41), ("WorldMap_Galewick", 37, 41), ("WorldMap_Cinderwood", 49, 24),
+                ("WorldMap_Lilymere", 7, 37), ("WorldMap_Lilymere", 6, 38),
+            };
+            var bad = new List<string>();
+            foreach (var name in new[] { "StillIsle", "Galewick", "Cinderwood", "Lilymere" })
+            {
+                var map = AssetDatabase.LoadAssetAtPath<WorldMap>($"Assets/_Project/Data/WorldMap_{name}.asset");
+                Assert.IsNotNull(map, name);
+                bool P(int c, int r) => map.Raw(r, c) == IslandMap.Path;
+                for (int r = 0; r < map.Rows; r++)
+                    for (int c = 0; c < map.Columns; c++)
+                    {
+                        if (!P(c, r)) continue;
+                        bool h = P(c - 1, r) || P(c + 1, r), v = P(c, r - 1) || P(c, r + 1);
+                        bool one = h && !P(c, r - 1) && !P(c, r + 1) || v && !P(c - 1, r) && !P(c + 1, r);
+                        if (one && !allowed.Contains((map.name, c, r))) bad.Add($"{map.name} c{c} r{r}");
+                    }
+            }
+            Assert.IsEmpty(bad, "one-wide road tiles: " + string.Join(", ", bad));
+        }
+
+        // ---- A: corridors ----
+
+        [Test]
+        public void Corridor_TwoWideStraight_NeverStops()
+        {
+            var map = Map("XXXXXXXXXXXX", "XPPPPPPPPPPX", "XPPPPPPPPPPX", "XXXXXXXXXXXX");
+            foreach (var row in new[] { 1, 2 })
+            {
+                var (end, tiles) = Walk(map, new Vector2Int(1, row), E);
+                Assert.AreEqual(SmartStep.Blocked, end, $"row {row}");
+                Assert.AreEqual(9, tiles.Count, $"row {row} walks to the end");
+                Assert.IsTrue(tiles.All(t => t.y == row), "keeps to its lane");
+            }
+        }
+
+        [Test]
+        public void Corridor_TwoWideLBend_TurnsByItself_InEitherLane()
+        {
+            // Road along rows 5-6 to the east, bends north up columns 7-8.
+            var map = Map(
+                "XXXXXXXXXX",
+                "XGGGGGGPPX",
+                "XGGGGGGPPX",
+                "XGGGGGGPPX",
+                "XGGGGGGPPX",
+                "XPPPPPPPPX",
+                "XPPPPPPPPX",
+                "XXXXXXXXXX");
+            foreach (var row in new[] { 5, 6 })
+            {
+                var (end, tiles) = Walk(map, new Vector2Int(1, row), E);
+                Assert.AreNotEqual(SmartStep.Junction, end, $"lane row {row}: a bend is not a junction");
+                Assert.AreEqual(1, tiles[tiles.Count - 1].y, $"lane row {row}: walks up to the top");
+                int turnX = tiles.First(t => t.y < row).x;
+                Assert.IsTrue(tiles.Where(t => t.y < 5).All(t => t.x == turnX), "stays in one lane after the bend");
+            }
+        }
+
+        [Test]
+        public void Corridor_TwoWideT_StopsOnce_AtTheSideRoad()
+        {
+            var map = Map(
+                "XXXXXXXXXXXXXX",
+                "XGGGGGPPGGGGGX",
+                "XGGGGGPPGGGGGX",
+                "XPPPPPPPPPPPPX",
+                "XPPPPPPPPPPPPX",
+                "XXXXXXXXXXXXXX");
+            foreach (var row in new[] { 3, 4 })
+            {
+                var (end, tiles) = Walk(map, new Vector2Int(1, row), E);
+                Assert.AreEqual(SmartStep.Junction, end, $"lane row {row}");
+                Assert.AreEqual(new Vector2Int(6, row), tiles[tiles.Count - 1], $"lane row {row}: stops where the side road opens");
+                // The next swipe on goes past it to the end.
+                var (end2, more) = Walk(map, tiles[tiles.Count - 1], E);
+                Assert.AreEqual(SmartStep.Blocked, end2, "past the junction: no second stop on the side road's other lane");
+                Assert.AreEqual(12, more[more.Count - 1].x);
+            }
+        }
+
+        [Test]
+        public void Corridor_ThreeWidePlaza_WalksThrough()
+        {
+            var map = Map("XXXXXXXXXXXX", "XPPPPPPPPPPX", "XPPPPPPPPPPX", "XPPPPPPPPPPX", "XXXXXXXXXXXX");
+            for (int row = 1; row <= 3; row++)
+            {
+                var (end, tiles) = Walk(map, new Vector2Int(1, row), E);
+                Assert.AreEqual(SmartStep.Blocked, end, $"row {row}");
+                Assert.AreEqual(10, tiles[tiles.Count - 1].x);
+            }
+        }
+
+        [Test]
+        public void Corridor_Crossroads_Stops_AndChevronsShowThreeWays()
+        {
+            var map = Map(
+                "XXXXXXXXXXXX",
+                "XGGGGPPGGGGX",
+                "XGGGGPPGGGGX",
+                "XPPPPPPPPPPX",
+                "XPPPPPPPPPPX",
+                "XGGGGPPGGGGX",
+                "XGGGGPPGGGGX",
+                "XXXXXXXXXXXX");
+            var (end, tiles) = Walk(map, new Vector2Int(1, 3), E);
+            Assert.AreEqual(SmartStep.Junction, end);
+            var at = tiles[tiles.Count - 1];
+            Assert.AreEqual(5, at.x);
+            var ways = new List<Vector2Int>();
+            WalkPreview.OpenWays(map, at, E, ways);
+            CollectionAssert.AreEquivalent(new[] { E, N, S }, ways);
+        }
+
+        [Test]
+        public void Corridor_StopsBesideADoor_AndAtTheFirstGrass()
+        {
+            var map = Map("XXXXXXXXXXXX", "XPPPPPPPPPPX", "XPPPPPPPPPPX", "XXXXXXXXXXXX");
+            var door = new RectInt(8, 0, 1, 1);
+            WalkStop Stop(Vector2Int from, Vector2Int next) =>
+                WalkUp.Distance(next, door) == 1 && WalkUp.Distance(from, door) > 1 ? WalkStop.On : WalkStop.None;
+            var (end, tiles) = Walk(map, new Vector2Int(1, 1), E, Stop);
+            Assert.AreEqual(SmartStep.Interactable, end);
+            Assert.AreEqual(new Vector2Int(7, 1), tiles[tiles.Count - 1], "stops on the first tile beside it");
+        }
+    }
+}

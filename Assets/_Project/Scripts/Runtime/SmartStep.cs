@@ -51,10 +51,11 @@ namespace Diorama
         /// <paramref name="stopAt"/> gets (from tile, next tile).
         /// </summary>
         public static string Plan(IslandMap map, Vector2Int from, Vector2Int direction, bool continuous, int maxTiles,
-            Func<Vector2Int, Vector2Int, WalkStop> stopAt, List<Vector2Int> tiles, bool throughBranches = false)
+            Func<Vector2Int, Vector2Int, WalkStop> stopAt, List<Vector2Int> tiles, bool throughBranches = false, bool corridors = false)
         {
             tiles.Clear();
             if (map == null || direction.sqrMagnitude != 1) return Blocked;
+            if (corridors) return PlanCorridor(map, from, direction, maxTiles, stopAt, tiles);
             var cur = from;
             var h = direction;
             bool turned = false;
@@ -94,6 +95,69 @@ namespace Diorama
                 cur = next;
                 if (s == WalkStop.On) return Interactable;
                 if (!continuous && map.At(cur.y, cur.x) == IslandMap.TallGrass && was != IslandMap.TallGrass) return Grass;
+            }
+            return Cap;
+        }
+
+        // ---- step 29: corridors (roads two tiles wide) ----
+
+        /// <summary>A side opening counts when the road reaches this many tiles further that way than it did one step back.</summary>
+        public const int OpeningGain = 2;
+
+        /// <summary>A way "goes on" when the road runs at least this many tiles that way (a road's width is 2).</summary>
+        public const int GoesOn = 2;
+
+        /// <summary>Road tiles in a row from <paramref name="at"/> (excluded) toward <paramref name="way"/>.</summary>
+        public static int RoadRun(IslandMap map, Vector2Int at, Vector2Int way, int max = 8)
+        {
+            int n = 0;
+            for (var t = at + way; n < max && PathWalk(map, t); t += way) n++;
+            return n;
+        }
+
+        /// <summary>
+        /// Step 29: the ways the road opens from <paramref name="cur"/> when walking <paramref name="h"/>, per corridor, not
+        /// per tile. Ahead counts when the road runs on at least <see cref="GoesOn"/> tiles. A side counts only where the road
+        /// reaches <see cref="OpeningGain"/> or more tiles further that way than it did one tile back: the other lane of a
+        /// two-wide road (or a plaza's width) is the same on every step, so it never counts; a road leaving is a jump.
+        /// </summary>
+        public static void Openings(IslandMap map, Vector2Int cur, Vector2Int h, out bool ahead, out bool left, out bool right)
+        {
+            var l = Left(h);
+            var back = cur - h;
+            ahead = RoadRun(map, cur, h) >= GoesOn;
+            left = RoadRun(map, cur, l) >= RoadRun(map, back, l) + OpeningGain;
+            right = RoadRun(map, cur, -l) >= RoadRun(map, back, -l) + OpeningGain;
+        }
+
+        /// <summary>
+        /// Step 29: a swipe walk on corridors. Straight on along the road; at a bend (one way on, not ahead) it turns by
+        /// itself at the first tile that opens that way (so it keeps to its lane); at a real junction (two or more ways on)
+        /// it stops (<see cref="Junction"/>) and the next swipe picks; a dead end, a blocked tile or a stop from
+        /// <paramref name="stopAt"/> ends it. Off the road it walks straight. Only a tap or these stop it.
+        /// </summary>
+        static string PlanCorridor(IslandMap map, Vector2Int from, Vector2Int direction, int maxTiles,
+            Func<Vector2Int, Vector2Int, WalkStop> stopAt, List<Vector2Int> tiles)
+        {
+            var cur = from;
+            var h = direction;
+            for (int i = 0; i < maxTiles; i++)
+            {
+                if (i > 0 && PathWalk(map, cur))
+                {
+                    Openings(map, cur, h, out bool ahead, out bool a, out bool b);
+                    int ways = (ahead ? 1 : 0) + (a ? 1 : 0) + (b ? 1 : 0);
+                    if (ways >= 2) return Junction;
+                    if (!ahead && (a || b)) h = a ? Left(h) : -Left(h);
+                    // Not ahead and no opening: walk to the road's end (or the other lane's corner) and stop there.
+                }
+                var next = cur + h;
+                if (!map.CanWalk(next)) return Blocked;
+                var s = stopAt != null ? stopAt(cur, next) : WalkStop.None;
+                if (s == WalkStop.Before && i > 0) return Interactable;
+                tiles.Add(next);
+                cur = next;
+                if (s == WalkStop.On) return Interactable;
             }
             return Cap;
         }

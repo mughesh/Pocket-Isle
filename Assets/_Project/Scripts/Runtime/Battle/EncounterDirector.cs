@@ -217,6 +217,8 @@ namespace Diorama
 
         void Start()
         {
+            // Step 29: the swipe walk stops at the tall grass edge until the first wild Isling is met.
+            GestureTestPiece.GrassEdgeMetCheck = () => this != null && (Seen.Count > 0 || party != null && party.members.Count + party.storage.Count > 1);
             if (explorer == null || window == null || island == null || party == null || stage == null || runes == null || pods == null || typeChart == null)
             {
                 Debug.LogError("[EncounterDirector] Missing references (run Tools > Diorama > Step 5 > 2. Add Battle to MR_Main, then Tools > Pocket Isle > Set Up MR_Main (6 capture)).", this);

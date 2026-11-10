@@ -13,12 +13,23 @@ namespace Diorama
         public const int Tile = 0;
         public const int Footprints = 1;
         public const int Ring = 2;
+        /// <summary>Step 29: a chevron pointing along the yaw (walk preview, junction arrows).</summary>
+        public const int Chevron = 3;
+
+        /// <summary>Step 29 colour rule: gold = where to go next (trails, gold marks); white / soft cyan = the explorer's own walk.</summary>
+        public static readonly Color WalkColor = new Color(0.78f, 0.95f, 1f), WalkCore = new Color(1f, 1f, 1f), WalkOutline = new Color(0.03f, 0.08f, 0.12f);
 
         static readonly int ModeId = Shader.PropertyToID("_Mode");
         static readonly int AlphaId = Shader.PropertyToID("_Alpha");
         static readonly int PhaseId = Shader.PropertyToID("_Phase");
         static readonly int PulseId = Shader.PropertyToID("_Pulse");
         static readonly int IntensityId = Shader.PropertyToID("_Intensity");
+        static readonly int ColorId = Shader.PropertyToID("_Color");
+        static readonly int CoreId = Shader.PropertyToID("_Core");
+        static readonly int OutlineId = Shader.PropertyToID("_Outline");
+
+        /// <summary>Step 29: draw these marks white / soft cyan instead of the material's gold.</summary>
+        public bool walkColours;
 
         readonly string _name;
         readonly IslandBuilder _island;
@@ -67,6 +78,12 @@ namespace Diorama
             _block.SetFloat(PhaseId, phase);
             _block.SetFloat(PulseId, pulse ? 1f : 0f);
             _block.SetFloat(IntensityId, intensity);
+            if (walkColours)
+            {
+                _block.SetColor(ColorId, WalkColor);
+                _block.SetColor(CoreId, WalkCore);
+                _block.SetColor(OutlineId, WalkOutline);
+            }
             r.SetPropertyBlock(_block);
             if (!r.gameObject.activeSelf) r.gameObject.SetActive(true);
         }
