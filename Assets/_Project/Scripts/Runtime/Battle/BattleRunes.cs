@@ -786,7 +786,7 @@ namespace Diorama
                 Vector3 v = cam.WorldToViewportPoint(world);
                 if (v.z > 0f && v.y > captionMaxViewportY) world = cam.ViewportToWorldPoint(new Vector3(v.x, captionMaxViewportY, v.z));
                 Vector3 away = world - cam.transform.position;
-                if (away.sqrMagnitude > 1e-8f) _captionRoot.rotation = Quaternion.LookRotation(away, Vector3.up);
+                if (away.sqrMagnitude > 1e-8f) _captionRoot.rotation = Quaternion.LookRotation(away, BattleHud.LabelUp(cam));
             }
             _captionRoot.position = world;
         }

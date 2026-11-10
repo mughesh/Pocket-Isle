@@ -28,6 +28,26 @@ namespace Diorama.Tests
         }
 
         [Test]
+        public void LabelUp_IgnoresAHeadRoll()
+        {
+            var go = new GameObject("test cam");
+            try
+            {
+                var cam = go.AddComponent<Camera>();
+                go.transform.rotation = Quaternion.Euler(40f, 20f, 0f);
+                var level = BattleHud.LabelUp(cam);
+                go.transform.rotation = Quaternion.Euler(40f, 20f, 25f); // the same look, head tilted
+                var rolled = BattleHud.LabelUp(cam);
+                Assert.Less(Vector3.Angle(level, rolled), 0.5f);
+                Assert.Less(Vector3.Angle(level, Quaternion.Euler(40f, 20f, 0f) * Vector3.up), 0.5f, "no roll: the head's own up");
+            }
+            finally
+            {
+                Object.DestroyImmediate(go);
+            }
+        }
+
+        [Test]
         public void Bloom_StopsAtTheClosestTile_OnlyApproaching()
         {
             var bloom = new Vector2Int(0, 0);

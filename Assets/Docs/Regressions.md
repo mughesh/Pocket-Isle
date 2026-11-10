@@ -46,7 +46,12 @@ catches a break: a test, a smoke-run rule (`Note "rule"` in the smoke report, wa
 | R39 | Fishing and the pond line only from a bank, never a bridge; every realm with a river has a water table. | Nov 10 playtests | `Step29Tests.Fishing_NeverFromABridge_OnlyFromABank` |
 | R40 | A hand moment never leaves the explorer or a hand locked: every lock has an unlock on every exit (done, timeout, hand lost), logged `[HandPuzzle] lock/unlock <id>`. | Nov 7 (statue), Nov 10 (ember carry): 2nd time | `Step29Tests.Fingertip_*`; log |
 | R41 | A hand moment's ghost and chip show when the moment becomes usable, even if it was touched while blocked (the cold bellows). | Nov 6-8 ghost notes, Nov 10 bellows: came back | headset; log `lesson re-armed` |
-| R42 | No bubble, chip, card or tablet comes nearer the head than 45 cm. | Nov 10 playtests | `Step29Tests.Text_NeverCloserThan45cm...`; headset lean-in |
+| R42 | Only the Isling / Spirit speech bubble keeps 45 cm from the head; move tablets, captions, cards, chips and tablets stay where they are (pushed back, they sank into the island). | Nov 10 playtests; Nov 11 headset (over-applied) | `Nov11Tests.KeepTextAway_OnlyOnTheSpeechBubble` |
+| R43 | Labels that face the head use the head's up with the roll taken out (`BattleHud.LabelUp`): they never roll when the head tilts and stay level across the view. | Nov 11 headset | `Nov11Tests.LabelUp_IgnoresAHeadRoll`, `...NeverRollWithTheHead` |
+| R44 | Every HP display (bar, pod ring) changes when the hit lands on screen, never when the turn is worked out. | Nov 11 headset | headset; `BattleStage.ShownHp` |
+| R45 | Anything that heals says so before it's used (motes, a + now and then, a halo) and the walk stops beside it the first time, with the Spirit naming it. | Nov 11 headset | `Nov11Tests.Bloom_*` |
+| R46 | A Keeper door under 3 Islings always warns (every mode, the Quick Journey too) and never refuses. | Nov 11 headset (no warning seen) | `Nov11Tests.Temple_ThreeIslings_WarnsEverywhere_NeverAWall` |
+| R47 | No baked prop with features thinner than ~2 voxels or bumps on a round column: check the prop audit sheets (`PropAudit.All`) after new recipes. | Nov 11 headset (tower pillars jagged); 2nd time after the Nov 6 rug | `PropAudit` sheets, by eye |
 
 ## How to use
 - A new note that repeats one of these: say which rule broke and why the check missed it, then fix the check too.

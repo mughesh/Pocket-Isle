@@ -528,10 +528,11 @@ namespace Diorama
         }
 
         /// <summary>
-        /// Nov 11 (Mugesh: the name plates tilted with his head): a label's up is the world's up seen from the head (no
-        /// roll), so placement and turning both ignore a head tilt.
+        /// Nov 11 (Mugesh: the name plates tilted with his head): a label's up is the head's up with the roll taken out
+        /// (the world's up seen along the view), so a head tilt never turns them, and they stay level across the view
+        /// (plain world up slanted the ones off to the side when looking down).
         /// </summary>
-        static Vector3 LabelUp(Camera cam)
+        public static Vector3 LabelUp(Camera cam)
         {
             var up = Vector3.ProjectOnPlane(Vector3.up, cam.transform.forward);
             return up.sqrMagnitude > 1e-6f ? up.normalized : Vector3.up;
@@ -544,7 +545,7 @@ namespace Diorama
         {
             if (cam == null) return;
             Vector3 away = t.position - cam.transform.position;
-            if (away.sqrMagnitude > 1e-8f) t.rotation = Quaternion.LookRotation(away, Vector3.up);
+            if (away.sqrMagnitude > 1e-8f) t.rotation = Quaternion.LookRotation(away, LabelUp(cam));
         }
 
         void Free(TextMeshPro t)
