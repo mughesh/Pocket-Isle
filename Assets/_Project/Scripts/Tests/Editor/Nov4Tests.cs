@@ -6,18 +6,18 @@ namespace Diorama.Tests
     public class Nov4Tests
     {
         [Test]
-        public void Temple_Galewick4_Others6_QuickNone()
+        public void Temple_Three_Everywhere_QuickToo()
         {
-            Assert.AreEqual(4, TempleRules.Needed(true, false));
-            Assert.AreEqual(6, TempleRules.Needed(false, false));
-            Assert.AreEqual(0, TempleRules.Needed(true, true));
-            Assert.AreEqual(0, TempleRules.Needed(false, true));
+            Assert.AreEqual(3, TempleRules.Needed(true, false));
+            Assert.AreEqual(3, TempleRules.Needed(false, false));
+            Assert.AreEqual(3, TempleRules.Needed(true, true), "Nov 11: the Quick Journey warns too");
+            Assert.AreEqual(3, TempleRules.Needed(false, true));
         }
 
         [Test]
         public void Temple_EnoughIslings_LetsIn()
         {
-            Assert.IsFalse(TempleRules.CanEnter(3, 4));
+            Assert.IsFalse(TempleRules.CanEnter(2, 3));
             Assert.IsTrue(TempleRules.CanEnter(4, 4));
             Assert.IsFalse(TempleRules.CanEnter(5, 6));
             Assert.IsTrue(TempleRules.CanEnter(6, 6));

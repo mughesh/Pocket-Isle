@@ -305,7 +305,6 @@ namespace Diorama
         {
             _row = new GameObject("Rune Row").transform;
             _row.SetParent(transform, false);
-            KeepTextAway.On(_row); // step 29 G: the move tablets too
             for (int i = 0; i < _runes.Length; i++)
             {
                 var root = new GameObject($"Rune {i + 1}").transform;
@@ -318,7 +317,6 @@ namespace Diorama
             // Nov 10 (playtest: the line ran into Run and through props): its own billboard over the wild Isling, on top of
             // everything like the battle labels, away from the moves.
             _captionRoot = new GameObject("Caption").transform;
-            KeepTextAway.On(_captionRoot); // step 29 G
             _captionRoot.SetParent(transform, false);
             _caption = MakeText(_captionRoot, captionFontSize * captionScale);
             _caption.color = captionText;
@@ -788,7 +786,7 @@ namespace Diorama
                 Vector3 v = cam.WorldToViewportPoint(world);
                 if (v.z > 0f && v.y > captionMaxViewportY) world = cam.ViewportToWorldPoint(new Vector3(v.x, captionMaxViewportY, v.z));
                 Vector3 away = world - cam.transform.position;
-                if (away.sqrMagnitude > 1e-8f) _captionRoot.rotation = Quaternion.LookRotation(away, cam.transform.up);
+                if (away.sqrMagnitude > 1e-8f) _captionRoot.rotation = Quaternion.LookRotation(away, Vector3.up);
             }
             _captionRoot.position = world;
         }

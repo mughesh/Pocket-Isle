@@ -2372,7 +2372,7 @@ MonoBehaviour:
     objective: 0
     priority: 2
     note: 'step 14h: at a temple door with fewer Islings in the pods than suggested:
-      Galewick 4, the others 6; Go in / Not yet show; not in the Quick Journey'
+      3 at every door (Nov 11), the Quick Journey too; Go in / Not yet show'
     target: 
     validWhile: 
     context: realm
@@ -2437,6 +2437,20 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: Your Islings are healed!
+      context:
+  - id: heal.bloom.meet
+    once: 0
+    objective: 0
+    priority: 2
+    note: 'Nov 11: the walk stopped beside a healing bloom (first time in a realm, or with anyone hurt); {bloom} = dandelion / ember-lily / lotus'
+    target: landmark:healBloom
+    validWhile:
+    context:
+    kind: 0
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: A healing {bloom}! Poke it to heal your Islings.
       context:
   - id: hall.tired
     once: 0

@@ -23,7 +23,9 @@ namespace Diorama
         static readonly int OuterId = Shader.PropertyToID("_Outer");
 
         /// <summary>Ring size relative to the pod's diameter.</summary>
-        public float sizeOfPod = 2.1f;
+        public float sizeOfPod = DefaultSize;
+        /// <summary>Nov 11: slim, just round the glass (2.1 overlapped the next pod).</summary>
+        public const float DefaultSize = 1.42f;
         /// <summary>Fill speed (share per second) when HP changes; a sweep runs at this rate too.</summary>
         public float fillRate = 1.6f;
 
@@ -106,6 +108,14 @@ namespace Diorama
 
                 float share = Share(c);
                 bool fainted = c.IsFainted;
+                // Nov 11: in battle the ring follows the HP bar, which only drops when the hit lands (the model's HP
+                // changes when the turn is worked out, before the wild's move plays).
+                var stage = BattleStage.Live;
+                if (stage != null && stage.ShownHp(c, out float barHp, out int barMax))
+                {
+                    share = Mathf.Clamp01(barHp / Mathf.Max(1, barMax));
+                    fainted = barHp <= 0f;
+                }
                 if (r.shown < 0f) r.shown = share;
                 if (Time.time >= r.sweepAt)
                 {
@@ -126,7 +136,7 @@ namespace Diorama
                     {
                         r.root.rotation = Quaternion.LookRotation(away, Vector3.up);
                         // A little toward the head, so the rim's rock and the pod's own glass never cover it.
-                        r.root.position -= away.normalized * pod.WorldRadius * 1.1f;
+                        r.root.position -= away.normalized * pod.WorldRadius * 0.9f;
                     }
                 }
                 r.root.localScale = Vector3.one * size;
@@ -137,8 +147,9 @@ namespace Diorama
                 _block.SetFloat(FillId, fainted ? 1f : r.shown);
                 _block.SetColor(FillColorId, ColourFor(r.shown, fainted));
                 _block.SetFloat(AlphaId, fainted ? 0.85f : blink);
-                _block.SetFloat(InnerId, 0.66f);
-                _block.SetFloat(OuterId, 0.96f);
+                // Nov 11: slim, just outside the pod's glass (the thick 2.1x ring overlapped the next pod).
+                _block.SetFloat(InnerId, 0.75f);
+                _block.SetFloat(OuterId, 0.95f);
                 r.renderer.SetPropertyBlock(_block);
 
                 string badge = Badge(share, fainted);
@@ -165,9 +176,9 @@ namespace Diorama
             badgeGo.layer = layer;
             badgeGo.transform.SetParent(root, false);
             // Top-right of the ring, a little toward the head.
-            badgeGo.transform.localPosition = new Vector3(0.42f, 0.42f, -0.05f);
+            badgeGo.transform.localPosition = new Vector3(0.36f, 0.36f, -0.05f);
             var t = badgeGo.AddComponent<TextMeshPro>();
-            t.fontSize = 3.2f;
+            t.fontSize = 2.6f;
             t.fontStyle = FontStyles.Bold;
             t.alignment = TextAlignmentOptions.Center;
             t.textWrappingMode = TextWrappingModes.NoWrap;

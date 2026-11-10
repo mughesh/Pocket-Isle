@@ -302,10 +302,10 @@ namespace Diorama.Tests
         [Test]
         public void Temple_Warns_UnderTheSuggestedTeam_NeverInTheQuickJourney()
         {
-            Assert.AreEqual(4, TempleRules.Needed(true, false));
-            Assert.AreEqual(6, TempleRules.Needed(false, false));
-            Assert.AreEqual(0, TempleRules.Needed(true, true), "no warning in the Quick Journey");
-            Assert.IsFalse(TempleRules.CanEnter(3, 4), "3 at Galewick: the warning");
+            Assert.AreEqual(3, TempleRules.Needed(true, false));
+            Assert.AreEqual(3, TempleRules.Needed(false, false));
+            Assert.AreEqual(3, TempleRules.Needed(true, true), "Nov 11: the Quick Journey warns too");
+            Assert.IsFalse(TempleRules.CanEnter(2, 3), "2 at Galewick: the warning");
             Assert.IsTrue(TempleRules.CanEnter(6, 6), "a full team: straight in");
             Assert.AreEqual("temple.warn", TempleRules.Line(6));
             var s = UnityEditor.AssetDatabase.LoadAssetAtPath<DialogueScript>("Assets/_Project/Data/Dialogue/Script_v1.asset");

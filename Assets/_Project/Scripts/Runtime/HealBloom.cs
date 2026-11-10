@@ -19,6 +19,8 @@ namespace Diorama
     {
         public const string LandmarkName = "healBloom";
         public const string HealedLine = "heal.bloom";
+        /// <summary>Nov 11: the Spirit names it the first time the walk stops beside it (and when someone is hurt).</summary>
+        public const string MeetLine = "heal.bloom.meet";
 
         [Serializable]
         public struct Kind
@@ -39,7 +41,13 @@ namespace Diorama
         public Kind[] kinds = new Kind[0];
 
         [Tooltip("Height of the bloom in tiles.")]
-        public float heightTiles = 1.4f;
+        public float heightTiles = 1.8f;
+        [Tooltip("Nov 11: a fingertip this close (m) wakes it: it swells, glows green and its motes quicken.")]
+        public float hoverRadius = 0.08f;
+        [Tooltip("Nov 11: the walk stops at its closest tile when it passes this close (tiles, straight-line).")]
+        public float stopRadiusTiles = 2.3f;
+        [Tooltip("Nov 11: the heal's shockwave reach in tiles.")]
+        public float waveTiles = 2.5f;
         public float reopenSeconds = 60f;
         [Tooltip("A fingertip this close (m) pokes it.")]
         public float pokeRadius = 0.03f;
@@ -61,7 +69,25 @@ namespace Diorama
         MaterialPropertyBlock _block;
         readonly Dictionary<string, float> _closedUntil = new Dictionary<string, float>();
         readonly bool[] _wasNear = new bool[2], _wasPinching = { true, true };
-        float _open = 1f, _lastUse = -99f;
+        float _open = 1f, _lastUse = -99f, _hover, _squash, _nextMote, _nextPlus;
+        BattleFx.Item _halo;
+        Vector2Int? _stopTile;
+        readonly HashSet<string> _met = new HashSet<string>();
+
+        /// <summary>The name of a realm's bloom (for the Spirit's line).</summary>
+        public static string NameFor(string realm) =>
+            realm == "galewick" ? "dandelion" : realm == "cinderwood" ? "ember-lily" : realm == "lilymere" ? "lotus" : "healing flower";
+
+        /// <summary>
+        /// Nov 11 (Mugesh: it was a little off the road, the walk never stopped beside it): stop on <paramref name="next"/>
+        /// when it is the walk's closest tile to the bloom within <paramref name="radius"/> tiles: the walk gets nearer
+        /// with this step, and one more step the same way would not (pure).
+        /// </summary>
+        public static bool ClosestApproach(Vector2Int from, Vector2Int next, Vector2Int bloom, float radius)
+        {
+            float d0 = (from - bloom).sqrMagnitude, d1 = (next - bloom).sqrMagnitude, d2 = (next + (next - from) - bloom).sqrMagnitude;
+            return d1 <= radius * radius && d1 < d0 && d2 >= d1 && next != bloom;
+        }
 
         /// <summary>The bloom's tile on a map, if it has one (pure over the map).</summary>
         public static bool TryGetTile(WorldMap map, out Vector2Int tile)
@@ -92,13 +118,27 @@ namespace Diorama
 
         void Awake() => _instance = this;
 
-        void OnEnable() => GestureTestPiece.StopProviders.Add(Footprints);
-
-        void OnDisable() => GestureTestPiece.StopProviders.Remove(Footprints);
-
-        static IEnumerable<RectInt> Footprints(WorldMap map)
+        void OnEnable()
         {
-            if (TryGetTile(map, out var t)) yield return new RectInt(t.x, t.y, 1, 1);
+            if (explorer != null) explorer.walkStops.Add(WalkStopHere);
+        }
+
+        void OnDisable()
+        {
+            if (explorer != null) explorer.walkStops.Remove(WalkStopHere);
+            if (_halo != null && stage != null && stage.fx != null) stage.fx.Release(_halo);
+            _halo = null;
+        }
+
+        /// <summary>Nov 11: stops the walk at its closest tile to the bloom, the first time in a realm, or with anyone hurt.</summary>
+        WalkStop WalkStopHere(Vector2Int from, Vector2Int next)
+        {
+            var world = island != null ? island.world : null;
+            if (world == null || SceneSwap.IsInside || !TryGetTile(world, out var t)) return WalkStop.None;
+            if (_met.Contains(world.realm ?? "") && !(AnyHurt(party) && IsOpen(world.realm))) return WalkStop.None;
+            if (!ClosestApproach(from, next, t, stopRadiusTiles)) return WalkStop.None;
+            _stopTile = next;
+            return WalkStop.On;
         }
 
         void Start()
@@ -133,7 +173,28 @@ namespace Diorama
 
         void OnStep(Vector2Int tile)
         {
-            if (TryGetTile(island.world, out var t) && t == tile) Use("walked onto it");
+            if (!TryGetTile(island.world, out var t)) return;
+            if (t == tile)
+            {
+                Use("walked onto it");
+                return;
+            }
+            if (_stopTile == tile)
+            {
+                _stopTile = null;
+                Meet();
+            }
+        }
+
+        /// <summary>Nov 11: the walk stopped beside it: the Spirit says what it is and it wakes up a little.</summary>
+        void Meet()
+        {
+            string realm = island.world != null ? island.world.realm ?? "" : "";
+            bool first = _met.Add(realm);
+            Dialogue.SetVar("bloom", NameFor(realm));
+            Dialogue.Repeat(MeetLine);
+            _hover = Mathf.Max(_hover, 0.6f);
+            Debug.Log($"[HealBloom] {realm}: the walk stopped beside the {NameFor(realm)} ({(first ? "first time" : "someone is hurt")}); the Spirit names it.");
         }
 
         PropRecipe RecipeFor(string realm)
@@ -157,7 +218,11 @@ namespace Diorama
                 show = island.FootprintContains(ground);
             }
             if (_view.gameObject.activeSelf != show) _view.gameObject.SetActive(show);
-            if (!show) return;
+            if (!show)
+            {
+                if (_halo != null) _halo.SetAlpha(0f);
+                return;
+            }
             if (_realmShown != world.realm)
             {
                 _realmShown = world.realm;
@@ -171,10 +236,14 @@ namespace Diorama
             var bounds = recipe.bakedMesh.bounds;
             float scale = heightTiles * tileSize * island.Zoom / Mathf.Max(1e-4f, bounds.size.y);
             float breathe = 1f + 0.04f * Mathf.Sin(Time.time * 2.2f) * _open;
+            // Nov 11: a fingertip near wakes it (swells, glows); a poke squashes it before the puff.
+            _squash = Mathf.MoveTowards(_squash, 0f, Time.deltaTime / 0.18f);
+            float swell = 1f + 0.12f * _hover * _open, squash = 1f - 0.3f * Mathf.Sin(_squash * Mathf.PI);
             // Closed: folded down and dark; open: up, breathing, glowing.
             _view.localPosition = ground;
             _view.localRotation = Quaternion.Euler(0f, Time.time * 8f * _open, 0f);
-            _view.localScale = new Vector3(scale * Mathf.Lerp(0.75f, 1f, _open), scale * Mathf.Lerp(0.45f, 1f, _open) * breathe, scale * Mathf.Lerp(0.75f, 1f, _open));
+            float wide = scale * Mathf.Lerp(0.75f, 1f, _open) * swell * (2f - squash);
+            _view.localScale = new Vector3(wide, scale * Mathf.Lerp(0.45f, 1f, _open) * breathe * swell * squash, wide);
             float gold = Time.time < _goldUntil && open ? 0.5f + 0.5f * Mathf.Sin(Time.time * 5f) : 0f;
             _block.Clear();
             recipe.ApplyTo(_block);
@@ -182,19 +251,70 @@ namespace Diorama
             _block.SetFloat(RestoredSelfId, 1f);
             _block.SetFloat(ClearSinkId, 0f);
             if (gold > 0f) _block.SetColor(OutlineTintId, new Color(gold * this.gold.r + (1f - gold) * 0.1f, Mathf.Lerp(0.08f, this.gold.g, gold), Mathf.Lerp(0.05f, this.gold.b, gold), 1f));
+            else if (_hover > 0.01f && open) _block.SetColor(OutlineTintId, Color.Lerp(new Color(0.1f, 0.08f, 0.05f, 1f), HealFx.Green, _hover));
             _renderer.SetPropertyBlock(_block);
-            if (!GameMenu.IsOpen && !GamePause.IsPaused) Hands(_view.position + Vector3.up * (bounds.size.y * scale * 0.5f));
+            Cues(world.realm, open, Head());
+            bool near = false;
+            if (!GameMenu.IsOpen && !GamePause.IsPaused) near = Hands(_view.position + Vector3.up * (bounds.size.y * scale * 0.5f));
+            _hover = Mathf.MoveTowards(_hover, near && open ? 1f : 0f, Time.deltaTime / (near ? 0.15f : 0.6f));
         }
 
-        void Hands(Vector3 at)
+        float TileWorldSize => (island.map != null ? island.map.tileSize : 0.05f) * island.Zoom * island.transform.lossyScale.x;
+
+        Vector3 Head()
         {
+            var mesh = _filter != null ? _filter.sharedMesh : null;
+            float h = mesh != null ? mesh.bounds.size.y * _view.lossyScale.y : TileWorldSize;
+            return _view.position + _view.up * (h * 0.75f);
+        }
+
+        /// <summary>
+        /// Nov 11 (Mugesh: nothing said it heals): while open, soft green motes rise from the flower, a green "+" floats up
+        /// now and then, and a faint green halo breathes on the ground round it. Gone while closed.
+        /// </summary>
+        void Cues(string realm, bool open, Vector3 head)
+        {
+            var fx = stage != null ? stage.fx : null;
+            if (fx == null) return;
+            float tile = TileWorldSize;
+            var up = island.transform.up;
+            if (_halo == null)
+            {
+                _halo = fx.Get(BattleFx.Shape.Ring);
+                _halo.Set(HealFx.Green, Color.white, 1f, 1.2f);
+            }
+            float haloAlpha = open ? (0.28f + 0.14f * Mathf.Sin(Time.time * 2.2f)) * (1f + 1.6f * _hover) * _open : 0f;
+            _halo.transform.SetPositionAndRotation(_view.position + up * (tile * 0.03f), island.transform.rotation);
+            _halo.transform.localScale = Vector3.one * (tile * (1.1f + 0.25f * _hover) / Mathf.Max(1e-5f, fx.transform.lossyScale.x));
+            _halo.SetAlpha(Mathf.Clamp01(haloAlpha));
+            if (!open) return;
+            if (Time.time >= _nextMote)
+            {
+                _nextMote = Time.time + (_hover > 0.3f ? 0.06f : 0.22f);
+                HealFx.Mote(fx, head, up, tile, realm, _hover > 0.3f);
+            }
+            if (Time.time >= _nextPlus)
+            {
+                _nextPlus = Time.time + 2.6f;
+                stage.PopHealAt(head + up * (tile * 0.2f), 0.8f, 1.6f);
+            }
+        }
+
+        /// <summary>Pokes and look + pinch; true while a fingertip is within <see cref="hoverRadius"/>.</summary>
+        bool Hands(Vector3 at)
+        {
+            bool any = false;
             for (int h = 0; h < 2; h++)
             {
                 bool left = h == 0;
                 var hand = HandRegistry.Get(left ? Handedness.Left : Handedness.Right);
                 bool tracked = hand != null && hand.IsTrackedDataValid;
                 bool busy = grabGuard != null && grabGuard.IsHandBusy(left);
-                bool near = tracked && !busy && HandLookup.TryGetJoint(hand, HandJointId.HandIndexTip, out var tip) && (tip - at).magnitude < pokeRadius;
+                Vector3 tip = default;
+                bool hasTip = tracked && !busy && HandLookup.TryGetJoint(hand, HandJointId.HandIndexTip, out tip);
+                float dist = hasTip ? (tip - at).magnitude : float.MaxValue;
+                if (dist < hoverRadius) any = true;
+                bool near = dist < pokeRadius;
                 if (near && !_wasNear[h]) Use("poke");
                 _wasNear[h] = near;
                 bool pinch = tracked && hand.GetIndexFingerIsPinching();
@@ -202,6 +322,7 @@ namespace Diorama
                     Use("look + pinch");
                 _wasPinching[h] = pinch;
             }
+            return any;
         }
 
         /// <summary>Heals at the current map's bloom (bridge, tests: "debug").</summary>
@@ -215,34 +336,42 @@ namespace Diorama
                 Debug.Log($"[HealBloom] {world.realm}: closed ({how}), opens in {_closedUntil[world.realm] - Time.time:0} s.");
                 return;
             }
+            _squash = 1f;
             if (!AnyHurt(party))
             {
-                Debug.Log($"[HealBloom] {world.realm}: nobody hurt ({how}), a shimmer only.");
-                if (stage != null && _view != null) stage.PopHealAt(_view.position);
+                Debug.Log($"[HealBloom] {world.realm}: nobody hurt ({how}), a small puff only.");
+                if (stage != null && stage.fx != null && _view != null)
+                {
+                    var p = HealFx.For(world.realm);
+                    float tile = TileWorldSize;
+                    stage.fx.Burst(Head(), p.count / 4, p.main, tile * 0.8f, p.life * 0.7f, tile * 0.05f, island.transform.up * (tile * p.rise));
+                }
                 return;
             }
             Heals++;
             party.HealAll();
-            if (pods != null) pods.HealSweep(0f);
             _closedUntil[world.realm] = Time.time + reopenSeconds;
-            GameAudio.Ui(Diorama.Audio.AudioIds.ShrineHeal);
-            Dialogue.Say(HealedLine);
-            StartCoroutine(Burst());
-            Debug.Log($"[HealBloom] {world.realm}: healed ({how}); closed for {reopenSeconds:0} s.");
+            StartCoroutine(HealMoment(world.realm));
+            Debug.Log($"[HealBloom] {world.realm}: healed ({how}); big puff, heal wave; closed for {reopenSeconds:0} s.");
         }
 
-        IEnumerator Burst()
+        /// <summary>
+        /// Nov 11: the poke squashes it, then it bursts in the realm's puff (seeds, embers or petals); a moment later the
+        /// heal wave washes over the explorer (flash, two shockwaves, a rising halo, sparkles and "+"), the pod rings
+        /// refill with a sweep, the chime and the Spirit's line.
+        /// </summary>
+        IEnumerator HealMoment(string realm)
         {
-            if (stage == null) yield break;
-            var rnd = new System.Random(Heals);
-            float tile = island.map != null ? island.map.tileSize * island.transform.lossyScale.x : 0.03f;
-            for (int i = 0; i < 12; i++)
-            {
-                var centre = explorer.WorldPosition;
-                float a = (float)rnd.NextDouble() * Mathf.PI * 2f, r = tile * (0.3f + 0.9f * (float)rnd.NextDouble());
-                stage.PopHealAt(centre + new Vector3(Mathf.Cos(a) * r, tile * 0.3f * (float)rnd.NextDouble(), Mathf.Sin(a) * r));
-                yield return new WaitForSeconds(0.08f);
-            }
+            yield return new WaitForSeconds(0.12f);
+            var fx = stage != null ? stage.fx : null;
+            float tile = TileWorldSize;
+            var up = island.transform.up;
+            GameAudio.Ui(Diorama.Audio.AudioIds.ShrineHeal);
+            if (fx != null && _view != null) StartCoroutine(HealFx.Puff(fx, Head(), up, tile, realm));
+            yield return new WaitForSeconds(0.35f);
+            if (pods != null) pods.HealSweep(0.12f);
+            Dialogue.Say(HealedLine);
+            if (fx != null) yield return HealFx.Wave(fx, stage, explorer.WorldPosition, island.transform.rotation, up, tile, waveTiles);
         }
     }
 }

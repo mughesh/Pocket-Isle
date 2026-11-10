@@ -137,13 +137,22 @@ namespace Diorama
             Debug.Log("[HearthShrines] Lodge heal: the floor's green + rise, the rings refill one by one.");
             var room = island.Content;
             if (stage == null || room == null) yield break;
+            // Nov 11 (Mugesh: the floor's heal could look better): the shared heal wave from the room's middle (flash,
+            // shockwaves across the floor, a rising halo, sparkles), while green light motes and "+" well up all over the
+            // floor for ~2.5 s.
+            float tile = island.map.tileSize * island.Zoom * island.transform.lossyScale.x;
+            var up = island.transform.up;
+            var mid = island.transform.TransformPoint(island.TileToLocal(new Vector2((room.Columns - 1) * 0.5f, (room.Rows - 1) * 0.5f), room.capHeight));
+            if (fx != null) StartCoroutine(HealFx.Wave(fx, stage, mid, island.transform.rotation, up, tile, Mathf.Max(room.Columns, room.Rows) * 0.55f, 2.2f));
             var rnd = new System.Random(7);
-            for (float t = 0f; t < 2.2f; t += 0.07f)
+            for (float t = 0f; t < 2.5f; t += 0.06f)
             {
-                var tile = new Vector2(1f + (float)rnd.NextDouble() * Mathf.Max(1, room.Columns - 3), 1f + (float)rnd.NextDouble() * Mathf.Max(1, room.Rows - 3));
-                var world = island.transform.TransformPoint(island.TileToLocal(tile, room.capHeight));
-                stage.PopHealAt(world, 1.7f, 2.2f);
-                yield return new WaitForSeconds(0.07f);
+                var at = new Vector2(1f + (float)rnd.NextDouble() * Mathf.Max(1, room.Columns - 3), 1f + (float)rnd.NextDouble() * Mathf.Max(1, room.Rows - 3));
+                var world = island.transform.TransformPoint(island.TileToLocal(at, room.capHeight));
+                if (rnd.NextDouble() < 0.45) stage.PopHealAt(world, 1.5f, 2f);
+                if (fx != null)
+                    fx.Burst(world, 3, rnd.NextDouble() < 0.3 ? HealFx.Gold : HealFx.Green, tile * 0.12f, 1.4f, tile * 0.05f, up * (tile * 1.4f));
+                yield return new WaitForSeconds(0.06f);
             }
         }
 

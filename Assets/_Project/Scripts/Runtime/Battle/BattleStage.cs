@@ -107,7 +107,30 @@ namespace Diorama
             }
         }
 
-        void OnEnable() => ObjectiveArea.Collect += KeepClearOfCreatures;
+        void OnEnable()
+        {
+            ObjectiveArea.Collect += KeepClearOfCreatures;
+            Live = this;
+        }
+
+        /// <summary>Nov 11: the stage in the scene (the pod HP rings read the HP bar through it).</summary>
+        public static BattleStage Live { get; private set; }
+
+        IslingInstance _playerBarOwner;
+
+        /// <summary>
+        /// Nov 11 (Mugesh: the pod ring dropped when he chose his move, before the wild's hit landed): the HP the near
+        /// Isling's battle bar shows now (it only changes when a hit lands); false when <paramref name="c"/> has no bar.
+        /// </summary>
+        public bool ShownHp(IslingInstance c, out float hp, out int max)
+        {
+            hp = 0f;
+            max = 1;
+            if (c == null || _playerBar == null || _playerBarOwner != c) return false;
+            hp = _playerBar.target;
+            max = _playerBar.max;
+            return true;
+        }
 
         void OnDisable()
         {
@@ -207,6 +230,7 @@ namespace Diorama
             hud.RemoveBar(_playerBar);
             // Step 14k: the near one's label in front of its pad, toward the runes.
             _playerBar = hud.AddBar(_player, player.Name, player.level, player.currentHp, player.MaxHp, 0f, true, () => PadRadiusLocal(_playerPad));
+            _playerBarOwner = player;
             if (progression != null) hud.SetXp(_playerBar, progression.XpShare(player));
         }
 

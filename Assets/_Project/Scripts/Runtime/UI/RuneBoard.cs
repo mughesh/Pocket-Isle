@@ -161,7 +161,6 @@ namespace Diorama
             _block = new MaterialPropertyBlock();
             _root = new GameObject("Board").transform;
             _root.SetParent(transform, false);
-            KeepTextAway.On(_root); // step 29 G
             var reticleGo = new GameObject("Gaze Reticle");
             reticleGo.transform.SetParent(_root, false);
             reticleGo.transform.localScale = Vector3.one * 0.008f;

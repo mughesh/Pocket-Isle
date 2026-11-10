@@ -55,7 +55,6 @@ namespace Diorama
         {
             _progression = progression;
             _root = new GameObject("Pod Card").transform;
-            KeepTextAway.On(_root); // step 29 G
             _panel = Quad("Panel", hud, quad, new Vector3(Width, Height, 1f), Vector3.zero, 0);
             SetPanelWidth(Width);
             _bar = Quad("HP Bar", hud, quad, new Vector3(BarWidth, BarHeight, 1f), new Vector3(0f, -0.0035f, -0.0005f), 1);

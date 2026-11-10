@@ -356,7 +356,7 @@ namespace Diorama
             PlateExtents(out float bottom, out float top, out float halfW);
             float padR = b.padRadiusNow != null ? b.padRadiusNow() : b.padRadius;
             Vector3 feet = island.TileToLocal(a.tile, island.Content.capHeight + a.baseLift);
-            Vector3 up = cam.transform.up;
+            Vector3 up = LabelUp(cam);
             Vector3 At(float shift) => it.TransformPoint(feet + new Vector3(shift, footLift, padR + footGap)) + up * (-bottom * scale);
 
             float settleUntil = b.bornAt;
@@ -421,7 +421,7 @@ namespace Diorama
             var clear = cr.Value;
             clear.yMax += 0.015f; // a little air over the moves
             cr = clear;
-            Vector3 up = cam.transform.up, right = cam.transform.right;
+            Vector3 up = LabelUp(cam), right = LabelRight(cam);
             for (int k = 0; k < 40; k++)
             {
                 Vector3 lo = cam.WorldToViewportPoint(world - right * halfW - up * below);
@@ -446,7 +446,7 @@ namespace Diorama
             var r = ScreenRect(cam, nb);
             if (!r.HasValue) return 0f;
             var rect = r.Value;
-            Vector3 right = cam.transform.right, up = cam.transform.up;
+            Vector3 right = LabelRight(cam), up = LabelUp(cam);
             for (int k = 0; k <= 30; k++)
                 for (int s = 0; s < 2; s++)
                 {
@@ -527,12 +527,24 @@ namespace Diorama
             b.quad.SetPropertyBlock(_block);
         }
 
+        /// <summary>
+        /// Nov 11 (Mugesh: the name plates tilted with his head): a label's up is the world's up seen from the head (no
+        /// roll), so placement and turning both ignore a head tilt.
+        /// </summary>
+        static Vector3 LabelUp(Camera cam)
+        {
+            var up = Vector3.ProjectOnPlane(Vector3.up, cam.transform.forward);
+            return up.sqrMagnitude > 1e-6f ? up.normalized : Vector3.up;
+        }
+
+        static Vector3 LabelRight(Camera cam) => Vector3.Cross(LabelUp(cam), cam.transform.forward).normalized;
+
         /// <summary>Turns a label so its front faces the camera.</summary>
         static void Face(Transform t, Camera cam)
         {
             if (cam == null) return;
             Vector3 away = t.position - cam.transform.position;
-            if (away.sqrMagnitude > 1e-8f) t.rotation = Quaternion.LookRotation(away, cam.transform.up);
+            if (away.sqrMagnitude > 1e-8f) t.rotation = Quaternion.LookRotation(away, Vector3.up);
         }
 
         void Free(TextMeshPro t)

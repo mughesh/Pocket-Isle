@@ -365,6 +365,8 @@ Step 11b, the hand moments (lesson lines stay pinned as a chip until the moment 
   - Spirit: I can't get there from here. Let's walk closer.
 - `heal.bloom` · in any · story (step 29: a healing bloom or the lodge healed hurt Islings)
   - Spirit: Your Islings are healed!
+- `heal.bloom.meet` · in any · story (Nov 11: the walk stopped beside a healing bloom, first time in a realm or with anyone hurt; {bloom} = dandelion / ember-lily / lotus)
+  - Spirit: A healing {bloom}! Poke it to heal your Islings.
 - `hall.tired` · in realm · story (step 29: at a Keeper's door with an Isling under half HP or fainted; once per door until healed; the bloom pulses gold)
   - Spirit: Your Islings are tired. Heal them first.
 - `lm.keeper.meet` · in hall · story · once · → tidemother (step 11c: in the lake temple, she clutches the hoarded water)

@@ -508,6 +508,9 @@ namespace Diorama.EditorTools
 
             // ---- step 29: HP rings, the pod card's line, a healing bloom, the tired warning (bridge: RunOnly with arg "Step29") ----
 
+            Vector3 _bloomWorld;
+            double _usedAt = 999;
+            bool _puffShot, _waveShot;
             bool _chose29;
             double _choseAt29;
 
@@ -545,6 +548,7 @@ namespace Diorama.EditorTools
                     var rack = UnityEngine.Object.FindFirstObjectByType<PodRack>();
                     int pods = Party_.members.Count(c => c != null && c.species != null);
                     Step27Debug.Shot("29_rings");
+                    Nov11Debug.Rings("nov11_rings");
                     if (rack == null || rack.HpRings == null || rack.HpRings.Shown != pods)
                     {
                         Note("problem", $"Step29 rings: {(rack != null && rack.HpRings != null ? rack.HpRings.Shown : -1)} shown for {pods} pods");
@@ -577,8 +581,18 @@ namespace Diorama.EditorTools
                     var bloom = UnityEngine.Object.FindFirstObjectByType<HealBloom>();
                     if (bloom == null) return false;
                     if (Elapsed < 2.5) return false;
-                    if (Elapsed < 3.1) { Step27Debug.Shot("29_bloom_open"); return false; }
-                    if (bloom.Heals == 0) bloom.Use("smoke");
+                    if (Elapsed < 3.1)
+                    {
+                        Step27Debug.Shot("29_bloom_open");
+                        if (HealBloom.TryGetTile(GameState.Instance.explorer.island.world, out var bt))
+                            _bloomWorld = GameState.Instance.explorer.island.transform.TransformPoint(
+                                GameState.Instance.explorer.island.TileToLocal(bt, GameState.Instance.explorer.island.Content.capHeight));
+                        Nov11Debug.Close("nov11_bloom_idle", _bloomWorld, 0.2f, 0.05f);
+                        return false;
+                    }
+                    if (bloom.Heals == 0) { bloom.Use("smoke"); _usedAt = Elapsed; }
+                    if (!_puffShot && Elapsed - _usedAt > 0.3) { _puffShot = true; Nov11Debug.Close("nov11_bloom_puff", _bloomWorld, 0.3f, 0.06f); }
+                    if (!_waveShot && Elapsed - _usedAt > 0.95) { _waveShot = true; Nov11Debug.Close("nov11_bloom_wave", GameState.Instance.explorer.WorldPosition, 0.32f, 0.08f); }
                     if (Elapsed < 4.5) return false;
                     Step27Debug.Shot("29_bloom_healed");
                     return bloom.Heals > 0 && AllFull() && !bloom.IsOpenHere;
