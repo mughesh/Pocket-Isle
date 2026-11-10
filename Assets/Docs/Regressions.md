@@ -38,6 +38,15 @@ catches a break: a test, a smoke-run rule (`Note "rule"` in the smoke report, wa
 | R31 | From any seated head position the moves, the battle line and the name labels never overlap. | Nov 10 playtest (2nd time after step 24 moved the row) | SmokeRun `BattleLayout` (6 heads) |
 | R32 | The Spirit hovers over the active interaction, never on the island's floor. | Nov 10 playtest (step 16 had parked it beside the target) | headset; shots `layout_*` |
 | R33 | While the menu is open a lesson's card is grey and off the tablets, its ghost hidden. The menu stops the game's clock: anything timed by `Time.time` freezes where it is. | Nov 10 playtest | SmokeRun `MenuOverLesson`; headset |
+| R34 | Every road is at least 2 tiles wide, except the listed bridge and the road through tall grass; widening never opens a way round a blocker (log, vine, gate). | Nov 10 playtests, step 29 A0 | `Step29Tests.RealMaps_HaveNoOneWideRoadsLeft_ExceptTheListed`, `Step14eTests` (vine) |
+| R35 | The swipe walk stops at real junctions (per corridor), beside doors, shrines and blooms, and at the first tall grass; never mid-corridor on a 2-wide road. A tap stops it anywhere. | Nov 10 playtests (2nd time walking was the top complaint) | `Step29Tests` corridor tests |
+| R36 | Gold means "where to go next" only; the explorer's own walk marks and junction arrows are white / soft cyan. | Nov 10 playtests | headset |
+| R37 | Off-turn the moves are sunk and grey, and a press only shakes: nothing is ever queued. | Nov 10 playtests | `Step29Tests`; log `pressed off-turn` |
+| R38 | Every rim pod shows its HP ring, in battle or not; a hurt pod's card says where to heal. | Nov 10 playtests | smoke `RunOnly` "Step29" |
+| R39 | Fishing and the pond line only from a bank, never a bridge; every realm with a river has a water table. | Nov 10 playtests | `Step29Tests.Fishing_NeverFromABridge_OnlyFromABank` |
+| R40 | A hand moment never leaves the explorer or a hand locked: every lock has an unlock on every exit (done, timeout, hand lost), logged `[HandPuzzle] lock/unlock <id>`. | Nov 7 (statue), Nov 10 (ember carry): 2nd time | `Step29Tests.Fingertip_*`; log |
+| R41 | A hand moment's ghost and chip show when the moment becomes usable, even if it was touched while blocked (the cold bellows). | Nov 6-8 ghost notes, Nov 10 bellows: came back | headset; log `lesson re-armed` |
+| R42 | No bubble, chip, card or tablet comes nearer the head than 45 cm. | Nov 10 playtests | `Step29Tests.Text_NeverCloserThan45cm...`; headset lean-in |
 
 ## How to use
 - A new note that repeats one of these: say which rule broke and why the check missed it, then fix the check too.

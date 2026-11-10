@@ -588,7 +588,23 @@ namespace Diorama.EditorTools
                     return $"heals {(b != null ? b.Heals : -1)}, full {AllFull()}";
                 });
 
-                // Seat shots for the report: a fishing bank (ripples), a junction stop (chevrons), the battle's two turns.
+                // Seat shots for the report: a junction stop (chevrons), a fishing bank (ripples), the battle's two turns.
+                Add(P, "shot: a junction stop on the Still Isle", () => Go("Hub: wind gate"), () =>
+                {
+                    if (Elapsed < 4 || SceneSwap.IsBusy) return false;
+                    var e = GameState.Instance.explorer;
+                    if (Elapsed < 4.6)
+                    {
+                        e.Teleport(new Vector2Int(15, 5), new Vector2Int(0, 1));
+                        UnityEngine.Object.FindFirstObjectByType<MicrogestureInput>().DebugRaise(ThumbGesture.SwipeBack, GestureSource.Keyboard);
+                        return false;
+                    }
+                    if (!e.IsStill || Elapsed < 6) return false;
+                    Step27Debug.Shot("29_junction");
+                    if (e.PlanEnd != SmartStep.Junction) Note("problem", $"Step29: the walk ended at {e.PlanEnd}, c{e.Tile.x} r{e.Tile.y}");
+                    return true;
+                }, 25f, null, 0.1f, false, () => $"explorer c{GameState.Instance.explorer.Tile.x} r{GameState.Instance.explorer.Tile.y}, end {GameState.Instance.explorer.PlanEnd}");
+                Add(P, "back to Galewick", () => Go("GW: tower"), () => Elapsed > 4 && !SceneSwap.IsBusy, 20f);
                 Add(P, "shot: a Galewick fishing bank", () =>
                 {
                     var e = GameState.Instance.explorer;
