@@ -1343,6 +1343,10 @@ namespace Diorama
 
         /// <summary>Step 9f: "+34" in gold rising from a world point (a benched Isling's pod on the rim).</summary>
         /// <summary>Step 18: a small green "+" over a rim pod (a little rest after a win).</summary>
+        /// <summary>Step 29: a heal "+" of a given size and life (the lodge's floor, the bloom's burst).</summary>
+        public void PopHealAt(Vector3 world, float scale, float seconds) =>
+            hud.PopText(hud.transform.InverseTransformPoint(world) + Vector3.up * 0.012f, "+", HealColor, scale, seconds);
+
         public void PopHealAt(Vector3 world) =>
             hud.PopText(hud.transform.InverseTransformPoint(world) + Vector3.up * 0.012f, "+", HealColor, 1.2f, 1.6f);
 

@@ -123,6 +123,30 @@ namespace Diorama
             if (lodgeToo) StartCoroutine(IntoLodgeAfterLoss());
         }
 
+        /// <summary>
+        /// Step 29 C15 (playtest: healing in the lodge wasn't felt): green "+" flow up out of the lodge floor for about 2 s,
+        /// the rim rings refill one by one with a soft chime, and the Spirit says the Islings are healed. Only when someone
+        /// was hurt.
+        /// </summary>
+        IEnumerator LodgeHealMoment()
+        {
+            yield return new WaitForSeconds(0.4f);
+            var stage = FindFirstObjectByType<BattleStage>();
+            if (pods != null) pods.HealSweep(0.3f);
+            Dialogue.Say(HealBloom.HealedLine);
+            Debug.Log("[HearthShrines] Lodge heal: the floor's green + rise, the rings refill one by one.");
+            var room = island.Content;
+            if (stage == null || room == null) yield break;
+            var rnd = new System.Random(7);
+            for (float t = 0f; t < 2.2f; t += 0.07f)
+            {
+                var tile = new Vector2(1f + (float)rnd.NextDouble() * Mathf.Max(1, room.Columns - 3), 1f + (float)rnd.NextDouble() * Mathf.Max(1, room.Rows - 3));
+                var world = island.transform.TransformPoint(island.TileToLocal(tile, room.capHeight));
+                stage.PopHealAt(world, 1.7f, 2.2f);
+                yield return new WaitForSeconds(0.07f);
+            }
+        }
+
         IEnumerator IntoLodgeAfterLoss()
         {
             yield return null;
@@ -544,6 +568,7 @@ namespace Diorama
             LastShrine = shrine;
             LastShrineMap = OutdoorMap != null ? OutdoorMap.name : null;
             if (LastShrineMap != null) ShrineByMap[LastShrineMap] = shrine;
+            bool hurt = HealBloom.AnyHurt(party);
             party.HealEveryone();
             pods.WarmWave();
             GameAudio.At(AudioIds.ShrineFlare, FlameWorld(shrine));
@@ -556,6 +581,7 @@ namespace Diorama
             if (swap != null && lodge != null) swap.Enter(lodge, lodge.startTile);
             while (SceneSwap.IsBusy) yield return null;
             _entering = false;
+            if (hurt) StartCoroutine(LodgeHealMoment());
         }
 
         Vector3 FlameWorld(Vector2Int shrine) =>

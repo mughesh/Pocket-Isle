@@ -237,6 +237,21 @@ namespace Diorama
 
         public float releaseGrace = 0.1f, lostGrace = 0.3f;
 
+        /// <summary>
+        /// Step 29 (playtest: the carry got stuck, never reached the forge, movement stayed off): touching the ember sets
+        /// the index fingertip on fire (no pinch, no grip); poking the target with that finger lights it. Not lit within
+        /// <see cref="fingerTimeout"/> s, or the hand lost for <see cref="fingerLost"/> s: the flame floats back to the ember.
+        /// </summary>
+        public bool fingertip;
+        public float fingerTimeout = 20f, fingerLost = 1f;
+        float _held;
+
+        /// <summary>Seconds the flame has been on the finger.</summary>
+        public float HeldSeconds => State == EmberState.Held ? _held : 0f;
+
+        /// <summary>Why the last fingertip flame went back ("timeout", "hand lost"), or null.</summary>
+        public string BackReason { get; private set; }
+
         public EmberState State { get; private set; } = EmberState.InVent;
         /// <summary>The hand carrying it (0 left, 1 right), -1 = none.</summary>
         public int Holder { get; private set; } = -1;
@@ -254,11 +269,12 @@ namespace Diorama
                     for (int h = 0; h < hands.Length; h++)
                     {
                         var x = hands[h];
-                        if (x.tracked && !x.busy && x.gripStarted && x.atEmber)
+                        if (x.tracked && !x.busy && (fingertip || x.gripStarted) && x.atEmber)
                         {
                             State = EmberState.Held;
                             Holder = h;
-                            _open = _lost = 0f;
+                            _open = _lost = _held = 0f;
+                            BackReason = null;
                             OverFirebox = false;
                             return State;
                         }
@@ -267,6 +283,26 @@ namespace Diorama
                 case EmberState.Held:
                 {
                     var x = Holder >= 0 && Holder < hands.Length ? hands[Holder] : default;
+                    if (fingertip)
+                    {
+                        _held += dt;
+                        if (!x.tracked)
+                        {
+                            _lost += dt;
+                            if (_lost >= fingerLost) GoBack("hand lost");
+                            break;
+                        }
+                        _lost = 0f;
+                        OverFirebox = x.overFirebox;
+                        if (x.overFirebox)
+                        {
+                            State = EmberState.In;
+                            Holder = -1;
+                            OverFirebox = false;
+                        }
+                        else if (_held >= fingerTimeout) GoBack("timeout");
+                        break;
+                    }
                     if (!x.tracked)
                     {
                         _lost += dt;
@@ -293,6 +329,14 @@ namespace Diorama
         void Release()
         {
             State = OverFirebox ? EmberState.In : EmberState.Falling;
+            Holder = -1;
+            OverFirebox = false;
+        }
+
+        void GoBack(string why)
+        {
+            BackReason = why;
+            State = EmberState.Falling;
             Holder = -1;
             OverFirebox = false;
         }

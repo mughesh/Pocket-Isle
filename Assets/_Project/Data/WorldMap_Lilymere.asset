@@ -535,3 +535,7 @@ MonoBehaviour:
     tile: {x: 22, y: 13}
     line: 
     radius: 0
+  - name: healBloom
+    tile: {x: 24, y: 10}
+    line: 
+    radius: 0

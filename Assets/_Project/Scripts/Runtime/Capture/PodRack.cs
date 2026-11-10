@@ -252,6 +252,7 @@ namespace Diorama
             for (int i = 0; i < _xpFlash.Length; i++) _xpFlash[i] = -10f;
             _quad = BattleHud.VerticalQuad();
             if (hudMaterial != null) _card = new PodCard(hudMaterial, _quad, progression);
+            _hpRings = new PodHpRings(Resources.Load<Material>("PodRing"), _quad);
             Layout();
             if (handle != null) handle.GrabStarted += CloseCard;
             Dialogue.RegisterTarget("leadPod", () => PointOf(party.LeadSlot), k => PulseOf(party.LeadSlot, k), () => FocusRadius(party.LeadSlot));
@@ -291,10 +292,19 @@ namespace Diorama
 
         void OnDisable() => ResumeRim();
 
+        PodHpRings _hpRings;
+
+        /// <summary>Step 29 C: the HP rings round the rim pods (tests, the bridge).</summary>
+        public PodHpRings HpRings => _hpRings;
+
+        /// <summary>Step 29 C: the rings refill with a sweep; <paramref name="stagger"/> &gt; 0 = one after another, each with a soft chime.</summary>
+        public void HealSweep(float stagger) => _hpRings?.Sweep(stagger, stagger > 0f);
+
         void OnDestroy()
         {
             if (handle != null) handle.GrabStarted -= CloseCard;
             if (_card != null) _card.Destroy();
+            _hpRings?.Destroy();
             if (_quad != null) Destroy(_quad);
         }
 
@@ -454,7 +464,12 @@ namespace Diorama
         void Update()
         {
             if (!_laidOut) return;
-            if (HideForTitle()) return;
+            if (HideForTitle())
+            {
+                _hpRings?.Tick(this, party, true);
+                return;
+            }
+            _hpRings?.Tick(this, party, MenuUp || SceneSwap.IsBusy);
             SyncParty();
             UpdateCradle();
             UpdateDropPreview();

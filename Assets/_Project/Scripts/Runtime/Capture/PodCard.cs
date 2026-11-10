@@ -31,7 +31,15 @@ namespace Diorama
 
         readonly Transform _root;
         readonly MeshRenderer _panel, _bar, _xp;
-        readonly TextMeshPro _name, _info, _hp, _next;
+        readonly TextMeshPro _name, _info, _hp, _next, _tip;
+        const float TipHeight = 0.017f;
+        public const string TiredLine = "Tired! Heal at the lodge or a healing bloom.", FaintedLine = "Fainted. Heal at the lodge or a healing bloom.";
+
+        /// <summary>Step 29 C: the line under a hurt Isling's HP (pure): tired, fainted, or none at full HP.</summary>
+        public static string HealTip(IslingInstance c) => c == null ? "" : c.IsFainted ? FaintedLine : c.currentHp < c.MaxHp ? TiredLine : "";
+
+        /// <summary>The tip shown now (tests, the bridge).</summary>
+        public string Tip => _tip != null && _tip.gameObject.activeSelf ? _tip.text : "";
         readonly ProgressionConfig _progression;
         readonly MaterialPropertyBlock _block = new MaterialPropertyBlock();
         float _until, _appear;
@@ -55,19 +63,25 @@ namespace Diorama
             _info = Text("Info", SmallSize, new Vector3(0f, 0.0058f, -0.001f), 0.008f);
             _hp = Text("HP", SmallSize, new Vector3(0f, -0.0205f, -0.001f), 0.008f);
             _next = Text("Next", SmallSize * 0.85f, new Vector3(XpWidth * 0.5f + 0.002f, XpY, -0.001f), 0.008f);
+            _tip = Text("Tip", SmallSize * 0.85f, new Vector3(0f, -Height * 0.5f - TipHeight * 0.45f, -0.001f), TipHeight);
+            _tip.color = new Color(0.62f, 0.2f, 0.12f, 1f);
+            _tip.textWrappingMode = TextWrappingModes.Normal;
+            _tip.gameObject.SetActive(false);
             _next.alignment = TextAlignmentOptions.Center;
             _next.rectTransform.sizeDelta = new Vector2(BarWidth - XpWidth + 0.002f, 0.008f);
             _root.gameObject.SetActive(false);
         }
 
-        void SetPanelWidth(float width)
+        void SetPanelWidth(float width, bool tip = false)
         {
-            _panel.transform.localScale = new Vector3(width, Height, 1f);
+            float height = Height + (tip ? TipHeight : 0f);
+            _panel.transform.localScale = new Vector3(width, height, 1f);
+            _panel.transform.localPosition = new Vector3(0f, tip ? -TipHeight * 0.5f : 0f, 0f);
             var block = new MaterialPropertyBlock();
             block.SetColor(BackColorId, Back);
             block.SetColor(BorderColorId, Ink);
             block.SetFloat(FillId, 0f);
-            block.SetFloat(AspectId, width / Height);
+            block.SetFloat(AspectId, width / height);
             block.SetFloat(RadiusId, 0.25f);
             block.SetFloat(BorderId, 0.045f);
             _panel.SetPropertyBlock(block);
@@ -139,7 +153,17 @@ namespace Diorama
             _until = Time.time + seconds;
             if (!Visible) _appear = 0f;
             _root.gameObject.SetActive(true);
-            SetPanelWidth(FitName(c.Name));
+            string tipText = HealTip(c);
+            bool tip = tipText.Length > 0;
+            float panel = FitName(c.Name);
+            _tip.gameObject.SetActive(tip);
+            if (tip)
+            {
+                // Two short lines under the HP ("Tired!" / "Heal at the lodge or a healing bloom."), wrapped to the card.
+                _tip.text = tipText;
+                _tip.rectTransform.sizeDelta = new Vector2(panel - 2f * Pad, TipHeight);
+            }
+            SetPanelWidth(panel, tip);
             string state = c.IsFainted ? " · <color=#B04030>Fainted</color>" : "";
             _info.text = $"Lv {c.level} · {c.Element}{state}";
             float f = c.MaxHp > 0 ? Mathf.Clamp01(c.currentHp / (float)c.MaxHp) : 0f;

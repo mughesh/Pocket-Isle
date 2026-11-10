@@ -469,6 +469,9 @@ namespace Diorama
             public Vector3 pinchPoint, palm;
             /// <summary>Nov 8: the palm's facing (out of the palm side; the palm joint's -Y on both hands, ISDK v207).</summary>
             public Vector3 palmNormal;
+            /// <summary>Step 29: the index fingertip (the burning finger).</summary>
+            public Vector3 indexTip;
+            public bool tipTracked;
             public bool Holding => pinch || fist;
             /// <summary>The pinch point while pinching, the palm while a fist.</summary>
             public Vector3 GripPoint => pinch ? pinchPoint : palm;
@@ -489,6 +492,7 @@ namespace Diorama
                     s.palm = palmPose.position;
                     s.palmNormal = palm ? palmPose.rotation * Vector3.down : Vector3.up;
                     s.fist = palm && IsFist(hand, s.palm);
+                    s.tipTracked = HandLookup.TryGetJoint(hand, HandJointId.HandIndexTip, out s.indexTip);
                 }
                 s.busy = grabGuard != null && grabGuard.IsHandBusy(left);
                 s.pinchStarted = s.pinch && !_wasPinching[h];

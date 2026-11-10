@@ -363,6 +363,10 @@ Step 11b, the hand moments (lesson lines stay pinned as a chip until the moment 
   - Spirit: The temple is open! Walk in.
 - `door.noway` · in any · story (step 27: look + pinch on a door with no walkable way there)
   - Spirit: I can't get there from here. Let's walk closer.
+- `heal.bloom` · in any · story (step 29: a healing bloom or the lodge healed hurt Islings)
+  - Spirit: Your Islings are healed!
+- `hall.tired` · in realm · story (step 29: at a Keeper's door with an Isling under half HP or fainted; once per door until healed; the bloom pulses gold)
+  - Spirit: Your Islings are tired. Heal them first.
 - `lm.keeper.meet` · in hall · story · once · → tidemother (step 11c: in the lake temple, she clutches the hoarded water)
   - Tidemother: Stay back! This water is all that's left. I won't lose it again!
   - Spirit: She's so scared. Let's calm her down.

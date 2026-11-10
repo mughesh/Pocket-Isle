@@ -768,10 +768,16 @@ MonoBehaviour:
   aboveIslandMargin: 0.015
   blipEvery: 4
   blipGap: 0.12
+  grainGap: 0.2
+  entranceAfterSeconds: 30
   blipVolume: 0.75
   objectivesBlip: 1
   heartBlipEvery: 7
   heartBlipGap: 0.3
+  parkedBack: {r: 0.46, g: 0.46, b: 0.45, a: 0.82}
+  parkedEdge: {r: 0.3, g: 0.3, b: 0.29, a: 1}
+  parkedText: {r: 0.17, g: 0.17, b: 0.17, a: 1}
+  parkedSpot: {x: 0.16, y: 0.07}
 --- !u!4 &232676578
 Transform:
   m_ObjectHideFlags: 0
@@ -1909,12 +1915,15 @@ MonoBehaviour:
   swipeWalksUntilTap: 1
   untilTapTiles: 200
   doubleSwipeSeconds: 0.45
+  lessonSpeed: 0.65
+  roamTiles: 60
   maxPathSteps: 40
   runPathSteps: 8
   showDebugLabels: 0
   holdReleaseMm: 5
   holdGraceSeconds: 0.25
   hopHeight: 0.012
+  stopAtFirstGrass: 1
 --- !u!114 &374318555
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2007,6 +2016,8 @@ MonoBehaviour:
   appearStagger: 0.04
   walkOnAhead: 6
   intensity: 1.4
+  junctionSeconds: 2
+  junctionTiles: 0.7
 --- !u!114 &374318560
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2101,6 +2112,9 @@ MonoBehaviour:
   captionScale: 1.2
   captionText: {r: 1, g: 0.95, b: 0.84, a: 1}
   captionPill: {r: 0.13, g: 0.1, b: 0.08, a: 0.86}
+  overArena: 1
+  arenaInset: 0.04
+  arenaHover: 0.03
   pods: {fileID: 78739058}
   podReach: 0.12
   duckOffset: {x: 0, y: 0.07, z: -0.04}
@@ -2111,6 +2125,12 @@ MonoBehaviour:
   pressDepth: 0.008
   runWidth: 0.7
   popStagger: 0.1
+  offTurnSink: 0.016
+  offTurnBack: 0.008
+  offTurnGrey: 0.85
+  turnSeconds: 0.25
+  captionOverHead: 0.03
+  captionMaxViewportY: 0.86
 --- !u!4 &382714128
 Transform:
   m_ObjectHideFlags: 0
@@ -2296,6 +2316,69 @@ MonoBehaviour:
   keeperSpot: {x: 4.5, y: 4}
   ringSize: 2.4
   firstLine: 
+--- !u!1 &476515065
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 476515067}
+  - component: {fileID: 476515066}
+  m_Layer: 0
+  m_Name: Heal Blooms
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &476515066
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 476515065}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d2b1818aafbc404692985b965f1b5e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.HealBloom
+  island: {fileID: 270959109}
+  explorer: {fileID: 374318554}
+  party: {fileID: 1499891276}
+  pods: {fileID: 78739058}
+  stage: {fileID: 1078587928}
+  grabGuard: {fileID: 270959111}
+  material: {fileID: 2100000, guid: 816769f54a1129a4992d139a9519d8a4, type: 2}
+  kinds:
+  - realm: galewick
+    recipe: {fileID: 11400000, guid: 96c0de2dcbb20f346b4587aec50797c3, type: 2}
+  - realm: cinderwood
+    recipe: {fileID: 11400000, guid: bce0c6eff82c82f4e9ae77ab569b2223, type: 2}
+  - realm: lilymere
+    recipe: {fileID: 11400000, guid: ee0903dcf9a5bf042908a1074691ca31, type: 2}
+  heightTiles: 1.4
+  reopenSeconds: 60
+  pokeRadius: 0.03
+  gazeRadius: 0.03
+  gold: {r: 1, g: 0.82, b: 0.3, a: 1}
+--- !u!4 &476515067
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 476515065}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &509277689
 GameObject:
   m_ObjectHideFlags: 0
@@ -3259,7 +3342,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.FocusHighlight
   beamMaterial: {fileID: 2100000, guid: c343845155ce4db4085e740710002b64, type: 2}
   gold: {r: 1, g: 0.74, b: 0.16, a: 1}
-  hoverColor: {r: 1, g: 1, b: 1, a: 1}
+  gazeColor: {r: 1, g: 0.95, b: 0.82, a: 1}
+  gazeGlow: 0.45
+  pinchIconSize: 0.05
+  pinchIconGap: 0.015
+  pinchIconHandNear: 0.08
+  tickGap: 0.35
+  tickVolume: 0.35
   lingerSeconds: 6
   softPulseGap: 4
   haloSize: 1.5
@@ -3827,6 +3916,7 @@ MonoBehaviour:
   pause: {fileID: 1541842442}
   encounters: {fileID: 1499891275}
   onboarding: {fileID: 1380201671}
+  roomGap: 0.022
   dim: 0.45
   firstLine: menu.first
 --- !u!1 &1037280312
@@ -4331,6 +4421,8 @@ MonoBehaviour:
   footGap: 0.006
   footLift: 0.002
   minViewportY: 0.06
+  nearSideGap: 0.012
+  nearChest: 0.55
   clearCheckSeconds: 0.25
   settleSeconds: 1.5
   ghostHold: 0.4
@@ -4381,6 +4473,7 @@ MonoBehaviour:
   idleSway: 3
   glanceYaw: 14
   lungeHop: 0.35
+  theirTurnBeat: 0.7
 --- !u!1 &1083828881
 GameObject:
   m_ObjectHideFlags: 0
@@ -4530,6 +4623,7 @@ MonoBehaviour:
   - cinder.brazier.two
   - cinder.brazier.three
   openLine: cinder.forge.open
+  walkInLine: cinder.forge.walkin
   coldLine: cw.forge.cold
   volume: 0.7
 --- !u!114 &1127440542
@@ -5287,6 +5381,9 @@ MonoBehaviour:
   goldMaterial: {fileID: 2100000, guid: dc3915bdb04a1cb4eb4760821e23e7b7, type: 2}
   fx: {fileID: 1078587927}
   sparkleColor: {r: 1, g: 0.82, b: 0.35, a: 1}
+  practicePassSeconds: 60
+  practiceNiceLine: lesson.practice.nice
+  practiceDoneLine: lesson.practice.done
   twoHandsPassSeconds: 8
   swipeTiles: 4
 --- !u!4 &1380201672
@@ -6328,6 +6425,8 @@ MonoBehaviour:
   roarSeconds: 2.5
   doneLine: cw.ember.done
   volume: 0.7
+  fingertipFire: 1
+  touchRadius: 0.03
   tipLine: cw.ember.tip
   tipChip: Tip it in!
 --- !u!1 &1612879608
@@ -6950,7 +7049,9 @@ MonoBehaviour:
   speakLift: 0.012
   speakBrighten: 0.18
   shineBrighten: 0.35
-  flySeconds: 0.5
+  glideSeconds: 0.6
+  parkSeconds: 5
+  staysWithin: 0.06
   flyArc: 0.02
   targetOffset: {x: 0.065, y: 0.012, z: 0}
   aboveOffset: {x: 0.1, y: 0.015}
@@ -6961,6 +7062,7 @@ MonoBehaviour:
   holdSharpness: 7
   sparkScale: 0.72
   sparkGlow: 0.35
+  minHover: 0.09
   sideGap: 0.05
   sideLift: 0.02
   bubbleProbe: {x: 0.07, y: 0.05}
@@ -7107,6 +7209,7 @@ MonoBehaviour:
   title: {fileID: 59714807}
   firstWalkLesson: walk
   shardMaterial: {fileID: 2100000, guid: 5cf32f9131fcae742b5bdedc45e8d5d7, type: 2}
+  crackSparksPerSecond: 14
   starters:
   - {fileID: 11400000, guid: 4e0827bf455d6eb4c853967a75296d1d, type: 2}
   - {fileID: 11400000, guid: 3e6a8bbe90a2d0447b3543119e52c28a, type: 2}
@@ -7469,6 +7572,8 @@ MonoBehaviour:
   tipChip: Drop it on the vine!
   doneLine: cw.vine.done
   volume: 0.7
+  fingertipFire: 1
+  touchRadius: 0.03
 --- !u!1 &1994521897
 GameObject:
   m_ObjectHideFlags: 0
@@ -8434,3 +8539,4 @@ SceneRoots:
   - {fileID: 1553131432}
   - {fileID: 1200054858}
   - {fileID: 2107210737}
+  - {fileID: 476515067}

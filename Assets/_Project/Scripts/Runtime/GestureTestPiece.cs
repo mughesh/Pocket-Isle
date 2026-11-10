@@ -272,6 +272,9 @@ namespace Diorama
         /// <summary>False while a battle or the battle zoom is on, or a hand moment holds it (no walking, no GoTo).</summary>
         public bool CanMove => !_locked && !_heldStill && !Zoomed;
 
+        /// <summary>Step 29: the explorer's tile centre in the world (on the cap).</summary>
+        public Vector3 WorldPosition => TileWorld(_tile);
+
         /// <summary>Step 29: standing (no step in progress, no heading).</summary>
         public bool IsStill => _stepT >= 1f && _heading == Vector2Int.zero;
 

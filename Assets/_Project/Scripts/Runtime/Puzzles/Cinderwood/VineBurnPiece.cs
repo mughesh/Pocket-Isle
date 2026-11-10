@@ -55,6 +55,12 @@ namespace Diorama
         [Range(0f, 1f)] public float volume = 0.7f;
 
         readonly EmberCarry _carry = new EmberCarry();
+        [Tooltip("Step 29: touch the ember = the index fingertip catches fire; poke the target with it. Off = pick and place.")]
+        public bool fingertipFire = true;
+        [Tooltip("Step 29: a fingertip this close (m) touches the ember.")]
+        public float touchRadius = 0.03f;
+        FingerFlame _flame;
+        string _fingerChip = "Now poke the fire";
         readonly HandState[] _hands = new HandState[2];
         readonly EmberCarry.Hand[] _in = new EmberCarry.Hand[2];
         readonly Vector3[] _grip = new Vector3[2];
@@ -76,7 +82,7 @@ namespace Diorama
         public override Vector3? FocusPoint => Here && !IsSolved && (_carry.State == EmberState.InVent || _carry.State == EmberState.Hovering) ? _emberWorld : (Vector3?)null;
         public override float FocusRadius => 0.5f * TileWorld;
         /// <summary>The lesson's grab_drop ghost picks the ember and lets go over the vine.</summary>
-        public override Vector3? GhostDropPoint => Here && !IsSolved ? VineWorld : (Vector3?)null;
+        public override Vector3? GhostDropPoint => !fingertipFire && Here && !IsSolved ? VineWorld : (Vector3?)null;
 
         float Scale => grabGuard != null ? grabGuard.ScaleFactor : 1f;
         Vector2 VineMiddle
@@ -106,6 +112,9 @@ namespace Diorama
                 _burning = new PropView[vine.Length];
                 for (int i = 0; i < vine.Length; i++) _burning[i] = new PropView($"Burning Vine {i}", island, vineRecipe);
             }
+            _carry.fingertip = fingertipFire;
+            _flame = new FingerFlame(fx);
+            if (fingertipFire) ghostClip = "poke";
             _rings = new GuideRings("Vine Guide", island, guideMaterial, 2, fx);
             Dialogue.RegisterTarget("vine", () => Here && !IsSolved ? VineWorld : (Vector3?)null, null, () => 0.8f * TileWorld);
             if (guideMaterial == null) Debug.LogError($"[VineBurnPiece] {name}: no guide material, so no gold rings (Set Up MR_Main (14e Nov 3 late notes)).", this);
@@ -119,6 +128,7 @@ namespace Diorama
             if (_burning != null)
                 foreach (var v in _burning) v?.Destroy();
             _rings?.Destroy();
+            _flame?.Hide();
             ReleaseHalo();
             if (map != null)
                 foreach (var t in vine)
@@ -173,7 +183,7 @@ namespace Diorama
             if (_carry.State == EmberState.Held)
             {
                 // The carrying hand never walks the explorer or swipes.
-                IslandHandle.MarkHandHeld(_carry.Holder == 0);
+                if (!_carry.fingertip) IslandHandle.MarkHandHeld(_carry.Holder == 0);
                 TileTouch.Block(_carry.Holder == 0, 0.4f);
             }
         }
@@ -183,6 +193,18 @@ namespace Diorama
             var s = _hands[h];
             var x = new EmberCarry.Hand { tracked = s.tracked, busy = s.busy, holding = s.Holding, gripStarted = s.pinchStarted || s.fistStarted };
             float scale = Scale;
+            if (_carry.fingertip)
+            {
+                x.tracked = s.tracked && s.tipTracked;
+                if (!x.tracked) return x;
+                _grip[h] = s.indexTip;
+                float touch = Mathf.Max(touchRadius * scale + 0.25f * emberSize * TileWorld, 0.025f);
+                bool idle = _carry.State == EmberState.InVent || _carry.State == EmberState.Hovering;
+                if (idle && !s.busy && (s.indexTip - _emberWorld).magnitude <= touch * 2f) FocusHighlight.Hover(_emberWorld, FocusRadius);
+                x.atEmber = (s.indexTip - _emberWorld).magnitude <= touch;
+                x.overFirebox = OverVine(s.indexTip, scale);
+                return x;
+            }
             float reach = Mathf.Max(grabRadius * scale + 0.25f * emberSize * TileWorld, grabAssist);
             bool waiting = _carry.State == EmberState.InVent || _carry.State == EmberState.Hovering;
             if (s.tracked && !s.busy && waiting && (s.GripPoint - _emberWorld).magnitude <= reach) FocusHighlight.Hover(_emberWorld, FocusRadius);
@@ -212,6 +234,14 @@ namespace Diorama
             {
                 case EmberState.Held:
                     MarkInteracted();
+                    Debug.Log($"[HandPuzzle] lock {id}: {(_carry.fingertip ? "fingertip fire" : "ember carried")} ({(_carry.Holder == 0 ? "left" : "right")} hand).");
+                    if (_carry.fingertip)
+                    {
+                        _flame.Catch(_grip[_carry.Holder], island.transform.up);
+                        Dialogue.SetChip(_fingerChip);
+                        Debug.Log($"[{GetType().Name}] {id}: the fingertip caught fire; poke the vine with it.");
+                        break;
+                    }
                     Dialogue.SetChip(tipChip);
                     if (Time.time - _tipSaidAt > 12f && !string.IsNullOrEmpty(tipLine))
                     {
@@ -223,11 +253,20 @@ namespace Diorama
                     if (fx != null) fx.Burst(_emberWorld, 10, new Color(1f, 0.6f, 0.25f), TileWorld * 0.4f, 0.6f, TileWorld * 0.04f, island.transform.up * TileWorld * 0.8f);
                     break;
                 case EmberState.Falling:
+                    Debug.Log($"[HandPuzzle] unlock {id}: {(_carry.fingertip ? $"the flame floats back to the ember ({_carry.BackReason ?? "let go"})" : "the ember falls back")}.");
+                    if (_carry.fingertip)
+                    {
+                        _fallFrom = _flame.Shown ? _emberWorld : _emberWorld;
+                        _flame.Hide();
+                        Dialogue.SetChip(null);
+                    }
                     Debug.Log($"[VineBurnPiece] {id}: let go away from the vine, the ember falls back to its vent.");
                     _fallFrom = _emberWorld;
                     _anim = 0f;
                     break;
                 case EmberState.In:
+                    Debug.Log($"[HandPuzzle] unlock {id}: lit.");
+                    if (_carry.fingertip) { _flame.Light(_emberWorld, island.transform.up); Dialogue.SetChip(null); }
                     Debug.Log($"[VineBurnPiece] {id}: dropped on the vine.");
                     StartCoroutine(Burn(_emberWorld));
                     break;
@@ -352,6 +391,13 @@ namespace Diorama
                 case EmberState.Hovering:
                     _emberWorld = Vector3.Lerp(_emberWorld, HoverWorld, Time.deltaTime * 4f);
                     break;
+                case EmberState.Held when _carry.fingertip:
+                    if (_carry.Holder >= 0) _emberWorld = _grip[_carry.Holder];
+                    if (Here) _flame.Show(_emberWorld, island.transform.up);
+                    Guide(show);
+                    if (_ember != null) _ember.Hide();
+                    ReleaseHalo();
+                    return;
                 case EmberState.Held:
                     if (_carry.Holder >= 0) _emberWorld = Vector3.Lerp(_emberWorld, _grip[_carry.Holder], Time.deltaTime * 25f);
                     break;

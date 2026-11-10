@@ -503,6 +503,87 @@ namespace Diorama.EditorTools
                 if (_only != null && _only.Any(o => o.StartsWith("Step27", StringComparison.OrdinalIgnoreCase))) Step27Shots();
                 if (_only != null && _only.Any(o => o.StartsWith("MenuOverBattle", StringComparison.OrdinalIgnoreCase))) MenuOverBattle();
                 if (_only != null && _only.Any(o => o.StartsWith("BattleLayout", StringComparison.OrdinalIgnoreCase))) BattleLayout();
+                if (_only != null && _only.Any(o => o.StartsWith("Step29", StringComparison.OrdinalIgnoreCase))) Step29();
+            }
+
+            // ---- step 29: HP rings, the pod card's line, a healing bloom, the tired warning (bridge: RunOnly with arg "Step29") ----
+
+            void Step29()
+            {
+                const string P = "Step29";
+                static void Hurt()
+                {
+                    var party = Party_;
+                    if (party == null) return;
+                    for (int i = 0; i < party.members.Count; i++)
+                    {
+                        var c = party.members[i];
+                        if (c == null) continue;
+                        c.currentHp = i == 0 ? Mathf.Max(1, c.MaxHp / 5) : i == 1 ? 0 : Mathf.Max(1, c.MaxHp * 3 / 5);
+                    }
+                    party.NotifyChanged();
+                }
+                static bool AllFull() => Party_ != null && Party_.members.All(c => c == null || c.currentHp >= c.MaxHp);
+                Add(P, "preset (reload, Continue)", () =>
+                {
+                    DevCheats.WildOff = true;
+                    GameState.Instance.QuickPreset(GameState.QuickStage.Gift);
+                }, () => QuickJourney.Active && !TitleScreen.Showing && Elapsed > 6, 60f, () => { if (TitleScreen.Showing) RuneBoard.DebugPress("Continue"); }, 2f, true);
+                Add(P, "go to the tower, hurt the team", () =>
+                {
+                    BattleDebug.SeatCamera();
+                    DevCheats.Invincible = true;
+                    DevCheats.WildOff = true;
+                    Go("GW: tower");
+                }, () => Elapsed > 4 && !SceneSwap.IsBusy, 20f);
+                Add(P, "a ring on every pod (low blinks, fainted grey)", Hurt, () =>
+                {
+                    if (Elapsed < 2) return false;
+                    var rack = UnityEngine.Object.FindFirstObjectByType<PodRack>();
+                    int pods = Party_.members.Count(c => c != null && c.species != null);
+                    Step27Debug.Shot("29_rings");
+                    if (rack == null || rack.HpRings == null || rack.HpRings.Shown != pods)
+                    {
+                        Note("problem", $"Step29 rings: {(rack != null && rack.HpRings != null ? rack.HpRings.Shown : -1)} shown for {pods} pods");
+                        return true;
+                    }
+                    return true;
+                }, 10f, null, 0.5f, true);
+                Add(P, "the hurt pod's card says where to heal", () =>
+                {
+                    var rack = UnityEngine.Object.FindFirstObjectByType<PodRack>();
+                    var c = Party_.members[0];
+                    rack.ShowCardFor(c, () => rack.SlotWorld(0) + Vector3.up * 0.06f, 6f);
+                }, () =>
+                {
+                    if (Elapsed < 1) return false;
+                    Step27Debug.Shot("29_card");
+                    if (PodCard.HealTip(Party_.members[0]) != PodCard.TiredLine) Note("problem", "Step29 card: the hurt pod has no tired line");
+                    return true;
+                }, 8f);
+                Add(P, "at the tower door: the Spirit says heal first", () =>
+                {
+                    TempleRules.TiredCheck(UnityEngine.Object.FindFirstObjectByType<TowerDoor>());
+                }, () => Elapsed > 1.5, 6f);
+                Add(P, "the bloom heals everyone", () =>
+                {
+                    var explorer = GameState.Instance.explorer;
+                    if (HealBloom.TryGetTile(explorer.island.world, out var t)) explorer.Teleport(t + new Vector2Int(0, 2), new Vector2Int(0, -1));
+                }, () =>
+                {
+                    var bloom = UnityEngine.Object.FindFirstObjectByType<HealBloom>();
+                    if (bloom == null) return false;
+                    if (Elapsed < 2.5) return false;
+                    if (Elapsed < 3.1) { Step27Debug.Shot("29_bloom_open"); return false; }
+                    if (bloom.Heals == 0) bloom.Use("smoke");
+                    if (Elapsed < 4.5) return false;
+                    Step27Debug.Shot("29_bloom_healed");
+                    return bloom.Heals > 0 && AllFull() && !bloom.IsOpenHere;
+                }, 15f, null, 0.5f, true, () =>
+                {
+                    var b = UnityEngine.Object.FindFirstObjectByType<HealBloom>();
+                    return $"heals {(b != null ? b.Heals : -1)}, full {AllFull()}";
+                });
             }
 
             // ---- Nov 10: moves, battle line and name labels never overlap, from several heads (bridge: RunOnly with arg "BattleLayout") ----

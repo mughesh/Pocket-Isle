@@ -46,12 +46,47 @@ namespace Diorama
 
         static Party _party;
 
+        public const string TiredLine = "hall.tired";
+        /// <summary>Step 29 C16: an Isling under this share of its HP (or fainted) counts as tired.</summary>
+        public const float TiredShare = 0.5f;
+        static readonly System.Collections.Generic.HashSet<string> _toldTired = new System.Collections.Generic.HashSet<string>();
+
+        /// <summary>Any Isling in the pods fainted or under half HP (pure).</summary>
+        public static bool AnyTired(Party party)
+        {
+            if (party == null) return false;
+            foreach (var c in party.members)
+                if (c != null && c.species != null && (c.IsFainted || c.currentHp < c.MaxHp * TiredShare)) return true;
+            return false;
+        }
+
+        /// <summary>
+        /// Step 29 C16 (playtests: nobody healed before a Keeper): at a Keeper's door with a tired team the Spirit says once
+        /// (per door, until the team is healed) "Your Islings are tired. Heal them first." and the healing bloom pulses gold.
+        /// Never a wall: the door goes on as usual.
+        /// </summary>
+        public static void TiredCheck(Object door)
+        {
+            if (_party == null) _party = Object.FindFirstObjectByType<Party>();
+            string key = door != null ? door.name : "door";
+            if (!AnyTired(_party))
+            {
+                _toldTired.Remove(key);
+                return;
+            }
+            if (!_toldTired.Add(key)) return;
+            Dialogue.Repeat(TiredLine);
+            HealBloom.PulseGold(10f);
+            Debug.Log($"[TempleRules] {key}: the team is tired: the Spirit says heal first; the bloom pulses gold (the door still works).");
+        }
+
         /// <summary>
         /// True when the explorer may walk straight in. Otherwise (a small team) the Spirit warns, Go in / Not yet show,
         /// and <paramref name="enter"/> runs on Go in. <paramref name="asked"/> keeps a bump right after "Not yet" quiet.
         /// </summary>
         public static bool Gate(bool galewick, string keeper, ref float asked, Object door, Action enter)
         {
+            TiredCheck(door);
             int needed = Needed(galewick, QuickJourney.Active);
             if (needed <= 0) return true;
             if (_party == null) _party = Object.FindFirstObjectByType<Party>();

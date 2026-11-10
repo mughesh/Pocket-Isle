@@ -2425,6 +2425,34 @@ MonoBehaviour:
       speakerName: Spirit
       text: I can't get there from here. Let's walk closer.
       context:
+  - id: heal.bloom
+    once: 0
+    objective: 0
+    priority: 2
+    note: 'step 29: a healing bloom or the lodge healed hurt Islings'
+    target:
+    validWhile:
+    context:
+    kind: 0
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Your Islings are healed!
+      context:
+  - id: hall.tired
+    once: 0
+    objective: 0
+    priority: 2
+    note: 'step 29: at a Keeper''s door with an Isling under half HP or fainted; once per door until healed; the bloom pulses gold'
+    target:
+    validWhile:
+    context: realm
+    kind: 0
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Your Islings are tired. Heal them first.
+      context:
   - id: lm.keeper.meet
     once: 1
     objective: 0

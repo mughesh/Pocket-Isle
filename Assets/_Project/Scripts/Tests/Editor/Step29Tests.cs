@@ -191,5 +191,103 @@ namespace Diorama.Tests
             Assert.AreEqual(SmartStep.Interactable, end);
             Assert.AreEqual(new Vector2Int(7, 1), tiles[tiles.Count - 1], "stops on the first tile beside it");
         }
+        // ---- B: whose turn ----
+
+        [Test]
+        public void Battle_TheirTurnLine_AndChooseLine()
+        {
+            Assert.AreEqual("Wild Vanehare's turn...", BattleRunes.TheirTurn("Wild Vanehare"));
+            Assert.AreEqual("Choose your attack", BattleRunes.ChooseCaption);
+        }
+
+        // ---- C: health ----
+
+        [Test]
+        public void Rings_Colours_LowAndFaintedBadges()
+        {
+            Assert.AreEqual(PodHpRings.Green, PodHpRings.ColourFor(0.8f, false));
+            Assert.AreEqual(PodHpRings.Yellow, PodHpRings.ColourFor(0.4f, false));
+            Assert.AreEqual(PodHpRings.Red, PodHpRings.ColourFor(0.2f, false));
+            Assert.AreEqual(PodHpRings.Grey, PodHpRings.ColourFor(0f, true));
+            Assert.AreEqual("!", PodHpRings.Badge(0.25f, false), "a quarter or less blinks with !");
+            Assert.AreEqual("", PodHpRings.Badge(0.3f, false));
+            Assert.AreEqual("zz", PodHpRings.Badge(0f, true));
+        }
+
+        [Test]
+        public void Bloom_Tiles_OnEveryRealm_BesideTheRoad_NotInGrass()
+        {
+            foreach (var name in new[] { "Galewick", "Cinderwood", "Lilymere" })
+            {
+                var map = AssetDatabase.LoadAssetAtPath<WorldMap>($"Assets/_Project/Data/WorldMap_{name}.asset");
+                Assert.IsTrue(HealBloom.TryGetTile(map, out var t), $"{name} has a bloom");
+                Assert.AreEqual(IslandMap.Grass, map.At(t), $"{name}: on plain grass");
+                Assert.IsTrue(map.CanWalk(t), $"{name}: walkable (never in the way)");
+                bool road = false;
+                foreach (var d in new[] { E, W, N, S }) road |= map.At(t + d) == IslandMap.Path;
+                Assert.IsTrue(road, $"{name}: beside the road");
+                for (int dx = -1; dx <= 1; dx++)
+                    for (int dy = -1; dy <= 1; dy++)
+                        Assert.AreNotEqual(IslandMap.TallGrass, map.At(t + new Vector2Int(dx, dy)), $"{name}: not hidden in tall grass");
+            }
+        }
+
+        [Test]
+        public void Tired_UnderHalf_OrFainted_AndCardLines()
+        {
+            var go = new GameObject("party");
+            try
+            {
+                var party = go.AddComponent<Party>();
+                var species = AssetDatabase.FindAssets("t:IslingSpecies").Select(g => AssetDatabase.LoadAssetAtPath<IslingSpecies>(AssetDatabase.GUIDToAssetPath(g))).First(x => x != null);
+                var c = new IslingInstance(species, 5);
+                party.members.Add(c);
+                Assert.IsFalse(TempleRules.AnyTired(party));
+                Assert.AreEqual("", PodCard.HealTip(c));
+                c.currentHp = c.MaxHp / 2 - 1;
+                Assert.IsTrue(TempleRules.AnyTired(party));
+                Assert.AreEqual(PodCard.TiredLine, PodCard.HealTip(c));
+                c.currentHp = 0;
+                Assert.AreEqual(PodCard.FaintedLine, PodCard.HealTip(c));
+                Assert.IsTrue(HealBloom.AnyHurt(party));
+            }
+            finally
+            {
+                Object.DestroyImmediate(go);
+            }
+        }
+
+        // ---- D: the burning fingertip ----
+
+        static EmberCarry.Hand[] Hands(bool tracked = true, bool atEmber = false, bool over = false) =>
+            new[] { default(EmberCarry.Hand), new EmberCarry.Hand { tracked = tracked, atEmber = atEmber, overFirebox = over } };
+
+        [Test]
+        public void Fingertip_TouchCatches_PokeLights_NoGripNeeded()
+        {
+            var carry = new EmberCarry { fingertip = true };
+            Assert.AreEqual(EmberState.Held, carry.Feed(0.02f, Hands(atEmber: true)), "a touch is enough");
+            Assert.AreEqual(1, carry.Holder);
+            Assert.AreEqual(EmberState.Held, carry.Feed(0.5f, Hands()));
+            Assert.AreEqual(EmberState.In, carry.Feed(0.02f, Hands(over: true)), "poking the target lights it");
+            Assert.AreEqual(-1, carry.Holder);
+        }
+
+        [Test]
+        public void Fingertip_NeverStuck_TimesOut_OrHandLost()
+        {
+            var carry = new EmberCarry { fingertip = true, fingerTimeout = 20f, fingerLost = 1f };
+            carry.Feed(0.02f, Hands(atEmber: true));
+            for (int i = 0; i < 19; i++) carry.Feed(1f, Hands());
+            Assert.AreEqual(EmberState.Held, carry.State);
+            Assert.AreEqual(EmberState.Falling, carry.Feed(1.1f, Hands()), "20 s unlit: the flame floats back");
+            Assert.AreEqual("timeout", carry.BackReason);
+            carry.Back();
+            carry.Feed(0.02f, Hands(atEmber: true));
+            carry.Feed(0.6f, Hands(tracked: false));
+            Assert.AreEqual(EmberState.Held, carry.State, "a short tracking drop keeps it");
+            Assert.AreEqual(EmberState.Falling, carry.Feed(0.6f, Hands(tracked: false)), "lost for a second: back");
+            Assert.AreEqual(-1, carry.Holder);
+        }
     }
 }
