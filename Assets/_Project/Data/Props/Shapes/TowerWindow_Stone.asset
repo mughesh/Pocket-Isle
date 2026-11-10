@@ -21,7 +21,7 @@ MonoBehaviour:
     b: {x: 0.03, y: 0, z: 0}
     size: {x: 1, y: 0.95, z: 0.16}
     rotation: {x: 0, y: 0, z: 0}
-    bumps: 0.022
+    bumps: 0.012
     bumpFrequency: 7
   - kind: 5
     blend: 0

@@ -119,7 +119,9 @@ namespace Diorama.EditorTools
         /// <summary>Reed clump, 1 x 1: a tuft of tall reeds with three brown cattail heads; sways.</summary>
         static PropRecipe ReedClump()
         {
-            var reeds = Recipe("ReedClump", new Vector2Int(1, 1), true, true, 900);
+            // Nov 11: the blade tips were thinner than a voxel and baked into broken bits: thicker tips, finer (56).
+            var reeds = Recipe("ReedClump", new Vector2Int(1, 1), true, true, 1400);
+            reeds.resolution = 56;
             reeds.palette = Palette(Sand, C("#7A5A3A"), TempleStone, Reed, LagoonWindow, C("#8FAE5A"));
             reeds.scaleJitter = 0.18f;
             reeds.outline = 0.014f;
@@ -131,7 +133,7 @@ namespace Diorama.EditorTools
                 var at = new Vector3(Mathf.Cos(a) * r, 0f, Mathf.Sin(a) * r);
                 float h = 0.7f + 0.35f * ((i * 3) % 5) / 4f;
                 var top = at + new Vector3(Mathf.Cos(a) * 0.08f, h, Mathf.Sin(a) * 0.08f);
-                blades.Add(Cone(at, top, 0.035f, 0.008f, blades.Count == 0 ? 0f : 0.02f));
+                blades.Add(Cone(at, top, 0.038f, 0.016f, blades.Count == 0 ? 0f : 0.02f));
                 if (i % 3 == 0) heads.Add(Ell(top + new Vector3(0f, -0.12f, 0f), new Vector3(0.04f, 0.1f, 0.04f), heads.Count == 0 ? 0f : 0.01f));
             }
             reeds.pieces = new List<PropPiece>
@@ -145,7 +147,9 @@ namespace Diorama.EditorTools
         /// <summary>Lily pad, 1 x 1 (on water, not blocking): a flat disc with a notch, a thin rim; sizes from the scale jitter.</summary>
         static PropRecipe LilyPad()
         {
-            var pad = Recipe("LilyPad", new Vector2Int(1, 1), false, true, 500);
+            // Nov 11: the thin vein ring baked as an octagon: finer (64), more triangles.
+            var pad = Recipe("LilyPad", new Vector2Int(1, 1), false, true, 900);
+            pad.resolution = 64;
             pad.palette = Palette(Sand, StiltWood, TempleStone, LilyGreen, LagoonWindow, C("#7CC27E"));
             pad.yawJitter = 180f;
             pad.scaleJitter = 0.35f;
@@ -156,8 +160,7 @@ namespace Diorama.EditorTools
                 Piece(PShape("LilyPad_Disc",
                     Ell(new Vector3(0f, -0.07f, 0f), new Vector3(0.34f, 0.025f, 0.34f), 0f),
                     Box(new Vector3(0.22f, -0.07f, 0f), new Vector3(0.16f, 0.06f, 0.03f), 0f, 0.01f, new Vector3(0f, 0f, 0f)).Sub()), PropSlot.Leaf, PropMotion.Sway, 0.02f),
-                Piece(PShape("LilyPad_Vein",
-                    Torus(new Vector3(0f, -0.05f, 0f), 0.2f, 0.012f, Vector3.zero, 0f)), PropSlot.Accent, PropMotion.Sway, 0.02f),
+                // Nov 11: no vein ring (half sunk in the pad, its outline baked as jagged black spikes).
             };
             return pad;
         }
@@ -328,21 +331,22 @@ namespace Diorama.EditorTools
         /// <summary>Stone basin, 2 x 2: a round stone ring with a mossy lip and a dry cracked sand floor (11b fills it).</summary>
         static PropRecipe StoneBasin()
         {
-            var basin = Recipe("StoneBasin", new Vector2Int(2, 2), true, false, 1800);
+            // Nov 11: the mossy rim baked as noisy shreds: calmer moss, a rounder inner lip, finer (56 -> 72), more triangles.
+            var basin = Recipe("StoneBasin", new Vector2Int(2, 2), true, false, 2600);
             basin.palette = Palette(Sand, StiltWood, TempleStone, LagoonMoss, LagoonWindow, LagoonTeal);
             basin.yawJitter = 0f;
             basin.scaleJitter = 0f;
-            basin.resolution = 56;
+            basin.resolution = 72;
             basin.pieces = new List<PropPiece>
             {
                 Piece(PShape("StoneBasin_Ring",
                     Cone(new Vector3(0f, 0f, 0f), new Vector3(0f, 0.32f, 0f), 0.86f, 0.8f, 0f).Bumps(0.015f, 9f),
-                    Cone(new Vector3(0f, 0.12f, 0f), new Vector3(0f, 0.5f, 0f), 0.66f, 0.66f, 0.03f).Sub(),
+                    Cone(new Vector3(0f, 0.12f, 0f), new Vector3(0f, 0.5f, 0f), 0.66f, 0.66f, 0.06f).Sub(),
                     Floor(0f)), PropSlot.Stone),
                 Piece(PShape("StoneBasin_Floor",
-                    Ell(new Vector3(0f, 0.12f, 0f), new Vector3(0.66f, 0.03f, 0.66f), 0f).Bumps(0.012f, 16f)), PropSlot.Clay),
+                    Ell(new Vector3(0f, 0.12f, 0f), new Vector3(0.62f, 0.03f, 0.62f), 0f).Bumps(0.008f, 16f)), PropSlot.Clay),
                 Piece(PShape("StoneBasin_Moss",
-                    Torus(new Vector3(0f, 0.32f, 0f), 0.74f, 0.05f, Vector3.zero, 0f).Bumps(0.02f, 10f)), PropSlot.Leaf),
+                    Torus(new Vector3(0f, 0.32f, 0f), 0.74f, 0.05f, Vector3.zero, 0f).Bumps(0.008f, 10f)), PropSlot.Leaf),
             };
             return basin;
         }
@@ -467,13 +471,14 @@ namespace Diorama.EditorTools
         /// <summary>Step 11b: the scooped ball of water (a glossy teal blob with bubbles; the piece wobbles and places it).</summary>
         static PropRecipe WaterBall()
         {
-            var ball = Recipe("WaterBall", new Vector2Int(1, 1), false, false, 700);
+            // Nov 11: faceted (32, 700): rounder.
+            var ball = Recipe("WaterBall", new Vector2Int(1, 1), false, false, 1300);
             ball.palette = Palette(LagoonTeal, StiltWood, TempleStone, LilyGreen, C("#E8FBFF", 0.6f), C("#BFEFF4", 0.2f));
             ball.yawJitter = 0f;
             ball.scaleJitter = 0f;
             ball.outline = 0.012f;
             ball.spec = 0.9f;
-            ball.resolution = 32;
+            ball.resolution = 48;
             ball.pieces = new List<PropPiece>
             {
                 Piece(PShape("WaterBall_Body", Sphere(new Vector3(0f, 0.5f, 0f), 0.45f, 0f)), PropSlot.Clay),
@@ -488,13 +493,14 @@ namespace Diorama.EditorTools
         /// <summary>Step 11b: the water in the stone basin (a teal disc the piece raises a step per pour).</summary>
         static PropRecipe BasinWater()
         {
-            var water = Recipe("BasinWater", new Vector2Int(2, 2), false, false, 300);
+            // Nov 11: the disc's edge was a polygon: rounder.
+            var water = Recipe("BasinWater", new Vector2Int(2, 2), false, false, 700);
             water.palette = Palette(LagoonTeal, StiltWood, TempleStone, LilyGreen, C("#E8FBFF", 0.5f), LagoonDeep);
             water.yawJitter = 0f;
             water.scaleJitter = 0f;
             water.outline = 0f;
             water.spec = 0.7f;
-            water.resolution = 32;
+            water.resolution = 56;
             water.pieces = new List<PropPiece>
             {
                 Piece(PShape("BasinWater_Disc", Cone(new Vector3(0f, 0f, 0f), new Vector3(0f, 0.05f, 0f), 0.66f, 0.66f, 0f)), PropSlot.Clay),

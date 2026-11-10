@@ -61,13 +61,15 @@ namespace Diorama.EditorTools
                 Add(corner);
             }
 
-            var pillar = Recipe("TowerPillar", new Vector2Int(1, 1), true, false, 800);
+            // Nov 11 (Mugesh: the pillars looked jagged): finer and smoother (resolution 40 -> 72, ~2x budget, bumps a third).
+            var pillar = Recipe("TowerPillar", new Vector2Int(1, 1), true, false, 1800);
             pillar.palette = Stones();
+            pillar.resolution = 72;
             pillar.pieces = new List<PropPiece>
             {
                 Piece(PShape("TowerPillar_Stone",
                     Box(new Vector3(0f, 0.07f, 0f), new Vector3(0.26f, 0.07f, 0.26f), 0.02f, 0f),
-                    Cone(new Vector3(0f, 0.1f, 0f), new Vector3(0f, 1.9f, 0f), 0.17f, 0.15f, 0.03f).Bumps(0.01f, 9f),
+                    Cone(new Vector3(0f, 0.1f, 0f), new Vector3(0f, 1.9f, 0f), 0.17f, 0.15f, 0.03f).Bumps(0.0035f, 9f),
                     Box(new Vector3(0f, 1.95f, 0f), new Vector3(0.24f, 0.06f, 0.24f), 0.02f, 0.02f),
                     Floor(0f)), PropSlot.Stone),
                 Piece(PShape("TowerPillar_Band",
@@ -78,13 +80,14 @@ namespace Diorama.EditorTools
 
             // The big round window (2 x 1, in the back wall, which rises a little higher here): a round hole, a wooden
             // frame and cross bars.
-            var window = Recipe("TowerWindow", new Vector2Int(2, 1), true, false, 2000);
+            // Nov 11: the round hole's rim baked ragged; finer (60 -> 84), more triangles, softer wall bumps.
+            var window = Recipe("TowerWindow", new Vector2Int(2, 1), true, false, 3400);
             window.palette = Stones();
-            window.resolution = 60;
+            window.resolution = 84;
             window.pieces = new List<PropPiece>
             {
                 Piece(PShape("TowerWindow_Stone",
-                    Box(new Vector3(0f, 0.95f, 0f), new Vector3(1f, 0.95f, 0.16f), 0.03f, 0f).Bumps(0.022f, 7f),
+                    Box(new Vector3(0f, 0.95f, 0f), new Vector3(1f, 0.95f, 0.16f), 0.03f, 0f).Bumps(0.012f, 7f),
                     Box(new Vector3(0f, 1.93f, 0f), new Vector3(1.02f, 0.05f, 0.2f), 0.02f, 0f),
                     Ell(new Vector3(0f, 1.02f, 0f), new Vector3(0.74f, 0.74f, 0.4f), 0f).Sub(),
                     Floor(0f)), PropSlot.Stone),
@@ -160,18 +163,19 @@ namespace Diorama.EditorTools
             Add(beam);
 
             // A heap of tangled kites on the floor.
-            var heap = Recipe("TangledKites", new Vector2Int(1, 1), true, true, 1400);
+            // Nov 11: the strings baked broken (1 cm tubes at 56): thicker strings, finer (72).
+            var heap = Recipe("TangledKites", new Vector2Int(1, 1), true, true, 1800);
             heap.palette = Stones();
-            heap.resolution = 56;
+            heap.resolution = 72;
             heap.outline = 0.014f;
             heap.pieces = new List<PropPiece>
             {
                 Piece(PShape("TangledKites_Red", KiteDiamond(new Vector3(-0.08f, 0.1f, 0.02f), Quaternion.Euler(-12f, 30f, 8f), 0.2f, 0.26f, 0.17f, 0.07f, 0.012f, 0, 0).ToArray()), PropSlot.Clay),
                 Piece(PShape("TangledKites_Teal", KiteDiamond(new Vector3(0.12f, 0.16f, -0.08f), Quaternion.Euler(-35f, -50f, -15f), 0.18f, 0.24f, 0.15f, 0.06f, 0.012f, 0, 0).ToArray()), PropSlot.Leaf),
                 Piece(PShape("TangledKites_String",
-                    Torus(new Vector3(0f, 0.06f, 0.05f), 0.16f, 0.01f, new Vector3(8f, 0f, 12f), 0.004f),
-                    Torus(new Vector3(0.05f, 0.1f, -0.02f), 0.12f, 0.01f, new Vector3(70f, 30f, 0f), 0.004f),
-                    Torus(new Vector3(-0.06f, 0.09f, 0.04f), 0.1f, 0.01f, new Vector3(40f, -60f, 20f), 0.004f),
+                    Torus(new Vector3(0f, 0.06f, 0.05f), 0.16f, 0.016f, new Vector3(8f, 0f, 12f), 0.006f),
+                    Torus(new Vector3(0.05f, 0.1f, -0.02f), 0.12f, 0.016f, new Vector3(70f, 30f, 0f), 0.006f),
+                    Torus(new Vector3(-0.06f, 0.09f, 0.04f), 0.1f, 0.016f, new Vector3(40f, -60f, 20f), 0.006f),
                     Floor(0f)), PropSlot.Stone),
                 Piece(PShape("TangledKites_Spars",
                     Cone(new Vector3(-0.25f, 0.03f, 0.2f), new Vector3(0.25f, 0.2f, -0.15f), 0.014f, 0.014f, 0f),

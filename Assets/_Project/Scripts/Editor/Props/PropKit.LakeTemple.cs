@@ -60,8 +60,10 @@ namespace Diorama.EditorTools
                 Add(corner);
             }
 
-            var pillar = Recipe("TemplePillar", new Vector2Int(1, 1), true, false, 900);
+            // Nov 11 (Mugesh: the pillars looked jagged): finer and smoother (resolution 40 -> 72, ~2x budget, bumps a third).
+            var pillar = Recipe("TemplePillar", new Vector2Int(1, 1), true, false, 1900);
             pillar.palette = Stones();
+            pillar.resolution = 72;
             var vine = new List<SdfPrimitive>();
             for (int i = 0; i < 6; i++)
             {
@@ -72,7 +74,7 @@ namespace Diorama.EditorTools
             {
                 Piece(PShape("TemplePillar_Stone",
                     Box(new Vector3(0f, 0.07f, 0f), new Vector3(0.26f, 0.07f, 0.26f), 0.03f, 0f),
-                    Cone(new Vector3(0f, 0.1f, 0f), new Vector3(0f, 1.9f, 0f), 0.17f, 0.15f, 0.03f).Bumps(0.008f, 8f),
+                    Cone(new Vector3(0f, 0.1f, 0f), new Vector3(0f, 1.9f, 0f), 0.17f, 0.15f, 0.03f).Bumps(0.003f, 8f),
                     Box(new Vector3(0f, 1.95f, 0f), new Vector3(0.24f, 0.06f, 0.24f), 0.03f, 0.02f),
                     Floor(0f)), PropSlot.Stone),
                 Piece(PShape("TemplePillar_Vine", vine.ToArray()), PropSlot.Leaf, PropMotion.Sway, 0.01f),
@@ -80,13 +82,14 @@ namespace Diorama.EditorTools
             Add(pillar);
 
             // The high window (2 x 1, in the back wall): a tall rounded opening high up, filled with still water-light.
-            var window = Recipe("TempleWindow", new Vector2Int(2, 1), true, false, 2000);
+            // Nov 11: the opening's rim baked ragged; finer (60 -> 84), more triangles, softer wall bumps.
+            var window = Recipe("TempleWindow", new Vector2Int(2, 1), true, false, 3400);
             window.palette = Stones();
-            window.resolution = 60;
+            window.resolution = 84;
             window.pieces = new List<PropPiece>
             {
                 Piece(PShape("TempleWindow_Stone",
-                    Box(new Vector3(0f, 1f, 0f), new Vector3(1f, 1f, 0.16f), 0.04f, 0f).Bumps(0.016f, 6f),
+                    Box(new Vector3(0f, 1f, 0f), new Vector3(1f, 1f, 0.16f), 0.04f, 0f).Bumps(0.009f, 6f),
                     Box(new Vector3(0f, 2.03f, 0f), new Vector3(1.02f, 0.05f, 0.2f), 0.02f, 0f),
                     Ell(new Vector3(0f, 1.3f, 0f), new Vector3(0.48f, 0.62f, 0.4f), 0f).Sub(),
                     Floor(0f)), PropSlot.Stone),

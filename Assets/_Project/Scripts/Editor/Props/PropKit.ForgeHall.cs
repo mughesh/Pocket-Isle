@@ -40,13 +40,15 @@ namespace Diorama.EditorTools
             };
             Add(wall);
 
-            var pillar = Recipe("HallPillar", new Vector2Int(1, 1), true, false, 800);
+            // Nov 11 (Mugesh: the pillars looked jagged): finer and smoother (resolution 40 -> 72, ~2x budget, bumps a third).
+            var pillar = Recipe("HallPillar", new Vector2Int(1, 1), true, false, 1800);
+            pillar.resolution = 72;
             pillar.palette = Palette(ForgeIron, Wood, HallStone, Leaf, ember, HallDark);
             pillar.pieces = new List<PropPiece>
             {
                 Piece(PShape("HallPillar_Stone",
                     Box(new Vector3(0f, 0.07f, 0f), new Vector3(0.3f, 0.07f, 0.3f), 0.02f, 0f),
-                    Cone(new Vector3(0f, 0.1f, 0f), new Vector3(0f, 1.9f, 0f), 0.2f, 0.18f, 0.03f).Bumps(0.012f, 9f),
+                    Cone(new Vector3(0f, 0.1f, 0f), new Vector3(0f, 1.9f, 0f), 0.2f, 0.18f, 0.03f).Bumps(0.004f, 9f),
                     Box(new Vector3(0f, 1.95f, 0f), new Vector3(0.28f, 0.06f, 0.28f), 0.02f, 0.02f),
                     Floor(0f)), PropSlot.Stone),
                 Piece(PShape("HallPillar_Band",

@@ -511,6 +511,7 @@ namespace Diorama.EditorTools
             Vector3 _bloomWorld;
             double _usedAt = 999;
             bool _puffShot, _waveShot;
+            readonly HashSet<string> _hallShots = new HashSet<string>();
             bool _chose29;
             double _choseAt29;
 
@@ -1325,6 +1326,14 @@ namespace Diorama.EditorTools
                 {
                     var hall = Hall(keeperId);
                     if (hall == null || SceneSwap.IsBusy) return;
+                    // Nov 11: seat and close shots of each hall (the pillars and walls' fit and finish).
+                    if (!_hallShots.Contains(keeperId) && Elapsed > 4 && Places.Now == "hall")
+                    {
+                        _hallShots.Add(keeperId);
+                        Step27Debug.Shot($"nov11_hall_{keeperId}");
+                        var isl = GameState.Instance.explorer.island;
+                        Nov11Debug.Close($"nov11_hall_{keeperId}_close", isl.transform.TransformPoint(isl.LocalBounds.center), 0.4f, 0.05f);
+                    }
                     if (hall.untangle != null && !hall.untangle.IsSolved && hall.untangle.Here) Drive(hall.untangle, _pumps);
                     PumpBattle(false);
                     if (!InBattle) hall.CollectShard("smoke run");

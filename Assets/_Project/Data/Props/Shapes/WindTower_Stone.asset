@@ -49,7 +49,7 @@ MonoBehaviour:
     mirrorX: 0
     a: {x: 0, y: 3.7, z: 0}
     b: {x: 0, y: 4.1, z: 0}
-    size: {x: 0.6, y: 0.6, z: 0}
+    size: {x: 0.52, y: 0.52, z: 0}
     rotation: {x: 0, y: 0, z: 0}
     bumps: 0
     bumpFrequency: 0

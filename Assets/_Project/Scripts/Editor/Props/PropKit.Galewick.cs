@@ -396,7 +396,8 @@ namespace Diorama.EditorTools
                 Cone(new Vector3(0f, 0f, 0f), new Vector3(0f, 3.6f, 0f), 0.78f, 0.62f, 0f).Bumps(0.006f, 5f),
                 Torus(new Vector3(0f, 0.06f, 0f), 0.78f, 0.08f, Vector3.zero, 0.03f),
                 Cone(new Vector3(0f, 3.55f, 0f), new Vector3(0f, 3.95f, 0f), 0.74f, 0.74f, 0.03f),
-                Cone(new Vector3(0f, 3.7f, 0f), new Vector3(0f, 4.1f, 0f), 0.6f, 0.6f, 0f).Sub(),
+                // Nov 11: the thin crown wall (0.14) baked shredded from above: thicker (0.22).
+                Cone(new Vector3(0f, 3.7f, 0f), new Vector3(0f, 4.1f, 0f), 0.52f, 0.52f, 0f).Sub(),
                 Ell(new Vector3(0f, 0.63f, 0.76f), new Vector3(0.39f, 0.67f, 0.2f), 0.02f).Sub(),
                 Floor(0f),
             };
