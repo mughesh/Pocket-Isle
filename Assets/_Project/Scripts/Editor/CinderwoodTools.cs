@@ -1012,7 +1012,8 @@ namespace Diorama.EditorTools
             int behindLog = reachOpen.Count - reach.Count;
             if (cut > 0) problems.Add($"{cut} walkable tile(s) cut off from everything");
             float share = walkable > 0 ? tall / (float)walkable : 0f;
-            if (share < 0.16f || share > 0.25f) problems.Add($"tall grass is {share:P0} of the walkable land (want ~20%)");
+            // Step 29 A0: the roads went two wide (about 25 trees and rocks became road), so the floor is 15%, not 16%.
+            if (share < 0.15f || share > 0.25f) problems.Add($"tall grass is {share:P0} of the walkable land (want ~20%)");
 
             // Tall grass patches (4-connected), 6-20 tiles; smaller ones are reported, not failed (ragged edges).
             var patches = Components(map, t => map.At(t) == IslandMap.TallGrass);
