@@ -618,6 +618,9 @@ namespace Diorama
         // ---- turns ----
 
         /// <summary>Animates one turn's events in order. <paramref name="caption"/> receives the battle text lines.</summary>
+        [Tooltip("Step 29: seconds the \"Wild X's turn...\" line shows before the wild move plays.")]
+        public float theirTurnBeat = 0.7f;
+
         public IEnumerator Play(IReadOnlyList<BattleEvent> events, BattleSystem battle, Action<string> caption)
         {
             for (int i = 0; i < events.Count; i++)
@@ -628,6 +631,12 @@ namespace Diorama
                 switch (e.kind)
                 {
                     case BattleEventKind.MoveUsed:
+                        if (e.side == BattleSide.Wild)
+                        {
+                            // Step 29 (playtests: moves pressed during the wild Isling's turn): say whose turn it is first.
+                            caption(BattleRunes.TheirTurn(battle.keeper != null ? who : $"Wild {who}"));
+                            yield return Wait(theirTurnBeat);
+                        }
                         caption($"{(e.side == BattleSide.Wild ? "Wild " : "")}{who} used {e.move.Name}!");
                         // The move's outcome is the next event; it plays at the moment of impact.
                         bool hasOutcome = i + 1 < events.Count && IsOutcome(events[i + 1].kind);

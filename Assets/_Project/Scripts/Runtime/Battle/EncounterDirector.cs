@@ -530,7 +530,7 @@ namespace Diorama
                     continue;
                 }
 
-                runes.SetCaption(prompt ?? $"What will {battle.player.isling.Name} do?");
+                runes.SetCaption(prompt ?? BattleRunes.ChooseCaption);
                 prompt = null;
                 _act = default;
                 _waiting = true;

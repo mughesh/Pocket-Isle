@@ -100,7 +100,30 @@ namespace Diorama
             public float hover;
             public float pulse;     // dialogue highlight
             public float press;     // step 14f: sinks after a pick
+            public float shake;     // step 29: a press off-turn
         }
+
+        [Header("Step 29: whose turn")]
+        [Tooltip("Off-turn the moves sink this far (row-local m, down) and this far back, grey, with no hover.")]
+        public float offTurnSink = 0.016f;
+        public float offTurnBack = 0.008f;
+        [Tooltip("How grey the moves go off-turn (0..1).")]
+        [Range(0f, 1f)] public float offTurnGrey = 0.85f;
+        [Tooltip("Seconds to sink or rise.")]
+        public float turnSeconds = 0.25f;
+        public const string ChooseCaption = "Choose your attack";
+
+        float _up;          // 0 = off-turn (sunk, grey), 1 = the player's turn
+        float _risePulse;   // one soft gold rim pulse when the moves rise
+
+        /// <summary>Step 29: 0 = sunk and grey (not the player's turn), 1 = up (tests, the bridge).</summary>
+        public float Up => _up;
+
+        /// <summary>Step 29: off-turn presses that only shook (tests, the bridge).</summary>
+        public int OffTurnPresses { get; private set; }
+
+        /// <summary>The caption while the wild (or Keeper) side acts.</summary>
+        public static string TheirTurn(string name) => $"{name}'s turn...";
 
         static readonly int BackColorId = Shader.PropertyToID("_BackColor");
         static readonly int BorderColorId = Shader.PropertyToID("_BorderColor");
@@ -406,7 +429,8 @@ namespace Diorama
 
         void OnPokeState(int index, InteractableStateChangeArgs args)
         {
-            if (args.NewState == InteractableState.Hover && index >= 0 && index < _runes.Length && _runes[index].shown)
+            // Step 29: off-turn, no hover sound.
+            if (args.NewState == InteractableState.Hover && _interactable && index >= 0 && index < _runes.Length && _runes[index].shown)
                 GameAudio.At(AudioIds.RuneHover, _runes[index].visual.position);
             if (args.NewState == InteractableState.Hover && !_loggedPokeHover)
             {
@@ -418,6 +442,11 @@ namespace Diorama
             {
                 _loggedPokeSelect = true;
                 Debug.Log($"[BattleRunes] Poke select on rune {index + 1} (first time).");
+            }
+            if (!_interactable && index >= 0 && index < _runes.Length && _runes[index].shown && !GamePause.IsPaused)
+            {
+                OffTurnPress(index, "poke");
+                return;
             }
             if (_interactable && !GamePause.IsPaused && _runes[index].shown && _runes[index].appear > 0.6f)
             {
@@ -536,6 +565,7 @@ namespace Diorama
         /// <summary>Dims the runes and ignores input while a turn plays.</summary>
         public void SetInteractable(bool on)
         {
+            if (on && !_interactable) _risePulse = 1f;
             _interactable = on;
             for (int i = 0; i < 2; i++) _wasPinching[i] = true; // a pinch already held doesn't count
             Paint();
@@ -580,6 +610,10 @@ namespace Diorama
             PlaceRow(false);
             int was = _hovered;
             _hovered = _interactable ? GazeHover() : -1;
+            if (!_interactable && _reticle != null) _reticle.enabled = false;
+            _up = Mathf.MoveTowards(_up, _interactable ? 1f : 0f, Time.deltaTime / Mathf.Max(0.01f, turnSeconds));
+            _risePulse = Mathf.MoveTowards(_risePulse, 0f, Time.deltaTime / 0.9f);
+            float sink = 1f - Mathf.SmoothStep(0f, 1f, _up);
             if (_hovered >= 0 && _hovered != was) GameAudio.At(AudioIds.RuneHover, _runes[_hovered].visual.position);
             for (int i = 0; i < _runes.Length; i++)
             {
@@ -592,6 +626,9 @@ namespace Diorama
                 // Scale the visual only: the poke surface keeps its size.
                 r.visual.localScale = Vector3.one * (Mathf.Max(0.001f, a) * (1f + 0.12f * r.hover + 0.08f * r.pulse));
                 r.press = Mathf.MoveTowards(r.press, 0f, Time.deltaTime / 0.3f);
+                r.shake = Mathf.MoveTowards(r.shake, 0f, Time.deltaTime / 0.3f);
+                float wobble = r.shake > 0f ? Mathf.Sin(Time.time * 70f) * 0.004f * r.shake : 0f;
+                r.root.localPosition = new Vector3(RuneX(i) + wobble, -offTurnSink * sink, offTurnBack * sink);
                 if (r.tablet != null) r.tablet.Press(r.press > 0.5f ? 1f : r.press * 2f);
             }
             Paint();
@@ -628,15 +665,30 @@ namespace Diorama
             }
         }
 
-        /// <summary>Picks from code (testing). Ignored unless the runes are waiting for a choice.</summary>
+        /// <summary>Picks from code (testing). Ignored unless the runes are waiting for a choice (step 29: off-turn it only shakes).</summary>
         public void Choose(int index)
         {
             if (_interactable) Pick(index, "code");
+            else OffTurnPress(index, "code");
+        }
+
+        /// <summary>Step 29 (playtests: moves pressed during the wild Isling's turn): a tiny shake, nothing queued, no sound.</summary>
+        void OffTurnPress(int index, string how)
+        {
+            if (index < 0 || index >= _runes.Length || !_runes[index].shown) return;
+            _runes[index].shake = 1f;
+            OffTurnPresses++;
+            Debug.Log($"[BattleRunes] {(index == RunIndex ? "Run" : $"Move {index + 1}")} pressed off-turn by {how}: shake, nothing queued.");
         }
 
         void Pick(int index, string how)
         {
             if (index < 0 || index >= _runes.Length || !_runes[index].usable || !_runes[index].shown) return;
+            if (!_interactable)
+            {
+                OffTurnPress(index, how);
+                return;
+            }
             Debug.Log($"[BattleRunes] Picked {(index == RunIndex ? "Run" : $"move {index + 1}")} by {how}.");
             GameAudio.At(index == RunIndex ? AudioIds.BattleRun : AudioIds.RuneSelect, _runes[index].visual.position);
             GameAudio.At(AudioIds.StepStone, _runes[index].visual.position);
@@ -814,14 +866,17 @@ namespace Diorama
                 {
                     // The move's element on the inlay (Run: a plain groove); usable = full, else dimmed.
                     bool on = _interactable && r.usable;
-                    var inlay = r.tint;
+                    float grey = offTurnGrey * (1f - Mathf.SmoothStep(0f, 1f, _up));
+                    var tint = Color.Lerp(r.tint, Grey(r.tint), grey);
+                    var inlay = tint;
                     inlay.a = i == RunIndex ? 0f : 0.9f;
                     r.tablet.inlay = inlay;
                     // Nov 4 (Mugesh: only a coloured border): the whole face takes the move's element colour.
-                    var face = r.tint;
+                    var face = tint;
                     face.a = i == RunIndex ? 0f : 0.8f;
                     r.tablet.face = face;
-                    r.tablet.Paint(r.hover, on ? 0f : 0.65f, 0f, 0.7f * r.pulse);
+                    // Step 29: one soft gold rim pulse as the moves rise for the player's turn.
+                    r.tablet.Paint(r.hover, on ? 0f : 0.65f, 0f, Mathf.Max(0.7f * r.pulse, r.usable ? 0.8f * Mathf.Sin(_risePulse * Mathf.PI) : 0f));
                     var lc = Color.Lerp(TabletKit.LabelColor, TabletKit.LabelLit, Mathf.Max(r.hover, r.pulse));
                     lc.a = on ? 1f : 0.55f;
                     r.label.color = lc;
@@ -846,6 +901,12 @@ namespace Diorama
                 c.a = Mathf.Lerp(0.5f, 1f, dim);
                 r.label.color = c;
             }
+        }
+
+        static Color Grey(Color c)
+        {
+            float l = c.r * 0.3f + c.g * 0.59f + c.b * 0.11f;
+            return new Color(l, l, l, c.a);
         }
 
         static float EaseOutBack(float t)
