@@ -194,7 +194,7 @@ namespace Diorama.EditorTools
                 new LessonData
                 {
                     id = Onboarding.FarLesson, line = "lesson.walk.far", chip = "Swipe, tap", again = "lesson.walk.far.again", startWhen = "canWalk", delay = 0.8f,
-                    doneWhen = "tapStopped | atGoldTile | swipeWalks2", skipAfter = 30f, goldTileRule = "ahead",
+                    doneWhen = "tapStopped", skipAfter = 60f, // step 28: only the thumb tap teaches the tap
                     ghost = Step12aSetup.SwipeTapClip, place = GhostPlace.AboveIsland, target = "ghost", ghostScale = 0.6f,
                 },
                 new LessonData

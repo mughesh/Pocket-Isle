@@ -84,6 +84,7 @@ namespace Diorama
         /// <summary>The gaze is on something at <paramref name="world"/> (radius in world metres): white for this frame.</summary>
         public static void Hover(Vector3 world, float radius)
         {
+            if (Onboarding.LessonWalking) return; // step 28: nothing invites a detour during the walk lessons
             _hoverPoint = world;
             _hoverRadius = radius;
             _hoverFrame = Time.frameCount;

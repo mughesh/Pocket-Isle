@@ -319,7 +319,7 @@ namespace Diorama.EditorTools
                 return;
             }
             var t = island.transform;
-            cam.transform.position = t.position + t.rotation * new Vector3(0f, 0.55f, 0.45f);
+            cam.transform.position = t.position + t.rotation * SeatOffset;
             var rack = _lookPod >= 0 ? Object.FindFirstObjectByType<PodRack>() : null;
             var pod = rack != null ? rack.Pod(_lookPod) : null;
             Vector3 look = pod != null ? pod.transform.position : t.position + t.rotation * new Vector3(0f, 0f, 0.05f);
@@ -330,6 +330,9 @@ namespace Diorama.EditorTools
         }
 
         static int _lookPod = -1;
+
+        /// <summary>Nov 10: where the held seat camera sits, from the island (the layout check tries several heads).</summary>
+        public static Vector3 SeatOffset = new Vector3(0f, 0.55f, 0.45f);
 
         /// <summary>Seated camera aims its gaze at rim pod 2 (or back at the island): tests the gaze-grow.</summary>
         public static void LookAtPod2() { _lookPod = 1; SeatCamera(); }

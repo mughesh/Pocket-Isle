@@ -342,8 +342,8 @@ namespace Diorama
             Vector3 local = island.TileToLocal(Center(s), island.Content.capHeight + bowlHeight * island.map.tileSize);
             bool dormant = Dormant(i);
             bool visible = outside && !window.IsZoomed && island.FootprintContains(local);
-            if (visible && !explorer.Locked && !dormant) Dialogue.Say("shrine.first");
-            bool usable = visible && !_entering && !explorer.Locked;
+            if (visible && !explorer.Locked && !dormant && !Onboarding.LessonWalking) Dialogue.Say("shrine.first");
+            bool usable = visible && !_entering && !explorer.Locked && !Onboarding.LessonWalking; // step 28: inert during the walk lessons
             if (dormant)
             {
                 // Step 10f: the flame is nearly out (FlameCupPiece draws it). Trying to rest only gets the Spirit's line.
@@ -487,6 +487,7 @@ namespace Diorama
         /// <summary>Look + pinch on a shrine (also BattleDebug): enter if next to it, otherwise walk there first.</summary>
         public void Pick(int index, string how)
         {
+            if (Onboarding.LessonWalking) return; // step 28: inert during the walk lessons, no line
             if (index < 0 || index >= _shrines.Count || _entering || !Outside) return;
             var s = _shrines[index];
             if (!Onboarding.Finished)

@@ -18,6 +18,8 @@ namespace Diorama
     /// bigger, still on top on the dark plate. The near Isling's label in front of its pad (toward the runes); the wild /
     /// Keeper's in front of its pad, between the pads, sliding sideways only as far as needed to clear the near Isling on
     /// screen (checked every <see cref="clearCheckSeconds"/>).
+    /// Nov 10 (playtest: the name sat on Body Slam; step 24 moved the moves over the arena, right where this label stood): the
+    /// near Isling's label stands beside its Isling, on the side away from the explorer, at chest height, and rises if it would touch a move.
     /// </summary>
     public class BattleHud : MonoBehaviour
     {
@@ -45,6 +47,10 @@ namespace Diorama
         public float footLift = 0.002f;
         [Tooltip("A label's bottom edge stays over this much of the view's height (0..1).")]
         [Range(0f, 0.4f)] public float minViewportY = 0.06f;
+        [Tooltip("Nov 10: the near label's gap to its Isling's side, island-local metres.")]
+        public float nearSideGap = 0.012f;
+        [Tooltip("Nov 10: the near label's height, as a share of its Isling's height.")]
+        [Range(0f, 1f)] public float nearChest = 0.55f;
         [Tooltip("How often the wild label re-checks that it clears the near Isling on screen (s).")]
         public float clearCheckSeconds = 0.25f;
         [Tooltip("Nov 6 (Mugesh: the name panels kept swaying): the wild label finds its spot only this long after both labels " +
@@ -75,6 +81,8 @@ namespace Diorama
             public float shift, shiftTarget, checkedAt = -1f;
             /// <summary>Nov 6: when the bar appeared; the near label's lift over the caption (only ever grows: no bobbing).</summary>
             public float bornAt, captionLift;
+            /// <summary>Nov 10: the near label's spot, found while it settles, then held (no sway): island-local x from the feet, and height.</summary>
+            public float sideX, chestY;
         }
 
         class Pop
@@ -361,18 +369,18 @@ namespace Diorama
                 b.shiftTarget = ClearShift(cam, At, halfW * scale, (top - bottom) * 0.5f * scale, (top + bottom) * 0.5f * scale);
             }
             b.shift = b.near ? 0f : b.checkedAt < 0f ? b.shiftTarget : Mathf.MoveTowards(b.shift, b.shiftTarget, Time.deltaTime * 0.6f);
-            Vector3 world = At(b.shift);
+            Vector3 world = b.near ? NearSpot(b, cam, feet, halfW, settleUntil) : At(b.shift);
             // Keep it in view: its top under maxViewportY, its bottom over minViewportY.
             float above = top * scale, below = -bottom * scale;
             Vector3 v = cam.WorldToViewportPoint(world + up * above);
             if (v.z > 0f && v.y > maxViewportY) world = cam.ViewportToWorldPoint(new Vector3(v.x, maxViewportY, v.z)) - up * above;
             v = cam.WorldToViewportPoint(world - up * below);
             if (v.z > 0f && v.y < minViewportY) world = cam.ViewportToWorldPoint(new Vector3(v.x, minViewportY, v.z)) + up * below;
-            // The near label rises over the caption above the runes rather than sit on it.
+            // The near label rises over the moves rather than sit on them.
             if (b.near)
             {
-                // Nov 6: the lift only grows (it bobbed up and down as the caption came and went).
-                float lift = Vector3.Dot(ClearCaption(cam, world, halfW * scale, above, below) - world, up);
+                // Nov 6: the lift only grows (it bobbed up and down as things came and went).
+                float lift = Vector3.Dot(ClearRow(cam, world, halfW * scale, above, below) - world, up);
                 b.captionLift = Mathf.Max(b.captionLift, lift);
                 world += up * b.captionLift;
             }
@@ -380,19 +388,38 @@ namespace Diorama
         }
 
         BattleRunes _runes;
+        GestureTestPiece _explorer;
 
-        /// <summary>Step 14k: lifts a label (along the view's up) until it clears the runes' caption on screen.</summary>
-        Vector3 ClearCaption(Camera cam, Vector3 world, float halfW, float above, float below)
+        /// <summary>Nov 10: beside the near Isling on the player's right, found while it settles, then held.</summary>
+        Vector3 NearSpot(Bar b, Camera cam, Vector3 feet, float halfW, float settleUntil)
+        {
+            var a = b.actor;
+            var it = a.island.transform;
+            if (!b.topSet || Time.time <= settleUntil)
+            {
+                float width = 0.03f;
+                if (a.TryGetVisualBounds(out var bounds)) width = Mathf.Max(bounds.extents.x, bounds.extents.z) / Mathf.Max(1e-5f, it.lossyScale.x);
+                // The side away from the explorer, who stands beside its Isling; else the player's right.
+                if (_explorer == null) _explorer = FindFirstObjectByType<GestureTestPiece>();
+                float sign = _explorer != null && _explorer.Body != null
+                    ? (_explorer.Body.localPosition.x >= feet.x ? -1f : 1f)
+                    : Vector3.Dot(it.right, cam.transform.right) >= 0f ? 1f : -1f;
+                b.sideX = sign * Mathf.Max(Mathf.Abs(b.sideX), width + halfW * labelScale + nearSideGap);
+                b.chestY = Mathf.Lerp(feet.y, a.LocalTop.y, nearChest);
+                b.topSet = true;
+            }
+            return it.TransformPoint(new Vector3(feet.x + b.sideX, b.chestY, feet.z));
+        }
+
+        /// <summary>Step 14k, Nov 10: lifts a label (along the view's up) until it clears the shown moves on screen.</summary>
+        Vector3 ClearRow(Camera cam, Vector3 world, float halfW, float above, float below)
         {
             if (_runes == null) _runes = FindFirstObjectByType<BattleRunes>();
-            var cap = _runes != null ? _runes.Caption : null;
-            if (cap == null || !cap.gameObject.activeInHierarchy || string.IsNullOrEmpty(cap.text)) return world;
-            var r = cap.GetComponent<Renderer>();
-            if (r == null || !r.enabled) return world;
-            var cr = ScreenRect(cam, r.bounds);
+            if (_runes == null || !_runes.TryGetRowBounds(out var row)) return world;
+            var cr = ScreenRect(cam, row);
             if (!cr.HasValue) return world;
             var clear = cr.Value;
-            clear.yMax += 0.015f; // a little air over the caption
+            clear.yMax += 0.015f; // a little air over the moves
             cr = clear;
             Vector3 up = cam.transform.up, right = cam.transform.right;
             for (int k = 0; k < 40; k++)

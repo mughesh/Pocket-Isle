@@ -72,6 +72,12 @@ namespace Diorama
         [Tooltip("A second swipe the same way within this many seconds keeps walking.")]
         public float doubleSwipeSeconds = 0.45f;
 
+        [Header("Lesson walking (step 28)")]
+        [Tooltip("Share of the normal smart-step speed while the walk lessons run.")]
+        [Range(0.3f, 1f)] public float lessonSpeed = 0.65f;
+        [Tooltip("Tiles a lesson walk plans at a time (it plans more when they run out).")]
+        [Min(4)] public int roamTiles = 60;
+
         [Header("Go to tile")]
         [Tooltip("Longest path GoTo will walk, in steps.")]
         public int maxPathSteps = ExplorerPath.DefaultMaxSteps;
@@ -108,8 +114,11 @@ namespace Diorama
         /// <summary>Raised when the explorer arrives on a tall grass tile (column, row).</summary>
         public event Action<Vector2Int> OnTallGrassStep;
 
-        /// <summary>Raised whenever the explorer arrives on a tile (column, row).</summary>
+        /// <summary>Raised whenever the explorer arrives on a tile (column, row). Not during a lesson walk: nothing on the island reacts then.</summary>
         public event Action<Vector2Int> OnStep;
+
+        /// <summary>Step 28: a tile reached on a lesson walk (only the lessons listen, so nothing else can react to it).</summary>
+        public event Action<Vector2Int> OnLessonStep;
 
         /// <summary>Raised when a walk is stopped by a prop (the blocked tile): walking into a building's doorway.</summary>
         public event Action<Vector2Int> OnBump;
@@ -332,7 +341,8 @@ namespace Diorama
         /// </summary>
         public bool GoTo(Vector2Int target)
         {
-            if (!CanMove || target == _tile) return false;
+            // Step 28: the walk lessons teach the swipe and the tap; nothing walks the explorer anywhere else meanwhile.
+            if (!CanMove || target == _tile || Onboarding.LessonWalking) return false;
             if (!ExplorerPath.Find(Map, _tile, target, _path, maxPathSteps))
             {
                 Debug.Log($"[GestureTestPiece] GoTo c{target.x} r{target.y}: no path within {maxPathSteps} steps.");
@@ -486,6 +496,19 @@ namespace Diorama
         /// <summary>Plans from the tile being stepped onto (the current step always finishes).</summary>
         void Replan(Vector2Int way, bool continuous)
         {
+            if (Onboarding.LessonWalking)
+            {
+                _roaming = true;
+                _continuous = true; // a plan that runs out is planned again (TryStep)
+                PlanFrom = _tile;
+                PlanEnd = SmartStep.PlanRoam(Map, _tile, way, GateTile, roamTiles, _plan);
+                _planIndex = 0;
+                _running = false;
+                PlanChanged?.Invoke();
+                Debug.Log($"[GestureTestPiece] Lesson walk {HeadingName(way)} from c{_tile.x} r{_tile.y}: walks until a thumb tap.");
+                return;
+            }
+            _roaming = false;
             _continuous = continuous;
             PlanFrom = _tile;
             bool open = swipeWalksUntilTap;
@@ -494,6 +517,18 @@ namespace Diorama
             _running = false;
             PlanChanged?.Invoke();
             Debug.Log($"[GestureTestPiece] {(continuous ? "Walk on" : "Smart step")} {HeadingName(way)} from c{_tile.x} r{_tile.y}: {_plan.Count} tiles, ends at {PlanEnd}.");
+        }
+
+        bool _roaming;
+
+        /// <summary>Step 28: a lesson walk keeps off the gates' tiles.</summary>
+        bool GateTile(Vector2Int t)
+        {
+            var world = island.world;
+            if (world == null) return false;
+            foreach (var g in world.gates)
+                if (g.Covers(t)) return true;
+            return false;
         }
 
         void ClearPlan()
@@ -556,7 +591,7 @@ namespace Diorama
         void TapWhileStanding()
         {
             var front = _tile + _facing;
-            if (Map.At(front.y, front.x) == IslandMap.Water)
+            if (Map.At(front.y, front.x) == IslandMap.Water && !Onboarding.LessonWalking)
             {
                 _last += " - fishing";
                 GameAudio.At(AudioIds.PondTap, TileWorld(front));
@@ -580,6 +615,13 @@ namespace Diorama
         {
             if (moveMode == MoveMode.SmartStep && _plan.Count > 0 && !FollowingPath)
             {
+                // Step 28: the lessons ended mid-walk (the practice's time limit): normal rules again, it stops here.
+                if (_roaming && !Onboarding.LessonWalking)
+                {
+                    Stop();
+                    RefreshLabel();
+                    return;
+                }
                 if (_planIndex >= _plan.Count && _continuous && PlanEnd == SmartStep.Cap) Replan(_heading, true);
                 if (_planIndex >= _plan.Count)
                 {
@@ -599,6 +641,8 @@ namespace Diorama
                     return;
                 }
                 _planIndex++;
+                // Step 28: a lesson walk's turn at a wall: just a soft bump, no line.
+                if (_roaming && _planIndex > 1 && step - _tile != _heading) GameAudio.At(AudioIds.WalkBump, TileWorld(_tile)).SetVolume(0.5f);
                 _heading = _facing = step - _tile;
                 _fromTile = _tile;
                 _tile = step;
@@ -654,11 +698,13 @@ namespace Diorama
             if (_heading != Vector2Int.zero) GameAudio.At(AudioIds.WalkStop, TileWorld(_tile));
             _heading = Vector2Int.zero;
             _running = false;
+            _roaming = false;
             ClearPlan();
         }
 
         /// <summary>Seconds for the step being taken now.</summary>
-        float StepSeconds => moveMode == MoveMode.SmartStep && !FollowingPath
+        float StepSeconds => _roaming ? smartSeconds / Mathf.Max(0.1f, lessonSpeed)
+            : moveMode == MoveMode.SmartStep && !FollowingPath
             ? (_continuous ? continuousSeconds : smartSeconds)
             : _running ? runSeconds : walkSeconds;
 
@@ -676,7 +722,7 @@ namespace Diorama
             else if (ch == IslandMap.Path) id = AudioIds.StepPath;
             else id = AudioIds.StepStone;
             GameAudio.At(id, at);
-            if (ch == IslandMap.TallGrass) GameAudio.At(AudioIds.GrassRustle, at);
+            if (ch == IslandMap.TallGrass && !_roaming) GameAudio.At(AudioIds.GrassRustle, at);
         }
 
         bool ThumbStillHeld()
@@ -712,9 +758,18 @@ namespace Diorama
                 _stepT = Mathf.Min(1f, _stepT + Time.deltaTime / StepSeconds);
                 if (_stepT >= 1f)
                 {
-                    OnStep?.Invoke(_tile);
-                    StepSound();
-                    if (Map.At(_tile.y, _tile.x) == IslandMap.TallGrass) OnTallGrassStep?.Invoke(_tile);
+                    // Step 28: on a lesson walk only the lessons hear it: every door, gate, shrine and line listens to OnStep.
+                    if (_roaming)
+                    {
+                        OnLessonStep?.Invoke(_tile);
+                        StepSound();
+                    }
+                    else
+                    {
+                        OnStep?.Invoke(_tile);
+                        StepSound();
+                        if (Map.At(_tile.y, _tile.x) == IslandMap.TallGrass) OnTallGrassStep?.Invoke(_tile);
+                    }
                 }
             }
             if (_stepT >= 1f && (_heading != Vector2Int.zero || FollowingPath)) TryStep();

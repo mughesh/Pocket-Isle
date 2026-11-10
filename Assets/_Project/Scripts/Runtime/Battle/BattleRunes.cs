@@ -223,7 +223,12 @@ namespace Diorama
             for (int i = 0; i < _runes.Length; i++) _runes[i].pulse = i >= from && i <= to ? k : 0f;
         }
 
-        void OnDestroy() => Destroy(_quad);
+        void OnDestroy()
+        {
+            Destroy(_quad);
+            if (_captionTextMat != null) Destroy(_captionTextMat);
+            if (_captionPillMat != null) Destroy(_captionPillMat);
+        }
 
         // Step 12c (Oct 28 notes: the bubble sat over a rune and ate the press): the Spirit's bubble keeps off shown runes.
         void OnEnable() => DialogueBubble.KeepClear += KeepClear;
@@ -238,6 +243,39 @@ namespace Diorama
                 var p = r.root.position;
                 keep.Add(new Vector4(p.x, p.y, p.z, runeSize.x * 0.55f * r.root.lossyScale.x));
             }
+            // Nov 10: and off the battle line (three spheres along the pill).
+            if (_captionPill != null && _captionPill.gameObject.activeInHierarchy)
+            {
+                var t = _captionPill.transform;
+                float w = t.lossyScale.x, radius = t.lossyScale.y * 0.8f;
+                for (int k = -1; k <= 1; k++)
+                {
+                    var p = t.position + t.right * (k * w * 0.36f);
+                    keep.Add(new Vector4(p.x, p.y, p.z, radius));
+                }
+            }
+        }
+
+        /// <summary>Nov 10: the shown moves' plates in the world, so a label can keep off them. False with none up.</summary>
+        public bool TryGetRowBounds(out Bounds bounds)
+        {
+            bounds = default;
+            bool any = false;
+            for (int i = 0; i < _runes.Length; i++)
+            {
+                var r = _runes[i];
+                if (r == null || !r.shown || r.root == null) continue;
+                var half = new Vector3(PlateSize(i).x, runeSize.y, 0f) * 0.5f;
+                for (int sx = -1; sx <= 1; sx += 2)
+                    for (int sy = -1; sy <= 1; sy += 2)
+                    {
+                        var p = r.root.TransformPoint(new Vector3(sx * half.x, sy * half.y, 0f));
+                        if (any) bounds.Encapsulate(p);
+                        else bounds = new Bounds(p, Vector3.zero);
+                        any = true;
+                    }
+            }
+            return any;
         }
 
         void Build()
@@ -253,17 +291,28 @@ namespace Diorama
                 BuildPoke(rune, i, PlateSize(i));
                 _runes[i] = rune;
             }
-            _caption = MakeText(_row, captionFontSize * captionScale);
-            _caption.transform.localPosition = new Vector3(0f, runeSize.y * 0.5f + 0.02f, 0f);
+            // Nov 10 (playtest: the line ran into Run and through props): its own billboard over the wild Isling, on top of
+            // everything like the battle labels, away from the moves.
+            _captionRoot = new GameObject("Caption").transform;
+            _captionRoot.SetParent(transform, false);
+            _caption = MakeText(_captionRoot, captionFontSize * captionScale);
             _caption.color = captionText;
             _caption.outlineWidth = 0.08f;
+            _captionTextMat = new Material(_caption.fontSharedMaterial) { name = "Battle Line (on top)", renderQueue = 3995 };
+            _captionTextMat.SetFloat(ShaderUtilities.ShaderTag_ZTestMode, (float)UnityEngine.Rendering.CompareFunction.Always);
+            _caption.fontSharedMaterial = _captionTextMat;
             // Step 16: a dark rounded pill behind the line (it was white text on the busy island).
             var pillGo = new GameObject("Caption Pill");
-            pillGo.transform.SetParent(_row, false);
-            pillGo.transform.localPosition = _caption.transform.localPosition + new Vector3(0f, 0f, 0.0008f);
+            pillGo.transform.SetParent(_captionRoot, false);
+            pillGo.transform.localPosition = new Vector3(0f, 0f, 0.0008f);
             pillGo.AddComponent<MeshFilter>().sharedMesh = _quad;
             _captionPill = pillGo.AddComponent<MeshRenderer>();
-            _captionPill.sharedMaterial = hudMaterial;
+            if (hudMaterial != null)
+            {
+                _captionPillMat = new Material(hudMaterial) { name = "Battle Line Pill (on top)", renderQueue = 3990 };
+                _captionPillMat.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.Always);
+                _captionPill.sharedMaterial = _captionPillMat;
+            }
             _captionPill.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             pillGo.SetActive(false);
 
@@ -492,9 +541,6 @@ namespace Diorama
             Paint();
         }
 
-        /// <summary>Step 14k: the caption over the runes (the near label keeps clear of it).</summary>
-        public TextMeshPro Caption => _caption;
-
         public void SetCaption(string text)
         {
             if (_caption != null) _caption.text = text;
@@ -530,6 +576,7 @@ namespace Diorama
             // and its line step aside while the game menu (or its Journal / Settings) is open, and come back on close.
             bool menu = GameMenu.IsOpen;
             if (_row.gameObject.activeSelf == menu) _row.gameObject.SetActive(!menu);
+            if (_captionRoot.gameObject.activeSelf == menu) _captionRoot.gameObject.SetActive(!menu);
             PlaceRow(false);
             int was = _hovered;
             _hovered = _interactable ? GazeHover() : -1;
@@ -616,7 +663,7 @@ namespace Diorama
             _duck = Mathf.MoveTowards(_duck, reach ? 1f : 0f, Time.deltaTime * (_duck < 0.5f ? 6f : 2f));
             Vector3 rest = overArena ? ArenaRest(b.center.x) : new Vector3(b.center.x, island.map.capHeight, b.max.z) + offset + avoidOffset * _avoid;
             _row.localPosition = rest + duckOffset * Mathf.SmoothStep(0f, 1f, _duck);
-            if (overArena) PlaceCaption(cam, snap);
+            PlaceCaption(cam);
             if (cam != null)
             {
                 // Head direction projected on the island, as a yaw in island space (the row's front looks toward -Z).
@@ -667,29 +714,29 @@ namespace Diorama
             return new Vector3(x, island.map.capHeight + arenaHover + half * Mathf.Cos(rad), island.FootprintHalfSize.y - arenaInset - half * Mathf.Sin(rad));
         }
 
-        // A little past the row end, so the near label (BattleHud.ClearCaption) is not lifted into its Isling.
-        const float captionPastRow = 0.035f;
-        float _captionX;
+        [Tooltip("Nov 10: the battle line sits this far over the wild Isling's head (island-local m).")]
+        public float captionOverHead = 0.03f;
+        [Tooltip("Nov 10: and stays under this much of the view's height (0..1).")]
+        [Range(0.5f, 1f)] public float captionMaxViewportY = 0.86f;
+        Transform _captionRoot;
+        Material _captionTextMat, _captionPillMat;
 
-        /// <summary>
-        /// Step 24: the row is closer to the player's Isling now, so the battle line can't sit over the middle: it goes to the
-        /// end of the row away from the Isling, as seen from the head.
-        /// </summary>
-        void PlaceCaption(Camera cam, bool snap)
+        /// <summary>The battle line: above the wild Isling (the spot the Spirit's battle words read best), facing the head.</summary>
+        void PlaceCaption(Camera cam)
         {
-            if (_caption == null || _captionPill == null) return;
-            float reach = Mathf.Max(0f, HalfRow - _captionPill.transform.localScale.x * 0.5f) + captionPastRow;
-            float target = 0f;
-            if (cam != null && _avoidA != null)
+            if (_captionRoot == null) return;
+            var b = island.LocalBounds;
+            Vector3 local = _avoidB != null ? _avoidB.LocalTop + Vector3.up * captionOverHead
+                : new Vector3(b.center.x, island.map.capHeight + 0.14f, b.min.z + (b.max.z - b.min.z) * 0.35f);
+            Vector3 world = island.transform.TransformPoint(local);
+            if (cam != null)
             {
-                Vector3 o = _row.InverseTransformPoint(cam.transform.position), q = _row.InverseTransformPoint(_avoidA.WorldCenter);
-                if (q.z > 0f && o.z < 0f) target = Vector3.Lerp(o, q, -o.z / (q.z - o.z)).x >= 0f ? -reach : reach;
+                Vector3 v = cam.WorldToViewportPoint(world);
+                if (v.z > 0f && v.y > captionMaxViewportY) world = cam.ViewportToWorldPoint(new Vector3(v.x, captionMaxViewportY, v.z));
+                Vector3 away = world - cam.transform.position;
+                if (away.sqrMagnitude > 1e-8f) _captionRoot.rotation = Quaternion.LookRotation(away, cam.transform.up);
             }
-            _captionX = snap ? target : Mathf.MoveTowards(_captionX, target, Time.deltaTime * 0.6f);
-            var c = _caption.transform.localPosition;
-            _caption.transform.localPosition = new Vector3(_captionX, c.y, c.z);
-            var p = _captionPill.transform.localPosition;
-            _captionPill.transform.localPosition = new Vector3(_captionX, p.y, p.z);
+            _captionRoot.position = world;
         }
 
         /// <summary>True when the row (runes and caption) sits between the head and either creature's body.</summary>

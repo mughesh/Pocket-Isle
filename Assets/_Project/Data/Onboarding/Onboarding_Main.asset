@@ -183,9 +183,9 @@ MonoBehaviour:
     helpAfter: 30
     startWhen: canWalk
     delay: 0.8
-    doneWhen: tapStopped | atGoldTile | swipeWalks2
+    doneWhen: tapStopped
     validWhile: 
-    skipAfter: 30
+    skipAfter: 60
     failWhen: 
     rewindTo: 
     praise: 1
@@ -200,7 +200,7 @@ MonoBehaviour:
     ghostSpread: 0
     goldPath: 
     goldTileSteps: 0
-    goldTileRule: ahead
+    goldTileRule: 
     tutorialGrass: 0
   - id: practice
     line: lesson.practice
@@ -216,7 +216,7 @@ MonoBehaviour:
     failWhen:
     rewindTo:
     praise: 0
-    ghost: thumb_tap
+    ghost: thumb_swipe_left_tap
     place: 2
     target: ghost
     source:

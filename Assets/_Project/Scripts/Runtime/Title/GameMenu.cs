@@ -141,7 +141,7 @@ namespace Diorama
             // end; Controls and Title live in Settings; Dev (Editor and QA builds) set apart.
             runes.Clear();
             runes.rimLocked = true; // step 17 B: rim rows sit on the rim, island-front locked
-            var size = new Vector2(0.072f, 0.034f);
+            var size = new Vector2(0.066f, 0.034f);
             var big = new Vector2(0.08f, 0.038f);
             // Nov 4 (Mugesh: Resume and the others too close): 2.4 cm between tablets (was 0.8). Nov 8 (still a few mm): the
             // gap is set in the room, not on the island: at the island's 0.6 start 2.4 cm local was 1.4 cm, smaller again
@@ -149,7 +149,10 @@ namespace Diorama
             float boardScale = Mathf.Max(0.05f, runes.transform.lossyScale.x);
             float gap = Mathf.Clamp(roomGap / boardScale, 0.024f, 0.07f);
             const float side = 0.034f, apart = 0.04f;
-            float width = big.x + 2f * (size.x + gap) + gap + side;
+            // Nov 10 (playtest: no way back to the start without quitting): Main menu saves and goes to the title, where
+            // New journey restarts. Not mid-opening (no save yet) or in the finale; the slot stays empty then.
+            bool toTitle = !Opening.InProgress && !FinaleDirector.Running;
+            float width = big.x + 3f * (size.x + gap) + gap + side;
             float x = -width * 0.5f;
             var resume = runes.Add("Resume", new Vector2(x + big.x * 0.5f, 0f), big, () => Close("Resume"));
             resume.primary = true;
@@ -158,6 +161,8 @@ namespace Diorama
             if (!Opening.InProgress) runes.Add("Journal", new Vector2(x + size.x * 0.5f, 0f), size, OpenJournal);
             x += size.x + gap;
             runes.Add("Settings", new Vector2(x + size.x * 0.5f, 0f), size, OpenSettings);
+            x += size.x + gap;
+            if (toTitle) runes.Add("Main menu", new Vector2(x + size.x * 0.5f, 0f), size, ToTitle);
             x += size.x + gap;
             runes.AddIcon(VolumeSettings.MusicOn ? "Music on" : "Music off", TabletKit.Speaker(VolumeSettings.MusicOn), new Vector2(x + side * 0.5f, 0f), side, ToggleMusic);
 #if UNITY_EDITOR || POCKET_DEV

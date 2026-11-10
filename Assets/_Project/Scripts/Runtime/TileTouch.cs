@@ -64,7 +64,7 @@ namespace Diorama
         {
             if (island == null || explorer == null || island.map == null) return;
             // Step 11d: off unless the player turned it on in Settings (it fought the hand moments on the island).
-            if (!GameSettings.TouchWalk)
+            if (!GameSettings.TouchWalk || Onboarding.LessonWalking) // step 28: no tile walking during the walk lessons
             {
                 foreach (var f in _fingers) f.hasLast = f.dipped = false;
                 return;

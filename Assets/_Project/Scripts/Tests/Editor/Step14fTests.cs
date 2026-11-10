@@ -21,10 +21,10 @@ namespace Diorama.Tests
             var s = Lessons();
             var far = s.lessons.Find(l => l.id == Onboarding.FarLesson);
             Assert.IsNotNull(far);
-            foreach (var e in new[] { "tapStopped", "atGoldTile", "swipeWalks2" })
-                StringAssert.Contains(e, far.doneWhen);
-            Assert.IsTrue(far.skipAfter > 0f && far.skipAfter <= 30f, $"passes itself within 30 s ({far.skipAfter})");
-            Assert.AreEqual("ahead", far.goldTileRule);
+            // Step 28: only the tap itself passes it (stopping by itself on a gold tile taught nothing); a long wait never walls.
+            Assert.AreEqual("tapStopped", far.doneWhen);
+            Assert.IsTrue(far.skipAfter > 0f && far.skipAfter <= 60f, $"passes itself within 60 s ({far.skipAfter})");
+            Assert.IsTrue(string.IsNullOrEmpty(far.goldTileRule));
             // Step 16: the lessons show the swipe ghost only; Nov 6: the far line teaches the tap (a swipe walks until a tap).
             Assert.AreEqual(GhostHands.SwipeTapClip, far.ghost); // Step 22: a swipe left, then the tap (Nov 7 and Nov 8: swipe then tap)
             Assert.IsFalse(far.chip.ToLowerInvariant().Contains("tap"), far.chip);
@@ -48,7 +48,7 @@ namespace Diorama.Tests
         }
 
         [Test]
-        public void FarLesson_PassesAfter30s_WithNothingDone()
+        public void FarLesson_PassesAfter60s_WithNothingDone()
         {
             var far = Lessons().lessons.Find(l => l.id == Onboarding.FarLesson);
             var lessons = new System.Collections.Generic.List<LessonData> { new LessonData { id = far.id, doneWhen = far.doneWhen, skipAfter = far.skipAfter } };
@@ -56,8 +56,8 @@ namespace Diorama.Tests
             runner.Begin(0);
             Assert.AreEqual(LessonRunner.Outcome.Started, runner.Tick(0.1f));
             var last = LessonRunner.Outcome.None;
-            for (float t = 0f; t < 31f && runner.IsRunning; t += 0.1f) last = runner.Tick(0.1f);
-            Assert.IsFalse(runner.IsRunning, "still stuck after 31 s");
+            for (float t = 0f; t < 61f && runner.IsRunning; t += 0.1f) last = runner.Tick(0.1f);
+            Assert.IsFalse(runner.IsRunning, "still stuck after 61 s");
             Assert.AreEqual(LessonRunner.Outcome.Skipped, last);
         }
 

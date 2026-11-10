@@ -107,7 +107,7 @@ namespace Diorama
             bool here = _here != null && _here() && _island.Content != null;
             Vector3 door = here ? _doorway() : default;
             bool visible = here && Visible(door);
-            bool free = visible && Free;
+            bool free = visible && Free && !Onboarding.LessonWalking;
 
             // A walk to the door that got cancelled (a swipe, a new destination) no longer goes in.
             if (_pending && !_explorer.Destination.HasValue && !_atFront(_explorer.Tile)) _pending = false;
@@ -163,6 +163,7 @@ namespace Diorama
         /// <summary>Look + pinch or a poke on the door (also the bridge): in from the front, otherwise walk up first.</summary>
         public void Pick(string how)
         {
+            if (Onboarding.LessonWalking) return; // step 28: inert during the walk lessons
             string name = _owner != null ? _owner.name : "door";
             if (_atFront(_explorer.Tile))
             {

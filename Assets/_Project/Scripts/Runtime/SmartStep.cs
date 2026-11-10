@@ -97,5 +97,43 @@ namespace Diorama
             }
             return Cap;
         }
+
+        /// <summary>How far ahead a roaming walk compares the two ways it could turn.</summary>
+        const int RoamLook = 30;
+
+        /// <summary>
+        /// Step 28: a lesson walk. Straight on over any walkable tile (roads, grass, tall grass); at something it can't enter
+        /// it turns to the side with the longer open run, or back if both sides are shut. It never ends by itself:
+        /// <see cref="Cap"/> means "plan more", and only a boxed-in explorer gets <see cref="Blocked"/>.
+        /// <paramref name="blocked"/> adds tiles it must keep off (the gates).
+        /// </summary>
+        public static string PlanRoam(IslandMap map, Vector2Int from, Vector2Int direction, Func<Vector2Int, bool> blocked, int maxTiles, List<Vector2Int> tiles)
+        {
+            tiles.Clear();
+            if (map == null || direction.sqrMagnitude != 1) return Blocked;
+            bool Open(Vector2Int t) => map.CanWalk(t) && (blocked == null || !blocked(t));
+            int Run(Vector2Int at, Vector2Int way)
+            {
+                int n = 0;
+                for (var t = at + way; n < RoamLook && Open(t); t += way) n++;
+                return n;
+            }
+            var cur = from;
+            var h = direction;
+            for (int i = 0; i < maxTiles; i++)
+            {
+                if (!Open(cur + h))
+                {
+                    var l = Left(h);
+                    int a = Run(cur, l), b = Run(cur, -l);
+                    if (a > 0 || b > 0) h = a >= b ? l : -l;
+                    else if (Open(cur - h)) h = -h;
+                    else return Blocked;
+                }
+                cur += h;
+                tiles.Add(cur);
+            }
+            return Cap;
+        }
     }
 }

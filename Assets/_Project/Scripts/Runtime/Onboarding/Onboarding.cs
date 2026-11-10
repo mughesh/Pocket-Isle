@@ -108,6 +108,19 @@ namespace Diorama
         /// <summary>Step 17: the running lesson's id (move, twoHands, ...), or null.</summary>
         public static string Lesson => _instance != null ? _instance.CurrentId : null;
 
+        /// <summary>
+        /// Step 28: the walk lessons and the tap practice are on: the explorer walks slower, never stops by itself and
+        /// nothing on the island reacts to it. Read from the saved lesson, so a reload mid-tutorial resumes it.
+        /// </summary>
+        public static bool LessonWalking
+        {
+            get
+            {
+                var id = Lesson;
+                return id == WalkLesson || id == FarLesson || id == PracticeLesson;
+            }
+        }
+
         /// <summary>A lesson starts teaching: show its ghost.</summary>
         public event Action<LessonData> LessonShown;
         /// <summary>The lesson being taught ended (done = true with praise; false = skipped, rewound or interrupted).</summary>
@@ -156,6 +169,7 @@ namespace Diorama
             if (explorer != null)
             {
                 explorer.OnStep -= OnStep;
+                explorer.OnLessonStep -= OnStep;
                 explorer.Stopped -= OnStopped;
                 explorer.Swiped -= OnSwiped;
                 explorer.walkStops.Remove(GoldStop);
@@ -172,11 +186,12 @@ namespace Diorama
                 return;
             }
             explorer.OnStep += OnStep;
+            explorer.OnLessonStep += OnStep;
             explorer.Stopped += OnStopped;
             explorer.Swiped += OnSwiped;
             explorer.walkStops.Add(GoldStop);
             encounters.BattleEnded += OnBattleEnded;
-            _goldMarks = new GoldMarks("Lesson Gold Tile", island, goldMaterial);
+            _goldMarks = new GoldMarks("Lesson Gold Tile", island, goldMaterial) { intensity = 1.5f };
 
             GameConditions.Register("battle.send", () => encounters != null && encounters.AwaitingSendOut);
             GameConditions.Register("battle.out", () => encounters != null && encounters.PlayerOut);
@@ -503,6 +518,7 @@ namespace Diorama
                 StopCoroutine(_goldPath);
                 _goldPath = null;
             }
+            _trail.Clear();
             if (l.goldTileSteps > 0 || !string.IsNullOrEmpty(l.goldTileRule) || l.id == PracticeLesson) _goldTile = null;
             if (done && l.praise) GameAudio.Ui(Diorama.Audio.AudioIds.UiLesson);
             if (HandsMissing) SetHandsMissing(false);
@@ -557,34 +573,45 @@ namespace Diorama
 
         // ---- gold tiles ----
 
-        /// <summary>Gold tiles run from the explorer to the lesson's landmark until it gets there.</summary>
-        float _goldSoundAt = -99f;
+        /// <summary>
+        /// Nov 10 (playtest: the way to the grass was very faint): the same gold trail as the Spirit's (<see cref="SpiritTrail"/>),
+        /// from the explorer to the lesson's landmark, kept up to date as it walks. It used to flash the tiles one by one.
+        /// </summary>
+        float _goldSoundAt = -99f, _trailAt;
+        readonly List<Vector2Int> _trail = new List<Vector2Int>();
+        const int TrailTiles = 14;
+        const float TrailTileSize = 0.78f;
 
         IEnumerator GoldPath(LessonData l)
         {
-            var path = new List<Vector2Int>();
+            _trailAt = Time.time;
             while (true)
             {
                 var world = island.world;
-                if (world == null || !world.TryGetLandmark(l.goldPath, out var to)) yield break;
-                if (explorer.CanMove && explorer.Tile != to && ExplorerPath.Find(world, explorer.Tile, to, path, 60))
+                if (world == null || !world.TryGetLandmark(l.goldPath, out var to))
                 {
-                    var from = explorer.Tile;
-                    // A sparkle as a run starts, at most every 4 s (the run repeats every ~1.2 s).
-                    if (path.Count > 0 && Time.time - _goldSoundAt > 4f)
+                    _trail.Clear();
+                    yield break;
+                }
+                if (explorer.CanMove && explorer.Tile != to && ExplorerPath.FindAlongRoads(world, explorer.Tile, to, _trail, 400))
+                {
+                    if (_trail.Count > 0 && Time.time - _goldSoundAt > 8f)
                     {
                         _goldSoundAt = Time.time;
-                        GameAudio.At(Diorama.Audio.AudioIds.PathGold, island.transform.TransformPoint(island.TileToLocal(path[0], island.Content.capHeight)));
-                    }
-                    foreach (var tile in path)
-                    {
-                        if (explorer.Tile != from) break;
-                        island.FlashTile(tile, 0.4f);
-                        yield return new WaitForSeconds(0.12f);
+                        GameAudio.At(Diorama.Audio.AudioIds.PathGold, island.transform.TransformPoint(island.TileToLocal(_trail[0], island.Content.capHeight)));
                     }
                 }
-                yield return new WaitForSeconds(1.2f);
+                else _trail.Clear();
+                yield return new WaitForSeconds(0.5f);
             }
+        }
+
+        void DrawTrail()
+        {
+            int n = Mathf.Min(TrailTiles, _trail.Count);
+            float age = Time.time - _trailAt;
+            for (int i = 0; i < n; i++)
+                _goldMarks.Draw(_trail[i], GoldMarks.Tile, 0f, i == _trail.Count - 1 ? TrailTileSize * 1.15f : TrailTileSize, Mathf.Clamp01((age - i * 0.05f) / 0.2f), n > 1 ? i / (float)(n - 1) : 1f, true);
         }
 
         /// <summary>
@@ -671,25 +698,34 @@ namespace Diorama
             PickPracticeTile();
         }
 
-        /// <summary>The next gold tile, along the path ahead (where the explorer faces first), in view, never tall grass.</summary>
+        /// <summary>The way the walk goes next (zero while standing).</summary>
+        Vector2Int WalkWay() =>
+            explorer.Heading == Vector2Int.zero ? Vector2Int.zero
+            : explorer.PlanIndex < explorer.Plan.Count ? explorer.Plan[explorer.PlanIndex] - explorer.Tile : explorer.Heading;
+
+        /// <summary>
+        /// Step 28: the next gold tile, straight on along the walk with a real run-up, in view, never in tall grass. Standing:
+        /// the longest clear line from here. Nothing long enough ahead (a wall coming up) = no tile until the walk has turned.
+        /// </summary>
         void PickPracticeTile()
         {
             _goldTile = null;
             var world = island.world;
             if (world == null || explorer == null) return;
             int want = StopPractice.Distance(_practiced);
-            var plan = new List<Vector2Int>();
-            var ways = new[] { explorer.Facing, new Vector2Int(0, -1), new Vector2Int(-1, 0), new Vector2Int(1, 0), new Vector2Int(0, 1) };
+            var way = WalkWay();
+            var ways = way != Vector2Int.zero ? new[] { way }
+                : new[] { explorer.Facing, new Vector2Int(0, -1), new Vector2Int(-1, 0), new Vector2Int(1, 0), new Vector2Int(0, 1) };
             float best = float.MinValue;
             for (int w = 0; w < ways.Length; w++)
             {
-                SmartStep.Plan(world, explorer.Tile, ways[w], true, 12, null, plan);
                 int n = 0;
-                while (n < plan.Count && island.FootprintContains(island.TileToLocal(plan[n], island.Content.capHeight))) n++;
-                if (n < StopPractice.Nearest) continue;
-                var pick = plan[Mathf.Min(want, n) - 1];
-                if (world.At(pick) == IslandMap.TallGrass) continue;
-                float score = Mathf.Min(want, n) + (world.At(pick) == IslandMap.Path ? 1f : 0f) + (w == 0 ? 3f : 0f) - (ways[w] == -explorer.Facing ? 6f : 0f);
+                for (var t = explorer.Tile + ways[w]; n < want && world.CanWalk(t) && island.FootprintContains(island.TileToLocal(t, island.Content.capHeight)); t += ways[w]) n++;
+                int along = n;
+                while (along >= StopPractice.Nearest && world.At(explorer.Tile + ways[w] * along) == IslandMap.TallGrass) along--;
+                if (along < StopPractice.Nearest) continue;
+                var pick = explorer.Tile + ways[w] * along;
+                float score = along + (world.At(pick) == IslandMap.Path ? 1f : 0f) + (w == 0 ? 3f : 0f);
                 if (score <= best) continue;
                 best = score;
                 _goldTile = pick;
@@ -703,11 +739,17 @@ namespace Diorama
         /// <summary>Walked past the gold tile: a new one ahead, no fail state.</summary>
         void PracticeStep(Vector2Int tile)
         {
-            if (!_goldTile.HasValue) return;
+            if (!_goldTile.HasValue)
+            {
+                PickPracticeTile();
+                return;
+            }
             int d = StopPractice.Distance(tile, _goldTile.Value);
             _practiceBest = Mathf.Min(_practiceBest, d);
-            if (!StopPractice.WalkedPast(d, _practiceBest)) return;
-            Debug.Log("[Onboarding] Practice: walked past the gold tile: a new one ahead.");
+            // Step 28: the walk turned away from it, or went past: it moves ahead again. Next to it still counts as a stop.
+            bool away = d >= 2 && !StopPractice.StraightAhead(tile, WalkWay(), _goldTile.Value);
+            if (!away && !StopPractice.WalkedPast(d, _practiceBest)) return;
+            Debug.Log("[Onboarding] Practice: not ahead any more: a new gold tile ahead.");
             PickPracticeTile();
         }
 
@@ -751,6 +793,7 @@ namespace Diorama
             _goldMarks.Begin();
             if (_goldTile.HasValue && Running && explorer != null && explorer.Tile != _goldTile.Value)
                 _goldMarks.Draw(_goldTile.Value, GoldMarks.Tile, 0f, 0.92f, 1f, 1f, true);
+            DrawTrail();
             _goldMarks.End();
         }
 

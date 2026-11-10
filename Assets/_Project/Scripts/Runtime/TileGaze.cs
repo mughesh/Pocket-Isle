@@ -33,7 +33,7 @@ namespace Diorama
             if (island == null || explorer == null || island.map == null) return;
             bool onTile = TryGetGazeTile(out var tile, out var hit);
             bool bubbleFirst = bubble != null && bubble.IsGazed || pods != null && pods.IsGazed || DevCheats.PanelGazed;
-            bool usable = onTile && !bubbleFirst && explorer.CanMove;
+            bool usable = onTile && !bubbleFirst && explorer.CanMove && !Onboarding.LessonWalking;
             if (usable) GazeTarget.Mark(island.transform.TransformPoint(hit));
             if (usable)
             {

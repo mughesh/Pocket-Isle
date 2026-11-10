@@ -374,6 +374,8 @@ namespace Diorama
             _heart = line.speaker == DialogueSpeaker.Heart;
             _chipText = string.IsNullOrEmpty(chip) ? null : chip;
             _popStart = -1f;
+            _parked = false;
+            _visual.gameObject.SetActive(true);
             _root.gameObject.SetActive(true);
             Layout(line.text, false);
 
@@ -555,10 +557,16 @@ namespace Diorama
             _clipper.Size = new Vector3(_size.x, _size.y, 0.02f);
             if (_progressTotal > 0 || _dots.Count > 0) LayoutDots();
 
-            var back = _line.speaker == DialogueSpeaker.Keeper ? keeperColor : _line.speaker == DialogueSpeaker.Heart ? heartColor : spiritColor;
+            PaintPanel(false);
+        }
+
+        /// <summary>The panel and tail in the speaker's colours, or (the menu is open) grey like the dimmed island.</summary>
+        void PaintPanel(bool grey)
+        {
+            var back = grey ? parkedBack : _line.speaker == DialogueSpeaker.Keeper ? keeperColor : _line.speaker == DialogueSpeaker.Heart ? heartColor : spiritColor;
             // Objectives: a gold border (thinner and rounder since the Oct 28 notes: "feels blocky"); chatter: plain cream.
-            Color edge = _heart ? heartGlow : _objective ? objectiveGold : outlineColor;
-            Paint(_panelRenderer, back, _size.x / _size.y, Mathf.Min(0.45f, (chip ? 0.5f * _size.y : _objective ? 0.02f : 0.012f) / _size.y), (_objective ? 0.0026f : 0.0018f) / _size.y, edge);
+            Color edge = grey ? parkedEdge : _heart ? heartGlow : _objective ? objectiveGold : outlineColor;
+            Paint(_panelRenderer, back, _size.x / _size.y, Mathf.Min(0.45f, (_chip ? 0.5f * _size.y : _objective ? 0.02f : 0.012f) / _size.y), (_objective ? 0.0026f : 0.0018f) / _size.y, edge);
             Paint(_tailRenderer, back, 1f, 0.1f, 0.12f, edge);
         }
 
@@ -591,8 +599,13 @@ namespace Diorama
             _chipText = null;
             if (pop && _root.gameObject.activeSelf)
             {
-                // A lesson's chip pops when the lesson is done.
-                _popStart = Time.time;
+                if (Dialogue.Held)
+                {
+                    Park();
+                    return;
+                }
+                // A lesson's chip pops when the lesson is done (unscaled: the pause stops the game's clock).
+                _popStart = Time.unscaledTime;
                 return;
             }
             _root.gameObject.SetActive(false);
@@ -723,11 +736,67 @@ namespace Diorama
             }
         }
 
+        // ---- behind the menu ----
+
+        [Header("Behind the menu (Nov 10)")]
+        [Tooltip("A lesson's card while the menu is open: greyed like the island, waiting over the island's back, off the menu's tablets.")]
+        public Color parkedBack = new Color(0.46f, 0.46f, 0.45f, 0.82f);
+        public Color parkedEdge = new Color(0.3f, 0.3f, 0.29f, 1f);
+        public Color parkedText = new Color(0.17f, 0.17f, 0.17f, 1f);
+        [Tooltip("Where it waits: this high over the cap and this far in from the island's back edge (island-local m).")]
+        public Vector2 parkedSpot = new Vector2(0.16f, 0.07f);
+        bool _parked;
+
+        /// <summary>A lesson's card is waiting, grey, behind the open menu (tests, the bridge).</summary>
+        public bool IsParked => _parked;
+
+        /// <summary>
+        /// Nov 10 (playtest: the lesson card stayed bright over the Resume tablet): the menu stops the game's clock, so its
+        /// pop-out froze half way, on top of everything. The card now greys out and waits off the tablets.
+        /// </summary>
+        void Park()
+        {
+            _parked = true;
+            _popStart = -1f;
+            _root.localScale = Vector3.one;
+            PaintPanel(true);
+            _text.color = parkedText;
+            _text.maxVisibleCharacters = 99999;
+            if (_icon.gameObject.activeSelf) Paint(_iconRenderer, parkedText, 1f, 0f, 0f);
+            foreach (var d in _dots)
+                if (d.gameObject.activeSelf) Paint(d, parkedEdge, 1f, 0f, 0f);
+        }
+
+        void UpdateParked()
+        {
+            if (!Dialogue.Held)
+            {
+                _parked = false;
+                _visual.gameObject.SetActive(true);
+                _root.gameObject.SetActive(false);
+                return;
+            }
+            // Settings and the Journal fill that space: it steps out for them.
+            bool show = GameMenu.IsOpen && !SettingsBoard.IsOpen && !JournalBoard.IsOpen;
+            if (_visual.gameObject.activeSelf != show) _visual.gameObject.SetActive(show);
+            if (island == null || island.map == null) return;
+            var b = island.LocalBounds;
+            Vector3 goal = island.transform.TransformPoint(new Vector3(b.center.x, island.CapTopLocal + parkedSpot.x, b.min.z + parkedSpot.y));
+            _root.position = Vector3.Lerp(_root.position, goal, 1f - Mathf.Exp(-Time.unscaledDeltaTime * 8f));
+            var cam = Camera.main;
+            if (cam != null) _root.rotation = Quaternion.LookRotation(_root.position - cam.transform.position, Vector3.up);
+        }
+
         void Update()
         {
+            if (_parked)
+            {
+                UpdateParked();
+                if (_parked) return;
+            }
             if (_popStart >= 0f)
             {
-                float u = (Time.time - _popStart) / 0.18f;
+                float u = (Time.unscaledTime - _popStart) / 0.18f;
                 if (u >= 1f)
                 {
                     _popStart = -1f;

@@ -249,6 +249,8 @@ namespace Diorama
         }
 
         [Header("Step 16: out of the objective's way")]
+        [Tooltip("Nov 10: however low the target is, the Spirit hovers at least this far over the island's top (island-scale m).")]
+        public float minHover = 0.09f;
         [Tooltip("Parks this far beside the target's edge (island-scale m), on the player's right first, then left.")]
         public float sideGap = 0.05f;
         [Tooltip("And this high above the target's middle (island-scale m).")]
@@ -321,11 +323,24 @@ namespace Diorama
         }
 
         /// <summary>
-        /// Step 16: beside the target (its radius plus <see cref="sideGap"/>), a little above its middle, on the player's
-        /// right first, then the left, further out if both are taken: the first spot where neither the Spirit nor its
-        /// bubble covers the objective's area (<see cref="ObjectiveArea"/>: the ghost, the drop spot, the battle's
-        /// creatures) in the player's view. Pulled back inside the view cone. Returned in the parent's space.
+        /// Nov 10 (playtest: the lantern sat on the island's floor; step 16 parked it beside the target's middle, and a target
+        /// on the ground is at floor height): it hovers over the active interaction again like step 14a: straight above the
+        /// target (its radius plus <see cref="aboveOffset"/>), else above and to the player's right, above and to the left, or
+        /// higher: the first spot where neither the Spirit nor its bubble covers the objective's area
+        /// (<see cref="ObjectiveArea"/>: the ghost, the drop spot, the battle's creatures). Never under
+        /// <see cref="minHover"/> over the island. Pulled back inside the view cone. Returned in the parent's space.
         /// </summary>
+        /// <summary>Candidate 0 straight above, 1 and 2 above and to one side, 3 higher.</summary>
+        Vector3 HoverSpot(Vector3 target, int candidate, Vector3 side, Vector3 toPlayer, float scale)
+        {
+            float above = (_targetRadius + aboveOffset.x * scale) * (candidate == 3 ? 1.5f : 1f);
+            Vector3 spot = target + Vector3.up * above + toPlayer * (aboveOffset.y * scale);
+            if (candidate == 1 || candidate == 2) spot += side * (_targetRadius + sideGap * scale);
+            float floor = island.transform.TransformPoint(new Vector3(0f, island.CapTopLocal + minHover, 0f)).y;
+            if (spot.y < floor) spot.y = floor;
+            return spot;
+        }
+
         Vector3 TargetLocal(Vector3 target)
         {
             var parent = transform.parent != null ? transform.parent : island.transform;
@@ -347,22 +362,21 @@ namespace Diorama
                     // Keep the side chosen last while it stays clear (no flip-flopping), then right, left, further right, further left.
                     int c = pass == 0 ? _side : i;
                     if (c < 0) break;
-                    Vector3 side = (c % 2 == 0 ? right : -right);
-                    float gap = _targetRadius + sideGap * scale * (c < 2 ? 1f : 1.8f);
-                    Vector3 spot = target + side * gap + Vector3.up * (sideLift * scale) + toPlayer * (aboveOffset.y * scale);
+                    Vector3 side = c == 2 ? -right : right;
+                    Vector3 spot = HoverSpot(target, c, side, toPlayer, scale);
                     Vector3 bubble = spot + side * (bubbleProbe.x * scale) + Vector3.up * (bubbleProbe.y * scale);
                     bool clear = !ObjectiveArea.Blocks(head, spot, spiritProbeRadius, _avoid) && !ObjectiveArea.Blocks(head, bubble, bubbleProbeRadius, _avoid);
                     if (clear || pass == 1 && i == 3 && pick < 0)
                     {
                         pick = clear ? c : 0;
-                        world = clear ? spot : target + right * (_targetRadius + sideGap * scale) + Vector3.up * (sideLift * scale);
+                        world = clear ? spot : HoverSpot(target, 0, right, toPlayer, scale);
                         break;
                     }
                     if (pass == 0) break;
                 }
             if (pick != _side)
             {
-                Debug.Log($"[LanternSpirit] Parks {(pick % 2 == 0 ? "right" : "left")} of the target{(pick >= 2 ? " (further out)" : "")}.");
+                Debug.Log($"[LanternSpirit] Hovers {(pick == 0 ? "above" : pick == 1 ? "above and right of" : pick == 2 ? "above and left of" : "high above")} the target.");
                 _side = pick;
             }
 

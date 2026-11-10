@@ -427,6 +427,13 @@ namespace Diorama
 
         void Tick(float dt)
         {
+            // Nov 10 (playtest): the menu stops the clock, so a lesson's ghost froze over the menu's tablets. The Controls card's own ghost still plays.
+            if (Dialogue.Held && !previewing)
+            {
+                SetVisible(0f);
+                _keyValid = false;
+                return;
+            }
             _visible = debugFreeze >= 0f && _showing ? 1f : Mathf.MoveTowards(_visible, _showing ? 1f : 0f, dt / Mathf.Max(0.01f, fadeSeconds));
             if (_clip == null || _visible <= 0f)
             {

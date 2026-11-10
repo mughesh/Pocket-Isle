@@ -84,6 +84,57 @@ namespace Diorama.EditorTools
             Debug.Log(sb.ToString());
         }
 
+        /// <summary>
+        /// Nov 10: what overlaps on screen from the current camera among the moves, the battle line and the name labels.
+        /// Empty = clean. The moves' row counts only while it is up.
+        /// </summary>
+        public static List<string> LayoutOverlaps()
+        {
+            var hits = new List<string>();
+            var cam = Camera.main;
+            var runes = Object.FindFirstObjectByType<BattleRunes>();
+            var hud = Object.FindFirstObjectByType<BattleHud>();
+            if (cam == null || runes == null || hud == null)
+            {
+                hits.Add("no battle to check");
+                return hits;
+            }
+            var moves = new List<Item>();
+            foreach (var c in runes.GetComponentsInChildren<Oculus.Interaction.Surfaces.BoundsClipper>())
+                moves.Add(new Item { name = Owner(c.transform), rect = Quad(cam, c.transform, c.Size.x, c.Size.y) });
+            var labels = new List<Item>();
+            foreach (Transform c in hud.transform)
+                if (c.name.StartsWith("HP "))
+                {
+                    var plate = c.Find("Plate");
+                    if (plate != null) labels.Add(new Item { name = c.name, rect = Quad(cam, plate, 1f, 1f) });
+                }
+            foreach (var r in runes.GetComponentsInChildren<MeshRenderer>())
+                if (r.name == "Caption Pill" && r.gameObject.activeInHierarchy) labels.Add(new Item { name = "battle line", rect = Quad(cam, r.transform, 1f, 1f) });
+            var body = GameState.Instance != null && GameState.Instance.explorer != null ? GameState.Instance.explorer.Body : null;
+            if (body != null)
+                foreach (var m in moves)
+                {
+                    float covered = 0f;
+                    foreach (var r in body.GetComponentsInChildren<Renderer>())
+                    {
+                        if (!r.enabled) continue;
+                        var v = View(cam, r.bounds);
+                        if (!v.Overlaps(m.rect)) continue;
+                        var o = Rect.MinMaxRect(Mathf.Max(v.xMin, m.rect.xMin), Mathf.Max(v.yMin, m.rect.yMin), Mathf.Min(v.xMax, m.rect.xMax), Mathf.Min(v.yMax, m.rect.yMax));
+                        covered = Mathf.Max(covered, o.width * o.height / Mathf.Max(1e-6f, m.rect.width * m.rect.height));
+                    }
+                    if (covered > 0.15f) hits.Add($"explorer covers {covered * 100f:0}% of {m.name}");
+                }
+            foreach (var l in labels)
+                foreach (var m in moves)
+                    if (l.rect.Overlaps(m.rect)) hits.Add($"{l.name} on {m.name}");
+            for (int i = 0; i < labels.Count; i++)
+                for (int j = i + 1; j < labels.Count; j++)
+                    if (labels[i].rect.Overlaps(labels[j].rect)) hits.Add($"{labels[i].name} on {labels[j].name}");
+            return hits;
+        }
+
         /// <summary>Reloads the open scene from disk: a new field default stays at its old value in memory across domain reloads.</summary>
         public static void ReloadScene()
         {
@@ -95,6 +146,22 @@ namespace Diorama.EditorTools
             }
             UnityEditor.SceneManagement.EditorSceneManager.OpenScene(scene.path);
             Debug.Log("[Step24Debug] Scene reloaded from disk.");
+        }
+
+        /// <summary>A flat quad's true rectangle on screen (a world box round a turned quad reads wider than it is).</summary>
+        static Rect Quad(Camera cam, Transform t, float w, float h)
+        {
+            float x0 = 9f, y0 = 9f, x1 = -9f, y1 = -9f;
+            for (int sx = -1; sx <= 1; sx += 2)
+                for (int sy = -1; sy <= 1; sy += 2)
+                {
+                    var v = cam.WorldToViewportPoint(t.TransformPoint(new Vector3(sx * w, sy * h, 0f) * 0.5f));
+                    x0 = Mathf.Min(x0, v.x);
+                    y0 = Mathf.Min(y0, v.y);
+                    x1 = Mathf.Max(x1, v.x);
+                    y1 = Mathf.Max(y1, v.y);
+                }
+            return Rect.MinMaxRect(x0, y0, x1, y1);
         }
 
         static Bounds Flat(Transform t, float w, float h)

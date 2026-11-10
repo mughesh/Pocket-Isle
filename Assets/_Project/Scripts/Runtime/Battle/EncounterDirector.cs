@@ -1095,7 +1095,7 @@ namespace Diorama
                 wildPad = f.keeperPad,
                 towardPlayer = -line,
                 pivot = pivot,
-                explorerSpot = f.myPad - line * 0.35f + side * 0.85f,
+                explorerSpot = f.myPad + line * 0.35f + side * 0.85f, // Nov 10: a little behind its Isling, not in front of the moves
             };
             layout.zoom = Mathf.Min(FitZoom(pivot, new[] { (Vector2)f.myPad, f.keeperPad }), f.maxZoom);
             return layout;
@@ -1162,7 +1162,7 @@ namespace Diorama
                 towardPlayer = toward,
                 pivot = pivot,
                 // Just behind the party creature's pad, to one side.
-                explorerSpot = my - line * 0.35f + side * 0.85f,
+                explorerSpot = my + line * 0.35f + side * 0.85f, // Nov 10: a little behind its Isling, not in front of the moves
                 fallback = fallback,
             };
             layout.zoom = FitZoom(pivot, new[] { (Vector2)my, wild });

@@ -502,6 +502,45 @@ namespace Diorama.EditorTools
                 BuildQuick();
                 if (_only != null && _only.Any(o => o.StartsWith("Step27", StringComparison.OrdinalIgnoreCase))) Step27Shots();
                 if (_only != null && _only.Any(o => o.StartsWith("MenuOverBattle", StringComparison.OrdinalIgnoreCase))) MenuOverBattle();
+                if (_only != null && _only.Any(o => o.StartsWith("BattleLayout", StringComparison.OrdinalIgnoreCase))) BattleLayout();
+            }
+
+            // ---- Nov 10: moves, battle line and name labels never overlap, from several heads (bridge: RunOnly with arg "BattleLayout") ----
+
+            void BattleLayout()
+            {
+                const string P = "BattleLayout";
+                Add(P, "preset (reload, Continue)", () => GameState.Instance.QuickPreset(GameState.QuickStage.Gift),
+                    () => QuickJourney.Active && !TitleScreen.Showing && Elapsed > 6, 60f, () => { if (TitleScreen.Showing) RuneBoard.DebugPress("Continue"); }, 2f, true);
+                Add(P, "a battle, the moves up", () =>
+                {
+                    BattleDebug.SeatOffset = new Vector3(0f, 0.55f, 0.45f);
+                    BattleDebug.SeatCamera();
+                    DevCheats.Invincible = true;
+                    BattleDebug.Grass();
+                }, () =>
+                {
+                    var d = Director;
+                    return d != null && d.InBattle && d.PlayerOut && UnityEngine.Object.FindFirstObjectByType<BattleRunes>().TryGetRowBounds(out _) && Elapsed > 8;
+                }, 60f, () =>
+                {
+                    var d = Director;
+                    if (d != null && d.AwaitingSendOut && Party_ != null) d.DebugPick(Mathf.Max(0, Party_.NextFighter(-1)));
+                }, 1f, true);
+                foreach (var (name, seat) in new[]
+                         {
+                             ("seat", new Vector3(0f, 0.55f, 0.45f)), ("steep", new Vector3(0f, 0.72f, 0.2f)), ("low", new Vector3(0f, 0.36f, 0.58f)),
+                             ("left", new Vector3(0.22f, 0.5f, 0.42f)), ("right", new Vector3(-0.22f, 0.5f, 0.42f)), ("close", new Vector3(0f, 0.4f, 0.28f)),
+                         })
+                    Add(P, $"nothing overlaps from {name}", () => BattleDebug.SeatOffset = seat, () =>
+                    {
+                        if (Elapsed < 2.5) return false;
+                        var hits = Step24Debug.LayoutOverlaps();
+                        Step27Debug.Shot($"layout_{name}");
+                        if (hits.Count > 0) Note("problem", $"BattleLayout {name}: {string.Join("; ", hits)}");
+                        return true;
+                    }, 10f, null, 0.8f, true);
+                Add(P, "seat camera back", () => BattleDebug.SeatOffset = new Vector3(0f, 0.55f, 0.45f), () => true, 3f);
             }
 
             // ---- Nov 10: the battle's on-top labels hide behind the menu (bridge: RunOnly with arg "MenuOverBattle") ----
@@ -615,7 +654,49 @@ namespace Diorama.EditorTools
                 Add(P, "opening: shard, pinch, move, two hands, starter", null,
                     () => !Opening.InProgress && Lesson is "walk" or "far" or "look" or "grass" || Onboarding.Finished && !Opening.InProgress, 300f, PumpLessons, 1f, true,
                     () => $"lesson '{Lesson}'");
-                Add(P, "walk lessons: swipe, far, look", null, () => Lesson == "grass" || Onboarding.Finished, 120f, PumpLessons, 1f, true, () => $"lesson '{Lesson}'");
+                // Step 28: from the start tile each swipe walks with no tap for 20 s; it never stops and nothing reacts.
+                foreach (var (name, swipe) in new[] { ("forward", ThumbGesture.SwipeForward), ("left", ThumbGesture.SwipeLeft), ("right", ThumbGesture.SwipeRight), ("back", ThumbGesture.SwipeBack) })
+                {
+                    string bad = null;
+                    int moved = 0;
+                    var last = Vector2Int.zero;
+                    Add(P, $"lesson walk {name}: 20 s, no tap", () =>
+                    {
+                        var e = GameState.Instance.explorer;
+                        e.Teleport(e.SpawnTile, new Vector2Int(0, -1));
+                        last = e.Tile;
+                        UnityEngine.Object.FindFirstObjectByType<MicrogestureInput>().DebugRaise(swipe, GestureSource.Keyboard);
+                    }, () =>
+                    {
+                        if (bad != null || Elapsed < 20) return false;
+                        return moved >= 30;
+                    }, 24f, () =>
+                    {
+                        var e = GameState.Instance.explorer;
+                        if (e.Tile != last) moved++;
+                        last = e.Tile;
+                        if (e.Heading == Vector2Int.zero) bad = "it stopped";
+                        else if (InBattle) bad = "a battle started";
+                        else if (SceneSwap.IsBusy) bad = "a door or gate reacted";
+                        else if (!Onboarding.LessonWalking) bad = $"not lesson walking (lesson '{Lesson}')";
+                    }, 0.25f, true, () => bad ?? $"{moved} tiles, c{GameState.Instance.explorer.Tile.x} r{GameState.Instance.explorer.Tile.y}");
+                }
+                Add(P, "a thumb tap stops the lesson walk", () => UnityEngine.Object.FindFirstObjectByType<MicrogestureInput>().DebugRaise(ThumbGesture.Tap, GestureSource.Keyboard),
+                    () => Elapsed > 1 && GameState.Instance.explorer.Heading == Vector2Int.zero, 6f, null, 0.5f, true);
+                // Nov 10: the lesson's card greys out behind the menu, off the tablets.
+                Add(P, "menu over a lesson: the card greys", () => Menu?.TryOpen(), () =>
+                {
+                    var b = UnityEngine.Object.FindFirstObjectByType<DialogueBubble>();
+                    if (!GameMenu.IsOpen || Elapsed < 2 || b == null || !b.IsParked) return false;
+                    Step27Debug.Shot("menu_over_lesson");
+                    return true;
+                }, 15f, null, 0.8f, true);
+                Add(P, "menu closed: the lesson's line is back", () => Menu?.Close("smoke"), () =>
+                {
+                    var b = UnityEngine.Object.FindFirstObjectByType<DialogueBubble>();
+                    return !GameMenu.IsOpen && Elapsed > 2.5 && b != null && !b.IsParked;
+                }, 15f, null, 0.8f, true);
+                Add(P, "walk lessons: swipe, far, look", null, () => Lesson == "grass" || Onboarding.Finished, 180f, PumpLessons, 1f, true, () => $"lesson '{Lesson}'");
                 Add(P, "first battle: send, rune, catch", () => DevCheats.WildOff = false,
                     () => !InBattle && Caught > 0 && !Onboarding.Running, 240f, () =>
                     {

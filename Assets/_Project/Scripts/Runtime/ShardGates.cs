@@ -274,7 +274,7 @@ namespace Diorama
         /// </summary>
         void UpdateNear()
         {
-            bool still = !explorer.Locked && !explorer.Destination.HasValue && explorer.Heading == Vector2Int.zero && !_entering && _pending < 0;
+            bool still = !explorer.Locked && !explorer.Destination.HasValue && explorer.Heading == Vector2Int.zero && !_entering && _pending < 0 && !Onboarding.LessonWalking;
             int on = -1;
             for (int i = 0; i < _portals.Count; i++)
             {
@@ -301,7 +301,7 @@ namespace Diorama
         /// <summary>Look + pinch on a gate (also Step8Debug): use it from its front, otherwise walk there first.</summary>
         public void Pick(int index, string how)
         {
-            if (index < 0 || index >= _portals.Count || _entering || !Outside) return;
+            if (index < 0 || index >= _portals.Count || _entering || !Outside || Onboarding.LessonWalking) return;
             var g = _portals[index].link;
             if (AtFront(g, explorer.Tile))
             {
