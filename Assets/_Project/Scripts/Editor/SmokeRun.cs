@@ -1228,6 +1228,13 @@ namespace Diorama.EditorTools
                 Keeper(P, "gw.keeper", null, ShardHolder.WindId);
                 Shard(P, ShardHolder.WindId);
                 Add(P, "end card", null, () => RuneBoard.DebugList().Contains("See the ending"), 90f, null, 1f, true);
+                // Nov 11 panel (R48): the end card is never interrupted by the evolve objective (a due starter is normal here).
+                Add(P, "end card owns the stage", () =>
+                {
+                    if (Dialogue.CurrentObjective == GrowthDirector.ReadyLine) Note("rule", "R48 evolve.ready pinned over the end card");
+                    var g = UnityEngine.Object.FindFirstObjectByType<GrowthDirector>();
+                    if (g != null && g.Due >= 0) Note("rule", $"R48 pod {g.Due + 1} glows under the end card");
+                }, () => Elapsed > 2, 5f);
                 // Step 18: since Nov 7 the dreamed fire and water shards wait for the player (45 s each, then by themselves):
                 // place each one as it's offered.
                 Add(P, "See the ending", () => RuneBoard.DebugPress("See the ending"), () => FinaleDirector.Running, 60f, () =>

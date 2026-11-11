@@ -51,8 +51,16 @@ namespace Diorama
         bool _sending, _ending, _timing, _previewing;
         float _calm, _savedAt;
 
+        /// <summary>
+        /// Nov 11 panel (the end card was stepped on by "Kilnpot is glowing..."): the ending owns the stage from the shard's
+        /// lock-in (the statue's whisper, quick.end, the end card) until Keep exploring; See the ending and Title end in a
+        /// scene reload. <see cref="GrowthDirector"/> holds its glow and its line while this is up (R48).
+        /// </summary>
+        public static bool EndingUp { get; private set; }
+
         void Awake()
         {
+            EndingUp = false;
             QuickJourney.Config = config;
             QuickJourney.Owner = this;
             if (config == null) Debug.LogError("[QuickJourney] No config (Set Up MR_Main (9g title, menus, quick)): no Quick Journey dials.", this);
@@ -80,6 +88,7 @@ namespace Diorama
             QuickJourney.Owner = null;
             QuickJourney.Config = null;
             QuickJourney.InQuickRealm = false;
+            EndingUp = false;
             FinaleDirector.Moment -= OnFinaleMoment;
         }
 
@@ -216,6 +225,7 @@ namespace Diorama
         IEnumerator End()
         {
             _ending = true;
+            EndingUp = true;
             if (!QuickJourney.TimerDone)
             {
                 QuickJourney.TimerDone = true;
@@ -311,6 +321,7 @@ namespace Diorama
             Dialogue.SetFocal("end card", false);
             runes.Clear();
             runes.rimLocked = true; // step 17 B: rim rows sit on the rim, island-front locked
+            EndingUp = false;
             Debug.Log("[QuickJourney] Keep exploring: the full adventure's trail leads on (Cinderwood next).");
             var trail = FindFirstObjectByType<SpiritTrail>();
             if (trail != null) trail.Show("quick journey: keep exploring");

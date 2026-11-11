@@ -120,9 +120,13 @@ namespace Diorama
 
         // ---- due ----
 
-        /// <summary>Pods may glow and be grabbed for evolving: no battle, not the lodge, no finale, no scene change, no tutorial.</summary>
+        /// <summary>
+        /// Pods may glow and be grabbed for evolving: no battle, not the lodge, no finale, no scene change, no tutorial.
+        /// Nov 11 panel: not while the Quick Journey's ending is up either (R48: the end card is never interrupted).
+        /// </summary>
         bool Available => !encounters.InBattle && !pods.InBattle && !pods.LodgeMode && !FinaleDirector.Running && !SceneSwap.IsBusy &&
-                          !Onboarding.Running && !GameMenu.IsOpen && !JournalBoard.IsOpen && !KeeperHall.ShardUp && !KeeperHall.EvolutionHeld && !ShardCarried && !StatueSocket.SceneUp;
+                          !Onboarding.Running && !GameMenu.IsOpen && !JournalBoard.IsOpen && !KeeperHall.ShardUp && !KeeperHall.EvolutionHeld && !ShardCarried && !StatueSocket.SceneUp &&
+                          !QuickJourneyDirector.EndingUp;
 
         static readonly string[] ShardIds = { ShardHolder.FireId, ShardHolder.WindId, ShardHolder.WaterId };
 
