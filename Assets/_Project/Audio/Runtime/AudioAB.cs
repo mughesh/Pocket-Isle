@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Diorama.Audio
 {
-    /// <summary>Headset A/B switches on the Dev panel (remembered on the device). Both start on the old sound until Mugesh picks.</summary>
+    /// <summary>Headset A/B switches on the Dev panel, Tools tab, "Sound A/B" (remembered on the device). Jingles start on synth; voices start on the new ones (Nov 11).</summary>
     public static class AudioAB
     {
         const string JinglesKey = "PocketIsle.AB.AcousticJingles", VoicesKey = "PocketIsle.AB.NewVoices";
@@ -15,10 +15,13 @@ namespace Diorama.Audio
             set => PlayerPrefs.SetInt(JinglesKey, value ? 1 : 0);
         }
 
-        /// <summary>Keeper and Heart voices: false = the re-pitched blip, true = entrance call + voice grains. The Spirit keeps its blip either way.</summary>
+        /// <summary>
+        /// Keeper and Heart voices: false = the re-pitched blip, true = entrance call + voice grains. The Spirit keeps its blip either way.
+        /// Nov 11 (Mugesh heard no owl: the switch defaulted to the blip): the new voices are the default.
+        /// </summary>
         public static bool NewVoices
         {
-            get => PlayerPrefs.GetInt(VoicesKey, 0) == 1;
+            get => PlayerPrefs.GetInt(VoicesKey, 1) == 1;
             set => PlayerPrefs.SetInt(VoicesKey, value ? 1 : 0);
         }
 

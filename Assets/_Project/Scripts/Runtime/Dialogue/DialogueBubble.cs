@@ -406,8 +406,13 @@ namespace Diorama
                 var call = GameAudio.At(Diorama.Audio.AudioIds.SpiritBlip, at);
                 call.SetPitch(0.25f);
                 call.SetVolume(1f);
-                GameAudio.At(Diorama.Audio.AudioIds.SparkChime, at).SetVolume(0.45f);
-                Debug.Log("[DialogueBubble] The Heart's entrance call (synth, two octaves down, bell ping).");
+                // Nov 11 (Mugesh: the Heart's voice done properly, in the spirit of the "moooo" but richer): with the new
+                // voices on and a generated call in the cue, that singing-bowl and choir tone rides on top of the synth's
+                // low hum instead of the bell ping. Voices: blip (Dev panel > Tools > Sound A/B) gives the old call back.
+                bool rich = Diorama.Audio.AudioAB.NewVoices && Diorama.Audio.AudioService.Has(Diorama.Audio.AudioIds.VoiceCallHeart);
+                if (rich) GameAudio.At(Diorama.Audio.AudioIds.VoiceCallHeart, at).SetVolume(heartCallLayer);
+                else GameAudio.At(Diorama.Audio.AudioIds.SparkChime, at).SetVolume(0.45f);
+                Debug.Log($"[DialogueBubble] The Heart's entrance call (synth two octaves down + {(rich ? "the generated bowl and choir call" : "bell ping")}).");
             }
             else if (_objective && string.IsNullOrEmpty(chip)) GameAudio.At(Diorama.Audio.AudioIds.SpiritFocus, _root.position).SetVolume(0.6f);
             for (int i = 0; i < 2; i++) _wasPinching[i] = true; // a pinch already held doesn't skip
@@ -700,6 +705,8 @@ namespace Diorama
         [Min(1)] public int blipEvery = 4;
         [Tooltip("And never closer than this (seconds), however fast the letters come (Oct 27: 0.2).")]
         public float blipGap = 0.12f;
+        [Tooltip("Nov 11: the Heart's first line: how loud the generated bowl and choir call sits on top of the synth's low hum (0-1).")]
+        [Range(0f, 1f)] public float heartCallLayer = 0.6f;
         [Tooltip("Step 24: new voices: at least this long between grains (a grain is 0.15-0.3 s, a blip far shorter).")]
         public float grainGap = 0.2f;
         [Tooltip("Step 24: new voices: this long after a speaker's last line, its next line counts as a new scene and gets the entrance call again (s).")]

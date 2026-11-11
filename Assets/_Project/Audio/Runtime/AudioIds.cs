@@ -94,6 +94,7 @@ namespace Diorama.Audio
         public const string EvoRise = "evo.rise";
         public const string ExplorerStretch = "explorer.stretch";
         public const string Faint = "faint";
+        public const string FingerCatch = "finger.catch";
         public const string FireboxRoar = "firebox.roar";
         public const string FlameCup = "flame.cup";
         public const string FlameRekindle = "flame.rekindle";
@@ -113,6 +114,7 @@ namespace Diorama.Audio
         public const string HitNormal = "hit.normal";
         public const string HitSuper = "hit.super";
         public const string HitWeak = "hit.weak";
+        public const string HoldDone = "hold.done";
         public const string HpLow = "hp.low";
         public const string IceCrack = "ice.crack";
         public const string IceShatter = "ice.shatter";
@@ -144,6 +146,7 @@ namespace Diorama.Audio
         public const string KiteTug = "kite.tug";
         public const string KnotPull = "knot.pull";
         public const string LagoonRise = "lagoon.rise";
+        public const string LanternBurn = "lantern.burn";
         public const string LanternLight = "lantern.light";
         public const string LanternSputter = "lantern.sputter";
         public const string LilyClick = "lily.click";
@@ -231,6 +234,7 @@ namespace Diorama.Audio
         public const string SwInsect = "sw.insect";
         public const string SwLeaves = "sw.leaves";
         public const string SwPebble = "sw.pebble";
+        public const string ThornBurn = "thorn.burn";
         public const string TowerDoor = "tower.door";
         public const string UiLesson = "ui.lesson";
         public const string UiPebble = "ui.pebble";

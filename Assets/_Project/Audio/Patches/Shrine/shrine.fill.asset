@@ -391,4 +391,5 @@ MonoBehaviour:
   confidence: 0
   review:
     status: 0
-    note: 
+    note: 'Gen vs synth: pick. Gen lane: shrine.fill_1 ok (new take (nov11), -26
+      dB above 250 Hz, low share 0.00)'

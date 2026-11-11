@@ -519,4 +519,7 @@ MonoBehaviour:
   confidence: 1
   review:
     status: 0
-    note: 
+    note: 'Gen vs synth: pick. Gen lane: lantern.light_5 ok (new take (nov11b), -30
+      dB above 250 Hz, low share 0.00); lantern.light_8 ok (new take (nov11b), -34
+      dB above 250 Hz, low share 0.18); lantern.light_7 ok (new take (nov11b), -36
+      dB above 250 Hz, low share 0.10)'
