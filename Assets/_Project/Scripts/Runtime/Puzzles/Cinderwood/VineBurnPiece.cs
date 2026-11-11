@@ -44,7 +44,10 @@ namespace Diorama
         public float ventRing = 0.9f, vineRing = 1.6f;
 
         [Header("Burning")]
+        [Tooltip("The crumble: charred, it shrinks into the ground over this long.")]
         public float burnSeconds = 1.6f;
+        /// <summary>Nov 11 (Mugesh: it went poof at once): first the fire spreads along the vine for this long: it glows, darkens and embers rise, still whole.</summary>
+        public const float SpreadSeconds = 1.3f;
 
         [Header("Lines")]
         [Tooltip("Said (the Spirit points at the vine) when the ember is picked up, at most every 12 s.")]
@@ -322,8 +325,12 @@ namespace Diorama
         {
             _burnRunning = true;
             LessonComplete();
-            GameAudio.Play(AudioIds.EmberDrop, at, _audio, PuzzleSounds.Crackle, volume * 0.8f);
-            GameAudio.Play(AudioIds.FireboxRoar, at, _audio, PuzzleSounds.Whoosh, volume);
+            if (AudioService.Has(AudioIds.ThornBurn)) GameAudio.At(AudioIds.ThornBurn, at).SetVolume(volume); // Nov 11: the 2.5 s burn
+            else
+            {
+                GameAudio.Play(AudioIds.EmberDrop, at, _audio, PuzzleSounds.Crackle, volume * 0.8f);
+                GameAudio.Play(AudioIds.FireboxRoar, at, _audio, PuzzleSounds.Whoosh, volume);
+            }
             // Off the map in one go (one island rebuild); the views burn away.
             foreach (var t in vine)
             {
@@ -332,28 +339,43 @@ namespace Diorama
             }
             float tile = TileWorld;
             float next = 0f;
-            for (float t = 0f; t < burnSeconds; t += Time.deltaTime)
+            // Nov 11: two acts. Spread (SpreadSeconds): the fire runs along the vine from the tile nearest the touch, each tile
+            // glowing up and darkening in turn, flames and embers along it, still whole. Crumble (burnSeconds): charred, it
+            // shrinks into the ground in embers and smoke.
+            int from = NearestVine(at);
+            float total = SpreadSeconds + burnSeconds;
+            for (float t = 0f; t < total; t += Time.deltaTime)
             {
-                float u = Mathf.Clamp01(t / burnSeconds);
+                float spread = Mathf.Clamp01(t / SpreadSeconds);
+                float u = Mathf.Clamp01((t - SpreadSeconds) / burnSeconds);
                 for (int i = 0; i < vine.Length; i++)
                 {
                     var v = _burning != null ? _burning[i] : null;
                     if (v == null) continue;
-                    // Fire runs out from the middle: each tile starts a little later, chars, then sinks to nothing.
+                    // How far the fire has reached this tile (1 = fully alight), later for tiles further from the touch.
+                    float lag = vine.Length > 1 ? 0.55f * Mathf.Abs(i - from) / (vine.Length - 1) : 0f;
+                    float lit = Mathf.Clamp01((spread - lag) / Mathf.Max(0.01f, 1f - lag));
+                    // Crumble: each tile a little after the one before, chars, then sinks to nothing.
                     float k = Mathf.Clamp01((u - 0.12f * i) / 0.8f);
                     float size = Mathf.Lerp(1f, 0f, Mathf.SmoothStep(0f, 1f, k));
-                    v.restoredSelf = 1f - k;
-                    v.glowBoostB = new Vector4(2f * Mathf.Sin(k * Mathf.PI), 0f, 0f, 0f);
+                    v.restoredSelf = Mathf.Lerp(1f, 0.35f, lit) * (1f - k);
+                    float flicker = 0.85f + 0.15f * Mathf.Sin(t * 19f + i * 1.7f);
+                    v.glowBoostB = new Vector4(Mathf.Max(2.4f * lit * flicker * (1f - 0.5f * k), 2f * Mathf.Sin(k * Mathf.PI)), 0f, 0f, 0f);
                     v.Place(vine[i], -0.25f * k, Quaternion.identity, Here && size > 0.02f, size);
                 }
                 if (fx != null && Here && t >= next)
                 {
                     next = t + 0.08f;
-                    foreach (var vt in vine)
+                    for (int i = 0; i < vine.Length; i++)
                     {
+                        float lag = vine.Length > 1 ? 0.55f * Mathf.Abs(i - from) / (vine.Length - 1) : 0f;
+                        if (spread < lag) continue; // the fire hasn't reached this tile yet
+                        var vt = vine[i];
                         var p = MapToWorld(new Vector3(vt.x + Random.Range(-0.4f, 0.4f), Random.Range(0.1f, 0.6f), vt.y + Random.Range(-0.3f, 0.3f)));
-                        fx.Burst(p, 4, new Color(1f, 0.55f + Random.Range(0f, 0.2f), 0.18f), tile * 0.5f, 0.5f, tile * 0.07f, island.transform.up * tile * 0.9f);
-                        if (u > 0.4f) fx.Burst(p, 2, new Color(0.3f, 0.28f, 0.27f, 0.8f), tile * 0.2f, 1.3f, tile * 0.12f, island.transform.up * tile * 0.5f);
+                        // Flames along it while it spreads, then embers and smoke as it chars.
+                        fx.Burst(p, u <= 0f ? 5 : 3, new Color(1f, 0.55f + Random.Range(0f, 0.2f), 0.18f), tile * 0.5f, 0.5f, tile * 0.07f, island.transform.up * tile * (u <= 0f ? 1.2f : 0.9f));
+                        if (spread > 0.5f) fx.Burst(p, 1, new Color(1f, 0.75f, 0.35f), tile * 0.15f, 1.4f, tile * 0.035f, island.transform.up * tile * 1.6f);
+                        if (u > 0.3f) fx.Burst(p, 2, new Color(0.3f, 0.28f, 0.27f, 0.8f), tile * 0.2f, 1.3f, tile * 0.12f, island.transform.up * tile * 0.5f);
                     }
                 }
                 yield return null;
@@ -366,6 +388,21 @@ namespace Diorama
             if (explorer != null) explorer.Cheer();
             if (!string.IsNullOrEmpty(doneLine)) Dialogue.Say(doneLine);
             Debug.Log($"[VineBurnPiece] {id}: the vine burnt away, the trail is open.");
+        }
+
+        /// <summary>The vine tile nearest a world point (where the fire starts).</summary>
+        int NearestVine(Vector3 at)
+        {
+            int best = 0;
+            float bestSq = float.MaxValue;
+            for (int i = 0; i < vine.Length; i++)
+            {
+                float d = (TileTop(vine[i]) - at).sqrMagnitude;
+                if (d >= bestSq) continue;
+                bestSq = d;
+                best = i;
+            }
+            return best;
         }
 
         void QuietSolve()
