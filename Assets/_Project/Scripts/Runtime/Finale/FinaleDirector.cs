@@ -421,15 +421,33 @@ namespace Diorama
             }
             runes.Clear();
             runes.rimLocked = true; // step 17 B: rim rows sit on the rim, island-front locked
-            runes.Add("Skip", Vector2.zero, new Vector2(0.07f, 0.03f), () =>
+            runes.Add("Skip", Vector2.zero, SkipSize, () =>
             {
                 _skip = true;
                 runes.Hide();
                 MusicDirector.SkipFinale(); // step 20
                 Debug.Log("[FinaleDirector] Skip: on to the end.");
             });
-            runes.Anchor = null;
+            runes.Anchor = SkipSpot;
             runes.Show(0.1f);
+        }
+
+        public static readonly Vector2 SkipSize = new Vector2(0.07f, 0.03f);
+        const float SkipRimGap = 0.016f;
+
+        /// <summary>
+        /// Nov 11 panel (R17: nothing sits on the pods): the Skip tablet takes the Journal tablet's rim spot, left of the
+        /// pods' socket band (seen from the player) by <see cref="SkipRimGap"/>, as <c>LodgeJournalBook.RimSpot</c>; on
+        /// their right when the left has no room. Null (no pods) = the rim's middle as before.
+        /// </summary>
+        Vector3? SkipSpot()
+        {
+            if (island == null || island.map == null || pods == null || !pods.SocketBandLocal(out float minX, out float maxX, out _)) return null;
+            float hw = SkipSize.x / 0.6f * 0.5f;
+            float x = maxX + SkipRimGap + hw;
+            if (x + hw > island.FootprintHalfSize.x) x = minX - SkipRimGap - hw;
+            var b = island.LocalBounds;
+            return island.transform.TransformPoint(new Vector3(x, island.map.capHeight, b.max.z) + runes.offset);
         }
 
         /// <summary>Step 16: waits <paramref name="seconds"/>, or less once Skip is pressed.</summary>
