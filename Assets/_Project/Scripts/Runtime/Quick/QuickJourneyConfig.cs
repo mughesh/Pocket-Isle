@@ -14,6 +14,17 @@ namespace Diorama
         [Tooltip("Lesson ids skipped in the quick slot (every lesson that teaches a hand verb stays).")]
         public string[] cutLessons = { };
 
+        [System.Serializable]
+        public struct LessonTime
+        {
+            public string id;
+            [Tooltip("Skipped quietly after teaching this long (s) in the quick slot. 0 = waits forever.")]
+            [Min(0f)] public float skipAfter;
+        }
+
+        [Tooltip("Nov 11 panel: a lesson's quiet skip in the quick slot only (move 25 s, two hands 20 s; the full adventure keeps the lesson's own skipAfter). Empty = no change.")]
+        public LessonTime[] skipAfterOverrides = { };
+
         [Header("Dials in the quick realm (Galewick since step 14c)")]
         [Tooltip("Nov 3 (no gift any more): the quick realm's Keeper is this many levels off in the quick slot (negative = easier).")]
         public int keeperLevelOffset = -2;

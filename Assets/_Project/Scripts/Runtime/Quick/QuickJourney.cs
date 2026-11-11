@@ -40,6 +40,8 @@ namespace Diorama
 
         public static bool SkipsLesson(string id) => SkipsLesson(id, Active, Config);
 
+        public static float SkipAfter(string id, float skipAfter) => SkipAfter(id, skipAfter, Active, Config);
+
         // ---- dials (pure, tested) ----
 
         public static float EncounterChance(float baseChance, bool quick, QuickJourneyConfig c) =>
@@ -82,6 +84,18 @@ namespace Diorama
 
         public static bool SkipsLesson(string id, bool quick, QuickJourneyConfig c) =>
             quick && c != null && c.cutLessons != null && Array.IndexOf(c.cutLessons, id) >= 0;
+
+        /// <summary>
+        /// Nov 11 panel: a lesson's quiet skip (s) in the quick slot (<see cref="QuickJourneyConfig.skipAfterOverrides"/>);
+        /// the lesson's own <paramref name="skipAfter"/> otherwise (pure).
+        /// </summary>
+        public static float SkipAfter(string id, float skipAfter, bool quick, QuickJourneyConfig c)
+        {
+            if (!quick || c == null || c.skipAfterOverrides == null) return skipAfter;
+            foreach (var o in c.skipAfterOverrides)
+                if (o.id == id) return o.skipAfter;
+            return skipAfter;
+        }
 
         // ---- timer ----
 

@@ -42,6 +42,9 @@ namespace Diorama
         /// <summary>Lessons this returns true for are passed over (step 9g: the Quick Journey's cuts).</summary>
         public Func<string, bool> Skip { get; set; }
 
+        /// <summary>Nov 11 panel: (lesson id, its skipAfter) to the skipAfter to use (the Quick Journey's shorter opening waits).</summary>
+        public Func<string, float, float> SkipAfter { get; set; }
+
         /// <summary>Records that something happened (stays true until a rewind clears it).</summary>
         public bool Mark(string name)
         {
@@ -164,9 +167,10 @@ namespace Diorama
                 return Outcome.Started;
             }
             Teaching += dt;
-            if (l.skipAfter > 0f && Teaching >= l.skipAfter)
+            float skipAfter = SkipAfter != null ? SkipAfter(l.id, l.skipAfter) : l.skipAfter;
+            if (skipAfter > 0f && Teaching >= skipAfter)
             {
-                Advance($"skipped after {l.skipAfter:0} s");
+                Advance($"skipped after {skipAfter:0} s");
                 return Outcome.Skipped;
             }
             return Outcome.None;

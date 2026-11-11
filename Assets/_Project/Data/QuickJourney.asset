@@ -13,6 +13,11 @@ MonoBehaviour:
   m_Name: QuickJourney
   m_EditorClassIdentifier: Diorama.Runtime::Diorama.QuickJourneyConfig
   cutLessons: []
+  skipAfterOverrides:
+  - id: move
+    skipAfter: 25
+  - id: twoHands
+    skipAfter: 20
   keeperLevelOffset: -4
   encounterRate: 0.5
   xpMultiplier: 2
