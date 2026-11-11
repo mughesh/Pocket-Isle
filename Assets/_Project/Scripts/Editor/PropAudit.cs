@@ -22,11 +22,12 @@ namespace Diorama.EditorTools
         static readonly int RestoredSelfId = Shader.PropertyToID("_RestoredSelf");
         static readonly int ClearSinkId = Shader.PropertyToID("_ClearSink");
 
-        static float _pitch = 24f;
+        static float _pitch = 24f, _yaw = -28f;
 
         public static void All()
         {
             _pitch = 24f;
+            _yaw = -28f;
             Run(null);
         }
 
@@ -35,6 +36,18 @@ namespace Diorama.EditorTools
         {
             var arg = File.Exists("Temp/ClaudeBridge/arg.txt") ? File.ReadAllText("Temp/ClaudeBridge/arg.txt") : "";
             _pitch = 24f;
+            _yaw = -28f;
+            // Nov 12: "front;" looks at the props' faces (+Z, where the player sits); the default view is from behind.
+            if (arg.StartsWith("front;"))
+            {
+                _yaw = 152f;
+                arg = arg.Substring(6);
+            }
+            if (arg.StartsWith("side;"))
+            {
+                _yaw = 100f;
+                arg = arg.Substring(5);
+            }
             if (arg.StartsWith("pitch=") && arg.Contains(";"))
             {
                 float.TryParse(arg.Substring(6, arg.IndexOf(';') - 6), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out _pitch);
@@ -110,7 +123,7 @@ namespace Diorama.EditorTools
                     var b = mr.bounds;
                     float radius = b.extents.magnitude;
                     float dist = radius / Mathf.Sin(cam.fieldOfView * 0.5f * Mathf.Deg2Rad) * 1.05f;
-                    var dir = Quaternion.Euler(_pitch, -28f, 0f) * Vector3.back;
+                    var dir = Quaternion.Euler(_pitch, _yaw, 0f) * Vector3.back;
                     cam.transform.SetPositionAndRotation(b.center + dir * dist, Quaternion.LookRotation(-dir, Vector3.up));
                     int cx = i % cols, cy = i / cols;
                     cam.rect = new Rect(cx / (float)cols, 1f - (cy + 1) / (float)rows, 1f / cols, 1f / rows);

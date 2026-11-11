@@ -33,6 +33,9 @@ namespace Diorama.EditorTools
             return all;
         }
 
+        /// <summary>Nov 12: the cold shrine alone (not baked), after the lit one was rewritten.</summary>
+        internal static PropRecipe WriteHearthShrineCold() => HearthShrineCold();
+
         /// <summary>The Hearth Shrine's own pieces minus its flame (the bowl stays, cold).</summary>
         static PropRecipe HearthShrineCold()
         {

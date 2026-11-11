@@ -386,26 +386,39 @@ namespace Diorama.EditorTools
         {
             // Nov 7 (Mugesh: jagged, the door too small to notice): finer and smoother (resolution 60 -> 88, budget 3200 -> 5200,
             // softer bumps) and a door about 1.4x bigger.
-            var tower = Recipe(name, new Vector2Int(2, 2), true, false, 5200);
+            // Nov 12 (Mugesh: the towers look broken and bare): the bald dome with notches is now a walkway with a
+            // parapet and merlons round a slate cone roof (like the mill's), a finial and a pennant; two stone bands
+            // and a scatter of raised blocks break up the wall. The door, the slits and the vanes stay where they were.
+            var tower = Recipe(name, new Vector2Int(2, 2), true, false, 4600);
             tower.palette = Palette(CloudStone, MillWood, Slate, Meadow, WarmWindow, SailWhite);
             tower.yawJitter = 0f;
             tower.scaleJitter = 0f;
             tower.resolution = 88;
+            float Radius(float y) => Mathf.Lerp(0.78f, 0.62f, y / 3.6f);
             var crown = new List<SdfPrimitive>
             {
-                Cone(new Vector3(0f, 0f, 0f), new Vector3(0f, 3.6f, 0f), 0.78f, 0.62f, 0f).Bumps(0.006f, 5f),
+                Cone(new Vector3(0f, 0f, 0f), new Vector3(0f, 3.5f, 0f), 0.78f, 0.625f, 0f).Bumps(0.006f, 5f),
                 Torus(new Vector3(0f, 0.06f, 0f), 0.78f, 0.08f, Vector3.zero, 0.03f),
-                Cone(new Vector3(0f, 3.55f, 0f), new Vector3(0f, 3.95f, 0f), 0.74f, 0.74f, 0.03f),
-                // Nov 11: the thin crown wall (0.14) baked shredded from above: thicker (0.22).
-                Cone(new Vector3(0f, 3.7f, 0f), new Vector3(0f, 4.1f, 0f), 0.52f, 0.52f, 0f).Sub(),
+                // Stone bands.
+                Torus(new Vector3(0f, 1.35f, 0f), Radius(1.35f), 0.05f, Vector3.zero, 0.02f),
+                Torus(new Vector3(0f, 2.5f, 0f), Radius(2.5f), 0.05f, Vector3.zero, 0.02f),
+                // The walkway slab and the parapet on it.
+                Ell(new Vector3(0f, 3.66f, 0f), new Vector3(0.88f, 0.1f, 0.88f), 0.03f),
+                Torus(new Vector3(0f, 3.8f, 0f), 0.78f, 0.075f, Vector3.zero, 0.02f),
                 Ell(new Vector3(0f, 0.63f, 0.76f), new Vector3(0.39f, 0.67f, 0.2f), 0.02f).Sub(),
                 Floor(0f),
             };
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < 8; i++)
             {
-                float a = i * 60f + 30f;
+                float a = i * 45f + 22.5f;
                 var d = Quaternion.Euler(0f, a, 0f) * Vector3.forward;
-                crown.Add(Box(d * 0.68f + Vector3.up * 4.0f, new Vector3(0.16f, 0.2f, 0.2f), 0.03f, 0.03f, new Vector3(0f, a, 0f)).Sub());
+                crown.Add(Box(d * 0.78f + Vector3.up * 3.93f, new Vector3(0.12f, 0.1f, 0.075f), 0.02f, 0.015f, new Vector3(0f, a, 0f)));
+            }
+            // Raised blocks here and there on the wall (never over the door or the slits).
+            foreach (var (a, y) in new[] { (95f, 0.5f), (150f, 0.95f), (-100f, 0.7f), (-150f, 1.7f), (80f, 1.9f), (175f, 2.2f), (-70f, 2.9f), (120f, 3.0f), (-125f, 0.35f), (60f, 2.85f), (-60f, 1.1f), (-170f, 3.1f) })
+            {
+                var d = Quaternion.Euler(0f, a, 0f) * Vector3.forward;
+                crown.Add(Box(d * (Radius(y) - 0.005f) + Vector3.up * y, new Vector3(0.11f, 0.055f, 0.03f), 0.012f, 0.012f, new Vector3(0f, a, 0f)));
             }
             var slits = new List<SdfPrimitive>();
             foreach (var (a, y) in new[] { (30f, 1.6f), (-35f, 2.4f), (10f, 3.05f) })
@@ -417,11 +430,21 @@ namespace Diorama.EditorTools
             tower.pieces = new List<PropPiece>
             {
                 Piece(PShape("WindTower_Stone", crown.ToArray()), PropSlot.Clay),
+                // The slate roof inside the parapet, its finial, pole and pennant.
+                Piece(PShape("WindTower_Roof",
+                    Cone(new Vector3(0f, 3.78f, 0f), new Vector3(0f, 4.72f, 0f), 0.6f, 0.04f, 0f),
+                    Plane(new Vector3(0f, 3.72f, 0f), Vector3.down, 0f)), PropSlot.Stone),
+                Piece(PShape("WindTower_Finial",
+                    Sphere(new Vector3(0f, 4.78f, 0f), 0.075f),
+                    Cone(new Vector3(0f, 4.8f, 0f), new Vector3(0f, 5.12f, 0f), 0.022f, 0.016f, 0.01f)), PropSlot.Wood),
+                Piece(PShape("WindTower_Pennant",
+                    Ell(new Vector3(0.15f, 5.02f, 0f), new Vector3(0.15f, 0.07f, 0.014f), 0f),
+                    Ell(new Vector3(0.33f, 5.0f, 0f), new Vector3(0.08f, 0.04f, 0.012f), 0.03f)), PropSlot.Accent, PropMotion.Sway, 0.05f),
                 shut
                     ? Piece(TowerDoorShape(), PropSlot.Wood)
                     : Piece(PShape("WindTower_Inside",
                         Ell(new Vector3(0f, 0.59f, 0.5f), new Vector3(0.38f, 0.62f, 0.05f), 0f),
-                        Floor(0f)), PropSlot.Stone),
+                        Floor(0f)), PropSlot.Leaf),
                 Piece(PShape("WindTower_Frame",
                     Torus(new Vector3(0f, 0.63f, 0.72f), 0.42f, 0.06f, new Vector3(90f, 0f, 0f), 0f),
                     Plane(new Vector3(0f, 0.56f, 0f), Vector3.down, 0f),
@@ -432,7 +455,8 @@ namespace Diorama.EditorTools
                 Piece(PShape("WindTower_Vanes", Sails(0.85f, 0.16f, false)), PropSlot.Wood, PropMotion.Spin, 0.7f, hub),
                 Piece(PShape("WindTower_VaneCloth", Sails(0.85f, 0.16f, true)), PropSlot.Accent, PropMotion.Spin, 0.7f, hub + new Vector3(0f, 0f, -0.02f)),
             };
-            if (!shut) tower.palette[(int)PropSlot.Stone] = C("#2E2B2C");
+            // The open doorway's dark inside: the Leaf slot (the tower has no leaves); Stone is the slate roof.
+            if (!shut) tower.palette[(int)PropSlot.Leaf] = C("#2E2B2C");
             return tower;
         }
 

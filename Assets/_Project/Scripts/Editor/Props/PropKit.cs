@@ -273,35 +273,72 @@ namespace Diorama.EditorTools
         {
             DioramaSceneSetup.EnsureFolder(Root);
             DioramaSceneSetup.EnsureFolder($"{Root}/Shapes");
-            var shrine = Recipe("HearthShrine", new Vector2Int(2, 2), true, false, 2600);
+            // Nov 12 (Mugesh: the main buildings look broken and bare): a finer bake (40 -> 72) and real stonework: two
+            // steps, a plinth band and a cornice, round corner posts with caps, a framed arch with a keystone, a round
+            // lit window in each side wall, a stone eave under the moss dome with a finial on each corner. The bowl,
+            // the flame and the doorway stay where they were (the palm ring and the beacon use them).
+            var shrine = Recipe("HearthShrine", new Vector2Int(2, 2), true, false, 4400);
             shrine.palette = Palette(Clay, Wood, Stone, C("#7E9468"), C("#FFB04A", 1.2f), Smoke);
             shrine.yawJitter = 0f;
             shrine.scaleJitter = 0f;
-            shrine.resolution = 40;
+            shrine.resolution = 72;
+            var walls = new List<SdfPrimitive>
+            {
+                // Two steps.
+                Box(new Vector3(0f, 0.035f, 0f), new Vector3(0.92f, 0.035f, 0.86f), 0.02f, 0f),
+                Box(new Vector3(0f, 0.1f, -0.02f), new Vector3(0.8f, 0.04f, 0.72f), 0.02f, 0.01f),
+                // The hut, a plinth band and a cornice round it.
+                Box(new Vector3(0f, 0.46f, -0.04f), new Vector3(0.62f, 0.34f, 0.52f), 0.05f, 0.02f),
+                Box(new Vector3(0f, 0.2f, -0.04f), new Vector3(0.655f, 0.05f, 0.555f), 0.02f, 0.015f),
+                Box(new Vector3(0f, 0.75f, -0.04f), new Vector3(0.66f, 0.04f, 0.56f), 0.02f, 0.015f),
+                // The doorway and the round side windows.
+                Ell(new Vector3(0f, 0.36f, 0.5f), new Vector3(0.23f, 0.3f, 0.22f), 0.01f).Sub(),
+                Box(new Vector3(0f, 0.2f, 0.5f), new Vector3(0.23f, 0.12f, 0.22f), 0.01f, 0.01f).Sub(),
+                Sphere(new Vector3(0.66f, 0.48f, -0.04f), 0.13f, 0.01f).Sub().Mirror(),
+                // The eave: a stone slab the dome sits on.
+                Box(new Vector3(0f, 0.82f, -0.04f), new Vector3(0.8f, 0.035f, 0.7f), 0.03f, 0.01f),
+                // The bowl on its stem.
+                Cone(new Vector3(0f, 0.95f, 0f), new Vector3(0f, 1.3f, 0f), 0.13f, 0.1f, 0.05f),
+                Ell(new Vector3(0f, 1.32f, 0f), new Vector3(0.26f, 0.09f, 0.26f), 0.04f),
+                Torus(new Vector3(0f, 1.39f, 0f), 0.22f, 0.055f, Vector3.zero, 0.03f),
+                Sphere(new Vector3(0f, 1.44f, 0f), 0.2f, 0.02f).Sub(),
+                Floor(0f),
+            };
+            var trim = new List<SdfPrimitive>();
+            // Corner posts with round caps, a finial on each eave corner.
+            foreach (float z in new[] { 0.48f, -0.56f })
+            {
+                trim.Add(Cone(new Vector3(0.62f, 0.14f, z), new Vector3(0.62f, 0.78f, z), 0.085f, 0.075f, 0f).Mirror());
+                trim.Add(Sphere(new Vector3(0.74f, 0.9f, z + (z > 0f ? 0.14f : -0.1f)), 0.065f, 0.02f).Mirror());
+            }
+            // The arch: a ring round the doorway's top, jambs down to the step, a keystone.
+            trim.Add(Torus(new Vector3(0f, 0.36f, 0.5f), 0.29f, 0.05f, new Vector3(90f, 0f, 0f), 0f));
+            trim.Add(Plane(new Vector3(0f, 0.34f, 0f), Vector3.down, 0f));
+            var jambs = new List<SdfPrimitive>
+            {
+                Box(new Vector3(0.29f, 0.24f, 0.5f), new Vector3(0.05f, 0.11f, 0.05f), 0.015f, 0f).Mirror(),
+                Box(new Vector3(0f, 0.68f, 0.52f), new Vector3(0.07f, 0.075f, 0.05f), 0.02f, 0f),
+                // Window rings.
+                Torus(new Vector3(0.63f, 0.48f, -0.04f), 0.14f, 0.035f, new Vector3(0f, 0f, 90f), 0f).Mirror(),
+            };
             shrine.pieces = new List<PropPiece>
             {
-                Piece(PShape("HearthShrine_Stone",
-                    Box(new Vector3(0f, 0.05f, 0f), new Vector3(0.88f, 0.05f, 0.8f), 0.04f, 0f),
-                    Box(new Vector3(0f, 0.42f, -0.04f), new Vector3(0.66f, 0.38f, 0.56f), 0.12f, 0.05f),
-                    Ell(new Vector3(0f, 0.34f, 0.5f), new Vector3(0.24f, 0.32f, 0.22f), 0.03f).Sub(),
-                    Box(new Vector3(0f, 0.14f, 0.5f), new Vector3(0.24f, 0.14f, 0.22f), 0.02f, 0.02f).Sub(),
-                    Torus(new Vector3(0f, 0.36f, 0.52f), 0.28f, 0.045f, new Vector3(90f, 0f, 0f), 0.03f),
-                    Cone(new Vector3(0f, 0.95f, 0f), new Vector3(0f, 1.3f, 0f), 0.13f, 0.1f, 0.05f),
-                    Ell(new Vector3(0f, 1.32f, 0f), new Vector3(0.26f, 0.09f, 0.26f), 0.04f),
-                    Torus(new Vector3(0f, 1.39f, 0f), 0.22f, 0.055f, Vector3.zero, 0.03f),
-                    Sphere(new Vector3(0f, 1.44f, 0f), 0.2f, 0.02f).Sub(),
-                    Floor(0f)), PropSlot.Stone),
-                Piece(PShape("HearthShrine_Cap",
-                    Ell(new Vector3(0f, 0.82f, -0.04f), new Vector3(0.78f, 0.34f, 0.68f)),
-                    Plane(new Vector3(0f, 0.74f, 0f), Vector3.down, 0.03f)), PropSlot.Leaf, PropMotion.Sway, 0.008f),
-                Piece(PShape("HearthShrine_Door",
-                    Ell(new Vector3(0f, 0.3f, 0.36f), new Vector3(0.2f, 0.28f, 0.08f))), PropSlot.Glow, PropMotion.Flicker, 0.003f),
-                Piece(PShape("HearthShrine_Flame",
+                W(Piece(PShape("HearthShrine_Stone", walls.ToArray()), PropSlot.Stone), 1500f),
+                W(Piece(PShape("HearthShrine_Trim", trim.ToArray()), PropSlot.Stone), 700f),
+                W(Piece(PShape("HearthShrine_Frame", jambs.ToArray()), PropSlot.Stone), 500f),
+                W(Piece(PShape("HearthShrine_Cap",
+                    Ell(new Vector3(0f, 0.85f, -0.04f), new Vector3(0.72f, 0.33f, 0.62f)).Bumps(0.014f, 14f),
+                    Plane(new Vector3(0f, 0.84f, 0f), Vector3.down, 0.02f)), PropSlot.Leaf, PropMotion.Sway, 0.008f), 800f),
+                W(Piece(PShape("HearthShrine_Door",
+                    Ell(new Vector3(0f, 0.3f, 0.36f), new Vector3(0.2f, 0.28f, 0.08f))), PropSlot.Glow, PropMotion.Flicker, 0.003f), 200f),
+                W(Piece(PShape("HearthShrine_Windows",
+                    Ell(new Vector3(0.56f, 0.48f, -0.04f), new Vector3(0.04f, 0.115f, 0.115f)).Mirror()), PropSlot.Glow, PropMotion.Flicker, 0.002f), 200f),
+                W(Piece(PShape("HearthShrine_Flame",
                     Sphere(new Vector3(0f, 1.42f, 0f), 0.15f),
                     Cone(new Vector3(0f, 1.44f, 0f), new Vector3(0f, 1.82f, 0f), 0.13f, 0.015f, 0.08f),
                     Cone(new Vector3(0.08f, 1.43f, 0.02f), new Vector3(0.14f, 1.66f, 0.04f), 0.06f, 0.01f, 0.06f),
                     Cone(new Vector3(-0.07f, 1.43f, -0.03f), new Vector3(-0.12f, 1.62f, -0.05f), 0.055f, 0.01f, 0.06f)),
-                    PropSlot.Glow, PropMotion.Flicker, 0.03f),
+                    PropSlot.Glow, PropMotion.Flicker, 0.03f), 500f),
             };
             // The 1 x 1 step 7 shrine's extra piece.
             if (AssetDatabase.LoadAssetAtPath<SdfShape>($"{Root}/Shapes/HearthShrine_Tip.asset") != null)

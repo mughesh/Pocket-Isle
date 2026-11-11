@@ -22,7 +22,27 @@ MonoBehaviour:
     slot: 2
     motion: 0
     motionAmount: 0
-    budgetWeight: 0
+    budgetWeight: 2500
+  - shape: {fileID: 11400000, guid: 467540d409c362f4999ec1a492b6e113, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 2
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 1500
+  - shape: {fileID: 11400000, guid: a010b18293be37441b6b8775f8626ee8, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 2
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 2300
   - shape: {fileID: 11400000, guid: 68993b31c757cc4459bcef10bb0005a3, type: 2}
     part: {fileID: 0}
     position: {x: 0, y: 0, z: 0}
@@ -32,7 +52,37 @@ MonoBehaviour:
     slot: 2
     motion: 0
     motionAmount: 0
-    budgetWeight: 0
+    budgetWeight: 600
+  - shape: {fileID: 11400000, guid: 5b8636e18e5ad8e4990a21a0345850c0, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 2
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 150
+  - shape: {fileID: 11400000, guid: dc37183e426b48f40834de27cf734ea0, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 2
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 380
+  - shape: {fileID: 11400000, guid: 08c1f00e51266e84c94343b0a07ee172, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 2
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 450
   - shape: {fileID: 11400000, guid: 2749ff90e2af9b240a1585fcd770016b, type: 2}
     part: {fileID: 0}
     position: {x: 0, y: 0, z: 0}
@@ -42,7 +92,7 @@ MonoBehaviour:
     slot: 3
     motion: 1
     motionAmount: 0.035
-    budgetWeight: 0
+    budgetWeight: 520
   - shape: {fileID: 11400000, guid: e30bdf462168f914f8fe161b37a7a171, type: 2}
     part: {fileID: 0}
     position: {x: 0, y: 0, z: 0}
@@ -52,47 +102,47 @@ MonoBehaviour:
     slot: 4
     motion: 2
     motionAmount: 0.001
-    budgetWeight: 0
+    budgetWeight: 260
   - shape: {fileID: 11400000, guid: 1cc059c360899ba48b8ef93d9078a67c, type: 2}
     part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
+    position: {x: 0.24, y: 1.03, z: 0.49}
     rotation: {x: 0, y: 0, z: 0}
-    scale: 1
+    scale: 0.071428575
     mirrorX: 0
     slot: 0
     motion: 0
     motionAmount: 0
-    budgetWeight: 0
+    budgetWeight: 110
   - shape: {fileID: 11400000, guid: fac5cb4fae9b3a149a10d0cac0554160, type: 2}
     part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
+    position: {x: 0, y: 1.17, z: 0.54}
     rotation: {x: 0, y: 0, z: 0}
-    scale: 1
+    scale: 0.071428575
     mirrorX: 0
     slot: 1
     motion: 0
     motionAmount: 0
-    budgetWeight: 0
+    budgetWeight: 110
   - shape: {fileID: 11400000, guid: 35dba0641d9a27e479cb24c7220f2b01, type: 2}
     part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
+    position: {x: -0.24, y: 1.03, z: 0.49}
     rotation: {x: 0, y: 0, z: 0}
-    scale: 1
+    scale: 0.071428575
     mirrorX: 0
     slot: 5
     motion: 0
     motionAmount: 0
-    budgetWeight: 0
+    budgetWeight: 110
   - shape: {fileID: 11400000, guid: c1ddec2206eaa664f928237320e10305, type: 2}
     part: {fileID: 0}
-    position: {x: 0, y: 0, z: 0}
+    position: {x: 0, y: 2.15, z: 0.59}
     rotation: {x: 0, y: 0, z: 0}
-    scale: 1
+    scale: 0.33333334
     mirrorX: 0
     slot: 4
     motion: 2
     motionAmount: 0.001
-    budgetWeight: 0
+    budgetWeight: 70
   palette:
   - restored: {r: 0.78431374, g: 0.3254902, b: 0.24313726, a: 1}
     unrestored: {r: 0.78431374, g: 0.3254902, b: 0.24313726, a: 1}
@@ -125,6 +175,6 @@ MonoBehaviour:
   randomYaw: 0
   yawJitter: 0
   scaleJitter: 0
-  resolution: 48
-  triangleBudget: 6000
+  resolution: 72
+  triangleBudget: 9000
   bakedMesh: {fileID: 4300000, guid: 43348123947bcbb449d0ec7895f0724b, type: 2}

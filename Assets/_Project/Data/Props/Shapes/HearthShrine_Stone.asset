@@ -17,50 +17,90 @@ MonoBehaviour:
     blend: 0
     k: 0
     mirrorX: 0
-    a: {x: 0, y: 0.05, z: 0}
-    b: {x: 0.04, y: 0, z: 0}
-    size: {x: 0.88, y: 0.05, z: 0.8}
+    a: {x: 0, y: 0.035, z: 0}
+    b: {x: 0.02, y: 0, z: 0}
+    size: {x: 0.92, y: 0.035, z: 0.86}
     rotation: {x: 0, y: 0, z: 0}
     bumps: 0
     bumpFrequency: 0
   - kind: 5
     blend: 0
-    k: 0.05
+    k: 0.01
     mirrorX: 0
-    a: {x: 0, y: 0.42, z: -0.04}
-    b: {x: 0.12, y: 0, z: 0}
-    size: {x: 0.66, y: 0.38, z: 0.56}
+    a: {x: 0, y: 0.1, z: -0.02}
+    b: {x: 0.02, y: 0, z: 0}
+    size: {x: 0.8, y: 0.04, z: 0.72}
+    rotation: {x: 0, y: 0, z: 0}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 5
+    blend: 0
+    k: 0.02
+    mirrorX: 0
+    a: {x: 0, y: 0.46, z: -0.04}
+    b: {x: 0.05, y: 0, z: 0}
+    size: {x: 0.62, y: 0.34, z: 0.52}
+    rotation: {x: 0, y: 0, z: 0}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 5
+    blend: 0
+    k: 0.015
+    mirrorX: 0
+    a: {x: 0, y: 0.2, z: -0.04}
+    b: {x: 0.02, y: 0, z: 0}
+    size: {x: 0.655, y: 0.05, z: 0.555}
+    rotation: {x: 0, y: 0, z: 0}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 5
+    blend: 0
+    k: 0.015
+    mirrorX: 0
+    a: {x: 0, y: 0.75, z: -0.04}
+    b: {x: 0.02, y: 0, z: 0}
+    size: {x: 0.66, y: 0.04, z: 0.56}
     rotation: {x: 0, y: 0, z: 0}
     bumps: 0
     bumpFrequency: 0
   - kind: 1
     blend: 1
-    k: 0.03
+    k: 0.01
     mirrorX: 0
-    a: {x: 0, y: 0.34, z: 0.5}
+    a: {x: 0, y: 0.36, z: 0.5}
     b: {x: 0, y: 0, z: 0}
-    size: {x: 0.24, y: 0.32, z: 0.22}
+    size: {x: 0.23, y: 0.3, z: 0.22}
     rotation: {x: 0, y: 0, z: 0}
     bumps: 0
     bumpFrequency: 0
   - kind: 5
     blend: 1
-    k: 0.02
+    k: 0.01
     mirrorX: 0
-    a: {x: 0, y: 0.14, z: 0.5}
-    b: {x: 0.02, y: 0, z: 0}
-    size: {x: 0.24, y: 0.14, z: 0.22}
+    a: {x: 0, y: 0.2, z: 0.5}
+    b: {x: 0.01, y: 0, z: 0}
+    size: {x: 0.23, y: 0.12, z: 0.22}
     rotation: {x: 0, y: 0, z: 0}
     bumps: 0
     bumpFrequency: 0
-  - kind: 3
-    blend: 0
-    k: 0.03
-    mirrorX: 0
-    a: {x: 0, y: 0.36, z: 0.52}
+  - kind: 0
+    blend: 1
+    k: 0.01
+    mirrorX: 1
+    a: {x: 0.66, y: 0.48, z: -0.04}
     b: {x: 0, y: 0, z: 0}
-    size: {x: 0.28, y: 0.045, z: 0}
-    rotation: {x: 90, y: 0, z: 0}
+    size: {x: 0.13, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 5
+    blend: 0
+    k: 0.01
+    mirrorX: 0
+    a: {x: 0, y: 0.82, z: -0.04}
+    b: {x: 0.03, y: 0, z: 0}
+    size: {x: 0.8, y: 0.035, z: 0.7}
+    rotation: {x: 0, y: 0, z: 0}
     bumps: 0
     bumpFrequency: 0
   - kind: 2

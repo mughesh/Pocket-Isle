@@ -15,31 +15,51 @@ MonoBehaviour:
   primitives:
   - kind: 1
     blend: 0
-    k: 0.1
+    k: 0
     mirrorX: 0
-    a: {x: 0, y: 1.52, z: -0.06}
+    a: {x: 0, y: 1.66, z: -0.14}
     b: {x: 0, y: 0, z: 0}
-    size: {x: 0.6, y: 0.15, z: 0.5}
+    size: {x: 0.54, y: 0.12, z: 0.42}
     rotation: {x: 0, y: 0, z: 0}
-    bumps: 0.015
+    bumps: 0.016
     bumpFrequency: 18
   - kind: 1
     blend: 0
-    k: 0.1
+    k: 0
     mirrorX: 0
-    a: {x: 0, y: 2.3, z: 0.12}
+    a: {x: 0.24, y: 2.6, z: 0.2}
     b: {x: 0, y: 0, z: 0}
-    size: {x: 0.24, y: 0.08, z: 0.24}
+    size: {x: 0.16, y: 0.06, z: 0.14}
     rotation: {x: 0, y: 0, z: 0}
     bumps: 0.012
-    bumpFrequency: 18
+    bumpFrequency: 20
+  - kind: 1
+    blend: 0
+    k: 0.04
+    mirrorX: 0
+    a: {x: -0.3, y: 2.66, z: 0.05}
+    b: {x: 0, y: 0, z: 0}
+    size: {x: 0.15, y: 0.06, z: 0.13}
+    rotation: {x: 0, y: 0, z: 0}
+    bumps: 0.012
+    bumpFrequency: 20
+  - kind: 1
+    blend: 0
+    k: 0.04
+    mirrorX: 0
+    a: {x: -0.56, y: 2.3, z: 0.18}
+    b: {x: 0, y: 0, z: 0}
+    size: {x: 0.08, y: 0.16, z: 0.14}
+    rotation: {x: 0, y: 0, z: 0}
+    bumps: 0.012
+    bumpFrequency: 20
   - kind: 1
     blend: 0
     k: 0.06
     mirrorX: 0
-    a: {x: 0.45, y: 0.72, z: -0.3}
+    a: {x: 0.52, y: 0.8, z: -0.4}
     b: {x: 0, y: 0, z: 0}
-    size: {x: 0.2, y: 0.08, z: 0.3}
+    size: {x: 0.22, y: 0.07, z: 0.3}
     rotation: {x: 0, y: 0, z: 0}
     bumps: 0.012
     bumpFrequency: 18
@@ -47,9 +67,9 @@ MonoBehaviour:
     blend: 0
     k: 0.05
     mirrorX: 0
-    a: {x: 0.85, y: 0.13, z: 0.75}
+    a: {x: 0.9, y: 0.14, z: 0.72}
     b: {x: 0, y: 0, z: 0}
-    size: {x: 0.32, y: 0.05, z: 0.22}
+    size: {x: 0.3, y: 0.05, z: 0.2}
     rotation: {x: 0, y: 0, z: 0}
     bumps: 0.012
     bumpFrequency: 20
@@ -57,9 +77,9 @@ MonoBehaviour:
     blend: 0
     k: 0.05
     mirrorX: 0
-    a: {x: -0.7, y: 0.13, z: -0.85}
+    a: {x: -0.7, y: 0.14, z: -0.95}
     b: {x: 0, y: 0, z: 0}
-    size: {x: 0.36, y: 0.05, z: 0.22}
+    size: {x: 0.34, y: 0.05, z: 0.22}
     rotation: {x: 0, y: 0, z: 0}
     bumps: 0.012
     bumpFrequency: 20

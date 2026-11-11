@@ -17,49 +17,79 @@ MonoBehaviour:
     blend: 0
     k: 0
     mirrorX: 0
-    a: {x: -0.12, y: 2.24, z: 0.4}
+    a: {x: 0.090188526, y: 0.94889426, z: 0.5153935}
     b: {x: 0, y: 0, z: 0}
-    size: {x: 0.02, y: 0.11, z: 0.04}
-    rotation: {x: -30, y: 0, z: 22}
+    size: {x: 0.013499999, y: 0.018, z: 0.10559403}
+    rotation: {x: 38.34488, y: 108.33569, z: 108.63333}
     bumps: 0
     bumpFrequency: 0
   - kind: 1
     blend: 0
     k: 0
     mirrorX: 0
-    a: {x: 0.42, y: 1.05, z: 0.25}
+    a: {x: 0.24225183, y: 0.6211875, z: 0.5594689}
     b: {x: 0, y: 0, z: 0}
-    size: {x: 0.022, y: 0.17, z: 0.05}
-    rotation: {x: 0, y: -50, z: -20}
+    size: {x: 0.013499999, y: 0.018, z: 0.13291997}
+    rotation: {x: 67.91284, y: 38.029808, z: 63.53037}
     bumps: 0
     bumpFrequency: 0
   - kind: 1
     blend: 0
     k: 0
     mirrorX: 0
-    a: {x: 0.47, y: 0.86, z: 0.18}
+    a: {x: -0.08018852, y: 0.9288943, z: 0.5073028}
     b: {x: 0, y: 0, z: 0}
-    size: {x: 0.02, y: 0.09, z: 0.05}
-    rotation: {x: 0, y: -50, z: 30}
+    size: {x: 0.013499999, y: 0.018, z: 0.11545779}
+    rotation: {x: 50.70012, y: 240.77277, z: 241.86218}
     bumps: 0
     bumpFrequency: 0
   - kind: 1
     blend: 0
     k: 0
     mirrorX: 0
-    a: {x: -0.5, y: 1.15, z: 0.05}
+    a: {x: -0.25822902, y: 0.69133157, z: 0.54685307}
     b: {x: 0, y: 0, z: 0}
-    size: {x: 0.02, y: 0.14, z: 0.05}
-    rotation: {x: 0, y: 60, z: 18}
+    size: {x: 0.013499999, y: 0.018, z: 0.12069656}
+    rotation: {x: 70.13106, y: 322.05368, z: 306.4476}
     bumps: 0
     bumpFrequency: 0
   - kind: 1
     blend: 0
     k: 0
     mirrorX: 0
-    a: {x: -0.55, y: 0.12, z: 1.12}
+    a: {x: 0.044992495, y: 0.7155632, z: 0.37397525}
     b: {x: 0, y: 0, z: 0}
-    size: {x: 0.18, y: 0.03, z: 0.04}
-    rotation: {x: 0, y: -20, z: 0}
+    size: {x: 0.013499999, y: 0.018, z: 0.124215156}
+    rotation: {x: 53.738754, y: 194.80988, z: 190.21214}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 1
+    blend: 0
+    k: 0
+    mirrorX: 0
+    a: {x: 0.8560019, y: 0.6321037, z: -0.34958774}
+    b: {x: 0, y: 0, z: 0}
+    size: {x: 0.013499999, y: 0.018, z: 0.13181075}
+    rotation: {x: 343.68784, y: 192.70808, z: 65.251625}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 1
+    blend: 0
+    k: 0
+    mirrorX: 0
+    a: {x: -0.8512348, y: 0.6034128, z: -0.19829884}
+    b: {x: 0, y: 0, z: 0}
+    size: {x: 0.013499999, y: 0.018, z: 0.16175614}
+    rotation: {x: 35.80179, y: 205.63245, z: 301.77603}
+    bumps: 0
+    bumpFrequency: 0
+  - kind: 1
+    blend: 0
+    k: 0
+    mirrorX: 0
+    a: {x: 0.26198953, y: 1.4421153, z: 0.46747705}
+    b: {x: 0, y: 0, z: 0}
+    size: {x: 0.013499999, y: 0.018, z: 0.11077608}
+    rotation: {x: 44.386562, y: 101.815285, z: 69.065994}
     bumps: 0
     bumpFrequency: 0

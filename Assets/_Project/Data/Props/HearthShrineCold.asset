@@ -22,7 +22,27 @@ MonoBehaviour:
     slot: 2
     motion: 0
     motionAmount: 0
-    budgetWeight: 0
+    budgetWeight: 1500
+  - shape: {fileID: 11400000, guid: ccc4b27a49e65184ca93d0a082492cf7, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 2
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 700
+  - shape: {fileID: 11400000, guid: fc4f79a4e25b03f40a4089ec99bd46bc, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 2
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 500
   - shape: {fileID: 11400000, guid: e2814b8752677f74b8e858b3cdeb3834, type: 2}
     part: {fileID: 0}
     position: {x: 0, y: 0, z: 0}
@@ -32,7 +52,7 @@ MonoBehaviour:
     slot: 3
     motion: 1
     motionAmount: 0.008
-    budgetWeight: 0
+    budgetWeight: 800
   - shape: {fileID: 11400000, guid: f244fe6d5c9144d4eaf584874db8c090, type: 2}
     part: {fileID: 0}
     position: {x: 0, y: 0, z: 0}
@@ -42,7 +62,17 @@ MonoBehaviour:
     slot: 4
     motion: 2
     motionAmount: 0.003
-    budgetWeight: 0
+    budgetWeight: 200
+  - shape: {fileID: 11400000, guid: d97aa223426b75844a7501a056c02600, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 4
+    motion: 2
+    motionAmount: 0.002
+    budgetWeight: 200
   palette:
   - restored: {r: 0.8140393, g: 0.50571483, b: 0.24471544, a: 1}
     unrestored: {r: 0.7607843, g: 0.45882353, b: 0.25882354, a: 1}
@@ -75,6 +105,6 @@ MonoBehaviour:
   randomYaw: 0
   yawJitter: 0
   scaleJitter: 0
-  resolution: 40
-  triangleBudget: 2600
+  resolution: 72
+  triangleBudget: 4400
   bakedMesh: {fileID: 4300000, guid: 4da9dd50b39899d4a8ac54b3111416bd, type: 2}

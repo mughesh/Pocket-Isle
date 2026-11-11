@@ -163,66 +163,143 @@ namespace Diorama.EditorTools
         /// </summary>
         static PropRecipe Statue(string name, int stage)
         {
-            var statue = Recipe(name, new Vector2Int(3, 3), true, false, 6000);
+            // Nov 12 (Mugesh: "it looks like a deformed dog", broken mesh, no detail): the statue is the Heart of the World
+            // asleep in old stone, the same guardian the finale wakes (PropKit.Heart): its pose, its face with a broad
+            // muzzle and closed lids, the mane of carved curls, the bead collar, claws and the curled tail. A carved
+            // breastplate hangs under the collar and holds the three sockets. Finer bake (48 -> 72) and each part baked
+            // as its own piece, so small forms stay crisp.
+            var statue = Recipe(name, new Vector2Int(3, 3), true, false, 9000);
             statue.palette = Palette(H("#C8533E", 0.25f), H("#4F86C6", 0.25f), H("#BDB5A5"), HubMoss, H("#FFCB6B", 0.65f), StatueWindRim);
             statue.yawJitter = 0f;
             statue.scaleJitter = 0f;
-            statue.resolution = 48;
+            statue.resolution = 72;
             statue.outline = 0.03f;
 
-            var stone = new List<SdfPrimitive>
+            var bodyPrims = new List<SdfPrimitive>
             {
-                Ell(new Vector3(0.5f, 0.42f, -0.25f), new Vector3(0.36f, 0.32f, 0.5f), 0.15f).Mirror(),
-                Ell(new Vector3(0f, 1.0f, -0.05f), new Vector3(0.55f, 0.75f, 0.48f), 0.2f),
-                Ell(new Vector3(0f, 1.1f, 0.22f), new Vector3(0.46f, 0.5f, 0.32f), 0.15f),
-                Cone(new Vector3(0.26f, 0.95f, 0.3f), new Vector3(0.28f, 0.22f, 0.5f), 0.14f, 0.12f, 0.12f).Mirror(),
-                Ell(new Vector3(0.28f, 0.11f, 0.58f), new Vector3(0.16f, 0.1f, 0.2f), 0.08f).Mirror(),
-                Cone(new Vector3(0f, 1.5f, 0.05f), new Vector3(0f, 1.85f, 0.15f), 0.3f, 0.26f, 0.15f),
-                Ell(new Vector3(0f, 2.0f, 0.18f), new Vector3(0.36f, 0.33f, 0.36f), 0.15f),
-                Cone(new Vector3(0f, 1.95f, 0.4f), new Vector3(0f, 1.88f, 0.72f), 0.2f, 0.13f, 0.12f),
-                Sphere(new Vector3(0f, 1.92f, 0.74f), 0.07f, 0.04f),
-                Ell(new Vector3(0.37f, 1.8f, 0.08f), new Vector3(0.1f, 0.34f, 0.17f), 0.08f, new Vector3(0f, 0f, 14f)).Mirror(),
-                Cone(new Vector3(-0.45f, 0.3f, -0.6f), new Vector3(-0.95f, 0.2f, 0f), 0.2f, 0.11f, 0.15f),
-                Sphere(new Vector3(-0.95f, 0.2f, 0.22f), 0.12f, 0.12f),
-                // Closed, smiling eyes and a small mouth line (carved).
-                Ell(new Vector3(0.17f, 2.05f, 0.49f), new Vector3(0.09f, 0.025f, 0.07f), 0.01f, new Vector3(0f, 0f, -15f)).Sub().Mirror(),
-                Ell(new Vector3(0f, 1.8f, 0.66f), new Vector3(0.08f, 0.02f, 0.06f), 0.01f).Sub(),
+                // Haunches, a deep torso rising to a high chest (the Heart's own pose).
+                Ell(new Vector3(0.5f, 0.46f, -0.3f), new Vector3(0.4f, 0.4f, 0.54f), 0.15f).Mirror(),
+                Ell(new Vector3(0f, 0.95f, -0.14f), new Vector3(0.56f, 0.72f, 0.5f), 0.24f),
+                Ell(new Vector3(0f, 1.27f, 0.17f), new Vector3(0.5f, 0.52f, 0.38f), 0.18f),
+                // Straight front legs, broad paws; back paws tucked beside the haunches.
+                Cone(new Vector3(0.27f, 1.05f, 0.3f), new Vector3(0.3f, 0.22f, 0.54f), 0.15f, 0.12f, 0.12f).Mirror(),
+                Ell(new Vector3(0.3f, 0.13f, 0.64f), new Vector3(0.17f, 0.11f, 0.22f), 0.08f).Mirror(),
+                Ell(new Vector3(0.75f, 0.12f, 0.16f), new Vector3(0.15f, 0.1f, 0.25f), 0.08f).Mirror(),
+                // The neck up to the head.
+                Cone(new Vector3(0f, 1.5f, 0f), new Vector3(0f, 1.88f, 0.1f), 0.34f, 0.27f, 0.15f),
+                // The breastplate: its face passes through the three sockets.
+                Ell(new Vector3(0f, 1.08f, 0.36f), new Vector3(0.43f, 0.3f, 0.175f), 0.04f),
                 Floor(0.1f),
             };
-            foreach (var s in StatueSockets) stone.Add(Sphere(s + new Vector3(0f, 0f, 0.03f), 0.08f, 0.02f).Sub());
+            var collarEval = new SdfEvaluator(bodyPrims);
+            foreach (var s in StatueSockets) bodyPrims.Add(Sphere(s + new Vector3(0f, 0f, 0.03f), 0.08f, 0.02f).Sub());
+
+            var claws = new List<SdfPrimitive>();
+            foreach (float x in new[] { 0.3f, -0.3f })
+                foreach (float dx in new[] { -0.085f, 0f, 0.085f })
+                    claws.Add(Cone(new Vector3(x + dx, 0.09f, 0.8f), new Vector3(x + dx, 0.05f, 0.9f), 0.036f, 0.012f, 0f));
+
+            // The tail curled up at its side.
+            var tailPts = new[]
+            {
+                (new Vector3(-0.45f, 0.24f, -0.82f), 0.17f), (new Vector3(-0.82f, 0.44f, -0.72f), 0.15f), (new Vector3(-0.98f, 0.78f, -0.52f), 0.13f),
+                (new Vector3(-0.92f, 1.06f, -0.32f), 0.11f), (new Vector3(-0.74f, 1.18f, -0.24f), 0.09f), (new Vector3(-0.66f, 1.08f, -0.22f), 0.07f),
+            };
+            var tail = new List<SdfPrimitive>();
+            for (int i = 0; i + 1 < tailPts.Length; i++)
+                tail.Add(Cone(tailPts[i].Item1, tailPts[i + 1].Item1, tailPts[i].Item2, tailPts[i + 1].Item2, i == 0 ? 0f : 0.06f).Bumps(0.008f, 12f));
+
+            // The bead collar round the neck, low on the chest at the front.
+            var collar = new List<SdfPrimitive>();
+            for (int i = 0; i < 26; i++)
+            {
+                float a = i / 26f * Mathf.PI * 2f;
+                var dir = new Vector3(Mathf.Sin(a), 0f, Mathf.Cos(a));
+                float y = Mathf.Lerp(1.42f, 1.66f, (1f - Mathf.Cos(a)) * 0.5f);
+                var axis = new Vector3(0f, y, 0.06f);
+                if (collarEval.Surface(axis + dir * 1.2f, -dir, out var bp, out var bn))
+                    collar.Add(Sphere(bp + bn * 0.012f, 0.062f, collar.Count == 0 ? 0f : 0.03f).Bumps(0.006f, 20f));
+            }
+
+            // The head: the Heart's, asleep. Stone lids fill the eye sockets, a thin line carved along each.
+            var skull = new List<SdfPrimitive>
+            {
+                Ell(new Vector3(0f, 2.14f, 0.24f), new Vector3(0.39f, 0.35f, 0.36f), 0f),
+                Ell(new Vector3(0f, 1.94f, 0.57f), new Vector3(0.24f, 0.15f, 0.25f), 0.12f),
+                Ell(new Vector3(0.13f, 1.9f, 0.68f), new Vector3(0.1f, 0.09f, 0.1f), 0.06f).Mirror(),
+                Ell(new Vector3(0f, 2.02f, 0.8f), new Vector3(0.1f, 0.065f, 0.065f), 0.05f),
+                Ell(new Vector3(0.16f, 2.275f, 0.53f), new Vector3(0.13f, 0.035f, 0.08f), 0.05f, new Vector3(0f, 0f, -12f)).Mirror(),
+                Ell(new Vector3(0.37f, 2.17f, 0.16f), new Vector3(0.07f, 0.17f, 0.12f), 0.06f, new Vector3(0f, 0f, 28f)).Mirror(),
+                Ell(new Vector3(0f, 1.86f, 0.77f), new Vector3(0.06f, 0.016f, 0.05f), 0.01f).Sub(),
+                Ell(new Vector3(0.085f, 1.875f, 0.752f), new Vector3(0.042f, 0.014f, 0.045f), 0.01f, new Vector3(0f, -20f, 28f)).Sub().Mirror(),
+                Ell(new Vector3(0.155f, 2.15f, 0.572f), new Vector3(0.095f, 0.074f, 0.057f), 0.02f).Mirror(),
+                Ell(new Vector3(0.155f, 2.135f, 0.632f), new Vector3(0.078f, 0.013f, 0.03f), 0.006f, new Vector3(0f, 0f, -10f)).Sub().Mirror(),
+                // The empty round setting in its forehead.
+                Sphere(ForeheadSocket + new Vector3(0f, 0f, -0.03f), 0.068f, 0.01f).Sub(),
+            };
+
+            var plinth = new List<SdfPrimitive>
+            {
+                Ell(new Vector3(0f, 0.04f, 0f), new Vector3(1.35f, 0.1f, 1.35f), 0f).Bumps(0.006f, 10f),
+                Torus(new Vector3(0f, 0.13f, 0f), 1.22f, 0.035f, Vector3.zero, 0.02f),
+            };
+            // Small square notches carved round the plinth's edge.
+            for (int i = 0; i < 16; i++)
+            {
+                float a = i * 22.5f + 11.25f;
+                var d = Quaternion.Euler(0f, a, 0f) * Vector3.forward;
+                plinth.Add(Box(d * 1.36f + Vector3.up * 0.07f, new Vector3(0.05f, 0.035f, 0.05f), 0.01f, 0.01f, new Vector3(0f, a, 0f)).Sub());
+            }
+            plinth.Add(Floor(0f));
+
+            var cracks = HeartVeins(collarEval);
+            if (cracks.Count > 0) cracks.RemoveAt(0); // no glowing core: the statue sleeps
+            // Hairline cracks, not the Heart's bright veins: half as wide, and only every other stretch.
+            var fine = new List<SdfPrimitive>();
+            for (int i = 0; i < cracks.Count; i++)
+            {
+                if (i % 2 == 1) continue;
+                var c = cracks[i];
+                c.size = new Vector3(c.size.x * 0.45f, c.size.y, c.size.z);
+                fine.Add(c);
+            }
+            cracks = fine;
 
             statue.pieces = new List<PropPiece>
             {
-                Piece(PShape("Statue_Stone", stone.ToArray()), PropSlot.Stone),
-                Piece(PShape("Statue_Plinth",
-                    Ell(new Vector3(0f, 0.04f, 0f), new Vector3(1.3f, 0.1f, 1.3f), 0f).Bumps(0.006f, 10f),
-                    Floor(0f)), PropSlot.Stone),
-                Piece(PShape("Statue_Moss",
-                    Ell(new Vector3(0f, 1.52f, -0.06f), new Vector3(0.6f, 0.15f, 0.5f)).Bumps(0.015f, 18f),
-                    Ell(new Vector3(0f, 2.3f, 0.12f), new Vector3(0.24f, 0.08f, 0.24f)).Bumps(0.012f, 18f),
-                    Ell(new Vector3(0.45f, 0.72f, -0.3f), new Vector3(0.2f, 0.08f, 0.3f), 0.06f).Bumps(0.012f, 18f),
-                    Ell(new Vector3(0.85f, 0.13f, 0.75f), new Vector3(0.32f, 0.05f, 0.22f), 0.05f).Bumps(0.012f, 20f),
-                    Ell(new Vector3(-0.7f, 0.13f, -0.85f), new Vector3(0.36f, 0.05f, 0.22f), 0.05f).Bumps(0.012f, 20f)), PropSlot.Leaf,
-                    stage >= 2 ? PropMotion.Sway : PropMotion.None, stage >= 2 ? 0.035f : 0f),
-                Piece(PShape("Statue_Cracks",
-                    Ell(new Vector3(-0.12f, 2.24f, 0.4f), new Vector3(0.02f, 0.11f, 0.04f), 0f, new Vector3(-30f, 0f, 22f)),
-                    Ell(new Vector3(0.42f, 1.05f, 0.25f), new Vector3(0.022f, 0.17f, 0.05f), 0f, new Vector3(0f, -50f, -20f)),
-                    Ell(new Vector3(0.47f, 0.86f, 0.18f), new Vector3(0.02f, 0.09f, 0.05f), 0f, new Vector3(0f, -50f, 30f)),
-                    Ell(new Vector3(-0.5f, 1.15f, 0.05f), new Vector3(0.02f, 0.14f, 0.05f), 0f, new Vector3(0f, 60f, 18f)),
-                    Ell(new Vector3(-0.55f, 0.12f, 1.12f), new Vector3(0.18f, 0.03f, 0.04f), 0f, new Vector3(0f, -20f, 0f))), PropSlot.Glow, PropMotion.Flicker, 0.001f),
-                Piece(PShape("Statue_RimFire", Torus(StatueSockets[0] + new Vector3(0f, 0f, 0.02f), 0.085f, 0.018f, new Vector3(90f, 0f, 0f), 0f)), PropSlot.Clay),
-                Piece(PShape("Statue_RimWater", Torus(StatueSockets[1] + new Vector3(0f, 0f, 0.02f), 0.085f, 0.018f, new Vector3(90f, 0f, 0f), 0f)), PropSlot.Wood),
-                Piece(PShape("Statue_RimWind", Torus(StatueSockets[2] + new Vector3(0f, 0f, 0.02f), 0.085f, 0.018f, new Vector3(90f, 0f, 0f), 0f)), PropSlot.Accent),
+                W(Piece(PShape("Statue_Stone", bodyPrims.ToArray()), PropSlot.Stone), 2500f),
+                W(Piece(PShape("Statue_Head", skull.ToArray()), PropSlot.Stone), 1500f),
+                W(Piece(PShape("Statue_Mane", Mane().ToArray()), PropSlot.Stone), 2300f),
+                W(Piece(PShape("Statue_Plinth", plinth.ToArray()), PropSlot.Stone), 600f),
+                W(Piece(PShape("Statue_Claws", claws.ToArray()), PropSlot.Stone), 150f),
+                W(Piece(PShape("Statue_Tail", tail.ToArray()), PropSlot.Stone), 380f),
+                W(Piece(PShape("Statue_Collar", collar.ToArray()), PropSlot.Stone), 450f),
+                W(Piece(PShape("Statue_Moss",
+                    Ell(new Vector3(0f, 1.66f, -0.14f), new Vector3(0.54f, 0.12f, 0.42f), 0f).Bumps(0.016f, 18f),
+                    Ell(new Vector3(0.24f, 2.6f, 0.2f), new Vector3(0.16f, 0.06f, 0.14f), 0f).Bumps(0.012f, 20f),
+                    Ell(new Vector3(-0.3f, 2.66f, 0.05f), new Vector3(0.15f, 0.06f, 0.13f), 0.04f).Bumps(0.012f, 20f),
+                    Ell(new Vector3(-0.56f, 2.3f, 0.18f), new Vector3(0.08f, 0.16f, 0.14f), 0.04f).Bumps(0.012f, 20f),
+                    Ell(new Vector3(0.52f, 0.8f, -0.4f), new Vector3(0.22f, 0.07f, 0.3f), 0.06f).Bumps(0.012f, 18f),
+                    Ell(new Vector3(0.9f, 0.14f, 0.72f), new Vector3(0.3f, 0.05f, 0.2f), 0.05f).Bumps(0.012f, 20f),
+                    Ell(new Vector3(-0.7f, 0.14f, -0.95f), new Vector3(0.34f, 0.05f, 0.22f), 0.05f).Bumps(0.012f, 20f)), PropSlot.Leaf,
+                    stage >= 2 ? PropMotion.Sway : PropMotion.None, stage >= 2 ? 0.035f : 0f), 520f),
+                W(Piece(PShape("Statue_Cracks", cracks.ToArray()), PropSlot.Glow, PropMotion.Flicker, 0.001f), 260f),
+                Small("Statue_RimFire", StatueSockets[0], 14f, PropSlot.Clay, PropMotion.None, 0f, 110f, Torus(StatueSockets[0] + new Vector3(0f, 0f, 0.02f), 0.085f, 0.02f, new Vector3(90f, 0f, 0f), 0f)),
+                Small("Statue_RimWater", StatueSockets[1], 14f, PropSlot.Wood, PropMotion.None, 0f, 110f, Torus(StatueSockets[1] + new Vector3(0f, 0f, 0.02f), 0.085f, 0.02f, new Vector3(90f, 0f, 0f), 0f)),
+                Small("Statue_RimWind", StatueSockets[2], 14f, PropSlot.Accent, PropMotion.None, 0f, 110f, Torus(StatueSockets[2] + new Vector3(0f, 0f, 0.02f), 0.085f, 0.02f, new Vector3(90f, 0f, 0f), 0f)),
             };
             if (stage >= 1)
-                // The closed eyes: a thin gold line inside each carved lid.
-                statue.pieces.Add(Piece(PShape("Statue_Eyes",
-                    Ell(new Vector3(0.17f, 2.045f, 0.5f), new Vector3(0.075f, 0.014f, 0.05f), 0f, new Vector3(0f, 0f, -15f)).Mirror()), PropSlot.Glow, PropMotion.Flicker, 0.001f));
+                // The closed eyes: a thin gold line along each carved lid.
+                statue.pieces.Add(Small("Statue_Eyes", new Vector3(0f, 2.15f, 0.59f), 3f, PropSlot.Glow, PropMotion.Flicker, 0.001f, 70f,
+                    Ell(new Vector3(0.155f, 2.135f, 0.628f), new Vector3(0.07f, 0.011f, 0.02f), 0f, new Vector3(0f, 0f, -10f)).Mirror()));
             EditorUtility.SetDirty(statue);
             return statue;
         }
 
         /// <summary>Step 13: writes and bakes the statue's wake stages (the finale setup; the hub writer writes them too).</summary>
+/// <summary>Nov 12: the three statue recipes alone (not baked), for a rebake that leaves the hub's other props be.</summary>
+        internal static PropRecipe[] WriteStatues() => new[] { Statue(), Statue(StatueLitName, 1), Statue(StatueAwakeName, 2) };
+
         internal static void WriteStatueStages()
         {
             foreach (var r in new[] { Statue(StatueLitName, 1), Statue(StatueAwakeName, 2) })
