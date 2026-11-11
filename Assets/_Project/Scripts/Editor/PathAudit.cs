@@ -117,8 +117,12 @@ namespace Diorama.EditorTools
         /// within fewer than <see cref="MinLeg"/> tiles: counted as staircase steps, a 2 x 2 window of 3 path tiles whose
         /// nearest other such window is within MinLeg - 1 tiles along a row or column.
         /// </summary>
-        static int Jogs(IslandMap map)
+        static int Jogs(IslandMap map) => JogPairs(map).Count;
+
+        /// <summary>Nov 11: the jogs as corner pairs (the 2 x 2 windows' top-left tiles).</summary>
+        public static List<(Vector2Int a, Vector2Int b)> JogPairs(IslandMap map)
         {
+            var pairs = new List<(Vector2Int, Vector2Int)>();
             var corners = new List<Vector2Int>();
             int rows = map.Rows, cols = map.Columns;
             for (int r = 0; r + 1 < rows; r++)
@@ -127,16 +131,15 @@ namespace Diorama.EditorTools
                     int n = (P(map, c, r) ? 1 : 0) + (P(map, c + 1, r) ? 1 : 0) + (P(map, c, r + 1) ? 1 : 0) + (P(map, c + 1, r + 1) ? 1 : 0);
                     if (n == 3) corners.Add(new Vector2Int(c, r));
                 }
-            int jogs = 0;
             for (int i = 0; i < corners.Count; i++)
                 for (int j = i + 1; j < corners.Count; j++)
                 {
                     var d = corners[j] - corners[i];
                     int along = Mathf.Max(Mathf.Abs(d.x), Mathf.Abs(d.y)), across = Mathf.Min(Mathf.Abs(d.x), Mathf.Abs(d.y));
                     // Two corners of one staircase step: close along, offset by 1-2 across (not the two corners of a 2-wide L).
-                    if (along >= 1 && along < MinLeg && across >= 1 && across <= 2 && Mathf.Abs(d.x) != Mathf.Abs(d.y)) jogs++;
+                    if (along >= 1 && along < MinLeg && across >= 1 && across <= 2 && Mathf.Abs(d.x) != Mathf.Abs(d.y)) pairs.Add((corners[i], corners[j]));
                 }
-            return jogs;
+            return pairs;
         }
 
         static readonly Dictionary<char, Color32> Colors = new Dictionary<char, Color32>
