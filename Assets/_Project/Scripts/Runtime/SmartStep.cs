@@ -28,6 +28,12 @@ namespace Diorama
         public const string Grass = "grass";
         public const string Interactable = "interactable";
         public const string Turns = "turns";
+        /// <summary>Nov 11 (R51): the plan was cut at the island window's edge (the explorer never leaves the view).</summary>
+        public const string View = "view";
+        /// <summary>Nov 11 (R52): the walk came onto a road from off it: it stops on the road (a decision point, like a junction).</summary>
+        public const string RoadEnter = "road";
+        /// <summary>Nov 11 (R52): the road ended under a walk along it: it stops on the last road tile instead of walking off into the grass.</summary>
+        public const string RoadEnd = "road end";
 
         /// <summary>A second swipe the same way within the window while walking = walk on (else a fresh smart step).</summary>
         public static bool WalkOn(Vector2Int lastWay, float lastAt, Vector2Int way, float now, float window, bool walking) =>
@@ -88,16 +94,34 @@ namespace Diorama
                 }
                 turned = turnNow;
                 if (!map.CanWalk(next)) return Blocked;
+                if (LeavesRoad(map, cur, next, i)) return RoadEnd;
                 var s = stopAt != null ? stopAt(cur, next) : WalkStop.None;
                 if (s == WalkStop.Before && i > 0) return Interactable;
                 char was = map.At(cur.y, cur.x);
                 tiles.Add(next);
                 cur = next;
                 if (s == WalkStop.On) return Interactable;
+                if (EntersRoad(map, was, cur)) return RoadEnter;
                 if (!continuous && map.At(cur.y, cur.x) == IslandMap.TallGrass && was != IslandMap.TallGrass) return Grass;
             }
             return Cap;
         }
+
+        // ---- Nov 11 (R52): roads are sticky ----
+
+        /// <summary>
+        /// Nov 11 (Mugesh: a walk toward a road crossed it straight into the grass beyond): coming onto a road from off it
+        /// ends the walk on that road tile. The next swipe follows the road, or crosses it.
+        /// </summary>
+        static bool EntersRoad(IslandMap map, char was, Vector2Int now) => was != IslandMap.Path && map.At(now.y, now.x) == IslandMap.Path;
+
+        /// <summary>
+        /// A walk along a road never wanders off its end into the grass: step <paramref name="i"/> from a road tile onto a
+        /// non-road tile is only the swipe's own first steps (<see cref="GoesOn"/>: the road didn't continue that way, e.g.
+        /// crossing a two-wide road's other lane), never after following the road.
+        /// </summary>
+        static bool LeavesRoad(IslandMap map, Vector2Int cur, Vector2Int next, int i) =>
+            i >= GoesOn && map.At(cur.y, cur.x) == IslandMap.Path && map.At(next.y, next.x) != IslandMap.Path;
 
         // ---- step 29: corridors (roads two tiles wide) ----
 
@@ -153,11 +177,14 @@ namespace Diorama
                 }
                 var next = cur + h;
                 if (!map.CanWalk(next)) return Blocked;
+                if (LeavesRoad(map, cur, next, i)) return RoadEnd;
                 var s = stopAt != null ? stopAt(cur, next) : WalkStop.None;
                 if (s == WalkStop.Before && i > 0) return Interactable;
+                char was = map.At(cur.y, cur.x);
                 tiles.Add(next);
                 cur = next;
                 if (s == WalkStop.On) return Interactable;
+                if (EntersRoad(map, was, cur)) return RoadEnter;
             }
             return Cap;
         }
