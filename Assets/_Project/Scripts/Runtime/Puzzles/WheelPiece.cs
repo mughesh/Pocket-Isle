@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Oculus.Interaction.Input;
 using UnityEngine;
 
@@ -94,6 +95,14 @@ namespace Diorama
 
         Vector2 Center => anchor + new Vector2((footprint.x - 1) * 0.5f, (footprint.y - 1) * 0.5f);
         protected override Vector2 HomeTile => Center;
+
+        /// <summary>
+        /// Nov 11 (Mugesh: the mill's view never showed the drawbridge come down): more map tiles the held view frames with
+        /// the wheel (BigMill adds its bridge), so the cause and the effect are both in the window.
+        /// </summary>
+        public readonly List<Vector2> alsoFrame = new List<Vector2>();
+
+        protected override void ExtraFrame(List<Vector2> into) => into.AddRange(alsoFrame);
 
         /// <summary>The hub now (world).</summary>
         public Vector3 HubWorld => MapToWorld(Hub);

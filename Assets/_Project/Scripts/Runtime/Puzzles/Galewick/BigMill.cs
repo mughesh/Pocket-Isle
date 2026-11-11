@@ -56,6 +56,9 @@ namespace Diorama
             _bridge = new PropView("Drawbridge", island, bridgeRecipe);
             _gap = new PropView("Ditch Gap", island, gapRecipe);
             _gear = new PropView("Mill Gear", island, gearRecipe);
+            // Nov 11: the held view frames the bridge with the mill, so the player sees it come down.
+            wheel.alsoFrame.Add(bridge);
+            wheel.alsoFrame.Add(bridge + Vector2Int.one);
             wheel.Solved += OnSolved;
             PuzzleState.Restored += Apply;
             Apply();
@@ -90,10 +93,28 @@ namespace Diorama
             if (!_lowering && _down < 1f) StartCoroutine(Lower());
         }
 
+        [Header("Nov 11: show the bridge")]
+        [Tooltip("Mugesh: the view framed the mill too early and the bridge stayed outside it. While the bridge lowers the window holds " +
+                 "between the mill and the bridge, and this long after it lands, then goes back to the explorer.")]
+        public float holdAfterSeconds = 1.2f;
+
+        /// <summary>The map point the view holds while the bridge lowers: between the mill and the bridge.</summary>
+        public Vector2 ShowPoint => (wheel.Home + bridge + new Vector2(0.5f, 0.5f)) * 0.5f;
+
+        /// <summary>The view is held on the mill and the bridge (tests, the bridge).</summary>
+        public bool Showing { get; private set; }
+
         IEnumerator Lower()
         {
             _lowering = true;
             if (!string.IsNullOrEmpty(doneLine)) Dialogue.Say(doneLine);
+            var window = wheel.window;
+            if (window != null && explorer != null && !explorer.Locked)
+            {
+                Showing = true;
+                window.SetFocus(ShowPoint);
+                Debug.Log($"[BigMill] The view holds on the mill and the bridge (c{ShowPoint.x:0.#} r{ShowPoint.y:0.#}) while it lowers.");
+            }
             var hub = MapWorld(new Vector3(bridge.x + 0.5f, 0.3f, bridge.y + 0.5f));
             _turn ??= new LoopAnchor(transform, "Mill Sound");
             _turn.Set(AudioIds.MillTurn, hub, 0.3f);
@@ -121,6 +142,14 @@ namespace Diorama
             Map.SetPropOpen(bridge, true);
             _lowering = false;
             Debug.Log("[BigMill] The drawbridge is down: the way north is open.");
+            if (Showing)
+            {
+                yield return new WaitForSeconds(holdAfterSeconds);
+                Showing = false;
+                // A battle owns the view while the explorer is locked; it clears the focus itself.
+                if (window != null && explorer != null && !explorer.Locked) window.SetFocus(null);
+                Debug.Log("[BigMill] The view goes back to the explorer.");
+            }
         }
 
         void Update()
