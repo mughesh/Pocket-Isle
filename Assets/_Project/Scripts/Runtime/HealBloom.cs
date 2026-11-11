@@ -163,6 +163,43 @@ namespace Diorama
             explorer.OnStep += OnStep;
             foreach (var k in kinds)
                 if (k.recipe == null || k.recipe.bakedMesh == null) Debug.LogError($"[HealBloom] The {k.realm} bloom isn't baked.", this);
+            // Nov 11: the poke ghost's target (the flower's head).
+            Dialogue.RegisterTarget(GhostTarget, () => _view != null && _view.gameObject.activeSelf ? Head() : (Vector3?)null, null, () => TileWorldSize * 0.6f);
+        }
+
+        // ---- Nov 11: a poke ghost over the bloom, the first time each realm's shows ----
+
+        public const string GhostTarget = "healBloom";
+        public const string GhostClip = "poke";
+        [Tooltip("Nov 11 (Mugesh: ghost hands over the healing trees): the poke ghost shows this long the first time a realm's bloom is in view, open and the explorer near; it fades by itself when a hand comes near.")]
+        public float ghostSeconds = 12f;
+        readonly HashSet<string> _ghosted = new HashSet<string>();
+        float _ghostUntil;
+        bool _ghostMine;
+
+        /// <summary>The poke ghost is up over the bloom (tests, the bridge).</summary>
+        public bool GhostShowing => _ghostMine;
+
+        void Ghost(bool show, bool open, string realm, Vector2Int tile)
+        {
+            var ghosts = GhostHands.Current;
+            if (ghosts == null) return;
+            if (_ghostMine)
+            {
+                bool keep = show && open && Time.time < _ghostUntil && ghosts.ClipName == GhostClip && !Opening.InProgress && !Onboarding.Running;
+                if (keep) return;
+                _ghostMine = false;
+                if (ghosts.ClipName == GhostClip && !ghosts.previewing) ghosts.Hide();
+                Debug.Log($"[HealBloom] {realm}: the poke ghost goes.");
+                return;
+            }
+            if (!show || !open || _ghosted.Contains(realm ?? "") || ghosts.IsShowing || Opening.InProgress || Onboarding.Running || GameMenu.IsOpen ||
+                explorer == null || explorer.Locked || Mathf.Max(Mathf.Abs(explorer.Tile.x - tile.x), Mathf.Abs(explorer.Tile.y - tile.y)) > stopRadiusTiles + 1f) return;
+            _ghosted.Add(realm ?? "");
+            _ghostMine = true;
+            _ghostUntil = Time.time + ghostSeconds;
+            ghosts.Show(GhostClip, GhostPlace.AtTarget, GhostTarget, 1f, DominantHand.Left, false);
+            Debug.Log($"[HealBloom] {realm}: the poke ghost over the {NameFor(realm)} (first time here).");
         }
 
         void OnDestroy()
@@ -208,7 +245,8 @@ namespace Diorama
         {
             var world = island.world;
             var recipe = world != null ? RecipeFor(world.realm) : null;
-            bool show = recipe != null && recipe.bakedMesh != null && TryGetTile(world, out var tile) && !SceneSwap.IsInside && !SceneSwap.IsBusy &&
+            Vector2Int tile = default;
+            bool show = recipe != null && recipe.bakedMesh != null && TryGetTile(world, out tile) && !SceneSwap.IsInside && !SceneSwap.IsBusy &&
                         !TitleScreen.Showing;
             Vector3 ground = default;
             if (show)
@@ -218,6 +256,7 @@ namespace Diorama
                 show = island.FootprintContains(ground);
             }
             if (_view.gameObject.activeSelf != show) _view.gameObject.SetActive(show);
+            Ghost(show, show && IsOpen(world.realm), world != null ? world.realm : null, tile);
             if (!show)
             {
                 if (_halo != null) _halo.SetAlpha(0f);
@@ -351,6 +390,7 @@ namespace Diorama
             Heals++;
             party.HealAll();
             _closedUntil[world.realm] = Time.time + reopenSeconds;
+            _ghostUntil = 0f; // the poke happened: no ghost needed
             StartCoroutine(HealMoment(world.realm));
             Debug.Log($"[HealBloom] {world.realm}: healed ({how}); big puff, heal wave; closed for {reopenSeconds:0} s.");
         }
