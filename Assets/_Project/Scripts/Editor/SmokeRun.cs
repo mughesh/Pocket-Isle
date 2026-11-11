@@ -179,7 +179,61 @@ namespace Diorama.EditorTools
 
             public Runner(string[] only)
             {
+                // Panel review (Nov 11): the word "shots" in the arg is not a phase: it turns on a seat shot at the end of
+                // every beat and on every new line (Logs/Panel/NNN_*.png + index.md with the line, draw calls, triangles).
+                if (only != null && only.Any(o => o.Equals("shots", StringComparison.OrdinalIgnoreCase)))
+                {
+                    _panelShots = true;
+                    only = only.Where(o => !o.Equals("shots", StringComparison.OrdinalIgnoreCase)).ToArray();
+                    if (only.Length == 0) only = null;
+                    Directory.CreateDirectory(PanelDir);
+                    foreach (var f in Directory.GetFiles(PanelDir)) File.Delete(f);
+                }
                 _only = only;
+            }
+
+            const string PanelDir = "Logs/Panel";
+            readonly bool _panelShots;
+            int _panelCount;
+            string _panelLine;
+            double _panelLineAt = -1;
+            readonly StringBuilder _panelIndex = new StringBuilder("# Panel shots\n\n| # | Beat | When | Line | Draws | Tris |\n|---|---|---|---|---|---|\n");
+
+            void PanelShot(string when)
+            {
+                if (!_panelShots) return;
+                try
+                {
+                    var cam = Camera.main;
+                    if (cam == null) return;
+                    string beat = Current != null ? Current.phase + " - " + Current.name : "setup";
+                    string safe = Regex.Replace(beat.ToLowerInvariant(), "[^a-z0-9]+", "_").Trim('_');
+                    if (safe.Length > 40) safe = safe.Substring(0, 40);
+                    string file = $"{_panelCount:000}_{safe}_{when}.png";
+                    BattleDebug.Render($"{PanelDir}/{file}", cam.transform.position, cam.transform.rotation);
+                    var d = Dialogue_;
+                    string line = d != null && d.bubble != null && Dialogue.IsTalking ? d.bubble.Text : "";
+                    line = (line ?? "").Replace("\n", " ").Replace("|", "/");
+                    _panelIndex.Append($"| {_panelCount:000} | {beat} | {when} | {line} | {UnityEditor.UnityStats.batches} | {UnityEditor.UnityStats.triangles} |\n");
+                    _panelCount++;
+                    File.WriteAllText($"{PanelDir}/index.md", _panelIndex.ToString());
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning($"[SmokeRun] panel shot failed: {e.Message}");
+                }
+            }
+
+            /// <summary>A shot 0.9 s after each new line starts (typed far enough to read), once per line.</summary>
+            void PanelLines()
+            {
+                if (!_panelShots) return;
+                var d = Dialogue_;
+                string text = d != null && d.bubble != null && Dialogue.IsTalking ? d.bubble.Text : null;
+                if (text == null) { _panelLine = null; _panelLineAt = -1; return; }
+                string key = text.Length > 24 ? text.Substring(0, 24) : text;
+                if (key != _panelLine) { _panelLine = key; _panelLineAt = Now + 0.9; return; }
+                if (_panelLineAt > 0 && Now >= _panelLineAt) { _panelLineAt = -1; PanelShot("line"); }
             }
 
             Beat Current => _index >= 0 && _index < _beats.Count ? _beats[_index] : null;
@@ -231,6 +285,7 @@ namespace Diorama.EditorTools
                 var b = Current;
                 if (b == null) return;
                 if (EditorApplication.isPaused) EditorApplication.isPaused = false; // Error Pause must not freeze the run
+                PanelLines();
                 SkipLongLines();
                 WatchProgress();
                 WatchRules();
@@ -241,6 +296,7 @@ namespace Diorama.EditorTools
                 {
                     _passed++;
                     _results.Add($"| {b.phase} | {b.name} | ok | {Elapsed:0} s{Info(b)} |");
+                    PanelShot("done");
                     Debug.Log($"[SmokeRun] ok: {BeatName} ({Elapsed:0} s){Info(b)}.");
                     Next();
                     return;
