@@ -54,6 +54,21 @@ namespace Diorama
             return any;
         }
 
+        // Nov 12 (Mugesh: text over the Keeper's head; the layout check: the Spirit's line over the wild Isling): every
+        // creature on a stage is a keep-clear zone for the speech bubble, a sphere from its middle to its top (not the
+        // smoke and flames round it, which reach far).
+        void OnEnable() => DialogueBubble.KeepClear += KeepClearOfMe;
+
+        void OnDisable() => DialogueBubble.KeepClear -= KeepClearOfMe;
+
+        void KeepClearOfMe(System.Collections.Generic.List<Vector4> keep)
+        {
+            if (!isActiveAndEnabled || island == null || island.Content == null) return;
+            Vector3 c = WorldCenter, top = island.transform.TransformPoint(LocalTop);
+            // A little over the top: crowns, ears and crests reach past it.
+            keep.Add(new Vector4(c.x, c.y, c.z, Mathf.Max(1e-3f, (top - c).magnitude * 1.3f)));
+        }
+
         /// <summary>Step 14j: the world bounds of everything drawn on it right now (see <see cref="TryGetVisualTop"/>).</summary>
         public bool TryGetVisualBounds(out Bounds bounds)
         {

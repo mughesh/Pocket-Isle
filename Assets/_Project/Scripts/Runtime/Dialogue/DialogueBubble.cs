@@ -27,7 +27,12 @@ namespace Diorama
         readonly System.Collections.Generic.List<Vector4> _keep = new System.Collections.Generic.List<Vector4>();
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void ResetStatics() => KeepClear = null;
+        static void ResetStatics()
+        {
+            KeepClear = null;
+            _heartCalled = false;
+            _heartLastAt = -999f;
+        }
 
         public Material hudMaterial;
         [Tooltip("Pinches from a hand that is grabbing or touching the rim are ignored.")]
@@ -138,9 +143,21 @@ namespace Diorama
         bool _objective;
         bool _heart;
         static bool _heartCalled;
+        // Nov 12 (Mugesh: the statue is silent when it talks): the call came once per app session (the first Heart line ever,
+        // often the opening). Now once per scene: a Heart line after HeartSceneGap seconds of the Heart not speaking calls again.
+        static float _heartLastAt = -999f;
+        bool _heartMurmured;
+        public const float HeartSceneGap = 20f;
+
+        /// <summary>Nov 12 (pure): the Heart's line gets its entrance call (first line of a scene).</summary>
+        public static bool HeartCallsNow(bool calledBefore, float lastAt, float now) => !calledBefore || now - lastAt > HeartSceneGap;
 
         /// <summary>Step 29 H: the Heart's call plays again (a new game, tests).</summary>
-        public static void ResetHeartCall() => _heartCalled = false;
+        public static void ResetHeartCall()
+        {
+            _heartCalled = false;
+            _heartLastAt = -999f;
+        }
         Mesh _targetMesh;
         BoundsClipper _clipper;
         PokeInteractable _poke;
@@ -173,8 +190,26 @@ namespace Diorama
         public bool IsChip => _showing && _chip;
         public string Text => _showing ? _text.text : null;
 
+        /// <summary>Nov 12: the panel's world bounds while a line or chip shows (the battle line keeps off it).</summary>
+        public bool TryGetPanelBounds(out Bounds bounds)
+        {
+            bounds = default;
+            if (!_showing || _panelRenderer == null || !_panelRenderer.gameObject.activeInHierarchy) return false;
+            bounds = _panelRenderer.bounds;
+            return true;
+        }
+
         /// <summary>Seconds a line of <paramref name="chars"/> characters stays up after it is typed in.</summary>
         public static float HoldSeconds(int chars, float holdBase, float holdPerChar) => holdBase + holdPerChar * chars;
+
+        /// <summary>
+        /// Nov 12 (Mugesh: the finale's lines change "so slow, it makes me sleepy"): during the finale a line is held
+        /// <see cref="FinaleHoldBase"/> + <see cref="FinaleHoldPerChar"/> x characters after it is typed, at most
+        /// <see cref="FinaleHoldMax"/> (was 1.5 + 0.06 x characters, no cap). A poke or look + pinch skips at once.
+        /// </summary>
+        public static float FinaleHoldSeconds(int chars) => Mathf.Min(FinaleHoldMax, FinaleHoldBase + FinaleHoldPerChar * chars);
+
+        public const float FinaleHoldBase = 1f, FinaleHoldPerChar = 0.035f, FinaleHoldMax = 3.5f;
 
         void Awake()
         {
@@ -388,7 +423,7 @@ namespace Diorama
             _text.maxVisibleCharacters = 0;
             _instant = !_heart && _chars < instantUnderChars;
             _typeSeconds = _instant ? 0f : _chars / Mathf.Max(1f, CharsPerSecond);
-            _holdSeconds = HoldSeconds(_chars, holdBase, holdPerChar);
+            _holdSeconds = FinaleDirector.Running ? FinaleHoldSeconds(_chars) : HoldSeconds(_chars, holdBase, holdPerChar);
             _shownAt = Time.time;
             _blipAt = 0;
             _blipTime = 0f;
@@ -399,24 +434,35 @@ namespace Diorama
             bool called = !_heart && PlayEntranceCall(line, anchor != null ? anchor.position : _root.position);
             // Step 29 H (Mugesh: the new Heart call is worse than the old deep synth "moooo"): the first time the Heart
             // speaks, the old synth call, once: the Spirit's blip two octaves down with a bell ping. Then only soft murmurs.
-            if (_heart && !_heartCalled)
+            if (_heart)
             {
-                _heartCalled = true;
-                var at = anchor != null ? anchor.position : _root.position;
-                var call = GameAudio.At(Diorama.Audio.AudioIds.SpiritBlip, at);
-                call.SetPitch(0.25f);
-                call.SetVolume(1f);
-                // Nov 11 (Mugesh: the Heart's voice done properly, in the spirit of the "moooo" but richer): with the new
-                // voices on and a generated call in the cue, that singing-bowl and choir tone rides on top of the synth's
-                // low hum instead of the bell ping. Voices: blip (Dev panel > Tools > Sound A/B) gives the old call back.
-                bool rich = Diorama.Audio.AudioAB.NewVoices && Diorama.Audio.AudioService.Has(Diorama.Audio.AudioIds.VoiceCallHeart);
-                if (rich) GameAudio.At(Diorama.Audio.AudioIds.VoiceCallHeart, at).SetVolume(heartCallLayer);
-                else GameAudio.At(Diorama.Audio.AudioIds.SparkChime, at).SetVolume(0.45f);
-                Debug.Log($"[DialogueBubble] The Heart's entrance call (synth two octaves down + {(rich ? "the generated bowl and choir call" : "bell ping")}).");
+                _heartMurmured = false;
+                bool callNow = HeartCallsNow(_heartCalled, _heartLastAt, Time.time);
+                _heartLastAt = Time.time;
+                if (callNow) HeartCall(anchor);
             }
             else if (_objective && string.IsNullOrEmpty(chip)) GameAudio.At(Diorama.Audio.AudioIds.SpiritFocus, _root.position).SetVolume(0.6f);
             for (int i = 0; i < 2; i++) _wasPinching[i] = true; // a pinch already held doesn't skip
             Place(true);
+        }
+
+        /// <summary>
+        /// The Heart's entrance call: the old synth "moooo" (the Spirit's blip two octaves down) with the generated bowl and
+        /// choir call on top when the new voices are on, else the bell ping. Nov 12: head-locked, so it is always heard.
+        /// </summary>
+        void HeartCall(Transform anchor)
+        {
+            _heartCalled = true;
+            var call = GameAudio.Ui(Diorama.Audio.AudioIds.SpiritBlip);
+            call.SetPitch(0.25f);
+            call.SetVolume(1f);
+            // Nov 11 (Mugesh: the Heart's voice done properly, in the spirit of the "moooo" but richer): with the new
+            // voices on and a generated call in the cue, that singing-bowl and choir tone rides on top of the synth's
+            // low hum instead of the bell ping. Voices: blip (Dev panel > Tools > Sound A/B) gives the old call back.
+            bool rich = Diorama.Audio.AudioAB.NewVoices && Diorama.Audio.AudioService.Has(Diorama.Audio.AudioIds.VoiceCallHeart);
+            if (rich) GameAudio.Ui(Diorama.Audio.AudioIds.VoiceCallHeart).SetVolume(heartCallLayer);
+            else GameAudio.Ui(Diorama.Audio.AudioIds.SparkChime).SetVolume(0.45f);
+            Debug.Log($"[Heart] call (synth moo two octaves down + {(rich ? "the generated bowl and choir call" : "bell ping")}).");
         }
 
         float CharsPerSecond => _heart ? heartCharsPerSecond : Mathf.Max(charsPerSecond, typingCharsPerSecond);
@@ -635,6 +681,14 @@ namespace Diorama
         void Skip(string how)
         {
             float t = Time.time - _shownAt;
+            if (FinaleDirector.Running && _chipText == null)
+            {
+                // Nov 12: in the finale one poke or pinch goes straight to the next line.
+                Debug.Log($"[DialogueBubble] Finale: skipped by {how}.");
+                _showing = false;
+                Skipped?.Invoke();
+                return;
+            }
             if (t < _typeSeconds)
             {
                 // The first poke or pinch shows the whole line; the next one skips it.
@@ -719,6 +773,9 @@ namespace Diorama
         [Min(1)] public int heartBlipEvery = 7;
         [Tooltip("Step 29 H: the Heart's typing murmurs, this share of the blip volume (subtle).")]
         [Range(0f, 1f)] public float heartMurmur = 0.55f;
+
+        /// <summary>Nov 12: the Heart's murmurs never go under this share of the blip volume.</summary>
+        public const float HeartMurmurFloor = 0.9f;
         [Tooltip("Step 18: and at least this long between the Heart's blips (s).")]
         public float heartBlipGap = 0.3f;
 
@@ -735,9 +792,21 @@ namespace Diorama
             if (_chip || _objective && !objectivesBlip || shown < _blipAt + every || shown >= _chars || Time.time < _blipTime + gap) return;
             _blipAt = shown;
             _blipTime = Time.time;
-            var h = GameAudio.At(_heart ? Diorama.Audio.AudioIds.VoiceHeart : VoiceFor(_line), _root.position);
-            h.SetVolume(_heart ? blipVolume * heartMurmur : blipVolume);
-            h.SetPitch(_heart ? UnityEngine.Random.Range(0.96f, 1.02f) : UnityEngine.Random.Range(0.94f, 1.06f));
+            if (_heart)
+            {
+                // Nov 12: the murmurs were a 3D voice at a quarter volume, 1.5 m range from the bubble: unheard. Head-locked now,
+                // never under HeartMurmurFloor of the blip volume.
+                _heartLastAt = Time.time;
+                var m = GameAudio.Ui(Diorama.Audio.AudioIds.VoiceHeart);
+                m.SetVolume(blipVolume * Mathf.Max(heartMurmur, HeartMurmurFloor));
+                m.SetPitch(UnityEngine.Random.Range(0.96f, 1.02f));
+                if (!_heartMurmured) Debug.Log("[Heart] murmur (typing).");
+                _heartMurmured = true;
+                return;
+            }
+            var h = GameAudio.At(VoiceFor(_line), _root.position);
+            h.SetVolume(blipVolume);
+            h.SetPitch(UnityEngine.Random.Range(0.94f, 1.06f));
         }
 
         /// <summary>Step 18: the blip cue for a line's speaker.</summary>
@@ -1067,8 +1136,11 @@ namespace Diorama
                     float dx = Mathf.Abs(tp.x - b.x) - _size.x * 0.5f, dy = Mathf.Abs(tp.y - b.y) - _size.y * 0.5f;
                     float ox = Mathf.Max(dx, 0f), oy = Mathf.Max(dy, 0f);
                     if (ox * ox + oy * oy >= tr * tr) continue;
-                    // Up until the bubble's lower edge clears the top of the sphere.
-                    pos += head.up * (tp.y + tr - (b.y - _size.y * 0.5f) + 0.004f);
+                    // Up until the bubble's lower edge clears the top of the sphere. Nov 12: unless that leaves the central
+                    // view (the view clamp would pull it straight back onto the thing): then aside, on its side.
+                    var up = pos + head.up * (tp.y + tr - (b.y - _size.y * 0.5f) + 0.004f);
+                    if (Vector3.Angle(head.forward, up - head.position) <= maxViewAngle) pos = up;
+                    else pos += head.right * (_sideSign * (tr + _size.x * 0.5f - (b.x - tp.x) * _sideSign + 0.004f));
                     moved = true;
                 }
                 if (!moved) break;

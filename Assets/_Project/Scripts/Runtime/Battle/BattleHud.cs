@@ -73,6 +73,8 @@ namespace Diorama
             public MeshRenderer plate;
             /// <summary>Step 14k: the near Isling's label (the wild / Keeper's keeps clear of that actor).</summary>
             public bool near;
+            /// <summary>Nov 12: the wild Isling's or Keeper's plate sits beside its body, not at its feet.</summary>
+            public bool beside;
             public float padRadius, top;
             public bool topSet;
             /// <summary>Step 14k: the pad's radius now (island-local; the battle zoom changes it); null = <see cref="padRadius"/>.</summary>
@@ -161,6 +163,8 @@ namespace Diorama
 
             var bar = new Bar { root = root, quad = quad, label = label, actor = actor, max = Mathf.Max(1, max), shown = hp, target = hp };
             bar.near = near;
+            // Nov 12: every wild plate beside its Isling (at its feet it covered a small one's legs, a Keeper's whole name).
+            bar.beside = !near;
             bar.padRadius = padRadius;
             bar.padRadiusNow = padRadiusNow;
             bar.bornAt = Time.time;
@@ -174,6 +178,14 @@ namespace Diorama
         /// <summary>Step 24: a Keeper's label is its name only (a Lv 12 Isling against a "Lv 4" boss read wrong).</summary>
         public static string LabelText(string name, int level, bool showLevel) =>
             showLevel ? $"<b>{name}</b>  <size=80%>Lv {level}</size>" : $"<b>{name}</b>";
+
+        /// <summary>Nov 12: every shown HP plate's world bounds (the battle line keeps off them).</summary>
+        public void PlateBounds(List<Bounds> into)
+        {
+            into.Clear();
+            foreach (var b in _bars)
+                if (b.plate != null && b.root != null && b.root.gameObject.activeInHierarchy) into.Add(b.plate.bounds);
+        }
 
         /// <summary>Removes one bar (a creature left the field).</summary>
         public void RemoveBar(Bar bar)
@@ -356,6 +368,7 @@ namespace Diorama
             PlateExtents(out float bottom, out float top, out float halfW);
             float padR = b.padRadiusNow != null ? b.padRadiusNow() : b.padRadius;
             Vector3 feet = island.TileToLocal(a.tile, island.Content.capHeight + a.baseLift);
+
             Vector3 up = LabelUp(cam);
             Vector3 At(float shift) => it.TransformPoint(feet + new Vector3(shift, footLift, padR + footGap)) + up * (-bottom * scale);
 
@@ -369,7 +382,9 @@ namespace Diorama
                 b.shiftTarget = ClearShift(cam, At, halfW * scale, (top - bottom) * 0.5f * scale, (top + bottom) * 0.5f * scale);
             }
             b.shift = b.near ? 0f : b.checkedAt < 0f ? b.shiftTarget : Mathf.MoveTowards(b.shift, b.shiftTarget, Time.deltaTime * 0.6f);
-            Vector3 world = b.near ? NearSpot(b, cam, feet, halfW, settleUntil) : At(b.shift);
+            // Nov 12 (Mugesh, shot 04: Galeowl's plate had no name): a Keeper is wider than its pad, so a plate at its feet sat
+            // inside its body and the belly hid the name on the headset. A Keeper's plate goes beside it, like the near label.
+            Vector3 world = b.near ? NearSpot(b, cam, feet, halfW, settleUntil) : b.beside ? BesideSpot(b, feet, halfW, settleUntil) : At(b.shift);
             // Keep it in view: its top under maxViewportY, its bottom over minViewportY.
             float above = top * scale, below = -bottom * scale;
             Vector3 v = cam.WorldToViewportPoint(world + up * above);
@@ -389,6 +404,40 @@ namespace Diorama
 
         BattleRunes _runes;
         GestureTestPiece _explorer;
+
+        /// <summary>
+        /// Nov 12: beside a Keeper at its chest, on the side away from the player's Isling and the explorer, clear of its
+        /// body; found while it settles, then held.
+        /// </summary>
+        Vector3 BesideSpot(Bar b, Vector3 feet, float halfW, float settleUntil)
+        {
+            var a = b.actor;
+            var it = a.island.transform;
+            if (!b.topSet || Time.time <= settleUntil)
+            {
+                float width = 0.05f;
+                if (a.TryGetVisualBounds(out var bounds)) width = Mathf.Max(bounds.extents.x, bounds.extents.z) / Mathf.Max(1e-5f, it.lossyScale.x);
+                float others = 0f;
+                int n = 0;
+                foreach (var o in _bars)
+                    if (o.near && o.actor != null)
+                    {
+                        others += o.actor.island.TileToLocal(o.actor.tile).x;
+                        n++;
+                    }
+                if (_explorer == null) _explorer = FindFirstObjectByType<GestureTestPiece>();
+                if (_explorer != null && _explorer.Body != null)
+                {
+                    others += _explorer.Body.localPosition.x;
+                    n++;
+                }
+                float sign = n > 0 && others / n > feet.x ? -1f : 1f;
+                b.sideX = sign * (width + halfW * labelScale + nearSideGap);
+                b.chestY = Mathf.Lerp(feet.y, a.LocalTop.y, 0.4f);
+                b.topSet = true;
+            }
+            return it.TransformPoint(new Vector3(feet.x + b.sideX, b.chestY, feet.z));
+        }
 
         /// <summary>Nov 10: beside the near Isling on the player's right, found while it settles, then held.</summary>
         Vector3 NearSpot(Bar b, Camera cam, Vector3 feet, float halfW, float settleUntil)

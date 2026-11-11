@@ -246,6 +246,7 @@ namespace Diorama.EditorTools
                 Build();
                 if (_only != null) _beats.RemoveAll(b => b.phase != "Setup" && !_only.Any(o => b.phase.StartsWith(o, StringComparison.OrdinalIgnoreCase)));
                 Application.logMessageReceived += OnLog;
+                if (Directory.Exists($"{OutDir}/layout")) Directory.Delete($"{OutDir}/layout", true);
                 _runStart = Now;
                 Debug.Log($"[SmokeRun] Start: {_beats.Count} beats{(_only != null ? " (only " + string.Join(", ", _only) + ")" : "")}.");
                 EditorApplication.update += Tick;
@@ -267,6 +268,7 @@ namespace Diorama.EditorTools
                     return;
                 }
                 _beatStart = Now;
+                _beatLayout.Clear();
                 _nextPump = Now + 0.5;
                 _stuckNoted = false;
                 _sigSince = Now;
@@ -289,9 +291,20 @@ namespace Diorama.EditorTools
                 SkipLongLines();
                 WatchProgress();
                 WatchRules();
+                WatchLayout();
                 bool done = false;
                 try { done = b.done == null ? Elapsed >= b.timeout : b.done(); }
                 catch (Exception e) { Note("exception", $"beat check threw {e.GetType().Name}: {e.Message}"); }
+                if (done && _beatLayout.Count > 0)
+                {
+                    // Nov 12: a text overlapped something during the beat: the beat fails (the run goes on).
+                    _failed++;
+                    _results.Add($"| {b.phase} | {b.name} | **FAIL** | layout: {string.Join("; ", _beatLayout).Replace("|", "/")} |");
+                    Debug.LogWarning($"[SmokeRun] FAIL: {BeatName}: layout: {string.Join("; ", _beatLayout)}");
+                    PanelShot("done");
+                    Next();
+                    return;
+                }
                 if (done)
                 {
                     _passed++;
@@ -366,6 +379,47 @@ namespace Diorama.EditorTools
             // Step 21: Mugesh's notes as rules (Assets/Docs/Regressions.md), watched the whole run; a broken one is noted
             // "rule" (once per beat), so a later step can't quietly undo an earlier fix.
             double _shardMusicSince = -1, _menuSince = -1;
+
+            // ---- Nov 12: no text overlaps another, a creature, the explorer or a prop (B7) ----
+            readonly List<string> _beatLayout = new List<string>();
+            readonly HashSet<string> _layoutShot = new HashSet<string>();
+            double _layoutNext;
+            int _layoutShots;
+
+            void WatchLayout()
+            {
+                if (Now < _layoutNext) return;
+                _layoutNext = Now + 0.5;
+                List<string> hits;
+                try { hits = TextLayoutCheck.Check(Camera.main); }
+                catch (Exception e)
+                {
+                    Note("exception", $"layout check threw {e.GetType().Name}: {e.Message}");
+                    return;
+                }
+                foreach (var h in hits)
+                {
+                    // One note per pair per beat (the share in brackets changes frame to frame).
+                    string pair = Regex.Replace(h, @" \([^)]*%[^)]*\)", "");
+                    if (_beatLayout.Any(x => Regex.Replace(x, @" \([^)]*%[^)]*\)", "") == pair)) continue;
+                    _beatLayout.Add(h);
+                    Note("layout", pair);
+                    if (!_layoutShot.Add(pair) || _layoutShots >= 60) continue;
+                    try
+                    {
+                        var cam = Camera.main;
+                        string safe = Regex.Replace(h.ToLowerInvariant(), "[^a-z0-9]+", "_").Trim('_');
+                        if (safe.Length > 50) safe = safe.Substring(0, 50);
+                        Directory.CreateDirectory($"{OutDir}/layout");
+                        BattleDebug.Render($"{OutDir}/layout/{_layoutShots:000}_{safe}.png", cam.transform.position, cam.transform.rotation);
+                        _layoutShots++;
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogWarning($"[SmokeRun] layout shot failed: {e.Message}");
+                    }
+                }
+            }
 
             void WatchRules()
             {

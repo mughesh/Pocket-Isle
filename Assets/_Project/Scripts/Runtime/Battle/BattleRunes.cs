@@ -820,7 +820,12 @@ namespace Diorama
         Transform _captionRoot;
         Material _captionTextMat, _captionPillMat;
 
-        /// <summary>The battle line: above the wild Isling (the spot the Spirit's battle words read best), facing the head.</summary>
+        /// <summary>
+        /// The battle line: above the wild Isling (the spot the Spirit's battle words read best), facing the head. Nov 12
+        /// (Mugesh, shot 04: "Choose your attack" sat behind Galeowl's head: a Keeper is so tall that the view's top edge
+        /// pushed the line down into it): when that spot covers a creature, an HP plate or the moves on screen, the line
+        /// goes beside the wild Isling (left, then right), else over everything; a clear spot is kept while it stays clear.
+        /// </summary>
         void PlaceCaption(Camera cam)
         {
             if (_captionRoot == null) return;
@@ -830,12 +835,143 @@ namespace Diorama
             Vector3 world = island.transform.TransformPoint(local);
             if (cam != null)
             {
-                Vector3 v = cam.WorldToViewportPoint(world);
-                if (v.z > 0f && v.y > captionMaxViewportY) world = cam.ViewportToWorldPoint(new Vector3(v.x, captionMaxViewportY, v.z));
+                Vector3 up = BattleHud.LabelUp(cam);
+                if (_avoidB != null && _captionPill != null && _captionPill.gameObject.activeSelf) world = ClearCaptionSpot(cam, world, up);
+                else world = UnderTop(cam, world);
                 Vector3 away = world - cam.transform.position;
-                if (away.sqrMagnitude > 1e-8f) _captionRoot.rotation = Quaternion.LookRotation(away, BattleHud.LabelUp(cam));
+                if (away.sqrMagnitude > 1e-8f) _captionRoot.rotation = Quaternion.LookRotation(away, up);
             }
             _captionRoot.position = world;
+        }
+
+        Vector3 UnderTop(Camera cam, Vector3 world)
+        {
+            Vector3 v = cam.WorldToViewportPoint(world);
+            return v.z > 0f && v.y > captionMaxViewportY ? cam.ViewportToWorldPoint(new Vector3(v.x, captionMaxViewportY, v.z)) : world;
+        }
+
+        readonly System.Collections.Generic.List<Rect> _captionKeepOff = new System.Collections.Generic.List<Rect>();
+        readonly System.Collections.Generic.List<Bounds> _captionPlates = new System.Collections.Generic.List<Bounds>();
+        readonly Vector3[] _captionSpots = new Vector3[4];
+        int _captionSpot;
+        BattleHud _captionHud;
+        DialogueBubble _captionBubble;
+
+        /// <summary>Nov 12: which spot the battle line took (0 over the head, 1 left, 2 right, 3 over everything; tests, the bridge).</summary>
+        public int CaptionSpot => _captionSpot;
+
+        /// <summary>Nov 12: the first spot (over the head, left, right, over everything) whose pill covers nothing to keep clear.</summary>
+        Vector3 ClearCaptionSpot(Camera cam, Vector3 over, Vector3 up)
+        {
+            Vector3 fwd = (over - cam.transform.position).normalized;
+            Vector3 right = Vector3.Cross(up, fwd).normalized;
+            float s = _captionRoot.lossyScale.x;
+            var ps = _captionPill.transform.localScale;
+            float hw = ps.x * s * 0.5f, hh = ps.y * s * 0.5f, gap = 0.008f * island.transform.lossyScale.x;
+
+            _captionKeepOff.Clear();
+            KeepOff(cam, _avoidA);
+            KeepOff(cam, _avoidB);
+            if (_captionHud == null) _captionHud = FindFirstObjectByType<BattleHud>();
+            if (_captionHud != null)
+            {
+                _captionHud.PlateBounds(_captionPlates);
+                foreach (var pb in _captionPlates) _captionKeepOff.Add(ViewRect(cam, pb));
+            }
+            if (TryGetRowBounds(out var row)) _captionKeepOff.Add(ViewRect(cam, row));
+            if (_captionBubble == null) _captionBubble = FindFirstObjectByType<DialogueBubble>();
+            if (_captionBubble != null && _captionBubble.TryGetPanelBounds(out var bubble)) _captionKeepOff.Add(ViewRect(cam, bubble));
+
+            _captionSpots[0] = UnderTop(cam, over);
+            bool hasBody = _avoidB.TryGetVisualBounds(out var vb);
+            if (!hasBody) vb = new Bounds(over, Vector3.zero);
+            if (hasBody)
+            {
+                var ar = new Vector3(Mathf.Abs(right.x), Mathf.Abs(right.y), Mathf.Abs(right.z));
+                float halfW = Vector3.Dot(vb.extents, ar);
+                Vector3 chest = vb.center + up * (vb.extents.y * 0.45f);
+                _captionSpots[1] = chest - right * (halfW + hw + gap);
+                _captionSpots[2] = chest + right * (halfW + hw + gap);
+                // Over everything: the wild Isling and every HP plate.
+                float top = Mathf.Abs(Vector3.Dot(vb.extents, new Vector3(Mathf.Abs(up.x), Mathf.Abs(up.y), Mathf.Abs(up.z))));
+                foreach (var pb in _captionPlates)
+                    for (int i = 0; i < 8; i++)
+                    {
+                        var q = pb.center + Vector3.Scale(pb.extents, new Vector3((i & 1) == 0 ? -1 : 1, (i & 2) == 0 ? -1 : 1, (i & 4) == 0 ? -1 : 1));
+                        top = Mathf.Max(top, Vector3.Dot(q - vb.center, up));
+                    }
+                _captionSpots[3] = vb.center + up * (top + hh + gap);
+            }
+            else _captionSpots[1] = _captionSpots[2] = _captionSpots[3] = _captionSpots[0];
+
+            float Cost(Vector3 at)
+            {
+                var a = cam.WorldToViewportPoint(at - right * hw - up * hh);
+                var c = cam.WorldToViewportPoint(at + right * hw + up * hh);
+                if (a.z <= 0f || c.z <= 0f) return 1e6f;
+                var r = Rect.MinMaxRect(Mathf.Min(a.x, c.x), Mathf.Min(a.y, c.y), Mathf.Max(a.x, c.x), Mathf.Max(a.y, c.y));
+                float cost = 0f;
+                foreach (var k in _captionKeepOff)
+                    if (r.Overlaps(k))
+                        cost += (Mathf.Min(r.xMax, k.xMax) - Mathf.Max(r.xMin, k.xMin)) * (Mathf.Min(r.yMax, k.yMax) - Mathf.Max(r.yMin, k.yMin));
+                // Off the view (or over its top limit) counts too.
+                cost += Mathf.Max(0f, r.yMax - captionMaxViewportY) * r.width + Mathf.Max(0f, 0.02f - r.xMin) * r.height + Mathf.Max(0f, r.xMax - 0.98f) * r.height;
+                return cost;
+            }
+
+            if (Cost(_captionSpots[_captionSpot]) <= 1e-6f) return _captionSpots[_captionSpot];
+            // Beside the wild Isling: the side away from its HP plate first (the plate sits beside it too).
+            bool plateLeft = false;
+            float nearest = float.MaxValue;
+            foreach (var pb in _captionPlates)
+            {
+                float d = (pb.center - vb.center).sqrMagnitude;
+                if (d >= nearest) continue;
+                nearest = d;
+                plateLeft = Vector3.Dot(pb.center - vb.center, right) < 0f;
+            }
+            int[] order = plateLeft ? new[] { 0, 2, 1, 3 } : new[] { 0, 1, 2, 3 };
+            int best = 0;
+            float bestCost = float.MaxValue;
+            foreach (int i in order)
+            {
+                float c = Cost(_captionSpots[i]);
+                if (c <= 1e-6f)
+                {
+                    best = i;
+                    break;
+                }
+                if (c < bestCost)
+                {
+                    bestCost = c;
+                    best = i;
+                }
+            }
+            if (best != _captionSpot)
+                Debug.Log($"[BattleRunes] The battle line moves {(best == 0 ? "over the wild Isling's head" : best == 1 ? "to its left" : best == 2 ? "to its right" : "over everything")} (clear of the creatures, plates and moves).");
+            _captionSpot = best;
+            return _captionSpots[best];
+        }
+
+        void KeepOff(Camera cam, StageActor actor)
+        {
+            if (actor != null && actor.TryGetVisualBounds(out var vb)) _captionKeepOff.Add(ViewRect(cam, vb));
+        }
+
+        static Rect ViewRect(Camera cam, Bounds b)
+        {
+            float x0 = float.MaxValue, y0 = float.MaxValue, x1 = float.MinValue, y1 = float.MinValue;
+            for (int i = 0; i < 8; i++)
+            {
+                var p = b.center + Vector3.Scale(b.extents, new Vector3((i & 1) == 0 ? -1 : 1, (i & 2) == 0 ? -1 : 1, (i & 4) == 0 ? -1 : 1));
+                var v = cam.WorldToViewportPoint(p);
+                if (v.z <= 0f) continue;
+                x0 = Mathf.Min(x0, v.x);
+                y0 = Mathf.Min(y0, v.y);
+                x1 = Mathf.Max(x1, v.x);
+                y1 = Mathf.Max(y1, v.y);
+            }
+            return x1 >= x0 ? Rect.MinMaxRect(x0, y0, x1, y1) : new Rect(-10f, -10f, 0f, 0f);
         }
 
         /// <summary>True when the row (runes and caption) sits between the head and either creature's body.</summary>

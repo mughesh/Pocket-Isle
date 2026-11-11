@@ -133,8 +133,53 @@ namespace Diorama
             float scale = _island.transform.lossyScale.x * (0.6f + 0.4f * EaseOutBack(pop));
             var t = _island.transform;
             Vector3 at = t.position + t.up * (0.16f * t.lossyScale.x / 0.6f) + Vector3.ProjectOnPlane(t.forward, Vector3.up).normalized * (0.08f * t.lossyScale.x / 0.6f);
+            at = OverTheExplorer(at, scale);
             _tag.Place(at, scale, fade);
             if (_pic != null) _pic.enabled = fade > 0.05f;
+        }
+
+        GestureTestPiece _explorer;
+
+        /// <summary>
+        /// Nov 12 (the layout check: "New Isling!" sat on the explorer): rises along the view's up until the tag clears the
+        /// explorer on screen (a few steps at most).
+        /// </summary>
+        Vector3 OverTheExplorer(Vector3 at, float scale)
+        {
+            var cam = Camera.main;
+            if (_explorer == null) _explorer = GameState.Instance != null ? GameState.Instance.explorer : null;
+            var body = _explorer != null ? _explorer.Body : null;
+            if (cam == null || body == null || !body.gameObject.activeInHierarchy) return at;
+            bool any = false;
+            var b = new Bounds();
+            foreach (var r in body.GetComponentsInChildren<Renderer>())
+            {
+                if (!r.enabled) continue;
+                if (!any) b = r.bounds;
+                else b.Encapsulate(r.bounds);
+                any = true;
+            }
+            if (!any) return at;
+            var size = _tag.Size * scale;
+            Vector3 up = cam.transform.up, right = cam.transform.right;
+            Rect Screen(Vector3 c, float hw, float hh)
+            {
+                var a = cam.WorldToViewportPoint(c - right * hw - up * hh);
+                var d = cam.WorldToViewportPoint(c + right * hw + up * hh);
+                return Rect.MinMaxRect(Mathf.Min(a.x, d.x), Mathf.Min(a.y, d.y), Mathf.Max(a.x, d.x), Mathf.Max(a.y, d.y));
+            }
+            float x0 = 1f, y0 = 1f, x1 = 0f, y1 = 0f;
+            for (int i = 0; i < 8; i++)
+            {
+                var v = cam.WorldToViewportPoint(b.center + Vector3.Scale(b.extents, new Vector3((i & 1) == 0 ? -1 : 1, (i & 2) == 0 ? -1 : 1, (i & 4) == 0 ? -1 : 1)));
+                x0 = Mathf.Min(x0, v.x);
+                y0 = Mathf.Min(y0, v.y);
+                x1 = Mathf.Max(x1, v.x);
+                y1 = Mathf.Max(y1, v.y);
+            }
+            var me = Rect.MinMaxRect(x0, y0, x1, y1);
+            for (int i = 0; i < 12 && Screen(at, size.x * 0.5f, size.y * 0.5f).Overlaps(me); i++) at += up * (size.y * 0.5f);
+            return at;
         }
 
         static float EaseOutBack(float p)

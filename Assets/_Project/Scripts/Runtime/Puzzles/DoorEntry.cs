@@ -225,6 +225,38 @@ namespace Diorama
             _nextWave = Time.time;
         }
 
+        /// <summary>Nov 12: props this close to the door (tiles, Chebyshev) count for the chip's height.</summary>
+        public const int ChipReach = 2;
+
+        /// <summary>Nov 12: the chip's bottom sits this far (tiles) over the tallest of them.</summary>
+        public const float ChipMargin = 0.6f;
+
+        float _chipTop = -1f;
+        WorldMap _chipTopMap;
+
+        /// <summary>
+        /// Nov 12 (pure): the top (tiles over the cap) of the tallest baked prop whose footprint lies within
+        /// <paramref name="reach"/> tiles of <paramref name="footprint"/>, the door's own prop included; props bake in tile units,
+        /// grown by their largest scale jitter.
+        /// </summary>
+        public static float ChipHeightTiles(WorldMap world, RectInt footprint, int reach)
+        {
+            float top = 0f;
+            if (world == null) return top;
+            for (int r = footprint.yMin - reach - 3; r < footprint.yMax + reach; r++)
+                for (int c = footprint.xMin - reach - 3; c < footprint.xMax + reach; c++)
+                {
+                    if (!world.TryGetProp(world.PropAt(r, c), out var e) || e.recipe == null || e.recipe.bakedMesh == null) continue;
+                    var f = WorldMap.FootprintOf(e);
+                    var rect = new RectInt(c, r, f.x, f.y);
+                    int gapX = Mathf.Max(0, Mathf.Max(rect.xMin - (footprint.xMax - 1), footprint.xMin - (rect.xMax - 1)));
+                    int gapY = Mathf.Max(0, Mathf.Max(rect.yMin - (footprint.yMax - 1), footprint.yMin - (rect.yMax - 1)));
+                    if (Mathf.Max(gapX, gapY) > reach) continue;
+                    top = Mathf.Max(top, e.recipe.bakedMesh.bounds.max.y * (1f + e.recipe.scaleJitter));
+                }
+            return top;
+        }
+
         void Chip(bool on, Vector3 door)
         {
             _chipAlpha = Mathf.MoveTowards(_chipAlpha, on ? 1f : 0f, Time.deltaTime * 4f);
@@ -234,10 +266,16 @@ namespace Diorama
                 _chip.Place(Vector3.zero, 0f, 0f);
                 return;
             }
-            // Beside the door, never over it (R15): on the side that is inside the window.
-            float aside = _footprint.width * 0.5f + 0.4f + (_chip.Size.x * 0.5f) / Mathf.Max(1e-4f, TileWorld);
-            var spot = new Vector3(door.x + aside, door.y + 0.3f, door.z + 1.2f);
-            if (!Visible(spot)) spot.x = door.x - aside;
+            // Nov 12 (Mugesh, shot 05: the chip sat low, through the stone arch and the tower): above everything round the
+            // door, the tallest prop within ChipReach tiles plus a margin, centred over the doorway, facing the head.
+            if (_chipTop < 0f || _chipTopMap != _island.world)
+            {
+                _chipTopMap = _island.world;
+                _chipTop = ChipHeightTiles(_island.world, _footprint, ChipReach);
+                Debug.Log($"[DoorEntry] {_owner.name}: chip over the tallest prop within {ChipReach} tiles ({_chipTop:0.0} tiles).");
+            }
+            float halfH = _chip.Size.y * 0.5f / Mathf.Max(1e-4f, TileWorld);
+            var spot = new Vector3(door.x, Mathf.Max(door.y, _chipTop) + ChipMargin + halfH, door.z);
             var world = _island.transform.TransformPoint(Local(spot));
             var cam = Camera.main;
             // The bubble's size (it has to be read, however small the island is), square to the view.
