@@ -658,10 +658,11 @@ namespace Diorama
                         if (e.side == BattleSide.Wild)
                         {
                             // Step 29 (playtests: moves pressed during the wild Isling's turn): say whose turn it is first.
-                            caption(BattleRunes.TheirTurn(battle.keeper != null ? who : $"Wild {who}"));
+                            caption(BattleRunes.TheirTurn(BattleRunes.WildName(who, battle.keeper != null)));
                             yield return Wait(theirTurnBeat);
                         }
-                        caption($"{(e.side == BattleSide.Wild ? "Wild " : "")}{who} used {e.move.Name}!");
+                        // Nov 11 panel (R49): a Keeper is never "Wild".
+                        caption(BattleRunes.MoveLine(who, e.move.Name, e.side == BattleSide.Wild, battle.keeper != null));
                         // The move's outcome is the next event; it plays at the moment of impact.
                         bool hasOutcome = i + 1 < events.Count && IsOutcome(events[i + 1].kind);
                         var outcome = hasOutcome ? events[i + 1] : default;
@@ -671,7 +672,7 @@ namespace Diorama
                         break;
                     case BattleEventKind.Fainted:
                         bool dazed = e.side == BattleSide.Wild && battle.WildDazed;
-                        caption(dazed ? $"Wild {who} is dazed!" : $"{(e.side == BattleSide.Wild ? "Wild " : "")}{who} fainted!");
+                        caption(BattleRunes.FaintLine(who, e.side == BattleSide.Wild, battle.keeper != null, dazed));
                         if (self != null)
                         {
                             fx.Burst(self.WorldCenter, 20, Smoke, World(0.03f), 0.7f, World(0.005f), Vector3.up * World(0.02f));

@@ -125,6 +125,20 @@ namespace Diorama
         /// <summary>The caption while the wild (or Keeper) side acts.</summary>
         public static string TheirTurn(string name) => $"{name}'s turn...";
 
+        /// <summary>Nov 11 panel (R49): the other side's name in captions: "Wild Vanehare", but a Keeper is never wild.</summary>
+        public static string WildName(string name, bool keeper) => keeper ? name : $"Wild {name}";
+
+        /// <summary>The move caption: "Wild Vanehare used Gust!", "Galeowl used Gale Shot!", "Toastling used Ember!".</summary>
+        public static string MoveLine(string name, string move, bool wild, bool keeper) => $"{(wild ? WildName(name, keeper) : name)} used {move}!";
+
+        /// <summary>The knock-out caption: a wild one faints or is dazed; a Keeper calms down ("Galeowl is calm!"); the player's faints.</summary>
+        public static string FaintLine(string name, bool wild, bool keeper, bool dazed)
+        {
+            if (dazed) return $"{WildName(name, keeper)} is dazed!";
+            if (wild && keeper) return $"{name} is calm!";
+            return $"{(wild ? WildName(name, false) : name)} fainted!";
+        }
+
         static readonly int BackColorId = Shader.PropertyToID("_BackColor");
         static readonly int BorderColorId = Shader.PropertyToID("_BorderColor");
         static readonly int FillId = Shader.PropertyToID("_Fill");
