@@ -96,15 +96,16 @@ namespace Diorama.Tests
             foreach (var row in new[] { 1, 2 })
             {
                 var (end, tiles) = Walk(map, new Vector2Int(1, row), E);
-                Assert.AreEqual(SmartStep.Blocked, end, $"row {row}");
+                Assert.That(end, Is.EqualTo(SmartStep.RoadEnd).Or.EqualTo(SmartStep.Blocked), $"row {row}");
                 Assert.AreEqual(9, tiles.Count, $"row {row} walks to the end");
                 Assert.IsTrue(tiles.All(t => t.y == row), "keeps to its lane");
             }
         }
 
         [Test]
-        public void Corridor_TwoWideLBend_TurnsByItself_InEitherLane()
+        public void Corridor_TwoWideLBend_StopsAtTheCorner_InEitherLane()
         {
+            // Nov 12 (Mugesh's rule): the walk goes straight and stops where the road turns; the next swipe takes the bend.
             // Road along rows 5-6 to the east, bends north up columns 7-8.
             var map = Map(
                 "XXXXXXXXXX",
@@ -118,10 +119,11 @@ namespace Diorama.Tests
             foreach (var row in new[] { 5, 6 })
             {
                 var (end, tiles) = Walk(map, new Vector2Int(1, row), E);
-                Assert.AreNotEqual(SmartStep.Junction, end, $"lane row {row}: a bend is not a junction");
-                Assert.AreEqual(1, tiles[tiles.Count - 1].y, $"lane row {row}: walks up to the top");
-                int turnX = tiles.First(t => t.y < row).x;
-                Assert.IsTrue(tiles.Where(t => t.y < 5).All(t => t.x == turnX), "stays in one lane after the bend");
+                Assert.AreEqual(SmartStep.Corner, end, $"lane row {row}");
+                Assert.AreEqual(new Vector2Int(8, row), tiles[tiles.Count - 1], $"lane row {row}: straight to the corner");
+                Assert.IsTrue(tiles.All(t => t.y == row), "never turns by itself");
+                var (end2, up) = Walk(map, tiles[tiles.Count - 1], N);
+                Assert.AreEqual(1, up[up.Count - 1].y, "the next swipe walks up the bend");
             }
         }
 
@@ -132,17 +134,19 @@ namespace Diorama.Tests
                 "XXXXXXXXXXXXXX",
                 "XGGGGGPPGGGGGX",
                 "XGGGGGPPGGGGGX",
+                "XGGGGGPPGGGGGX",
+                "XGGGGGPPGGGGGX",
                 "XPPPPPPPPPPPPX",
                 "XPPPPPPPPPPPPX",
                 "XXXXXXXXXXXXXX");
-            foreach (var row in new[] { 3, 4 })
+            foreach (var row in new[] { 5, 6 })
             {
                 var (end, tiles) = Walk(map, new Vector2Int(1, row), E);
                 Assert.AreEqual(SmartStep.Junction, end, $"lane row {row}");
                 Assert.AreEqual(new Vector2Int(6, row), tiles[tiles.Count - 1], $"lane row {row}: stops where the side road opens");
                 // The next swipe on goes past it to the end.
                 var (end2, more) = Walk(map, tiles[tiles.Count - 1], E);
-                Assert.AreEqual(SmartStep.Blocked, end2, "past the junction: no second stop on the side road's other lane");
+                Assert.That(end2, Is.EqualTo(SmartStep.RoadEnd).Or.EqualTo(SmartStep.Blocked), "past the junction: no second stop on the side road's other lane");
                 Assert.AreEqual(12, more[more.Count - 1].x);
             }
         }
@@ -154,7 +158,7 @@ namespace Diorama.Tests
             for (int row = 1; row <= 3; row++)
             {
                 var (end, tiles) = Walk(map, new Vector2Int(1, row), E);
-                Assert.AreEqual(SmartStep.Blocked, end, $"row {row}");
+                Assert.That(end, Is.EqualTo(SmartStep.RoadEnd).Or.EqualTo(SmartStep.Blocked), $"row {row}");
                 Assert.AreEqual(10, tiles[tiles.Count - 1].x);
             }
         }
@@ -166,12 +170,14 @@ namespace Diorama.Tests
                 "XXXXXXXXXXXX",
                 "XGGGGPPGGGGX",
                 "XGGGGPPGGGGX",
+                "XGGGGPPGGGGX",
                 "XPPPPPPPPPPX",
                 "XPPPPPPPPPPX",
+                "XGGGGPPGGGGX",
                 "XGGGGPPGGGGX",
                 "XGGGGPPGGGGX",
                 "XXXXXXXXXXXX");
-            var (end, tiles) = Walk(map, new Vector2Int(1, 3), E);
+            var (end, tiles) = Walk(map, new Vector2Int(1, 4), E);
             Assert.AreEqual(SmartStep.Junction, end);
             var at = tiles[tiles.Count - 1];
             Assert.AreEqual(5, at.x);

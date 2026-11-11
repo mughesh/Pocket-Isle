@@ -38,7 +38,9 @@ namespace Diorama.Tests
         {
             var t = KeeperSim.Trail(400, 1f);
             if (t.grassHub + t.grassCinder == 0) Assert.Inconclusive("Maps or progression missing.");
-            Assert.That(t.level, Is.InRange(7.7f, 9.2f));
+            // Nov 12: 7.5, not 7.7. The straightened west road (c11-12) took the shortest-path estimate off 3 tall grass tiles it
+            // used to cut through; the road the player walks never crossed them (it ran on c8-9), so play is unchanged.
+            Assert.That(t.level, Is.InRange(7.5f, 9.2f));
         }
 
         [Test]

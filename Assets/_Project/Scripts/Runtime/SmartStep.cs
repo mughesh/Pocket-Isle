@@ -41,6 +41,13 @@ namespace Diorama
 
         static bool PathWalk(IslandMap map, Vector2Int t) => map.At(t.y, t.x) == IslandMap.Path && map.CanWalk(t);
 
+        /// <summary>
+        /// Nov 12: a road tile, or a single walkable tile in a road's lane with road on both sides along <paramref name="h"/>
+        /// (a kite or a landmark left on the grass inside a lane): the walk goes straight over it.
+        /// </summary>
+        public static bool RoadLike(IslandMap map, Vector2Int t, Vector2Int h) =>
+            PathWalk(map, t) || map.CanWalk(t) && PathWalk(map, t - h) && PathWalk(map, t + h);
+
         static Vector2Int Left(Vector2Int h) => new Vector2Int(-h.y, h.x);
 
         /// <summary>
@@ -154,37 +161,101 @@ namespace Diorama
             right = RoadRun(map, cur, -l) >= RoadRun(map, back, -l) + OpeningGain;
         }
 
+        /// <summary>Nov 12: the walk stopped where the road turns (it can't go on straight, a road runs on to a side).</summary>
+        public const string Corner = "corner";
+
+        /// <summary>Nov 12, measured only: plain corners turn by themselves (the step 29 behaviour). Off: Mugesh's rule stops at corners.</summary>
+        public static bool FollowBends;
+
+        /// <summary>Nov 12: a side road counts when it reaches this many tiles past the corridor's own width.</summary>
+        public const int SideReach = 3;
+
+        /// <summary>Nov 12: a side road is at most this many rows wide; wider is a plaza or a stretch where the road is wider.</summary>
+        public const int SideMaxRows = 4;
+
+        /// <summary>The corridor's width to side <paramref name="s"/> round <paramref name="p"/>: the fewest road tiles that way within 3 rows.</summary>
+        public static int CorridorEdge(IslandMap map, Vector2Int p, Vector2Int h, Vector2Int s)
+        {
+            int edge = int.MaxValue;
+            for (int j = -3; j <= 3; j++)
+            {
+                var t = p + h * j;
+                if (!PathWalk(map, t)) continue;
+                edge = Mathf.Min(edge, RoadRun(map, t, s, 16));
+            }
+            return edge == int.MaxValue ? 0 : edge;
+        }
+
         /// <summary>
-        /// Step 29: a swipe walk on corridors. Straight on along the road; at a bend (one way on, not ahead) it turns by
-        /// itself at the first tile that opens that way (so it keeps to its lane); at a real junction (two or more ways on)
-        /// it stops (<see cref="Junction"/>) and the next swipe picks; a dead end, a blocked tile or a stop from
-        /// <paramref name="stopAt"/> ends it. Off the road it walks straight. Only a tap or these stop it.
+        /// Nov 12 (Mugesh's stopping rule): a real side road leaves at <paramref name="cur"/> to side <paramref name="s"/>:
+        /// the road reaches at least <see cref="SideReach"/> tiles past the corridor's width there, over 2 to
+        /// <see cref="SideMaxRows"/> rows (a lane, not a plaza or a wider stretch), <paramref name="cur"/> is its first row
+        /// walking <paramref name="h"/>, and the road goes on straight past it (else it is a corner, stopped at its end).
+        /// Ragged edges, notches, stray tiles and stubs never count.
+        /// </summary>
+        public static bool SideRoad(IslandMap map, Vector2Int cur, Vector2Int h, Vector2Int s)
+        {
+            if (!PathWalk(map, cur)) return false;
+            int need = CorridorEdge(map, cur, h, s) + SideReach;
+            bool Wide(Vector2Int t) => PathWalk(map, t) && RoadRun(map, t, s, 16) >= need;
+            if (!Wide(cur) || Wide(cur - h)) return false;
+            int rows = 1;
+            var t = cur + h;
+            for (; rows <= SideMaxRows && Wide(t); t += h) rows++;
+            if (rows < 2 || rows > SideMaxRows) return false;
+            // The road goes on straight past the side road (two tiles at least).
+            return RoadRun(map, t - h, h) >= GoesOn + 1;
+        }
+
+        /// <summary>
+        /// Nov 12 (Mugesh: "it clearly looks like a bad layout for the road", three swipes to cross one field): the swipe walk
+        /// goes straight in the swipe's way and stops only where the road turns (straight on is off the road and the road
+        /// runs on to a side: <see cref="Corner"/>), where a real side road leaves (<see cref="SideRoad"/>:
+        /// <see cref="Junction"/>), at the road's end, one tile before a door or a stop from <paramref name="stopAt"/>, at a
+        /// blocked tile, and on a road it came onto from the grass (R52). It never turns by itself. Off the road it walks
+        /// straight. A swipe across a road (the road doesn't run that way from the start) may cross the other lane and go on.
         /// </summary>
         static string PlanCorridor(IslandMap map, Vector2Int from, Vector2Int direction, int maxTiles,
             Func<Vector2Int, Vector2Int, WalkStop> stopAt, List<Vector2Int> tiles)
         {
             var cur = from;
             var h = direction;
+            var l = Left(h);
+            // Along a road from the start (the road runs on this way): its end and its corners stop the walk at once.
+            bool along = PathWalk(map, from) && RoadRun(map, from, h) >= GoesOn;
+            bool bent = false;
             for (int i = 0; i < maxTiles; i++)
             {
+                if (bent && i > 0 && PathWalk(map, cur) && RoadRun(map, cur - h, h) > 2) bent = false; // a new straight: the next corner may bend too
                 if (i > 0 && PathWalk(map, cur))
                 {
-                    Openings(map, cur, h, out bool ahead, out bool a, out bool b);
-                    int ways = (ahead ? 1 : 0) + (a ? 1 : 0) + (b ? 1 : 0);
-                    if (ways >= 2) return Junction;
-                    if (!ahead && (a || b)) h = a ? Left(h) : -Left(h);
-                    // Not ahead and no opening: walk to the road's end (or the other lane's corner) and stop there.
+                    if (!RoadLike(map, cur + h, h))
+                    {
+                        if (along || i >= GoesOn)
+                        {
+                            int a = RoadRun(map, cur, l), b = RoadRun(map, cur, -l);
+                            // Measured option (off by default, Mugesh's rule stops at corners): a plain corner, one way on, turns by itself.
+                            if (FollowBends && !bent && (a >= SideReach) != (b >= SideReach) && Mathf.Min(a, b) <= 1)
+                            {
+                                h = a >= SideReach ? l : -l;
+                                l = Left(h);
+                                bent = true;
+                            }
+                            else return a >= SideReach || b >= SideReach ? Corner : RoadEnd;
+                        }
+                    }
+                    else if (SideRoad(map, cur, h, l) || SideRoad(map, cur, h, -l)) return Junction;
                 }
                 var next = cur + h;
                 if (!map.CanWalk(next)) return Blocked;
-                if (LeavesRoad(map, cur, next, i)) return RoadEnd;
+                if (i >= GoesOn && PathWalk(map, cur) && !RoadLike(map, next, h)) return RoadEnd;
                 var s = stopAt != null ? stopAt(cur, next) : WalkStop.None;
                 if (s == WalkStop.Before && i > 0) return Interactable;
-                char was = map.At(cur.y, cur.x);
+                bool wasRoad = RoadLike(map, cur, h);
                 tiles.Add(next);
                 cur = next;
                 if (s == WalkStop.On) return Interactable;
-                if (EntersRoad(map, was, cur)) return RoadEnter;
+                if (!wasRoad && PathWalk(map, cur)) return RoadEnter;
             }
             return Cap;
         }

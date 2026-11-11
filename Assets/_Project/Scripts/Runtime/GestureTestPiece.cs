@@ -69,6 +69,10 @@ namespace Diorama
         public bool swipeWalksUntilTap = true;
         [Tooltip("Most tiles one swipe walks when it walks until a tap.")]
         [Min(1)] public int untilTapTiles = 200;
+
+        [Tooltip("Nov 12: off = Mugesh's rule, the swipe walk stops at every corner. On = a plain corner (one way on) turns by itself " +
+                 "(fewer swipes: see Assets/Docs/Run-31.md).")]
+        public bool followBends;
         [Tooltip("A second swipe the same way within this many seconds keeps walking.")]
         public float doubleSwipeSeconds = 0.45f;
 
@@ -589,7 +593,9 @@ namespace Diorama
             // Step 29 (playtests: nobody could stop at corners and got lost): the open walk follows bends by itself and
             // stops at real junctions (per corridor, roads are two wide), one tile before doors, shrines, blooms and hand
             // moments, at the first tall grass edge ever, and at blocked tiles. A tap still stops it anywhere.
+            SmartStep.FollowBends = followBends;
             PlanEnd = SmartStep.Plan(Map, _tile, way, continuous || open, open ? untilTapTiles : continuous ? 60 : smartTiles, PlanStop, _plan, false, open);
+            SmartStep.FollowBends = false;
             KeepPlanInView();
             _planIndex = 0;
             _running = false;

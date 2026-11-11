@@ -21,6 +21,7 @@ namespace Diorama
         public const string ThroughRoad = "walked through a road instead of stopping on it";
         public const string OffRoad = "walked off a road after following it";
         public const string ThroughJunction = "walked through a junction";
+        public const string Turned = "turned by itself (Nov 12: the walk goes straight)";
         public const string PastStop = "walked past a stop (gate, door, shrine, bloom)";
         public const string EndsBlocked = "ends on a blocked tile";
         public const string Loops = "never ends (walks on after " + "10 plans)";
@@ -126,13 +127,18 @@ namespace Diorama
                     continue;
                 }
                 if ((t - prev).sqrMagnitude != 1) Fail(rep, start, way, OffMap, t);
-                if (!last && Road(map, t) && !Road(map, prev)) Fail(rep, start, way, ThroughRoad, t);
-                if (k >= SmartStep.GoesOn && Road(map, prev) && !Road(map, t)) Fail(rep, start, way, OffRoad, t);
-                if (k >= 1 && !last && Road(map, prev))
+                var dir = t - prev;
+                bool prevRoad = SmartStep.RoadLike(map, prev, dir);
+                if (!last && Road(map, t) && !prevRoad) Fail(rep, start, way, ThroughRoad, t);
+                if (k >= SmartStep.GoesOn && Road(map, prev) && !SmartStep.RoadLike(map, t, dir)) Fail(rep, start, way, OffRoad, t);
+                if (k >= 1 && Road(map, prev))
                 {
+                    // Nov 12: straight only, through no real side road.
                     var before = k > 1 ? tiles[k - 2] : from;
-                    SmartStep.Openings(map, prev, prev - before, out bool ahead, out bool l, out bool r);
-                    if ((ahead ? 1 : 0) + (l ? 1 : 0) + (r ? 1 : 0) >= 2) Fail(rep, start, way, ThroughJunction, prev);
+                    var h = prev - before;
+                    if (t - prev != h) Fail(rep, start, way, Turned, prev);
+                    var side = new Vector2Int(-h.y, h.x);
+                    if (SmartStep.SideRoad(map, prev, h, side) || SmartStep.SideRoad(map, prev, h, -side)) Fail(rep, start, way, ThroughJunction, prev);
                 }
                 if (stop == null) continue;
                 var s = stop(prev, t);
