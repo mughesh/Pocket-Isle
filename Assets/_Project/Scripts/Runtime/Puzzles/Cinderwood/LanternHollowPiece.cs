@@ -36,6 +36,15 @@ namespace Diorama
         [Tooltip("A fingertip this close to the top lights it (metres at the placed island size).")]
         public float touchRadius = 0.04f;
 
+        [Header("Nov 11: the burning fingertip")]
+        [Tooltip("Mugesh: light the lanterns with the fire finger. Touch the village flame (or a lit lantern) and the index tip catches fire; " +
+                 "poke each lantern with it. Look + pinch still lights one without fire. Off = a cold fingertip touch lights them.")]
+        public bool fingertipFire = true;
+        [Tooltip("A fingertip this close (m) to the village flame or a lit lantern's top catches fire.")]
+        public float fireTouchRadius = 0.035f;
+        [Tooltip("The flame goes out by itself after this long (s), or a second after the hand is lost.")]
+        public float fireSeconds = 20f;
+
         [Header("Guidance")]
         [Tooltip("Its lesson waits until this puzzle is solved (the village flame). Empty = no wait.")]
         public string waitFor = "cw.flame";
@@ -66,6 +75,11 @@ namespace Diorama
         [Range(0f, 1f)] public float volume = 0.7f;
 
         LanternChain _chain;
+        FingerFlame _flame;
+        FlameCupPiece _source;
+        int _fireHand = -1;
+        float _fireAt, _fireLostAt = -1f, _burnVolume;
+        LoopAnchor _burn;
         readonly HandState[] _hands = new HandState[2];
         readonly bool[] _touching = new bool[2];
         PropView[] _burning;
@@ -77,6 +91,8 @@ namespace Diorama
         float _wispAt;
 
         public LanternChain Chain => _chain;
+        /// <summary>Nov 11: the hand whose fingertip burns (-1 = none).</summary>
+        public int FireHand => _fireHand;
         public override bool Busy => false;
         public bool Burning => _burnRunning;
         protected override Vector2 HomeTile => lanterns.Length > 0 ? (Vector2)(lanterns[0] + lanterns[lanterns.Length - 1]) * 0.5f : Vector2.zero;
@@ -127,8 +143,88 @@ namespace Diorama
             if (island != null)
                 for (int i = 0; i < smoke.Length; i++) _burning[i] = new PropView($"Hollow Smoke {i}", island, smokeRecipe);
             _rings = new GuideRings("Lantern Guide", island, guideMaterial, lanterns.Length, fx);
+            _flame = new FingerFlame(fx);
             if (guideMaterial == null) Debug.LogError($"[LanternHollowPiece] {name}: no guide material, so no gold rings (Set Up MR_Main (10f Cinderwood hands)).", this);
             base.Start();
+        }
+
+        // ---- Nov 11: the fire finger ----
+
+        /// <summary>Where a cold fingertip catches fire: the village flame (once rekindled) and every lit lantern's top.</summary>
+        bool FireSource(Vector3 tip, float r, out Vector3 at)
+        {
+            at = default;
+            if (_source == null) _source = FindFirstObjectByType<FlameCupPiece>();
+            if (_source != null && _source.IsSolved && _source.Here && (tip - _source.FlameWorld).magnitude <= r * 1.6f)
+            {
+                at = _source.FlameWorld;
+                return true;
+            }
+            for (int i = 0; i < lanterns.Length; i++)
+                if (_chain.lit[i] && (tip - TopWorld(i)).magnitude <= r)
+                {
+                    at = TopWorld(i);
+                    return true;
+                }
+            return false;
+        }
+
+        void Fire()
+        {
+            float r = fireTouchRadius * Scale;
+            if (_fireHand >= 0)
+            {
+                var s = _hands[_fireHand];
+                bool lost = !s.tracked || !s.tipTracked || s.busy;
+                if (lost && _fireLostAt < 0f) _fireLostAt = Time.time;
+                if (!lost) _fireLostAt = -1f;
+                string why = Time.time - _fireAt > fireSeconds ? "timeout" : lost && Time.time - _fireLostAt > 1f ? "hand lost" : null;
+                if (why != null)
+                {
+                    Debug.Log($"[LanternHollowPiece] {id}: the fingertip flame goes out ({why}).");
+                    _flame.Hide();
+                    _fireHand = -1;
+                    return;
+                }
+                if (!lost)
+                {
+                    _flame.Show(s.indexTip, island.transform.up);
+                    TileTouch.Block(_fireHand == 0, 0.4f);
+                }
+                return;
+            }
+            for (int h = 0; h < 2; h++)
+            {
+                var s = _hands[h];
+                if (!s.tracked || !s.tipTracked || s.busy) continue;
+                if (!FireSource(s.indexTip, r, out var at)) continue;
+                MarkInteracted();
+                _fireHand = h;
+                _fireAt = Time.time;
+                _fireLostAt = -1f;
+                _flame.Catch(s.indexTip, island.transform.up);
+                FocusHighlight.Hover(at, FocusRadius);
+                Debug.Log($"[LanternHollowPiece] {id}: the {(h == 0 ? "left" : "right")} fingertip caught fire; poke the lanterns with it.");
+            }
+        }
+
+        /// <summary>A quiet steady burn over the lit lanterns (one loop, louder with more lit), once the clip exists.</summary>
+        void BurnSound()
+        {
+            int lit = _chain != null ? Count(_chain.Mask) : 0;
+            bool on = Here && lit > 0 && !_burnRunning && InView && AudioService.Has(AudioIds.LanternBurn);
+            if (!on)
+            {
+                _burn?.Off(0.4f);
+                return;
+            }
+            Vector3 sum = Vector3.zero;
+            for (int i = 0; i < lanterns.Length; i++)
+                if (_chain.lit[i]) sum += TopWorld(i);
+            _burn ??= new LoopAnchor(transform, "Lantern Burn");
+            _burn.Set(AudioIds.LanternBurn, sum / lit, 0.4f);
+            _burnVolume = Mathf.MoveTowards(_burnVolume, Mathf.Min(1f, 0.25f + 0.1f * lit), Time.deltaTime);
+            _burn.Handle.SetVolume(_burnVolume * volume);
         }
 
         protected override void OnDestroy()
@@ -136,6 +232,8 @@ namespace Diorama
             if (_burning != null)
                 foreach (var v in _burning) v?.Destroy();
             _rings?.Destroy();
+            _flame?.Hide();
+            _burn?.Off(0f);
             if (map != null)
                 foreach (var t in smoke)
                 {
@@ -170,10 +268,20 @@ namespace Diorama
             if (!IsSolved && Here && RealmState.Restored >= 0.99f) QuietSolve();
             if (Usable && !IsSolved && !_burnRunning)
             {
+                if (fingertipFire) Fire();
                 Touches();
                 LookPinch();
             }
-            else _gazed = -1;
+            else
+            {
+                _gazed = -1;
+                if (_fireHand >= 0)
+                {
+                    _flame.Hide();
+                    _fireHand = -1;
+                }
+            }
+            BurnSound();
             if (!IsSolved)
             {
                 int k = _chain.Tick(Time.deltaTime);
@@ -231,7 +339,10 @@ namespace Diorama
                 bool was = _touching[h];
                 _touching[h] = touched >= 0;
                 if (touched < 0 || was) continue;
+                // Nov 11: only a burning fingertip lights one (a cold touch does nothing; look + pinch is the other door).
+                if (fingertipFire && h != _fireHand) continue;
                 MarkInteracted();
+                if (fingertipFire && !_chain.lit[touched]) _flame.Flare(TopWorld(touched), island.transform.up);
                 bool litNow = _chain.Touch(touched);
                 Debug.Log($"[LanternHollowPiece] {id}: lantern {touched} touched ({(h == 0 ? "left" : "right")}){(_chain.Racing ? ", the fire races on" : "")}.");
                 if (litNow) Lit(touched, "touched");
@@ -414,6 +525,7 @@ namespace Diorama
         {
             if (!Here || IsSolved || i < 0 || i >= lanterns.Length) return;
             MarkInteracted();
+            if (fingertipFire && _fireHand < 0) DebugCatchFire(1);
             float since = _chain.Clock - _chain.LastTouchAt;
             bool litNow = _chain.Touch(i);
             Debug.Log($"[LanternHollowPiece] {id}: {since:0.00} s since the last touch; {i}{(_chain.Racing ? ", the fire races on" : "")} (clock {_chain.Clock:0.00}, frame {Time.frameCount}).");
@@ -428,8 +540,18 @@ namespace Diorama
             if (_chain.Nudge(i)) Lit(i, "debug look + pinch");
         }
 
+        /// <summary>Debug (bridge): the fingertip catches fire from the village flame (hand 0 / 1).</summary>
+        public void DebugCatchFire(int hand)
+        {
+            if (!Here || IsSolved || _fireHand >= 0) return;
+            _fireHand = Mathf.Clamp(hand, 0, 1);
+            _fireAt = Time.time;
+            _fireLostAt = -1f;
+            Debug.Log($"[LanternHollowPiece] {id}: debug: the {(hand == 0 ? "left" : "right")} fingertip caught fire.");
+        }
+
         public string Describe() =>
-            $"lanterns {Count(_chain != null ? _chain.Mask : 0)}/{lanterns.Length} (mask {(_chain != null ? _chain.Mask : 0)}), racing {(_chain != null && _chain.Racing)}, burning {_burnRunning}, " +
+            $"lanterns {Count(_chain != null ? _chain.Mask : 0)}/{lanterns.Length} (mask {(_chain != null ? _chain.Mask : 0)}), racing {(_chain != null && _chain.Racing)}, burning {_burnRunning}, fire hand {_fireHand}, " +
             $"smoke tiles open {(map != null && smoke.Length > 0 && map.IsPropOpen(smoke[0]))}";
     }
 }

@@ -88,7 +88,7 @@ namespace Diorama
         /// <summary>The flame catches on the finger: a soft "whoomp" and a puff of sparks.</summary>
         public void Catch(Vector3 tip, Vector3 up)
         {
-            GameAudio.At(AudioIds.FlameRekindle, tip).SetVolume(0.7f);
+            GameAudio.At(AudioService.Has(AudioIds.FingerCatch) ? AudioIds.FingerCatch : AudioIds.FlameRekindle, tip).SetVolume(0.7f);
             if (_fx != null) _fx.Burst(tip, 10, Spark, height * 1.2f, 0.5f, height * 0.08f, up * height * 2f);
         }
 
@@ -99,6 +99,13 @@ namespace Diorama
             GameAudio.At(AudioIds.EmberDrop, at);
             if (_fx != null) _fx.Burst(at, 18, Body, height * 2.5f, 0.7f, height * 0.12f, up * height * 3f);
             Hide();
+        }
+
+        /// <summary>Nov 11 (the hollow's lanterns): the finger lights a target and keeps burning: a hiss and a flare, no hide.</summary>
+        public void Flare(Vector3 at, Vector3 up)
+        {
+            GameAudio.At(AudioIds.SteamHiss, at).SetVolume(0.4f);
+            if (_fx != null) _fx.Burst(at, 14, Body, height * 2f, 0.6f, height * 0.1f, up * height * 2.5f);
         }
 
         public void Hide()

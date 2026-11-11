@@ -13,6 +13,7 @@ Shader "Diorama/Beacon"
         _Intensity ("Intensity", Range(0, 3)) = 1
         _Mode ("Mode (0 column, 1 ring, 2 pillar, 3 cracks, 4 portal, 5 arrow)", Float) = 0
         _Fill ("Ring Fill", Range(0, 1)) = 0
+        _Band ("Ring Band Width", Range(0.02, 0.5)) = 0.1
         [Enum(UnityEngine.Rendering.CompareFunction)] _ZTest ("Depth Test", Float) = 4
     }
 
@@ -40,6 +41,7 @@ Shader "Diorama/Beacon"
                 float _Intensity;
                 float _Mode;
                 float _Fill;
+                float _Band;
             CBUFFER_END
 
             struct Attributes
@@ -144,12 +146,15 @@ Shader "Diorama/Beacon"
                     // Ring: a thin band; the filled arc (clockwise from the front) is bright, the rest faint.
                     float2 p = i.uv * 2.0 - 1.0;
                     float r = length(p);
-                    float band = saturate(1.0 - abs(r - 0.82) / 0.1);
+                    // Nov 11: the band's width is a property (the hold rings were too thin to read from the seat); the
+                    // filled arc's leading edge glows hot.
+                    float band = saturate(1.0 - abs(r - 0.82) / _Band);
                     band *= band;
                     float angle = frac(atan2(p.x, -p.y) / 6.28318 + 1.0);
                     float lit = angle <= _Fill ? 1.0 : 0.25 + 0.1 * sin(t * 3.0);
-                    a = band * lit;
-                    col = lerp(_Color.rgb, _Core.rgb, lit * 0.6);
+                    float edge = _Fill > 0.001 && _Fill < 0.999 ? saturate(1.0 - abs(angle - _Fill) / 0.05) : 0.0;
+                    a = band * (lit + 0.6 * edge);
+                    col = lerp(_Color.rgb, _Core.rgb, saturate(lit * 0.6 + edge));
                 }
                 a *= _Intensity;
                 return half4(col * a, a);

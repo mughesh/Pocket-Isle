@@ -238,6 +238,7 @@ namespace Diorama
             MarkSolved(1);
             HearthShrines.SetDormant(map.name, shrine, false);
             _cup?.Off(0.3f);
+            GameAudio.At(HearthShrines.HoldDoneCue, FlameWorld).SetVolume(0.8f); // Nov 11: the ring filled
             GameAudio.Play(AudioIds.FlameRekindle, ShrineWorld, _audio, PuzzleSounds.Whoosh, volume);
             Flare();
             if (explorer != null) explorer.Cheer();
@@ -377,8 +378,9 @@ namespace Diorama
                     return;
                 }
                 _cup.Set(AudioIds.FlameCup, ShrineWorld, 0.3f);
-                _cup.Handle.SetVolume(0.35f + 0.65f * _meter.Progress);
-                _cup.Handle.SetPitch(0.95f + 0.15f * _meter.Progress);
+                // Nov 11 (Mugesh: the hold's sound should be more prominent): louder, rising more.
+                _cup.Handle.SetVolume(0.55f + 0.45f * _meter.Progress);
+                _cup.Handle.SetPitch(0.92f + 0.3f * _meter.Progress);
                 return;
             }
             float want = held ? volume * 0.3f * (0.4f + 0.6f * _meter.Progress) * GameAudio.SfxVolume : 0f;

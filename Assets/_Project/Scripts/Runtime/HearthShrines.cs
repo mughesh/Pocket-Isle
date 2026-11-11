@@ -217,6 +217,17 @@ namespace Diorama
 
         static readonly int IntensityId = Shader.PropertyToID("_Intensity");
         static readonly int FillId = Shader.PropertyToID("_Fill");
+        static readonly int BandId = Shader.PropertyToID("_Band");
+
+        [Header("Nov 11: the hold ring")]
+        [Tooltip("Mugesh: the hand-hold rings were too thin. The ring's band width (shader units; was 0.1) and its size in tiles while it fills.")]
+        public float ringBand = 0.24f;
+        public float ringTiles = 1.6f;
+        [Tooltip("Ring brightness while it fills (1 = the old resting glow).")]
+        public float ringIntensity = 2.2f;
+
+        /// <summary>Nov 11: the chime when a hold ring fills (hold.done once generated, else the spark chime).</summary>
+        public static string HoldDoneCue => AudioService.Has(AudioIds.HoldDone) ? AudioIds.HoldDone : AudioIds.SparkChime;
         static readonly int ModeId = Shader.PropertyToID("_Mode");
 
         readonly List<Vector2Int> _shrines = new List<Vector2Int>();
@@ -393,10 +404,12 @@ namespace Diorama
                     {
                         b.ring.localPosition = local + Vector3.up * (island.map.tileSize * 0.25f);
                         b.ring.localRotation = Quaternion.Euler(90f, 0f, 0f);
-                        b.ring.localScale = Vector3.one * island.map.tileSize * 1.1f;
+                        b.ring.localScale = Vector3.one * island.map.tileSize * ringTiles;
                         _block.Clear();
                         _block.SetFloat(ModeId, 1f);
                         _block.SetFloat(FillId, fill);
+                        _block.SetFloat(BandId, ringBand);
+                        _block.SetFloat(IntensityId, ringIntensity);
                         _block.SetFloat(IntensityId, 1.4f);
                         b.ringRenderer.SetPropertyBlock(_block);
                     }
@@ -414,6 +427,7 @@ namespace Diorama
             if (warming && !_fill.IsValid)
             {
                 _fill = AudioService.PlayLoop(AudioIds.ShrineFill, island.transform.TransformPoint(local), 0.15f);
+                _fill.SetVolume(1f); // Nov 11: more prominent
                 _fillShrine = i;
             }
             if (_fillShrine == i)
@@ -428,6 +442,7 @@ namespace Diorama
             if (b.hold >= holdSeconds)
             {
                 b.hold = 0f;
+                GameAudio.At(HoldDoneCue, island.transform.TransformPoint(local)).SetVolume(0.8f);
                 // Next to it: in at once. Farther away: the explorer walks there, then goes in (as with look + pinch).
                 Pick(i, "palm over the flame");
             }
@@ -461,13 +476,17 @@ namespace Diorama
             _block.SetFloat(IntensityId, (_gazed == i ? 1.6f : 1f) * (1.1f + 0.9f * b.near));
             b.columnRenderer.SetPropertyBlock(_block);
 
-            float ring = island.map.tileSize * 1.1f;
+            // Nov 11: while a palm fills it the ring is bigger, wider and brighter (it was too thin to read from the seat).
+            float filling = Mathf.Clamp01(b.hold / Mathf.Max(0.01f, holdSeconds) * 4f);
+            float ring = island.map.tileSize * Mathf.Lerp(1.1f, ringTiles, filling);
             b.ring.localPosition = local + Vector3.up * (island.map.tileSize * 0.25f);
             b.ring.localRotation = Quaternion.Euler(90f, 0f, 0f);
             b.ring.localScale = Vector3.one * ring * (0.6f + 0.4f * ringOn);
             _block.Clear();
             _block.SetFloat(ModeId, 1f);
             _block.SetFloat(FillId, _pending == i ? 1f : Mathf.Clamp01(b.hold / holdSeconds));
+            _block.SetFloat(BandId, Mathf.Lerp(0.1f, ringBand, filling));
+            _block.SetFloat(IntensityId, Mathf.Lerp(1f, ringIntensity, filling));
             _block.SetFloat(IntensityId, ringOn * 1.4f);
             b.ringRenderer.SetPropertyBlock(_block);
         }
