@@ -802,7 +802,7 @@ namespace Diorama
             Vector3 goal = island.transform.TransformPoint(new Vector3(b.center.x, island.CapTopLocal + parkedSpot.x, b.min.z + parkedSpot.y));
             _root.position = Vector3.Lerp(_root.position, goal, 1f - Mathf.Exp(-Time.unscaledDeltaTime * 8f));
             var cam = Camera.main;
-            if (cam != null) _root.rotation = Quaternion.LookRotation(_root.position - cam.transform.position, Vector3.up);
+            if (cam != null) _root.rotation = Quaternion.LookRotation(_root.position - cam.transform.position, BattleHud.LabelUp(cam));
         }
 
         void Update()
@@ -995,7 +995,9 @@ namespace Diorama
             _root.localScale = Vector3.one * Mathf.SmoothStep(0.6f, 1f, _appear);
             if (cam == null) return;
             Vector3 away = _root.position - cam.transform.position;
-            if (away.sqrMagnitude > 1e-6f) _root.rotation = Quaternion.LookRotation(away, Vector3.up);
+            // Nov 11 panel (R43 for bubbles too): the head's up with the roll taken out, so a bubble off to the side stays
+            // level when looking down (plain world up slanted it, as it had the battle labels).
+            if (away.sqrMagnitude > 1e-6f) _root.rotation = Quaternion.LookRotation(away, BattleHud.LabelUp(cam));
         }
 
         /// <summary>
