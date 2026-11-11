@@ -753,15 +753,25 @@ namespace Diorama
             PickPracticeTile();
         }
 
-        /// <summary>A thumb tap stopped the walk: on or next to the gold tile counts.</summary>
+        [Tooltip("Nov 11 (Mugesh: stopping only on the gold tile was too hard): a stop on the gold tile's line (\"Perfect!\"); any other tap stop gets the nice line.")]
+        public string practicePerfectLine = "lesson.practice.perfect";
+
+        /// <summary>
+        /// A thumb tap stopped the walk. Nov 11 (Mugesh: only the gold tile counted and it was hard, the look + pinch lesson
+        /// takes any success): every tap that stops the walk counts; on or next to the gold tile it's "Perfect!" with the
+        /// burst, elsewhere "Nice stop!" with a small burst at the explorer. The gold tile stays as the thing to aim for.
+        /// </summary>
         void PracticeStop()
         {
-            if (!_goldTile.HasValue || !StopPractice.Landed(explorer.Tile, _goldTile.Value)) return;
+            bool gold = _goldTile.HasValue && StopPractice.Landed(explorer.Tile, _goldTile.Value);
             _practiced++;
             int goal = StopPractice.Goal(QuickJourney.Active);
-            Debug.Log($"[Onboarding] Practice: stop {_practiced}/{goal} on c{explorer.Tile.x} r{explorer.Tile.y}.");
+            Debug.Log($"[Onboarding] Practice: stop {_practiced}/{goal} on c{explorer.Tile.x} r{explorer.Tile.y}{(gold ? " (the gold tile)" : " (off the gold tile: counts too)")}.");
             if (fx != null)
-                fx.Burst(island.transform.TransformPoint(island.TileToLocal(_goldTile.Value, island.Content.capHeight)), 18, sparkleColor, 0.06f, 0.5f, 0.004f, Vector3.up * 0.03f);
+            {
+                var at = island.transform.TransformPoint(island.TileToLocal(gold ? _goldTile.Value : explorer.Tile, island.Content.capHeight));
+                fx.Burst(at, gold ? 18 : 8, sparkleColor, gold ? 0.06f : 0.035f, 0.5f, 0.004f, Vector3.up * 0.03f);
+            }
             GameAudio.Ui(Diorama.Audio.AudioIds.UiLesson);
             Dialogue.SetProgress(_practiced, goal);
             if (_practiced >= goal)
@@ -770,7 +780,7 @@ namespace Diorama
                 _runner.Mark("practiceDone");
                 return;
             }
-            Dialogue.Repeat(practiceNiceLine);
+            Dialogue.Repeat(gold && !string.IsNullOrEmpty(practicePerfectLine) ? practicePerfectLine : practiceNiceLine);
             PickPracticeTile();
         }
 

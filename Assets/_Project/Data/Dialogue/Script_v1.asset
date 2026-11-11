@@ -313,6 +313,20 @@ MonoBehaviour:
       speakerName: Spirit
       text: Nice stop!
       context:
+  - id: lesson.practice.perfect
+    once: 0
+    objective: 1
+    priority: 1
+    note: 'Nov 11: a stop on the gold tile (any tap stop counts; off the tile it is the nice line)'
+    target:
+    validWhile: canWalk
+    context: outside & !battle
+    kind: 1
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Perfect!
+      context:
   - id: lesson.practice.done
     once: 0
     objective: 0
@@ -1506,7 +1520,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Smoke! Poke the lanterns to light them.
+      text: Smoke! Touch the village flame, then poke the lanterns.
       context: 
   - id: cw.lanterns.done
     once: 1

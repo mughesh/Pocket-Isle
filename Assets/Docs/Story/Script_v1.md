@@ -59,6 +59,8 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
   - Spirit: Swipe to walk. Tap your thumb to stop on the gold!
 - `lesson.practice.nice` · in outside & !battle · objective · while canWalk (step 27: a good stop)
   - Spirit: Nice stop!
+- `lesson.practice.perfect` · in outside & !battle · objective · while canWalk (Nov 11: a stop on the gold tile; any tap stop counts, off the tile it is the nice line)
+  - Spirit: Perfect!
 - `lesson.practice.done` · in outside & !battle · story · while canWalk (step 27: the last stop)
   - Spirit: Perfect!
 - `lesson.walk.help` · in outside & !battle · objective · while canWalk · → ghost
@@ -220,7 +222,7 @@ Step 10f, Cinderwood's new hand moments (lesson lines stay pinned as a chip unti
 - `cw.flame.done` · in cinderwood · story · once (the flame rekindled: the warmth rolls over the plaza)
   - Spirit: It's burning! Look, the whole village is waking up.
 - `cw.lanterns` · in cinderwood · objective · → puzzle:cw.hollow (lesson at the smoky hollow, once the village flame is rekindled; chip "Lanterns n/6"; step 14c: short, the arrival taught it)
-  - Spirit: Smoke! Poke the lanterns to light them.
+  - Spirit: Smoke! Touch the village flame, then poke the lanterns.
 - `cw.lanterns.done` · in cinderwood · story · once (every lantern lit: the smoke burns off the path)
   - Spirit: The smoke's burning away! The path is clear.
 - `cw.ember` · in cinderwood · objective · → puzzle:cw.ember (lesson at the forge's ember vent, before the bellows; chip "Pick it up!")
