@@ -153,7 +153,7 @@ MonoBehaviour:
     again: lesson.walk.again
     chip: Swipe to walk
     help: lesson.walk.help
-    helpAfter: 30
+    helpAfter: 12
     startWhen: canWalk
     delay: 1.5
     doneWhen: swipeWalked
