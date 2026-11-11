@@ -902,7 +902,7 @@ namespace Diorama
             StartCoroutine(pods.FlyHome(slot, 0.5f));
             yield return stage.PodBurst();
             stage.ShowPlayerBar(c);
-            runes.Show(c.species.moves);
+            runes.Show(c.species.moves, c.Element);
         }
 
         /// <summary>

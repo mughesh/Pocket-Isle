@@ -101,7 +101,37 @@ namespace Diorama
             public float pulse;     // dialogue highlight
             public float press;     // step 14f: sinks after a pick
             public float shake;     // step 29: a press off-turn
+            public bool beat;       // Nov 11: the Isling's own element move: glows and breathes on the player's turn until a pick
         }
+
+        [Header("Nov 11: which move to press")]
+        [Tooltip("Mugesh: nothing showed which button to poke. The Isling's own element move glows and breathes in scale (1 to this) on the player's turn until a move is chosen.")]
+        public float beatScale = 1.08f;
+        [Tooltip("One breath, in seconds.")]
+        public float beatSeconds = 1.2f;
+
+        /// <summary>Nov 11: the breathing move's scale and glow (0..1) at time <paramref name="t"/> (pure).</summary>
+        public static float BeatWave(float t, float seconds) => 0.5f - 0.5f * Mathf.Cos(t / Mathf.Max(0.01f, seconds) * 2f * Mathf.PI);
+
+        /// <summary>
+        /// Nov 11: the move to press first: the Isling's own element attack, else its first attack (never Run or a support move).
+        /// </summary>
+        public static int BeatIndex(MoveData[] moves, Element element)
+        {
+            if (moves == null) return -1;
+            int first = -1;
+            for (int i = 0; i < Mathf.Min(3, moves.Length); i++)
+            {
+                var m = moves[i];
+                if (m == null || m.kind == MoveKind.Support) continue;
+                if (m.element == element) return i;
+                if (first < 0) first = i;
+            }
+            return first;
+        }
+
+        /// <summary>The move that breathes on the player's turn (-1 = none), tests and the bridge.</summary>
+        public int BeatMove { get; private set; } = -1;
 
         [Header("Step 29: whose turn")]
         [Tooltip("Off-turn the moves sink this far (row-local m, down) and this far back, grey, with no hover.")]
@@ -534,15 +564,17 @@ namespace Diorama
         /// The creature is out: its three moves pop in one after another (Run stays). Not pickable until
         /// <see cref="SetInteractable"/>.
         /// </summary>
-        public void Show(MoveData[] moves)
+        public void Show(MoveData[] moves, Element element = Element.Neutral)
         {
             bool wasHidden = !gameObject.activeSelf;
             Open();
+            BeatMove = BeatIndex(moves, element);
             for (int i = 0; i < 3; i++)
             {
                 var m = moves != null && i < moves.Length ? moves[i] : null;
                 var r = _runes[i];
                 r.usable = m != null;
+                r.beat = i == BeatMove;
                 r.tint = m != null ? ElementStyle.Of(m.element).main : Color.gray;
                 string kind = m == null ? "" : m.kind == MoveKind.Support ? "Support" : m.element.ToString();
                 r.label.text = m != null ? $"<b>{m.Name}</b>\n<size=70%>{kind}</size>" : "-";
@@ -637,8 +669,9 @@ namespace Diorama
                 r.appear = Mathf.MoveTowards(r.appear, popping ? 1f : 0f, Time.deltaTime / (popping ? 0.25f : 0.15f));
                 float a = r.shown ? EaseOutBack(r.appear) : r.appear;
                 r.visual.gameObject.SetActive(r.appear > 0.001f);
-                // Scale the visual only: the poke surface keeps its size.
-                r.visual.localScale = Vector3.one * (Mathf.Max(0.001f, a) * (1f + 0.12f * r.hover + 0.08f * r.pulse));
+                // Scale the visual only: the poke surface keeps its size. Nov 11: the Isling's element move breathes on its turn.
+                float beat = r.beat && _interactable && r.usable ? BeatWave(Time.time, beatSeconds) : 0f;
+                r.visual.localScale = Vector3.one * (Mathf.Max(0.001f, a) * (1f + 0.12f * r.hover + 0.08f * r.pulse + (beatScale - 1f) * beat));
                 r.press = Mathf.MoveTowards(r.press, 0f, Time.deltaTime / 0.3f);
                 r.shake = Mathf.MoveTowards(r.shake, 0f, Time.deltaTime / 0.3f);
                 float wobble = r.shake > 0f ? Mathf.Sin(Time.time * 70f) * 0.004f * r.shake : 0f;
@@ -889,9 +922,10 @@ namespace Diorama
                     var face = tint;
                     face.a = i == RunIndex ? 0f : 0.8f;
                     r.tablet.face = face;
-                    // Step 29: one soft gold rim pulse as the moves rise for the player's turn.
-                    r.tablet.Paint(r.hover, on ? 0f : 0.65f, 0f, Mathf.Max(0.7f * r.pulse, r.usable ? 0.8f * Mathf.Sin(_risePulse * Mathf.PI) : 0f));
-                    var lc = Color.Lerp(TabletKit.LabelColor, TabletKit.LabelLit, Mathf.Max(r.hover, r.pulse));
+                    // Step 29: one soft gold rim pulse as the moves rise for the player's turn. Nov 11: the element move keeps glowing with its breath.
+                    float beat = r.beat && on ? BeatWave(Time.time, beatSeconds) : 0f;
+                    r.tablet.Paint(r.hover, on ? 0f : 0.65f, 0f, Mathf.Max(0.7f * r.pulse, r.usable ? 0.8f * Mathf.Sin(_risePulse * Mathf.PI) : 0f, 0.25f + 0.55f * beat));
+                    var lc = Color.Lerp(TabletKit.LabelColor, TabletKit.LabelLit, Mathf.Max(r.hover, r.pulse, 0.5f * beat));
                     lc.a = on ? 1f : 0.55f;
                     r.label.color = lc;
                     continue;
