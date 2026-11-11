@@ -389,6 +389,22 @@ namespace Diorama
             if (placer != null) placer.Placed -= PositionLabel;
         }
 
+        void OnEnable() => DialogueBubble.KeepClear += KeepClearOfMe;
+
+        void OnDisable() => DialogueBubble.KeepClear -= KeepClearOfMe;
+
+        /// <summary>
+        /// Nov 11 (Mugesh: a chip sat right over the explorer in Lilymere; R53): bubbles and chips keep clear of the explorer
+        /// as the player sees it, the way they keep clear of the battle row and the starter pods.
+        /// </summary>
+        void KeepClearOfMe(List<Vector4> keep)
+        {
+            if (_cube == null || !_cube.gameObject.activeInHierarchy || island == null || island.map == null) return;
+            float tile = island.map.tileSize * island.Zoom * island.transform.lossyScale.x;
+            Vector3 p = _cube.position + island.transform.up * (tile * 0.7f);
+            keep.Add(new Vector4(p.x, p.y, p.z, tile * 1.1f));
+        }
+
         bool Zoomed => window != null && window.IsZoomed;
 
 
@@ -559,6 +575,7 @@ namespace Diorama
                 _continuous = true; // a plan that runs out is planned again (TryStep)
                 PlanFrom = _tile;
                 PlanEnd = SmartStep.PlanRoam(Map, _tile, way, GateTile, roamTiles, _plan);
+                KeepPlanInView();
                 _planIndex = 0;
                 _running = false;
                 PlanChanged?.Invoke();
@@ -573,6 +590,7 @@ namespace Diorama
             // stops at real junctions (per corridor, roads are two wide), one tile before doors, shrines, blooms and hand
             // moments, at the first tall grass edge ever, and at blocked tiles. A tap still stops it anywhere.
             PlanEnd = SmartStep.Plan(Map, _tile, way, continuous || open, open ? untilTapTiles : continuous ? 60 : smartTiles, PlanStop, _plan, false, open);
+            KeepPlanInView();
             _planIndex = 0;
             _running = false;
             PlanChanged?.Invoke();
@@ -580,6 +598,27 @@ namespace Diorama
         }
 
         bool _roaming;
+
+        /// <summary>Nov 11 (R51): the island shows this tile now (a held view never lets the walk leave the island).</summary>
+        bool InView(Vector2Int t) => window == null || window.Shows(t);
+
+        /// <summary>A tile the explorer may step onto now: walkable and shown by the island.</summary>
+        bool CanStepTo(Vector2Int t) => Map.CanWalk(t) && InView(t);
+
+        /// <summary>
+        /// Cuts the plan at the window's edge; the plan then ends there (<see cref="SmartStep.View"/>). Only while the view
+        /// is held on a focus point: a view that follows the explorer scrolls with the walk, so cutting there stopped every
+        /// long walk at the edge of where it began (the Nov 11 smoke run: the lesson walk "stopped"). Each step is still
+        /// guarded by <see cref="CanStepTo"/> either way.
+        /// </summary>
+        void KeepPlanInView()
+        {
+            if (window == null || !window.HasFocus) return;
+            int cut = WalkRules.Truncate(_plan, InView);
+            if (cut == 0) return;
+            PlanEnd = SmartStep.View;
+            Debug.Log($"[GestureTestPiece] The plan stops at the island's edge: {cut} tile(s) outside the view cut (R51).");
+        }
 
         /// <summary>Step 28: a lesson walk keeps off the gates' tiles.</summary>
         bool GateTile(Vector2Int t)
@@ -707,9 +746,9 @@ namespace Diorama
                     return;
                 }
                 var step = _plan[_planIndex];
-                if (!Map.CanWalk(step) || (step - _tile).sqrMagnitude != 1)
+                if (!CanStepTo(step) || (step - _tile).sqrMagnitude != 1)
                 {
-                    _last += " - plan blocked";
+                    _last += Map.CanWalk(step) && !InView(step) ? " - island's edge (R51)" : " - plan blocked";
                     Stop();
                     RefreshLabel();
                     return;
@@ -733,9 +772,9 @@ namespace Diorama
                     return;
                 }
                 var step = _path[_pathIndex++];
-                if (!Map.CanWalk(step) || (step - _tile).sqrMagnitude != 1)
+                if (!CanStepTo(step) || (step - _tile).sqrMagnitude != 1)
                 {
-                    _last += " - path blocked";
+                    _last += Map.CanWalk(step) && !InView(step) ? " - island's edge (R51)" : " - path blocked";
                     CancelPath();
                     RefreshLabel();
                     return;
@@ -749,10 +788,10 @@ namespace Diorama
             }
             var next = _tile + _heading;
             char ch = Map.At(next.y, next.x);
-            if (!Map.CanWalk(next))
+            if (!CanStepTo(next))
             {
                 Stop();
-                _last += ch == IslandMap.Empty ? " - edge" : IslandMap.IsWalkable(ch) ? " - blocked (prop)" : $" - blocked ({ch})";
+                _last += ch == IslandMap.Empty ? " - edge" : !IslandMap.IsWalkable(ch) ? $" - blocked ({ch})" : !InView(next) ? " - island's edge (R51)" : " - blocked (prop)";
                 RefreshLabel();
                 if (ch != IslandMap.Empty && IslandMap.IsWalkable(ch))
                 {

@@ -103,6 +103,19 @@ namespace Diorama
         /// <summary>Where the view centre ends up when focused on <paramref name="tile"/> (clamped to the map).</summary>
         public Vector2 FocusCenter(Vector2 tile) => ClampToMap(tile + CenterBias());
 
+        /// <summary>
+        /// Nov 11 (R51): the island shows this map tile right now (inside the window and on a footprint tile, not a round
+        /// corner). The walk never steps anywhere else, so a held view (a hand moment, the lotus garden) can't let the
+        /// explorer leave the island.
+        /// </summary>
+        public bool Shows(Vector2Int tile)
+        {
+            if (island == null || island.map == null) return true;
+            Vector2 center = _hasCenter ? _center : island.CenteredView;
+            return WalkRules.InWindow(center, island.map.Columns, island.map.Rows, _zoom * _mapZoom, tile) &&
+                   island.FootprintContains(island.TileToLocal(tile));
+        }
+
         /// <summary>Scales the map content around <paramref name="tile"/> by <paramref name="factor"/>, eased over <paramref name="seconds"/>.</summary>
         public void ZoomTo(Vector2Int tile, float factor, float seconds) => ZoomTo((Vector2)tile, factor, seconds);
 
