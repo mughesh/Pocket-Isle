@@ -55,6 +55,9 @@ catches a break: a test, a smoke-run rule (`Note "rule"` in the smoke report, wa
 | R48 | The Quick Journey's end card is never interrupted by an objective: no pod glows and no `evolve.ready` from the shard's lock-in until Keep exploring. | Nov 11 panel (shots 13-15: "Kilnpot is glowing" over the end card) | `PanelTests.QuickEnding_HoldsTheGrowthDirector`; smoke `Quick Journey` "end card owns the stage" |
 | R49 | A Keeper is never "Wild" in a caption; it calms ("Galeowl is calm!"), it doesn't faint. | Nov 11 panel (shot 10) | `PanelTests.Keeper_IsNeverWild_InCaptions` |
 | R50 | One text per event at the catch: the Spirit's line waits until the "New Isling!" toast has gone. | Nov 11 panel (shot 05: four texts at once) | `PanelTests.Catch_TheSpiritWaitsForTheToast` |
+| R51 | The explorer never leaves the island: a step is only ever onto a tile the window shows now (`WorldWindow.Shows`); a held view (hand moment, lotus garden, the mill's bridge) cuts the plan at the view's edge. | Nov 11 headset (Lilymere: walked off the island twice under a focus lock) | `Nov11WalkTests.InWindow_*`, `Explorer_GuardsEveryStep_WithTheWindow` |
+| R52 | Roads are sticky: a walk coming onto a road from off it stops on the road; a walk along a road stops at its end, never in the grass beyond; only the swipe's first two steps may leave a road (crossing the other lane). The walking simulation (`WalkSim`, every tile x 4 ways, every map) must stay clean. | Nov 11 headset (crossed a road straight into the grass) | `Nov11WalkTests.Walk_*`, `WalkSim_EveryRealm_IsClean` |
+| R53 | A bubble or chip never covers the explorer: the explorer is a `DialogueBubble.KeepClear` sphere, like the battle row and the starter pods. | Nov 11 headset (Lilymere: "Walk in, or look and pinch" over the explorer) | `Nov11FixTests.Explorer_KeepsBubblesOffItself` |
 
 ## How to use
 - A new note that repeats one of these: say which rule broke and why the check missed it, then fix the check too.
