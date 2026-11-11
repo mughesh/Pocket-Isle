@@ -1,5 +1,42 @@
 # Panel review: the judged path (Nov 11, 1 PM IST)
 
+## Phase 4–5: what was built (Nov 11, 5:30 PM IST, branch `panel-review`)
+
+Mugesh's "go" came at ~5 PM with the Tier 2 answers below. Everything is **headset test pending**; the checklist for it is
+`Assets/Docs/TEST-NOW-panel.md` (his filled-in `TEST-NOW.md` was left untouched: the evening fix list reads from it).
+
+**Built (one commit each):**
+
+| # | What landed | Verified by |
+|---|---|---|
+| T1-1 | `QuickJourneyDirector.EndingUp` from the shard's lock-in to Keep exploring; `GrowthDirector.Available` honours it: no pod glow, no `evolve.ready` over the whisper, `quick.end` or the end card. The smoke run's new beat "end card owns the stage" notes any R48 break. | `PanelTests.QuickEnding_*`; smoke: all seven end lines and the card with no pin (`20_end_card_after_no_evolve_pin.png`, was `13–15_*`) |
+| T1-2 | Walk lesson `helpAfter` 30 → 12 s ("Or look at a spot and pinch."). The far lesson has no help line, so it was left as is. | `PanelTests.WalkLesson_*` |
+| T1-3 | Captions through `BattleRunes.WildName / MoveLine / FaintLine`: "Galeowl's turn...", "Galeowl used Gale Shot!", "**Galeowl is calm!**"; wild ones unchanged. | `PanelTests.Keeper_IsNeverWild_InCaptions` |
+| T1-4 | `capture.success.first` is said after the pod flies home and the "New Isling!" toast has gone (`JournalToast.Showing`), not with "Caught!" / "Gotcha!". | `PanelTests.Catch_*`; `22_catch_after_one_voice.png` |
+| T1-5 | `DialogueBubble` faces the head with `BattleHud.LabelUp` (both the placed and the parked bubble): R43 for bubbles. | `PanelTests.Bubbles_*`; the bubble tests and the smoke run unchanged |
+| T1-6 | Finale Skip tablet anchored at the Journal tablet's rim spot, left of the pod band (`FinaleDirector.SkipSpot`); the rim's middle only if there are no pods. | `21_finale_skip_beside_pods_after.png` (was `16_*`) |
+| T1-7 | `TowerHallTheme` restored palette: floor tiles are `path` in the hall, so the whole floor is now cream (0.68/0.63/0.55) against slate walls and pillars; bases/tips/dirt/rock a touch warmer; light 0.84/0.9/1.0 blue → 1.0/0.94/0.84 warm, 0.85 → 0.9. Asset values only. | `19_tower_hall_after.png` (was `09_*`); `PanelTests.TowerHall_*` |
+| T1-8 | Regressions R48 (end card never interrupted), R49 (Keepers never wild), R50 (one voice at the catch); R46 amended for the quick slot. | this file, `Regressions.md` |
+| T2-1 (yes) | `TempleRules.Needed`: **2 in the quick slot**, 3 everywhere else (`QuickIslings`). Three older tests updated. | `PanelTests.Temple_*`, `Nov11Tests`, `Nov4Tests`, `Step14hTests` |
+| T2-2 (yes) | `QuickJourneyConfig.skipAfterOverrides` (move 25 s, two hands 20 s) through `QuickJourney.SkipAfter` and a `LessonRunner.SkipAfter` hook; the lessons' own 45 s stay for the full adventure; nothing is cut. | `PanelTests.QuickSlot_*`, `LessonRunner_UsesTheSkipAfterHook` |
+
+**Not built:** T2-3 (realm music dial: no), T2-4 (warm the hall on the calm: no), T2-6 (realm card: no). T2-5: Mugesh measured **72 fps stable** on his pass; no capture needed. Nothing from Tier 1 was reverted.
+
+**Runs after the last item:** EditMode 444 passed / 0 failed (11 new in `PanelTests`); smoke `New game, Lodge, Menus, Evolution, Save + continue, Quick Journey, Step29, BattleLayout, MenuOverBattle` with shots: **81 ok / 0 failed / 0 notes** (7.8 min); Readiness Report: 0 "no" rows, "To do: nothing" (the generated report files were not committed).
+
+**Triangles / draws (Editor, seat camera, `shots_index_after.md` vs `shots_index.md`):** tower hall at the door 119 → 120 draws, 137k → 138k tris; hall fight peak 143 → 145 draws, 151k → 153k tris; end card 123 draws / 124k tris; finale credits peak 143 draws / 192k tris (unchanged beat). No item adds geometry or a material; the ±2 is kite and particle timing.
+
+**Mugesh's headset note (5 PM): "colours look dull on the headset display."** Not acted on: a global colour change is outside Tier 1 and he suspects his monitor's contrast. If it holds after T1-7's hall, the honest fix is a small saturation/contrast lift in the toon shader's banding or the URP colour grading, tested on device first. Listed as a Tier 2 question below.
+
+**Tier 2 as yes/no (open):**
+- T2-8 **A saturation / contrast lift for the headset** (one URP post-process volume or a shader band tweak, Quest-tested)? Needs a device A/B; not before the fix list.
+- T2-3 realm music before restoration in the quick slot: still no?
+- T2-4 warm the hall on Galeowl's calm (restoration fade): still no after seeing T1-7?
+
+**Next on this branch, on Mugesh's word:** the design chat's `Assets/Docs/Prompts/fix-list-nov11.md` (his `[x]` lines + `Notes copy.md`), same rules.
+
+---
+
 ## 0. State found
 1. **master = `0cc5c7eb` = step-29b, pushed** (steps 22–29b: Nov 10 playtest fixes, Nov 11 headset notes, prop rebake). Tests 433/433, full smoke 91 ok / 0 failed, Release Check PASS. Branch `panel-review` made from it.
 2. **Nothing from steps 22–29b has been on the headset.** Mugesh has started the `TEST-NOW.md` pass on a QA build of `78a9b7d` (2 lines annotated so far: starter card works; the "surf pulsing" bed was never seen).

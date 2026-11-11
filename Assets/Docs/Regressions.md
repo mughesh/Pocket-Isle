@@ -50,8 +50,11 @@ catches a break: a test, a smoke-run rule (`Note "rule"` in the smoke report, wa
 | R43 | Labels that face the head use the head's up with the roll taken out (`BattleHud.LabelUp`): they never roll when the head tilts and stay level across the view. | Nov 11 headset | `Nov11Tests.LabelUp_IgnoresAHeadRoll`, `...NeverRollWithTheHead` |
 | R44 | Every HP display (bar, pod ring) changes when the hit lands on screen, never when the turn is worked out. | Nov 11 headset | headset; `BattleStage.ShownHp` |
 | R45 | Anything that heals says so before it's used (motes, a + now and then, a halo) and the walk stops beside it the first time, with the Spirit naming it. | Nov 11 headset | `Nov11Tests.Bloom_*` |
-| R46 | A Keeper door under 3 Islings always warns (every mode, the Quick Journey too) and never refuses. | Nov 11 headset (no warning seen) | `Nov11Tests.Temple_ThreeIslings_WarnsEverywhere_NeverAWall` |
+| R46 | A Keeper door under 3 Islings always warns and never refuses; the Quick Journey slot warns under 2 (its party is two, its Keeper tuned for two). | Nov 11 headset (no warning seen); Nov 11 panel (every judge was sent for a third) | `Nov11Tests.Temple_ThreeIslings_WarnsEverywhere_NeverAWall`, `PanelTests.Temple_TwoInTheQuickSlot_ThreeEverywhereElse` |
 | R47 | No baked prop with features thinner than ~2 voxels or bumps on a round column: check the prop audit sheets (`PropAudit.All`) after new recipes. | Nov 11 headset (tower pillars jagged); 2nd time after the Nov 6 rug | `PropAudit` sheets, by eye |
+| R48 | The Quick Journey's end card is never interrupted by an objective: no pod glows and no `evolve.ready` from the shard's lock-in until Keep exploring. | Nov 11 panel (shots 13-15: "Kilnpot is glowing" over the end card) | `PanelTests.QuickEnding_HoldsTheGrowthDirector`; smoke `Quick Journey` "end card owns the stage" |
+| R49 | A Keeper is never "Wild" in a caption; it calms ("Galeowl is calm!"), it doesn't faint. | Nov 11 panel (shot 10) | `PanelTests.Keeper_IsNeverWild_InCaptions` |
+| R50 | One text per event at the catch: the Spirit's line waits until the "New Isling!" toast has gone. | Nov 11 panel (shot 05: four texts at once) | `PanelTests.Catch_TheSpiritWaitsForTheToast` |
 
 ## How to use
 - A new note that repeats one of these: say which rule broke and why the check missed it, then fix the check too.
