@@ -69,8 +69,20 @@ Design chat measurements (RMS, whole clip / energy above 2.5 kHz / below 300 Hz)
 
 ## E. Step 15b as written
 12. Do `Assets/Docs/Prompts/step-15b-sfx-paid-regen.md` (confirm a paid tier via the API, regenerate the kept free
-    clips with their original prompts, replace the `_FREE` twins, Release Check passes, `AudioCredits.md`). **Budget:
-    check the balance first; 15b first, then F; stop and report if F would go past the plan's credits.**
+    clips with their original prompts, replace the `_FREE` twins, Release Check passes, `AudioCredits.md`).
+    **Licence rule (ElevenLabs help center):** paid-plan content may be used commercially forever, *except* content made
+    with a **Beta** service. Use only a sound-effects model that isn't marked beta/alpha; log the model id per clip in
+    the sidecars, and note the plan, month and model in `AudioCredits.md`. **Budget (Nov 9):
+    the plan is Starter. The pricing page now lists sound effects per generation (Starter 150/month), but the free plan
+    made all our clips on ~10k credits through the API, so the real API cost is unknown: measure it.** Read the quota
+    and balance from the API before the first call and after the first few; log every call and its cost. Needs: 15b =
+    **148 unique takes** (`Regen-List.md`; sliced batches count once) minus the takes F replaces anyway (step.*,
+    amb.stillisle, amb.lodge, amb.galewick.restored, scene.rise/sink); F ≈ 60–90; step 24 E ≈ 25.
+    **Priority order, so the must-have finishes first:** (1) 15b regen (licence: without it the free clips can't ship),
+    (2) F13–14 footsteps + ambience beds, (3) F15 one-shots, (4) step 24 E voices, (5) F16 acoustic jingles.
+    **Keep ~10% of the quota in reserve; when you reach it, stop, finish importing what you have, and report exactly
+    what's left undone** (Mugesh can upgrade to Creator and run the rest). Ignore the "~20 credits per second / 20k"
+    budget in the 15b prompt: it's outdated.
 
 ## F. New natural sounds for the flagged ones (generate 3–4 takes each, pick with the contact sheets / AudioScope)
 13. Footsteps, for a **tiny figure on a tabletop** (short, soft, close but small; 0.1–0.2 s each, slice from batches):
