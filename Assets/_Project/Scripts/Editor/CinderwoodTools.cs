@@ -44,14 +44,15 @@ namespace Diorama.EditorTools
         // Step 10f: the smoky hollow on the trail from the village to the springs. The eight path tiles under the smoke (in
         // order along the trail) and the six stone lanterns lining it (in order: the chain runs this way). Everything else
         // walkable beside it turns to rock, so the smoke is the only way through.
+        // Nov 11 (Mugesh: the hollow zig-zagged for no reason): a straight 2-wide band, x 29-30, y 33-36 (map rows 26-23).
         public static readonly Vector2Int[] HollowXY =
         {
-            new Vector2Int(28, 33), new Vector2Int(29, 33), new Vector2Int(29, 34), new Vector2Int(30, 34),
-            new Vector2Int(29, 35), new Vector2Int(30, 35), new Vector2Int(30, 36), new Vector2Int(31, 36),
+            new Vector2Int(29, 33), new Vector2Int(30, 33), new Vector2Int(29, 34), new Vector2Int(30, 34),
+            new Vector2Int(29, 35), new Vector2Int(30, 35), new Vector2Int(29, 36), new Vector2Int(30, 36),
         };
         public static readonly Vector2Int[] HollowLanternXY =
         {
-            new Vector2Int(30, 33), new Vector2Int(28, 34), new Vector2Int(31, 34), new Vector2Int(28, 35), new Vector2Int(31, 35), new Vector2Int(29, 36),
+            new Vector2Int(31, 33), new Vector2Int(28, 34), new Vector2Int(31, 34), new Vector2Int(28, 35), new Vector2Int(31, 35), new Vector2Int(28, 36),
         };
         /// <summary>
         /// Nov 3 (Mugesh: the step 14c arrival lanterns were bland): a thorny vine across the 2-tile trail 3 rows past the
@@ -67,7 +68,7 @@ namespace Diorama.EditorTools
         public static readonly Vector2Int VineMarkXY = new Vector2Int(11, 7);
 
         /// <summary>The trail tile just before the smoke on the village side (landmark, dev panel Go to).</summary>
-        public static readonly Vector2Int HollowMarkXY = new Vector2Int(28, 32);
+        public static readonly Vector2Int HollowMarkXY = new Vector2Int(29, 32); // Nov 11: under the straight band
         // Step 10f: the forge's firebox (in the cliff line, just east of the bellows) and the ember vent beside it.
         public static readonly Vector2Int FireboxXY = new Vector2Int(24, 56);
         public static readonly Vector2Int ForgeVentXY = new Vector2Int(26, 54);

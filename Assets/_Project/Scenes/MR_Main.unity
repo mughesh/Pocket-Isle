@@ -1006,6 +1006,9 @@ MonoBehaviour:
   ghosts: {fileID: 1421177268}
   ghostClip: palm_hover
   dormantLine: cw.flame.cold
+  ringBand: 0.24
+  ringTiles: 1.6
+  ringIntensity: 2.2
 --- !u!4 &261742742
 Transform:
   m_ObjectHideFlags: 0
@@ -2127,6 +2130,8 @@ MonoBehaviour:
   pressDepth: 0.008
   runWidth: 0.7
   popStagger: 0.1
+  beatScale: 1.08
+  beatSeconds: 1.2
   offTurnSink: 0.016
   offTurnBack: 0.008
   offTurnGrey: 0.85
@@ -2362,10 +2367,14 @@ MonoBehaviour:
   - realm: lilymere
     recipe: {fileID: 11400000, guid: ee0903dcf9a5bf042908a1074691ca31, type: 2}
   heightTiles: 1.4
+  hoverRadius: 0.08
+  stopRadiusTiles: 2.3
+  waveTiles: 2.5
   reopenSeconds: 60
   pokeRadius: 0.03
   gazeRadius: 0.03
   gold: {r: 1, g: 0.82, b: 0.3, a: 1}
+  ghostSeconds: 12
 --- !u!4 &476515067
 Transform:
   m_ObjectHideFlags: 0
@@ -4220,24 +4229,27 @@ MonoBehaviour:
   markIntensity: 1.3
   grabAssist: 0.08
   lanterns:
-  - {x: 30, y: 26}
+  - {x: 31, y: 26}
   - {x: 28, y: 25}
   - {x: 31, y: 25}
   - {x: 28, y: 24}
   - {x: 31, y: 24}
-  - {x: 29, y: 23}
+  - {x: 28, y: 23}
   smoke:
-  - {x: 28, y: 26}
   - {x: 29, y: 26}
+  - {x: 30, y: 26}
   - {x: 29, y: 25}
   - {x: 30, y: 25}
   - {x: 29, y: 24}
   - {x: 30, y: 24}
+  - {x: 29, y: 23}
   - {x: 30, y: 23}
-  - {x: 31, y: 23}
   smokeRecipe: {fileID: 11400000, guid: 8011fa5b8621e244bb7ae74db9c428bb, type: 2}
   topHeight: 0.72
   touchRadius: 0.04
+  fingertipFire: 1
+  fireTouchRadius: 0.035
+  fireSeconds: 20
   waitFor: cw.flame
   guideMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
   ringSize: 0.9
@@ -5388,6 +5400,7 @@ MonoBehaviour:
   practiceDoneLine: lesson.practice.done
   twoHandsPassSeconds: 8
   swipeTiles: 4
+  practicePerfectLine: lesson.practice.perfect
 --- !u!4 &1380201672
 Transform:
   m_ObjectHideFlags: 0
@@ -8388,6 +8401,7 @@ MonoBehaviour:
   lowerSeconds: 2.2
   doneLine: gw.mill.done
   volume: 0.7
+  holdAfterSeconds: 1.2
 --- !u!114 &2130837836
 MonoBehaviour:
   m_ObjectHideFlags: 0

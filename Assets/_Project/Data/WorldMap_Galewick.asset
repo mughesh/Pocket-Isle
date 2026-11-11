@@ -64,7 +64,7 @@ MonoBehaviour:
 
     XRRRRFRRRRFRFRFFFRFRFFFRRRFGFFTTPPPGGGGTGGGGGGPPGGGGFFRFFFFX
 
-    XRRFRFRRRRFFFFRRRRFFFFRFRFFGFGTTPPPPPPGPPPPPPPPPGGGGRRFFRFFX
+    XRRFRFRRRRFFFFRRRRFFFFRFRFFGFGTTPPPPPPPPPPPPPPPPGGGGRRFFRFFX
 
     XRRRFFFRFRRRRFFRFRFRFRFFRFFGFFTTPPPPPPPPPPPPPPPPGGFFFFFFRRRX
 
@@ -78,29 +78,29 @@ MonoBehaviour:
 
     XFFFRFFRFFFFFFFFWWWWWWWWWWWWWWWWPPWWWWWWWWWWWWWFRFFRFFFFRRRX
 
-    XRFRRRFFFFGGGGGGGGGGGGGGGGGGGGGGPPTTGGGFRFRFFRFFFRRFFFFFRRRX
+    XRFRRRFFFFGGGGGGGGGGGGGGGGGGGGGGPPGGGGGFRFRFFRFFFRRFFFFFRRRX
 
-    XRFFRRFRFFGGGGFGTGGGGGGGGGGGGGGGPPTTGGGRFFRFFRFFRFFFFRFFFFFX
+    XRFFRRFRFFGGGGFGTGGGGGGGGGGGGGGGPPGGGGGRFFRFFRFFRFFFFRFFFFFX
 
-    XRFFFFRFFFGGGGTTTTGGGGGGGGGGGGGGPPTGGGGFFFFRFFRRFRFRFRRFRFRX
+    XRFFFFRFFFGGGGTTTTGGGGGGGGGGGGGGPPGGGGGFFFFRFFRRFRFRFRRFRFRX
 
     XFFFRFRRFRTTGGTTTTGGGGGGPPPPPPPPPPGGGGGFRFRRRRFFFRFFRFFRRFRX
 
     XRRFFRFFRFTTTGGTTGGGGGGPPPPPPPPPPPGGGGGFFFFRFFRFGGRFFFFFFFFX
 
-    XRFRFFFFFFTTTGGGGGGGGTTPPPPPPPGGGGGGGGGFFFRFFGGGGGGGRFFRRFFX
+    XRFRFFFFFFTTTGGGGGGGGTTPPPPPPPPGGGGGGGGFFFRFFGGGGGGGRFFRRFFX
 
-    XFFRFRFRRFTTTGGGGGGGGTTPPPPGPPPGGGGGGGGFFRRFGGGGGGGGGGFFRRFX
+    XFFRFRFRRFTTTGGGGGGGGTTPPPPPPPPGGGGGGGGFFRRFGGGGGGGGGGFFRRFX
 
-    XRRFRRFRRRGGGGGGGGGGGGGPPPPGPPPPPPPGPGPPPPPPPGGGGGGGGGFFRFRX
+    XRRFRRFRRRGGGGGGGGGGGGGPPPPPPPPPPPPPPPPPPPPPPGGGGGGGGGFFRFRX
 
     XFRRFRFFRFGGGGGGGGGGGGGGPPGGPPPPPPPPPPPPPPPPPPGGTGGGGGGFRFRX
 
     XRRRFFFRFRGFGGGGGGGGGGGGPPGGGGGGGGGGGTTTFFGGPPTTTTGGGGGRFRRX
 
-    XFRFRRFRRFGGTTPPGGGGGGGGPPGGGGGGGGGGTTTTFFGGPPTTTTTGGGGFFRRX
+    XFRFRRFRRFGGTTGGGGGGGGGGPPGGGGGGGGGGTTTTFFGGPPTTTTTGGGGFFRRX
 
-    XFRRRFFFRFGGTTPPPGGRGGGGPPGGGTGTTTTGTTTFRFGGPPPPPTTGGGGFRFRX
+    XFRRRFFFRFGGTTGGGGGRGGGGPPGGGTGTTTTGTTTFRFGGPPPPPTTGGGGFRFRX
 
     XRRFRRFRFGPPPPPPPPPPPPPPPPGTTTTTTTTTGGGFFFFGPPPPPGGGGGGFRFRX
 
@@ -159,7 +159,7 @@ MonoBehaviour:
 
     .....................CCC....................................
 
-    .....................CCC.........b..........................
+    .....................CCC....................................
 
     ................c...........................................
 
@@ -171,9 +171,9 @@ MonoBehaviour:
 
     ..............................c.............................
 
-    .........................................o..................
+    .........................................o.......b..........
 
-    .................................................b..........
+    ............................................................
 
     ................................p..........K................
 
@@ -183,11 +183,11 @@ MonoBehaviour:
 
     .............................b..............................
 
-    ...........................W................................
+    ...........................W..........b.....................
 
     ...........................W................g...p...........
 
-    ...........................W..........b.....................
+    ...........................W................................
 
     ...........................W................................
 
@@ -201,27 +201,27 @@ MonoBehaviour:
 
     ............................................................
 
-    ..........wwwwww.....----...................................
+    ..........wwwwww.....----.........Y.........................
 
     .........................h..M...............................
 
-    ...................h...............b........................
+    ...................h........................................
 
     ............b........................W......................
 
-    ......................b...........s..W......................
+    .....................b............s..W......................
 
-    .................m............b......W......................
+    .................m.................b.W......................
 
     ...............................m.....W......................
 
-    ..............Y....................b.W..............e.......
+    ....................................................e.......
 
     ..................h.......h...................e.............
 
-    .................................b................v.........
+    ..................................................v.........
 
-    ..............................p.............................
+    ..............................p..b..........................
 
     .......................p..s.................................
 
@@ -521,7 +521,7 @@ MonoBehaviour:
     line: gw.village.first
     radius: 4
   - name: shrine
-    tile: {x: 14, y: 40}
+    tile: {x: 34, y: 33}
     line: 
     radius: 0
   - name: mill

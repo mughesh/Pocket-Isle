@@ -27,7 +27,7 @@ namespace Diorama.EditorTools
         // ---- story tiles (x, y) ----
         public static readonly Vector2Int GateXY = new Vector2Int(7, 6);      // return gate, 2 x 1 (front y 5)
         public static readonly Vector2Int ArriveXY = new Vector2Int(10, 5);   // arrive here facing north
-        public static readonly Vector2Int ShrineXY = new Vector2Int(14, 19);  // 2 x 2, front y 17
+        public static readonly Vector2Int ShrineXY = new Vector2Int(34, 26);  // 2 x 2, front y 24. Nov 11 (Mugesh): roadside by the big mill, south of the ditch (was 14, 19 in an inner pocket)
         /// <summary>The big mill (2 x 2, anchor = its north-west tile), on the ditch's south bank west of the crossing.</summary>
         public static readonly Vector2Int MillXY = new Vector2Int(28, 25);
         /// <summary>The ditch rows (water) and the 2-wide crossing over it (the drawbridge, step 10b).</summary>
