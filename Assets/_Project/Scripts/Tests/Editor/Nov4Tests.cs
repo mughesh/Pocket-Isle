@@ -6,12 +6,12 @@ namespace Diorama.Tests
     public class Nov4Tests
     {
         [Test]
-        public void Temple_Three_Everywhere_QuickToo()
+        public void Temple_Three_Everywhere_TwoInTheQuickSlot()
         {
             Assert.AreEqual(3, TempleRules.Needed(true, false));
             Assert.AreEqual(3, TempleRules.Needed(false, false));
-            Assert.AreEqual(3, TempleRules.Needed(true, true), "Nov 11: the Quick Journey warns too");
-            Assert.AreEqual(3, TempleRules.Needed(false, true));
+            Assert.AreEqual(2, TempleRules.Needed(true, true), "Nov 11 panel: the quick slot's party is two and its Keeper is tuned for two");
+            Assert.AreEqual(2, TempleRules.Needed(false, true));
         }
 
         [Test]

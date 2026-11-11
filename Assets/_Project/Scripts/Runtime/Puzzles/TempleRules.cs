@@ -9,19 +9,22 @@ namespace Diorama
     /// <see cref="GalewickIslings"/>, the forge and the lake temple <see cref="OtherIslings"/>), the Spirit warns
     /// (<see cref="WarnLine"/>: "{keeper} is strong. Bring at least {n} Islings.") and two tablets ask
     /// <b>Go in</b> / <b>Not yet</b>. Go in enters as usual: a warning, never a wall (the Keeper is tuned to the team,
-    /// <see cref="KeeperScaling"/>). Nov 11: 3 everywhere, the Quick Journey too.
+    /// <see cref="KeeperScaling"/>). Nov 11: 3 everywhere, the Quick Journey too; Nov 11 panel: 2 in the quick slot.
     /// </summary>
     public static class TempleRules
     {
         /// <summary>Nov 11 (Mugesh: battles are easier now; he walked into the tower with fewer and was never told): 3 at every
         /// door, and the Quick Journey warns too. Still a warning (Go in / Not yet), never a wall.</summary>
         public const int GalewickIslings = 3, OtherIslings = 3;
+        /// <summary>Nov 11 panel (Mugesh's yes): the quick slot's party is the starter and one catch, and its Keeper is tuned for
+        /// two, so every judge was told to go and find a third. 2 in the quick slot only; 3 everywhere else (R46).</summary>
+        public const int QuickIslings = 2;
         /// <summary>Step 24: only a debounce (was 3 s of silent refusals): a bump after "Not yet" asks again at once.</summary>
         public const float AskAgainSeconds = 1f;
         public const string WarnLine = "temple.warn", GoIn = "Go in", NotYet = "Not yet";
 
         /// <summary>Islings suggested at a temple door (0 = no warning).</summary>
-        public static int Needed(bool galewick, bool quick) => galewick ? GalewickIslings : OtherIslings;
+        public static int Needed(bool galewick, bool quick) => quick ? QuickIslings : galewick ? GalewickIslings : OtherIslings;
 
         /// <summary>Enough Islings: no question, straight in.</summary>
         public static bool CanEnter(int carried, int needed) => carried >= needed;

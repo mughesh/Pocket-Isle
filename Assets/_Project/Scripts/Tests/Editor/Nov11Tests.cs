@@ -89,10 +89,12 @@ namespace Diorama.Tests
         [Test]
         public void Temple_ThreeIslings_WarnsEverywhere_NeverAWall()
         {
-            Assert.AreEqual(3, TempleRules.Needed(true, true));
+            Assert.AreEqual(3, TempleRules.Needed(true, false));
             Assert.AreEqual(3, TempleRules.Needed(false, false));
+            Assert.AreEqual(2, TempleRules.Needed(true, true), "Nov 11 panel: 2 in the quick slot only");
             Assert.IsFalse(TempleRules.CanEnter(2, 3));
             Assert.IsTrue(TempleRules.CanEnter(3, 3));
+            Assert.IsTrue(TempleRules.CanEnter(2, 2), "the quick party of two walks straight in");
         }
 
         [Test]

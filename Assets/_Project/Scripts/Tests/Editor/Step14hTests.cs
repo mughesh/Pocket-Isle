@@ -304,7 +304,7 @@ namespace Diorama.Tests
         {
             Assert.AreEqual(3, TempleRules.Needed(true, false));
             Assert.AreEqual(3, TempleRules.Needed(false, false));
-            Assert.AreEqual(3, TempleRules.Needed(true, true), "Nov 11: the Quick Journey warns too");
+            Assert.AreEqual(2, TempleRules.Needed(true, true), "Nov 11 panel: the Quick Journey warns under 2");
             Assert.IsFalse(TempleRules.CanEnter(2, 3), "2 at Galewick: the warning");
             Assert.IsTrue(TempleRules.CanEnter(6, 6), "a full team: straight in");
             Assert.AreEqual("temple.warn", TempleRules.Line(6));
