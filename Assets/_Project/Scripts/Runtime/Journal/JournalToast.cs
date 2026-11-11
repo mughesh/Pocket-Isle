@@ -25,6 +25,12 @@ namespace Diorama
         /// <summary>The last toast's text (tests, the bridge).</summary>
         public string LastText { get; private set; }
 
+        /// <summary>A toast is up (popping, holding or fading).</summary>
+        public bool Up => Time.time - _start < Seconds;
+
+        /// <summary>Nov 11 panel (R50): a toast is up right now; the Spirit's catch line waits for it.</summary>
+        public static bool Showing => Instance != null && Instance.Up;
+
         public static void Ensure(IslandBuilder island)
         {
             if (Instance != null || island == null) return;

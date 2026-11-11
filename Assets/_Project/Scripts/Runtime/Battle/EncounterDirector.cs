@@ -953,7 +953,6 @@ namespace Diorama
             Diorama.Audio.MusicDirector.Jingle(3f);
             stage.RemoveWild();
             runes.SetCaption($"Gotcha! {wild.Name} joined you!");
-            Dialogue.Say("capture.success.first");
             yield return new WaitForSeconds(0.7f);
             if (!party.IsFull)
             {
@@ -974,6 +973,10 @@ namespace Diorama
                 Dialogue.Say("party.full");
                 yield return pods.StreakAway(slot);
             }
+            // Nov 11 panel (R50, four texts at once at the catch): the Spirit's line comes after the "New Isling!" toast
+            // has gone (it pops as the pod flies home), not over it. The sparkle's "Caught!" and the caption stay.
+            for (float t = 0f; t < JournalToast.Seconds + 1f && JournalToast.Showing; t += Time.deltaTime) yield return null;
+            Dialogue.Say("capture.success.first");
         }
 
         static IEnumerator Then(IEnumerator routine, System.Action done)
