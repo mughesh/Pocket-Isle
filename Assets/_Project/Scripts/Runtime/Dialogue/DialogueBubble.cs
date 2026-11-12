@@ -453,16 +453,27 @@ namespace Diorama
         void HeartCall(Transform anchor)
         {
             _heartCalled = true;
+            PlayHeartCall();
+        }
+
+        /// <summary>
+        /// Step 32 C: the Heart's call as picked in Dev panel > Tools > Sound A/B > Heart voice: the synth moo (the Spirit's
+        /// blip two octaves down, the call Mugesh liked), or a generated candidate at full volume. Head-locked (2D).
+        /// </summary>
+        public static void PlayHeartCall()
+        {
+            int voice = Diorama.Audio.AudioAB.HeartVoice;
+            string cue = Diorama.Audio.AudioAB.HeartCallCue(voice);
+            if (cue != null && Diorama.Audio.AudioService.Has(cue))
+            {
+                GameAudio.Ui(cue).SetVolume(1f);
+                Debug.Log($"[Heart] call: candidate {voice} ({cue}).");
+                return;
+            }
             var call = GameAudio.Ui(Diorama.Audio.AudioIds.SpiritBlip);
             call.SetPitch(0.25f);
             call.SetVolume(1f);
-            // Nov 11 (Mugesh: the Heart's voice done properly, in the spirit of the "moooo" but richer): with the new
-            // voices on and a generated call in the cue, that singing-bowl and choir tone rides on top of the synth's
-            // low hum instead of the bell ping. Voices: blip (Dev panel > Tools > Sound A/B) gives the old call back.
-            bool rich = Diorama.Audio.AudioAB.NewVoices && Diorama.Audio.AudioService.Has(Diorama.Audio.AudioIds.VoiceCallHeart);
-            if (rich) GameAudio.Ui(Diorama.Audio.AudioIds.VoiceCallHeart).SetVolume(heartCallLayer);
-            else GameAudio.Ui(Diorama.Audio.AudioIds.SparkChime).SetVolume(0.45f);
-            Debug.Log($"[Heart] call (synth moo two octaves down + {(rich ? "the generated bowl and choir call" : "bell ping")}).");
+            Debug.Log($"[Heart] call: synth moo two octaves down{(cue != null ? $" ({cue} has no clips)" : "")}.");
         }
 
         float CharsPerSecond => _heart ? heartCharsPerSecond : Mathf.Max(charsPerSecond, typingCharsPerSecond);
@@ -814,7 +825,8 @@ namespace Diorama
         public static string VoiceFor(DialogueLine line)
         {
             if (line == null) return Diorama.Audio.AudioIds.SpiritBlip;
-            if (Diorama.Audio.AudioAB.NewVoices)
+            // Step 32 C: the Heart's murmurs follow its voice switch (synth moo = the synth hum, candidates their grains).
+            if (Diorama.Audio.AudioAB.NewVoices && !(line.speaker == DialogueSpeaker.Heart && Diorama.Audio.AudioAB.HeartVoice == 0))
             {
                 var key = SpeakerKey(line);
                 if (key != null && Diorama.Audio.AudioService.Has(Diorama.Audio.AudioAB.GrainCue(key))) return Diorama.Audio.AudioAB.GrainCue(key);

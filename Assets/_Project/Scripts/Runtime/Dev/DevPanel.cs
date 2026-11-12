@@ -535,6 +535,14 @@ namespace Diorama
                         () => Diorama.Audio.AudioAB.AcousticJingles = !Diorama.Audio.AudioAB.AcousticJingles, () => Diorama.Audio.AudioAB.AcousticJingles);
                     Add(() => $"Voices: {(Diorama.Audio.AudioAB.NewVoices ? "new" : "blip")}",
                         () => Diorama.Audio.AudioAB.NewVoices = !Diorama.Audio.AudioAB.NewVoices, () => Diorama.Audio.AudioAB.NewVoices);
+                    // Step 32 C: the Heart's voice, picked by ear (synth moo, then candidates 1-6); Play plays its call here.
+                    Add(() => $"Heart voice: {Diorama.Audio.AudioAB.HeartVoiceName(Diorama.Audio.AudioAB.HeartVoice)}",
+                        () =>
+                        {
+                            Diorama.Audio.AudioAB.HeartVoice = (Diorama.Audio.AudioAB.HeartVoice + 1) % (Diorama.Audio.AudioAB.HeartCandidates + 1);
+                            DialogueBubble.PlayHeartCall();
+                        }, () => Diorama.Audio.AudioAB.HeartVoice > 0);
+                    Add(() => "Play Heart call", DialogueBubble.PlayHeartCall);
                     // Step 18/20: the music, tuned on the headset (levels remembered on this device): one row per cue.
                     Heading("Music");
                     Add(() => $"Realm music: {(Diorama.Audio.MusicDirector.RealmMusicBeforeRestore ? "always" : "reward")}",

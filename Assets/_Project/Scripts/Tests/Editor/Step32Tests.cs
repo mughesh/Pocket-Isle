@@ -57,6 +57,22 @@ namespace Diorama.Tests
         }
 
         [Test]
+        public void HeartVoice_SynthMooByDefault_SixCandidatesWithClips()
+        {
+            Assert.AreEqual(6, Diorama.Audio.AudioAB.HeartCandidates);
+            Assert.IsNull(Diorama.Audio.AudioAB.HeartCallCue(0), "0 = the synth moo");
+            Assert.AreEqual("synth moo", Diorama.Audio.AudioAB.HeartVoiceName(0));
+            for (int n = 1; n <= Diorama.Audio.AudioAB.HeartCandidates; n++)
+                foreach (var cue in new[] { Diorama.Audio.AudioAB.HeartCallCue(n), $"voice.grain.heart.c{n}" })
+                {
+                    var c = AssetDatabase.LoadAssetAtPath<Diorama.Audio.AudioCue>($"Assets/_Project/Audio/Data/Cues/Cries/{cue}.asset");
+                    Assert.IsNotNull(c, cue);
+                    Assert.Greater(c.clips.Length, 0, $"{cue} has clips");
+                }
+            Assert.AreEqual("voice.grain.galeowl", Diorama.Audio.AudioAB.GrainCue("galeowl"), "the Keepers keep theirs");
+        }
+
+        [Test]
         public void OldSaves_AtTheFourSwipeLesson_ResumeAtTheSwipeAndTap()
         {
             var src = System.IO.File.ReadAllText("Assets/_Project/Scripts/Runtime/Onboarding/Onboarding.cs");

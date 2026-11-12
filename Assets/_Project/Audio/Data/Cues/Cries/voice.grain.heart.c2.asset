@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28966354f9950c5429c46b779a504dcd, type: 3}
+  m_Name: voice.grain.heart.c2
+  m_EditorClassIdentifier: Diorama.Audio::Diorama.Audio.AudioCue
+  id: voice.grain.heart.c2
+  clips:
+  - {fileID: 8300000, guid: e9fa6159d3602f74fbc7f849c850428b, type: 3}
+  - {fileID: 8300000, guid: 2609c64783955dc46a18d8071eba3639, type: 3}
+  - {fileID: 8300000, guid: dc2ece7f5c0919c4fb8bfd46543d34e6, type: 3}
+  - {fileID: 8300000, guid: ada982819fe815644af7c150d7efbc47, type: 3}
+  - {fileID: 8300000, guid: ee7c1eaca5bd8d745883045da0fff00b, type: 3}
+  - {fileID: 8300000, guid: 62b3018da917a174eb3fcdb4d76c3bc1, type: 3}
+  - {fileID: 8300000, guid: 843cce037a93fea4cb522d298c4af1b3, type: 3}
+  - {fileID: 8300000, guid: 3930136af7ff1554cadf59513d570de1, type: 3}
+  volume: 0.5
+  volumeJitter: 0.05
+  pitchMin: 0.97
+  pitchMax: 1.03
+  pitchStepSemitones: 0
+  bus: 4
+  spatial: 1
+  minDistance: 0.1
+  maxDistance: 1.5
+  loop: 0
+  restSeconds: 0
+  lowPassHz: 0
+  maxSeconds: 0
+  maxVoices: 2
+  minInterval: 0.04
+  priority: 70
+  awaitingClips: 0
+  notes: 
+  review:
+    status: 0
+    note: 

@@ -36,7 +36,28 @@ namespace Diorama.Audio
             return has(twin) ? twin : id;
         }
 
-        public static string GrainCue(string speaker) => "voice.grain." + speaker;
+        public static string GrainCue(string speaker) =>
+            speaker == "heart" && HeartVoice > 0 ? $"voice.grain.heart.c{HeartVoice}" : "voice.grain." + speaker;
+
+        const string HeartKey = "PocketIsle.AB.HeartVoice";
+
+        /// <summary>Step 32 C: generated Heart voice candidates (calls voice.call.heart.cN, murmurs voice.grain.heart.cN).</summary>
+        public const int HeartCandidates = 6;
+
+        /// <summary>
+        /// Step 32 C: the Heart's voice, picked by ear on the headset (remembered on the device): 0 = the synth moo (call)
+        /// and the synth hum (murmurs), 1-6 = a generated candidate's call and murmurs.
+        /// </summary>
+        public static int HeartVoice
+        {
+            get => Mathf.Clamp(PlayerPrefs.GetInt(HeartKey, 0), 0, HeartCandidates);
+            set => PlayerPrefs.SetInt(HeartKey, Mathf.Clamp(value, 0, HeartCandidates));
+        }
+
+        /// <summary>Step 32 C: the candidate's call cue, or null for the synth moo.</summary>
+        public static string HeartCallCue(int voice) => voice <= 0 ? null : $"voice.call.heart.c{voice}";
+
+        public static string HeartVoiceName(int voice) => voice <= 0 ? "synth moo" : voice.ToString();
         public static string CallCue(string speaker) => "voice.call." + speaker;
     }
 }
