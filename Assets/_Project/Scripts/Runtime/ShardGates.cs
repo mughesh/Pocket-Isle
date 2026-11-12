@@ -72,7 +72,7 @@ namespace Diorama
             public Transform quad;
             public MeshRenderer renderer;
             public float bump, gaze;
-            public bool seen, armed;
+            public bool seen, armed, guardLogged;
             public AudioHandle hum;
         }
 
@@ -225,7 +225,19 @@ namespace Diorama
         }
 
         /// <summary>A gate whose prop the map hides for now (step 9c: the temple's return gate before the Keeper is calmed).</summary>
-        bool Hidden(int i) => _scanned != null && _scanned.IsPropHidden(_portals[i].link.tile);
+        bool Hidden(int i)
+        {
+            if (_scanned == null) return false;
+            var tile = _portals[i].link.tile;
+            if (_scanned.IsPropHidden(tile)) return true;
+            if (!KeeperHall.GateLocked(_scanned, tile)) return false;
+            if (!_portals[i].guardLogged)
+            {
+                _portals[i].guardLogged = true;
+                Debug.LogWarning($"[ShardGates] The {_portals[i].link.id} gate at c{tile.x} r{tile.y} kept shut: its Keeper isn't calmed with the shard taken (the map showed it).");
+            }
+            return true;
+        }
 
         Vector3? GatePoint(int i)
         {

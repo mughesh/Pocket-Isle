@@ -328,6 +328,17 @@ namespace Diorama
             }
         }
 
+        /// <summary>
+        /// Step 33 (friend test: after losing to Galeowl a portal by the tower took players out of the realm unfinished): a
+        /// Keeper's temple gate stays shut until that Keeper is calmed and its shard taken, whatever the map's hidden props say.
+        /// </summary>
+        public static bool GateLocked(WorldMap map, Vector2Int tile)
+        {
+            foreach (var k in _live)
+                if (k != null && k.realmMap == map && k.templeGate == tile) return !(k.Calmed && k.ShardTaken);
+            return false;
+        }
+
         /// <summary>The temple gate shows once calmed (hidden and walk-through before).</summary>
         void ApplyState()
         {
