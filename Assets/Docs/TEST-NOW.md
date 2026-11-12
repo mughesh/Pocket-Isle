@@ -7,3 +7,4 @@
 - [ ] Statue: each shard **grabs on the first try** (pinch or fist, even if the hand closes just before it), with the pod grab sound →
 - [ ] Statue: the Heart's **call at full volume** at its first line of each scene →
 - [ ] Finale lanterns: only "original designs", "Sounds", "Pocket Isle / Made by Mugesh" (no Music, no Font) →
+- [ ] Galewick: beat Galeowl, walk out: the breeze is the **old soft synth one** (no pressure cooker); the lodge palm-hold has its Nov 11 tone back →
