@@ -76,7 +76,7 @@ namespace Diorama.EditorTools
         }
 
         /// <summary>The stop tile a leg starts from: the place itself when walkable, else the zone tile nearest to it.</summary>
-        static Vector2Int StartTile(WorldMap map, Vector2Int place, HashSet<Vector2Int> zone)
+        public static Vector2Int StartTile(WorldMap map, Vector2Int place, HashSet<Vector2Int> zone)
         {
             if (map.CanWalk(place)) return place;
             return zone.OrderBy(t => (t - place).sqrMagnitude).ThenBy(t => t.y).ThenBy(t => t.x).First();

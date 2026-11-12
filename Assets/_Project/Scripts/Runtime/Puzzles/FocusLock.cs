@@ -39,7 +39,7 @@ namespace Diorama
             HandPuzzle best = null;
             Vector2 focus = default;
             float bestDist = float.MaxValue;
-            bool calm = !Opening.InProgress && !Onboarding.Running && !explorer.Locked && !SceneSwap.IsBusy;
+            bool calm = !Opening.InProgress && !Onboarding.Running && !explorer.Locked && !SceneSwap.IsBusy && !explorer.LeavingHeldView;
             if (calm)
                 foreach (var p in _pieces)
                 {
@@ -69,7 +69,7 @@ namespace Diorama
                 if (_holding != best || (focus - _at).sqrMagnitude > moveAfter * moveAfter)
                 {
                     if (_holding != best) Debug.Log($"[FocusLock] Holding the view on {best.id}.");
-                    window.SetFocus(focus);
+                    window.SetFocus(focus, true);
                     _at = focus;
                     _holding = best;
                 }

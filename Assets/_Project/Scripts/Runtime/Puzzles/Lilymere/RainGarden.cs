@@ -567,13 +567,13 @@ namespace Diorama
             // The window holds about its width in tiles; keep a tile and a half of margin for the round corners.
             float room = Mathf.Min(island.map.Columns, island.map.Rows) / Mathf.Max(1f, island.Zoom) - 2.5f;
             bool fits = all1.x - all0.x <= room && all1.y - all0.y <= room;
-            bool live = Here && !IsSolved && !_finishing && !explorer.Locked && !Opening.InProgress && !Onboarding.Running;
+            bool live = Here && !IsSolved && !_finishing && !explorer.Locked && !Opening.InProgress && !Onboarding.Running && !explorer.LeavingHeldView;
             bool want = live && near && fits;
             Vector2 focus = (all0 + all1) * 0.5f;
             if (want && (!_settled && !window.HasFocus || _settled && (focus - _focusAt).sqrMagnitude > 0.06f))
             {
                 if (!_settled) Debug.Log($"[RainGarden] {id}: at the garden: the window settles over all {buds.Length} buds and the explorer.");
-                window.SetFocus(focus);
+                window.SetFocus(focus, true);
                 _focusAt = focus;
                 _settled = true;
             }

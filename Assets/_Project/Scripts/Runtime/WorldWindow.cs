@@ -91,11 +91,19 @@ namespace Diorama
         /// Centres the view on a map point (battles: the middle of the stage) instead of the explorer; null goes back
         /// to following the explorer. Both directions glide.
         /// </summary>
-        public void SetFocus(Vector2? tile)
+        /// <param name="soft">Step 32: a puzzle's held view (the lotus garden, a focus lock): a swipe walking out of it lets
+        /// go of the view instead of being cut at its edge (it stopped Lilymere walks every couple of tiles).</param>
+        public void SetFocus(Vector2? tile, bool soft = false)
         {
             _focus = tile;
+            _soft = soft && tile.HasValue;
             _easing = true;
         }
+
+        bool _soft;
+
+        /// <summary>Step 32: the view is held by a puzzle that lets go when the explorer walks out of it.</summary>
+        public bool SoftFocus => _focus.HasValue && _soft;
 
         /// <summary>Step 11d: the view is centred on a focus point (a battle, the lotus garden), not the explorer.</summary>
         public bool HasFocus => _focus.HasValue;
