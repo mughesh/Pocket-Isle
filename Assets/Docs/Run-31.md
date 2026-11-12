@@ -1,11 +1,11 @@
 # Run 31: the Nov 12 overnight (walking you can count, text that never overlaps, the sounds)
 
-Prompt: `Assets/Docs/Prompts/overnight-nov12.md`. Branch `panel-review`, 2 commits (`3811de7d` A, `c8fd239e` B + C). **Not pushed. Nothing here has been on the headset.**
+Prompt: `Assets/Docs/Prompts/overnight-nov12.md`. Branch `panel-review`, 3 commits (`3811de7d` A, `c8fd239e` B + C, and the morning layout follow-up). **Not pushed. Nothing here has been on the headset.**
 Headset checklist: the fresh, short `Assets/Docs/TEST-NOW.md` (the design chat's short list is kept as `TEST-NOW-nov12-short-before.md`).
 
 ## Read this first
 - **Your stopping rule is in, and it costs swipes on bendy roads.** Every stop on every route is now a real turn, a real side road or a door (81 fake stops before, 1 left: the hub statue). But the old walk followed bends by itself, so a corner is now a swipe: the main routes need about as many or more swipes than before (Galewick 32 -> 36). **Follow Bends** (one checkbox on GestureTestPiece, off by default) keeps your rule for junctions and turns plain corners by itself: Galewick 27, Lilymere 28, Still Isle 15, all lower than before; Cinderwood 25 (23 before, but those 23 had 4 fake stops). My pick would be on; it's your rule, so it's off. Try both on the headset.
-- **The layout check works and still fails 4 beats** (list below, with shots). They are smaller than before and two are its own box being generous, but the smoke run is red until they're gone. That is on purpose: it's the check you asked for.
+- **The layout check is green now** (morning follow-up, 8:45 AM): the 4 failing beats are gone, 115 ok / 0 failed. Two were real and are fixed, two were the check measuring badly. Details under B.
 - **The "pressure cooker" is my best guess, not a certainty.** No breeze or gust clip changed since Nov 9. The only Galewick sounds that changed since your last good test are the fix list's: the lodge's hold tone (a new "rising tone" take), its chime, and the Keeper voices. I turned the new hold tone off. If the cooker was something else, say where you heard it.
 
 ## Checks
@@ -17,6 +17,7 @@ Headset checklist: the fresh, short `Assets/Docs/TEST-NOW.md` (the design chat's
 | Swipe count | **1 unexplained stop** (81 before); every leg within its budget (`Nov12SwipeBudget.txt`, a test) |
 | Smoke run after A | **92 ok, 0 failed** |
 | Smoke run after B + C (with the new layout check) | **88 ok, 4 failed (layout)**, list below |
+| Smoke run after the layout follow-up (8:42 AM) | **115 ok, 0 failed**; door shots 14 ok, 0 failed; tests 483 / 0; Release Check passed |
 | Door shots (Step27 phase) | 13 ok, 1 layout note (the Spirit's bubble touches the tower chip by 8% in the look + pinch beat) |
 | Audio Release Check | passed |
 
@@ -73,10 +74,16 @@ Straight in the swipe's way. Stops only: where the road can't go on straight but
 | 7 | **Layout check in the smoke run** (`TextLayoutCheck`): every half second, every visible text (bubble, door chips, battle line, HP plates, New Isling tag, finale cards) against each other and the creatures and the explorer (on screen), and against the island's props (in 3D); a hit fails the beat and saves a seat shot to `Logs/SmokeRun/layout/`. | `SmokeRun_ChecksTheLayoutAtEveryBeat` |
 | + | Every stage creature is a keep-clear zone for the speech bubble; the bubble steps aside instead of rising out of the central view; the New Isling tag lifts off the explorer. | |
 
-**Still failing the layout check (4 beats; shots in `Run-31-img/layout/`):**
-1. First battle (Toastling): the battle line touches the wild plate while the plate settles beside it (27%), and the Spirit's "Water beats Fire" bubble touches its spiky crest (18%).
-2. Evolution, palm off: "New Isling!" vs the explorer (56% of its box). On the shot they don't touch; the explorer's box is probably inflated by a ring under it. To check.
-3. Lilymere and Galewick halls: the Keeper's own bubble sits just over its head, the tail on its crest (15-16% of the box). Looks right on the shot; the check counts the crest.
+**The 4 beats that failed the layout check: all clear now (morning follow-up, one more commit).**
+
+| What failed | Real? | What was done |
+|---|---|---|
+| First battle: the battle line on Toastling's plate (2.6 s) | **Real** | When the Spirit's bubble took the spot over the head, the line fell back onto the plate's side. It has two more spots now (beside the wild Isling at its waist, either side) and takes the side away from the plate first. |
+| Galeowl fight: the Spirit's bubble on the owl's forehead | **Real** | A Keeper is so big that the last clamps (central view, never far from the Spirit) pulled the bubble back onto it. Keeping clear of creatures and the explorer is now checked once more, last. Log: `[Bubble] kept clear of a creature after the clamps`. |
+| Evolution: "New Isling!" over the explorer | Check's mistake | The check boxed the tag and its portrait as one box, and boxed tilted plates along the world's axes (the tag measured nearly square). It now measures each plate from its own corners and tests a tag's parts one by one. |
+| Halls: the Keeper's bubble "on" its own crest; "All tangled!" on the owl | Check's mistake + a glide | The body's box no longer includes the smoke and aura. The "All tangled!" hit was the bubble gliding across the owl for a few frames on its way to a clear spot. |
+
+**One rule changed in the check, on purpose:** an overlap counts when it holds for two samples in a row (half a second). A bubble gliding to its next spot crosses things for a few frames; that is not a text left on something. The log still lists every single-sample hit (`[Layout] ... (first sample: counts if it holds)`); the last full run had two, both one bubble glide in Galeowl's hall.
 
 ## C. Sounds and pace
 | # | What | Done |
@@ -87,6 +94,5 @@ Straight in the swipe's way. Stops only: where the road can't go on straight but
 
 ## Not done / not verified
 - Nothing on the headset: walking feel, the caption and plates with real heads, the chips' height in the room, every sound by ear.
-- The 4 layout failures above.
 - No device build, no frame-rate capture.
 - Follow Bends is measured, not felt.

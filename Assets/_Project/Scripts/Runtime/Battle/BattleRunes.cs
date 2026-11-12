@@ -852,12 +852,12 @@ namespace Diorama
 
         readonly System.Collections.Generic.List<Rect> _captionKeepOff = new System.Collections.Generic.List<Rect>();
         readonly System.Collections.Generic.List<Bounds> _captionPlates = new System.Collections.Generic.List<Bounds>();
-        readonly Vector3[] _captionSpots = new Vector3[4];
+        readonly Vector3[] _captionSpots = new Vector3[6];
         int _captionSpot;
         BattleHud _captionHud;
         DialogueBubble _captionBubble;
 
-        /// <summary>Nov 12: which spot the battle line took (0 over the head, 1 left, 2 right, 3 over everything; tests, the bridge).</summary>
+        /// <summary>Nov 12: which spot the battle line took (0 over the head, 1 left, 2 right, 3 over everything, 4 low left, 5 low right; tests, the bridge).</summary>
         public int CaptionSpot => _captionSpot;
 
         /// <summary>Nov 12: the first spot (over the head, left, right, over everything) whose pill covers nothing to keep clear.</summary>
@@ -901,8 +901,13 @@ namespace Diorama
                         top = Mathf.Max(top, Vector3.Dot(q - vb.center, up));
                     }
                 _captionSpots[3] = vb.center + up * (top + hh + gap);
+                // Beside it and lower (the first battle: the Spirit's bubble over its head reached the chest spot, and the
+                // line went onto the wild Isling's plate for 2.6 s): at its waist, on either side.
+                Vector3 waist = vb.center - up * (vb.extents.y * 0.25f);
+                _captionSpots[4] = waist - right * (halfW + hw + gap);
+                _captionSpots[5] = waist + right * (halfW + hw + gap);
             }
-            else _captionSpots[1] = _captionSpots[2] = _captionSpots[3] = _captionSpots[0];
+            else _captionSpots[1] = _captionSpots[2] = _captionSpots[3] = _captionSpots[4] = _captionSpots[5] = _captionSpots[0];
 
             float Cost(Vector3 at)
             {
@@ -930,7 +935,7 @@ namespace Diorama
                 nearest = d;
                 plateLeft = Vector3.Dot(pb.center - vb.center, right) < 0f;
             }
-            int[] order = plateLeft ? new[] { 0, 2, 1, 3 } : new[] { 0, 1, 2, 3 };
+            int[] order = plateLeft ? new[] { 0, 2, 5, 3, 1, 4 } : new[] { 0, 1, 4, 3, 2, 5 };
             int best = 0;
             float bestCost = float.MaxValue;
             foreach (int i in order)
@@ -948,7 +953,7 @@ namespace Diorama
                 }
             }
             if (best != _captionSpot)
-                Debug.Log($"[BattleRunes] The battle line moves {(best == 0 ? "over the wild Isling's head" : best == 1 ? "to its left" : best == 2 ? "to its right" : "over everything")} (clear of the creatures, plates and moves).");
+                Debug.Log($"[BattleRunes] The battle line moves {(best == 0 ? "over the wild Isling's head" : best == 1 ? "to its left" : best == 2 ? "to its right" : best == 3 ? "over everything" : best == 4 ? "low to its left" : "low to its right")} (clear of the creatures, plates and moves).");
             _captionSpot = best;
             return _captionSpots[best];
         }

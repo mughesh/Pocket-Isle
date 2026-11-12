@@ -17,6 +17,8 @@ namespace Diorama.EditorTools
             public string name;
             public Rect view;
             public Bounds world;
+            /// <summary>The text's parts on screen, when it has several (a tag and its portrait): a body is tested against each.</summary>
+            public List<Rect> parts;
         }
 
         /// <summary>Share of the smaller text two texts may share on screen.</summary>
@@ -45,8 +47,11 @@ namespace Diorama.EditorTools
                     // A body's box is generous (round creatures, ears, crests, aura): its core must stay clear: 10% off the
                     // sides and the bottom, 20% off the top (a speaker's own bubble sits just over its crest, the tail on it).
                     var core = Rect.MinMaxRect(b.view.xMin + b.view.width * 0.1f, b.view.yMin + b.view.height * 0.1f, b.view.xMax - b.view.width * 0.1f, b.view.yMax - b.view.height * 0.2f);
-                    float share = Share(t.view, core, Area(core));
-                    if (share > BodyOverlap) hits.Add($"{t.name} covers {b.name} ({share * 100f:0}% of it)");
+                    float share = 0f;
+                    if (t.parts == null) share = Share(t.view, core, Area(core));
+                    else
+                        foreach (var part in t.parts) share = Mathf.Max(share, Share(part, core, Area(core)));
+                    if (share > BodyOverlap) hits.Add($"{t.name} covers {b.name} ({share * 100f:0}% of it; text {R(t.view)}, body {R(b.view)})");
                 }
             if (!EncounterDirector.AnyInBattle)
                 foreach (var t in texts)
@@ -69,6 +74,8 @@ namespace Diorama.EditorTools
             var s = text.size;
             return vol / Mathf.Max(1e-12f, s.x * s.y * s.z);
         }
+
+        static string R(Rect r) => $"x {r.xMin:0.000}-{r.xMax:0.000} y {r.yMin:0.000}-{r.yMax:0.000}";
 
         static float Area(Rect r) => Mathf.Max(1e-6f, r.width * r.height);
 
@@ -97,9 +104,40 @@ namespace Diorama.EditorTools
             return any ? Rect.MinMaxRect(x0, y0, x1, y1) : new Rect(-10f, -10f, 0f, 0f);
         }
 
+        /// <summary>
+        /// A renderer's box on screen from its own (local) bounds: a plate that faces the head is tilted in the world, and
+        /// the corners of its world-axis box reach far past it on screen (the New Isling tag measured nearly square, and
+        /// "covered" an explorer it never touched). Particles keep their world box.
+        /// </summary>
+        public static Rect View(Camera cam, Renderer r)
+        {
+            if (r is ParticleSystemRenderer) return View(cam, r.bounds);
+            var lb = r.localBounds;
+            var m = r.localToWorldMatrix;
+            float x0 = float.MaxValue, y0 = float.MaxValue, x1 = float.MinValue, y1 = float.MinValue;
+            bool any = false;
+            for (int i = 0; i < 8; i++)
+            {
+                var p = m.MultiplyPoint3x4(lb.center + Vector3.Scale(lb.extents, new Vector3((i & 1) == 0 ? -1 : 1, (i & 2) == 0 ? -1 : 1, (i & 4) == 0 ? -1 : 1)));
+                var v = cam.WorldToViewportPoint(p);
+                if (v.z <= 0f) continue;
+                any = true;
+                x0 = Mathf.Min(x0, v.x);
+                y0 = Mathf.Min(y0, v.y);
+                x1 = Mathf.Max(x1, v.x);
+                y1 = Mathf.Max(y1, v.y);
+            }
+            return any ? Rect.MinMaxRect(x0, y0, x1, y1) : new Rect(-10f, -10f, 0f, 0f);
+        }
+
+        static Rect Union(Rect a, Rect b) => a.width <= 0f && a.x < -5f ? b : b.width <= 0f && b.x < -5f ? a
+            : Rect.MinMaxRect(Mathf.Min(a.xMin, b.xMin), Mathf.Min(a.yMin, b.yMin), Mathf.Max(a.xMax, b.xMax), Mathf.Max(a.yMax, b.yMax));
+
+        static readonly Rect None = new Rect(-10f, -10f, 0f, 0f);
+
         static bool Shown(Renderer r) => r != null && r.enabled && r.gameObject.activeInHierarchy && r.bounds.size.sqrMagnitude > 1e-8f;
 
-        static void Add(List<Item> list, Camera cam, string name, Bounds b) => list.Add(new Item { name = name, view = View(cam, b), world = b });
+        static void Add(List<Item> list, string name, Rect view, Bounds b) => list.Add(new Item { name = name, view = view, world = b });
 
         /// <summary>Every text showing now, with its plate's bounds.</summary>
         public static List<Item> Texts(Camera cam)
@@ -110,32 +148,40 @@ namespace Diorama.EditorTools
                 if (bubble.Text == null && !bubble.IsChip) continue;
                 bool any = false;
                 var all = new Bounds();
+                var view = None;
                 foreach (var r in bubble.GetComponentsInChildren<MeshRenderer>())
                 {
                     // The tail points at the speaker on purpose: the panel is what must keep clear.
                     if (!Shown(r) || r.name == "Tail" || r.name == "Chip Hand") continue;
                     if (!any) all = r.bounds;
                     else all.Encapsulate(r.bounds);
+                    view = Union(view, View(cam, r));
                     any = true;
                 }
-                if (any) Add(list, cam, "speech bubble", all);
+                if (any) Add(list, "speech bubble", view, all);
             }
             // A tablet's parts (plate, frame) count as one text.
             var tablets = new Dictionary<Transform, Bounds>();
+            var tabletViews = new Dictionary<Transform, Rect>();
+            var tabletParts = new Dictionary<Transform, List<Rect>>();
             foreach (var r in Object.FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None))
             {
                 if (!Shown(r)) continue;
                 var go = r.transform;
-                if (r.name == "Caption Pill") Add(list, cam, "battle line", r.bounds);
-                else if (r.name == "Plate" && go.parent != null && go.parent.name.StartsWith("HP ")) Add(list, cam, $"HP plate {go.parent.name.Substring(3)}", r.bounds);
+                if (r.name == "Caption Pill") Add(list, "battle line", View(cam, r), r.bounds);
+                else if (r.name == "Plate" && go.parent != null && go.parent.name.StartsWith("HP ")) Add(list, $"HP plate {go.parent.name.Substring(3)}", View(cam, r), r.bounds);
                 else if (go.parent != null && r.name != "Text" && (go.parent.name.EndsWith(" Chip") || System.Array.Exists(TabletNames, n => go.parent.name.StartsWith(n))))
                 {
                     if (tablets.TryGetValue(go.parent, out var b)) b.Encapsulate(r.bounds);
                     else b = r.bounds;
                     tablets[go.parent] = b;
+                    var rv = View(cam, r);
+                    tabletViews[go.parent] = Union(tabletViews.TryGetValue(go.parent, out var tv) ? tv : None, rv);
+                    if (!tabletParts.TryGetValue(go.parent, out var parts)) tabletParts[go.parent] = parts = new List<Rect>();
+                    parts.Add(rv);
                 }
             }
-            foreach (var kv in tablets) Add(list, cam, kv.Key.name, kv.Value);
+            foreach (var kv in tablets) list.Add(new Item { name = kv.Key.name, view = tabletViews[kv.Key], world = kv.Value, parts = tabletParts[kv.Key] });
             return list;
         }
 
@@ -144,21 +190,30 @@ namespace Diorama.EditorTools
         {
             var list = new List<Item>();
             foreach (var a in Object.FindObjectsByType<StageActor>(FindObjectsSortMode.None))
-                if (a.isActiveAndEnabled && a.TryGetVisualBounds(out var b)) Add(list, cam, a.name, b);
+            {
+                if (!a.isActiveAndEnabled || !a.TryGetVisualBounds(out var b)) continue;
+                // The body's own meshes: the smoke, flames and aura round it reach far and a text may cross them.
+                var view = None;
+                foreach (var r in a.GetComponentsInChildren<Renderer>(false))
+                    if (Shown(r) && !(r is ParticleSystemRenderer) && !(r is TrailRenderer) && !(r is LineRenderer)) view = Union(view, View(cam, r));
+                Add(list, a.name, view.x < -5f ? View(cam, b) : view, b);
+            }
             var g = GameState.Instance;
             var body = g != null && g.explorer != null ? g.explorer.Body : null;
             if (body != null && body.gameObject.activeInHierarchy)
             {
                 bool any = false;
                 var all = new Bounds();
+                var view = None;
                 foreach (var r in body.GetComponentsInChildren<Renderer>())
                 {
                     if (!Shown(r)) continue;
                     if (!any) all = r.bounds;
                     else all.Encapsulate(r.bounds);
+                    view = Union(view, View(cam, r));
                     any = true;
                 }
-                if (any) Add(list, cam, "explorer", all);
+                if (any) Add(list, "explorer", view, all);
             }
             return list;
         }

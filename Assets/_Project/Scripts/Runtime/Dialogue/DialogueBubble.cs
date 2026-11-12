@@ -1064,6 +1064,23 @@ namespace Diorama
                 float limit = _pointing ? Mathf.Max(maxFromSpirit, SideClear + _size.x * 0.5f + _size.y * 0.5f) : maxFromSpirit;
                 if (off.magnitude > limit) target = from + off.normalized * limit;
             }
+            // Nov 12 (the layout check, Galeowl's hall: "All tangled!" lay on the owl, and in the fight the Spirit's line
+            // sat on its forehead): a Keeper is so big that the clamps above (central view, never far from the Spirit)
+            // pulled the bubble back onto it. Clear of the creatures and the explorer wins: checked once more, last.
+            if (cam != null && !GameMenu.IsOpen)
+            {
+                Vector3 clear = ClearOfKeeps(cam, target);
+                if (clear != target)
+                {
+                    if (island != null && island.map != null) clear = KeepAboveIsland(cam.transform.position, clear);
+                    if (Time.time - _clearLoggedAt > 5f)
+                    {
+                        _clearLoggedAt = Time.time;
+                        Debug.Log($"[Bubble] kept clear of a creature after the clamps ({(clear - target).magnitude * 100f:0.0} cm).");
+                    }
+                    target = clear;
+                }
+            }
             if (!snap && _hasResolved && (target - _resolved).magnitude < deadband) target = _resolved;
             _resolved = target;
             _hasResolved = true;
@@ -1114,6 +1131,8 @@ namespace Diorama
             }
             return true;
         }
+
+        float _clearLoggedAt = -100f;
 
         /// <summary>Moves the bubble up (in the view) until it covers none of the <see cref="KeepClear"/> spheres.</summary>
         Vector3 ClearOfKeeps(Camera cam, Vector3 pos)

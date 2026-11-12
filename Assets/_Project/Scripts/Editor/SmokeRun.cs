@@ -384,6 +384,7 @@ namespace Diorama.EditorTools
             readonly List<string> _beatLayout = new List<string>();
             readonly HashSet<string> _layoutShot = new HashSet<string>();
             double _layoutNext;
+            HashSet<string> _layoutBefore = new HashSet<string>();
             int _layoutShots;
 
             void WatchLayout()
@@ -397,10 +398,17 @@ namespace Diorama.EditorTools
                     Note("exception", $"layout check threw {e.GetType().Name}: {e.Message}");
                     return;
                 }
+                // A hit counts when it holds for two samples in a row (half a second): a bubble gliding to its next spot
+                // crosses a creature for a few frames, and a plate settles beside its body; neither is a text left on something.
+                var now = new HashSet<string>(hits.Select(x => Regex.Replace(x, @" \([^)]*%[^)]*\)", "")));
+                var before = _layoutBefore;
+                _layoutBefore = now;
                 foreach (var h in hits)
                 {
                     // One note per pair per beat (the share in brackets changes frame to frame).
                     string pair = Regex.Replace(h, @" \([^)]*%[^)]*\)", "");
+                    Debug.Log($"[Layout] {Now:0.0} {BeatName}: {h}{(before.Contains(pair) ? "" : " (first sample: counts if it holds)")}");
+                    if (!before.Contains(pair)) continue;
                     if (_beatLayout.Any(x => Regex.Replace(x, @" \([^)]*%[^)]*\)", "") == pair)) continue;
                     _beatLayout.Add(h);
                     Note("layout", pair);
