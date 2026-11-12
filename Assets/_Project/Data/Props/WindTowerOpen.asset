@@ -83,9 +83,19 @@ MonoBehaviour:
     motion: 2
     motionAmount: 0.001
     budgetWeight: 0
+  - shape: {fileID: 11400000, guid: 7102d535f5fde3842a67a45e7dfd324b, type: 2}
+    part: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    mirrorX: 0
+    slot: 1
+    motion: 0
+    motionAmount: 0
+    budgetWeight: 0
   - shape: {fileID: 11400000, guid: 0c131a4db3a7d8c4cbffb85b07aa46ff, type: 2}
     part: {fileID: 0}
-    position: {x: 0, y: 3.25, z: 0.72}
+    position: {x: 0, y: 2.85, z: 0.8}
     rotation: {x: 0, y: 0, z: 0}
     scale: 1
     mirrorX: 0
@@ -95,7 +105,7 @@ MonoBehaviour:
     budgetWeight: 0
   - shape: {fileID: 11400000, guid: 6afeca9742c4ec84cac684775f9a7d61, type: 2}
     part: {fileID: 0}
-    position: {x: 0, y: 3.25, z: 0.70000005}
+    position: {x: 0, y: 2.85, z: 0.82}
     rotation: {x: 0, y: 0, z: 0}
     scale: 1
     mirrorX: 0

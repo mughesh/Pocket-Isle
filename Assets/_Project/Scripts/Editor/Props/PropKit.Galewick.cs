@@ -426,7 +426,11 @@ namespace Diorama.EditorTools
                 var d = Quaternion.Euler(0f, a, 0f) * Vector3.forward;
                 slits.Add(Box(d * 0.66f + Vector3.up * y, new Vector3(0.05f, 0.16f, 0.06f), 0.02f, 0f, new Vector3(0f, a, 0f)));
             }
-            var hub = new Vector3(0f, 3.25f, 0.72f);
+            // Step 33 (friend test: the vanes cut through the tower): the hub sat 7 cm off the wall under the 88 cm walkway, so
+            // the 85 cm blades swept through the walkway and parapet. Now lower and further out, on a short axle, with
+            // shorter blades: the sweep (2.23 to 3.47 m) stays under the walkway and in front of the wall and its bands.
+            var hub = new Vector3(0f, 2.85f, 0.8f);
+            const float vaneReach = 0.62f;
             tower.pieces = new List<PropPiece>
             {
                 Piece(PShape("WindTower_Stone", crown.ToArray()), PropSlot.Clay),
@@ -452,8 +456,9 @@ namespace Diorama.EditorTools
                     Cone(new Vector3(-0.42f, 0f, 0.72f), new Vector3(-0.42f, 0.63f, 0.72f), 0.06f, 0.06f, 0f),
                     Floor(0f)), PropSlot.Wood),
                 Piece(PShape("WindTower_Slits", slits.ToArray()), PropSlot.Glow, PropMotion.Flicker, 0.001f),
-                Piece(PShape("WindTower_Vanes", Sails(0.85f, 0.16f, false)), PropSlot.Wood, PropMotion.Spin, 0.7f, hub),
-                Piece(PShape("WindTower_VaneCloth", Sails(0.85f, 0.16f, true)), PropSlot.Accent, PropMotion.Spin, 0.7f, hub + new Vector3(0f, 0f, -0.02f)),
+                Piece(PShape("WindTower_Axle", Cone(new Vector3(0f, hub.y, 0.58f), new Vector3(0f, hub.y, hub.z + 0.04f), 0.05f, 0.045f, 0.01f)), PropSlot.Wood),
+                Piece(PShape("WindTower_Vanes", Sails(vaneReach, 0.14f, false)), PropSlot.Wood, PropMotion.Spin, 0.7f, hub),
+                Piece(PShape("WindTower_VaneCloth", Sails(vaneReach, 0.14f, true)), PropSlot.Accent, PropMotion.Spin, 0.7f, hub + new Vector3(0f, 0f, 0.02f)),
             };
             // The open doorway's dark inside: the Leaf slot (the tower has no leaves); Stone is the slate roof.
             if (!shut) tower.palette[(int)PropSlot.Leaf] = C("#2E2B2C");
