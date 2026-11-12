@@ -159,6 +159,28 @@ namespace Diorama.EditorTools
             return n;
         }
 
+        /// <summary>
+        /// Step 26 (Meta's release manifest rules, VRC.Quest.Packaging): the launching activity (the one with the MAIN
+        /// action) needs android:excludeFromRecents="true"; Unity doesn't set it. Returns how many activities changed.
+        /// </summary>
+        public static int ExcludeFromRecents(string manifestPath)
+        {
+            var doc = new XmlDocument();
+            doc.Load(manifestPath);
+            const string androidNs = "http://schemas.android.com/apk/res/android";
+            int n = 0;
+            foreach (var act in doc.SelectNodes("//activity").Cast<XmlElement>().ToList())
+            {
+                bool main = act.SelectNodes("intent-filter/action").Cast<XmlElement>()
+                    .Any(a => a.GetAttribute("name", androidNs) == "android.intent.action.MAIN");
+                if (!main || act.GetAttribute("excludeFromRecents", androidNs) == "true") continue;
+                act.SetAttribute("excludeFromRecents", androidNs, "true");
+                n++;
+            }
+            if (n > 0) doc.Save(manifestPath);
+            return n;
+        }
+
         class PasswordWindow : EditorWindow
         {
             string _store = "", _key = "";
@@ -201,7 +223,10 @@ namespace Diorama.EditorTools
             // path is unityLibrary; the launcher manifest is its sibling.
             foreach (string m in new[] { Path.Combine(path, "src/main/AndroidManifest.xml"), Path.Combine(path, "../launcher/src/main/AndroidManifest.xml") })
                 if (File.Exists(m))
+                {
                     Debug.Log($"[ReleaseBuild] {Path.GetFullPath(m)}: removed {ReleaseBuild.StripPermissions(m)} permission line(s), added tools:node=\"remove\" for {string.Join(", ", ReleaseBuild.RemovedPermissions)}.");
+                    Debug.Log($"[ReleaseBuild] {Path.GetFullPath(m)}: excludeFromRecents=true on {ReleaseBuild.ExcludeFromRecents(m)} launching activity(ies).");
+                }
         }
     }
 }

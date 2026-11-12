@@ -44,5 +44,32 @@ namespace Diorama.Tests
                 File.Delete(path);
             }
         }
+
+        [Test]
+        public void ReleaseManifest_LaunchActivity_ExcludedFromRecents()
+        {
+            // Step 26: Meta's release manifest rules want excludeFromRecents="true" on the launching activity.
+            string path = Path.Combine(Path.GetTempPath(), "pocketisle_manifest_recents_test.xml");
+            File.WriteAllText(path,
+                "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
+                "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\" package=\"x\">\n" +
+                "  <application>\n" +
+                "    <activity android:name=\"Main\"><intent-filter><action android:name=\"android.intent.action.MAIN\" /></intent-filter></activity>\n" +
+                "    <activity android:name=\"Other\" />\n" +
+                "  </application>\n" +
+                "</manifest>\n");
+            try
+            {
+                Assert.AreEqual(1, ReleaseBuild.ExcludeFromRecents(path));
+                string xml = File.ReadAllText(path);
+                StringAssert.Contains("android:name=\"Main\" android:excludeFromRecents=\"true\"", xml);
+                StringAssert.Contains("<activity android:name=\"Other\" />", xml);
+                Assert.AreEqual(0, ReleaseBuild.ExcludeFromRecents(path), "running twice changes nothing");
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
     }
 }
