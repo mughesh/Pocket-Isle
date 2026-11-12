@@ -764,7 +764,7 @@ namespace Diorama
                 if (b == null) return;
                 var f = WorldMap.FootprintOf(e);
                 var recipe = e.recipe;
-                Vector3 p = MapPoint(new Vector2(c + (f.x - 1) * 0.5f, r + (f.y - 1) * 0.5f));
+                Vector3 p = MapPoint(new Vector2(c + (f.x - 1) * 0.5f + e.nudge.x, r + (f.y - 1) * 0.5f + e.nudge.y));
                 float yaw = recipe.randomYaw && f == Vector2Int.one
                     ? rnd.Next() * 360f
                     : (e.turned ? 90f : 0f) + e.yaw + (rnd.Next() * 2f - 1f) * recipe.yawJitter;

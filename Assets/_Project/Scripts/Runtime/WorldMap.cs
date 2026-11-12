@@ -16,6 +16,9 @@ namespace Diorama
         [Tooltip("Extra turn in degrees on top of Turned (fence corners, the cliff's second look). The footprint doesn't turn " +
                  "with it: use multiples of 90 on 1x1 props, 180 on bigger ones.")]
         public float yaw;
+        [Tooltip("Nov 13 (Mugesh: the statue stood half a tile right of the road): shifts the drawing by this many tiles " +
+                 "(column, row). What blocks walking (the footprint) doesn't move.")]
+        public Vector2 nudge;
 
         public char Key => string.IsNullOrEmpty(key) ? '.' : key[0];
     }

@@ -139,34 +139,42 @@ MonoBehaviour:
     recipe: {fileID: 11400000, guid: 4e524cd358b9b874f9c8ac964bd660a2, type: 2}
     turned: 0
     yaw: 0
+    nudge: {x: -0.5, y: 0}
   - key: f
     recipe: {fileID: 11400000, guid: 166d589c7b84f7440a8533ff62677e6c, type: 2}
     turned: 0
     yaw: 0
+    nudge: {x: 0, y: 0}
   - key: w
     recipe: {fileID: 11400000, guid: 060247c819eb9194baa615ac5e0a699d, type: 2}
     turned: 0
     yaw: 0
+    nudge: {x: 0, y: 0}
   - key: g
     recipe: {fileID: 11400000, guid: 5ed00ec5cf5c1fb4dac984c6ddfec929, type: 2}
     turned: 0
     yaw: 0
+    nudge: {x: 0, y: 0}
   - key: Y
     recipe: {fileID: 11400000, guid: b4ff74f9eeb49724995b03596b7d6943, type: 2}
     turned: 0
     yaw: 0
+    nudge: {x: 0, y: 0}
   - key: l
     recipe: {fileID: 11400000, guid: e5433c33ffbd7ef4e8a155c7e9b5a866, type: 2}
     turned: 0
     yaw: 0
+    nudge: {x: 0, y: 0}
   - key: b
     recipe: {fileID: 11400000, guid: 69f099619857df94f80e6b02d355f761, type: 2}
     turned: 0
     yaw: 0
+    nudge: {x: 0, y: 0}
   - key: s
     recipe: {fileID: 11400000, guid: cc9a99a98bf9cd94999ebf9174b7800f, type: 2}
     turned: 0
     yaw: 0
+    nudge: {x: 0, y: 0}
   viewZoom: 1
   theme: {fileID: 11400000, guid: 573607c9578eb9a4bb3fec0f01fdf495, type: 2}
   grassTable: {fileID: 11400000, guid: 019ec2e8b4e80634d82706540465e2a9, type: 2}

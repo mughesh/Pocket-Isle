@@ -31,7 +31,8 @@ namespace Diorama.Audio.EditorTools
         /// <summary>Step 23: one source family per cue: these flagged cues drop their synth noise variants and keep the natural takes.</summary>
         static readonly System.Collections.Generic.HashSet<string> NoSynth = new System.Collections.Generic.HashSet<string>
             { "step.grass", "step.path", "step.stone", "step.wood", "amb.lodge", "scene.rise", "scene.sink",
-              "amb.galewick", "amb.galewick.restored", "knot.pull" }; // step 25: amb.stillisle is synth again (its paid takes surged or were silent)
+              "amb.galewick", "amb.galewick.restored", "knot.pull",
+              "shrine.flame" }; // Nov 13: the synth flame is a bright 3.6 kHz crackle (Mugesh: a chatter); the generated take stays // step 25: amb.stillisle is synth again (its paid takes surged or were silent)
 
         [MenuItem("Tools/Pocket Isle/Audio/Sync Cues (create, clips, table, AudioIds)", priority = 91)]
         public static void SyncAll()

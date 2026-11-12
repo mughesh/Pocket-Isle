@@ -28,7 +28,8 @@ namespace Diorama
 
         readonly Kind[] _kinds =
         {
-            new Kind { cue = AudioIds.ShrineFlame, recipes = new[] { HearthShrines.RecipeName } },
+            // Nov 13 (Mugesh: a loud chatter under the shard's pokes, still there after it burst): half as loud.
+            new Kind { cue = AudioIds.ShrineFlame, recipes = new[] { HearthShrines.RecipeName }, volume = 0.5f },
             new Kind { cue = AudioIds.EmberCrackle, recipes = new[] { "EmberVent" }, volume = 0.8f },
             new Kind { cue = AudioIds.SteamHiss, recipes = new[] { "HotSpringSteam" }, tile = IslandMap.HotSpring, volume = 0.8f },
             new Kind { cue = AudioIds.MillTurn, recipes = new[] { "Windmill", "SmallMill" }, restoredOnly = true, volume = 0.6f },
@@ -49,7 +50,8 @@ namespace Diorama
             if (_encounters == null) _encounters = FindFirstObjectByType<EncounterDirector>();
             var swap = SceneSwap.Current;
             bool outside = _island != null && _island.Content != null && (swap == null || !swap.Inside);
-            bool quiet = !outside || _encounters != null && _encounters.InBattle || GamePause.IsPaused;
+            // Nov 13: nothing on the island sounds while only the shard floats in the room (the island isn't there yet).
+            bool quiet = !outside || _encounters != null && _encounters.InBattle || GamePause.IsPaused || Opening.ShardOnly;
             var world = outside ? swap != null ? swap.Outdoor : _island.world : null;
             if (quiet || world == null)
             {

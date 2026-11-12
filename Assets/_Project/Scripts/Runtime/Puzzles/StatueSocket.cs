@@ -256,12 +256,14 @@ namespace Diorama
             _dreamOffer = on;
             if (on) _quiet = true;
         }
-        protected override Vector2 HomeTile => statueAnchor + Vector2.one;
+        protected override Vector2 HomeTile => StatueCenter;
 
         public override Vector3? FocusPoint => Here && ShardHolder.Holds(id) && holder != null ? holder.CupWorld(id) : (Vector3?)null;
         public override float FocusRadius => 0.045f * island.transform.lossyScale.x;
 
-        Vector2 StatueCenter => statueAnchor + Vector2.one;
+        /// <summary>The statue's middle (map column, row): its 3 x 3 footprint's middle plus the map legend's nudge (Nov 13).</summary>
+        Vector2 StatueCenter => statueAnchor + Vector2.one +
+                                (map != null && map.TryGetProp(map.PropAt(statueAnchor.y, statueAnchor.x), out var e) ? e.nudge : Vector2.zero);
 
         /// <summary>Map (column, height in tiles, row) of the socket.</summary>
         Vector3 SocketMap

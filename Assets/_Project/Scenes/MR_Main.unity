@@ -1325,7 +1325,7 @@ MonoBehaviour:
   material: {fileID: 2100000, guid: 816769f54a1129a4992d139a9519d8a4, type: 2}
   fx: {fileID: 1078587927}
   width: 0.3
-  height: 0.25
+  height: 0.32
   far: 0.45
   bob: 0.008
   swayDegrees: 3
@@ -5406,6 +5406,10 @@ MonoBehaviour:
   practiceDoneLine: lesson.practice.done
   twoHandsPassSeconds: 8
   swipeTiles: 4
+  swipeNiceLine: lesson.walk.nice
+  swipeMoreLine: lesson.walk.more
+  swipeLastLine: lesson.walk.last
+  swipeAgainChip: Swipe again
   practicePerfectLine: lesson.practice.perfect
 --- !u!4 &1380201672
 Transform:
