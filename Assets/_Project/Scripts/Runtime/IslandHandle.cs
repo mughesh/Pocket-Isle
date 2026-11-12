@@ -511,6 +511,27 @@ namespace Diorama
             return false;
         }
 
+        [Tooltip("Step 33: in a battle, island grab waits while a hand (pinch point or palm) is this close to a pod (m past its glass).")]
+        public float podReach = 0.12f;
+
+        /// <summary>Step 33: hand <paramref name="h"/> (0 left, 1 right) is within <see cref="podReach"/> of the cradle or a party pod.</summary>
+        bool HandNearPods(int h)
+        {
+            var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
+            if (hand == null || !hand.IsTrackedDataValid || pods == null) return false;
+            bool Near(Vector3 p)
+            {
+                for (int i = 0; i < Party.Size; i++)
+                {
+                    var pod = pods.Pod(i);
+                    if (pod != null && pod.isActiveAndEnabled && (p - pod.transform.position).magnitude <= pod.WorldRadius + podReach) return true;
+                }
+                var cradle = pods.Pod(PodRack.CradleSlot);
+                return cradle != null && cradle.isActiveAndEnabled && (p - cradle.transform.position).magnitude <= cradle.WorldRadius + podReach;
+            }
+            return TryGetPinchPoint(hand, out var pinch) && Near(pinch) || HandLookup.TryGetJoint(hand, HandJointId.HandPalm, out var palm) && Near(palm);
+        }
+
         // ---- step 17: grab locks ----
 
         readonly Dictionary<string, string> _locks = new Dictionary<string, string>();
@@ -536,7 +557,8 @@ namespace Diorama
         /// <summary>Applies the locks to the rim interactable (never while it is held).</summary>
         void ApplyLocks()
         {
-            SetGrabLock("battle", encounters != null && encounters.InBattle, "battle up: the cradle and party pods win");
+            // Step 33 (friends: the island couldn't be moved in a battle): only a hand at the cradle or the party pods locks it.
+            SetGrabLock("battle", encounters != null && encounters.InBattle && (HandNearPods(0) || HandNearPods(1)), "a hand at the cradle or the party pods (battle)");
             if (rimInteractable == null) return;
             bool off = GrabLocked && !IsGrabbed;
             if (off == _rimLockedOff) return;
