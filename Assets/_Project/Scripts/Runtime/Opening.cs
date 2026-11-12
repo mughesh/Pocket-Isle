@@ -846,7 +846,7 @@ namespace Diorama
         IEnumerator Spark()
         {
             var start = LandmarkWorld("statue", 2.2f) ?? island.transform.position;
-            var end = spirit.HomeWorld;
+            var end = spirit.CentreWorld; // Nov 12: it greets from over the island's centre
             var orb = fx != null ? fx.Get(BattleFx.Shape.Orb) : null;
             var gold = new Color(1f, 0.85f, 0.45f);
             if (orb != null) orb.Set(Color.white, gold, 1f, 1.4f, 1f, 0.3f);

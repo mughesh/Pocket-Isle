@@ -49,8 +49,6 @@ namespace Diorama
         [Range(0f, 0.4f)] public float minViewportY = 0.06f;
         [Tooltip("Nov 10: the near label's gap to its Isling's side, island-local metres.")]
         public float nearSideGap = 0.012f;
-        [Tooltip("Nov 10: the near label's height, as a share of its Isling's height.")]
-        [Range(0f, 1f)] public float nearChest = 0.55f;
         [Tooltip("How often the wild label re-checks that it clears the near Isling on screen (s).")]
         public float clearCheckSeconds = 0.25f;
         [Tooltip("Nov 6 (Mugesh: the name panels kept swaying): the wild label finds its spot only this long after both labels " +
@@ -82,9 +80,11 @@ namespace Diorama
             /// <summary>Step 14k: sideways slide (island-local x) that keeps the wild label off the near Isling.</summary>
             public float shift, shiftTarget, checkedAt = -1f;
             /// <summary>Nov 6: when the bar appeared; the near label's lift over the caption (only ever grows: no bobbing).</summary>
-            public float bornAt, captionLift;
-            /// <summary>Nov 10: the near label's spot, found while it settles, then held (no sway): island-local x from the feet, and height.</summary>
-            public float sideX, chestY;
+            public float bornAt;
+            /// <summary>Nov 10: the label's spot beside its creature, found while it settles, then held (no sway): island-local x from the feet.</summary>
+            public float sideX;
+            /// <summary>Nov 12: the held lift over the moves (island-local y), measured once when the spot is found.</summary>
+            public float rowLift;
         }
 
         class Pop
@@ -384,80 +384,73 @@ namespace Diorama
             b.shift = b.near ? 0f : b.checkedAt < 0f ? b.shiftTarget : Mathf.MoveTowards(b.shift, b.shiftTarget, Time.deltaTime * 0.6f);
             // Nov 12 (Mugesh, shot 04: Galeowl's plate had no name): a Keeper is wider than its pad, so a plate at its feet sat
             // inside its body and the belly hid the name on the headset. A Keeper's plate goes beside it, like the near label.
-            Vector3 world = b.near ? NearSpot(b, cam, feet, halfW, settleUntil) : b.beside ? BesideSpot(b, feet, halfW, settleUntil) : At(b.shift);
+            // Nov 12 evening (Mugesh: Galeowl's name floated far to the left, Pebbloop's drifted up when he moved his head):
+            // both plates stand on the island floor beside their creature, measured from the body alone (not the shield),
+            // found while they settle and then held in the island's space: no view clamps, no lift that only grows.
+            if (b.near || b.beside)
+            {
+                bool settling = !b.topSet || Time.time <= settleUntil;
+                Vector3 spot = FloorSpot(b, cam, feet, halfW, bottom, settling);
+                if (b.near && settling)
+                {
+                    float above0 = top * scale, below0 = -bottom * scale;
+                    Vector3 w = it.TransformPoint(spot);
+                    b.rowLift = Mathf.Max(0f, it.InverseTransformPoint(ClearRow(cam, w, halfW * scale, above0, below0)).y - spot.y);
+                }
+                b.root.position = it.TransformPoint(spot + Vector3.up * b.rowLift);
+                return;
+            }
+            Vector3 world = At(b.shift);
             // Keep it in view: its top under maxViewportY, its bottom over minViewportY.
             float above = top * scale, below = -bottom * scale;
             Vector3 v = cam.WorldToViewportPoint(world + up * above);
             if (v.z > 0f && v.y > maxViewportY) world = cam.ViewportToWorldPoint(new Vector3(v.x, maxViewportY, v.z)) - up * above;
             v = cam.WorldToViewportPoint(world - up * below);
             if (v.z > 0f && v.y < minViewportY) world = cam.ViewportToWorldPoint(new Vector3(v.x, minViewportY, v.z)) + up * below;
-            // The near label rises over the moves rather than sit on them.
-            if (b.near)
-            {
-                // Nov 6: the lift only grows (it bobbed up and down as things came and went).
-                float lift = Vector3.Dot(ClearRow(cam, world, halfW * scale, above, below) - world, up);
-                b.captionLift = Mathf.Max(b.captionLift, lift);
-                world += up * b.captionLift;
-            }
             b.root.position = world;
         }
 
         BattleRunes _runes;
         GestureTestPiece _explorer;
 
-        /// <summary>
-        /// Nov 12: beside a Keeper at its chest, on the side away from the player's Isling and the explorer, clear of its
-        /// body; found while it settles, then held.
-        /// </summary>
-        Vector3 BesideSpot(Bar b, Vector3 feet, float halfW, float settleUntil)
-        {
-            var a = b.actor;
-            var it = a.island.transform;
-            if (!b.topSet || Time.time <= settleUntil)
-            {
-                float width = 0.05f;
-                if (a.TryGetVisualBounds(out var bounds)) width = Mathf.Max(bounds.extents.x, bounds.extents.z) / Mathf.Max(1e-5f, it.lossyScale.x);
-                float others = 0f;
-                int n = 0;
-                foreach (var o in _bars)
-                    if (o.near && o.actor != null)
-                    {
-                        others += o.actor.island.TileToLocal(o.actor.tile).x;
-                        n++;
-                    }
-                if (_explorer == null) _explorer = FindFirstObjectByType<GestureTestPiece>();
-                if (_explorer != null && _explorer.Body != null)
-                {
-                    others += _explorer.Body.localPosition.x;
-                    n++;
-                }
-                float sign = n > 0 && others / n > feet.x ? -1f : 1f;
-                b.sideX = sign * (width + halfW * labelScale + nearSideGap);
-                b.chestY = Mathf.Lerp(feet.y, a.LocalTop.y, 0.4f);
-                b.topSet = true;
-            }
-            return it.TransformPoint(new Vector3(feet.x + b.sideX, b.chestY, feet.z));
-        }
+        [Tooltip("Nov 12 evening: a plate on the floor stands this far (island-local m) beside its creature's body.")]
+        public float floorSideGap = 0.01f;
 
-        /// <summary>Nov 10: beside the near Isling on the player's right, found while it settles, then held.</summary>
-        Vector3 NearSpot(Bar b, Camera cam, Vector3 feet, float halfW, float settleUntil)
+        /// <summary>
+        /// Nov 12 evening: a plate standing on the island floor beside its creature (island-local): the wild Isling's or
+        /// Keeper's on the player's right, the party Isling's on the side away from the explorer. The body's width comes
+        /// from <see cref="StageActor.TryGetBodyBounds"/> (a shield bubble or smoke doesn't push it away).
+        /// </summary>
+        Vector3 FloorSpot(Bar b, Camera cam, Vector3 feet, float halfW, float bottom, bool settling)
         {
             var a = b.actor;
             var it = a.island.transform;
-            if (!b.topSet || Time.time <= settleUntil)
+            if (settling)
             {
-                float width = 0.03f;
-                if (a.TryGetVisualBounds(out var bounds)) width = Mathf.Max(bounds.extents.x, bounds.extents.z) / Mathf.Max(1e-5f, it.lossyScale.x);
-                // The side away from the explorer, who stands beside its Isling; else the player's right.
-                if (_explorer == null) _explorer = FindFirstObjectByType<GestureTestPiece>();
-                float sign = _explorer != null && _explorer.Body != null
-                    ? (_explorer.Body.localPosition.x >= feet.x ? -1f : 1f)
-                    : Vector3.Dot(it.right, cam.transform.right) >= 0f ? 1f : -1f;
-                b.sideX = sign * Mathf.Max(Mathf.Abs(b.sideX), width + halfW * labelScale + nearSideGap);
-                b.chestY = Mathf.Lerp(feet.y, a.LocalTop.y, nearChest);
+                float width = b.near ? 0.03f : 0.05f;
+                if (a.TryGetBodyBounds(out var bounds))
+                {
+                    var lb = it.InverseTransformVector(bounds.extents);
+                    width = Mathf.Max(Mathf.Abs(lb.x), Mathf.Abs(lb.z) * 0.5f);
+                }
+                // Island +X is the player's left: the player's right is the side of the island's right seen from the head.
+                float rightSign = cam != null && Vector3.Dot(it.right, cam.transform.right) >= 0f ? 1f : -1f;
+                if (cam == null) rightSign = -1f;
+                float sign = rightSign;
+                if (b.near)
+                {
+                    if (_explorer == null) _explorer = FindFirstObjectByType<GestureTestPiece>();
+                    if (_explorer != null && _explorer.Body != null) sign = _explorer.Body.localPosition.x >= feet.x ? -1f : 1f;
+                }
+                float sideX = sign * (width + halfW * labelScale + floorSideGap);
+                if (!b.topSet || Mathf.Abs(sideX - b.sideX) > 0.004f)
+                {
+                    b.sideX = sideX;
+                    if (b.topSet) Debug.Log($"[BattleHud] {a.name}'s plate settles on the floor {(sign * rightSign > 0f ? "to its right" : "to its left")}.");
+                }
                 b.topSet = true;
             }
-            return it.TransformPoint(new Vector3(feet.x + b.sideX, b.chestY, feet.z));
+            return new Vector3(feet.x + b.sideX, feet.y + footLift - bottom * labelScale, feet.z);
         }
 
         /// <summary>Step 14k, Nov 10: lifts a label (along the view's up) until it clears the shown moves on screen.</summary>

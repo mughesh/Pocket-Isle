@@ -107,6 +107,9 @@ namespace Diorama
         }
 
         /// <summary>Where the Spirit rests (world), above the near-left corner of the rim.</summary>
+        /// <summary>Nov 12: where the Spirit floats in the tutorial (world): over the island's centre, above the statue.</summary>
+        public Vector3 CentreWorld => island != null && island.map != null ? island.transform.TransformPoint(CentreLocal()) : transform.position;
+
         public Vector3 HomeWorld => island != null && island.map != null ? island.transform.TransformPoint(HomeLocal()) : transform.position;
 
         CreatureView _view;
@@ -210,17 +213,19 @@ namespace Diorama
 
         void Place(float t)
         {
-            // Step 17 F11: the move and resize lessons: above the back centre, never near a corner handle (the bubble covered
-            // the front-right handle and the ghost hand there).
-            bool backPark = BackParkLesson;
-            if (backPark != _backPark)
+            // Nov 12 (Mugesh: the Spirit hid behind the statue in the grab lessons; all the information at one angle): the
+            // whole tutorial it floats over the island's centre, above the statue (its bubble over it, the ghost hands below);
+            // in the grab lesson over the corner the ghost grabs; from the grass lesson on, its rim corner as before.
+            var park = TutorialPark;
+            if (park != _tutorialPark)
             {
-                _backPark = backPark;
+                _tutorialPark = park;
                 _forceMove = true;
-                Debug.Log(backPark ? $"[LanternSpirit] Lesson {Onboarding.Lesson}: parked above the back centre (clear of the corner handles)." : "[LanternSpirit] Back from the back centre.");
+                Debug.Log(park == TutorialSpot.Centre ? $"[LanternSpirit] Tutorial ({Onboarding.Lesson ?? "opening"}): over the island's centre, above the statue." :
+                    park == TutorialSpot.GrabCorner ? "[LanternSpirit] Grab lesson: over the corner the ghost grabs." : "[LanternSpirit] Tutorial over: back to the rim corner.");
             }
-            Vector3 wanted = backPark ? BackLocal() : _away ? TargetLocal(_targetWorld) : HomeLocal();
-            object key = backPark ? "back" : _away ? _targetKey : _battle ? "battle" : _homeLeft ? "homeLeft" : (object)"home";
+            Vector3 wanted = park == TutorialSpot.Centre ? CentreLocal() : park == TutorialSpot.GrabCorner ? GrabCornerLocal() : _away ? TargetLocal(_targetWorld) : HomeLocal();
+            object key = park == TutorialSpot.Centre ? "centre" : park == TutorialSpot.GrabCorner ? "grabCorner" : _away ? _targetKey : _battle ? "battle" : _homeLeft ? "homeLeft" : (object)"home";
             // Step 27: one goal at a time; a new target waits out the park, and the head moving doesn't count as a move.
             if (_park.Update(key, wanted, Time.time, _forceMove, parkSeconds, staysWithin, glideSeconds))
             {
@@ -291,24 +296,43 @@ namespace Diorama
             return HomeLocal(_homeLeft);
         }
 
-        [Tooltip("Step 17 F11: during the move and resize lessons the Spirit floats above the island's back centre: this high over the cap and this far in from the back edge (island-local m).")]
-        public Vector2 backPark = new Vector2(0.12f, 0.04f);
+        [Tooltip("Nov 12: in the tutorial the Spirit floats over the island's centre: x = this high over the cap (above the statue, near eye level), y = this far toward the player from the centre (island-local m).")]
+        public Vector2 centrePark = new Vector2(0.22f, 0.03f);
+        [Tooltip("Nov 12: in the grab lesson, this high over the corner the ghost grabs (island-local m).")]
+        public float grabCornerLift = 0.1f;
 
-        bool _backPark;
+        enum TutorialSpot { None, Centre, GrabCorner }
+        TutorialSpot _tutorialPark;
 
-        static bool BackParkLesson
+        /// <summary>Nov 12: the lessons from the greeting to the look lesson keep the Spirit over the centre; "grass" frees it.</summary>
+        public static bool CentreLesson(string lesson, bool opening) =>
+            lesson == null ? opening : lesson == "shard" || lesson == "pinch" || lesson == "twoHands" || lesson == "starter" ||
+                                       lesson == "walk" || lesson == "far" || lesson == "practice" || lesson == "look";
+
+        TutorialSpot TutorialPark
         {
             get
             {
+                if (_battle || FinaleDirector.Running) return TutorialSpot.None;
                 var id = Onboarding.Lesson;
-                return id == "move" || id == "twoHands";
+                if (id == "move") return TutorialSpot.GrabCorner;
+                return CentreLesson(id, Opening.InProgress) ? TutorialSpot.Centre : TutorialSpot.None;
             }
         }
 
-        Vector3 BackLocal()
+        Vector3 CentreLocal()
         {
             var b = island.LocalBounds;
-            return new Vector3(b.center.x, island.map.capHeight + backPark.x, b.min.z + backPark.y);
+            return new Vector3(b.center.x, island.map.capHeight + centrePark.x, b.center.z + centrePark.y);
+        }
+
+        /// <summary>The near corner on the dominant side, where the move ghost grabs (<see cref="Opening"/>'s rim point).</summary>
+        Vector3 GrabCornerLocal()
+        {
+            var half = island.FootprintHalfSize;
+            // Island +X is the player's left.
+            float x = DominantHand.Left ? half.x - 0.05f : -(half.x - 0.05f);
+            return new Vector3(x, island.CapTopLocal + grabCornerLift, half.y - 0.02f);
         }
 
         Vector3 HomeLocal(bool left)

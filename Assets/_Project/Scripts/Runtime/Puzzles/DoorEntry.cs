@@ -122,7 +122,9 @@ namespace Diorama
             bool near = open && Near(_explorer.Tile, _footprint);
             Boost = Mathf.MoveTowards(Boost, near || open && _objective != null && _objective() ? 1f : 0f, Time.deltaTime * 2f);
             Wave(near && free);
-            Chip(near && visible && free, door);
+            // Nov 12 evening (Mugesh: the tower's "Walk in, or look and pinch" still showed after he won and came out): the
+            // chip only invites in while the hall's Keeper is still to beat; the door still opens for a revisit.
+            Chip(near && visible && free && (_objective == null || _objective()), door);
         }
 
         bool Gazed(Vector3 door)

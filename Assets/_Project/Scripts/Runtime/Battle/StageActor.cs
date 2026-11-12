@@ -85,6 +85,37 @@ namespace Diorama
             return any;
         }
 
+        /// <summary>
+        /// Nov 12 (Mugesh: Galeowl's plate floated far off; the battle line shook with the owl): the body alone, without
+        /// the shield bubble, smoke, flames and particles round it. Labels and the battle line measure from this.
+        /// </summary>
+        public bool TryGetBodyBounds(out Bounds bounds)
+        {
+            bounds = default;
+            if (_renderers == null || Time.time - _renderersAt > 0.5f)
+            {
+                _renderers = GetComponentsInChildren<Renderer>(false);
+                _renderersAt = Time.time;
+            }
+            bool any = false;
+            foreach (var r in _renderers)
+            {
+                if (r == null || r is ParticleSystemRenderer || r is TrailRenderer || r is LineRenderer || attached.Contains(r) || IsFx(r.transform)) continue;
+                Add(r, ref bounds, ref any);
+            }
+            return any || TryGetVisualBounds(out bounds);
+        }
+
+        bool IsFx(Transform t)
+        {
+            for (; t != null && t != transform; t = t.parent)
+            {
+                var n = t.name;
+                if (n.Contains("Smoke") || n.Contains("Flame") || n.Contains("Aura") || n.Contains("Shield") || n.Contains("Glow") || n.Contains("Ring")) return true;
+            }
+            return false;
+        }
+
         static void Add(Renderer r, ref Bounds bounds, ref bool any)
         {
             if (r == null || !r.enabled || !r.gameObject.activeInHierarchy) return;

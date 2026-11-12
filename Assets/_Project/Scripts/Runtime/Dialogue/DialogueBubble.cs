@@ -759,8 +759,9 @@ namespace Diorama
         [Min(1)] public int blipEvery = 4;
         [Tooltip("And never closer than this (seconds), however fast the letters come (Oct 27: 0.2).")]
         public float blipGap = 0.12f;
-        [Tooltip("Nov 11: the Heart's first line: how loud the generated bowl and choir call sits on top of the synth's low hum (0-1).")]
-        [Range(0f, 1f)] public float heartCallLayer = 0.6f;
+        [Tooltip("Nov 11: the Heart's first line: how loud the generated bowl and choir call sits on top of the synth's low hum (0-1). " +
+                 "Nov 12 evening: 1 (was 0.6; Mugesh didn't hear the statue: it played at about a third of full volume, under the shard's burst).")]
+        [Range(0f, 1f)] public float heartCallLayer = 1f;
         [Tooltip("Step 24: new voices: at least this long between grains (a grain is 0.15-0.3 s, a blip far shorter).")]
         public float grainGap = 0.2f;
         [Tooltip("Step 24: new voices: this long after a speaker's last line, its next line counts as a new scene and gets the entrance call again (s).")]

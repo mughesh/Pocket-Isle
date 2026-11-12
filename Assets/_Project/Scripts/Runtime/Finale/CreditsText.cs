@@ -11,13 +11,13 @@ namespace Diorama
         public static readonly bool PaidSoundsDone = true;
 
         public const string SoundsFreePlan = "Sounds made with elevenlabs.io (free plan)";
-        public const string SoundsAfterRegen = "Sounds: synthesised and generated for Pocket Isle; some sounds by Kenney (CC0)";
+        public const string SoundsAfterRegen = "Sounds: synthesised and generated for Pocket Isle";
 
         public static string[] Lines => PaidSoundsDone
             ? new[]
             {
-                "Pocket Isle", "Made by Mugesh", "Music: Mugesh", "Islings, realms and Keepers: original designs", SoundsAfterRegen,
-                "Font: Liberation Sans (SIL Open Font License)",
+                // Nov 12 evening (Mugesh: minimal credits, no music or font lines).
+                "Pocket Isle", "Made by Mugesh", "Islings, realms and Keepers: original designs", SoundsAfterRegen,
             }
             : new[]
             {
@@ -45,12 +45,11 @@ namespace Diorama
         /// </summary>
         public static Lantern[] Lanterns => new[]
         {
+            // Nov 12 evening (Mugesh: minimal credits; no music or font lanterns).
             new Lantern("Islings, realms and Keepers", "original designs"),
-            new Lantern("Music", "Mugesh"),
             PaidSoundsDone
-                ? new Lantern("Sounds: synthesised and generated for Pocket Isle", "Some sounds: Kenney (CC0)")
+                ? new Lantern("Sounds", "synthesised and generated for Pocket Isle")
                 : new Lantern("Sounds: elevenlabs.io (free plan)", "Some sounds: Kenney (CC0)"),
-            new Lantern("Font: Liberation Sans", "SIL Open Font License"),
             new Lantern("Pocket Isle", "Made by Mugesh", true),
         };
 

@@ -836,8 +836,25 @@ namespace Diorama
             if (cam != null)
             {
                 Vector3 up = BattleHud.LabelUp(cam);
-                if (_avoidB != null && _captionPill != null && _captionPill.gameObject.activeSelf) world = ClearCaptionSpot(cam, world, up);
-                else world = UnderTop(cam, world);
+                bool shown = _captionPill != null && _captionPill.gameObject.activeSelf;
+                if (_avoidB != null && shown)
+                {
+                    // Nov 12 evening (Mugesh: the line shook with Galeowl and sometimes went inside it): the spot is found from
+                    // the body alone and held in the island's space; it is re-checked twice a second and only moves when the
+                    // held spot is covered.
+                    if (!_captionHeldOk || Time.time >= _captionCheckAt)
+                    {
+                        _captionCheckAt = Time.time + captionRecheckSeconds;
+                        _captionHeld = island.transform.InverseTransformPoint(ClearCaptionSpot(cam, world, up));
+                        _captionHeldOk = true;
+                    }
+                    world = island.transform.TransformPoint(_captionHeld);
+                }
+                else
+                {
+                    _captionHeldOk = false;
+                    world = UnderTop(cam, world);
+                }
                 Vector3 away = world - cam.transform.position;
                 if (away.sqrMagnitude > 1e-8f) _captionRoot.rotation = Quaternion.LookRotation(away, up);
             }
@@ -854,6 +871,11 @@ namespace Diorama
         readonly System.Collections.Generic.List<Bounds> _captionPlates = new System.Collections.Generic.List<Bounds>();
         readonly Vector3[] _captionSpots = new Vector3[6];
         int _captionSpot;
+        [Tooltip("Nov 12 evening: the battle line's held spot is re-checked this often (s).")]
+        public float captionRecheckSeconds = 0.5f;
+        Vector3 _captionHeld;
+        bool _captionHeldOk;
+        float _captionCheckAt;
         BattleHud _captionHud;
         DialogueBubble _captionBubble;
 
@@ -883,7 +905,7 @@ namespace Diorama
             if (_captionBubble != null && _captionBubble.TryGetPanelBounds(out var bubble)) _captionKeepOff.Add(ViewRect(cam, bubble));
 
             _captionSpots[0] = UnderTop(cam, over);
-            bool hasBody = _avoidB.TryGetVisualBounds(out var vb);
+            bool hasBody = _avoidB.TryGetBodyBounds(out var vb);
             if (!hasBody) vb = new Bounds(over, Vector3.zero);
             if (hasBody)
             {
@@ -924,6 +946,15 @@ namespace Diorama
                 return cost;
             }
 
+            // The held spot stays while it covers next to nothing (a tenth of the pill): no hopping with the owl's bob.
+            if (_captionHeldOk)
+            {
+                Vector3 held = island.transform.TransformPoint(_captionHeld);
+                var a0 = cam.WorldToViewportPoint(held - right * hw - up * hh);
+                var c0 = cam.WorldToViewportPoint(held + right * hw + up * hh);
+                float pillArea = Mathf.Abs((c0.x - a0.x) * (c0.y - a0.y));
+                if (Cost(held) <= pillArea * 0.1f) return held;
+            }
             if (Cost(_captionSpots[_captionSpot]) <= 1e-6f) return _captionSpots[_captionSpot];
             // Beside the wild Isling: the side away from its HP plate first (the plate sits beside it too).
             bool plateLeft = false;
@@ -960,7 +991,7 @@ namespace Diorama
 
         void KeepOff(Camera cam, StageActor actor)
         {
-            if (actor != null && actor.TryGetVisualBounds(out var vb)) _captionKeepOff.Add(ViewRect(cam, vb));
+            if (actor != null && actor.TryGetBodyBounds(out var vb)) _captionKeepOff.Add(ViewRect(cam, vb));
         }
 
         static Rect ViewRect(Camera cam, Bounds b)

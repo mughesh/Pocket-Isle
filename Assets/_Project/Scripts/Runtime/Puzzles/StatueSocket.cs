@@ -54,8 +54,11 @@ namespace Diorama
         public float voiceHeight = 2.6f;
 
         [Header("Grab")]
-        [Tooltip("World metres round the shard.")]
-        public float grabRadius = 0.07f;
+        [Tooltip("World metres round the shard (Nov 12 evening: 9 cm, was 7).")]
+        public float grabRadius = 0.09f;
+        [Tooltip("Nov 12 evening (Mugesh: the shard only took on the third grab): a pinch or fist that closed up to this long ago " +
+                 "still takes the shard when it reaches it (a hand often closes just before it arrives).")]
+        public float grabGraceSeconds = 0.6f;
         [Tooltip("Released this close to the socket (world metres): it locks in.")]
         public float snapRadius = 0.06f;
 
@@ -397,6 +400,8 @@ namespace Diorama
             base.Update();
         }
 
+        readonly float[] _closedAt = { -99f, -99f };
+
         void TryGrab()
         {
             if (holder == null) return;
@@ -404,15 +409,21 @@ namespace Diorama
             for (int h = 0; h < 2; h++)
             {
                 var s = _hands[h];
-                if (s.busy || !(s.pinchStarted || s.fistStarted)) continue;
-                var grip = s.pinchStarted ? s.pinchPoint : s.palm;
+                if (s.pinchStarted || s.fistStarted) _closedAt[h] = Time.time;
+                if (!s.Holding) _closedAt[h] = -99f;
+                // Nov 12 evening: a hand near the rim used to count as busy (the island's grab zone guess) even when it
+                // wasn't holding the island; only a hand really holding the island is busy here.
+                bool busy = s.busy && grabGuard != null && grabGuard.IsHandGrabbing(s.left);
+                if (busy || !s.Holding || Time.time - _closedAt[h] > grabGraceSeconds) continue;
+                var grip = s.GripPoint;
                 if ((grip - cup).magnitude > grabRadius * Mathf.Max(1f, island.transform.lossyScale.x)) continue;
                 _hand = h;
                 _shardWorld = cup;
                 _grabOffset = cup - grip;
                 holder.SetOut(id, true);
                 MarkInteracted();
-                Debug.Log($"[StatueSocket] {id} taken from the holder ({(s.left ? "left" : "right")} {(s.pinchStarted ? "pinch" : "palm")}).");
+                GameAudio.At(Diorama.Audio.AudioIds.PodGrab, cup);
+                Debug.Log($"[StatueSocket] {id} taken from the holder ({(s.left ? "left" : "right")} {(s.pinch ? "pinch" : "palm")}, {Time.time - _closedAt[h]:0.00} s after it closed).");
                 return;
             }
             // Look + pinch on the shard in its cup: it floats into the socket.
@@ -478,6 +489,7 @@ namespace Diorama
                 _shardWorld = cup;
                 holder.SetOut(id, true);
                 MarkInteracted();
+                GameAudio.At(Diorama.Audio.AudioIds.PodGrab, cup);
                 Debug.Log($"[StatueSocket] {id} lands on the {(s.left ? "left" : "right")} palm.");
                 return;
             }

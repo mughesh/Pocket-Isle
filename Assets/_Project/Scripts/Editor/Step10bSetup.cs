@@ -167,7 +167,7 @@ namespace Diorama.EditorTools
 
         static void SmallMills(Transform root, WorldMap map, StringBuilder log)
         {
-            var spots = new[] { new Vector2Int(17, 21), new Vector2Int(31, 20) };
+            var spots = new[] { new Vector2Int(17, 21), new Vector2Int(28, 17) }; // Nov 12 evening: the second beside the lower cottage
             for (int i = 0; i < spots.Length; i++)
             {
                 var wheel = Child<WheelPiece>(root, $"Small Mill {i}");

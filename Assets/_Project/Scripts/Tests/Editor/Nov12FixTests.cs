@@ -46,7 +46,11 @@ namespace Diorama.Tests
         [Test]
         public void KeeperPlate_GoesBesideTheBody_NeverInsideIt()
         {
-            StringAssert.Contains("BesideSpot(b, feet", Source("Assets/_Project/Scripts/Runtime/Battle/BattleHud.cs"));
+            // Nov 12 evening: on the floor beside the body alone (a shield bubble pushed Galeowl's plate far off).
+            var src = Source("Assets/_Project/Scripts/Runtime/Battle/BattleHud.cs");
+            StringAssert.Contains("FloorSpot(b, cam, feet", src);
+            StringAssert.Contains("TryGetBodyBounds", src);
+            StringAssert.Contains("TryGetBodyBounds", Source("Assets/_Project/Scripts/Runtime/Battle/BattleRunes.cs"));
             Assert.AreEqual("<b>Galeowl</b>", BattleHud.LabelText("Galeowl", 11, false), "a Keeper's plate is its name, no level");
         }
 

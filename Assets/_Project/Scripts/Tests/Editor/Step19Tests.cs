@@ -9,13 +9,13 @@ namespace Diorama.Tests
         public void Lanterns_InOrder_BigPortraitLast_SameCreditsAsTheCard()
         {
             var l = CreditsText.Lanterns;
-            Assert.AreEqual(5, l.Length);
+            // Nov 12 evening: minimal (no music or font lanterns).
+            Assert.AreEqual(3, l.Length);
             Assert.AreEqual("Islings, realms and Keepers", l[0].title);
-            Assert.AreEqual("Music", l[1].title);
-            StringAssert.StartsWith("Sounds", l[2].title);
-            StringAssert.StartsWith("Font", l[3].title);
-            Assert.AreEqual("Pocket Isle", l[4].title);
-            Assert.AreEqual("Made by Mugesh", l[4].subtitle);
+            StringAssert.StartsWith("Sounds", l[1].title);
+            Assert.AreEqual("Pocket Isle", l[2].title);
+            Assert.AreEqual("Made by Mugesh", l[2].subtitle);
+            Assert.IsFalse(System.Array.Exists(l, x => (x.title + x.subtitle).Contains("Music") || (x.title + x.subtitle).Contains("Font")));
             for (int i = 0; i < l.Length; i++) Assert.AreEqual(i == l.Length - 1, l[i].big, $"lantern {i}");
             foreach (var x in l)
             {
@@ -37,8 +37,9 @@ namespace Diorama.Tests
         [Test]
         public void Lanterns_About15To18Seconds()
         {
+            // Nov 12 evening: three lanterns, about 12 s.
             float s = FinaleDirector.LanternSeconds(CreditsText.Lanterns.Length, 2f, 1.6f, 5f, 1.2f);
-            Assert.That(s, Is.InRange(14f, 18f));
+            Assert.That(s, Is.InRange(10f, 18f));
         }
 
         [Test]

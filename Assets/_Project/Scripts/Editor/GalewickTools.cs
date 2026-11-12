@@ -39,9 +39,9 @@ namespace Diorama.EditorTools
         /// <summary>The three kite spots (10b), on the grass beside the loop.</summary>
         public static readonly Vector2Int[] KiteXY = { new Vector2Int(35, 37), new Vector2Int(43, 39), new Vector2Int(44, 34) };
         /// <summary>The narrow ridge path's cloud bank tiles (10b: three puffs block it, west to east).</summary>
-        public static readonly Vector2Int[] CloudXY = { new Vector2Int(21, 47), new Vector2Int(22, 47), new Vector2Int(23, 47) };
+        public static readonly Vector2Int[] CloudXY = { new Vector2Int(21, 47), new Vector2Int(24, 47), new Vector2Int(27, 47) }; // Nov 12 evening: spread (side by side they read as one cloud)
         /// <summary>Step 12b: the ridge path is 2 wide (rows 47-48); each puff also blocks the tile beside it on row 48.</summary>
-        public static readonly Vector2Int[] CloudTwinXY = { new Vector2Int(21, 48), new Vector2Int(22, 48), new Vector2Int(23, 48) };
+        public static readonly Vector2Int[] CloudTwinXY = { new Vector2Int(21, 48), new Vector2Int(24, 48), new Vector2Int(27, 48) };
         /// <summary>
         /// Step 14a: the arrival's two cloud puffs on the trail, 3 and 4 tiles past the arrival (west tiles; each also
         /// blocks the tile east of it: the trail is 2 wide). The realm's gesture taught right after the portal.
@@ -206,7 +206,7 @@ namespace Diorama.EditorTools
                 new Landmark { name = "shrine", tile = Tile(ShrineXY) },
                 new Landmark { name = "mill", tile = Tile(MillXY.x + 1, MillXY.y - 2), line = "gw.mill.first", radius = 3 },
                 new Landmark { name = "kites", tile = Tile(Vector2Int.RoundToInt(KiteCenter)), line = "gw.kites.first", radius = 6 },
-                new Landmark { name = "ridge", tile = Tile(CloudXY[2] + Vector2Int.right * 2), line = "gw.ridge.first", radius = 3 },
+                new Landmark { name = "ridge", tile = Tile(CloudXY[0] + Vector2Int.right * 4), line = "gw.ridge.first", radius = 3 },
                 new Landmark { name = "tower", tile = TowerFront, line = "gw.tower.first", radius = 4 },
                 new Landmark { name = "rare", tile = Tile(51, 51), line = "gw.rare.first", radius = 4 },
                 new Landmark { name = "fire", tile = Tile(49, 15) },
@@ -413,7 +413,7 @@ namespace Diorama.EditorTools
         {
             Disc(PlazaXY.x + 0.5f, PlazaXY.y + 0.5f, 2.3f, IslandMap.Path);
             foreach (var (x, y) in new[] { (19, 24), (25, 25), (18, 18), (26, 18) }) Prop(x, y, KCottage);
-            foreach (var (x, y) in new[] { (17, 21), (31, 20) }) Prop(x, y, KSmallMill);
+            foreach (var (x, y) in new[] { (17, 21), (28, 17) }) Prop(x, y, KSmallMill); // Nov 12 evening: the second beside the lower cottage
             Prop(MillXY, KMill);
             Prop(ShrineXY, KShrine);
             foreach (var (x, y) in new[] { (22, 22), (30, 21), (35, 19), (35, 24), (12, 23) }) Prop(x, y, KHay);
