@@ -353,7 +353,14 @@ namespace Diorama
         /// <summary>Debug shots: holds the clip at this point (0..1), fully visible. Negative = plays normally.</summary>
         [System.NonSerialized] public float debugFreeze = -1f;
 
-        void LateUpdate() => Tick(previewing ? Time.unscaledDeltaTime : Time.deltaTime);
+        void LateUpdate()
+        {
+            // Step 32: the swipe-and-tap lesson: a swipe while the explorer stands, a tap as soon as it walks.
+            var want = previewing || _hasSaved ? null : Onboarding.PracticeGhost;
+            if (want != null && _showing && _request.clip != want)
+                Show(want, _request.place, _request.target, _request.scale, _request.left, _request.both, _request.spread, turn: _request.turn);
+            Tick(previewing ? Time.unscaledDeltaTime : Time.deltaTime);
+        }
 
         /// <summary>Debug: the right ghost's skeleton wiring and where its thumb and index tips are now.</summary>
         public string DebugInfo()

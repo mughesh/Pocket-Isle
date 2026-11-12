@@ -339,7 +339,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Swipe to walk. Tap your thumb to stop on the gold!
+      text: Swipe your thumb to walk. Then tap to stop!
       context:
   - id: lesson.practice.nice
     once: 0
@@ -368,6 +368,20 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: Perfect! Once more.
+      context:
+  - id: lesson.practice.gold
+    once: 0
+    objective: 1
+    priority: 1
+    note: 'step 32: before the last round, the only one with a gold tile'
+    target:
+    validWhile: canWalk
+    context: outside & !battle
+    kind: 1
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Nice! Last one: stop on the gold!
       context:
   - id: lesson.practice.done
     once: 0

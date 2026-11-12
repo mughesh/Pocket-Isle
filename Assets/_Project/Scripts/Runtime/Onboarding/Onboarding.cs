@@ -84,8 +84,17 @@ namespace Diorama
         public float practicePassSeconds = 60f;
         [Tooltip("Step 27: a good stop's short line, and the practice's last line.")]
         public string practiceNiceLine = "lesson.practice.nice", practiceDoneLine = "lesson.practice.done";
+        [Tooltip("Step 32: after the second stop: the last round stops on the gold.")]
+        public string practiceGoldLine = "lesson.practice.gold";
+        [Tooltip("Step 32: the chip while standing, and while the explorer walks (the ghost then shows a tap).")]
+        public string practiceSwipeChip = "Swipe to walk", practiceTapChip = "Tap to stop";
+        [Tooltip("Step 32: during the walking lesson the explorer stays within this many tiles of the landmark (a square), " +
+                 "turning back toward it at the edge, so it never reaches the island's edge however long the player waits.")]
+        public string lessonAreaLandmark = "statue";
+        [Min(2)] public int lessonAreaRadius = 6;
         float _practiceFor;
         int _practiced, _practiceBest;
+        bool _practiceWalking;
         bool Practising => CurrentId == PracticeLesson && Current != null;
 
         [Tooltip("Step 16: the two-hand (turn, resize) lesson passes after this long without a two-hand grab (s).")]
@@ -124,6 +133,37 @@ namespace Diorama
                 return id == WalkLesson || id == FarLesson || id == PracticeLesson;
             }
         }
+
+        /// <summary>Smoke run: the swipe-and-tap lesson's time limit waits (its walk beats take longer than a minute).</summary>
+        [NonSerialized] public static bool DebugHoldPass;
+
+        /// <summary>Step 32: the lesson walk area's middle (the statue), while a walking lesson runs on a map that has it.</summary>
+        public static Vector2Int? LessonAreaCentre
+        {
+            get
+            {
+                if (_instance == null || !LessonWalking || _instance.island == null || _instance.island.world == null) return null;
+                return _instance.island.world.TryGetLandmark(_instance.lessonAreaLandmark, out var c) ? c : (Vector2Int?)null;
+            }
+        }
+
+        /// <summary>
+        /// Step 32: a lesson walk planned from <paramref name="from"/> may not step onto <paramref name="tile"/>: it lies
+        /// outside the lesson area and further out than the walk already is (a walk that starts outside can come back in).
+        /// </summary>
+        public static bool LessonAreaBlocks(Vector2Int from, Vector2Int tile)
+        {
+            var c = LessonAreaCentre;
+            if (!c.HasValue) return false;
+            int r = _instance.lessonAreaRadius;
+            return StopPractice.Distance(tile, c.Value) > Mathf.Max(r, StopPractice.Distance(from, c.Value));
+        }
+
+        /// <summary>Step 32: the ghost the swipe-and-tap lesson wants now: a swipe while standing, a tap while walking; null otherwise.</summary>
+        public static string PracticeGhost =>
+            _instance != null && _instance.Practising && _instance._shown && _instance.explorer != null
+                ? _instance.explorer.Heading != Vector2Int.zero ? "thumb_tap" : GhostHands.SwipeAllClip
+                : null;
 
         /// <summary>A lesson starts teaching: show its ghost.</summary>
         public event Action<LessonData> LessonShown;
@@ -240,6 +280,8 @@ namespace Diorama
             if (lessonId == "turn") lessonId = PracticeLesson;
             // Nov 12 evening: the far lesson ("Swipe to walk, tap to stop") went: the tap practice teaches the tap.
             if (lessonId == FarLesson) lessonId = PracticeLesson;
+            // Step 32: so did the four-swipe walk lesson: swipe and tap are taught together in the practice.
+            if (lessonId == WalkLesson) lessonId = PracticeLesson;
             // Step 9h moved the two-hands lesson into the opening: a save that waited for it at the end is done.
             if (finished || lessonId == "twoHands")
             {
@@ -256,6 +298,7 @@ namespace Diorama
         public void SkipTo(string id)
         {
             if (_runner == null || !_runner.IsRunning) return;
+            if (id == WalkLesson || id == FarLesson) id = PracticeLesson; // step 32: both went into the swipe-and-tap lesson
             int i = script.IndexOf(id);
             if (i < 0)
             {
@@ -375,7 +418,16 @@ namespace Diorama
                 }
             }
             else _twoHandsFor = 0f;
-            if (Practising)
+            if (Practising && _shown && explorer != null)
+            {
+                bool walking = explorer.Heading != Vector2Int.zero;
+                if (walking != _practiceWalking)
+                {
+                    _practiceWalking = walking;
+                    Dialogue.SetChip(walking ? practiceTapChip : practiceSwipeChip);
+                }
+            }
+            if (Practising && !DebugHoldPass)
             {
                 _practiceFor += Time.deltaTime;
                 if (_practiceFor >= practicePassSeconds && _practiceFor - Time.deltaTime < practicePassSeconds)
@@ -520,7 +572,7 @@ namespace Diorama
                 bool walk = l.id == WalkLesson;
                 Dialogue.Pin(new[] { l.line, l.again, l.help, script.handsLine, pinch ? pinchOnceLine : null,
                         walk ? swipeNiceLine : null, walk ? swipeMoreLine : null, walk ? swipeLastLine : null }, l.chip,
-                    practice ? new[] { practiceNiceLine, practicePerfectLine } : null);
+                    practice ? new[] { practiceNiceLine, practicePerfectLine, practiceGoldLine } : null);
                 // Step 14a: a counted lesson shows its progress dots (two pinches).
                 if (pinch) Dialogue.SetProgress(0, pinchCount);
                 else if (l.id == WalkLesson) Dialogue.SetProgress(0, swipeTiles);
@@ -748,6 +800,7 @@ namespace Diorama
         {
             _practiced = 0;
             _practiceFor = 0f;
+            _practiceWalking = false;
             PickPracticeTile();
         }
 
@@ -765,6 +818,12 @@ namespace Diorama
             _goldTile = null;
             var world = island.world;
             if (world == null || explorer == null) return;
+            int goal = StopPractice.Goal(QuickJourney.Active);
+            if (!StopPractice.GoldRound(_practiced, goal))
+            {
+                Debug.Log($"[Onboarding] Practice round {_practiced + 1}/{goal}: swipe, then any tap that stops the walk.");
+                return;
+            }
             int want = StopPractice.Distance(_practiced);
             var way = WalkWay();
             var ways = way != Vector2Int.zero ? new[] { way }
@@ -773,7 +832,8 @@ namespace Diorama
             for (int w = 0; w < ways.Length; w++)
             {
                 int n = 0;
-                for (var t = explorer.Tile + ways[w]; n < want && world.CanWalk(t) && island.FootprintContains(island.TileToLocal(t, island.Content.capHeight)); t += ways[w]) n++;
+                for (var t = explorer.Tile + ways[w]; n < want && world.CanWalk(t) && island.FootprintContains(island.TileToLocal(t, island.Content.capHeight)) &&
+                                                    !LessonAreaBlocks(explorer.Tile, t); t += ways[w]) n++;
                 int along = n;
                 while (along >= StopPractice.Nearest && world.At(explorer.Tile + ways[w] * along) == IslandMap.TallGrass) along--;
                 if (along < StopPractice.Nearest) continue;
@@ -794,7 +854,7 @@ namespace Diorama
         {
             if (!_goldTile.HasValue)
             {
-                PickPracticeTile();
+                if (StopPractice.GoldRound(_practiced, StopPractice.Goal(QuickJourney.Active))) PickPracticeTile();
                 return;
             }
             int d = StopPractice.Distance(tile, _goldTile.Value);
@@ -833,15 +893,17 @@ namespace Diorama
                 _runner.Mark("practiceDone");
                 return;
             }
-            Dialogue.Repeat(gold && !string.IsNullOrEmpty(practicePerfectLine) ? practicePerfectLine : practiceNiceLine);
+            bool goldNext = StopPractice.GoldRound(_practiced, goal);
+            Dialogue.Repeat(goldNext && !string.IsNullOrEmpty(practiceGoldLine) ? practiceGoldLine
+                : gold && !string.IsNullOrEmpty(practicePerfectLine) ? practicePerfectLine : practiceNiceLine);
             PickPracticeTile();
         }
 
         /// <summary>Debug (bridge): a good stop.</summary>
         public void DebugPracticeStop()
         {
-            if (!Practising || !_goldTile.HasValue) return;
-            explorer.Teleport(_goldTile.Value, explorer.Facing);
+            if (!Practising) return;
+            if (_goldTile.HasValue) explorer.Teleport(_goldTile.Value, explorer.Facing);
             PracticeStop();
         }
 

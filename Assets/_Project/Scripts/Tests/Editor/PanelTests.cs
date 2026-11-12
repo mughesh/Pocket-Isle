@@ -90,11 +90,11 @@ namespace Diorama.Tests
         {
             var s = AssetDatabase.LoadAssetAtPath<OnboardingScript>("Assets/_Project/Data/Onboarding/Onboarding_Main.asset");
             Assert.IsNotNull(s);
-            var walk = s.lessons.First(l => l.id == "walk");
+            // Step 32: the swipe-and-tap lesson took over the walk lesson's help line.
+            var walk = s.lessons.First(l => l.id == Onboarding.PracticeLesson);
             Assert.AreEqual("lesson.walk.help", walk.help);
             Assert.AreEqual(12f, walk.helpAfter, 1e-3f, "the second door before a judge gives up (was 30)");
-            // The far lesson has no help line; the rest keep 30.
-            foreach (var l in s.lessons.Where(l => l.id != "walk" && l.id != "starter"))
+            foreach (var l in s.lessons.Where(l => l.id != Onboarding.PracticeLesson && l.id != "starter"))
                 Assert.AreEqual(30f, l.helpAfter, 1e-3f, l.id);
         }
 

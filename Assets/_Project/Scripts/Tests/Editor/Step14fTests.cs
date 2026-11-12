@@ -24,7 +24,7 @@ namespace Diorama.Tests
             Assert.IsNull(s.lessons.Find(l => l.id == Onboarding.FarLesson), "the far lesson is out of the chain");
             var practice = s.lessons.Find(l => l.id == Onboarding.PracticeLesson);
             Assert.IsNotNull(practice);
-            Assert.AreEqual(GhostHands.SwipeTapClip, practice.ghost);
+            Assert.AreEqual(GhostHands.SwipeAllClip, practice.ghost, "step 32: opens on the swipe, a tap while walking");
             foreach (var l in s.lessons)
                 Assert.AreNotEqual(Step12aSetup.SwipeTwiceClip, l.ghost, $"lesson {l.id} teaches swiping twice");
 

@@ -148,39 +148,12 @@ MonoBehaviour:
     goldTileSteps: 0
     goldTileRule: 
     tutorialGrass: 0
-  - id: walk
-    line: lesson.walk
-    again: lesson.walk.again
-    chip: Swipe to walk
-    help: lesson.walk.help
-    helpAfter: 12
-    startWhen: canWalk
-    delay: 1.5
-    doneWhen: swipeWalked
-    validWhile: 
-    skipAfter: 0
-    failWhen: 
-    rewindTo: 
-    praise: 1
-    ghost: thumb_swipe_all
-    place: 2
-    target: ghost
-    source: 
-    targetLift: 0
-    ghostScale: 0.6
-    ghostTurn: {x: 0, y: 0}
-    bothHands: 0
-    ghostSpread: 0
-    goldPath: 
-    goldTileSteps: 0
-    goldTileRule: 
-    tutorialGrass: 0
   - id: practice
     line: lesson.practice
     again:
-    chip: "Swipe to walk \xB7 Tap to stop"
-    help:
-    helpAfter: 30
+    chip: Swipe to walk
+    help: lesson.walk.help
+    helpAfter: 12
     startWhen: canWalk
     delay: 0.8
     doneWhen: practiceDone
@@ -189,7 +162,7 @@ MonoBehaviour:
     failWhen:
     rewindTo:
     praise: 0
-    ghost: thumb_swipe_left_tap
+    ghost: thumb_swipe_all
     place: 2
     target: ghost
     source:

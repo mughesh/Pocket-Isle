@@ -47,7 +47,7 @@ namespace Diorama
         [Tooltip("Optional. The logo and the slot runes (step 9g).")]
         public TitleScreen title;
         [Tooltip("N (skip) jumps the lessons to this one.")]
-        public string firstWalkLesson = "walk";
+        public string firstWalkLesson = "practice";
         [Tooltip("Diorama/Toon material for the shard (mossy stone, gold cracks).")]
         public Material shardMaterial;
         [Tooltip("Step 22: gold motes per second leaving the shard's cracks.")]

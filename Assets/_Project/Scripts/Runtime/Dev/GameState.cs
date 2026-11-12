@@ -44,7 +44,7 @@ namespace Diorama
         public WorldMap lakeTemple;
         public Vector2Int lakeTempleEntry = new Vector2Int(4, 8);
         [Tooltip("Lesson the tutorial restarts at (the first one after the opening).")]
-        public string firstWalkLesson = "walk";
+        public string firstWalkLesson = "practice";
         [Tooltip("Who a preset team gets after the lead (species asset names). Step 9f: Steambara (the Keeper is tuned for a Water Isling in the party) and a fire common.")]
         public string[] presetCommons = { "Steambara", "Kettlewing" };
 

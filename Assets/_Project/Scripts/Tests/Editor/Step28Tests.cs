@@ -96,7 +96,9 @@ namespace Diorama.Tests
         public void Both_tap_lessons_show_the_swipe_and_then_the_tap()
         {
             var s = Lessons();
-            Assert.AreEqual(GhostHands.SwipeTapClip, s.lessons.Find(l => l.id == Onboarding.PracticeLesson).ghost);
+            // Step 32: it opens on the swipe; Onboarding.PracticeGhost swaps in the tap while walking.
+            Assert.AreEqual(GhostHands.SwipeAllClip, s.lessons.Find(l => l.id == Onboarding.PracticeLesson).ghost);
+            StringAssert.Contains("\"thumb_tap\" : GhostHands.SwipeAllClip", System.IO.File.ReadAllText("Assets/_Project/Scripts/Runtime/Onboarding/Onboarding.cs"));
         }
 
         [Test]

@@ -18,10 +18,10 @@ namespace Diorama.Tests
         public void WalkLessons_FourSwipes_ThenSwipeAndTap()
         {
             var s = Lessons();
-            var walk = s.lessons.Find(l => l.id == Onboarding.WalkLesson);
-            var practice = s.lessons.Find(l => l.id == Onboarding.PracticeLesson); // Nov 12 evening: the far lesson went
-            Assert.AreEqual(GhostHands.SwipeAllClip, walk.ghost, "the walk lesson shows left, right, forward, back");
-            Assert.AreEqual(GhostHands.SwipeTapClip, practice.ghost, "the practice shows a swipe, then the tap that stops");
+            // Step 32: one lesson: it opens on the swipe (any way); the ghost turns to a tap while the explorer walks.
+            Assert.IsNull(s.lessons.Find(l => l.id == Onboarding.WalkLesson));
+            var practice = s.lessons.Find(l => l.id == Onboarding.PracticeLesson);
+            Assert.AreEqual(GhostHands.SwipeAllClip, practice.ghost, "the lesson opens on the swipe");
         }
 
         [Test]

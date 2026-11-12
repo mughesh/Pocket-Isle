@@ -99,6 +99,9 @@ namespace Diorama.EditorTools
 
         static readonly SaveSlot[] Slots = { SaveSlot.Adventure, SaveSlot.Quick };
 
+        /// <summary>Step 32: the lesson pump leaves the swipe-and-tap lesson running (the lesson walk beats need it).</summary>
+        static bool _holdPractice;
+
         static void BackUpSaves()
         {
             Directory.CreateDirectory(BackupDir);
@@ -924,8 +927,9 @@ namespace Diorama.EditorTools
             {
                 const string P = "New game";
                 Add(P, "opening: the shard, then the title: Full adventure", null, () => _adventurePicked && !TitleScreen.Showing, 120f, PumpLessons, 1f, true);
-                Add(P, "opening: shard, pinch, move, two hands, starter", null,
-                    () => !Opening.InProgress && Lesson is "walk" or "far" or "look" or "grass" || Onboarding.Finished && !Opening.InProgress, 300f, PumpLessons, 1f, true,
+                // Step 32: the swipe-and-tap lesson is the walking lesson: the pump holds it (and its time limit) for the walk beats.
+                Add(P, "opening: shard, pinch, move, two hands, starter", () => { _holdPractice = true; Onboarding.DebugHoldPass = true; },
+                    () => !Opening.InProgress && Lesson is "walk" or "far" or "practice" or "look" or "grass" || Onboarding.Finished && !Opening.InProgress, 300f, PumpLessons, 1f, true,
                     () => $"lesson '{Lesson}'");
                 // Step 28: from the start tile each swipe walks with no tap for 20 s; it never stops and nothing reacts.
                 foreach (var (name, swipe) in new[] { ("forward", ThumbGesture.SwipeForward), ("left", ThumbGesture.SwipeLeft), ("right", ThumbGesture.SwipeRight), ("back", ThumbGesture.SwipeBack) })
@@ -957,19 +961,30 @@ namespace Diorama.EditorTools
                 Add(P, "a thumb tap stops the lesson walk", () => UnityEngine.Object.FindFirstObjectByType<MicrogestureInput>().DebugRaise(ThumbGesture.Tap, GestureSource.Keyboard),
                     () => Elapsed > 1 && GameState.Instance.explorer.Heading == Vector2Int.zero, 6f, null, 0.5f, true);
                 // Nov 10: the lesson's card greys out behind the menu, off the tablets.
-                Add(P, "menu over a lesson: the card greys", () => Menu?.TryOpen(), () =>
+                // Step 32: after a tap stop the lesson's card is down a moment (the nice line); the menu opens once it is back.
+                float menuAt = -1f;
+                Add(P, "menu over a lesson: the card greys", () => menuAt = -1f, () =>
                 {
                     var b = UnityEngine.Object.FindFirstObjectByType<DialogueBubble>();
-                    if (!GameMenu.IsOpen || Elapsed < 2 || b == null || !b.IsParked) return false;
+                    if (!GameMenu.IsOpen || menuAt < 0f || Elapsed - menuAt < 2 || b == null || !b.IsParked) return false;
                     Step27Debug.Shot("menu_over_lesson");
                     return true;
-                }, 15f, null, 0.8f, true);
+                }, 25f, () =>
+                {
+                    var b = UnityEngine.Object.FindFirstObjectByType<DialogueBubble>();
+                    if (menuAt < 0f && !GameMenu.IsOpen && b != null && b.IsPinned)
+                    {
+                        Menu?.TryOpen();
+                        menuAt = (float)Elapsed;
+                    }
+                }, 0.4f, true);
                 Add(P, "menu closed: the lesson's line is back", () => Menu?.Close("smoke"), () =>
                 {
                     var b = UnityEngine.Object.FindFirstObjectByType<DialogueBubble>();
                     return !GameMenu.IsOpen && Elapsed > 2.5 && b != null && !b.IsParked;
                 }, 15f, null, 0.8f, true);
-                Add(P, "walk lessons: swipe, far, look", null, () => Lesson == "grass" || Onboarding.Finished, 180f, PumpLessons, 1f, true, () => $"lesson '{Lesson}'");
+                Add(P, "walk lessons: swipe, far, look", () => { _holdPractice = false; Onboarding.DebugHoldPass = false; },
+                    () => Lesson == "grass" || Onboarding.Finished, 180f, PumpLessons, 1f, true, () => $"lesson '{Lesson}'");
                 Add(P, "first battle: send, rune, catch", () => DevCheats.WildOff = false,
                     () => !InBattle && Caught > 0 && !Onboarding.Running, 240f, () =>
                     {
@@ -1025,7 +1040,7 @@ namespace Diorama.EditorTools
                 {
                     case "pinch": ob.DebugPinch(); break;
                     case Onboarding.WalkLesson: ob.DebugSwipe(); break; // Nov 12 evening: four counted swipes
-                    case Onboarding.PracticeLesson: ob.DebugPracticeStop(); break;
+                    case Onboarding.PracticeLesson: if (!_holdPractice) ob.DebugPracticeStop(); break;
                     case "starter": if (o != null) o.DebugChoose(0); break;
                     case "grass":
                     case "send":

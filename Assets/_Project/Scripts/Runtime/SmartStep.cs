@@ -269,7 +269,8 @@ namespace Diorama
         /// <see cref="Cap"/> means "plan more", and only a boxed-in explorer gets <see cref="Blocked"/>.
         /// <paramref name="blocked"/> adds tiles it must keep off (the gates).
         /// </summary>
-        public static string PlanRoam(IslandMap map, Vector2Int from, Vector2Int direction, Func<Vector2Int, bool> blocked, int maxTiles, List<Vector2Int> tiles)
+        public static string PlanRoam(IslandMap map, Vector2Int from, Vector2Int direction, Func<Vector2Int, bool> blocked, int maxTiles, List<Vector2Int> tiles,
+            Vector2Int? toward = null)
         {
             tiles.Clear();
             if (map == null || direction.sqrMagnitude != 1) return Blocked;
@@ -288,7 +289,11 @@ namespace Diorama
                 {
                     var l = Left(h);
                     int a = Run(cur, l), b = Run(cur, -l);
-                    if (a > 0 || b > 0) h = a >= b ? l : -l;
+                    // Step 32: in the lesson area the turn goes toward its middle when that way is open.
+                    int side = toward.HasValue ? Math.Sign(Vector2.Dot(toward.Value - cur, l)) : 0;
+                    if (side > 0 && a > 0) h = l;
+                    else if (side < 0 && b > 0) h = -l;
+                    else if (a > 0 || b > 0) h = a >= b ? l : -l;
                     else if (Open(cur - h)) h = -h;
                     else return Blocked;
                 }

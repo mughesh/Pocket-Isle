@@ -32,8 +32,9 @@ namespace Diorama.Tests
         [Test]
         public void Practice_goal_is_three_and_two_in_the_quick_journey()
         {
+            // Step 32: three rounds in both (it is the only walking lesson now).
             Assert.AreEqual(3, StopPractice.Goal(false));
-            Assert.AreEqual(2, StopPractice.Goal(true));
+            Assert.AreEqual(3, StopPractice.Goal(true));
         }
 
         [Test]
@@ -65,9 +66,9 @@ namespace Diorama.Tests
             var s = AssetDatabase.LoadAssetAtPath<OnboardingScript>("Assets/_Project/Data/Onboarding/Onboarding_Main.asset");
             int practice = s.IndexOf(Onboarding.PracticeLesson);
             Assert.GreaterOrEqual(practice, 0);
-            Assert.AreEqual(s.IndexOf(Onboarding.WalkLesson) + 1, practice, "Nov 12 evening: straight after the swipes (the far lesson went)");
+            Assert.AreEqual(s.IndexOf("starter") + 1, practice, "step 32: straight after the starter (one swipe-and-tap lesson)");
             Assert.AreEqual(s.IndexOf("look"), practice + 1);
-            Assert.AreEqual("Swipe to walk · Tap to stop", s.lessons[practice].chip);
+            Assert.AreEqual("Swipe to walk", s.lessons[practice].chip, "the chip turns to \"Tap to stop\" while walking");
             Assert.AreEqual("practiceDone", s.lessons[practice].doneWhen);
         }
 

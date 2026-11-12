@@ -578,7 +578,10 @@ namespace Diorama
                 _roaming = true;
                 _continuous = true; // a plan that runs out is planned again (TryStep)
                 PlanFrom = _tile;
-                PlanEnd = SmartStep.PlanRoam(Map, _tile, way, GateTile, roamTiles, _plan);
+                // Step 32: inside the lesson area round the statue, turning back toward its middle at the edge.
+                var from = _tile;
+                PlanEnd = SmartStep.PlanRoam(Map, _tile, way, t => GateTile(t) || Onboarding.LessonAreaBlocks(from, t), roamTiles, _plan,
+                    Onboarding.LessonAreaCentre);
                 KeepPlanInView();
                 _planIndex = 0;
                 _running = false;
@@ -609,7 +612,12 @@ namespace Diorama
         bool InView(Vector2Int t) => window == null || window.Shows(t);
 
         /// <summary>A tile the explorer may step onto now: walkable and shown by the island.</summary>
-        bool CanStepTo(Vector2Int t) => Map.CanWalk(t) && InView(t);
+        bool CanStepTo(Vector2Int t) => Map.CanWalk(t) && (InView(t) || LeavingHeldView);
+
+        bool _leavingHold;
+
+        /// <summary>Step 32: walking out of a puzzle's held view (<see cref="WorldWindow.SoftFocus"/>): the puzzle lets go.</summary>
+        public bool LeavingHeldView => _leavingHold && _heading != Vector2Int.zero;
 
         /// <summary>
         /// Cuts the plan at the window's edge; the plan then ends there (<see cref="SmartStep.View"/>). Only while the view
@@ -619,7 +627,16 @@ namespace Diorama
         /// </summary>
         void KeepPlanInView()
         {
+            _leavingHold = false;
             if (window == null || !window.HasFocus) return;
+            if (window.SoftFocus)
+            {
+                // Step 32 (Lilymere: stops every two tiles "like a junction" round the lotus garden): a puzzle's held view
+                // lets go when the walk leaves it (the puzzles read LeavingHeldView); the view then follows the explorer.
+                _leavingHold = _plan.Exists(t => !InView(t));
+                if (_leavingHold) Debug.Log("[GestureTestPiece] The walk leaves the puzzle's held view: it lets go (no cut).");
+                return;
+            }
             int cut = WalkRules.Truncate(_plan, InView);
             if (cut == 0) return;
             PlanEnd = SmartStep.View;
@@ -816,6 +833,7 @@ namespace Diorama
         {
             if (_heading != Vector2Int.zero) GameAudio.At(AudioIds.WalkStop, TileWorld(_tile));
             _heading = Vector2Int.zero;
+            _leavingHold = false;
             _running = false;
             _roaming = false;
             ClearPlan();

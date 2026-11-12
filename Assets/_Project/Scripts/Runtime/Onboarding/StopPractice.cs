@@ -11,8 +11,14 @@ namespace Diorama
         /// <summary>The fewest tiles ahead worth a target (step 28: a real run-up, time to see it coming and tap).</summary>
         public const int Nearest = 4;
 
-        /// <summary>Good stops that pass the practice: three, two in the Quick Journey (the judges' path).</summary>
-        public static int Goal(bool quick) => quick ? 2 : 3;
+        /// <summary>
+        /// Stops that pass the swipe-and-tap lesson: three rounds of swipe, then tap. Step 32: the same in the Quick Journey
+        /// (it is now the only walking lesson, the four swipes went).
+        /// </summary>
+        public static int Goal(bool quick) => 3;
+
+        /// <summary>Step 32: only the last round has a gold tile; the first ones pass with any tap that stops the walk.</summary>
+        public static bool GoldRound(int stopsDone, int goal) => stopsDone >= goal - 1;
 
         /// <summary>Tiles along the walk to the next target, after this many good stops: 4, 5, 6.</summary>
         public static int Distance(int stops) => Nearest + Mathf.Max(0, stops);
