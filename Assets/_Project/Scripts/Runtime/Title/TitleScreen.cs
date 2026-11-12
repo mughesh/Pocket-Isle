@@ -32,6 +32,7 @@ namespace Diorama
         /// <summary>The Settings rune: show the settings board, call the action when it closes (step 9g B wires it).</summary>
         public static event Action<Action> SettingsRequested;
 
+        // Step 33 (friends: Settings was too small): Settings and Back are as big as the other two, the row symmetric.
         static readonly Vector2 Wide = new Vector2(0.1f, 0.042f), Small = new Vector2(0.07f, 0.03f);
 
         SaveSlot? _picked;
@@ -117,7 +118,7 @@ namespace Diorama
             var cont = runes.Add("Continue", new Vector2(-0.124f, 0f), Wide, () => _continue = true, SaveSlots.Label(active));
             cont.primary = true;
             runes.Add("New journey", new Vector2(0f, 0f), Wide, () => ShowSlotChoice(true));
-            runes.Add("Settings", new Vector2(0.109f, -0.004f), Small, OpenSettings);
+            runes.Add("Settings", new Vector2(0.124f, 0f), Wide, OpenSettings);
             if (SaveSlots.Exists(other))
                 runes.Add($"or: {SaveSlots.Label(other)}", new Vector2(-0.124f, -0.056f), new Vector2(0.1f, 0.026f), () => SwitchTo(other));
             runes.DefaultFocus = cont;
@@ -140,8 +141,8 @@ namespace Diorama
                 restart && SaveSlots.Exists(SaveSlot.Quick) ? "Hold to start over" : "about 10 min");
             full.hold = restart && SaveSlots.Exists(SaveSlot.Adventure);
             quick.hold = restart && SaveSlots.Exists(SaveSlot.Quick);
-            if (restart) runes.Add("Back", new Vector2(0.109f, -0.004f), Small, ShowReturning);
-            else runes.Add("Settings", new Vector2(0.109f, -0.004f), Small, OpenSettings);
+            if (restart) runes.Add("Back", new Vector2(0.124f, 0f), Wide, ShowReturning);
+            else runes.Add("Settings", new Vector2(0.124f, 0f), Wide, OpenSettings);
             runes.DefaultFocus = null;
             runes.Show();
         }
