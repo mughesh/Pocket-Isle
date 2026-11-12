@@ -311,7 +311,13 @@ namespace Diorama
                       $"{(both ? "both hands" : left ? "left hand" : "right hand")}, x{scale:0.##}.");
         }
 
-        public void Hide() => _showing = false;
+        public void Hide()
+        {
+            if (_showing && _request.clip != null) Debug.Log($"[GhostHands] {_request.clip}: hidden.");
+            _showing = false;
+        }
+
+        bool _nearLogged;
 
         Request _beforePreview;
         bool _hadBeforePreview;
@@ -484,8 +490,16 @@ namespace Diorama
             // Step 16: a real hand near the target (or the release spot) fades the ghost so it never hides the target.
             // Nov 8 (Mugesh: the first pinch ghost vanished under his resting hand): demos over the island have no target
             // to uncover, so they never fade for a hand.
+            // Step 33 (friend test: the wind-blow ghost disappeared): the sweep demo plays over the clouds, not on a small
+            // target a hand could hide, so a resting hand nearby no longer fades it.
             bool near = _request.place != GhostPlace.BesideHand && _request.place != GhostPlace.AboveIsland && debugFreeze < 0f &&
+                        _request.clip != "palm_sweep" &&
                         (HandNear(point, handNearRadius) || (release.HasValue && HandNear(release.Value, handNearRadius)));
+            if (near != _nearLogged && _showing)
+            {
+                _nearLogged = near;
+                if (near) Debug.Log($"[GhostHands] {_request.clip}: faded, a real hand is near its target.");
+            }
             _handNear = Mathf.MoveTowards(_handNear, near ? 1f : 0f, dt / Mathf.Max(0.01f, handNearSeconds));
             float alpha = _visible * loopFade * NearAlpha(_handNear, handNearAlpha);
             if (_request.aside)

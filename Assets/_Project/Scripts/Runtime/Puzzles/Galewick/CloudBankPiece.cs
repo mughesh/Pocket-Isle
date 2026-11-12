@@ -173,6 +173,7 @@ namespace Diorama
                 var p = new Vector2(local.x, local.z) - origin;
                 float lateral = Mathf.Abs(p.x * dir.y - p.y * dir.x);
                 if (lateral > corridor) continue;
+                if (LessonShowing) Debug.Log($"[CloudBankPiece] {id}: lesson over: a sweep hit puff {i} (strength {strength:0.00}).");
                 MarkInteracted();
                 bool gone = _bank.Gust(i, strength);
                 _drift[i] += dir * 0.35f * strength;
@@ -209,6 +210,10 @@ namespace Diorama
             }
         }
 
+        [Tooltip("Step 33: a look + pinch on a puff ends the sweep lesson only after this long (s): a resting pinch isn't the sweep.")]
+        public float lookHoldLessonSeconds = 0.4f;
+        float _lookHeldFor;
+
         void LookHold()
         {
             _gazed = Gazed();
@@ -217,7 +222,16 @@ namespace Diorama
             bool held = false;
             foreach (var h in _hands)
                 if (h.pinch && !h.busy) held = true;
-            if (!held) return;
+            if (!held)
+            {
+                _lookHeldFor = 0f;
+                return;
+            }
+            // Step 33 (friend test: the sweep ghost vanished): a hand resting with its fingers together while looking at a
+            // cloud ended the lesson at once. A look + pinch now counts after lookHoldLessonSeconds of holding.
+            _lookHeldFor += Time.deltaTime;
+            if (_lookHeldFor < lookHoldLessonSeconds) return;
+            if (LessonShowing) Debug.Log($"[CloudBankPiece] {id}: lesson over: look + pinch held {_lookHeldFor:0.0} s on puff {_gazed}.");
             MarkInteracted();
             LessonComplete();
             _drift[_gazed] += new Vector2(0f, -0.25f) * Time.deltaTime;
