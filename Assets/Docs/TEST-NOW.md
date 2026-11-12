@@ -1,14 +1,12 @@
-# TEST NOW (Nov 12 evening notes, `panel-review`): mark failures `[x]` + what you saw; then say "Fix every [x] in Assets/Docs/TEST-NOW.md."
-- [ ] New game: the Spirit greets from **over the island's centre** (above the statue), goes **over the grab corner** for the grab lesson, back to the centre for two hands, starter and walk lessons; back to its **right rim corner** at "go into the grass" →
-- [ ] Galewick plaza: **no mill on the road**; the small mill now stands beside the lower house →
-- [ ] Ridge by the tower: **3 separate clouds** on the road (they were side by side and read as one) →
-- [ ] Galeowl battle: both name plates **on the floor beside** their creature (Galeowl's on its right; the shield doesn't push it away); move your head: plates and "Choose your attack" **stay put, no shaking** →
-- [ ] After winning the tower and walking out: **no "Walk in, or look and pinch"** chip →
-- [ ] Statue: each shard **grabs on the first try** (pinch or fist, even if the hand closes just before it), with the pod grab sound →
-- [ ] Statue: the Heart's **call at full volume** at its first line of each scene →
-- [ ] Finale lanterns: only "original designs", "Sounds", "Pocket Isle / Made by Mugesh" (no Music, no Font) →
-- [ ] Galewick: beat Galeowl, walk out: the breeze is the **old soft synth one** (no pressure cooker); the lodge palm-hold has its Nov 11 tone back →
-- [ ] Battle by the water near the heal tree: **no tree or green ring on the battle stage** →
-- [ ] Still Isle: the square round the statue is **even** on both sides (plaza one column narrower on the right, both lamps the same distance from the road) →
-- [ ] Swipe lesson: **4 swipes** fill the 4 dots (one long walk = 1 dot); after each: "Nice! Now swipe another way." / "Good! Keep swiping, any way." / "One more swipe!" →
-- [ ] Right after the swipes: **straight into the tap practice** (no extra "Swipe to walk. Tap your thumb to stop" lesson); after each stop: "Nice stop! Swipe, then tap again." →
+# TEST NOW (steps 32 + 33, branch `step-32`): mark failures `[x]` + what you saw; then say "Fix every [x] in Assets/Docs/TEST-NOW.md."
+- [ ] Hub: the statue stands **centred on the road**; the title logo floats **above the statue's head**; no chatter under the shard pokes →
+- [ ] New game: **one walking lesson**: swipe ghost → explorer walks → ghost turns into a tap, chip "Tap to stop"; 3 rounds, gold tile only in the 3rd. How long did it take? →
+- [ ] Wait without tapping: the explorer **turns back near the statue**, never reaches the island's edge →
+- [ ] Lilymere: walk round the lotus garden and the main route: **no stops every 2 tiles** →
+- [ ] Dev panel > Tools > Sound A/B > **Heart voice**: press through synth moo, 1-6 (each plays its call). Which number do you like? →
+- [ ] Menus: poke a button, pull the hand away: the **hand picture follows** (never stuck on the button) →
+- [ ] Battle: **grab a corner to move the island**; a hand at the cradle pod still takes the pod →
+- [ ] Look at something pinchable: the icon reads as **a pinch** (not a "V") →
+- [ ] Title: **Settings as big** as Full adventure / Quick journey →
+- [ ] Galewick arrival clouds: the **sweep ghost stays** with your hand resting nearby →
+- [ ] Lose to Galeowl: **no portal by the tower**; the tower's vanes **never cut into the tower**; portal cut off? send a screenshot →
