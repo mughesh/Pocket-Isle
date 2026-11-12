@@ -8,3 +8,7 @@
 - [ ] Statue: the Heart's **call at full volume** at its first line of each scene →
 - [ ] Finale lanterns: only "original designs", "Sounds", "Pocket Isle / Made by Mugesh" (no Music, no Font) →
 - [ ] Galewick: beat Galeowl, walk out: the breeze is the **old soft synth one** (no pressure cooker); the lodge palm-hold has its Nov 11 tone back →
+- [ ] Battle by the water near the heal tree: **no tree or green ring on the battle stage** →
+- [ ] Still Isle: the square round the statue is **even** on both sides (plaza one column narrower on the right, both lamps the same distance from the road) →
+- [ ] Swipe lesson: **4 swipes** fill the 4 dots (one long walk = 1 dot); after each: "Nice! Now swipe another way." / "Good! Keep swiping, any way." / "One more swipe!" →
+- [ ] Right after the swipes: **straight into the tap practice** (no extra "Swipe to walk. Tap your thumb to stop" lesson); after each stop: "Nice stop! Swipe, then tap again." →

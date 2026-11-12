@@ -16,70 +16,49 @@ namespace Diorama.Tests
         }
 
         [Test]
-        public void FarLesson_SwipeAndTap_ThreeWaysDone_NeverTeachesTwice()
+        public void FarLesson_Gone_ThePracticeTeachesTheTap_NeverTwice()
         {
+            // Nov 12 evening (Mugesh: a stale tap lesson came between the swipes and the two-tap practice): the far lesson
+            // went; the practice teaches the tap, with its dots and a line after every stop.
             var s = Lessons();
-            var far = s.lessons.Find(l => l.id == Onboarding.FarLesson);
-            Assert.IsNotNull(far);
-            // Step 28: only the tap itself passes it (stopping by itself on a gold tile taught nothing); a long wait never walls.
-            Assert.AreEqual("tapStopped", far.doneWhen);
-            Assert.IsTrue(far.skipAfter > 0f && far.skipAfter <= 60f, $"passes itself within 60 s ({far.skipAfter})");
-            Assert.IsTrue(string.IsNullOrEmpty(far.goldTileRule));
-            // Step 16: the lessons show the swipe ghost only; Nov 6: the far line teaches the tap (a swipe walks until a tap).
-            Assert.AreEqual(GhostHands.SwipeTapClip, far.ghost); // Step 22: a swipe left, then the tap (Nov 7 and Nov 8: swipe then tap)
-            Assert.IsFalse(far.chip.ToLowerInvariant().Contains("tap"), far.chip);
-            Assert.IsFalse(far.chip.ToLowerInvariant().Contains("twice"), far.chip);
-            Assert.IsTrue(System.Array.IndexOf(Onboarding.Events, "swipeWalks2") >= 0);
+            Assert.IsNull(s.lessons.Find(l => l.id == Onboarding.FarLesson), "the far lesson is out of the chain");
+            var practice = s.lessons.Find(l => l.id == Onboarding.PracticeLesson);
+            Assert.IsNotNull(practice);
+            Assert.AreEqual(GhostHands.SwipeTapClip, practice.ghost);
             foreach (var l in s.lessons)
                 Assert.AreNotEqual(Step12aSetup.SwipeTwiceClip, l.ghost, $"lesson {l.id} teaches swiping twice");
 
             var script = AssetDatabase.LoadAssetAtPath<DialogueScript>("Assets/_Project/Data/Dialogue/Script_v1.asset");
             if (script == null) return;
-            bool farTeachesTap = false;
             foreach (var t in script.triggers)
                 if (t.id.StartsWith("lesson."))
                     foreach (var line in t.lines)
-                    {
                         Assert.IsFalse(line.text.ToLowerInvariant().Contains("twice"), $"{t.id}: '{line.text}'");
-                        // Nov 6: a swipe walks until a thumb tap, so the far lesson teaches the tap (step 16 had it stop by itself).
-                        if (t.id == "lesson.walk.far" && line.text.ToLowerInvariant().Contains("tap")) farTeachesTap = true;
-                    }
-            Assert.IsTrue(farTeachesTap, "lesson.walk.far teaches the thumb tap (a swipe walks until a tap)");
+            StringAssert.Contains("tap", script.Find("lesson.practice").lines[0].text.ToLowerInvariant());
+            StringAssert.Contains("again", script.Find("lesson.practice.nice").lines[0].text.ToLowerInvariant(), "a stop says what's next");
         }
 
         [Test]
-        public void FarLesson_PassesAfter60s_WithNothingDone()
+        public void SwipeLesson_FourSwipes_ALineAfterEach()
         {
-            var far = Lessons().lessons.Find(l => l.id == Onboarding.FarLesson);
-            var lessons = new System.Collections.Generic.List<LessonData> { new LessonData { id = far.id, doneWhen = far.doneWhen, skipAfter = far.skipAfter } };
-            var runner = new LessonRunner(lessons, Onboarding.Events);
-            runner.Begin(0);
-            Assert.AreEqual(LessonRunner.Outcome.Started, runner.Tick(0.1f));
-            var last = LessonRunner.Outcome.None;
-            for (float t = 0f; t < 61f && runner.IsRunning; t += 0.1f) last = runner.Tick(0.1f);
-            Assert.IsFalse(runner.IsRunning, "still stuck after 61 s");
-            Assert.AreEqual(LessonRunner.Outcome.Skipped, last);
+            // Nov 12 evening (Mugesh: one swipe that walked on filled all four dots): swipes count, not tiles.
+            Assert.AreEqual("nice", Onboarding.SwipeCue(1, 4, "nice", "more", "last"));
+            Assert.AreEqual("more", Onboarding.SwipeCue(2, 4, "nice", "more", "last"));
+            Assert.AreEqual("last", Onboarding.SwipeCue(3, 4, "nice", "more", "last"));
+            Assert.IsNull(Onboarding.SwipeCue(4, 4, "nice", "more", "last"));
+            var script = AssetDatabase.LoadAssetAtPath<DialogueScript>("Assets/_Project/Data/Dialogue/Script_v1.asset");
+            if (script == null) return;
+            foreach (var id in new[] { "lesson.walk.nice", "lesson.walk.more", "lesson.walk.last" })
+                Assert.IsTrue(script.Find(id) != null && script.Find(id).objective, $"{id} is a lesson line");
+            var src = System.IO.File.ReadAllText("Assets/_Project/Scripts/Runtime/Onboarding/Onboarding.cs");
+            StringAssert.DoesNotContain("_swipeTiles++", src, "one long walk isn't four swipes");
         }
 
         [Test]
-        public void FarLesson_DoneByATapStop()
+        public void OldSave_AtTheFarLesson_ResumesAtThePractice()
         {
-            var far = Lessons().lessons.Find(l => l.id == Onboarding.FarLesson);
-            var lessons = new System.Collections.Generic.List<LessonData> { new LessonData { id = far.id, doneWhen = far.doneWhen } };
-            GameConditions.Register("atGoldTile", () => false);
-            try
-            {
-                var runner = new LessonRunner(lessons, Onboarding.Events);
-                runner.Begin(0);
-                runner.Tick(0.1f);
-                Assert.AreEqual(LessonRunner.Outcome.None, runner.Tick(0.1f));
-                runner.Mark("tapStopped");
-                Assert.AreEqual(LessonRunner.Outcome.Done, runner.Tick(0.1f));
-            }
-            finally
-            {
-                GameConditions.Unregister("atGoldTile");
-            }
+            var src = System.IO.File.ReadAllText("Assets/_Project/Scripts/Runtime/Onboarding/Onboarding.cs");
+            StringAssert.Contains("if (lessonId == FarLesson) lessonId = PracticeLesson;", src);
         }
 
         [Test]

@@ -147,7 +147,7 @@ namespace Diorama.Tests
             var s = AssetDatabase.LoadAssetAtPath<DialogueScript>("Assets/_Project/Data/Dialogue/Script_v1.asset");
             var e = s.Find("lesson.practice.perfect");
             Assert.IsNotNull(e, "lesson.practice.perfect");
-            Assert.AreEqual("Perfect!", e.lines[0].text);
+            StringAssert.StartsWith("Perfect!", e.lines[0].text); // Nov 12 evening: "Perfect! Once more." (says what's next)
             StringAssert.Contains("Nice stop!", s.Find("lesson.practice.nice").lines[0].text);
         }
 

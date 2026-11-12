@@ -86,19 +86,16 @@ namespace Diorama.Tests
         }
 
         [Test]
-        public void Far_lesson_passes_only_by_a_real_tap_or_a_long_wait()
+        public void Far_lesson_gone_one_tap_lesson()
         {
-            var far = Lessons().lessons.Find(l => l.id == Onboarding.FarLesson);
-            Assert.AreEqual("tapStopped", far.doneWhen, "auto-stopping on a gold tile used to pass it without a tap");
-            Assert.IsTrue(string.IsNullOrEmpty(far.goldTileRule), "no gold tile to stop on in this lesson");
-            Assert.GreaterOrEqual(far.skipAfter, 60f);
+            // Nov 12 evening (Mugesh: a stale tap lesson before the two-tap practice): only the practice teaches the tap.
+            Assert.IsNull(Lessons().lessons.Find(l => l.id == Onboarding.FarLesson));
         }
 
         [Test]
         public void Both_tap_lessons_show_the_swipe_and_then_the_tap()
         {
             var s = Lessons();
-            Assert.AreEqual(GhostHands.SwipeTapClip, s.lessons.Find(l => l.id == Onboarding.FarLesson).ghost);
             Assert.AreEqual(GhostHands.SwipeTapClip, s.lessons.Find(l => l.id == Onboarding.PracticeLesson).ghost);
         }
 

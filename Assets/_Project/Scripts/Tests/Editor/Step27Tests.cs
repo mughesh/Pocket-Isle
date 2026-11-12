@@ -65,7 +65,7 @@ namespace Diorama.Tests
             var s = AssetDatabase.LoadAssetAtPath<OnboardingScript>("Assets/_Project/Data/Onboarding/Onboarding_Main.asset");
             int practice = s.IndexOf(Onboarding.PracticeLesson);
             Assert.GreaterOrEqual(practice, 0);
-            Assert.AreEqual(s.IndexOf(Onboarding.FarLesson) + 1, practice);
+            Assert.AreEqual(s.IndexOf(Onboarding.WalkLesson) + 1, practice, "Nov 12 evening: straight after the swipes (the far lesson went)");
             Assert.AreEqual(s.IndexOf("look"), practice + 1);
             Assert.AreEqual("Swipe to walk · Tap to stop", s.lessons[practice].chip);
             Assert.AreEqual("practiceDone", s.lessons[practice].doneWhen);

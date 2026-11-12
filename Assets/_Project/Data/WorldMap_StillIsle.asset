@@ -40,19 +40,19 @@ MonoBehaviour:
 
     XFFGGGGGGGGGGGPPGGGGGGGGGGGGFX
 
-    XFGGGGGGGGGGPPPPPPPGGGGGGGGGFX
+    XFGGGGGGGGGGPPPPPPGGGGGGGGGGFX
 
-    XFGGGGGGGGGGPPPPPPPGGGGGGGGGFX
-
-    XFPPPPPPPPPPPPPPPPPPPPPPPPPPFX
+    XFGGGGGGGGGGPPPPPPGGGGGGGGGGFX
 
     XFPPPPPPPPPPPPPPPPPPPPPPPPPPFX
 
-    XFGGGGGGGGGGPPPPPPPGGGGGGGGGGX
+    XFPPPPPPPPPPPPPPPPPPPPPPPPPPFX
 
-    XFGWWWWWGGGGPPPPPPPGGTTTGGGGGX
+    XFGGGGGGGGGGPPPPPPGGGGGGGGGGGX
 
-    XFGWWWWWGGGGPPPPPPPGTTTTTGGGFX
+    XFGWWWWWGGGGPPPPPPGGGTTTGGGGGX
+
+    XFGWWWWWGGGGPPPPPPGGTTTTTGGGFX
 
     XFGWWWWWGGGGGGPPGGGGTTTTTGGGFX
 
@@ -101,7 +101,7 @@ MonoBehaviour:
 
     .........b...........b........
 
-    ............l.....l....b......
+    ............l....l.....b......
 
     ..........b...................
 
@@ -117,7 +117,7 @@ MonoBehaviour:
 
     ........s.Y...................
 
-    ........s...l.....l...........
+    ........s...l....l............
 
     .........s....................
 

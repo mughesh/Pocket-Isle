@@ -271,7 +271,7 @@ namespace Diorama.Tests
             _made.Add(script);
             script.lessons = Chain();
             // Step 12a: the walk-on lesson replaced stop.
-            script.lessons.Insert(2, new LessonData { id = "far", startWhen = "canWalk", doneWhen = "walkedOn" });
+            script.lessons.Insert(2, new LessonData { id = Onboarding.PracticeLesson, startWhen = "canWalk", doneWhen = "practiceDone" });
             var go = new GameObject("Onboarding Test");
             _made.Add(go);
             var o = go.AddComponent<Onboarding>();
@@ -290,7 +290,7 @@ namespace Diorama.Tests
 
                 o.Restore("stop", false);
                 Assert.IsFalse(Onboarding.EncountersEnabled, "resumed mid-tutorial");
-                Assert.AreEqual("far", o.CurrentId, "an old save at the stop lesson resumes at walk on");
+                Assert.AreEqual(Onboarding.PracticeLesson, o.CurrentId, "an old save at the stop lesson resumes at the tap practice");
                 o.Restore(null, true);
                 Assert.IsTrue(Onboarding.EncountersEnabled, "returning player who finished it");
             }

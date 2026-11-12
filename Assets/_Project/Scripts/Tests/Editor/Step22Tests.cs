@@ -19,9 +19,9 @@ namespace Diorama.Tests
         {
             var s = Lessons();
             var walk = s.lessons.Find(l => l.id == Onboarding.WalkLesson);
-            var far = s.lessons.Find(l => l.id == Onboarding.FarLesson);
+            var practice = s.lessons.Find(l => l.id == Onboarding.PracticeLesson); // Nov 12 evening: the far lesson went
             Assert.AreEqual(GhostHands.SwipeAllClip, walk.ghost, "the walk lesson shows left, right, forward, back");
-            Assert.AreEqual(GhostHands.SwipeTapClip, far.ghost, "the far lesson shows a swipe, then the tap that stops");
+            Assert.AreEqual(GhostHands.SwipeTapClip, practice.ghost, "the practice shows a swipe, then the tap that stops");
         }
 
         [Test]

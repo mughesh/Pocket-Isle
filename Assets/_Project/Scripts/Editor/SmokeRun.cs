@@ -1024,6 +1024,7 @@ namespace Diorama.EditorTools
                 switch (ob.CurrentId)
                 {
                     case "pinch": ob.DebugPinch(); break;
+                    case Onboarding.WalkLesson: ob.DebugSwipe(); break; // Nov 12 evening: four counted swipes
                     case Onboarding.PracticeLesson: ob.DebugPracticeStop(); break;
                     case "starter": if (o != null) o.DebugChoose(0); break;
                     case "grass":

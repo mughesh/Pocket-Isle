@@ -247,7 +247,10 @@ namespace Diorama
             var recipe = world != null ? RecipeFor(world.realm) : null;
             Vector2Int tile = default;
             bool show = recipe != null && recipe.bakedMesh != null && TryGetTile(world, out tile) && !SceneSwap.IsInside && !SceneSwap.IsBusy &&
-                        !TitleScreen.Showing;
+                        !TitleScreen.Showing &&
+                        // Nov 12 evening (Mugesh: a battle by the water showed the heal tree in the middle of the stage): it
+                        // draws itself without the battle clearing's sink, so it hides while the battle view is zoomed in.
+                        island.Zoom <= 1.0001f && !EncounterDirector.AnyInBattle;
             Vector3 ground = default;
             if (show)
             {

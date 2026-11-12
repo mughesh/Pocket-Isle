@@ -94,8 +94,12 @@ namespace Diorama
 
         /// <summary>Nov 3: the walk lesson's id and how many tiles swipes must really walk (any direction).</summary>
         public const string WalkLesson = "walk", FarLesson = "far";
-        [Tooltip("Nov 3: tiles the explorer must really walk by swiping (any direction) in the walk lesson.")]
+        [Tooltip("Nov 12 evening (Mugesh: one swipe that walked four tiles filled all four dots): swipes in the walk lesson, any " +
+                 "direction; a swipe counts once the explorer takes a step from it.")]
         [Min(1)] public int swipeTiles = 4;
+        [Tooltip("Nov 12 evening: the walk lesson's line after the first swipe, the middle ones and the last-but-one (like the pinch lesson's \"Nice! Once more.\").")]
+        public string swipeNiceLine = "lesson.walk.nice", swipeMoreLine = "lesson.walk.more", swipeLastLine = "lesson.walk.last";
+        public string swipeAgainChip = "Swipe again";
 
         static Onboarding _instance;
 
@@ -231,9 +235,11 @@ namespace Diorama
         {
             if (_runner == null) return;
             // Step 12a: the stop lesson became the walk-on lesson (it teaches the tap too).
-            if (lessonId == "stop") lessonId = "far";
+            if (lessonId == "stop") lessonId = PracticeLesson;
             // Nov 3: the turn lesson went (the walk lesson counts real tiles now, any way).
-            if (lessonId == "turn") lessonId = "far";
+            if (lessonId == "turn") lessonId = PracticeLesson;
+            // Nov 12 evening: the far lesson ("Swipe to walk, tap to stop") went: the tap practice teaches the tap.
+            if (lessonId == FarLesson) lessonId = PracticeLesson;
             // Step 9h moved the two-hands lesson into the opening: a save that waited for it at the end is done.
             if (finished || lessonId == "twoHands")
             {
@@ -299,12 +305,11 @@ namespace Diorama
             if (_runner == null || !_runner.IsRunning) return;
             if (++_steps >= walkSteps) _runner.Mark("walked3");
             if (Practising) PracticeStep(tile);
-            // A tile walked by a swipe (a smart step or a walk-on), not by look + pinch (that walks to a destination).
-            if (_runner.Current != null && _runner.Current.id == WalkLesson && !explorer.Destination.HasValue)
+            // Nov 12 evening: a swipe counts in the walk lesson at its first step (one swipe walking on is one swipe).
+            if (_swipePending && _shown && _runner.Current != null && _runner.Current.id == WalkLesson && !explorer.Destination.HasValue)
             {
-                _swipeTiles++;
-                Dialogue.SetProgress(Mathf.Min(_swipeTiles, swipeTiles), swipeTiles);
-                if (_swipeTiles >= swipeTiles) _runner.Mark("swipeWalked");
+                _swipePending = false;
+                SwipeCounted();
             }
             // Step 14f: a swipe walk that reached its end (not a walk-on that carries on, not a look + pinch path).
             if (_runner.Current != null && _runner.Current.id == FarLesson && !explorer.Destination.HasValue &&
@@ -324,7 +329,9 @@ namespace Diorama
 
         void OnSwiped(bool walkOn)
         {
-            if (!walkOn || _runner == null || !_runner.IsRunning) return;
+            if (_runner == null || !_runner.IsRunning) return;
+            if (_runner.Current != null && _runner.Current.id == WalkLesson) _swipePending = true;
+            if (!walkOn) return;
             _runner.Mark("walkedOn");
             if (_runner.Current != null && _runner.Current.id == FarLesson && ++_walkOns >= 3) _runner.Mark("walkedOn3");
         }
@@ -446,6 +453,43 @@ namespace Diorama
             if (_pinches >= pinchCount) _runner.Mark("pinched");
         }
 
+        bool _swipePending;
+        int _swipes;
+        string _cueLine;
+
+        /// <summary>
+        /// Nov 12 evening (Mugesh: the four dots filled from one long walk): one swipe of the walk lesson. A dot fills, a
+        /// small burst at the explorer, the chime, and the line moves on: "Nice! Now swipe another way.", "Good! Keep
+        /// swiping, any way.", "One more swipe!"; the last one ends the lesson.
+        /// </summary>
+        void SwipeCounted()
+        {
+            _swipes++;
+            Debug.Log($"[Onboarding] Swipe {_swipes}/{swipeTiles}.");
+            if (fx != null && explorer != null && island != null && island.Content != null)
+                fx.Burst(island.transform.TransformPoint(island.TileToLocal(explorer.Tile, island.Content.capHeight)), 10, sparkleColor, 0.04f, 0.5f, 0.004f, Vector3.up * 0.03f);
+            Dialogue.SetProgress(Mathf.Min(_swipes, swipeTiles), swipeTiles);
+            if (_swipes >= swipeTiles)
+            {
+                _runner.Mark("swipeWalked");
+                return;
+            }
+            GameAudio.Ui(Diorama.Audio.AudioIds.UiLesson);
+            Dialogue.SetChip(swipeAgainChip);
+            _cueLine = SwipeCue(_swipes, swipeTiles, swipeNiceLine, swipeMoreLine, swipeLastLine);
+            if (!string.IsNullOrEmpty(_cueLine)) Dialogue.Repeat(_cueLine);
+        }
+
+        /// <summary>Nov 12 evening: the walk lesson's line after <paramref name="done"/> of <paramref name="goal"/> swipes.</summary>
+        public static string SwipeCue(int done, int goal, string nice, string more, string last) =>
+            done >= goal ? null : done == goal - 1 ? last : done == 1 ? nice : more;
+
+        /// <summary>Debug (bridge, smoke run): a swipe of the walk lesson as if the explorer stepped from it.</summary>
+        public void DebugSwipe()
+        {
+            if (_runner != null && _runner.Current != null && _runner.Current.id == WalkLesson && _shown) SwipeCounted();
+        }
+
         /// <summary>Debug (bridge): a pinch as if made with a hand (no sparkle without a tracked hand).</summary>
         public void DebugPinch()
         {
@@ -461,6 +505,9 @@ namespace Diorama
             _lineAway = 0f;
             _smartAtShow = explorer != null ? explorer.SmartStepsTaken : 0;
             _swipeTiles = _walkOns = _swipeWalks = 0;
+            _swipes = 0;
+            _swipePending = false;
+            _cueLine = null;
             if (l.id == PracticeLesson) StartPractice();
             else if (!string.IsNullOrEmpty(l.goldTileRule)) PickSmartGoldTile(l.goldTileRule);
             else if (l.goldTileSteps > 0) PickGoldTile(l.goldTileSteps);
@@ -470,7 +517,10 @@ namespace Diorama
             {
                 bool pinch = l.id == pinchLesson;
                 bool practice = l.id == PracticeLesson;
-                Dialogue.Pin(new[] { l.line, l.again, l.help, script.handsLine, pinch ? pinchOnceLine : null }, l.chip, practice ? new[] { practiceNiceLine } : null);
+                bool walk = l.id == WalkLesson;
+                Dialogue.Pin(new[] { l.line, l.again, l.help, script.handsLine, pinch ? pinchOnceLine : null,
+                        walk ? swipeNiceLine : null, walk ? swipeMoreLine : null, walk ? swipeLastLine : null }, l.chip,
+                    practice ? new[] { practiceNiceLine, practicePerfectLine } : null);
                 // Step 14a: a counted lesson shows its progress dots (two pinches).
                 if (pinch) Dialogue.SetProgress(0, pinchCount);
                 else if (l.id == WalkLesson) Dialogue.SetProgress(0, swipeTiles);
@@ -486,7 +536,9 @@ namespace Diorama
             bool talking = Dialogue.IsPending(l.line) || !string.IsNullOrEmpty(l.again) && Dialogue.IsPending(l.again) ||
                            !string.IsNullOrEmpty(l.help) && Dialogue.IsPending(l.help) || HandsMissing ||
                            // Step 14a: the pinch lesson's "Nice! Once more." is its line now.
-                           l.id == pinchLesson && !string.IsNullOrEmpty(pinchOnceLine) && Dialogue.IsPending(pinchOnceLine);
+                           l.id == pinchLesson && !string.IsNullOrEmpty(pinchOnceLine) && Dialogue.IsPending(pinchOnceLine) ||
+                           // Nov 12 evening: the walk lesson's "Nice! Now swipe another way." is its line after a swipe.
+                           !string.IsNullOrEmpty(_cueLine) && Dialogue.IsPending(_cueLine);
             if (!string.IsNullOrEmpty(l.help) && !_helped && _runner.Teaching >= l.helpAfter)
             {
                 // The help line takes the lesson line's place (and stays).
@@ -499,7 +551,7 @@ namespace Diorama
             _lineAway = talking ? 0f : _lineAway + Time.deltaTime;
             if (_lineAway < 1f) return;
             _lineAway = 0f;
-            var back = _helped && !string.IsNullOrEmpty(l.help) ? l.help : string.IsNullOrEmpty(l.again) ? l.line : l.again;
+            var back = _helped && !string.IsNullOrEmpty(l.help) ? l.help : !string.IsNullOrEmpty(_cueLine) ? _cueLine : string.IsNullOrEmpty(l.again) ? l.line : l.again;
             Dialogue.Repeat(back);
         }
 
@@ -511,8 +563,9 @@ namespace Diorama
             Dialogue.Unpin(done && l.id == pinchLesson && !string.IsNullOrEmpty(pinchDoneLine) ? pinchDoneLine
                 : done && l.id == PracticeLesson && _practiced >= StopPractice.Goal(QuickJourney.Active) ? practiceDoneLine
                 : praise ? script.praise[_praiseIndex++ % script.praise.Count] : null);
-            foreach (var id in new[] { l.line, l.again, l.help })
+            foreach (var id in new[] { l.line, l.again, l.help, _cueLine })
                 if (!string.IsNullOrEmpty(id)) Dialogue.Cancel(id);
+            _cueLine = null;
             if (_goldPath != null)
             {
                 StopCoroutine(_goldPath);

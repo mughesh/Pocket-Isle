@@ -63,11 +63,16 @@ namespace Diorama.Tests
         }
 
         [Test]
-        public void ShrineFill_IsBackToItsTakeBeforeTheFixList()
+        public void ShrineFill_KeepsItsNov11Take_TheBreezeIsSynth()
         {
+            // Nov 12 evening: the pressure cooker was the restoration breeze's paid takes (8-9 kHz hiss), not the shrine fill.
             var cue = AssetDatabase.LoadAssetAtPath<Diorama.Audio.AudioCue>("Assets/_Project/Audio/Data/Cues/Shrine/shrine.fill.asset");
             Assert.IsNotNull(cue);
-            Assert.AreEqual(1, cue.clips.Length, "the Nov 11 take is off");
+            Assert.AreEqual(2, cue.clips.Length, "the Nov 11 take is back");
+            var breeze = AssetDatabase.LoadAssetAtPath<Diorama.Audio.AudioCue>("Assets/_Project/Audio/Data/Cues/Realm/restore.breeze.asset");
+            Assert.IsNotNull(breeze);
+            Assert.AreEqual(1, breeze.clips.Length);
+            StringAssert.Contains("/Synth/", AssetDatabase.GetAssetPath(breeze.clips[0]), "the soft synth breeze");
         }
 
         [Test]
