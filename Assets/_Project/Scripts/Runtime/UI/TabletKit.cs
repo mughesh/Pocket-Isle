@@ -339,6 +339,38 @@ namespace Diorama
             return on ? _speakerOn = m : _speakerOff = m;
         }
 
+        static Mesh _power;
+
+        /// <summary>Nov 13: the game menu's quit icon, a power sign (a ring open at the top, a bar through the gap), drawn
+        /// for a 3 cm tablet, front-facing, as inlay. Not an X: an X reads as "close this menu".</summary>
+        public static Mesh Power()
+        {
+            if (_power != null) return _power;
+            P.Clear(); N.Clear(); C.Clear(); A.Clear(); T.Clear();
+            var col = new Color(1f, 1f, 1f, Inlay);
+            const int steps = 14;
+            const float r0 = 0.0058f, r1 = 0.0076f;
+            var c = new Vector2(0f, -0.0008f);
+            for (int i = 0; i < steps; i++)
+            {
+                // From 40 degrees right of the top, round the bottom, to 40 degrees left of it.
+                float a1 = (130f - Mathf.Lerp(0f, 280f, i / (float)steps)) * Mathf.Deg2Rad;
+                float a2 = (130f - Mathf.Lerp(0f, 280f, (i + 1) / (float)steps)) * Mathf.Deg2Rad;
+                Vector2 d1 = new Vector2(Mathf.Cos(a1), Mathf.Sin(a1)), d2 = new Vector2(Mathf.Cos(a2), Mathf.Sin(a2));
+                Poly(col, c + d1 * r0, c + d1 * r1, c + d2 * r1, c + d2 * r0);
+            }
+            Poly(col, new Vector2(-0.0009f, -0.0005f), new Vector2(-0.0009f, 0.0082f), new Vector2(0.0009f, 0.0082f), new Vector2(0.0009f, -0.0005f));
+            var m = new Mesh { name = "Power" };
+            m.SetVertices(P);
+            m.SetNormals(N);
+            m.SetColors(C);
+            m.SetUVs(1, A);
+            m.SetTriangles(T, 0);
+            m.RecalculateBounds();
+            m.UploadMeshData(true);
+            return _power = m;
+        }
+
         static Mesh _menuBars;
 
         /// <summary>Step 16: the menu stone's icon, three bars ("≡") drawn for a 3 cm tablet, front-facing, as inlay.</summary>
@@ -397,6 +429,6 @@ namespace Diorama
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void ResetStatics() => _mesh = _speakerOn = _speakerOff = null;
+        static void ResetStatics() => _mesh = _speakerOn = _speakerOff = _power = null;
     }
 }

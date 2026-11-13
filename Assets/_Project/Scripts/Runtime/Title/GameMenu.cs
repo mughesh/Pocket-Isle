@@ -141,6 +141,11 @@ namespace Diorama
             // end; Controls and Title live in Settings; Dev (Editor and QA builds) set apart.
             runes.Clear();
             runes.rimLocked = true; // step 17 B: rim rows sit on the rim, island-front locked
+            if (_askQuit)
+            {
+                ShowQuitAsk();
+                return;
+            }
             var size = new Vector2(0.066f, 0.034f);
             var big = new Vector2(0.08f, 0.038f);
             // Nov 4 (Mugesh: Resume and the others too close): 2.4 cm between tablets (was 0.8). Nov 8 (still a few mm): the
@@ -164,7 +169,10 @@ namespace Diorama
             x += size.x + gap;
             if (toTitle) runes.Add("Main menu", new Vector2(x + size.x * 0.5f, 0f), size, ToTitle);
             x += size.x + gap;
-            runes.AddIcon(VolumeSettings.MusicOn ? "Music on" : "Music off", TabletKit.Speaker(VolumeSettings.MusicOn), new Vector2(x + side * 0.5f, 0f), side, ToggleMusic);
+            // Nov 13 (Mugesh: no way to close the app): the speaker's slot is a red power tablet; it asks before quitting.
+            // Music stays in Settings (its volume row, off = the first pebble).
+            var quit = runes.AddIcon("Quit", TabletKit.Power(), new Vector2(x + side * 0.5f, 0f), side, AskQuit);
+            quit.tint = QuitRed;
 #if UNITY_EDITOR || POCKET_DEV
             var dev = runes.Add("Dev", new Vector2(-width * 0.5f - apart - 0.025f, 0f), new Vector2(0.05f, 0.028f), OpenDev);
             dev.tint = new Color(0.45f, 0.5f, 0.62f);
@@ -173,20 +181,54 @@ namespace Diorama
             runes.Show();
         }
 
-        void ToggleMusic()
+        static readonly Color QuitRed = new Color(0.82f, 0.24f, 0.2f);
+
+        bool _reshow, _askQuit;
+
+        void AskQuit()
         {
-            VolumeSettings.MusicOn = !VolumeSettings.MusicOn;
-            Debug.Log($"[GameMenu] Music {(VolumeSettings.MusicOn ? "on" : "off")}.");
+            Debug.Log("[GameMenu] Quit? (asking).");
+            _askQuit = true;
             // Rebuilt next frame: not from inside the rune's own pick.
             _reshow = true;
         }
 
-        bool _reshow;
+        /// <summary>Nov 13: "Quit game" (red) or "Stay" (gold, the default). Quitting saves first.</summary>
+        void ShowQuitAsk()
+        {
+            var big = new Vector2(0.08f, 0.038f);
+            const float gap = 0.03f;
+            var stay = runes.Add("Stay", new Vector2(-(big.x + gap) * 0.5f, 0f), big, () =>
+            {
+                _askQuit = false;
+                _reshow = true;
+            });
+            stay.primary = true;
+            var quit = runes.Add("Quit game", new Vector2((big.x + gap) * 0.5f, 0f), big, QuitNow);
+            quit.tint = QuitRed;
+            runes.DefaultFocus = stay;
+            runes.Show();
+        }
+
+        void QuitNow()
+        {
+            // Mid-opening there is no save yet; elsewhere the game saves as it does for Main menu.
+            bool canSave = save != null && !Opening.InProgress && !FinaleDirector.Running;
+            Debug.Log($"[GameMenu] Quit game ({(canSave ? "saved first" : "nothing to save yet")}).");
+            if (canSave) save.Save("menu: quit");
+            Close("Quit");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
+        }
 
         public void Close(string why)
         {
             if (!IsOpen) return;
             IsOpen = false;
+            _askQuit = false;
             GameAudio.Ui(Diorama.Audio.AudioIds.MenuClose);
             if (settings != null && SettingsBoard.IsOpen) settings.Close();
             if (JournalBoard.IsOpen && JournalBoard.Instance != null) JournalBoard.Instance.Close();

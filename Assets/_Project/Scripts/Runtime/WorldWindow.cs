@@ -63,25 +63,34 @@ namespace Diorama
             if (island == null || World == null) return;
             // The footprint is an even number of tiles wide, so its centre is a tile corner. Offsetting by half a
             // tile lines map tiles up with the base at rest; the explorer sits half a tile off the exact middle.
-            Vector2 target = explorerTile + CenterBias();
+            // Nov 13 (Mugesh: the statue, the road and the explorer don't line up with the island's middle): the half tile
+            // isn't always on the same side any more. The view holds still while the explorer is within half a tile of
+            // it, so on a 2-wide road both lanes show the road centred, and a fresh view leans toward the map's middle
+            // (Still Isle: the explorer starts on c15, the view centres on c14.5 = the road and the statue).
+            Vector2 half = CenterBias();
             if (!_hasCenter)
             {
-                _center = target;
+                _center = ClampToMap(explorerTile + StartBias(explorerTile));
                 _hasCenter = true;
             }
             Vector2 wanted;
-            if (_focus.HasValue) wanted = ClampToMap(_focus.Value + CenterBias());
+            if (_focus.HasValue) wanted = ClampToMap(_focus.Value + half);
             else
             {
-                Vector2 d = target - _center;
-                float dz = deadZoneTiles;
-                wanted = ClampToMap(target - new Vector2(Mathf.Clamp(d.x, -dz, dz), Mathf.Clamp(d.y, -dz, dz)));
+                // While gliding back from a focus, hold a tile-aligned point so the view comes to rest lined up with the base.
+                Vector2 hold = _easing ? Align(_center) : _center;
+                wanted = ClampToMap(new Vector2(HoldAxis(hold.x, explorerTile.x, half.x, deadZoneTiles),
+                                                HoldAxis(hold.y, explorerTile.y, half.y, deadZoneTiles)));
             }
             // Moving to or from a battle focus glides; normal following stays locked to the explorer.
             if (_easing)
             {
                 _center = Vector2.Lerp(_center, wanted, 1f - Mathf.Exp(-Time.deltaTime * 7f));
-                if (!_focus.HasValue && (_center - wanted).sqrMagnitude < 1e-4f) _easing = false;
+                if (!_focus.HasValue && (_center - wanted).sqrMagnitude < 1e-4f)
+                {
+                    _easing = false;
+                    _center = wanted;
+                }
             }
             else _center = wanted;
             Apply();
@@ -176,6 +185,29 @@ namespace Diorama
         {
             var fp = island.map;
             return new Vector2(fp.Columns % 2 == 0 ? 0.5f : 0f, fp.Rows % 2 == 0 ? 0.5f : 0f);
+        }
+
+        /// <summary>Nov 13: the half-tile side for a fresh view: columns lean toward the map's middle, rows as before.</summary>
+        Vector2 StartBias(Vector2 explorerTile)
+        {
+            Vector2 half = CenterBias();
+            float mid = (World.Columns - 1) * 0.5f;
+            return new Vector2(explorerTile.x > mid ? -half.x : half.x, half.y);
+        }
+
+        /// <summary>Nearest view centre that lines map tiles up with the base (x.5 on an even axis, whole on an odd one).</summary>
+        Vector2 Align(Vector2 c)
+        {
+            Vector2 half = CenterBias();
+            return new Vector2(Mathf.Round(c.x - half.x) + half.x, Mathf.Round(c.y - half.y) + half.y);
+        }
+
+        /// <summary>Pure rule (tests): the view centre for an explorer at <paramref name="x"/> on one axis, holding still
+        /// while the explorer is within <paramref name="half"/> (+ dead zone) of it.</summary>
+        public static float HoldAxis(float center, float x, float half, float deadZone)
+        {
+            float r = half + deadZone;
+            return x - Mathf.Clamp(x - center, -r, r);
         }
 
         /// <summary>Keeps the whole window inside the map; near a border the explorer walks off-centre instead.</summary>
