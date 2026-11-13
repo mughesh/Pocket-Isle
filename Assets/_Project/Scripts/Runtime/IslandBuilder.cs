@@ -144,6 +144,7 @@ namespace Diorama
             public bool outline;  // Toon Outline material: the theme sets its outline colour
             public int passes = 1; // draw calls per chunk (props draw their outline pass from the same material)
             public bool steam;    // hot spring steam: not drawn while the realm is unrestored (it has shrunk to nothing then)
+            public bool prop;     // a baked map prop: the gazed one swells (SetPropSwell)
             public Color color;   // current theme colour (caps: the tile flash uses it)
             public MaterialPropertyBlock props;
             public readonly List<Matrix4x4> local = new List<Matrix4x4>();
@@ -435,6 +436,40 @@ namespace Diorama
             _clearRadii = new Vector2(radiusAlong, radiusAcross);
             _clearView = viewEnd;
             _clearViewWidth = viewHalfWidth;
+        }
+
+        int _swellCell = -1;
+        float _swellScale = 1f;
+
+        /// <summary>
+        /// Nov 13 (Mugesh: the gazed thing should grow a little): the map prop under <paramref name="world"/> (its whole
+        /// footprint counts) is drawn at <paramref name="scale"/>, grown from its base. Null or 1 = none.
+        /// </summary>
+        public void SetPropSwell(Vector3? world, float scale)
+        {
+            int cell = -1;
+            if (world.HasValue && scale > 1.0001f) cell = PropCellAt(LocalToTile(transform.InverseTransformPoint(world.Value)));
+            if (cell < 0) scale = 1f;
+            if (cell == _swellCell && Mathf.Approximately(scale, _swellScale)) return;
+            _swellCell = cell;
+            _swellScale = scale;
+            _matricesDirty = true;
+        }
+
+        /// <summary>The content cell a prop covering <paramref name="tile"/> was placed from, or -1.</summary>
+        int PropCellAt(Vector2 tile)
+        {
+            if (!(Content is WorldMap wm)) return -1;
+            int tc = Mathf.RoundToInt(tile.x), tr = Mathf.RoundToInt(tile.y);
+            for (int r = tr; r >= tr - 3; r--)
+                for (int c = tc; c >= tc - 3; c--)
+                {
+                    if (r < 0 || c < 0 || r >= wm.Rows || c >= wm.Columns) continue;
+                    if (!wm.TryGetProp(wm.PropAt(r, c), out var e) || e.recipe == null || wm.IsPropHidden(new Vector2Int(c, r))) continue;
+                    var f = WorldMap.FootprintOf(e);
+                    if (tc < c + f.x && tr < r + f.y) return r * wm.Columns + c;
+                }
+            return -1;
         }
 
         /// <summary>Map tile (fractions) under an island-local point, for the current view.</summary>
@@ -777,6 +812,7 @@ namespace Diorama
         {
             var b = AddBatch(recipe.bakedMesh, propMaterial, true);
             b.passes = 2;
+            b.prop = true;
             recipe.ApplyTo(b.props);
             return b;
         }
@@ -934,11 +970,14 @@ namespace Diorama
                 if (!contentDirty) continue;
                 // Rows are contiguous runs of cells, so each row is one range copy.
                 int n = 0;
+                bool swell = b.prop && !b.steam && _swellCell >= 0 && _swellCell + 1 < b.cellStart.Length;
+                int s0 = swell ? b.cellStart[_swellCell] : 0, s1 = swell ? b.cellStart[_swellCell + 1] : 0;
+                var grow = Matrix4x4.Scale(Vector3.one * _swellScale);
                 for (int r = r0; r <= r1; r++)
                 {
                     int start = b.cellStart[r * ccols + c0], end = b.cellStart[r * ccols + c1 + 1];
                     if (b.world.Length < n + end - start) Array.Resize(ref b.world, Mathf.Max(64, (n + end - start) * 2));
-                    for (int i = start; i < end; i++) b.world[n++] = c2w * b.local[i];
+                    for (int i = start; i < end; i++) b.world[n++] = i >= s0 && i < s1 ? c2w * b.local[i] * grow : c2w * b.local[i];
                 }
                 b.count = n;
             }

@@ -31,5 +31,12 @@ namespace Diorama.Tests
             StringAssert.Contains("save.Save(\"menu: quit\")", src);
             Assert.IsNotNull(TabletKit.Power());
         }
+
+        [Test]
+        public void GazedProp_Swells()
+        {
+            StringAssert.Contains("island.SetPropSwell(", Src("Dialogue/FocusHighlight.cs"));
+            StringAssert.Contains("c2w * b.local[i] * grow", Src("IslandBuilder.cs"));
+        }
     }
 }

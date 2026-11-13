@@ -47,9 +47,10 @@ namespace Diorama.Tests
         }
 
         [Test]
-        public void PinchIcon_HasAPalm_NotJustTwoStrokes()
+        public void PinchIcon_BackToTheTwoStrokes_ThePalmVersionReadAsGibberish()
         {
-            StringAssert.Contains("var palm = new Vector3(-0.42f, 0f, 0f);", Src("Dialogue/PinchIcon.cs"));
+            // Nov 13: Mugesh preferred the earlier icon; the palm redraw is reverted.
+            StringAssert.DoesNotContain("var palm = new Vector3(-0.42f, 0f, 0f);", Src("Dialogue/PinchIcon.cs"));
         }
     }
 }

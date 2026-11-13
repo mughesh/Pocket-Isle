@@ -222,11 +222,33 @@ namespace Diorama
             BeamSound();
         }
 
+        [Tooltip("Nov 13: a gazed map prop (a shrine, a door, a tower) grows this much, eased in and out.")]
+        public float gazeSwell = 0.07f;
+
+        float _swell;
+        Vector3 _swellAt;
+
+        /// <summary>Nov 13: the gazed prop swells a little; it settles back when the gaze leaves.</summary>
+        void Swell(bool on)
+        {
+            if (island == null) return;
+            if (on && (_hoverPoint - _swellAt).sqrMagnitude > 1e-6f)
+            {
+                // A new target starts from its own size, not the last one's.
+                if (_swell > 0f && (_hoverPoint - _swellAt).magnitude > _hoverRadius) _swell = 0f;
+                _swellAt = _hoverPoint;
+            }
+            _swell = Mathf.MoveTowards(_swell, on ? 1f : 0f, Time.deltaTime / 0.15f);
+            float s = 1f + gazeSwell * Mathf.SmoothStep(0f, 1f, _swell);
+            island.SetPropSwell(_swell > 0f ? _swellAt : (Vector3?)null, s);
+        }
+
         /// <summary>Step 27: the glow, the pinch icon and the tick for what the gaze is on.</summary>
         void GazeExtras(bool hovering)
         {
             var cam = Camera.main;
             bool on = hovering && cam != null;
+            Swell(on);
             bool handNear = on && HandNear(_hoverPoint);
             _iconAlpha = Mathf.MoveTowards(_iconAlpha, on && !handNear ? 1f : 0f, Time.deltaTime * 6f);
             if (on)

@@ -31,7 +31,7 @@ namespace Diorama
             _root = new GameObject("Pinch Icon").transform;
             _root.SetParent(parent, false);
             _fingerMesh = FingersMesh();
-            _dotMesh = DiscMesh(new Vector3(0.12f, 0f, 0f), 0.11f, 16); // step 33: where the fingertips meet
+            _dotMesh = DiscMesh(Vector3.zero, 0.2f, 16);
             _shadow = Part("Shadow", _fingerMesh, hud);
             _shadow.transform.localScale = Vector3.one * 1.18f;
             _shadow.transform.localPosition = new Vector3(0f, 0f, 0.02f);
@@ -165,51 +165,27 @@ namespace Diorama
             return Build("Pinch Dot", v, t);
         }
 
-        /// <summary>
-        /// Step 33 (friends read the old two-finger mark as a "V"): a pinch seen from the side: a small palm on the left, the
-        /// index finger coming down from its top and the thumb up from its bottom, their tips meeting at the gold dot.
-        /// </summary>
+        /// <summary>Two tapered fingers coming in from the upper left and lower right... meeting at the dot (both windings).</summary>
         static Mesh FingersMesh()
         {
-            var v = new System.Collections.Generic.List<Vector3>();
-            var t = new System.Collections.Generic.List<int>();
-            void Tri(int i0, int i1, int i2)
+            const float w0 = 0.2f, w1 = 0.11f, len = 0.5f;
+            Vector3[] From(Vector3 dir)
             {
-                t.Add(i0); t.Add(i1); t.Add(i2);
-                t.Add(i0); t.Add(i2); t.Add(i1); // both windings
+                Vector3 side = new Vector3(-dir.y, dir.x, 0f);
+                Vector3 far = dir * len, near = dir * 0.12f;
+                return new[] { far + side * w0, far - side * w0, near + side * w1, near - side * w1 };
             }
-            void Finger(Vector3 from, Vector3 to, float w0, float w1)
+            var a = From(new Vector3(-0.7f, 0.72f, 0f).normalized);
+            var b = From(new Vector3(0.7f, 0.72f, 0f).normalized);
+            var v = new Vector3[8];
+            a.CopyTo(v, 0);
+            b.CopyTo(v, 4);
+            var t = new[]
             {
-                Vector3 dir = (to - from).normalized, side = new Vector3(-dir.y, dir.x, 0f);
-                int o = v.Count;
-                v.Add(from + side * w0); v.Add(from - side * w0); v.Add(to + side * w1); v.Add(to - side * w1);
-                Tri(o, o + 2, o + 1);
-                Tri(o + 1, o + 2, o + 3);
-                // a round fingertip
-                int c = v.Count;
-                v.Add(to);
-                const int n = 8;
-                for (int i = 0; i <= n; i++)
-                {
-                    float ang = Mathf.Atan2(side.y, side.x) - Mathf.PI * i / n;
-                    v.Add(to + new Vector3(Mathf.Cos(ang), Mathf.Sin(ang), 0f) * w1);
-                    if (i > 0) Tri(c, c + i, c + i + 1);
-                }
-            }
-            // The palm: a rounded blob the fingers grow from.
-            var palm = new Vector3(-0.42f, 0f, 0f);
-            int p0 = v.Count;
-            v.Add(palm);
-            const int pn = 18;
-            for (int i = 0; i < pn; i++)
-            {
-                float ang = i * Mathf.PI * 2f / pn;
-                v.Add(palm + new Vector3(Mathf.Cos(ang) * 0.2f, Mathf.Sin(ang) * 0.24f, 0f));
-                Tri(p0, p0 + 1 + i, p0 + 1 + (i + 1) % pn);
-            }
-            Finger(new Vector3(-0.38f, 0.2f, 0f), new Vector3(0.08f, 0.07f, 0f), 0.085f, 0.06f); // index, from above
-            Finger(new Vector3(-0.34f, -0.18f, 0f), new Vector3(0.08f, -0.07f, 0f), 0.09f, 0.065f); // thumb, from below
-            return Build("Pinch Fingers", v.ToArray(), t.ToArray());
+                0, 2, 1, 1, 2, 3, 0, 1, 2, 1, 3, 2,
+                4, 6, 5, 5, 6, 7, 4, 5, 6, 5, 7, 6,
+            };
+            return Build("Pinch Fingers", v, t);
         }
     }
 }
