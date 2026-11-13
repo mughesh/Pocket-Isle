@@ -38,5 +38,14 @@ namespace Diorama.Tests
             StringAssert.Contains("island.SetPropSwell(", Src("Dialogue/FocusHighlight.cs"));
             StringAssert.Contains("c2w * b.local[i] * grow", Src("IslandBuilder.cs"));
         }
+
+        [Test]
+        public void HealBloom_PopsUpWhatItDid()
+        {
+            var src = Src("HealBloom.cs");
+            StringAssert.Contains("Popup(HealedText,", src);
+            StringAssert.Contains("Popup(HealthyText,", src);
+            Assert.AreEqual("Islings' health restored!", HealBloom.HealedText);
+        }
     }
 }

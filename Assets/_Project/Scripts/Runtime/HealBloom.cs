@@ -382,6 +382,7 @@ namespace Diorama
             if (!AnyHurt(party))
             {
                 Debug.Log($"[HealBloom] {world.realm}: nobody hurt ({how}), a small puff only.");
+                Popup(HealthyText, new Color(0.92f, 0.96f, 0.9f));
                 if (stage != null && stage.fx != null && _view != null)
                 {
                     var p = HealFx.For(world.realm);
@@ -395,7 +396,20 @@ namespace Diorama
             _closedUntil[world.realm] = Time.time + reopenSeconds;
             _ghostUntil = 0f; // the poke happened: no ghost needed
             StartCoroutine(HealMoment(world.realm));
+            Popup(HealedText, new Color(0.62f, 1f, 0.55f));
             Debug.Log($"[HealBloom] {world.realm}: healed ({how}); big puff, heal wave; closed for {reopenSeconds:0} s.");
+        }
+
+        /// <summary>Nov 13 (Mugesh): a short line pops up over the bloom saying what it did.</summary>
+        public const string HealedText = "Islings' health restored!", HealthyText = "Islings are already healthy";
+
+        void Popup(string line, Color color)
+        {
+            if (_view == null || island == null) return;
+            float tile = TileWorldSize;
+            var up = island.transform.up;
+            FloatLabel.Show(line, island.transform, Head() + up * (tile * 0.7f), up, tile * 0.38f, color);
+            Debug.Log($"[HealBloom] Popup: {line}");
         }
 
         /// <summary>
