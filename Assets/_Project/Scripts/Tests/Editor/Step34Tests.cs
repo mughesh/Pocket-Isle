@@ -138,6 +138,19 @@ namespace Diorama.Tests
         }
 
         [Test]
+        public void KeeperHall_WaitsForContinue_BeforeTheMeeting()
+        {
+            // Nov 14 (Mugesh: a save from inside the forge hall started the battle under the title).
+            Assert.IsTrue(KeeperHall.WaitsForTitle(true, false));
+            Assert.IsTrue(KeeperHall.WaitsForTitle(false, true));
+            Assert.IsFalse(KeeperHall.WaitsForTitle(false, false));
+            var src = Src("Puzzles/KeeperHall.cs");
+            StringAssert.Contains("while (TitleUp) yield return null;", src);
+            StringAssert.Contains("!TitleUp) Approach();", src);
+            StringAssert.Contains("if (!TitleUp) UpdatePoke();", src);
+        }
+
+        [Test]
         public void PowerIcon_GapIsAtTheTop()
         {
             // Nov 14: the ring started at 130 degrees and swept 280 clockwise, so the gap was on the left.

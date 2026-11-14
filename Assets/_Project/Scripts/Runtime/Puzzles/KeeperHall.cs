@@ -442,11 +442,17 @@ namespace Diorama
             else if (_shard != null && !_shardHovering) _shard.Hide();
             if (show && Calmed && _phase == Phase.Idle)
             {
-                UpdatePoke();
+                if (!TitleUp) UpdatePoke();
                 if (!restsWhenCalm) Preen();
             }
-            if (show && !Calmed && _phase == Phase.Idle && approachRestart > 0f && !Tangled && !encounters.InBattle && Time.time > _restartAt) Approach();
+            if (show && !Calmed && _phase == Phase.Idle && approachRestart > 0f && !Tangled && !encounters.InBattle && Time.time > _restartAt && !TitleUp) Approach();
         }
+
+        /// <summary>Nov 14: the title (or the returning rise under it) is up: nothing in the hall starts a battle yet.</summary>
+        public static bool TitleUp => WaitsForTitle(TitleScreen.Showing, Opening.ReturningUp);
+
+        /// <summary>Pure (tested): a hall waits while the title shows or the island is still rising for a returning player.</summary>
+        public static bool WaitsForTitle(bool titleShowing, bool returningUp) => titleShowing || returningUp;
 
         Transform _speech;
 
@@ -616,6 +622,15 @@ namespace Diorama
         {
             if (_phase != Phase.Idle) yield break;
             _phase = Phase.Meeting;
+            if (TitleUp)
+            {
+                // Nov 14 (Mugesh: quit mid-battle in the forge hall, relaunched: the battle ran under the title, the pod
+                // fell and the moves worked before Continue): a save from inside the hall waits for Continue.
+                Debug.Log($"[KeeperHall] {KeeperName}: the title is up (a save from inside the hall); the meeting waits for Continue.");
+                while (TitleUp) yield return null;
+                yield return new WaitForSeconds(0.6f);
+                Debug.Log($"[KeeperHall] {KeeperName}: Continue; the meeting.");
+            }
             EnsureModel();
             _look.calm = 0f;
             _look.SetAllCrystals(0.6f);
