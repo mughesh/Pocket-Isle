@@ -151,6 +151,23 @@ namespace Diorama.Tests
         }
 
         [Test]
+        public void PadFit_AWideIsling_ShrinksAgainstAKeeper()
+        {
+            // Nov 14, the forge hall as measured: Riverloom h 0.233 w 0.282, Hearthstag h 0.453 w 0.273, tile 0.117.
+            var eye = new Vector3(0f, -1.4f, 0.9f); // below: the sightline rule can't act, only the width rule
+            var r = PadFit.Fit(eye, new Vector3(0f, 0.033f, 0.176f), 0.233f, new Vector3(0f, 0.033f, -0.176f), 0.453f, true, 0.282f, 0.273f, 0.117f);
+            Assert.IsTrue(r.wide);
+            Assert.AreEqual(0.6f * 0.273f / 0.282f, r.near, 1e-3f, "0.6 of the Keeper's width");
+            Assert.AreEqual(1f, r.wild, 1e-4f, "the Keeper keeps its size");
+            // Against a common wild one: at most 1.6 tiles wide.
+            r = PadFit.Fit(eye, new Vector3(0f, 0.033f, 0.176f), 0.233f, new Vector3(0f, 0.033f, -0.176f), 0.2f, false, 0.282f, 0.2f, 0.117f);
+            Assert.AreEqual(1.6f * 0.117f / 0.282f, r.near, 1e-3f);
+            // A slim one is untouched; no widths given = the old rules only.
+            Assert.IsFalse(PadFit.Fit(eye, Vector3.zero, 0.1f, Vector3.forward, 0.1f, false, 0.1f, 0.1f, 0.117f).wide);
+            Assert.IsFalse(PadFit.Fit(eye, Vector3.zero, 0.1f, Vector3.forward, 0.1f, false).wide);
+        }
+
+        [Test]
         public void PowerIcon_GapIsAtTheTop()
         {
             // Nov 14: the ring started at 130 degrees and swept 280 clockwise, so the gap was on the left.

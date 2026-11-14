@@ -213,7 +213,7 @@ namespace Diorama
             Vector3 nearFeet = island.TileToLocal(_player.tile, Cap + _player.baseLift), wildFeet = island.TileToLocal(_wild.tile, Cap + _wild.baseLift);
             _player.MeasureCached(out float nearH, out _);
             _wild.MeasureCached(out float wildH, out _);
-            var r = PadFit.Fit(eye, nearFeet, nearH, wildFeet, wildH, _wildKeeper);
+            var r = PadFit.Fit(eye, nearFeet, nearH, wildFeet, wildH, _wildKeeper, _player.MeasuredWidth, _wild.MeasuredWidth, TileSize * Zoom);
             bool changed = Mathf.Abs(_player.fitTarget - r.near) > 0.03f || Mathf.Abs(_wild.fitTarget - r.wild) > 0.03f;
             _player.fitTarget = r.near;
             _wild.fitTarget = r.wild;
@@ -221,7 +221,28 @@ namespace Diorama
             if (snap && _wild.grow <= 0.001f) _wild.fit = r.wild;
             if ((snap || changed) && (r.near < 0.999f || r.wild < 0.999f))
                 Debug.Log($"[BattleStage] Pad fit: near {_player.name} x{r.near:0.00} (drawn {nearH:0.000}), wild {_wild.name} x{r.wild:0.00} (drawn {wildH:0.000})" +
-                          $"{(r.sightline ? " (sightline)" : "")}{(r.ratio ? " (1.3x rule)" : "")}.");
+                          $"{(r.sightline ? " (sightline)" : "")}{(r.ratio ? " (1.3x rule)" : "")}{(r.wide ? " (too wide)" : "")}.");
+        }
+
+        /// <summary>Nov 14 (bridge): logs the pad fit's inputs and result for the battle on now.</summary>
+        public static void DebugPadFit()
+        {
+            var s = FindFirstObjectByType<BattleStage>();
+            if (s == null || s._player == null || s._wild == null || Camera.main == null)
+            {
+                Debug.Log("[BattleStage] DebugPadFit: no battle with both actors.");
+                return;
+            }
+            var t = s.island.transform;
+            Vector3 eye = t.InverseTransformPoint(Camera.main.transform.position);
+            Vector3 nf = s.island.TileToLocal(s._player.tile, s.Cap + s._player.baseLift), wf = s.island.TileToLocal(s._wild.tile, s.Cap + s._wild.baseLift);
+            s._player.MeasureCached(out float nh, out _);
+            s._wild.MeasureCached(out float wh, out _);
+            var r = PadFit.Fit(eye, nf, nh, wf, wh, s._wildKeeper, s._player.MeasuredWidth, s._wild.MeasuredWidth, s.TileSize * s.Zoom);
+            Debug.Log($"[BattleStage] DebugPadFit: eye {eye:F3}, near {s._player.name} feet {nf:F3} h {nh:F3} fit {s._player.fit:F2}/{s._player.fitTarget:F2}, " +
+                      $"wild {s._wild.name} feet {wf:F3} h {wh:F3} fit {s._wild.fit:F2}, keeper {s._wildKeeper}, allowed {PadFit.AllowedNearHeight(eye, nf, wf, wh * r.wild):F3}, " +
+                      $"result near {r.near:F2} wild {r.wild:F2} sight {r.sightline} ratio {r.ratio}, zoom {s.island.Zoom:F2}, " +
+                      $"width near {s._player.MeasuredWidth:F3} wild {s._wild.MeasuredWidth:F3}, tile {s.TileSize * s.island.Zoom:F3}");
         }
 
         /// <summary>HP bar for the party creature on the field (after a switch).</summary>

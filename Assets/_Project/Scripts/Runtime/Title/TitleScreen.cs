@@ -208,6 +208,9 @@ namespace Diorama
             Showing = false;
         }
 
+        /// <summary>Nov 14 (bridge): presses Continue on the title.</summary>
+        public static void DebugContinue() => Debug.Log($"[Title] DebugContinue: {(RuneBoard.DebugPress("Continue") ? "pressed" : "no Continue rune")}.");
+
         /// <summary>The N skip: everything away at once.</summary>
         public void Cancel()
         {

@@ -199,7 +199,22 @@ namespace Diorama
             }
             height = Mathf.Max(1e-4f, (b.max.y - feet) / s);
             center = Mathf.Clamp((b.center.y - feet) / s, 0f, height);
+            // Nov 14 (Mugesh: Riverloom far too big in the forge hall; half the stag's height but as wide as the stage):
+            // the widest flat extent, island-local (the world box of a turned body runs a little over).
+            _lastWidth = Mathf.Max(b.size.x, b.size.z) / Mathf.Max(1e-5f, island.transform.lossyScale.x);
             return true;
+        }
+
+        float _lastWidth, _measuredW;
+
+        /// <summary>Nov 14: the body's widest flat extent at grow 1 and fit 1 (island-local), cached like the height.</summary>
+        public float MeasuredWidth
+        {
+            get
+            {
+                MeasureCached(out _, out _);
+                return _measuredW * (island != null ? island.Zoom / _measuredZoom : 1f);
+            }
         }
 
         float _measuredH, _measuredC, _measuredZoom;
@@ -214,7 +229,9 @@ namespace Diorama
             if (!_measured || island == null)
             {
                 // Cached only once something is drawn (a pod still opening falls back to the nominal height).
+                _lastWidth = 0f;
                 _measured = Measure(out _measuredH, out _measuredC);
+                _measuredW = _lastWidth;
                 _measuredZoom = island != null ? Mathf.Max(1e-5f, island.Zoom) : 1f;
             }
             float k = island != null ? island.Zoom / _measuredZoom : 1f;

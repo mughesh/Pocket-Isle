@@ -20,23 +20,41 @@ namespace Diorama
         /// <summary>Step 14j: the wild actor shows from this share of its height up (was: its centre less 0.3 of its height at the near pad).</summary>
         public const float VisibleFrom = 0.05f;
 
+        /// <summary>
+        /// Nov 14 (Mugesh: Riverloom "too big" in the forge hall: half Hearthstag's height, so the height rules passed, but
+        /// 2.4 tiles wide, wider than the Keeper): the near actor is at most this many tiles wide, and at most
+        /// <see cref="KeeperNearWidth"/> of a Keeper's width.
+        /// </summary>
+        public const float MaxNearWidthTiles = 1.6f, KeeperNearWidth = 0.6f;
+
         public struct Result
         {
             public float near, wild;
-            public bool sightline, ratio;
+            public bool sightline, ratio, wide;
         }
 
         /// <summary>
         /// The fits (scale factors) for the near (player) and wild actors. Heights are the natural ones (fit 1), in the
         /// same units as the points; <paramref name="wildCenterShare"/> = centre height / height of the wild actor.
         /// </summary>
-        public static Result Fit(Vector3 eye, Vector3 nearFeet, float nearHeight, Vector3 wildFeet, float wildHeight, bool wildIsKeeper)
+        public static Result Fit(Vector3 eye, Vector3 nearFeet, float nearHeight, Vector3 wildFeet, float wildHeight, bool wildIsKeeper,
+            float nearWidth = 0f, float wildWidth = 0f, float tile = 0f)
         {
             var r = new Result { near = 1f, wild = 1f };
             if (nearHeight <= 1e-6f || wildHeight <= 1e-6f) return r;
             // A few passes: shrinking one can make the other too tall in turn.
             for (int pass = 0; pass < 4; pass++)
             {
+                if (nearWidth > 1e-6f && tile > 1e-6f)
+                {
+                    float maxW = MaxNearWidthTiles * tile;
+                    if (wildIsKeeper && wildWidth > 1e-6f) maxW = Mathf.Min(maxW, KeeperNearWidth * wildWidth * r.wild);
+                    if (nearWidth * r.near > maxW + 1e-6f)
+                    {
+                        r.near = Mathf.Max(MinFit, maxW / nearWidth);
+                        r.wide = true;
+                    }
+                }
                 float n = nearHeight * r.near, w = wildHeight * r.wild;
                 if (n > MaxRatio * w)
                 {

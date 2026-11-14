@@ -622,6 +622,9 @@ namespace Diorama
         {
             if (_phase != Phase.Idle) yield break;
             _phase = Phase.Meeting;
+            // Nov 14, second try (Mugesh: still happening): this runs from Start, which can come before Opening's Start
+            // marks the title up (start order is undefined). One frame later every Start has run.
+            yield return null;
             if (TitleUp)
             {
                 // Nov 14 (Mugesh: quit mid-battle in the forge hall, relaunched: the battle ran under the title, the pod
