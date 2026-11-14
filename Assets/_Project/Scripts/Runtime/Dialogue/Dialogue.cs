@@ -646,7 +646,13 @@ namespace Diorama
         /// Step 14g: the game menu or Settings is open: no line starts (the one showing goes back to the front of the
         /// queue), idle hints wait; everything shows once they close.
         /// </summary>
-        public static bool Held => GameMenu.IsOpen || SettingsBoard.IsOpen || JournalBoard.IsOpen;
+        public static bool Held => GameMenu.IsOpen || SettingsBoard.IsOpen || JournalBoard.IsOpen || TitleHeld;
+
+        /// <summary>
+        /// Nov 14 (Mugesh: the Lantern talked over the title, "Pod on your palm" from a save after a level-up): the title,
+        /// or the returning player's island rising under it, holds every line too; they show after Continue.
+        /// </summary>
+        static bool TitleHeld => Application.isPlaying && (TitleScreen.Showing || Opening.ReturningUp);
 
         static readonly HashSet<string> Focal = new HashSet<string>();
 
@@ -868,7 +874,7 @@ namespace Diorama
             if (held != _held)
             {
                 _held = held;
-                Debug.Log(held ? "[Dialogue] Menu open: the Spirit keeps quiet." : "[Dialogue] Menu closed: lines go on.");
+                Debug.Log(held ? $"[Dialogue] {(TitleHeld ? "Title" : "Menu")} up: the Spirit keeps quiet." : "[Dialogue] Menu / title closed: lines go on.");
                 if (held && _current.HasValue || !held && !_current.HasValue) Next();
             }
             if (held) return;

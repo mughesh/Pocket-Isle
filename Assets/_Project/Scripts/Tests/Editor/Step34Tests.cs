@@ -168,6 +168,16 @@ namespace Diorama.Tests
         }
 
         [Test]
+        public void TheSpirit_KeepsQuiet_UnderTheTitle()
+        {
+            // Nov 14 (Mugesh: the Lantern said "Pod on your palm" over the title).
+            var src = Src("Dialogue/Dialogue.cs");
+            StringAssert.Contains("JournalBoard.IsOpen || TitleHeld;", src);
+            StringAssert.Contains("(TitleScreen.Showing || Opening.ReturningUp)", src);
+            Assert.IsFalse(Dialogue.Held, "Edit mode: nothing holds the lines");
+        }
+
+        [Test]
         public void PowerIcon_GapIsAtTheTop()
         {
             // Nov 14: the ring started at 130 degrees and swept 280 clockwise, so the gap was on the left.
