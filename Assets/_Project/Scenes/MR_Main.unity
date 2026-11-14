@@ -3590,7 +3590,7 @@ MonoBehaviour:
   spirit: {fileID: 1847074513}
   keeperSpot: {x: 4.5, y: 3.4}
   keeperPad: {x: 4, y: 3}
-  partyPad: {x: 4, y: 7}
+  partyPad: {x: 4, y: 6}
   hallEntry: {x: 4, y: 8}
   forgeMouth: {x: 4.5, y: 1.4}
   forgeMouthHeight: 1.2
@@ -5737,6 +5737,8 @@ MonoBehaviour:
   rearm: 0.3
   bubble: {r: 0.78, g: 0.93, b: 1, a: 0.9}
   gold: {r: 1, g: 0.82, b: 0.35, a: 1}
+  wave: {r: 0.35, g: 0.72, b: 1, a: 1}
+  waveLight: {r: 0.72, g: 0.93, b: 1, a: 1}
 --- !u!1 &1497595888
 GameObject:
   m_ObjectHideFlags: 0

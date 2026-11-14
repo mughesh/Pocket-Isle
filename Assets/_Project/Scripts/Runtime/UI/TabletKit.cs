@@ -341,6 +341,9 @@ namespace Diorama
 
         static Mesh _power;
 
+        /// <summary>Where the power ring starts (degrees, 90 = top): 40 right of the top, so the gap is centred on the top.</summary>
+        public const float PowerGapStart = 50f;
+
         /// <summary>Nov 13: the game menu's quit icon, a power sign (a ring open at the top, a bar through the gap), drawn
         /// for a 3 cm tablet, front-facing, as inlay. Not an X: an X reads as "close this menu".</summary>
         public static Mesh Power()
@@ -353,9 +356,10 @@ namespace Diorama
             var c = new Vector2(0f, -0.0008f);
             for (int i = 0; i < steps; i++)
             {
-                // From 40 degrees right of the top, round the bottom, to 40 degrees left of it.
-                float a1 = (130f - Mathf.Lerp(0f, 280f, i / (float)steps)) * Mathf.Deg2Rad;
-                float a2 = (130f - Mathf.Lerp(0f, 280f, (i + 1) / (float)steps)) * Mathf.Deg2Rad;
+                // From 40 degrees right of the top (50), clockwise round the bottom, to 40 degrees left of it (130).
+                // Nov 14 (Mugesh: the power icon looked broken): it started at 130, so the gap sat on the left.
+                float a1 = (PowerGapStart - Mathf.Lerp(0f, 280f, i / (float)steps)) * Mathf.Deg2Rad;
+                float a2 = (PowerGapStart - Mathf.Lerp(0f, 280f, (i + 1) / (float)steps)) * Mathf.Deg2Rad;
                 Vector2 d1 = new Vector2(Mathf.Cos(a1), Mathf.Sin(a1)), d2 = new Vector2(Mathf.Cos(a2), Mathf.Sin(a2));
                 Poly(col, c + d1 * r0, c + d1 * r1, c + d2 * r1, c + d2 * r0);
             }

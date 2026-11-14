@@ -345,6 +345,29 @@ namespace Diorama
             return any;
         }
 
+        /// <summary>
+        /// Nov 14 (Mugesh: Steambara's body stood in front of the attack buttons in the lake temple): the name of a creature
+        /// whose body reaches through the shown plates toward the head, or null. Its body box is shrunk to 80% (bodies are
+        /// round, the box corners are air). The smoke run notes it.
+        /// </summary>
+        public string BodyThroughRow()
+        {
+            if (_row == null || !TryGetRowBounds(out _)) return null;
+            foreach (var a in new[] { _avoidA, _avoidB })
+            {
+                if (a == null || !a.TryGetBodyBounds(out var b)) continue;
+                float halfW = HalfRow, top = runeSize.y * 0.5f, bottom = -runeSize.y * 0.5f;
+                for (int i = 0; i < 8; i++)
+                {
+                    var p = b.center + Vector3.Scale(b.extents * 0.8f, new Vector3((i & 1) == 0 ? -1 : 1, (i & 2) == 0 ? -1 : 1, (i & 4) == 0 ? -1 : 1));
+                    var q = _row.InverseTransformPoint(p);
+                    // The row's front looks toward -Z: a body corner on that side, within the plates' face, is through it.
+                    if (q.z < 0f && Mathf.Abs(q.x) < halfW && q.y < top && q.y > bottom) return a.name;
+                }
+            }
+            return null;
+        }
+
         void Build()
         {
             _row = new GameObject("Rune Row").transform;

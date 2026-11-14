@@ -351,6 +351,13 @@ namespace Diorama.EditorTools
             log.Append($"\n  '{kindle.name}' {kindle.id} on {stag.name}: before body {(kindle.beforePrefab != null ? kindle.beforePrefab.name : "MISSING")}, ghost {kindle.ghostClip}, " +
                        $"ring {(kindle.ringMaterial != null ? kindle.ringMaterial.name : "MISSING")}; the calmed crown keeps a steady flame");
 
+            // Nov 14 (Mugesh: Steambara's body in front of the attack buttons in the lake temple): its party pad was one
+            // row nearer the front than the other halls' (set in 11c, before step 24 put the move row over the arena).
+            Undo.RecordObject(tide, "Step 34");
+            tide.partyPad = new Vector2Int(4, 6);
+            EditorUtility.SetDirty(tide);
+            log.Append($"\n  {tide.name}: party pad c4 r6 (was r7; the Isling stood through the move row)");
+
             var scene = stag.gameObject.scene;
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);

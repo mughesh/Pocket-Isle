@@ -124,6 +124,38 @@ namespace Diorama.Tests
         }
 
         [Test]
+        public void Shell_KnocksGetLouder_WithABlueWave()
+        {
+            // Nov 14 (Mugesh): more thump, louder for the next two knocks, the lodge's wave in blue growing each time.
+            Assert.Less(ShellKnockPiece.KnockStrength(1), ShellKnockPiece.KnockStrength(2));
+            Assert.Less(ShellKnockPiece.KnockStrength(2), ShellKnockPiece.KnockStrength(3));
+            Assert.AreEqual(1f, ShellKnockPiece.KnockStrength(3), 1e-4f);
+            Assert.LessOrEqual(ShellKnockPiece.KnockPitch(3), 1.3f, "low enough to thump");
+            var src = Src("Puzzles/Lilymere/ShellKnockPiece.cs");
+            StringAssert.Contains("AudioIds.KeeperStomp", src);
+            StringAssert.Contains("HealFx.Ripple(", src);
+            StringAssert.Contains("Splash(feet", src); // water when it wakes
+        }
+
+        [Test]
+        public void PowerIcon_GapIsAtTheTop()
+        {
+            // Nov 14: the ring started at 130 degrees and swept 280 clockwise, so the gap was on the left.
+            float gapMid = TabletKit.PowerGapStart + (360f - 280f) * 0.5f;
+            Assert.AreEqual(90f, gapMid, 1e-3f);
+            var m = TabletKit.Power();
+            Assert.Greater(m.bounds.max.y, 0.0075f, "the bar reaches above the ring");
+        }
+
+        [Test]
+        public void LakeTemple_PartyPad_MatchesTheOtherHalls()
+        {
+            // Nov 14: at row 7 the Isling stood through the move row; the other halls use row 6.
+            StringAssert.Contains("kh.partyPad = new Vector2Int(4, 6);", System.IO.File.ReadAllText("Assets/_Project/Scripts/Editor/Step11cSetup.cs"));
+            StringAssert.Contains("tide.partyPad = new Vector2Int(4, 6);", System.IO.File.ReadAllText("Assets/_Project/Scripts/Editor/Step34Setup.cs"));
+        }
+
+        [Test]
         public void Shell_AFingertipInsideKnocks_OutsideDoesNot()
         {
             var half = new Vector3(0.085f, 0.062f, 0.085f);

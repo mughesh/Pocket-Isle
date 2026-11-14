@@ -395,7 +395,14 @@ namespace Diorama.EditorTools
                 if (Now < _layoutNext) return;
                 _layoutNext = Now + 0.5;
                 List<string> hits;
-                try { hits = TextLayoutCheck.Check(Camera.main); }
+                try
+                {
+                    hits = TextLayoutCheck.Check(Camera.main);
+                    // Nov 14: a creature standing through the move plates (the lake temple's pad was a row too near).
+                    var row = InBattle ? UnityEngine.Object.FindFirstObjectByType<BattleRunes>() : null;
+                    string through = row != null ? row.BodyThroughRow() : null;
+                    if (through != null) hits.Add($"{through}'s body through the move row");
+                }
                 catch (Exception e)
                 {
                     Note("exception", $"layout check threw {e.GetType().Name}: {e.Message}");

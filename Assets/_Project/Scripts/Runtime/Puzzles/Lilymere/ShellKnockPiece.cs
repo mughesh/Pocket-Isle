@@ -56,8 +56,14 @@ namespace Diorama
             return x * x + y * y + z * z <= 1f;
         }
 
-        /// <summary>The knock's pitch rises with each one (pure, tested).</summary>
-        public static float KnockPitch(int knock) => 1.35f + 0.2f * Mathf.Clamp(knock - 1, 0, Knocks);
+        public Color wave = new Color(0.35f, 0.72f, 1f);
+        public Color waveLight = new Color(0.72f, 0.93f, 1f);
+
+        /// <summary>The knock's pitch rises a little with each one; low enough to thump (Nov 14; pure, tested).</summary>
+        public static float KnockPitch(int knock) => 1.0f + 0.12f * Mathf.Clamp(knock - 1, 0, Knocks);
+
+        /// <summary>Nov 14 (Mugesh: louder for the next two knocks): 0.55, 0.78, 1 for knocks 1-3 (pure, tested).</summary>
+        public static float KnockStrength(int knock) => Mathf.Lerp(0.55f, 1f, Mathf.Clamp01((knock - 1) / (float)(Knocks - 1)));
 
         protected override void ApplyState()
         {
@@ -95,6 +101,7 @@ namespace Diorama
             float breath = Mathf.Sin(t * 1.1f);
             float w = t - _wobbleAt;
             float wobble = w >= 0f && w < 0.8f ? Mathf.Exp(-w * 5f) * Mathf.Sin(w * 30f) : 0f;
+            wobble *= 0.7f + 0.5f * KnockStrength(_count);
             body.squash = new Vector3(1f - 0.012f * breath, 1f + 0.03f * breath + 0.05f * wobble, 1f - 0.012f * breath);
             body.shakeRoll = 9f * wobble;
             if (fx != null && Here && !Waking && t >= _bubbleAt)
@@ -155,20 +162,30 @@ namespace Diorama
             var actor = Actor;
             Vector3 c = actor != null ? actor.WorldCenter : at;
             float h = actor != null ? BodyHeight(actor) : TileWorld, tile = TileWorld;
-            // A hollow knock on stone-shell, higher each time; ripples under it.
+            // Nov 14 (Mugesh: more thump, louder for the next two): a hollow knock, lower than before, with the Keeper's
+            // stomp under it, both louder each knock; ripples under it.
+            float s = KnockStrength(_count);
             var knock = GameAudio.At(AudioIds.LogDrop, at);
             knock.SetPitch(KnockPitch(_count));
-            knock.SetVolume(volume * 0.75f);
-            GameAudio.At(AudioIds.ChannelRipple, c).SetVolume(volume * 0.5f);
+            knock.SetVolume(volume * (0.5f + 0.9f * s));
+            var thump = GameAudio.At(AudioIds.KeeperStomp, c);
+            thump.SetPitch(1.45f);
+            thump.SetVolume(volume * 0.6f * s);
+            GameAudio.At(AudioIds.ChannelRipple, c).SetVolume(volume * (0.3f + 0.4f * s));
             if (fx != null)
             {
-                fx.Burst(at, 10, gold, tile * 0.35f, 0.5f, tile * 0.04f);
+                var up = island.transform.up;
+                fx.Burst(at, Mathf.RoundToInt(10 * (0.6f + s)), gold, tile * 0.35f, 0.5f, tile * 0.04f);
+                // Nov 14: the lodge's heal wave, in blue, out from under the shell; wider and brighter each knock.
+                fx.StartCoroutine(HealFx.Ripple(fx, c - up * (h * 0.42f), island.transform.rotation, up, tile,
+                    h * 0.9f / Mathf.Max(1e-5f, tile) + 0.7f * _count, wave, waveLight, s, 0.8f + 0.25f * s));
                 // A ring of ripples and bubbles round the shell.
-                for (int i = 0; i < 14; i++)
+                int n = Mathf.RoundToInt(14 * (0.6f + s));
+                for (int i = 0; i < n; i++)
                 {
-                    float a = i / 14f * Mathf.PI * 2f;
+                    float a = i / (float)n * Mathf.PI * 2f;
                     Vector3 dir = island.transform.right * Mathf.Cos(a) + island.transform.forward * Mathf.Sin(a);
-                    fx.Burst(c + dir * (h * 0.8f) - island.transform.up * (h * 0.3f), 1, bubble, tile * 0.04f, 1f, tile * 0.055f, dir * tile * 0.5f + island.transform.up * tile * 0.35f);
+                    fx.Burst(c + dir * (h * 0.8f) - up * (h * 0.3f), 1, bubble, tile * 0.04f, 1f, tile * 0.055f, dir * tile * (0.35f + 0.3f * s) + up * tile * 0.35f);
                 }
             }
             Debug.Log($"[ShellKnockPiece] {id}: knock {_count} / {Knocks} ({how}).");
@@ -226,12 +243,20 @@ namespace Diorama
                 Body.shakeRoll = 10f * Mathf.Sin(t * 60f) * (t / 0.4f);
                 yield return null;
             }
+            float h = Body != null ? BodyHeight(Body) : tile;
+            var up = island.transform.up;
+            Vector3 feet = c - up * (h * 0.42f);
             if (fx != null)
             {
-                fx.Burst(c, 50, bubble, tile * 1.6f, 0.9f, tile * 0.06f, island.transform.up * tile * 0.9f);
-                fx.Burst(c, 24, Color.white, tile * 1.1f, 0.7f, tile * 0.05f, island.transform.up * tile * 0.5f);
+                fx.Burst(c, 50, bubble, tile * 1.6f, 0.9f, tile * 0.06f, up * tile * 0.9f);
+                fx.Burst(c, 24, Color.white, tile * 1.1f, 0.7f, tile * 0.05f, up * tile * 0.5f);
+                // Nov 14 (Mugesh: no water effects when it wakes): a splash all round the shell, a column of spray and
+                // the biggest blue wave of all.
+                Splash(feet, h, tile, 1f);
+                fx.StartCoroutine(HealFx.Ripple(fx, feet, island.transform.rotation, up, tile, h * 0.9f / Mathf.Max(1e-5f, tile) + 3.2f,
+                    wave, waveLight, 1.4f, 1.4f));
             }
-            GameAudio.At(AudioIds.PondSplash, c).SetVolume(volume);
+            GameAudio.At(AudioIds.PondSplash, c).SetVolume(volume * 1.3f);
             SwapToStanding(hall);
             var model = hall.Model;
             if (model == null) yield break;
@@ -247,7 +272,32 @@ namespace Diorama
             GameAudio.At(AudioIds.VoiceCallTidemother, model.WorldCenter);
             Debug.Log($"[ShellKnockPiece] {id}: the head and flippers burst out; {hall.KeeperLabel} rears, angry.");
             if (hall.Fury != null) hall.Fury.Rear(16f, 0.5f);
-            yield return new WaitForSeconds(1.2f);
+            // The flippers slap down after the rear: a second, smaller splash and wave.
+            yield return new WaitForSeconds(0.55f);
+            if (fx != null && model != null)
+            {
+                Splash(feet, h, tile, 0.6f);
+                fx.StartCoroutine(HealFx.Ripple(fx, feet, island.transform.rotation, up, tile, h * 0.9f / Mathf.Max(1e-5f, tile) + 2f,
+                    wave, waveLight, 0.8f, 1.1f));
+                GameAudio.At(AudioIds.PondSplash, model.WorldCenter).SetVolume(volume * 0.7f);
+            }
+            yield return new WaitForSeconds(0.65f);
+        }
+
+        /// <summary>Nov 14: water thrown up and out all round the shell, a white crown of spray and a column in the middle.</summary>
+        void Splash(Vector3 feet, float h, float tile, float size)
+        {
+            var up = island.transform.up;
+            int n = Mathf.RoundToInt(24 * size);
+            for (int i = 0; i < n; i++)
+            {
+                float a = i / (float)n * Mathf.PI * 2f;
+                Vector3 dir = island.transform.right * Mathf.Cos(a) + island.transform.forward * Mathf.Sin(a);
+                Vector3 rim = feet + dir * (h * 0.85f);
+                fx.Burst(rim, 2, wave, tile * 0.25f, 0.8f, tile * 0.07f, dir * (tile * 1.1f * size) + up * (tile * 1.6f * size));
+                fx.Burst(rim, 1, Color.white, tile * 0.2f, 0.6f, tile * 0.05f, dir * (tile * 0.7f * size) + up * (tile * 2.1f * size));
+            }
+            fx.Burst(feet + up * (h * 0.3f), Mathf.RoundToInt(30 * size), waveLight, tile * 0.5f, 0.9f, tile * 0.07f, up * (tile * 2.6f * size));
         }
 
         public override void DebugLookPinch()

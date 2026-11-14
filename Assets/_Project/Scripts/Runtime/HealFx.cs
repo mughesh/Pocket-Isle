@@ -139,7 +139,7 @@ namespace Diorama
             fx.Release(halo);
         }
 
-        static void Shock(BattleFx fx, BattleFx.Item ring, Vector3 feet, Quaternion flat, Vector3 up, float tile, float radiusTiles, float u)
+        static void Shock(BattleFx fx, BattleFx.Item ring, Vector3 feet, Quaternion flat, Vector3 up, float tile, float radiusTiles, float u, float alpha = 0.95f)
         {
             if (u <= 0f || u >= 1f)
             {
@@ -149,7 +149,38 @@ namespace Diorama
             float e = 1f - (1f - u) * (1f - u);
             ring.transform.SetPositionAndRotation(feet + up * (tile * 0.04f), flat);
             ring.transform.localScale = Vector3.one * Local(fx, tile * (0.3f + 2f * radiusTiles * e));
-            ring.SetAlpha((1f - u) * 0.95f);
+            ring.SetAlpha((1f - u) * alpha);
+        }
+
+        /// <summary>
+        /// Nov 14 (Mugesh: "reuse the wave we have for the healing effect in the lodge, with blue colour"): the heal's two
+        /// ground shockwaves and its flash alone, in any colours. <paramref name="strength"/> (0..1, more allowed) scales
+        /// how bright and how big the flash is; the reach is <paramref name="radiusTiles"/>.
+        /// </summary>
+        public static IEnumerator Ripple(BattleFx fx, Vector3 feet, Quaternion flat, Vector3 up, float tile, float radiusTiles,
+            Color main, Color accent, float strength = 1f, float seconds = 1f)
+        {
+            if (fx == null) yield break;
+            var flash = fx.Get(BattleFx.Shape.Orb);
+            flash.Set(Color.white, main, 1f, 1.4f, 1f, 0.3f);
+            var ring1 = fx.Get(BattleFx.Shape.Ring);
+            ring1.Set(main, Color.white, 1f, 1.3f);
+            var ring2 = fx.Get(BattleFx.Shape.Ring);
+            ring2.Set(accent, Color.white, 1f, 1.3f);
+            float alpha = Mathf.Clamp01(0.55f + 0.4f * strength), travel = seconds * 0.85f;
+            for (float t = 0f; t < seconds; t += Time.deltaTime)
+            {
+                float fu = Mathf.Clamp01(t / 0.35f);
+                flash.transform.position = feet + up * (tile * 0.3f);
+                flash.transform.localScale = Vector3.one * Local(fx, tile * (0.3f + 1.1f * strength * Mathf.Sqrt(fu)));
+                flash.SetAlpha((1f - fu) * Mathf.Clamp01(0.4f + 0.35f * strength));
+                Shock(fx, ring1, feet, flat, up, tile, radiusTiles, t / travel, alpha);
+                Shock(fx, ring2, feet, flat, up, tile, radiusTiles * 0.75f, (t - 0.18f) / travel, alpha);
+                yield return null;
+            }
+            fx.Release(flash);
+            fx.Release(ring1);
+            fx.Release(ring2);
         }
 
         /// <summary>

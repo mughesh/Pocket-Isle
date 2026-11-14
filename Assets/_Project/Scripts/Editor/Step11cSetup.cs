@@ -189,7 +189,7 @@ namespace Diorama.EditorTools
             kh.realmMap = lilymere;
             kh.keeperSpot = LakeTempleTools.KeeperSpot;
             kh.keeperPad = new Vector2Int(4, 3);
-            kh.partyPad = new Vector2Int(4, 7);
+            kh.partyPad = new Vector2Int(4, 6); // Nov 14: was row 7, so the Isling stood through the move row (step 24 put it over the arena)
             kh.hallEntry = LakeTempleTools.EntryTile;
             kh.forgeMouth = LakeTempleTools.DomeAt;
             kh.forgeMouthHeight = 1.2f;
