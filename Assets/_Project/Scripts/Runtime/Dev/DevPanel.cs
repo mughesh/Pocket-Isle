@@ -384,6 +384,13 @@ namespace Diorama
                         if (!groups.Contains(g) && g != Interiors) groups.Add(g);
                     }
                     groups.Add(Interiors);
+                    // Step 34: filming jumps (the Keeper in its "before" pose, a team ready; the save is edited and reloads).
+                    Heading("Filming (resets that Keeper)");
+                    foreach (var j in GameState.FilmJumps)
+                    {
+                        string label = j.label;
+                        Add(label, () => Status(state.Film(label) ? $"{label}: reloading, then into the hall." : "No save yet (finish the opening first)."));
+                    }
                     foreach (var g in groups)
                     {
                         bool any = false;

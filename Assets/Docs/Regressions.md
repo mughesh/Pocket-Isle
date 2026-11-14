@@ -63,6 +63,7 @@ catches a break: a test, a smoke-run rule (`Note "rule"` in the smoke report, wa
 | R56 | A wild or Keeper HP plate sits beside its creature, never at its feet inside a big body; a Keeper's plate shows its name. | Nov 12 headset (Galeowl's plate had no name) | `Nov12FixTests.KeeperPlate_*`; smoke "label inside a mesh" |
 | R57 | The Heart's call plays at its first line of every scene; its murmurs are heard while every Heart line types. | Nov 12 headset (silent statue), 2nd time after R12 | `Nov12FixTests.HeartCall_*`; log `[Heart] call` / `[Heart] murmur` |
 | R58 | Finale lines hold 1 s + 0.035 s a letter, 3.5 s at most; one poke or pinch skips. | Nov 12 headset ("makes me sleepy") | `Nov12FixTests.Finale_*` |
+| R59 | A Keeper's wake moment (Galeowl's knots, Tidemother's shell, Hearthstag's fire) gates only the first meeting: a Keeper already calmed (an older save, a rematch, the finale) never shows its "before" pose; a lost or fled battle doesn't reset it; the moment holds the explorer still and lets go on every exit. | Step 34 (new) | `Step34Tests` (`BeforeBody_*`, `Moment_*`, `Scene_*`); smoke Cinderwood / Lilymere shots `s34_*`; log `[HandPuzzle] lock/unlock cw.kindle / lm.shell` |
 
 ## How to use
 - A new note that repeats one of these: say which rule broke and why the check missed it, then fix the check too.

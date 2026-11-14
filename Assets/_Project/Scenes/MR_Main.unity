@@ -382,8 +382,89 @@ Transform:
   - {fileID: 896397233}
   - {fileID: 288828728}
   - {fileID: 949271663}
+  - {fileID: 1432422730}
   m_Father: {fileID: 1553131432}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &149764386
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 149764387}
+  - component: {fileID: 149764388}
+  m_Layer: 0
+  m_Name: Keeper Crown Kindle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &149764387
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 149764386}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1553131432}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &149764388
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 149764386}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d4c43086e706bb46b853a4037c22348, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.CrownKindlePiece
+  id: cw.kindle
+  map: {fileID: 11400000, guid: 826b78d0c19f2014a9858fa40dff5037, type: 2}
+  island: {fileID: 270959109}
+  window: {fileID: 270959113}
+  explorer: {fileID: 374318554}
+  grabGuard: {fileID: 270959111}
+  ghosts: {fileID: 1421177268}
+  fx: {fileID: 1078587927}
+  reach: 12
+  lessonLine: cw.keeper.kindle
+  ghostClip: cup_hands
+  ghostScale: 0.55
+  lessonChip: Cup the fire
+  counterLabel: 
+  focusMaterial: {fileID: 0}
+  markIntensity: 1.3
+  grabAssist: 0.08
+  keeper: {fileID: 2121894498}
+  swap: {fileID: 221433162}
+  beforePrefab: {fileID: 5257782420035603992, guid: 1b012b972824e5240a8b88633492d14f, type: 3}
+  touchGuard: 0.9
+  hintEvery: 20
+  volume: 0.8
+  radius: 0.14
+  facingAngle: 75
+  keepRadius: 1.3
+  keepAngle: 15
+  twoHandSeconds: 2
+  oneHandSeconds: 3
+  lookSeconds: 3
+  fireSize: {x: 0.1, y: 0.95}
+  darkCrystals: 0.08
+  ringMaterial: {fileID: 2100000, guid: 4b84b0a44e27dc947956498ae40f4bb2, type: 2}
+  ringSize: 1.5
+  ringBand: 0.24
+  ringIntensity: 2.2
 --- !u!1 &155307357
 GameObject:
   m_ObjectHideFlags: 0
@@ -1163,6 +1244,7 @@ MonoBehaviour:
   lipBelowPods: 0.02
   podClearance: 0.01
   cradlePodClearance: 0.12
+  podReach: 0.12
 --- !u!114 &270959112
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2192,7 +2274,8 @@ MonoBehaviour:
   shardTarget: windShard
   captionFormat: '{0} whips up a storm!'
   shardColor: {r: 0.42, g: 0.88, b: 0.32, a: 1}
-  untangle: {fileID: 1824753089}
+  wake: {fileID: 1824753089}
+  calmCrownFlame: 0
   forgeFlame: 0
   stomps: 0
   keeperLift: 0.5
@@ -2616,6 +2699,7 @@ MonoBehaviour:
   holdRate: 0.4
   doneLine: gw.gust.done
   rippleOnClear: 0
+  lookHoldLessonSeconds: 0.4
 --- !u!1 &540416227
 GameObject:
   m_ObjectHideFlags: 0
@@ -3124,6 +3208,7 @@ MonoBehaviour:
   holdRate: 0.4
   doneLine: gw.arrive.done
   rippleOnClear: 1
+  lookHoldLessonSeconds: 0.4
 --- !u!1 &678983518
 GameObject:
   m_ObjectHideFlags: 0
@@ -3372,6 +3457,7 @@ MonoBehaviour:
   coneWidth: 0.02
   beamLinger: 1.5
   island: {fileID: 270959109}
+  gazeSwell: 0.07
 --- !u!1 &886928184
 GameObject:
   m_ObjectHideFlags: 0
@@ -3453,7 +3539,8 @@ MonoBehaviour:
   shardTarget: waterShard
   captionFormat: '{0} churns up the water!'
   shardColor: {r: 0.45, g: 0.72, b: 1, a: 1}
-  untangle: {fileID: 0}
+  wake: {fileID: 1432422731}
+  calmCrownFlame: 0
   forgeFlame: 0
   stomps: 0
   keeperLift: 0
@@ -5404,6 +5491,11 @@ MonoBehaviour:
   practicePassSeconds: 60
   practiceNiceLine: lesson.practice.nice
   practiceDoneLine: lesson.practice.done
+  practiceGoldLine: lesson.practice.gold
+  practiceSwipeChip: Swipe to walk
+  practiceTapChip: Tap to stop
+  lessonAreaLandmark: statue
+  lessonAreaRadius: 6
   twoHandsPassSeconds: 8
   swipeTiles: 4
   swipeNiceLine: lesson.walk.nice
@@ -5573,6 +5665,78 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1432422729
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1432422730}
+  - component: {fileID: 1432422731}
+  m_Layer: 0
+  m_Name: Keeper Shell Knock
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1432422730
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1432422729}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 93667893}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1432422731
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1432422729}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 767281af8e42f1d499dc8adbbe3bfe34, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Diorama.Runtime::Diorama.ShellKnockPiece
+  id: lm.shell
+  map: {fileID: 11400000, guid: 320028e817a355b40b98f43d02ec05d3, type: 2}
+  island: {fileID: 270959109}
+  window: {fileID: 270959113}
+  explorer: {fileID: 374318554}
+  grabGuard: {fileID: 270959111}
+  ghosts: {fileID: 1421177268}
+  fx: {fileID: 1078587927}
+  reach: 12
+  lessonLine: lm.keeper.shell
+  ghostClip: poke
+  ghostScale: 0.65
+  lessonChip: Knock on its shell
+  counterLabel: 
+  focusMaterial: {fileID: 0}
+  markIntensity: 1.3
+  grabAssist: 0.08
+  keeper: {fileID: 896397234}
+  swap: {fileID: 221433162}
+  beforePrefab: {fileID: 4443374573695937783, guid: 2bd494d8dc41b9e4e982221c4420ee30, type: 3}
+  touchGuard: 0.9
+  hintEvery: 20
+  volume: 0.8
+  shellHalf: {x: 0.85, y: 0.62, z: 0.85}
+  leave: 1.15
+  rearm: 0.3
+  bubble: {r: 0.78, g: 0.93, b: 1, a: 0.9}
+  gold: {r: 1, g: 0.82, b: 0.35, a: 1}
 --- !u!1 &1497595888
 GameObject:
   m_ObjectHideFlags: 0
@@ -6089,6 +6253,7 @@ Transform:
   - {fileID: 1291464262}
   - {fileID: 1908534644}
   - {fileID: 2066182156}
+  - {fileID: 149764387}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1557685672
@@ -8288,7 +8453,8 @@ MonoBehaviour:
   shardTarget: fireShard
   captionFormat: '{0} blocks the way, crown ablaze!'
   shardColor: {r: 1, g: 0.7, b: 0.3, a: 1}
-  untangle: {fileID: 0}
+  wake: {fileID: 149764388}
+  calmCrownFlame: 1
   forgeFlame: 1
   stomps: 1
   keeperLift: 0

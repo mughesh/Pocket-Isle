@@ -373,6 +373,64 @@ namespace Diorama
 
         public bool SetRestored(WorldMap map, bool on) => map != null && EditSave(d => d.SetRestored(map.name, on ? 1f : 0f), $"{map.name} restored {on}");
 
+        // ---- step 34: filming jumps ----
+
+        /// <summary>Step 34: the Dev panel's filming jumps: (label, Keeper id, its wake moment's id, its shard, the hall's travel label).</summary>
+        public static readonly (string label, string keeper, string wake, string shard, string spot)[] FilmJumps =
+        {
+            ("Tidemother: shell", "lm.keeper", "lm.shell", ShardHolder.WaterId, "LM: lake temple"),
+            ("Hearthstag: kneeling", KeeperId, "cw.kindle", ShardId, "Forge Hall"),
+        };
+
+        // Survives the scene reload an edited save needs: where to go once the game is back.
+        static string _pendingSpot;
+
+        /// <summary>
+        /// Step 34 (for the video): the explorer in a Keeper's hall with the Keeper in its "before" pose and a team ready.
+        /// The Keeper and its wake moment are reset in the save (the shard too: it can be won again), the party gets the
+        /// preset team if it has under three, then the scene reloads and the jump follows.
+        /// </summary>
+        public bool Film(string label)
+        {
+            foreach (var j in FilmJumps)
+            {
+                if (j.label != label) continue;
+                if (party != null && party.members.Count < 3) PresetTeam(14);
+                HealAll();
+                _pendingSpot = j.spot;
+                bool ok = EditSave(d =>
+                {
+                    Puzzle(d, j.keeper, false, 0);
+                    Puzzle(d, j.wake, false, 0);
+                    Puzzle(d, j.shard, false, 0);
+                }, $"film jump '{label}'");
+                if (!ok) _pendingSpot = null;
+                Debug.Log($"[GameState] Film jump '{label}': {j.keeper} frightened, {j.wake} not done; going to {j.spot} after the reload ({(ok ? "ok" : "no save yet")}).");
+                return ok;
+            }
+            return false;
+        }
+
+        System.Collections.IEnumerator Start()
+        {
+            if (string.IsNullOrEmpty(_pendingSpot)) yield break;
+            string want = _pendingSpot;
+            _pendingSpot = null;
+            // The save restores over the first frames; a swap may still run.
+            yield return new WaitForSeconds(1.5f);
+            for (float t = 0f; t < 20f; t += 0.5f)
+            {
+                foreach (var s in Spots)
+                    if (s.label == want && GoTo(s))
+                    {
+                        Debug.Log($"[GameState] Film jump: at {want}.");
+                        yield break;
+                    }
+                yield return new WaitForSeconds(0.5f);
+            }
+            Debug.LogWarning($"[GameState] Film jump: couldn't go to {want} (busy for 20 s).");
+        }
+
         /// <summary>A puzzle solved (at its last stage), at a stage, or reset (<paramref name="stage"/> 0, not solved).</summary>
         public bool SetPuzzle(string id, bool solved, int stage) => EditSave(d => Puzzle(d, id, solved, stage), $"{id} {(solved ? "solved" : $"stage {stage}")}");
 

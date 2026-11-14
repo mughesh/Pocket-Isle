@@ -200,6 +200,8 @@ the lesson is done (step 9h: after ~6 s it shrinks to a hint chip; looking at th
   - Spirit: The forge is open! Walk in.
 - `cinder.hall.first` · in hall · intro · once · → hallKeeper (step 9b: first time inside the Forge Hall; Hearthstag comes in 9c)
   - Spirit: Something huge sleeps here... not yet.
+- `cw.keeper.kindle` · in hall · objective · → puzzle:cw.kindle (step 34: Hearthstag kneels, its crown fire nearly out; chip "Cup the fire")
+  - Spirit: Its fire is dying! Cup your hands round it.
 - `cinder.keeper.first` · in hall · story · once · → hearthstag (step 9c: first time in the Forge Hall; then the Keeper battle)
   - Spirit: It's scared... the fire is trapped inside it.
   - Spirit: Let's calm it down. Gently!
@@ -371,6 +373,8 @@ Step 11b, the hand moments (lesson lines stay pinned as a chip until the moment 
   - Spirit: A healing {bloom}! Poke it to heal your Islings.
 - `hall.tired` · in realm · story (step 29: at a Keeper's door with an Isling under half HP or fainted; once per door until healed; the bloom pulses gold)
   - Spirit: Your Islings are tired. Heal them first.
+- `lm.keeper.shell` · in hall · objective · → puzzle:lm.shell (step 34: Tidemother is inside its shell; chip "Knock on its shell")
+  - Spirit: It's hiding in its shell. Knock on it!
 - `lm.keeper.meet` · in hall · story · once · → tidemother (step 11c: in the lake temple, she clutches the hoarded water)
   - Tidemother: Stay back! This water is all that's left. I won't lose it again!
   - Spirit: She's so scared. Let's calm her down.

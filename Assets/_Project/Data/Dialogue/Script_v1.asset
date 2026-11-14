@@ -340,7 +340,7 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: Swipe your thumb to walk. Then tap to stop!
-      context:
+      context: 
   - id: lesson.practice.nice
     once: 0
     objective: 1
@@ -354,13 +354,14 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: Nice stop! Swipe, then tap again.
-      context:
+      context: 
   - id: lesson.practice.perfect
     once: 0
     objective: 1
     priority: 1
-    note: 'Nov 11: a stop on the gold tile (any tap stop counts; off the tile it is the nice line)'
-    target:
+    note: 'Nov 11: a stop on the gold tile (any tap stop counts; off the tile it
+      is the nice line)'
+    target: 
     validWhile: canWalk
     context: outside & !battle
     kind: 1
@@ -368,21 +369,21 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: Perfect! Once more.
-      context:
+      context: 
   - id: lesson.practice.gold
     once: 0
     objective: 1
     priority: 1
     note: 'step 32: before the last round, the only one with a gold tile'
-    target:
+    target: 
     validWhile: canWalk
     context: outside & !battle
     kind: 1
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Nice! Last one: stop on the gold!
-      context:
+      text: 
+      context: 
   - id: lesson.practice.done
     once: 0
     objective: 0
@@ -396,7 +397,7 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: Perfect!
-      context:
+      context: 
   - id: lesson.walk.help
     once: 0
     objective: 1
@@ -1404,7 +1405,7 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: The forge is open! Walk in.
-      context:
+      context: 
   - id: cinder.hall.first
     once: 1
     objective: 0
@@ -1418,6 +1419,21 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: Something huge sleeps here... not yet.
+      context: 
+  - id: cw.keeper.kindle
+    once: 0
+    objective: 1
+    priority: 2
+    note: 'lesson in the Forge Hall: Hearthstag kneels, its crown fire nearly out;
+      chip "Cup the fire"'
+    target: puzzle:cw.kindle
+    validWhile: 
+    context: hall
+    kind: 1
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: Its fire is dying! Cup your hands round it.
       context: 
   - id: cinder.keeper.first
     once: 1
@@ -2493,49 +2509,66 @@ MonoBehaviour:
     - speaker: 0
       speakerName: Spirit
       text: I can't get there from here. Let's walk closer.
-      context:
+      context: 
   - id: heal.bloom
     once: 0
     objective: 0
     priority: 2
     note: 'step 29: a healing bloom or the lodge healed hurt Islings'
-    target:
-    validWhile:
-    context:
+    target: 
+    validWhile: 
+    context: 
     kind: 0
     lines:
     - speaker: 0
       speakerName: Spirit
       text: Your Islings are healed!
-      context:
+      context: 
   - id: heal.bloom.meet
     once: 0
     objective: 0
     priority: 2
-    note: 'Nov 11: the walk stopped beside a healing bloom (first time in a realm, or with anyone hurt); {bloom} = dandelion / ember-lily / lotus'
+    note: 'Nov 11: the walk stopped beside a healing bloom (first time in a realm,
+      or with anyone hurt); {bloom} = dandelion / ember-lily / lotus'
     target: landmark:healBloom
-    validWhile:
-    context:
+    validWhile: 
+    context: 
     kind: 0
     lines:
     - speaker: 0
       speakerName: Spirit
       text: A healing {bloom}! Poke it to heal your Islings.
-      context:
+      context: 
   - id: hall.tired
     once: 0
     objective: 0
     priority: 2
-    note: 'step 29: at a Keeper''s door with an Isling under half HP or fainted; once per door until healed; the bloom pulses gold'
-    target:
-    validWhile:
+    note: 'step 29: at a Keeper''s door with an Isling under half HP or fainted;
+      once per door until healed; the bloom pulses gold'
+    target: 
+    validWhile: 
     context: realm
     kind: 0
     lines:
     - speaker: 0
       speakerName: Spirit
       text: Your Islings are tired. Heal them first.
-      context:
+      context: 
+  - id: lm.keeper.shell
+    once: 0
+    objective: 1
+    priority: 2
+    note: 'lesson in the lake temple: Tidemother is inside its shell; chip "Knock
+      on its shell"'
+    target: puzzle:lm.shell
+    validWhile: 
+    context: hall
+    kind: 1
+    lines:
+    - speaker: 0
+      speakerName: Spirit
+      text: It's hiding in its shell. Knock on it!
+      context: 
   - id: lm.keeper.meet
     once: 1
     objective: 0
