@@ -188,7 +188,7 @@ namespace Diorama.EditorTools
             knots.swap = hearth.swap;
             knots.stringMaterial = AssetDatabase.LoadAssetAtPath<Material>(KiteStringPath);
             EditorUtility.SetDirty(knots);
-            kh.untangle = knots;
+            kh.wake = knots;
 
             Undo.RecordObject(look, "Step 10e");
             look.keeper = kh;

@@ -34,6 +34,14 @@ namespace Diorama
         public bool idleStomps = true;
         public Vector2 snortEvery = new Vector2(3f, 6f);
         public Vector2 stompEvery = new Vector2(7f, 12f);
+        [Tooltip("Step 34: the crown flames' size (a Keeper waiting to be woken burns low: Hearthstag's dying fire).")]
+        [NonSerialized] public float flameScale = 1f;
+        [Tooltip("Step 34: the smoke, embers and trembling (0 = none: a Keeper hurt and still, frowning).")]
+        [NonSerialized] public float auraScale = 1f;
+        [Tooltip("Step 34: off = no snorts (a Keeper waiting to be woken).")]
+        [NonSerialized] public bool snorts = true;
+        [Tooltip("Step 34: at peace the crown keeps a small steady flame (0 = none; Hearthstag once calmed).")]
+        [NonSerialized] public float calmFlame;
 
         [Header("Look")]
         public Color smokeLight = new Color(0.36f, 0.31f, 0.42f, 0.62f);
@@ -244,15 +252,15 @@ namespace Diorama
         void LateUpdate()
         {
             if (_view == null) return;
-            float t = Time.time, f = Mathf.Clamp01(fury), p2 = phase2 ? 1f : 0f;
+            float t = Time.time, f = Mathf.Clamp01(fury), p2 = phase2 ? 1f : 0f, aura = Mathf.Clamp01(auraScale);
             // Aura.
             if (_smoke != null)
             {
                 var emission = _smoke.emission;
-                emission.rateOverTime = smokeRate * f * Mathf.Lerp(1f, 1.9f, p2);
+                emission.rateOverTime = smokeRate * f * aura * Mathf.Lerp(1f, 1.9f, p2);
             }
             // Embers drifting up off the body.
-            if (fx != null && f > 0.05f && t >= _nextEmber)
+            if (fx != null && f * aura > 0.05f && t >= _nextEmber)
             {
                 _nextEmber = t + Mathf.Lerp(0.35f, 0.12f, f) / Mathf.Lerp(1f, 1.6f, p2);
                 Vector3 local = new Vector3(UnityEngine.Random.Range(-0.4f, 0.4f), UnityEngine.Random.Range(0.3f, 1.05f), UnityEngine.Random.Range(-0.4f, 0.4f)) * Height;
@@ -262,9 +270,9 @@ namespace Diorama
             // Trembling.
             if (_actor != null)
             {
-                float amp = trembleTiles * f * Mathf.Lerp(1f, 1.8f, p2);
+                float amp = trembleTiles * f * aura * Mathf.Lerp(1f, 1.8f, p2);
                 _actor.shake = new Vector2(Mathf.PerlinNoise(t * 23f, 0.3f) - 0.5f, Mathf.PerlinNoise(0.7f, t * 21f) - 0.5f) * (2f * amp);
-                _actor.shakeRoll = (Mathf.PerlinNoise(t * 19f, 4.1f) - 0.5f) * 5f * f * Mathf.Lerp(1f, 1.6f, p2);
+                _actor.shakeRoll = (Mathf.PerlinNoise(t * 19f, 4.1f) - 0.5f) * 5f * f * aura * Mathf.Lerp(1f, 1.6f, p2);
             }
             // Mouth: a frown while frightened (the baked smile turned over), the smile back once calm.
             if (_mouth != null) _mouth.localRotation = f > 0.5f ? _mouthSmile * Quaternion.Euler(0f, 0f, 180f) : _mouthSmile;
@@ -273,7 +281,7 @@ namespace Diorama
             UpdateFlames(t, f, p2);
             UpdateCracks(t);
             // Snorts and stomps.
-            if (f > 0.3f && t >= _nextSnort)
+            if (snorts && f > 0.3f && t >= _nextSnort)
             {
                 _nextSnort = t + UnityEngine.Random.Range(snortEvery.x, snortEvery.y) / Mathf.Lerp(1f, 1.5f, p2);
                 if (!_view.IsDazed && !_view.IsFainted) Snort();
@@ -286,7 +294,10 @@ namespace Diorama
         {
             if (_flameRenderer == null) return;
             int n = _look != null ? Mathf.Min(5, _look.CrystalCount) : 0;
-            bool show = f > 0.02f && n > 0 && !_view.IsFainted;
+            // Step 34: the flames' size is the fury times flameScale (a dying fire), or the calm flame once at peace.
+            float burn = Burn(f, flameScale, calmFlame);
+            bool steady = calmFlame * CalmFlameSize >= f * flameScale;
+            bool show = burn > 0.02f && n > 0 && !_view.IsFainted;
             _flameRenderer.enabled = show;
             if (!show) return;
             var cam = Camera.main;
@@ -304,9 +315,11 @@ namespace Diorama
                     continue;
                 }
                 Vector3 c = _flames.InverseTransformPoint(_look.CrystalWorld(i));
-                float flick = 0.75f + 0.25f * Mathf.PerlinNoise(t * 6f + i * 2.3f, i);
-                float tall = h * 0.55f * f * flick * Mathf.Lerp(1f, 1.7f, p2) * (i == 2 ? 1.25f : 1f);
-                float wide = h * 0.22f * Mathf.Lerp(0.6f, 1f, f) * Mathf.Lerp(1f, 1.35f, p2);
+                // A steady flame flickers slowly and little; a dying one sputters (drops out now and then).
+                float flick = steady ? 0.9f + 0.1f * Mathf.PerlinNoise(t * 1.6f + i * 2.3f, i) : 0.75f + 0.25f * Mathf.PerlinNoise(t * 6f + i * 2.3f, i);
+                if (!steady && flameScale < 0.5f) flick *= 0.55f + 0.45f * Mathf.Abs(Mathf.Sin(t * 17f + i) * Mathf.Sin(t * 5.3f + i * 1.7f));
+                float tall = h * 0.55f * burn * flick * Mathf.Lerp(1f, 1.7f, p2) * (i == 2 ? 1.25f : 1f);
+                float wide = h * 0.22f * Mathf.Lerp(0.6f, 1f, burn) * Mathf.Lerp(1f, 1.35f, p2);
                 Vector3 b = c - up * (h * 0.04f);
                 _flameVerts[v] = b - right * wide * 0.5f;
                 _flameVerts[v + 1] = b + right * wide * 0.5f;
@@ -314,7 +327,10 @@ namespace Diorama
                 _flameVerts[v + 3] = b + right * wide * 0.5f + up * tall;
             }
             _flameMesh.vertices = _flameVerts;
-            _flameMaterial.SetFloat(IntensityId, Mathf.Lerp(0.8f, 2.6f, f) * Mathf.Lerp(1f, 1.4f, p2));
+            // Step 34: bounds that fit the flames (the fixed 3x-height box read as part of the body to the layout check
+            // once the calm flame stays lit).
+            _flameMesh.RecalculateBounds();
+            _flameMaterial.SetFloat(IntensityId, Mathf.Lerp(0.8f, 2.6f, burn) * Mathf.Lerp(1f, 1.4f, p2));
         }
 
         void UpdateCracks(float t)
@@ -360,6 +376,29 @@ namespace Diorama
                 float w = WorldPerLocal * h;
                 fx.Burst(transform.TransformPoint(nose + _smoke.transform.localPosition), 5, ember, w * 0.2f, 0.5f, w * 0.02f, transform.forward * (w * 0.5f));
             }
+        }
+
+        /// <summary>Step 34: a calm flame is this share of the raging one.</summary>
+        public const float CalmFlameSize = 0.3f;
+
+        /// <summary>Step 34: how big the crown flames burn (0..1): the fury times its scale, never under the calm flame.</summary>
+        public static float Burn(float fury, float flameScale, float calmFlame) =>
+            Mathf.Max(Mathf.Clamp01(fury) * Mathf.Max(0f, flameScale), Mathf.Clamp01(calmFlame) * CalmFlameSize);
+
+        /// <summary>Step 34: rears back <paramref name="degrees"/>, holds, comes down (no slam, no cracks: a Keeper that doesn't stomp).</summary>
+        public Coroutine Rear(float degrees, float hold)
+        {
+            if (_stomp != null || _actor == null || !isActiveAndEnabled) return null;
+            _stomp = StartCoroutine(RearRoutine(degrees, hold));
+            return _stomp;
+        }
+
+        IEnumerator RearRoutine(float degrees, float hold)
+        {
+            yield return Tilt(-degrees, 0.3f);
+            yield return new WaitForSeconds(hold);
+            yield return Tilt(0f, 0.35f);
+            _stomp = null;
         }
 
         /// <summary>A stomp on its own (rears a little and slams down).</summary>

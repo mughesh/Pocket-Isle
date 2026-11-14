@@ -1386,7 +1386,7 @@ namespace Diorama.EditorTools
             {
                 var g = GameState.Instance != null ? GameState.Instance : UnityEngine.Object.FindFirstObjectByType<GameState>();
                 var all = UnityEngine.Object.FindObjectsByType<HandPuzzle>(FindObjectsInactive.Include, FindObjectsSortMode.InstanceID);
-                var ids = all.Where(p => p.map != null && p.map.name.ToLowerInvariant().Contains(mapName) && !(p is StatueSocket) && !(p is KeeperUntangle) &&
+                var ids = all.Where(p => p.map != null && p.map.name.ToLowerInvariant().Contains(mapName) && !(p is StatueSocket) && !(p is KeeperUntangle) && !(p is KeeperWakePiece) &&
                                          !except.Contains(p.id))
                     .Select(p => p.id).Distinct().ToList();
                 ids.Sort(StoryOrder);
@@ -1454,6 +1454,8 @@ namespace Diorama.EditorTools
                     case ScoopPour scoop: if (k % 4 == 0) scoop.DebugLookPour(); break;
                     case StatueSocket socket: socket.DebugPlace(); break;
                     case KeeperUntangle knots: knots.DebugSnap(k % knots.knots.Length); break;
+                    // Step 34: the shell is knocked, the crown cupped, by look + pinch.
+                    case KeeperWakePiece wake: if (k % 2 == 0) wake.DebugLookPinch(); break;
                 }
             }
 
@@ -1475,7 +1477,19 @@ namespace Diorama.EditorTools
                         var isl = GameState.Instance.explorer.island;
                         Nov11Debug.Close($"nov11_hall_{keeperId}_close", isl.transform.TransformPoint(isl.LocalBounds.center), 0.4f, 0.05f);
                     }
-                    if (hall.untangle != null && !hall.untangle.IsSolved && hall.untangle.Here) Drive(hall.untangle, _pumps);
+                    // Step 34: seat shots of the Keeper before it wakes, standing just after, and calm.
+                    if (hall.wake is KeeperWakePiece w34 && Places.Now == "hall" && !SceneSwap.IsBusy)
+                    {
+                        string stage = !w34.IsSolved && w34.BeforeShown && Elapsed > 5 ? "before" : w34.IsSolved && !InBattle && !hall.Calmed ? "after" : hall.Calmed && !InBattle ? "calm" : null;
+                        if (stage != null && _hallShots.Add($"{keeperId}.{stage}"))
+                        {
+                            Step27Debug.Shot($"s34_{keeperId}_{stage}");
+                            Debug.Log($"[SmokeRun] Step 34 shot: {keeperId} {stage} ({w34.Describe()}).");
+                        }
+                        // Hold the before pose until its shot is taken (12 s at most).
+                        if (!w34.IsSolved && !_hallShots.Contains($"{keeperId}.before") && Elapsed < 12) return;
+                    }
+                    if (hall.wake != null && !hall.wake.IsSolved && hall.wake.Here) Drive(hall.wake, _pumps);
                     PumpBattle(false);
                     if (!InBattle) hall.CollectShard("smoke run");
                 }, 1.2f, true, () => $"calm {PuzzleState.IsSolved(keeperId)}, held {ShardHolder.Holds(shardId)}, place {Places.Now}");

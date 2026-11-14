@@ -199,7 +199,7 @@ namespace Diorama.EditorTools
             kh.restsWhenCalm = true;
             kh.hoots = false;
             kh.approachRestart = 2.5f;
-            kh.untangle = null;
+            kh.wake = null;
             var temple = LilymereTools.Tile(LilymereTools.TempleXY);
             kh.waveOrigin = temple + new Vector2(1f, 0.5f);
             kh.waveSeconds = 5f;

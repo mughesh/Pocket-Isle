@@ -168,7 +168,7 @@ namespace Diorama
             foreach (var p in _pieces)
             {
                 // Step 22: a retired moment (Lilymere's lily pad bridge, switched off in step 14a) can never be solved.
-                if (p == null || !p.gameObject.activeSelf || !p.enabled || p.map != world || p.IsSolved || p is StatueSocket || p is KeeperUntangle || !p.WalkStopWanted) continue;
+                if (p == null || !p.gameObject.activeSelf || !p.enabled || p.map != world || p.IsSolved || p is StatueSocket || p is KeeperUntangle || p is KeeperWakePiece || !p.WalkStopWanted) continue;
                 // Already at one: its own gold marks lead.
                 if (p.InReach(explorer.Tile)) return null;
                 var t = TrailEnd(world, p);

@@ -42,8 +42,12 @@ namespace Diorama
         public string captionFormat = "{0} blocks the way, crown ablaze!";
         [Tooltip("Sparks as the shard reaches the Spirit.")]
         public Color shardColor = new Color(1f, 0.7f, 0.3f);
-        [Tooltip("Step 10e: a hand puzzle to solve before the meeting (Galeowl's knots); empty = it meets you on the way in.")]
-        public KeeperUntangle untangle;
+        [Tooltip("Step 10e / 34: a hand moment to solve before the meeting (Galeowl's knots, Tidemother's shell, Hearthstag's dying fire); " +
+                 "empty = it meets you on the way in. Any HandPuzzle; a KeeperWakePiece also shows the Keeper's 'before' body and plays its waking beat.")]
+        [UnityEngine.Serialization.FormerlySerializedAs("untangle")]
+        public HandPuzzle wake;
+        [Tooltip("Step 34: calmed, its crown keeps a small steady flame (Hearthstag), in its hall and in a rematch.")]
+        public bool calmCrownFlame;
         [Tooltip("Its hall has a forge that lights on victory (Hearthstag).")]
         public bool forgeFlame = true;
         [Tooltip("It stomps (rears and slams down, lava cracks); off = it flaps up instead.")]
@@ -258,7 +262,14 @@ namespace Diorama
         public StageActor Model => _model;
         /// <summary>Not meeting, fighting or in its victory.</summary>
         public bool Idle => _phase == Phase.Idle;
-        bool Tangled => untangle != null && !untangle.IsSolved;
+        /// <summary>Step 34: its hand moment (any <see cref="HandPuzzle"/>) isn't solved yet: no meeting, it waits in its "before" pose.</summary>
+        public bool Tangled => wake != null && !wake.IsSolved;
+        /// <summary>Step 34: the wake piece draws the Keeper's "before" body (kneeling, withdrawn): the hall's own model hides.</summary>
+        bool BeforeBody => wake is KeeperWakePiece p && p != null && p.BeforeShown;
+        public KeeperFury Fury => _fury;
+        public KeeperLook Look => _look;
+        public float TileMetres => TileWorld;
+        public string KeeperLabel => KeeperName;
         float _preenAt, _restartAt;
         bool Active => swap != null && swap.Inside && swap.Interior == hall;
         float TileWorld => island.map.tileSize * island.Zoom * island.transform.lossyScale.x;
@@ -288,7 +299,7 @@ namespace Diorama
             if (shardRecipe != null) _shard = new PropView($"{ownShard} (flying)", island, shardRecipe) { restoredSelf = 1f };
             swap.Finished += OnSwapFinished;
             swap.Returned += OnReturned;
-            if (untangle != null) untangle.Solved += OnUntangled;
+            if (wake != null) wake.Solved += OnWoken;
             encounters.BattleEnded += OnBattleEnded;
             stage.Presented += OnPresented;
             PuzzleState.Restored += ApplyState;
@@ -314,7 +325,7 @@ namespace Diorama
                 swap.Returned -= OnReturned;
             }
             if (encounters != null) encounters.BattleEnded -= OnBattleEnded;
-            if (untangle != null) untangle.Solved -= OnUntangled;
+            if (wake != null) wake.Solved -= OnWoken;
             if (stage != null) stage.Presented -= OnPresented;
             PuzzleState.Restored -= ApplyState;
             if (_model != null) Destroy(_model.gameObject);
@@ -348,8 +359,20 @@ namespace Diorama
                 realmMap.SetPropOpen(templeGate, !Calmed);
             }
             if (_look != null) _look.calm = Calmed ? 1f : 0f;
-            if (_fury != null) _fury.fury = Calmed ? 0f : 1f;
+            if (_fury != null)
+            {
+                _fury.fury = Calmed ? 0f : 1f;
+                _fury.calmFlame = CalmFlame;
+            }
         }
+
+        float CalmFlame => calmCrownFlame && Calmed ? 1f : 0f;
+
+        /// <summary>Step 34: this Keeper's fury (aura, flames, frown) on another body of it (the wake piece's "before" body).</summary>
+        public KeeperFury DressFury(GameObject go) => AddFury(go);
+
+        /// <summary>Step 34: this Keeper's frightened look on another body of it.</summary>
+        public KeeperLook DressLook(GameObject go) => AddLook(go);
 
         KeeperFury AddFury(GameObject go)
         {
@@ -400,6 +423,7 @@ namespace Diorama
             _look.calm = Calmed ? 1f : 0f;
             _fury = AddFury(go);
             _fury.fury = Calmed ? 0f : 1f;
+            _fury.calmFlame = CalmFlame;
             _fury.idleStomps = false;
         }
 
@@ -407,8 +431,10 @@ namespace Diorama
         {
             bool active = Active;
             if (active) EnsureModel();
-            bool show = active && _phase != Phase.Fighting && !encounters.InBattle;
+            bool show = active && _phase != Phase.Fighting && !encounters.InBattle && !BeforeBody;
             if (_model != null) _model.gameObject.SetActive(show);
+            if (calmCrownFlame && active && Calmed && _phase == Phase.Idle && encounters.InBattle && encounters.Keeper != null && stage.Wild != null)
+                CalmBattleFlame(stage.Wild.gameObject);
             UpdateSpeech(active);
             UpdateFlame(forgeFlame && active && (Calmed || _phase == Phase.Victory || _phase == Phase.Shard));
             if (_phase == Phase.Fighting) UpdateBattleLook();
@@ -476,7 +502,26 @@ namespace Diorama
             StartCoroutine(Meet());
         }
 
-        /// <summary>Still wrapped in strings (the untangle piece runs): it sits dazed and trembling, the aura low.</summary>
+        GameObject _calmBody;
+
+        /// <summary>Step 34: a calmed Keeper's battle body (the friendly rematch) keeps its small steady crown flame.</summary>
+        void CalmBattleFlame(GameObject body)
+        {
+            if (_calmBody == body) return;
+            _calmBody = body;
+            AddLook(body).calm = 1f;
+            var f = AddFury(body);
+            f.fury = 0f;
+            f.idleStomps = false;
+            f.snorts = false;
+            f.calmFlame = 1f;
+            Debug.Log($"[KeeperHall] {KeeperName} (calm, a rematch): the crown keeps its steady flame.");
+        }
+
+        /// <summary>
+        /// Its hand moment isn't solved (the knots, the shell, the dying fire): it waits in its "before" pose, dazed and
+        /// trembling, the aura low. A <see cref="KeeperWakePiece"/> draws the before body itself and this model hides.
+        /// </summary>
         void ShowTangled()
         {
             EnsureModel();
@@ -485,14 +530,14 @@ namespace Diorama
             _model.View.Daze();
             _fury.fury = tangledFury;
             _fury.idleStomps = false;
-            Debug.Log($"[KeeperHall] {KeeperName} sits wrapped in strings ({untangle.Undone} / {untangle.knots.Length} knots undone).");
+            Debug.Log($"[KeeperHall] {KeeperName} waits for its hand moment ({wake.id}, {wake.GetType().Name}, progress {wake.Progress:0.00}): no meeting yet.");
         }
 
-        void OnUntangled(HandPuzzle p)
+        void OnWoken(HandPuzzle p)
         {
             if (!Active || Calmed) return;
-            Debug.Log($"[KeeperHall] {KeeperName} is free of the strings.");
-            StartCoroutine(Meet());
+            Debug.Log($"[KeeperHall] {KeeperName}'s hand moment is done ({p.id}): the meeting.");
+            StartCoroutine(Meet(true));
         }
 
         void UpdateFlame(bool on)
@@ -566,7 +611,8 @@ namespace Diorama
             yield return ShardRise();
         }
 
-        IEnumerator Meet()
+        /// <param name="woken">Step 34: its hand moment was solved just now (the waking beat plays first).</param>
+        IEnumerator Meet(bool woken = false)
         {
             if (_phase != Phase.Idle) yield break;
             _phase = Phase.Meeting;
@@ -574,7 +620,16 @@ namespace Diorama
             _look.calm = 0f;
             _look.SetAllCrystals(0.6f);
             explorer.Locked = true;
-            if (untangle != null)
+            var beat = wake as KeeperWakePiece;
+            if (beat != null && woken)
+            {
+                // Step 34: the piece's own waking beat (the shell bursts open, the stag rises under the flames).
+                Debug.Log($"[KeeperHall] {KeeperName} wakes ({wake.id}).");
+                _model.View.Revive();
+                _fury.fury = 1f;
+                yield return beat.WakeBeat(this);
+            }
+            else if (wake != null && beat == null)
             {
                 // Just untangled: it shakes free, flaps and the aura flares before it speaks.
                 _model.View.Revive();
@@ -657,6 +712,8 @@ namespace Diorama
                 _battleFury.fury = 1f;
                 _battleFury.phase2 = false;
                 _battleFury.idleStomps = false;
+                // Step 34: woken by kindling its crown, the fire burns big and angry through the fight.
+                _battleFury.flameScale = calmCrownFlame ? 1.3f : 1f;
                 SetShell(true);
                 StartCoroutine(BattleIntro(_battleFury));
             }
@@ -815,9 +872,16 @@ namespace Diorama
             for (float t = 0f; t < 2f; t += Time.deltaTime)
             {
                 _look.calm = Mathf.SmoothStep(0f, 1f, t / 2f);
+                // Step 34: the crown fire settles into a small steady flame.
+                if (calmCrownFlame) _fury.calmFlame = _look.calm;
                 yield return null;
             }
             _look.calm = 1f;
+            if (calmCrownFlame)
+            {
+                _fury.calmFlame = 1f;
+                Debug.Log($"[KeeperHall] {KeeperName}'s crown fire settles into a steady, gentle flame.");
+            }
             PuzzleState.Solve(keeperId, 1); // saved: calmed
             // Nods.
             for (float t = 0f; t < 1f; t += Time.deltaTime)
