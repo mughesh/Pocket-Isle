@@ -16,6 +16,14 @@ Branch `step-34` (from master `d9120f92`), not pushed. Tests **516 / 0**; smoke 
 - The cup ghost at full size hid the whole kneeling stag from the seat (R7). Now 0.55, on the crown only. Not re-shot.
 - Two "no progress" notes in the run were there before: the opening's starter beat, and the hall waiting for Kilnpot to evolve.
 
+## Nov 14 pm: first headset notes
+- **Isling through the attack buttons (lake temple only):** its party pad was row 7, the other halls row 6. Set in step 11c, before step 24 put the move row over the arena, so the Isling stood through the plates. Now row 6 (scene set by `Step34Setup.Scene`, `Step11cSetup` matches). New smoke check: a body through the move row is a layout failure (`BattleRunes.BodyThroughRow`).
+- **Knock:** lower pitch (1.0 to 1.24, was 1.35 to 1.75) with the Keeper's stomp under it pitched up; volume rises per knock (strength 0.55 / 0.78 / 1). The wobble is stronger each knock too.
+- **Blue wave:** the lodge's heal shockwave, split out as `HealFx.Ripple` (any colours), in blue from under the shell, wider and brighter each knock.
+- **Power icon (game menu):** the ring started at 130 degrees instead of 50, so its gap was on the left and the bar crossed solid ring. Now the gap is at the top.
+- Checks: tests 519 / 0; smoke `New game, Lilymere` 28 ok / 0 failed (the new through-the-row check did not fire).
+- **Waking water:** a splash all round the shell, a spray column and the biggest wave. When it rears, the flippers slap down a second, smaller splash and wave.
+
 ## Cost
 - Triangles / draws: ~0. The before body replaces the standing model (the hall shows one at a time). Kneel 14.5k tris / 14 draws = the standing stag's budgets; shell 10.6k / 13 (one part fewer). While cupping: one ring quad; the knock dots are pooled fx orbs.
 
