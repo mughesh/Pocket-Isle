@@ -27,7 +27,6 @@ Branch `step-34` (from master `d9120f92`), not pushed. Tests **516 / 0**; smoke 
 - **Power icon (game menu):** the ring started at 130 degrees instead of 50, so its gap was on the left and the bar crossed solid ring. Now the gap is at the top.
 - Checks: tests 519 / 0; smoke `New game, Lilymere` 28 ok / 0 failed (the new through-the-row check did not fire).
 - **Ghost hands worse in the build than in Editor Play (Nov 15):** `GhostClipLibrary` sat inside `GhostHandClip.cs`, so Unity made no script asset for it and `GhostClips.asset` saved `m_Script: 0`. The Editor still found the class by name; a build loaded no library, so every ghost used the code-made placeholder clips. Moved to its own `GhostClipLibrary.cs` and linked the asset. New `ScriptLinkTests`: no asset under `_Project` may have an unlinked script. Tests 524 / 0. Needs a build to confirm.
-- **Grabbed island tilted when a little off centre (Nov 15):** while held and after release it turned its front at the head, so 15 cm left read as a skewed island. Now the front stays square to the forward of the last placement / recenter (`IslandHandle.faceParallel`); only past `parallelCone` (35 deg, seen from the head) does it turn toward the head, by the extra only (no jump). `IslandFacingTests`. Tests 528 / 0. Headset only (no grab in the Editor).
 - **Waking water:** a splash all round the shell, a spray column and the biggest wave. When it rears, the flippers slap down a second, smaller splash and wave.
 
 ## Cost
