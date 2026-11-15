@@ -52,6 +52,10 @@ namespace Diorama
         public bool autoFace = true;
         [Tooltip("Easing time while held or just released (s).")]
         public float faceSeconds = 0.25f;
+        [Tooltip("Nov 15 (Mugesh: a small move to the side turned it too eagerly): while held, the island keeps the yaw it was " +
+                 "grabbed with until facing the head would need more than this (degrees); past it, it turns by the extra only. " +
+                 "0 = always face the head exactly.")]
+        public float holdStraightAngle = 20f;
         [Tooltip("Step 17 G: turn to face the head by itself when idle (off: leaning in 10 cm for fine work turned the island 10-12 deg, which read as a tilt; the island root moves only by a grab, a recenter or the first placement). The turn while held and after a release stays.")]
         public bool idleReface;
         [Tooltip("Idle: turn back when the head is more than this far off the front (degrees)... (step 14i: was 35, a new name so the scene takes 6)")]
@@ -269,7 +273,12 @@ namespace Diorama
         {
             _scaleLoop.Stop(0.2f);
             _releaseAt = Time.time;
-            // Finish easing to face the head (Update carries on).
+            // Nov 15: with the hold-straight zone the held yaw is final (a turn now would undo it). Without it, finish easing.
+            if (holdStraightAngle > 0f)
+            {
+                Debug.Log($"[IslandHandle] Released: {FacingError():0.0} deg off the line to the head (kept straight within {holdStraightAngle:0} deg).");
+                return;
+            }
             if (autoFace) StartTurn(faceSeconds);
             _logFacingAfterTurn = true;
         }
@@ -319,10 +328,20 @@ namespace Diorama
             {
                 Vector3 center = pivot + Quaternion.Euler(0f, y - _startYaw, 0f) * offset;
                 if (!TryGetFacingYaw(center, out float face)) return;
-                y += 0.5f * Mathf.DeltaAngle(y, face);
+                y += 0.5f * Mathf.DeltaAngle(y, DeadZoneYaw(_startYaw, face, holdStraightAngle));
             }
             float k = Mathf.SmoothStep(0f, 1f, (Time.time - _grabAt) / Mathf.Max(0.01f, faceSeconds));
             _yaw = Mathf.LerpAngle(_startYaw, y, k);
+        }
+
+        /// <summary>
+        /// Nov 15: the grabbed yaw (<paramref name="startYaw"/>) while facing the head (<paramref name="faceYaw"/>) is within
+        /// <paramref name="deadZone"/> of it; past that, turned toward the head by the extra only (no jump at the edge).
+        /// </summary>
+        public static float DeadZoneYaw(float startYaw, float faceYaw, float deadZone)
+        {
+            float off = Mathf.DeltaAngle(startYaw, faceYaw);
+            return startYaw + Mathf.Sign(off) * Mathf.Max(0f, Mathf.Abs(off) - Mathf.Max(0f, deadZone));
         }
 
         /// <summary>Eases <see cref="_yaw"/> toward facing the head from <paramref name="center"/>, once per frame.</summary>
