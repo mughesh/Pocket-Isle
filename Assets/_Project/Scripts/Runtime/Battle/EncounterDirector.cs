@@ -145,6 +145,12 @@ namespace Diorama
 
         /// <summary>In battle with the player's Isling out on its pad (its moves can be picked).</summary>
         public bool PlayerOut => InBattle && _activeSlot >= 0;
+        /// <summary>
+        /// Nov 15 (Mugesh: the catch ghost showed before the attack had even played): catching is open as the player sees
+        /// it, the cradle pod glowing. The battle works a whole turn out at once (the wild HP is already red while the attack
+        /// animates); the glow follows only after the turn has played.
+        /// </summary>
+        public bool CatchShown => InBattle && pods != null && pods.CradleGlow;
 
         /// <summary>Waiting for the player to send an Isling out (toss a pod onto the island).</summary>
         public bool AwaitingSendOut { get; private set; }

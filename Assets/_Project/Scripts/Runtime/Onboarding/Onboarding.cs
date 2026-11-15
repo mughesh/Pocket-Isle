@@ -239,7 +239,8 @@ namespace Diorama
 
             GameConditions.Register("battle.send", () => encounters != null && encounters.AwaitingSendOut);
             GameConditions.Register("battle.out", () => encounters != null && encounters.PlayerOut);
-            GameConditions.Register("wildRed", () => encounters != null && encounters.InBattle && encounters.CurrentBattle != null && encounters.CurrentBattle.CatchUnlocked);
+            // Nov 15: as the player sees it (the cradle glow, after the turn has played), not the battle's numbers, which run a turn ahead.
+            GameConditions.Register("wildRed", () => encounters != null && encounters.CatchShown);
             GameConditions.Register("canWalk", () => explorer != null && explorer.CanMove && !Opening.InProgress && !SceneSwap.IsBusy && !SceneSwap.IsInside);
             // Step 12a: smart steps since the current lesson showed (the walk lessons never block).
             GameConditions.Register("smartSteps3", () => explorer != null && explorer.SmartStepsTaken - _smartAtShow >= 3);
