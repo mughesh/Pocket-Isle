@@ -530,12 +530,10 @@ namespace Diorama.EditorTools
                 for (int y = 1; y < Size - 1; y++)
                 {
                     if (!IsGate(x, y) || _g[x, y] != IslandMap.Path) continue;
-                    Prop(x, y, KBedGap);
+                    // Nov 15 (Mugesh wants the fingertip pads back): the channel crossing is open water again until
+                    // the lily pads lock in (step 14a had made it planks).
+                    Prop(x, y, IsChannelGate(x, y) ? KChannelGap : KBedGap);
                 }
-            // Step 14a: the channel crossing is a plain plank bridge now (the stream by the arrival teaches the pads).
-            for (int x = CrossingXY.x; x <= CrossingXY.x + 1; x++)
-                for (int y = ChannelY0; y <= ChannelY1; y++)
-                    Prop(x, y, KPlank);
         }
 
         /// <summary>Step 11b: the channel crossing's tiles or the garden crossing's tiles (x, y), for the pieces.</summary>
@@ -544,7 +542,7 @@ namespace Diorama.EditorTools
             var list = new List<Vector2Int>();
             for (int y = 1; y < Size - 1; y++)
                 for (int x = 1; x < Size - 1; x++)
-                    if (IsGate(x, y) && IsGardenGate(x, y) == garden) list.Add(new Vector2Int(x, y));
+                    if (IsGate(x, y) && !IsStreamGate(x, y) && IsGardenGate(x, y) == garden) list.Add(new Vector2Int(x, y));
             return list;
         }
 
@@ -692,10 +690,14 @@ namespace Diorama.EditorTools
         static bool IsPath(int x, int y) => In(x, y) && _g[x, y] == IslandMap.Path;
 
         /// <summary>
-        /// A puzzle gate tile (x, y): the arrival stream's crossing (step 14a; it replaced the channel crossing's pads) or
-        /// the garden crossing (11b B); open once solved.
+        /// A puzzle gate tile (x, y): the arrival stream's crossing (step 14a), the channel crossing (11b A, the fingertip
+        /// lily pads; back on Nov 15) or the garden crossing (11b B); open once solved.
         /// </summary>
-        public static bool IsGate(int x, int y) => IsStreamGate(x, y) || IsGardenGate(x, y);
+        public static bool IsGate(int x, int y) => IsStreamGate(x, y) || IsChannelGate(x, y) || IsGardenGate(x, y);
+
+        /// <summary>The channel crossing's 2 x 3 tiles (the lily pad bridge's slots).</summary>
+        public static bool IsChannelGate(int x, int y) =>
+            x >= CrossingXY.x && x <= CrossingXY.x + 1 && y >= ChannelY0 && y <= ChannelY1;
 
         /// <summary>The trail's tiles inside the garden's dry bed (x 40..41).</summary>
         public static bool IsGardenGate(int x, int y) =>
@@ -968,7 +970,7 @@ namespace Diorama.EditorTools
                 if (!reach.Any(t => map.ZoneAt(t) == z && map.CanWalk(t))) problems.Add($"pocket '{z}' has no reachable tile");
 
             // Step 14a: the stream crossing is the only way off the arrival meadow, the garden gate the only way past the
-            // garden. The channel crossing is a plank bridge (always open) but still the only way over the channel.
+            // garden, the channel crossing (the lily pads) the only way over the channel.
             var noStream = new HashSet<Vector2Int>();
             var noCrossing = new HashSet<Vector2Int>();
             var noGarden = new HashSet<Vector2Int>();

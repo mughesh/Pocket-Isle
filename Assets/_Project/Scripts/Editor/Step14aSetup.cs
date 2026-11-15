@@ -12,8 +12,8 @@ namespace Diorama.EditorTools
     /// (two cloud puffs on the trail past the arrival) and the Lilymere map (the arrival stream; the channel crossing is a
     /// plank bridge) with their checks, and wires MR_Main: the grab frame shows the handles (6 cm, gold held), the
     /// Spirit's sunrays, Galewick's "Arrival Clouds" (CloudBankPiece gw.arrive, the sweep lesson moves here; the ridge
-    /// keeps its counter, no ghost), Lilymere's "Arrival Stream" (RainGarden in stream mode, lm.stream; old saves with
-    /// lm.pads solved count), the lily pad bridge off, the garden's rain lesson without its ghost. Safe to re-run.
+    /// keeps its counter, no ghost), Lilymere's "Arrival Stream" (RainGarden in stream mode, lm.stream), the garden's rain
+    /// lesson without its ghost. Safe to re-run (Nov 15: it no longer turns the channel's lily pad bridge off).
     /// </summary>
     public static class Step14aSetup
     {
@@ -188,7 +188,8 @@ namespace Diorama.EditorTools
             stream.lessonChip = "Palm down";
             stream.counterLabel = "Palm down · Pads";
             stream.doneLine = "lm.arrive.stream.done";
-            stream.legacySolvedId = "lm.pads";
+            // Nov 15: the channel's lily pads are their own puzzle again, so solving them no longer counts for the stream.
+            stream.legacySolvedId = "";
             stream.settleReach = 6f;
             EditorUtility.SetDirty(stream);
 
@@ -197,15 +198,9 @@ namespace Diorama.EditorTools
             garden.ghostClip = "";
             EditorUtility.SetDirty(garden);
 
-            var pads = Object.FindFirstObjectByType<LilyPadBridge>(FindObjectsInactive.Include);
-            if (pads != null)
-            {
-                Undo.RecordObject(pads.gameObject, "Step 14a");
-                pads.gameObject.SetActive(false);
-            }
+            // Nov 15: the channel's fingertip lily pad bridge stays on (Nov15PadsSetup turned it back on).
             log.Append(NL + $"  'Arrival Stream' (lm.stream): {bed.Count} stream tiles, {crossing.Count} crossing tiles, {stream.buds.Length} pads in the mud, " +
-                       $"lesson lm.arrive.stream + ghost {stream.ghostClip}, chip '{stream.counterLabel} n/{stream.buds.Length}', old lm.pads counts; " +
-                       $"lily pad bridge {(pads != null ? "off (the channel is planks)" : "not found")}; garden: no ghost");
+                       $"lesson lm.arrive.stream + ghost {stream.ghostClip}, chip '{stream.counterLabel} n/{stream.buds.Length}'; garden: no ghost");
         }
     }
 }

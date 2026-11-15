@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using Diorama.EditorTools;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -59,6 +60,16 @@ namespace Diorama.Tests
             var src = File.ReadAllText("Assets/_Project/Scripts/Runtime/Puzzles/FocusLock.cs");
             StringAssert.Contains("if (!explorer.Locked && window.SoftFocus) window.SetFocus(null);", src);
             StringAssert.Contains("wheel.alsoFrame.Add(bridge + new Vector2Int(0, -2));", File.ReadAllText("Assets/_Project/Scripts/Runtime/Puzzles/Galewick/BigMill.cs"));
+        }
+
+        [Test]
+        public void LilyPads_BackAtTheChannel_TheSetupNoLongerTurnsThemOff()
+        {
+            var setup = File.ReadAllText("Assets/_Project/Scripts/Editor/Step14aSetup.cs");
+            StringAssert.DoesNotContain("pads.gameObject.SetActive(false)", setup);
+            var scene = File.ReadAllText("Assets/_Project/Scenes/MR_Main.unity");
+            StringAssert.Contains("id: lm.pads", scene);
+            Assert.IsTrue(LilymereTools.IsChannelGate(LilymereTools.CrossingXY.x, LilymereTools.ChannelY0));
         }
 
         [Test]

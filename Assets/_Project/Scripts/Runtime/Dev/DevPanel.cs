@@ -483,7 +483,8 @@ namespace Diorama
                     {
                         // Step 11b: Lilymere's beats, in story order (basin = the lagoon risen).
                         Heading("Lilymere, in story order");
-                        Flag("LM stream", "lm.stream", 7); // step 14a: the arrival stream replaced the channel's pads
+                        Flag("LM stream", "lm.stream", 7); // step 14a: the arrival stream
+                        Flag("Lily pads", "lm.pads", 7); // Nov 15: the channel's fingertip pads are back
                         Flag("Rain", "lm.rain", 31);
                         Flag("Basin + rise", LilymereLagoon.RisenId, 2);
                         // Step 11c: Tidemother and the water shard.

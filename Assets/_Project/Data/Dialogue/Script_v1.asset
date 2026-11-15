@@ -2254,7 +2254,7 @@ MonoBehaviour:
     lines:
     - speaker: 0
       speakerName: Spirit
-      text: Planks over the lily channel. Someone keeps them mended.
+      text: The lily pads have all drifted apart.
       context: 
   - id: lm.garden.first
     once: 1

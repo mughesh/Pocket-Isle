@@ -894,7 +894,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &254543052
 Transform:
   m_ObjectHideFlags: 0
@@ -1222,6 +1222,8 @@ MonoBehaviour:
   maxScaleFactor: 2
   autoFace: 1
   faceSeconds: 0.25
+  holdStraightAngle: 20
+  releaseSettleSeconds: 0.6
   idleReface: 0
   reFaceAngle: 6
   idleSeconds: 1.5
@@ -1243,8 +1245,7 @@ MonoBehaviour:
   pinchStrengthForPoint: 0.4
   lipBelowPods: 0.02
   podClearance: 0.01
-  cradlePodClearance: 0.12
-  podReach: 0.12
+  cradleClearance: 0.03
 --- !u!114 &270959112
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3962,7 +3963,7 @@ MonoBehaviour:
   - {x: 12, y: 50}
   swellSeconds: 3.5
   bridgeSeconds: 1.6
-  legacySolvedId: lm.pads
+  legacySolvedId: 
   doneLine: lm.arrive.stream.done
   volume: 0.7
 --- !u!1 &980002958
@@ -7816,6 +7817,9 @@ MonoBehaviour:
   volume: 0.7
   fingertipFire: 1
   touchRadius: 0.03
+  fingerHoldSeconds: 3
+  thornTop: 0.55
+  touchSlack: 0.012
 --- !u!1 &1994521897
 GameObject:
   m_ObjectHideFlags: 0

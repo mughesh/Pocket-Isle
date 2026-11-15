@@ -156,8 +156,10 @@ namespace Diorama.Tests
                 Assert.AreEqual(IslandMap.Mud, map.Raw(t.y, t.x), $"pad at {p} lies in the mud");
             }
             Assert.AreEqual(LilymereTools.StreamPadsXY.Length, LilymereTools.StreamBridgeXY.Length, "one bridge slot per pad");
-            var plank = LilymereTools.Tile(LilymereTools.CrossingXY.x, LilymereTools.ChannelY0);
-            Assert.IsTrue(map.CanWalk(plank), "the channel crossing is a plank bridge");
+            // Nov 15: the channel crossing is open water again (the fingertip lily pads are back).
+            var gap = LilymereTools.Tile(LilymereTools.CrossingXY.x, LilymereTools.ChannelY0);
+            Assert.IsFalse(map.CanWalk(gap), "the channel crossing is shut until the lily pads lock in");
+            Assert.AreEqual(6, LilymereTools.GateTiles(false).Count, "the channel crossing's 2 x 3 covers (not the stream's)");
         }
 
         [Test]
