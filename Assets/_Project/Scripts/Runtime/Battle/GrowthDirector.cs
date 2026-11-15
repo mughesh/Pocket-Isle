@@ -229,7 +229,8 @@ namespace Diorama
         {
             if (ghosts == null || on == _ghostOn) return;
             _ghostOn = on;
-            if (on) ghosts.Show(GhostClip, GhostPlace.AtTarget, "evolvePod", 1f, DominantHand.Left, false, aside: true);
+            // Nov 15 (Mugesh): always the left hand here (the recorded right-hand take is mirrored), whatever the dominant hand.
+            if (on) ghosts.Show(GhostClip, GhostPlace.AtTarget, "evolvePod", 1f, true, false, aside: true);
             else ghosts.Hide();
         }
 
