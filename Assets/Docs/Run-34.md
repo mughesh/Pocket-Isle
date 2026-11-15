@@ -26,6 +26,7 @@ Branch `step-34` (from master `d9120f92`), not pushed. Tests **516 / 0**; smoke 
 - **The Lantern talked over the title** ("Pod on your palm", from a save after a level-up): the title and the returning rise now hold every line, like the game menu does (`Dialogue.Held`); they show after Continue. Checked on his save.
 - **Power icon (game menu):** the ring started at 130 degrees instead of 50, so its gap was on the left and the bar crossed solid ring. Now the gap is at the top.
 - Checks: tests 519 / 0; smoke `New game, Lilymere` 28 ok / 0 failed (the new through-the-row check did not fire).
+- **Ghost hands worse in the build than in Editor Play (Nov 15):** `GhostClipLibrary` sat inside `GhostHandClip.cs`, so Unity made no script asset for it and `GhostClips.asset` saved `m_Script: 0`. The Editor still found the class by name; a build loaded no library, so every ghost used the code-made placeholder clips. Moved to its own `GhostClipLibrary.cs` and linked the asset. New `ScriptLinkTests`: no asset under `_Project` may have an unlinked script. Tests 524 / 0. Needs a build to confirm.
 - **Waking water:** a splash all round the shell, a spray column and the biggest wave. When it rears, the flippers slap down a second, smaller splash and wave.
 
 ## Cost

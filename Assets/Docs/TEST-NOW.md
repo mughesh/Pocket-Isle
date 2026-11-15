@@ -4,4 +4,5 @@
 - [ ] **Quit inside the forge hall** (mid-battle), relaunch: the title shows over the hall, **nothing starts** (no pod, moves not pressable, **the Lantern is quiet**) until **Continue**; then the meeting and battle, and **Riverloom is smaller** than the Keeper (about 0.6 of its width) →
 - [ ] Filming > **Hearthstag: kneeling**: reads as kneeling and hurt; cup the fire (~2 s): it roars, rises and rears, then the battle →
 - [ ] After calming Hearthstag: a small steady flame on its crown (also in its rematch); a rematch skips the wake moment →
+- [ ] **Build:** the ghost hands look like Editor Play (the recorded clips, not the stiff code-made ones); log: `[GhostHands] Ready: ... 12 recorded` and lessons say `(recorded)` →
 - [ ] Game menu: the **power icon** is a ring open at the top with a bar through the gap; Galeowl's untangle still works →
