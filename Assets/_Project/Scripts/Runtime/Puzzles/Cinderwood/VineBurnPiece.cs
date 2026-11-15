@@ -62,13 +62,12 @@ namespace Diorama
         public bool fingertipFire = true;
         [Tooltip("Step 29: a fingertip this close (m) touches the ember.")]
         public float touchRadius = 0.03f;
-        [Tooltip("Nov 15 (Mugesh: it lit too early, near was enough): the burning fingertip must stay on the thorns this long (s).")]
-        public float fingerHoldSeconds = 3f;
-        [Tooltip("Nov 15: the fingertip touches the thorns inside the vine's body: up to this high above the cap (tiles), " +
-                 "half a tile across, plus touchSlack (m) all round.")]
-        public float thornTop = 0.55f, touchSlack = 0.012f;
+        [Tooltip("Nov 15 (Mugesh: touch it, not near it): the fingertip lights the vine only inside its body: half a tile " +
+                 "along it, this far either side of its middle (tiles; the ThornVine prop is about 0.45 deep), up to vineTop " +
+                 "above the cap (its thorn tips), plus touchMargin (m) all round. It lights at once (no hold).")]
+        public float vineHalfDepth = 0.24f, vineTop = 0.65f, touchMargin = 0.004f;
         FingerFlame _flame;
-        string _fingerChip = "Hold your flame on the thorns";
+        string _fingerChip = "Touch the thorns with your flame";
         readonly HandState[] _hands = new HandState[2];
         readonly EmberCarry.Hand[] _in = new EmberCarry.Hand[2];
         readonly Vector3[] _grip = new Vector3[2];
@@ -121,7 +120,7 @@ namespace Diorama
                 for (int i = 0; i < vine.Length; i++) _burning[i] = new PropView($"Burning Vine {i}", island, vineRecipe);
             }
             _carry.fingertip = fingertipFire;
-            _carry.fingerDwell = fingertipFire ? fingerHoldSeconds : 0f;
+            _carry.fingerDwell = 0f; // Nov 15: lights on the touch (the 3 s hold felt too long)
             _flame = new FingerFlame(fx);
             if (fingertipFire) ghostClip = "poke";
             _rings = new GuideRings("Vine Guide", island, guideMaterial, 2, fx);
@@ -170,7 +169,6 @@ namespace Diorama
             ReadHands(_hands);
             if (!IsSolved && Here && RealmState.Restored >= 0.99f) QuietSolve();
             if (!IsSolved && !_burnRunning) Hands();
-            DwellFire();
             Draw();
             base.Update();
         }
@@ -239,49 +237,23 @@ namespace Diorama
         }
 
         /// <summary>
-        /// Nov 15: the fingertip is on the thorns: inside a vine tile's body (half a tile across, from the cap up to
-        /// <see cref="thornTop"/>) give or take <see cref="touchSlack"/>. Not the drop cylinder above it.
+        /// Nov 15 (Mugesh: touch it, not near it): the fingertip is inside a vine tile's body: half a tile along the vine
+        /// (map columns, its hoops' span), <see cref="vineHalfDepth"/> either side (rows), from the cap up to
+        /// <see cref="vineTop"/>, give or take <see cref="touchMargin"/>.
         /// </summary>
         bool TouchingThorns(Vector3 p, float scale)
         {
-            Vector3 up = island.transform.up;
-            float tile = TileWorld, slack = touchSlack * scale;
+            float tile = Mathf.Max(1e-5f, TileWorld);
+            float m = touchMargin * scale / tile; // metres to tiles
+            var q = WorldToMap(p);
             foreach (var t in vine)
-            {
-                Vector3 d = p - MapToWorld(new Vector3(t.x, 0f, t.y));
-                float above = Vector3.Dot(d, up);
-                if ((d - up * above).magnitude <= 0.5f * tile + slack && above >= -slack && above <= thornTop * tile + slack) return true;
-            }
+                if (VineBody(q.x - t.x, q.z - t.y, q.y, m)) return true;
             return false;
         }
 
-        float _dwellFxAt;
-        int _dwellLogged = -1;
-
-        /// <summary>Nov 15 (Mugesh: not much fire on the vine): while the flame is held on, fire grows where it touches, then smoke.</summary>
-        void DwellFire()
-        {
-            float k = _carry.DwellShare;
-            if (_carry.State != EmberState.Held || !_carry.OverFirebox || k <= 0f || _carry.Holder < 0)
-            {
-                if (_carry.State != EmberState.Held) _dwellLogged = -1;
-                return;
-            }
-            int sec = Mathf.FloorToInt(k * fingerHoldSeconds);
-            if (sec != _dwellLogged)
-            {
-                _dwellLogged = sec;
-                Debug.Log($"[VineBurnPiece] {id}: flame held on the thorns {sec} / {fingerHoldSeconds:0} s.");
-            }
-            if (fx == null || !Here || Time.time < _dwellFxAt) return;
-            _dwellFxAt = Time.time + 0.05f;
-            var at = _grip[_carry.Holder];
-            float tile = TileWorld;
-            Vector3 up = island.transform.up;
-            int n = 2 + Mathf.RoundToInt(6f * k);
-            fx.Burst(at, n, new Color(1f, 0.5f + 0.3f * Random.value, 0.15f), tile * (0.25f + 0.6f * k), 0.45f + 0.3f * k, tile * (0.06f + 0.1f * k), up * tile * (0.8f + 1.2f * k));
-            if (k > 0.4f) fx.Burst(at + up * tile * 0.3f, 1, new Color(0.3f, 0.28f, 0.27f, 0.7f), tile * 0.25f, 1.2f, tile * 0.1f, up * tile * 0.6f);
-        }
+        /// <summary>A map offset from a vine tile's middle (tiles along, across, above the cap) inside its body, with margin <paramref name="m"/>.</summary>
+        public bool VineBody(float along, float across, float above, float m) =>
+            Mathf.Abs(along) <= 0.5f + m && Mathf.Abs(across) <= vineHalfDepth + m && above >= -m && above <= vineTop + m;
 
         void Changed(EmberState was, EmberState now)
         {

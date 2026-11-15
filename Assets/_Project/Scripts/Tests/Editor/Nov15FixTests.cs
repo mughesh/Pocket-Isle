@@ -37,6 +37,20 @@ namespace Diorama.Tests
         }
 
         [Test]
+        public void VineFire_LightsOnTheTouch_InsideTheVineOnly()
+        {
+            var go = new GameObject("vine");
+            var v = go.AddComponent<VineBurnPiece>();
+            Assert.IsTrue(v.VineBody(0.3f, 0.1f, 0.4f, 0.05f), "inside the tangle");
+            Assert.IsFalse(v.VineBody(0f, 0.4f, 0.3f, 0.05f), "beside it (in front or behind): near, not touching");
+            Assert.IsFalse(v.VineBody(0f, 0f, 0.8f, 0.05f), "above the thorns");
+            var src = File.ReadAllText("Assets/_Project/Scripts/Runtime/Puzzles/Cinderwood/VineBurnPiece.cs");
+            StringAssert.Contains("_carry.fingerDwell = 0f;", src);
+            StringAssert.DoesNotContain("DwellFire", src);
+            Object.DestroyImmediate(go);
+        }
+
+        [Test]
         public void SwipeWalk_GoesStraightOverABridgedStream()
         {
             var map = ScriptableObject.CreateInstance<WorldMap>();
