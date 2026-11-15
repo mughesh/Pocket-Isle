@@ -110,7 +110,7 @@ namespace Diorama
             if (end == Loops) Fail(rep, start, wayName, Loops, cur);
         }
 
-        static bool Road(IslandMap map, Vector2Int t) => map.At(t.y, t.x) == IslandMap.Path;
+        static bool Road(IslandMap map, Vector2Int t) => map.IsRoad(t);
 
         static void Check(IslandMap map, Vector2Int from, List<Vector2Int> tiles, Func<Vector2Int, Vector2Int, WalkStop> stop, Vector2Int start, string way, Report rep)
         {

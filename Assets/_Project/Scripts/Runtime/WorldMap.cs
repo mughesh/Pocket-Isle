@@ -286,6 +286,12 @@ namespace Diorama
 
         public override bool CanWalk(Vector2Int tile) => _bridged != null && _bridged.Contains(tile) || base.CanWalk(tile) && !PropBlocks(tile);
 
+        /// <summary>
+        /// Nov 15 (Mugesh: Lilymere's narrow road from the portal stopped with no turning): a lily pad bridge carries the
+        /// road over the stream, so the walk goes straight over it (it stopped before it, "road's end", and after it, "joins road").
+        /// </summary>
+        public override bool IsRoad(Vector2Int tile) => _bridged != null && _bridged.Contains(tile) || base.IsRoad(tile);
+
         /// <summary>True when the island doesn't draw the prop anchored here (a puzzle draws its own). It still blocks.</summary>
         public bool IsPropHidden(Vector2Int anchor) => _hiddenProps != null && _hiddenProps.Contains(anchor);
 

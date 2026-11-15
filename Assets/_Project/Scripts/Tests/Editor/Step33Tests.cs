@@ -17,11 +17,12 @@ namespace Diorama.Tests
         }
 
         [Test]
-        public void IslandGrab_InBattle_LockedOnlyByAHandAtThePods()
+        public void IslandGrab_InBattle_NoBlanketLock_CradleKeepOutSmall()
         {
+            // Nov 15: the 12 cm 'battle' lock held the near-right corner (beside the catch pod) off all battle.
             var src = Src("IslandHandle.cs");
-            StringAssert.Contains("encounters.InBattle && (HandNearPods(0) || HandNearPods(1))", src);
-            StringAssert.Contains("public float podReach = 0.12f;", src);
+            StringAssert.DoesNotContain("SetGrabLock(\"battle\"", src);
+            StringAssert.Contains("public float cradleClearance = 0.03f;", src);
         }
 
         [Test]

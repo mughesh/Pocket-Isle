@@ -82,8 +82,10 @@ namespace Diorama
             {
                 Debug.Log($"[FocusLock] Letting go of {(_holding != null ? _holding.id : "?")}.");
                 _holding = null;
-                // A battle owns the view while the explorer is locked; it clears the focus itself.
-                if (!explorer.Locked) window.SetFocus(null);
+                // A battle owns the view while the explorer is locked; it clears the focus itself. Nov 15 (Mugesh: the
+                // drawbridge came down out of view): only our own soft hold is cleared; a moment that just set a hard
+                // focus at its solve (the big mill showing its bridge lowering) keeps it.
+                if (!explorer.Locked && window.SoftFocus) window.SetFocus(null);
             }
         }
     }

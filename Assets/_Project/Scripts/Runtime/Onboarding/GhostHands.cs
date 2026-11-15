@@ -857,7 +857,10 @@ namespace Diorama
                 if (g.left) want = GhostHandClip.Mirror(want);
                 view = want * Quaternion.Inverse(kr);
             }
-            Vector3 keyInRoot = _clip.keyPinch || retarget ? PinchInRoot(g) : KeyInRoot(g, _clip.keyJoint);
+            // Nov 15 (Mugesh: the gaze-pinch ghost sat in the island floor, both hands): above a target the pinch closes over
+            // it, so the pinch point is what goes on the spot (keyed by the palm, the fingers hung ~12 cm under it).
+            bool pinchKey = _clip.keyPinch || retarget || _request.place == GhostPlace.AboveTarget;
+            Vector3 keyInRoot = pinchKey ? PinchInRoot(g) : KeyInRoot(g, _clip.keyJoint);
             if (yaw != 0f) frame *= Quaternion.Euler(0f, yaw, 0f);
             if (ThumbDemo && !measuredWrist && thumbYaw != 0f) frame *= Quaternion.Euler(0f, thumbYaw, 0f);
             if (ThumbDemo && !measuredWrist && thumbRoll != 0f) frame *= Quaternion.Euler(0f, 0f, thumbRoll);

@@ -39,7 +39,7 @@ namespace Diorama
         public static bool WalkOn(Vector2Int lastWay, float lastAt, Vector2Int way, float now, float window, bool walking) =>
             walking && way == lastWay && now - lastAt <= window;
 
-        static bool PathWalk(IslandMap map, Vector2Int t) => map.At(t.y, t.x) == IslandMap.Path && map.CanWalk(t);
+        static bool PathWalk(IslandMap map, Vector2Int t) => map.IsRoad(t) && map.CanWalk(t);
 
         /// <summary>
         /// Nov 12: a road tile, or a single walkable tile in a road's lane with road on both sides along <paramref name="h"/>
@@ -76,6 +76,7 @@ namespace Diorama
             {
                 var next = cur + h;
                 bool turnNow = false;
+                bool wasRoad = map.IsRoad(cur);
                 if (i > 0 && PathWalk(map, cur))
                 {
                     var l = Left(h);
@@ -108,19 +109,13 @@ namespace Diorama
                 tiles.Add(next);
                 cur = next;
                 if (s == WalkStop.On) return Interactable;
-                if (EntersRoad(map, was, cur)) return RoadEnter;
+                if (!wasRoad && map.IsRoad(cur)) return RoadEnter;
                 if (!continuous && map.At(cur.y, cur.x) == IslandMap.TallGrass && was != IslandMap.TallGrass) return Grass;
             }
             return Cap;
         }
 
-        // ---- Nov 11 (R52): roads are sticky ----
-
-        /// <summary>
-        /// Nov 11 (Mugesh: a walk toward a road crossed it straight into the grass beyond): coming onto a road from off it
-        /// ends the walk on that road tile. The next swipe follows the road, or crosses it.
-        /// </summary>
-        static bool EntersRoad(IslandMap map, char was, Vector2Int now) => was != IslandMap.Path && map.At(now.y, now.x) == IslandMap.Path;
+        // ---- Nov 11 (R52): roads are sticky (coming onto a road from off it ends the walk on that road tile) ----
 
         /// <summary>
         /// A walk along a road never wanders off its end into the grass: step <paramref name="i"/> from a road tile onto a
@@ -128,7 +123,7 @@ namespace Diorama
         /// crossing a two-wide road's other lane), never after following the road.
         /// </summary>
         static bool LeavesRoad(IslandMap map, Vector2Int cur, Vector2Int next, int i) =>
-            i >= GoesOn && map.At(cur.y, cur.x) == IslandMap.Path && map.At(next.y, next.x) != IslandMap.Path;
+            i >= GoesOn && map.IsRoad(cur) && !map.IsRoad(next);
 
         // ---- step 29: corridors (roads two tiles wide) ----
 

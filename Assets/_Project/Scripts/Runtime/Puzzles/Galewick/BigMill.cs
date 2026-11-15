@@ -59,6 +59,10 @@ namespace Diorama
             // Nov 11: the held view frames the bridge with the mill, so the player sees it come down.
             wheel.alsoFrame.Add(bridge);
             wheel.alsoFrame.Add(bridge + Vector2Int.one);
+            // Nov 15 (Mugesh: flicking, the bridge went out of focus): the road it opens onto (two rows past it) is framed
+            // too, so the bridge sits mid-island, not on the back rim behind the mill and under the Spirit's chip.
+            wheel.alsoFrame.Add(bridge + new Vector2Int(0, -2));
+            wheel.alsoFrame.Add(bridge + new Vector2Int(1, -2));
             wheel.Solved += OnSolved;
             PuzzleState.Restored += Apply;
             Apply();
@@ -99,7 +103,7 @@ namespace Diorama
         public float holdAfterSeconds = 1.2f;
 
         /// <summary>The map point the view holds while the bridge lowers: between the mill and the bridge.</summary>
-        public Vector2 ShowPoint => (wheel.Home + bridge + new Vector2(0.5f, 0.5f)) * 0.5f;
+        public Vector2 ShowPoint => (wheel.Home + bridge + new Vector2(0.5f, -0.5f)) * 0.5f;
 
         /// <summary>The view is held on the mill and the bridge (tests, the bridge).</summary>
         public bool Showing { get; private set; }

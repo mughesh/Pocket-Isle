@@ -99,6 +99,9 @@ namespace Diorama
         /// <summary>True if the explorer (and creatures) can stand on this tile (column, row): walkable terrain, no blocking prop.</summary>
         public virtual bool CanWalk(Vector2Int tile) => IsWalkable(At(tile.y, tile.x));
 
+        /// <summary>Nov 15: the swipe walk treats this tile (column, row) as road: a path tile, or (world maps) a bridge across a road.</summary>
+        public virtual bool IsRoad(Vector2Int tile) => At(tile.y, tile.x) == Path;
+
         /// <summary>Replaces the layout from code (generators) and drops the row cache.</summary>
         public void SetLayout(string text)
         {

@@ -104,8 +104,9 @@ namespace Diorama
         public float lipBelowPods = 0.02f;
         [Tooltip("A pinch point or palm this close to a pod's surface (world m) is the pod's, never the island's.")]
         public float podClearance = 0.01f;
-        [Tooltip("Step 17: a pinch this close to the cradle pod's glass (world m) goes to the pod, never the island corner under it.")]
-        public float cradlePodClearance = 0.12f;
+        [Tooltip("Step 17: a pinch this close to the cradle pod's glass (world m) goes to the pod, never the island corner under it. " +
+                 "Nov 15: was 12 cm (cradlePodClearance), which covered the whole near-right corner in a battle.")]
+        public float cradleClearance = 0.03f;
 
         IGrabbable _grabbable;
         Grabbable _grabbableComponent;
@@ -550,31 +551,10 @@ namespace Diorama
                 if (pod != null && pod.isActiveAndEnabled && GrabZone.PodWins(p, pod.transform.position, Mathf.Max(r, pod.WorldRadius + podClearance))) return true;
             }
             // Step 17 A2: the cradle pod sits just off the near-right corner (an always-grab handle) and was missed here,
-            // so a pinch on it grabbed the island. It wins within cradlePodClearance of its glass.
+            // so a pinch on it grabbed the island. It wins within cradleClearance of its glass.
             var cradle = pods.Pod(PodRack.CradleSlot);
-            if (cradle != null && cradle.isActiveAndEnabled && GrabZone.PodWins(p, cradle.transform.position, cradle.WorldRadius + cradlePodClearance)) return true;
+            if (cradle != null && cradle.isActiveAndEnabled && GrabZone.PodWins(p, cradle.transform.position, cradle.WorldRadius + cradleClearance)) return true;
             return false;
-        }
-
-        [Tooltip("Step 33: in a battle, island grab waits while a hand (pinch point or palm) is this close to a pod (m past its glass).")]
-        public float podReach = 0.12f;
-
-        /// <summary>Step 33: hand <paramref name="h"/> (0 left, 1 right) is within <see cref="podReach"/> of the cradle or a party pod.</summary>
-        bool HandNearPods(int h)
-        {
-            var hand = HandRegistry.Get(h == 0 ? Handedness.Left : Handedness.Right);
-            if (hand == null || !hand.IsTrackedDataValid || pods == null) return false;
-            bool Near(Vector3 p)
-            {
-                for (int i = 0; i < Party.Size; i++)
-                {
-                    var pod = pods.Pod(i);
-                    if (pod != null && pod.isActiveAndEnabled && (p - pod.transform.position).magnitude <= pod.WorldRadius + podReach) return true;
-                }
-                var cradle = pods.Pod(PodRack.CradleSlot);
-                return cradle != null && cradle.isActiveAndEnabled && (p - cradle.transform.position).magnitude <= cradle.WorldRadius + podReach;
-            }
-            return TryGetPinchPoint(hand, out var pinch) && Near(pinch) || HandLookup.TryGetJoint(hand, HandJointId.HandPalm, out var palm) && Near(palm);
         }
 
         // ---- step 17: grab locks ----
@@ -602,8 +582,9 @@ namespace Diorama
         /// <summary>Applies the locks to the rim interactable (never while it is held).</summary>
         void ApplyLocks()
         {
-            // Step 33 (friends: the island couldn't be moved in a battle): only a hand at the cradle or the party pods locks it.
-            SetGrabLock("battle", encounters != null && encounters.InBattle && (HandNearPods(0) || HandNearPods(1)), "a hand at the cradle or the party pods (battle)");
+            // Nov 15 (Mugesh: still not grabbable in a battle): the step 33 'battle' lock (any hand within 12 cm of a pod) is
+            // gone. The catch pod sits at the near-right corner, so it held that corner off all battle. Pods still win where
+            // it matters: a pinch on or next to a pod (NearPod) and a hand reaching a pod (PodRack's podReach guard).
             if (rimInteractable == null) return;
             bool off = GrabLocked && !IsGrabbed;
             if (off == _rimLockedOff) return;

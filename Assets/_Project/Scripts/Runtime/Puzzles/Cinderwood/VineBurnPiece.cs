@@ -62,8 +62,13 @@ namespace Diorama
         public bool fingertipFire = true;
         [Tooltip("Step 29: a fingertip this close (m) touches the ember.")]
         public float touchRadius = 0.03f;
+        [Tooltip("Nov 15 (Mugesh: it lit too early, near was enough): the burning fingertip must stay on the thorns this long (s).")]
+        public float fingerHoldSeconds = 3f;
+        [Tooltip("Nov 15: the fingertip touches the thorns inside the vine's body: up to this high above the cap (tiles), " +
+                 "half a tile across, plus touchSlack (m) all round.")]
+        public float thornTop = 0.55f, touchSlack = 0.012f;
         FingerFlame _flame;
-        string _fingerChip = "Now poke the thorns";
+        string _fingerChip = "Hold your flame on the thorns";
         readonly HandState[] _hands = new HandState[2];
         readonly EmberCarry.Hand[] _in = new EmberCarry.Hand[2];
         readonly Vector3[] _grip = new Vector3[2];
@@ -116,6 +121,7 @@ namespace Diorama
                 for (int i = 0; i < vine.Length; i++) _burning[i] = new PropView($"Burning Vine {i}", island, vineRecipe);
             }
             _carry.fingertip = fingertipFire;
+            _carry.fingerDwell = fingertipFire ? fingerHoldSeconds : 0f;
             _flame = new FingerFlame(fx);
             if (fingertipFire) ghostClip = "poke";
             _rings = new GuideRings("Vine Guide", island, guideMaterial, 2, fx);
@@ -164,6 +170,7 @@ namespace Diorama
             ReadHands(_hands);
             if (!IsSolved && Here && RealmState.Restored >= 0.99f) QuietSolve();
             if (!IsSolved && !_burnRunning) Hands();
+            DwellFire();
             Draw();
             base.Update();
         }
@@ -205,7 +212,7 @@ namespace Diorama
                 bool idle = _carry.State == EmberState.InVent || _carry.State == EmberState.Hovering;
                 if (idle && !s.busy && (s.indexTip - _emberWorld).magnitude <= touch * 2f) FocusHighlight.Hover(_emberWorld, FocusRadius);
                 x.atEmber = (s.indexTip - _emberWorld).magnitude <= touch;
-                x.overFirebox = OverVine(s.indexTip, scale);
+                x.overFirebox = TouchingThorns(s.indexTip, scale);
                 return x;
             }
             float reach = Mathf.Max(grabRadius * scale + 0.25f * emberSize * TileWorld, grabAssist);
@@ -229,6 +236,51 @@ namespace Diorama
                 if ((d - up * above).magnitude <= vineRadius * scale && above >= -0.06f * scale && above <= vineAbove * scale) return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// Nov 15: the fingertip is on the thorns: inside a vine tile's body (half a tile across, from the cap up to
+        /// <see cref="thornTop"/>) give or take <see cref="touchSlack"/>. Not the drop cylinder above it.
+        /// </summary>
+        bool TouchingThorns(Vector3 p, float scale)
+        {
+            Vector3 up = island.transform.up;
+            float tile = TileWorld, slack = touchSlack * scale;
+            foreach (var t in vine)
+            {
+                Vector3 d = p - MapToWorld(new Vector3(t.x, 0f, t.y));
+                float above = Vector3.Dot(d, up);
+                if ((d - up * above).magnitude <= 0.5f * tile + slack && above >= -slack && above <= thornTop * tile + slack) return true;
+            }
+            return false;
+        }
+
+        float _dwellFxAt;
+        int _dwellLogged = -1;
+
+        /// <summary>Nov 15 (Mugesh: not much fire on the vine): while the flame is held on, fire grows where it touches, then smoke.</summary>
+        void DwellFire()
+        {
+            float k = _carry.DwellShare;
+            if (_carry.State != EmberState.Held || !_carry.OverFirebox || k <= 0f || _carry.Holder < 0)
+            {
+                if (_carry.State != EmberState.Held) _dwellLogged = -1;
+                return;
+            }
+            int sec = Mathf.FloorToInt(k * fingerHoldSeconds);
+            if (sec != _dwellLogged)
+            {
+                _dwellLogged = sec;
+                Debug.Log($"[VineBurnPiece] {id}: flame held on the thorns {sec} / {fingerHoldSeconds:0} s.");
+            }
+            if (fx == null || !Here || Time.time < _dwellFxAt) return;
+            _dwellFxAt = Time.time + 0.05f;
+            var at = _grip[_carry.Holder];
+            float tile = TileWorld;
+            Vector3 up = island.transform.up;
+            int n = 2 + Mathf.RoundToInt(6f * k);
+            fx.Burst(at, n, new Color(1f, 0.5f + 0.3f * Random.value, 0.15f), tile * (0.25f + 0.6f * k), 0.45f + 0.3f * k, tile * (0.06f + 0.1f * k), up * tile * (0.8f + 1.2f * k));
+            if (k > 0.4f) fx.Burst(at + up * tile * 0.3f, 1, new Color(0.3f, 0.28f, 0.27f, 0.7f), tile * 0.25f, 1.2f, tile * 0.1f, up * tile * 0.6f);
         }
 
         void Changed(EmberState was, EmberState now)
@@ -365,7 +417,8 @@ namespace Diorama
                 }
                 if (fx != null && Here && t >= next)
                 {
-                    next = t + 0.08f;
+                    // Nov 15 (Mugesh: not much fire on the vine): denser, bigger, taller flames.
+                    next = t + 0.05f;
                     for (int i = 0; i < vine.Length; i++)
                     {
                         float lag = vine.Length > 1 ? 0.55f * Mathf.Abs(i - from) / (vine.Length - 1) : 0f;
@@ -373,7 +426,7 @@ namespace Diorama
                         var vt = vine[i];
                         var p = MapToWorld(new Vector3(vt.x + Random.Range(-0.4f, 0.4f), Random.Range(0.1f, 0.6f), vt.y + Random.Range(-0.3f, 0.3f)));
                         // Flames along it while it spreads, then embers and smoke as it chars.
-                        fx.Burst(p, u <= 0f ? 5 : 3, new Color(1f, 0.55f + Random.Range(0f, 0.2f), 0.18f), tile * 0.5f, 0.5f, tile * 0.07f, island.transform.up * tile * (u <= 0f ? 1.2f : 0.9f));
+                        fx.Burst(p, u <= 0f ? 8 : 4, new Color(1f, 0.5f + Random.Range(0f, 0.25f), 0.15f), tile * 0.55f, 0.6f, tile * 0.12f, island.transform.up * tile * (u <= 0f ? 1.8f : 1.1f));
                         if (spread > 0.5f) fx.Burst(p, 1, new Color(1f, 0.75f, 0.35f), tile * 0.15f, 1.4f, tile * 0.035f, island.transform.up * tile * 1.6f);
                         if (u > 0.3f) fx.Burst(p, 2, new Color(0.3f, 0.28f, 0.27f, 0.8f), tile * 0.2f, 1.3f, tile * 0.12f, island.transform.up * tile * 0.5f);
                     }

@@ -329,7 +329,7 @@ if the starter hasn't evolved; the starter becomes ready to evolve, `{name}` = t
 - `lm.village.first` · in lilymere · story · once · → landmark:village (first time near the stilt village)
   - Spirit: Stilt huts, standing over almost nothing.
 - `lm.channel.first` · in lilymere · story · once · → landmark:channel (first time at the lily channel)
-  - Spirit: The lily pads have all drifted apart.
+  - Spirit: Planks over the lily channel. Someone keeps them mended.
 - `lm.garden.first` · in lilymere · story · once · → landmark:garden (first time at the lotus garden)
   - Spirit: A lotus garden, dried to cracks. The buds won't open.
 - `lm.basin.first` · in lilymere · story · once · → landmark:basin (first time at the waterfall basin)

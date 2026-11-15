@@ -62,7 +62,7 @@ namespace Diorama
             public bool Ok => reached && Unexplained == 0;
         }
 
-        static bool Road(IslandMap map, Vector2Int t) => map.At(t.y, t.x) == IslandMap.Path && map.CanWalk(t);
+        static bool Road(IslandMap map, Vector2Int t) => map.IsRoad(t) && map.CanWalk(t);
 
         static Vector2Int Left(Vector2Int h) => new Vector2Int(-h.y, h.x);
 

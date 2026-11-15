@@ -244,7 +244,16 @@ namespace Diorama
         /// </summary>
         public bool fingertip;
         public float fingerTimeout = 20f, fingerLost = 1f;
-        float _held;
+        /// <summary>
+        /// Nov 15 (Mugesh: the thorns lit the moment the finger came near): the flame must stay on the target this long
+        /// before it lights (0 = at once). Off it for under <see cref="dwellGrace"/> keeps the progress (tracking flicker);
+        /// longer, it cools twice as fast as it built. Lighting never times out.
+        /// </summary>
+        public float fingerDwell, dwellGrace = 0.3f;
+        float _held, _dwell, _off;
+
+        /// <summary>0..1: how far the flame on the target has got toward lighting it.</summary>
+        public float DwellShare => State == EmberState.Held && fingerDwell > 0f ? Mathf.Clamp01(_dwell / fingerDwell) : 0f;
 
         /// <summary>Seconds the flame has been on the finger.</summary>
         public float HeldSeconds => State == EmberState.Held ? _held : 0f;
@@ -273,7 +282,7 @@ namespace Diorama
                         {
                             State = EmberState.Held;
                             Holder = h;
-                            _open = _lost = _held = 0f;
+                            _open = _lost = _held = _dwell = _off = 0f;
                             BackReason = null;
                             OverFirebox = false;
                             return State;
@@ -295,6 +304,13 @@ namespace Diorama
                         _lost = 0f;
                         OverFirebox = x.overFirebox;
                         if (x.overFirebox)
+                        {
+                            _dwell += dt;
+                            _off = 0f;
+                            _held = 0f; // lighting it: no timeout
+                        }
+                        else if (_dwell > 0f && (_off += dt) > dwellGrace) _dwell = Mathf.Max(0f, _dwell - 2f * dt);
+                        if (x.overFirebox && _dwell >= fingerDwell)
                         {
                             State = EmberState.In;
                             Holder = -1;
