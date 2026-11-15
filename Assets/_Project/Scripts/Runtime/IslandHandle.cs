@@ -52,6 +52,13 @@ namespace Diorama
         public bool autoFace = true;
         [Tooltip("Easing time while held or just released (s).")]
         public float faceSeconds = 0.25f;
+        [Tooltip("Nov 15 (Mugesh: a little left of centre the island turned to point at the head and read as tilted): the front " +
+                 "stays parallel to the player (square to the forward of the last placement / recenter), like a Quest window. " +
+                 "Off = the front points at the head wherever the island is.")]
+        public bool faceParallel = true;
+        [Tooltip("Moved more than this far to the side (degrees from the forward, seen from the head), the island starts turning " +
+                 "toward the head by the extra, so a spot far left or right still faces the player.")]
+        public float parallelCone = 35f;
         [Tooltip("Step 17 G: turn to face the head by itself when idle (off: leaning in 10 cm for fine work turned the island 10-12 deg, which read as a tilt; the island root moves only by a grab, a recenter or the first placement). The turn while held and after a release stays.")]
         public bool idleReface;
         [Tooltip("Idle: turn back when the head is more than this far off the front (degrees)... (step 14i: was 35, a new name so the scene takes 6)")]
@@ -112,6 +119,8 @@ namespace Diorama
         // facing: current eased yaw, whether a turn is in progress, how long the head has been off the front
         float _yaw;
         int _yawFrame = -1;
+        // Nov 15: the island's yaw at the last placement / recenter (front square to the player's forward); NaN = none yet.
+        float _homeYaw = float.NaN;
         bool _turning;
         float _turnSeconds, _offFor;
 
@@ -159,6 +168,8 @@ namespace Diorama
             if (frame == null) frame = FindFirstObjectByType<IslandGrabFrame>();
             WidenShell();
             if (placer != null) placer.Placed += LogFacing;
+            // Nov 15: the first placement can run before this Start (start order is undefined): take its forward now.
+            if (placer != null && placer.HasPlaced) _homeYaw = YawOf(Target.rotation);
             // The base skirt's front middle (the two-hands tip); the grab frame glows, no gold sphere.
             Dialogue.RegisterTarget("islandRim", () =>
             {
@@ -210,6 +221,7 @@ namespace Diorama
             var t = Target;
             _startPos = t.position;
             _startYaw = _yaw = YawOf(t.rotation);
+            if (float.IsNaN(_homeYaw)) _homeYaw = _startYaw; // never placed (Editor without a head): the pose it has
             _startScale = t.localScale.x;
             // ISDK ends and begins again when a second hand joins or leaves: only a fresh grab scrapes.
             if (_releaseAt < 0f) GameAudio.At(AudioIds.IslandGrab, points.Count > 0 ? points[0].position : t.position);
@@ -282,7 +294,31 @@ namespace Diorama
             return TryGetFacingYaw(t.position, out float target) ? Mathf.DeltaAngle(YawOf(t.rotation), target) : 0f;
         }
 
-        void LogFacing() => Debug.Log($"[IslandHandle] Facing after placement: {FacingError():0.0} deg off the line to the head.");
+        void LogFacing()
+        {
+            _homeYaw = YawOf(Target.rotation);
+            Debug.Log($"[IslandHandle] Facing after placement: {FacingError():0.0} deg off the line to the head; forward yaw {_homeYaw:0} kept for the parallel facing.");
+        }
+
+        /// <summary>
+        /// Nov 15: the yaw the island turns to: square to the player's forward (<paramref name="homeYaw"/>) while the line
+        /// to the head (<paramref name="faceYaw"/>) is within <paramref name="cone"/> of it; beyond, it turns by the extra
+        /// only, so there is no jump at the edge.
+        /// </summary>
+        public static float ParallelYaw(float homeYaw, float faceYaw, float cone)
+        {
+            float off = Mathf.DeltaAngle(homeYaw, faceYaw);
+            float extra = Mathf.Max(0f, Mathf.Abs(off) - Mathf.Max(0f, cone));
+            return homeYaw + Mathf.Sign(off) * extra;
+        }
+
+        /// <summary>Where the front should point from <paramref name="center"/>: parallel to the player, or at the head.</summary>
+        bool TryGetTargetYaw(Vector3 center, out float yaw)
+        {
+            if (!TryGetFacingYaw(center, out yaw)) return false;
+            if (faceParallel && !float.IsNaN(_homeYaw)) yaw = ParallelYaw(_homeYaw, yaw, parallelCone);
+            return true;
+        }
 
         Transform Head => placer != null ? placer.Head : Camera.main != null ? Camera.main.transform : null;
 
@@ -303,7 +339,7 @@ namespace Diorama
         {
             if (!autoFace || _yawFrame == Time.frameCount) return;
             _yawFrame = Time.frameCount;
-            if (!TryGetFacingYaw(center, out float target)) return;
+            if (!TryGetTargetYaw(center, out float target)) return;
             // Exponential ease; about 95% of the way in 'seconds'.
             _yaw = Mathf.LerpAngle(_yaw, target, 1f - Mathf.Exp(-Time.deltaTime * 3f / Mathf.Max(0.01f, seconds)));
         }
@@ -324,7 +360,7 @@ namespace Diorama
                 return;
             }
             var t = Target;
-            if (!TryGetFacingYaw(t.position, out float target)) return;
+            if (!TryGetTargetYaw(t.position, out float target)) return;
             float off = Mathf.Abs(Mathf.DeltaAngle(YawOf(t.rotation), target));
             bool zoomed = window != null && window.IsZoomed;
             // Step 14i: never while a lesson ghost demonstrates on the island (its targets would slide away).
@@ -344,7 +380,8 @@ namespace Diorama
             if (Mathf.Abs(Mathf.DeltaAngle(_yaw, target)) < 0.3f)
             {
                 _turning = false;
-                if (_logFacingAfterTurn) Debug.Log($"[IslandHandle] Facing after release: {FacingError():0.0} deg off the line to the head.");
+                if (_logFacingAfterTurn) Debug.Log($"[IslandHandle] Facing after release: {FacingError():0.0} deg off the line to the head " +
+                                                   $"({(faceParallel && !float.IsNaN(_homeYaw) ? $"parallel to the forward, yaw {_yaw:0}" : "facing the head")}).");
                 _logFacingAfterTurn = false;
             }
         }
