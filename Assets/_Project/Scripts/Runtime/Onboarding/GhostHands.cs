@@ -1212,6 +1212,15 @@ namespace Diorama
             Hold(rest, Frames(strokePause));
             foreach (var s in list)
             {
+                // Nov 15 (Mugesh recorded each direction): a recorded stroke plays its own thumb motion on the shared hand.
+                var rec = RecordedStroke(s.kind);
+                if (rec != null)
+                {
+                    segs.Add(InsertRecorded(clip, rec, rest, s.kind, s.dir, restTip));
+                    solved += $" {s.kind} recorded";
+                    Hold(rest, Frames(strokePause));
+                    continue;
+                }
                 // Forward / back (Mugesh: the recorded thumb's own reach didn't show): the whole thumb slides along the
                 // finger from its base, a little more than a real thumb, so it reads; left / right are solved across the
                 // finger from the neutral.
@@ -1257,6 +1266,70 @@ namespace Diorama
             Debug.Log($"[GhostHands] {clip.name}: {clip.frames.Count} frames ({clip.Duration:0.0} s), looping {string.Join(", ", segs.ConvertAll(x => x.kind.ToString()))} " +
                       $"({swipeAcross * 100f:0.0} / {swipeAlong * 100f:0.0} cm at hand size); recorded half travel {neutralMiss * 1000f:0.0} mm, solved:{solved}.");
             }
+        }
+
+        /// <summary>Nov 15: the recorded clip for a walk-demo stroke (L R F B), or null (that stroke stays solved).</summary>
+        GhostHandClip RecordedStroke(char kind)
+        {
+            string n = kind == 'L' ? "thumb_swipe_left" : kind == 'R' ? "thumb_swipe_right" : kind == 'F' ? "thumb_swipe_forward" : kind == 'B' ? "thumb_swipe_back" : null;
+            var c = n != null && library != null ? library.Find(n) : null;
+            return c != null && c.frames.Count > 1 ? c : null;
+        }
+
+        /// <summary>
+        /// Nov 15: appends a recorded stroke to a composed clip: the recording's thumb joints (mirrored when it was recorded
+        /// with the other hand) on the shared resting hand, so every stroke shares one wrist and fingers; a short blend in
+        /// from rest and back out. The arrow grows until the thumb tip is furthest from its resting spot.
+        /// </summary>
+        Stroke InsertRecorded(GhostHandClip clip, GhostHandClip rec, GhostFrame rest, char kind, Vector3 dir, Vector3 restTip)
+        {
+            var g = _right ?? _left;
+            bool mirror = rec.leftHand != clip.leftHand;
+            var rot = new Quaternion[JointCount];
+            var pos = new Vector3[JointCount];
+            GhostFrame At(float t)
+            {
+                rec.Sample(t, mirror, out _, out _, rot, pos);
+                var f = Copy(rest);
+                foreach (var j in TapJoints)
+                    if ((int)j < f.rot.Length) f.rot[(int)j] = rot[(int)j];
+                return f;
+            }
+            int Frames(float s) => Mathf.Max(1, Mathf.RoundToInt(s * clip.fps));
+            int s0 = clip.frames.Count;
+            var first = At(0f);
+            int inN = Frames(0.12f), outN = Frames(0.15f);
+            for (int i = 1; i <= inN; i++) clip.frames.Add(Blend(rest, first, Mathf.SmoothStep(0f, 1f, i / (float)inN)));
+            float step = Mathf.Max(0.05f, rec.speed) / clip.fps;
+            int peak = clip.frames.Count;
+            float far = -1f;
+            Vector3 peakTip = restTip;
+            for (float t = 0f; t <= rec.Duration + 1e-4f; t += step)
+            {
+                var f = At(t);
+                clip.frames.Add(f);
+                for (int i = 0; i < JointCount; i++)
+                {
+                    _rot[i] = f.rot[i];
+                    _pos[i] = f.pos[i];
+                }
+                Vector3 tip = KeyInRoot(g, HandJointId.HandThumbTip);
+                float d = (tip - restTip).sqrMagnitude;
+                if (d > far)
+                {
+                    far = d;
+                    peak = clip.frames.Count - 1;
+                    peakTip = tip;
+                }
+            }
+            var last = clip.frames[clip.frames.Count - 1];
+            for (int i = 1; i <= outN; i++) clip.frames.Add(Blend(last, rest, Mathf.SmoothStep(0f, 1f, i / (float)outN)));
+            // The arrow follows the way the recorded tip really went (falls back to the stroke's axis for a tiny move).
+            Vector3 moved = peakTip - restTip;
+            Vector3 arrow = moved.sqrMagnitude > 1e-6f ? moved.normalized : dir;
+            Debug.Log($"[GhostHands] {clip.clipName} {kind}: recorded {rec.clipName} ({rec.Duration:0.00} s{(mirror ? ", mirrored" : "")}), tip travel {moved.magnitude * 1000f:0} mm, " +
+                      $"{Vector3.Angle(arrow, dir):0} deg off the {kind} axis.");
+            return new Stroke { t0 = s0 / clip.fps, t1 = peak / clip.fps, kind = kind, dir = arrow, restTip = restTip };
         }
 
         /// <summary>Step 22: the far lesson's demo: a swipe left with its arrow, then a tap.</summary>

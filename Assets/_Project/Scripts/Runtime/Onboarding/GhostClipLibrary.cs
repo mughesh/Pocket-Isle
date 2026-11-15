@@ -23,6 +23,10 @@ namespace Diorama
             ("grab_rim_slide", GhostAnchor.Island, 3f, "Reach to the island's near edge, grab the rocky rim, slide it ~10 cm right, let go, pull back."),
             ("grab_drop", GhostAnchor.Island, 3f, "Grab an imaginary pod floating above the island, set it down on the near rim, open the hand, pull back."),
             ("thumb_swipe_forward", GhostAnchor.Wrist, 2f, "Hand relaxed as for microgestures. Slide the thumb forward along the side of the index finger once."),
+            // Nov 15: each walk-demo stroke from its own recording (GhostHands stitches them; an unrecorded one stays solved).
+            ("thumb_swipe_back", GhostAnchor.Wrist, 2f, "Same pose. Slide the thumb back along the side of the index finger (toward the wrist) once, return."),
+            ("thumb_swipe_left", GhostAnchor.Wrist, 2f, "Same pose. Swipe the thumb left across the index finger once (as the game's left swipe), return."),
+            ("thumb_swipe_right", GhostAnchor.Wrist, 2f, "Same pose. Swipe the thumb right across the index finger once (as the game's right swipe), return."),
             ("thumb_tap", GhostAnchor.Wrist, 2f, "Same pose. Lift the thumb and tap it down on the side of the index finger once."),
             ("pinch", GhostAnchor.Wrist, 2f, "Hand relaxed, palm sideways. Pinch thumb and index together once and open again."),
             ("grab_toss", GhostAnchor.Island, 2.5f, "Grab a pod at the rim, toss it gently up onto the island, open the hand."),
