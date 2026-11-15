@@ -1507,6 +1507,32 @@ namespace Diorama
             _arrowMesh.RecalculateBounds();
         }
 
+        readonly Dictionary<(Stroke, bool), (Vector3 tail, Vector3 dir)> _arrowLocal = new Dictionary<(Stroke, bool), (Vector3, Vector3)>();
+
+        /// <summary>
+        /// Nov 15: a stroke's resting thumb tip and arrow axis in this ghost's root frame: the clip sampled just before the
+        /// stroke (mirrored for the other hand, as it plays), the hand's axes measured on this skeleton (the back of the hand
+        /// flipped for a left hand), the stroke kind mapped as when it was built (L toward the palm side, R the back, F / B
+        /// along the fingers). On the right ghost this matches the build exactly.
+        /// </summary>
+        (Vector3 tail, Vector3 dir) ArrowLocal(Ghost g, Stroke st)
+        {
+            if (_arrowLocal.TryGetValue((st, g.left), out var known)) return known;
+            _clip.Sample(Mathf.Max(0f, st.t0 - 1f / Mathf.Max(1f, _clip.fps)), _clip.leftHand != g.left, out _, out _, _rot, _pos);
+            Vector3 tip = KeyInRoot(g, HandJointId.HandThumbTip);
+            Vector3 wrist = KeyInRoot(g, HandJointId.HandWristRoot);
+            Vector3 fingers = KeyInRoot(g, HandJointId.HandMiddle1) - wrist;
+            Vector3 across = KeyInRoot(g, HandJointId.HandIndex1) - KeyInRoot(g, HandJointId.HandPinky1);
+            Vector3 dorsal = Vector3.Cross(across, fingers).normalized * (g.left ? -1f : 1f);
+            Vector3 along = (fingers - dorsal * Vector3.Dot(fingers, dorsal)).normalized;
+            Vector3 dir = st.kind == 'L' ? -dorsal : st.kind == 'R' ? dorsal : st.kind == 'F' ? along : st.kind == 'B' ? -along : st.dir;
+            var result = (tip, dir);
+            _arrowLocal[(st, g.left)] = result;
+            Debug.Log($"[GhostHands] {_clip.clipName} {st.kind} arrow on the {(g.left ? "left" : "right")} ghost: tail {tip * 100f:F1} cm in its root" +
+                      $"{(g.left ? "" : $" (built {st.restTip * 100f:F1}, {Vector3.Angle(dir, st.dir):0} deg)")}.");
+            return result;
+        }
+
         /// <summary>
         /// Step 21: while a stroke of the swipe demo plays, a glowing gold arrow runs from the thumb's resting tip on the
         /// index finger along the line of the swipe, growing with the thumb, and fades in the pause after it.
@@ -1550,8 +1576,11 @@ namespace Diorama
             // Grows over the stroke's out, stays through its beat, fades as the thumb comes back.
             float grow = Mathf.Clamp01((t - now.t0) / Mathf.Max(0.05f, strokeOut));
             float fade = 1f - Mathf.Clamp01((t - now.t1) / Mathf.Max(0.05f, strokeBack + 0.1f));
-            Vector3 tail = g.root.TransformPoint(now.restTip);
-            Vector3 dir = g.root.TransformDirection(now.dir).normalized;
+            // Nov 15 (Mugesh: on the left hand the arrow sat way below the thumb): the stroke's rest tip and axis were found on
+            // the right skeleton; the left one is mirrored, so they're worked out again on the ghost that shows (cached).
+            var local = ArrowLocal(g, now);
+            Vector3 tail = g.root.TransformPoint(local.tail);
+            Vector3 dir = g.root.TransformDirection(local.dir).normalized;
             var cam = Camera.main;
             Vector3 toCam = cam != null ? (cam.transform.position - tail).normalized : -(frame * Vector3.forward);
             float len = arrowLength * scale * Mathf.Lerp(0.25f, 1f, Mathf.SmoothStep(0f, 1f, grow));
