@@ -1324,12 +1324,11 @@ namespace Diorama
             }
             var last = clip.frames[clip.frames.Count - 1];
             for (int i = 1; i <= outN; i++) clip.frames.Add(Blend(last, rest, Mathf.SmoothStep(0f, 1f, i / (float)outN)));
-            // The arrow follows the way the recorded tip really went (falls back to the stroke's axis for a tiny move).
+            // The arrow keeps the stroke's clean axis (a real forward swipe drifts sideways; a measured arrow read as the left one).
             Vector3 moved = peakTip - restTip;
-            Vector3 arrow = moved.sqrMagnitude > 1e-6f ? moved.normalized : dir;
             Debug.Log($"[GhostHands] {clip.clipName} {kind}: recorded {rec.clipName} ({rec.Duration:0.00} s{(mirror ? ", mirrored" : "")}), tip travel {moved.magnitude * 1000f:0} mm, " +
-                      $"{Vector3.Angle(arrow, dir):0} deg off the {kind} axis.");
-            return new Stroke { t0 = s0 / clip.fps, t1 = peak / clip.fps, kind = kind, dir = arrow, restTip = restTip };
+                      $"{(moved.sqrMagnitude > 1e-6f ? Vector3.Angle(moved, dir) : 0f):0} deg off the {kind} arrow.");
+            return new Stroke { t0 = s0 / clip.fps, t1 = peak / clip.fps, kind = kind, dir = dir, restTip = restTip };
         }
 
         /// <summary>Step 22: the far lesson's demo: a swipe left with its arrow, then a tap.</summary>
