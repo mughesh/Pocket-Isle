@@ -56,6 +56,8 @@ namespace Diorama
                  "grabbed with until facing the head would need more than this (degrees); past it, it turns by the extra only. " +
                  "0 = always face the head exactly.")]
         public float holdStraightAngle = 20f;
+        [Tooltip("Nov 15: after a release the island settles to face the head exactly, over about this long (s).")]
+        public float releaseSettleSeconds = 0.6f;
         [Tooltip("Step 17 G: turn to face the head by itself when idle (off: leaning in 10 cm for fine work turned the island 10-12 deg, which read as a tilt; the island root moves only by a grab, a recenter or the first placement). The turn while held and after a release stays.")]
         public bool idleReface;
         [Tooltip("Idle: turn back when the head is more than this far off the front (degrees)... (step 14i: was 35, a new name so the scene takes 6)")]
@@ -273,13 +275,10 @@ namespace Diorama
         {
             _scaleLoop.Stop(0.2f);
             _releaseAt = Time.time;
-            // Nov 15: with the hold-straight zone the held yaw is final (a turn now would undo it). Without it, finish easing.
-            if (holdStraightAngle > 0f)
-            {
-                Debug.Log($"[IslandHandle] Released: {FacingError():0.0} deg off the line to the head (kept straight within {holdStraightAngle:0} deg).");
-                return;
-            }
-            if (autoFace) StartTurn(faceSeconds);
+            // Nov 15 (Mugesh: with a recenter a little off, the held-straight island kept that error): after a release it
+            // settles gently to face the head exactly (the hold-straight zone only calms it while held).
+            Debug.Log($"[IslandHandle] Released: {FacingError():0.0} deg off the line to the head; settling to face it over {releaseSettleSeconds:0.0#} s.");
+            if (autoFace) StartTurn(releaseSettleSeconds);
             _logFacingAfterTurn = true;
         }
 
