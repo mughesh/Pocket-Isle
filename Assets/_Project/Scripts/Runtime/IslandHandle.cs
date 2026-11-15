@@ -210,6 +210,7 @@ namespace Diorama
             var t = Target;
             _startPos = t.position;
             _startYaw = _yaw = YawOf(t.rotation);
+            _grabAt = Time.time;
             _startScale = t.localScale.x;
             // ISDK ends and begins again when a second hand joins or leaves: only a fresh grab scrapes.
             if (_releaseAt < 0f) GameAudio.At(AudioIds.IslandGrab, points.Count > 0 ? points[0].position : t.position);
@@ -241,7 +242,7 @@ namespace Diorama
             {
                 // Turns around the hand, so the grabbed rim stays in the hand.
                 Vector3 hand = points[0].position;
-                AdvanceYaw(hand + _offset, faceSeconds);
+                HeldYaw(hand, _offset);
                 var turn = Quaternion.Euler(0f, _yaw - _startYaw, 0f);
                 t.SetPositionAndRotation(hand + turn * _offset, Quaternion.Euler(0f, _yaw, 0f));
                 return;
@@ -253,7 +254,7 @@ namespace Diorama
             float scale = Mathf.Clamp(_startScale * Vector3.Distance(a, b) / _startDist,
                 _baseScale * minScaleFactor, _baseScale * maxScaleFactor);
             Vector3 fromMid = (_startPos - _startMid) * (scale / _startScale);
-            AdvanceYaw(mid + fromMid, faceSeconds);
+            HeldYaw(mid, fromMid);
             var yawRot = Quaternion.Euler(0f, _yaw - _startYaw, 0f);
             t.SetPositionAndRotation(mid + yawRot * fromMid, Quaternion.Euler(0f, _yaw, 0f));
             t.localScale = Vector3.one * scale;
@@ -296,6 +297,32 @@ namespace Diorama
             if (to.sqrMagnitude < 1e-4f) return false;
             yaw = Mathf.Atan2(to.x, to.z) * Mathf.Rad2Deg;
             return true;
+        }
+
+        float _grabAt;
+
+        /// <summary>
+        /// Nov 15 (Mugesh: every grab left a slight tilt): while held, the front faces the head exactly from where the
+        /// island really is, like a Quest window being moved. Before, the facing was worked out from
+        /// <c>pivot + offset</c> before the turn around the hand, so it aimed from the wrong spot (a few degrees off while
+        /// held, then a twist after release), and it eased behind the hand. Now: the centre after the turn (solved in a
+        /// few steps, since the centre depends on the turn), followed exactly; only the first <see cref="faceSeconds"/> of
+        /// a grab blend in from the yaw it had, so a grab never snaps.
+        /// </summary>
+        void HeldYaw(Vector3 pivot, Vector3 offset)
+        {
+            if (!autoFace || _yawFrame == Time.frameCount) return;
+            _yawFrame = Time.frameCount;
+            float y = _yaw;
+            // Half steps: a corner grab can be as far from the centre as the head is, and full steps would overshoot.
+            for (int i = 0; i < 10; i++)
+            {
+                Vector3 center = pivot + Quaternion.Euler(0f, y - _startYaw, 0f) * offset;
+                if (!TryGetFacingYaw(center, out float face)) return;
+                y += 0.5f * Mathf.DeltaAngle(y, face);
+            }
+            float k = Mathf.SmoothStep(0f, 1f, (Time.time - _grabAt) / Mathf.Max(0.01f, faceSeconds));
+            _yaw = Mathf.LerpAngle(_startYaw, y, k);
         }
 
         /// <summary>Eases <see cref="_yaw"/> toward facing the head from <paramref name="center"/>, once per frame.</summary>

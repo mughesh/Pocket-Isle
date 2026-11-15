@@ -5,4 +5,5 @@
 - [ ] Filming > **Hearthstag: kneeling**: reads as kneeling and hurt; cup the fire (~2 s): it roars, rises and rears, then the battle →
 - [ ] After calming Hearthstag: a small steady flame on its crown (also in its rematch); a rematch skips the wake moment →
 - [ ] **Build:** the ghost hands look like Editor Play (the recorded clips, not the stiff code-made ones); log: `[GhostHands] Ready: ... 12 recorded` and lessons say `(recorded)` →
+- [ ] **Grab the island**, move it a little left / right and let go: it **faces you while held** (like moving a Quest window, no lag) and **doesn't twist after you let go**; log `Facing after release: 0.x deg` →
 - [ ] Game menu: the **power icon** is a ring open at the top with a bar through the gap; Galeowl's untangle still works →
