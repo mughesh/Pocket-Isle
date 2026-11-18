@@ -42,6 +42,24 @@ namespace Diorama.Tests
         }
 
         [Test]
+        public void ReleaseChecks_CodeAboveEveryBuiltApk()
+        {
+            Assert.AreEqual(14, EditorTools.ReleaseChecks.HighestCode(new[] { "PocketIsle-Release-1.0.0-13.apk", "PocketIsle-Release-1.0.0-14.apk", "PocketIsle-QA.apk", "PocketIsle-Release-TEST-NOT-FOR-SUBMISSION.apk" }));
+            Assert.AreEqual(0, EditorTools.ReleaseChecks.HighestCode(new string[0]));
+        }
+
+        [Test]
+        public void ReleaseChecks_BadgingCatchesTheUsualMistakes()
+        {
+            string good = "package: name='com.mugesh.pocketisle' versionCode='15' versionName='1.0.0'\nsdkVersion:'32'\ntargetSdkVersion:'34'\n" +
+                          "application-label:'Pocket Isle'\napplication-icon-640:'res/mipmap/app_icon.png'\nnative-code: 'arm64-v8a'\n";
+            CollectionAssert.IsEmpty(EditorTools.ReleaseChecks.CheckBadging(good, 15, "1.0.0", "Pocket Isle"));
+            string bad = good.Replace("15", "14").Replace("Pocket Isle", "Pocket isle") + "application-debuggable\nuses-permission: name='android.permission.RECORD_AUDIO'\n";
+            var f = EditorTools.ReleaseChecks.CheckBadging(bad, 15, "1.0.0", "Pocket Isle");
+            Assert.AreEqual(4, f.Count, string.Join("\n", f));
+        }
+
+        [Test]
         public void Rune_ArmsOnlyWithNoFingerInOrThroughIt()
         {
             var size = new Vector2(0.074f, 0.028f);

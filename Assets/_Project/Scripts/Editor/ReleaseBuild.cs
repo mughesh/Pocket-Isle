@@ -14,7 +14,9 @@ namespace Diorama.EditorTools
     /// <item>Signed with the release keystore outside the repo (<see cref="KeystorePath"/>, alias <see cref="Alias"/>).
     /// Passwords come from the environment (POCKETISLE_KS_PASS / POCKETISLE_KEY_PASS) or a password window; Unity keeps
     /// them for this Editor session only, they are never written anywhere.</item>
-    /// <item>Version 1.0.0; the version code goes up by one every build (at least 10) and is logged.</item>
+    /// <item>Version 1.0.0; the version code goes up by one every build (at least 10, and above every release APK in
+    /// Builds/) and is logged. Nov 18: <see cref="ReleaseChecks"/> runs before (name, package, uncommitted work) and after
+    /// (the APK itself, with a report and the headset checklist).</item>
     /// <item>No POCKET_DEV (dev panel compiled out), IL2CPP ARM64; the audio release guard is armed (no free clips).
     /// POCKETISLE_ALLOW_FREE_FOR_TEST=1 builds anyway, only as Builds/PocketIsle-Release-TEST-NOT-FOR-SUBMISSION.apk.</item>
     /// <item>The Meta SDK's Voice / mic code makes Unity add RECORD_AUDIO, MODIFY_AUDIO_SETTINGS and BLUETOOTH; the game
@@ -96,6 +98,13 @@ namespace Diorama.EditorTools
                 return;
             }
             bool test = Environment.GetEnvironmentVariable("POCKETISLE_ALLOW_FREE_FOR_TEST") == "1";
+            int code = NextVersionCode(PlayerSettings.Android.bundleVersionCode);
+            // Nov 18: name, package, a code above every release APK already built, scenes, uncommitted work.
+            if (!ReleaseChecks.Before(ref code))
+            {
+                Debug.LogWarning("[ReleaseBuild] Stopped by a release check; nothing was changed or built.");
+                return;
+            }
 
             PlayerSettings.Android.useCustomKeystore = true;
             PlayerSettings.Android.keystoreName = KeystorePath;
@@ -103,7 +112,6 @@ namespace Diorama.EditorTools
             PlayerSettings.Android.keystorePass = storePass;
             PlayerSettings.Android.keyaliasPass = keyPass;
             PlayerSettings.bundleVersion = VersionName;
-            int code = NextVersionCode(PlayerSettings.Android.bundleVersionCode);
             PlayerSettings.Android.bundleVersionCode = code;
             AssetDatabase.SaveAssets();
             string path = test ? TestApk : ReleaseApk(code);
@@ -111,9 +119,10 @@ namespace Diorama.EditorTools
 
             SessionState.SetBool(ReleaseKey, true);
             SessionState.SetBool(DeviceBuild.ReleaseGuardKey, !test);
+            bool built = false;
             try
             {
-                DeviceBuild.Build(false, path);
+                built = DeviceBuild.Build(false, path);
             }
             finally
             {
@@ -124,6 +133,8 @@ namespace Diorama.EditorTools
                 PlayerSettings.Android.useCustomKeystore = false;
                 AssetDatabase.SaveAssets();
             }
+            // Nov 18: the APK itself (version, name, debuggable, ABI, SDKs, manifest, signature) and the headset checklist.
+            if (built) ReleaseChecks.After(path, code);
         }
 
         /// <summary>Removes <see cref="RemovedPermissions"/> from a manifest (tools:node="remove" so no library adds them back).</summary>

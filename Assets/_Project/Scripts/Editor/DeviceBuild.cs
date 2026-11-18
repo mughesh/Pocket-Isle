@@ -46,17 +46,17 @@ namespace Diorama.EditorTools
         static void Build(bool development) => Build(development, ApkPath);
 
         /// <param name="defines">Extra scripting defines for this build only (the project settings are untouched).</param>
-        internal static void Build(bool development, string path, params string[] defines)
+        internal static bool Build(bool development, string path, params string[] defines)
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)
             {
                 Debug.LogError("[DeviceBuild] Stop Play mode first.");
-                return;
+                return false;
             }
             if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android)
             {
                 Debug.LogError($"[DeviceBuild] The active target is {EditorUserBuildSettings.activeBuildTarget}; switch to the Meta Quest (Android) build profile first.");
-                return;
+                return false;
             }
             Info();
             var options = new BuildPlayerOptions
@@ -74,6 +74,7 @@ namespace Diorama.EditorTools
                 Debug.Log($"[DeviceBuild] Built {path} ({(development ? "development" : "release")}{(defines.Length > 0 ? ", " + string.Join(" ", defines) : "")}): {s.totalSize / (1024f * 1024f):0.0} MB in {s.totalTime.TotalMinutes:0.0} min.");
             else
                 Debug.LogError($"[DeviceBuild] Build {s.result}: {s.totalErrors} error(s). See the Console / Editor.log.");
+            return s.result == BuildResult.Succeeded;
         }
     }
 }
