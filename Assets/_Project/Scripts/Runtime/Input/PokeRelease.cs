@@ -12,6 +12,10 @@ namespace Diorama
     /// <see cref="releaseDistance"/> from the touch point for <see cref="releaseSeconds"/>, the limiter is switched off and on
     /// (it frees the wrist) and a stuck select is let go. Every menu (game menu, settings, title, Journal, choice boards).
     /// Made at start-up; plain polling, no scene wiring.
+    /// Nov 18 (Mugesh: a fast poke on Settings sticks the finger, a slow one doesn't): a button that hides itself on the
+    /// press (Settings swaps the panel) takes its interactable away mid-select; ISDK drops the select but leaves the poke's
+    /// passed-surface flag on, so the limiter keeps the hand pinned to a button that's gone (and relocks after a release).
+    /// An orphaned pass (passed, nothing selected, no live recoil target) is cleared at once.
     /// </summary>
     public class PokeRelease : MonoBehaviour
     {
@@ -19,6 +23,7 @@ namespace Diorama
         public float releaseSeconds = 0.2f;
 
         static readonly FieldInfo PokeField = typeof(HandPokeLimiterVisual).GetField("_pokeInteractor", BindingFlags.Instance | BindingFlags.NonPublic);
+        static readonly FieldInfo RecoilField = typeof(PokeInteractor).GetField("_recoilInteractable", BindingFlags.Instance | BindingFlags.NonPublic);
 
         readonly List<(HandPokeLimiterVisual limiter, PokeInteractor poke)> _pairs = new List<(HandPokeLimiterVisual, PokeInteractor)>();
         readonly Dictionary<PokeInteractor, float> _offSince = new Dictionary<PokeInteractor, float>();
@@ -37,6 +42,21 @@ namespace Diorama
         public static bool ShouldRelease(float distance, float offFor, float releaseDistance, float releaseSeconds) =>
             distance > releaseDistance && offFor >= releaseSeconds;
 
+        /// <summary>Pure rule (tests): the poke says it's past a surface, but nothing is pressed and no live button can recoil.</summary>
+        public static bool IsOrphanedPass(bool passedSurface, bool hasSelected, bool recoilLive) =>
+            passedSurface && !hasSelected && !recoilLive;
+
+        /// <summary>Clears an orphaned pass; true when it did (the limiter frees the wrist on the change).</summary>
+        static bool ClearOrphan(PokeInteractor poke)
+        {
+            var recoil = RecoilField != null ? RecoilField.GetValue(poke) as PokeInteractable : null;
+            bool recoilLive = recoil != null && recoil.isActiveAndEnabled;
+            if (!IsOrphanedPass(poke.IsPassedSurface, poke.HasSelectedInteractable, recoilLive)) return false;
+            if (recoil != null && RecoilField != null) RecoilField.SetValue(poke, null);
+            poke.IsPassedSurface = false;
+            return true;
+        }
+
         void Update()
         {
             if (Time.unscaledTime >= _nextScan)
@@ -50,6 +70,12 @@ namespace Diorama
             foreach (var (limiter, poke) in _pairs)
             {
                 if (limiter == null || poke == null || !limiter.isActiveAndEnabled) continue;
+                if (ClearOrphan(poke))
+                {
+                    _offSince.Remove(poke);
+                    Debug.Log($"[PokeRelease] orphaned pass cleared ({poke.name}: its button went away mid-press).");
+                    continue;
+                }
                 bool held = poke.IsPassedSurface || poke.State == InteractorState.Select;
                 float distance = held ? (poke.Origin - poke.TouchPoint).magnitude : 0f;
                 if (!held || distance <= releaseDistance)

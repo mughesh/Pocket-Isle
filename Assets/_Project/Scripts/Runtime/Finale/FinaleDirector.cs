@@ -595,7 +595,7 @@ namespace Diorama
             }
             heart.appear = 1f;
             if (AudioService.Has(AudioIds.HeartBeat)) Beat(true);
-            else Sfx(AudioIds.HeartBeat, AudioIds.StatueSocket, heart.ChestWorld);
+            else Sfx(AudioIds.StatueSocket, null, heart.ChestWorld); // no beat cue: the socket chime
             // It breathes and lifts its head toward the player.
             for (float t = 0f; t < 2f; t += Time.deltaTime)
             {
@@ -1351,6 +1351,7 @@ namespace Diorama
             PuzzleState.Solve(FinaleLogic.DoneId, 1);
             SaveStep(FinaleStep.Done);
             Running = false;
+            Beat(false);
             Awake_(1f);
             _holding = false;
             spirit.Appear = 1f;
@@ -1507,7 +1508,10 @@ namespace Diorama
         {
             Vector3 c = heart.SocketWorld;
             Sfx(AudioIds.SparkChime, AudioIds.StatueSocket, c);
-            Sfx(AudioIds.HeartBeat, AudioIds.StatueSocket, c);
+            // Nov 18 (Mugesh: the heartbeat kept going in the other realms): heart.beat is a loop cue, and a one-shot Play of a
+            // loop cue loops with nobody holding its handle. The beat runs on the anchor (stopped after the Hall of Fame).
+            if (AudioService.Has(AudioIds.HeartBeat)) Beat(true);
+            else Sfx(AudioIds.StatueSocket, null, c);
             if (fx != null) fx.Burst(c, 30, Gold, Unit * 1.2f, 0.9f, Unit * 0.04f);
             Moment?.Invoke("crystal.lit");
             BattleFx.Item ring = fx != null ? fx.Get(BattleFx.Shape.Ring) : null;

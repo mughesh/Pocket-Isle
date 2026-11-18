@@ -25,7 +25,7 @@ WorldMap_StillIsle|statue|firstGrass|4
 WorldMap_StillIsle|statue|firstGrass|4
 WorldMap_StillIsle|firstGrass|pond|3
 WorldMap_Galewick|start|firstGrass|2
-WorldMap_Galewick|firstGrass|plaza|3
+WorldMap_Galewick|firstGrass|plaza|4
 WorldMap_Galewick|plaza|shrine|3
 WorldMap_Galewick|shrine|mill|2
 WorldMap_Galewick|mill|kites|5
@@ -34,11 +34,11 @@ WorldMap_Galewick|ridge|healBloom|1
 WorldMap_Galewick|healBloom|tower|2
 WorldMap_Galewick|tower|gate|14
 WorldMap_Galewick|rare|plaza|7
-WorldMap_Galewick|firstGrass|fishSpot1|7
+WorldMap_Galewick|firstGrass|fishSpot1|8
 WorldMap_Galewick|plaza|mill|2
 WorldMap_Galewick|tower|mill|10
 WorldMap_Galewick|tower|rare|9
-WorldMap_Galewick|firstGrass|fishSpot2|4
+WorldMap_Galewick|firstGrass|fishSpot2|5
 WorldMap_Galewick|kites|ridge|4
 WorldMap_Galewick|mill|ridge|6
 WorldMap_Galewick|healBloom|fishSpot1|5

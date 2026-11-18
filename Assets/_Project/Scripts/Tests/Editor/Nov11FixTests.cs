@@ -222,8 +222,19 @@ namespace Diorama.Tests
             // The stub road to the old pocket is gone.
             foreach (var t in new[] { new Vector2Int(14, 43), new Vector2Int(15, 43), new Vector2Int(14, 44), new Vector2Int(15, 44), new Vector2Int(16, 44) })
                 Assert.AreEqual(IslandMap.Grass, map.Raw(t.y, t.x), $"stub c{t.x} r{t.y}");
-            // Still reachable from the arrival, with the drawbridge up.
-            Assert.IsTrue(ExplorerPath.CanReach(map, map.startTile, new Vector2Int(34, 35), 200));
+            // Still reachable from the arrival, with the drawbridge up. Nov 18: through the arrival clouds once they're blown
+            // away (the meadow beside them is walled now, so it isn't reachable round them).
+            var puffs = new[] { new Vector2Int(10, 50), new Vector2Int(11, 50), new Vector2Int(10, 51), new Vector2Int(11, 51) };
+            Assert.IsFalse(ExplorerPath.CanReach(map, map.startTile, new Vector2Int(34, 35), 200), "no way round the clouds");
+            try
+            {
+                foreach (var t in puffs) map.SetPropOpen(t, true);
+                Assert.IsTrue(ExplorerPath.CanReach(map, map.startTile, new Vector2Int(34, 35), 200));
+            }
+            finally
+            {
+                foreach (var t in puffs) map.SetPropOpen(t, false);
+            }
         }
 
         // ---- E13 ----
