@@ -40,5 +40,21 @@ namespace Diorama.Tests
             Assert.IsFalse(PokeRelease.IsOrphanedPass(true, false, true));
             Assert.IsFalse(PokeRelease.IsOrphanedPass(false, false, false));
         }
+
+        [Test]
+        public void Rune_ArmsOnlyWithNoFingerInOrThroughIt()
+        {
+            var size = new Vector2(0.074f, 0.028f);
+            // Pushed through the new board's Controls tablet (the Settings press): not armed.
+            Assert.IsTrue(RuneBoard.FingerThrough(new Vector3(0.01f, 0f, 0.03f), size, 0.01f, 0.15f));
+            // Resting on its face, or just in front: still counts.
+            Assert.IsTrue(RuneBoard.FingerThrough(new Vector3(0f, 0.005f, -0.005f), size, 0.01f, 0.15f));
+            // In front (approaching for a press), beside it, or far behind: clear.
+            Assert.IsFalse(RuneBoard.FingerThrough(new Vector3(0f, 0f, -0.04f), size, 0.01f, 0.15f));
+            Assert.IsFalse(RuneBoard.FingerThrough(new Vector3(0.08f, 0f, 0.02f), size, 0.01f, 0.15f));
+            Assert.IsFalse(RuneBoard.FingerThrough(new Vector3(0f, 0f, 0.3f), size, 0.01f, 0.15f));
+            var src = File.ReadAllText("Assets/_Project/Scripts/Runtime/UI/RuneBoard.cs");
+            StringAssert.Contains("poke.enabled = false;\n            r.armed = false;", src.Replace("\r\n", "\n"));
+        }
     }
 }

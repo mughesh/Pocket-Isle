@@ -24,6 +24,7 @@ namespace Diorama
 
         static readonly FieldInfo PokeField = typeof(HandPokeLimiterVisual).GetField("_pokeInteractor", BindingFlags.Instance | BindingFlags.NonPublic);
         static readonly FieldInfo RecoilField = typeof(PokeInteractor).GetField("_recoilInteractable", BindingFlags.Instance | BindingFlags.NonPublic);
+        static readonly FieldInfo HitField = typeof(PokeInteractor).GetField("_hitInteractable", BindingFlags.Instance | BindingFlags.NonPublic);
 
         readonly List<(HandPokeLimiterVisual limiter, PokeInteractor poke)> _pairs = new List<(HandPokeLimiterVisual, PokeInteractor)>();
         readonly Dictionary<PokeInteractor, float> _offSince = new Dictionary<PokeInteractor, float>();
@@ -91,6 +92,10 @@ namespace Diorama
                 if (!ShouldRelease(distance, Time.unscaledTime - since, releaseDistance, releaseSeconds)) continue;
                 _offSince.Remove(poke);
                 if (poke.State == InteractorState.Select) poke.Unselect();
+                // Nov 18: a recoil target keeps the pass on (and relocks the wrist on the next state change): drop it too.
+                if (RecoilField != null) RecoilField.SetValue(poke, null);
+                if (HitField != null) HitField.SetValue(poke, null);
+                poke.IsPassedSurface = false;
                 limiter.enabled = false;
                 limiter.enabled = true;
                 Debug.Log($"[PokeRelease] visual freed ({poke.name}: the fingertip {distance * 100f:0.0} cm off the button for {releaseSeconds:0.0} s).");

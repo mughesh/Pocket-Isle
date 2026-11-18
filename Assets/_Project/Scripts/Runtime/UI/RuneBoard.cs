@@ -88,6 +88,8 @@ namespace Diorama
             internal float hover, appear, appearAt, fill, press;
             internal bool poked;
             internal float selectSince = -1f;
+            /// <summary>Nov 18: the poke is live (off until popped in with no fingertip in or through it).</summary>
+            internal bool armed;
 
             public void SetLabel(string text)
             {
@@ -342,6 +344,11 @@ namespace Diorama
             clipped.InjectAllClippedPlaneSurface(plane, new IBoundsClipper[] { clipper });
             var poke = surfaceGo.AddComponent<PokeInteractable>();
             poke.InjectAllPokeInteractable(clipped);
+            // Nov 18 (Mugesh: a fast poke on Settings sticks the hand's picture to the new board): a board built inside a
+            // press (Settings, the quit ask) puts live buttons where the finger already is, pushed through them; ISDK
+            // selects or recoils on them silently and pins the drawn hand to that plane. Off until Arm() says it's clear.
+            poke.enabled = false;
+            r.armed = false;
             poke.WhenStateChanged += args => OnPokeState(r, args);
             r.poke = poke;
 
@@ -391,7 +398,11 @@ namespace Diorama
             for (int i = 0; i < _runes.Count; i++)
             {
                 var r = _runes[i];
-                if (!was) r.appear = 0f;
+                if (!was)
+                {
+                    r.appear = 0f;
+                    Disarm(r);
+                }
                 r.appearAt = Time.unscaledTime + i * stagger;
                 r.fill = 0f;
             }
@@ -478,6 +489,7 @@ namespace Diorama
                 bool popping = Time.unscaledTime >= r.appearAt;
                 r.appear = Mathf.MoveTowards(r.appear, popping ? 1f : 0f, dt / 0.25f);
                 r.visual.localScale = Vector3.one * (Mathf.Max(0.001f, EaseOutBack(r.appear)) * (1f + HoverGrow * r.hover));
+                Arm(r);
                 r.press = Mathf.MoveTowards(r.press, 0f, dt / 0.3f);
                 if (r.tablet != null) r.tablet.Press(r.press > 0.5f ? 1f : r.press * 2f, HoverLift * r.hover * (1f - r.press));
             }
@@ -599,15 +611,62 @@ namespace Diorama
         {
             if (r.poke == null || !isActiveAndEnabled) return;
             r.selectSince = -1f;
-            StartCoroutine(ReleasePokeNextFrame(r.poke));
+            StartCoroutine(ReleasePokeNextFrame(r));
             Debug.Log($"[RuneBoard] {name}: {r.label}: poke released ({why}).");
         }
 
-        static IEnumerator ReleasePokeNextFrame(PokeInteractable poke)
+        static IEnumerator ReleasePokeNextFrame(Rune r)
         {
+            var poke = r.poke;
             poke.enabled = false;
             yield return null;
-            if (poke != null) poke.enabled = true;
+            if (poke != null && r.armed) poke.enabled = true;
+        }
+
+        // ---- Nov 18: arming (no live button around a finger) ----
+
+        static readonly List<PokeInteractor> Fingers = new List<PokeInteractor>();
+        static float _fingersAt = -10f;
+
+        /// <summary>Margin round a tablet (m in the room) and how far behind it a fingertip still counts as through it.</summary>
+        const float ArmMargin = 0.012f, ArmDepth = 0.15f;
+
+        /// <summary>
+        /// Pure rule (tests): a fingertip at <paramref name="local"/> (the rune's space, front = -z) is in or through a
+        /// <paramref name="size"/> tablet: inside its outline plus <paramref name="margin"/>, from <paramref name="margin"/>
+        /// in front of it to <paramref name="depth"/> behind.
+        /// </summary>
+        public static bool FingerThrough(Vector3 local, Vector2 size, float margin, float depth) =>
+            Mathf.Abs(local.x) <= size.x * 0.5f + margin && Mathf.Abs(local.y) <= size.y * 0.5f + margin &&
+            local.z >= -margin && local.z <= depth;
+
+        bool AnyFingerThrough(Rune r)
+        {
+            if (Time.unscaledTime - _fingersAt > 1f)
+            {
+                _fingersAt = Time.unscaledTime;
+                Fingers.Clear();
+                Fingers.AddRange(FindObjectsByType<PokeInteractor>(FindObjectsSortMode.None));
+            }
+            float scale = Mathf.Max(1e-4f, r.root.lossyScale.x);
+            foreach (var f in Fingers)
+                if (f != null && f.isActiveAndEnabled &&
+                    FingerThrough(r.root.InverseTransformPoint(f.Origin), r.size, ArmMargin / scale, ArmDepth / scale)) return true;
+            return false;
+        }
+
+        void Arm(Rune r)
+        {
+            if (r.poke == null || r.armed || r.appear < 0.6f || AnyFingerThrough(r)) return;
+            r.armed = true;
+            r.poke.enabled = true;
+        }
+
+        static void Disarm(Rune r)
+        {
+            if (r.poke == null) return;
+            r.armed = false;
+            r.poke.enabled = false;
         }
 
         /// <summary>Step 16: a poke held in Select longer than this (s, unscaled; not hold runes) is released.</summary>
